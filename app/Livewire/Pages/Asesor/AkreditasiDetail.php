@@ -1,0 +1,262 @@
+<?php
+
+namespace App\Livewire\Pages\Asesor;
+
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\WithFileUploads;
+
+#[Layout('layouts.app')]
+class AkreditasiDetail extends Component
+{
+    use WithFileUploads;
+
+    public $akreditasi;
+    public $pesantren;
+    public $laporan_visitasi_file;
+    public $ipm;
+    public $sdm;
+    public $levels = [];
+    public $fields = [
+        'santri_l',
+        'santri_p',
+        'ustadz_dirosah_l',
+        'ustadz_dirosah_p',
+        'ustadz_non_dirosah_l',
+        'ustadz_non_dirosah_p',
+        'pamong_l',
+        'pamong_p',
+        'musyrif_l',
+        'musyrif_p',
+        'tendik_l',
+        'tendik_p',
+    ];
+    public $komponens;
+
+    // Pesantren's EDPM data (read only)
+    public $pesantrenEvaluasis = [];
+    public $pesantrenCatatans = [];
+    public $pesantrenLinks = [];
+
+    // Assessor's EDPM evaluation (editable)
+    public $asesorEvaluasis = [];
+    public $asesorCatatans = [];
+    public $asesorNks = [];
+    public $asesorCatatanNks = [];
+    public $asesorButirCatatans = [];
+    public $visitasiTemplate;
+
+    // Values from the other assessor (for preview)
+    public $otherAsesorEvaluasis = [];
+    public $otherAsesorCatatans = [];
+    public $otherAsesorButirCatatans = [];
+
+    public $asesorTipe;
+    #[Url]
+    public $activeTab = 'profil';
+    public $isLocked = false;
+
+    // Overall Accreditation Scores
+
+
+    public function mount($uuid)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if (!$user->isAsesor()) {
+            abort(403);
+        }
+
+        $asesorService = app(\App\Services\AsesorService::class);
+        $data = $asesorService->getAkreditasiDetailAsesor($uuid, $user->id);
+
+        if (empty($data)) {
+            abort(404);
+        }
+
+        $this->akreditasi = $data['akreditasi'];
+        $this->asesorTipe = $data['asesorTipe'];
+        $this->pesantren = $data['pesantren'];
+        $this->ipm = $data['ipm'];
+        $this->sdm = $data['sdm'];
+        $this->komponens = $data['komponens'];
+        $this->visitasiTemplate = $data['visitasiTemplate'];
+
+        if ($this->pesantren && $this->pesantren->relationLoaded('units')) {
+            $this->levels = $this->pesantren->units->pluck('unit')->toArray();
+        }
+
+        // Security check: Hide Laporan Visitasi tab if status is 4 or 5
+        if (($this->akreditasi->status == 4 || $this->akreditasi->status == 5) && $this->activeTab === 'laporan_visitasi') {
+            $this->activeTab = 'profil';
+        }
+
+        // Pesantren EDPM
+        $this->pesantrenEvaluasis = $data['pesantren_edpm']['evaluasis'];
+        $this->pesantrenLinks = $data['pesantren_edpm']['links'];
+        $this->pesantrenCatatans = $data['pesantren_edpm']['catatans'];
+
+        // Assessor EDPM Data
+        $this->asesorEvaluasis = $data['evaluation']['asesorEvaluasis'];
+        $this->asesorNks = $data['evaluation']['asesorNks'];
+        $this->asesorButirCatatans = $data['evaluation']['asesorButirCatatans'];
+        $this->asesorCatatans = $data['evaluation']['asesorCatatans'];
+        $this->asesorCatatanNks = $data['evaluation']['asesorCatatanNks'];
+        $this->otherAsesorEvaluasis = $data['evaluation']['otherAsesorEvaluasis'];
+        $this->otherAsesorButirCatatans = $data['evaluation']['otherAsesorButirCatatans'];
+        $this->otherAsesorCatatans = $data['evaluation']['otherAsesorCatatans'];
+
+        if ($this->asesorTipe == 1 && !empty($this->asesorEvaluasis)) {
+            $this->isLocked = true;
+        }
+
+        foreach ($this->komponens as $komponen) {
+            if (!isset($this->pesantrenCatatans[$komponen->id])) {
+                $this->pesantrenCatatans[$komponen->id] = '-';
+            }
+        }
+    }
+
+    protected function messages()
+    {
+        return [
+            'asesorEvaluasis.*.required' => 'Nilai NA wajib diisi.',
+            'asesorEvaluasis.*.integer' => 'Nilai NA harus berupa angka.',
+            'asesorEvaluasis.*.between' => 'Nilai NA harus antara 1 sampai 4.',
+            'asesorNks.*.required' => 'Nilai NK wajib diisi.',
+            'asesorNks.*.integer' => 'Nilai NK harus berupa angka.',
+            'asesorNks.*.between' => 'Nilai NK harus antara 1 sampai 4.',
+        ];
+    }
+
+    protected function validationAttributes()
+    {
+        $attributes = [];
+        foreach ($this->komponens as $k) {
+            foreach ($k->butirs as $b) {
+                $attributes["asesorEvaluasis.{$b->id}"] = "Nilai NA Butir {$b->nomor_butir}";
+                $attributes["asesorNks.{$b->id}"] = "Nilai NK Butir {$b->nomor_butir}";
+            }
+        }
+        return $attributes;
+    }
+
+    public function saveAsesorEdpm($isFinal = false)
+    {
+        if ($this->akreditasi->status != 4 && $this->akreditasi->status != 3) {
+            session()->flash('error', 'Data tidak dapat diubah karena status bukan Visitasi/Validasi.');
+            return;
+        }
+
+        $rules = [
+            'asesorEvaluasis.*' => ($isFinal ? 'required' : 'nullable') . '|integer|between:1,4',
+            'asesorCatatans.*' => 'nullable|string',
+            'asesorButirCatatans.*' => 'nullable|string',
+        ];
+
+        // Custom validation for completeness
+        $missingItems = [];
+        foreach ($this->komponens as $komponen) {
+            foreach ($komponen->butirs as $butir) {
+                if ($isFinal && empty($this->asesorEvaluasis[$butir->id])) {
+                    $missingItems[] = "<li><b>NA {$this->asesorTipe}</b>: Butir {$butir->nomor_butir} ({$komponen->nama})</li>";
+                }
+
+                if ($this->asesorTipe == 1) {
+                    if ($isFinal && empty($this->otherAsesorEvaluasis[$butir->id])) {
+                        $this->dispatch('validation-failed', title: 'Validasi Gagal', html: "Asesor 2 belum menyelesaikan penilaian (Butir {$butir->nomor_butir} masih kosong).");
+                        return false;
+                    }
+
+                    $hasAllNa = !empty($this->asesorEvaluasis[$butir->id]) && !empty($this->otherAsesorEvaluasis[$butir->id]);
+                    if (($isFinal || $hasAllNa) && empty($this->asesorNks[$butir->id])) {
+                        $missingItems[] = "<li><b>NK</b>: Butir {$butir->nomor_butir} ({$komponen->nama})</li>";
+                    }
+                }
+            }
+        }
+
+        if ($isFinal && !empty($missingItems)) {
+            $htmlList = '<ul class="text-left list-disc pl-5 mt-2 space-y-1 text-[11px]">' . implode('', array_unique($missingItems)) . '</ul>';
+            $this->dispatch('validation-failed', title: 'Data Belum Lengkap', html: "Mohon lengkapi seluruh penilaian sebelum menyelesaikan:<br>" . $htmlList);
+            return false;
+        }
+
+        $this->validate($rules);
+
+        $asesorService = app(\App\Services\AsesorService::class);
+        $asesorId = Auth::user()->asesor->id;
+
+        if ($asesorService->saveAsesorEdpm($this->akreditasi->id, $asesorId, $this->asesorTipe, $this->akreditasi->user_id, [
+            'asesorEvaluasis' => $this->asesorEvaluasis,
+            'asesorButirCatatans' => $this->asesorButirCatatans,
+            'asesorNks' => $this->asesorNks,
+            'asesorCatatans' => $this->asesorCatatans,
+            'asesorCatatanNks' => $this->asesorCatatanNks,
+        ])) {
+            if ($this->asesorTipe == 1) $this->isLocked = true;
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Instrumen Akreditasi berhasil disimpan.');
+            return true;
+        }
+
+        return false;
+    }
+
+    public function finalizeVerification()
+    {
+        if ($this->asesorTipe != 1) abort(403);
+
+        if (!$this->saveAsesorEdpm(isFinal: true)) return;
+
+        $asesorService = app(\App\Services\AsesorService::class);
+        if ($asesorService->finalizeVerification($this->akreditasi->id)) {
+            session()->flash('status', 'Assessment berhasil diselesaikan. Status berubah menjadi Validasi Admin.');
+            return redirect()->route('asesor.akreditasi');
+        }
+    }
+
+    public function uploadLaporanVisitasi()
+    {
+        if ($this->akreditasi->status != 4 && $this->akreditasi->status != 3) {
+            abort(403, 'Proses unggah laporan hanya dapat dilakukan pada masa Visitasi atau Validasi.');
+            return;
+        }
+
+        $this->validate([
+            'laporan_visitasi_file' => 'required|file|mimes:pdf,docx|max:5120',
+        ], [
+            'laporan_visitasi_file.required' => 'File Laporan Visitasi wajib diunggah.',
+            'laporan_visitasi_file.mimes' => 'Format file harus PDF atau DOCX.',
+            'laporan_visitasi_file.max' => 'Ukuran file maksimal 5MB.',
+        ]);
+
+        $path = $this->laporan_visitasi_file->store('akreditasi/laporan_visitasi', 'public');
+
+        $asesorService = app(\App\Services\AsesorService::class);
+        $asesorService->uploadLaporanVisitasi($this->akreditasi->id, $this->asesorTipe, $path);
+
+        $this->dispatch('notification-received', type: 'success', title: 'Berhasil Upload', message: 'Laporan Visitasi berhasil diunggah secara permanen.');
+    }
+
+    public function setTab($tab)
+    {
+        $this->activeTab = $tab;
+    }
+
+    public function getTotal($field)
+    {
+        $total = 0;
+        foreach ($this->levels as $level) {
+            $total += (int)($this->sdm[$level]->$field ?? 0);
+        }
+        return $total;
+    }
+
+    public function render()
+    {
+        return view('livewire.pages.asesor.akreditasi-detail');
+    }
+}
