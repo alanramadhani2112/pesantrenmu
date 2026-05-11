@@ -109,7 +109,14 @@ class PesantrenService
 
     public function createSubmission(int $userId, ?int $parentId = null): ?\App\Models\Akreditasi
     {
-        // Check if already resubmitted
+        if (!empty($this->checkDataCompleteness($userId))) {
+            return null;
+        }
+
+        if (\App\Models\Akreditasi::where('user_id', $userId)->whereIn('status', [3, 4, 5, 6])->exists()) {
+            return null;
+        }
+
         if ($parentId && \App\Models\Akreditasi::where('parent', $parentId)->exists()) {
             return null;
         }

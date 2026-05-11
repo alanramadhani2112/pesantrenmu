@@ -972,14 +972,13 @@ new #[Layout('layouts.app')] class extends Component {
                                         <p class="text-xs text-purple-700">Silakan input nilai verifikasi untuk
                                             setiap butir penilaian.</p>
                                     </div>
-                                    <x-primary-button @click="confirmSaveNV($wire)" wire:loading.attr="disabled"
-                                        class="bg-purple-600 hover:bg-purple-700">
+                                    <x-ui.button type="button" @click="confirmSaveNV($wire)" wire:loading.attr="disabled" variant="primary">
                                         <svg wire:loading wire:target="saveAdminNv" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
                                         <span>Simpan NV</span>
-                                    </x-primary-button>
+                                    </x-ui.button>
                                 </div>
                             </div>
                             @endif
@@ -1161,46 +1160,43 @@ new #[Layout('layouts.app')] class extends Component {
                                         <h4 class="text-sm font-bold text-green-900 mb-4 uppercase">Setujui Akreditasi</h4>
                                         <form @submit.prevent="confirmApprove($wire)">
                                             <div class="space-y-4">
-                                                <div>
-                                                    <x-input-label for="nomor_sk" value="Nomor SK" />
-                                                    <x-text-input wire:model="nomor_sk" id="nomor_sk" type="text"
-                                                        class="mt-1 block w-full"
-                                                        required placeholder="Masukkan nomor SK resmi..." />
-                                                    <x-input-error :messages="$errors->get('nomor_sk')" class="mt-2" />
-                                                </div>
-                                                <div>
-                                                    <x-input-label for="sertifikat_file" value="Upload Sertifikat (PDF)" />
-                                                    <x-text-input wire:model="sertifikat_file" id="sertifikat_file" type="file"
+                                                <x-ui.form-field label="Nomor SK" for="nomor_sk" :error="$errors->get('nomor_sk')">
+                                                    <x-ui.input
+                                                        model="nomor_sk"
+                                                        id="nomor_sk"
+                                                        placeholder="Masukkan nomor SK resmi..."
+                                                        required
+                                                    />
+                                                </x-ui.form-field>
+
+                                                <x-ui.form-field label="Upload Sertifikat (PDF)" for="sertifikat_file" :error="$errors->get('sertifikat_file')">
+                                                    <x-ui.input
+                                                        model="sertifikat_file"
+                                                        id="sertifikat_file"
+                                                        type="file"
                                                         accept="application/pdf"
-                                                        class="mt-1 block w-full p-1"
-                                                        required />
+                                                        required
+                                                    />
                                                     <div wire:loading wire:target="sertifikat_file" class="text-[10px] text-indigo-600 font-bold mt-1">Mengunggah...</div>
-                                                    <x-input-error :messages="$errors->get('sertifikat_file')" class="mt-2" />
-                                                </div>
+                                                </x-ui.form-field>
+
                                                 <div class="grid grid-cols-2 gap-4">
-                                                    <div>
-                                                        <x-input-label for="masa_berlaku" value="Mulai Berlaku" />
-                                                        <x-text-input wire:model="masa_berlaku" id="masa_berlaku" type="date"
-                                                            class="mt-1 block w-full"
-                                                            required />
-                                                        <x-input-error :messages="$errors->get('masa_berlaku')" class="mt-2" />
-                                                    </div>
-                                                    <div>
-                                                        <x-input-label for="masa_berlaku_akhir" value="Akhir Berlaku" />
-                                                        <x-text-input wire:model="masa_berlaku_akhir" id="masa_berlaku_akhir" type="date"
-                                                            class="mt-1 block w-full"
-                                                            required />
-                                                        <x-input-error :messages="$errors->get('masa_berlaku_akhir')" class="mt-2" />
-                                                    </div>
+                                                    <x-ui.form-field label="Mulai Berlaku" for="masa_berlaku" :error="$errors->get('masa_berlaku')">
+                                                        <x-ui.input model="masa_berlaku" id="masa_berlaku" type="date" required />
+                                                    </x-ui.form-field>
+
+                                                    <x-ui.form-field label="Akhir Berlaku" for="masa_berlaku_akhir" :error="$errors->get('masa_berlaku_akhir')">
+                                                        <x-ui.input model="masa_berlaku_akhir" id="masa_berlaku_akhir" type="date" required />
+                                                    </x-ui.form-field>
                                                 </div>
                                                 <div class="flex justify-end">
-                                                    <x-primary-button wire:loading.attr="disabled" class="bg-green-600 hover:bg-green-700">
+                                                    <x-ui.button type="submit" variant="success" wire:loading.attr="disabled">
                                                         <svg wire:loading wire:target="approve" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                         </svg>
                                                         <span>Setujui & Simpan</span>
-                                                    </x-primary-button>
+                                                    </x-ui.button>
                                                 </div>
                                             </div>
                                         </form>
@@ -1211,22 +1207,24 @@ new #[Layout('layouts.app')] class extends Component {
                                         <h4 class="text-sm font-bold text-red-900 mb-4 uppercase">Tolak Akreditasi</h4>
                                         <form @submit.prevent="confirmReject($wire)">
                                             <div class="space-y-4">
-                                                <div>
-                                                    <x-input-label for="catatan_admin" value="Catatan Penolakan" />
-                                                    <textarea wire:model="catatan_admin" id="catatan_admin"
-                                                        class="mt-1 block w-full border-red-300 focus:border-red-500 focus:ring-red-500 rounded-md shadow-sm text-sm"
-                                                        rows="3" required placeholder="Masukkan alasan penolakan..."></textarea>
-                                                    <x-input-error :messages="$errors->get('catatan_admin')" class="mt-2" />
-                                                </div>
+                                                <x-ui.form-field label="Catatan Penolakan" for="catatan_admin" :error="$errors->get('catatan_admin')">
+                                                    <x-ui.textarea
+                                                        model="catatan_admin"
+                                                        id="catatan_admin"
+                                                        rows="3"
+                                                        required
+                                                        placeholder="Masukkan alasan penolakan..."
+                                                    />
+                                                </x-ui.form-field>
+
                                                 <div class="mt-6 flex justify-end">
-                                                    <x-primary-button type="submit" wire:loading.attr="disabled"
-                                                        class="bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                                    <x-ui.button type="submit" variant="danger" wire:loading.attr="disabled">
                                                         <svg wire:loading wire:target="reject" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                         </svg>
                                                         <span>Tolak Pengajuan</span>
-                                                    </x-primary-button>
+                                                    </x-ui.button>
                                                 </div>
                                             </div>
                                         </form>
@@ -1377,38 +1375,38 @@ new #[Layout('layouts.app')] class extends Component {
                     @endif
                     <!-- Modal Reschedule Visitasi -->
                     <x-modal name="visitasi-edit-modal" focusable>
-                        <form wire:submit="saveVisitasiReschedule" class="p-6">
-                            <h2 class="text-lg font-medium text-gray-900">Reschedule Jadwal Visitasi</h2>
-                            <p class="mt-1 text-sm text-gray-600">
-                                Perbarui jadwal visitasi untuk pesantren ini. Pastikan berada dalam rentang assessment.
-                            </p>
+                        <form x-on:submit.prevent="confirmRescheduleVisitasi($wire)">
+                            <x-ui.modal-header
+                                title="Reschedule Jadwal Visitasi"
+                                subtitle="Perbarui jadwal visitasi dalam rentang assessment."
+                                icon="timer"
+                            />
 
-                            <div class="mt-6 space-y-4">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <x-input-label for="tgl_visitasi" value="Tanggal Mulai Visitasi" />
-                                        <x-text-input wire:model="tgl_visitasi" id="tgl_visitasi" type="date"
-                                            class="mt-1 block w-full" />
-                                        <x-input-error :messages="$errors->get('tgl_visitasi')" class="mt-2" />
+                            <x-ui.modal-body>
+                                <div class="row g-5">
+                                    <div class="col-md-6">
+                                        <x-ui.form-field label="Tanggal Mulai Visitasi" for="tgl_visitasi" :error="$errors->get('tgl_visitasi')">
+                                            <x-ui.input model="tgl_visitasi" id="tgl_visitasi" type="date" />
+                                        </x-ui.form-field>
                                     </div>
-                                    <div>
-                                        <x-input-label for="tgl_visitasi_akhir" value="Tanggal Akhir Visitasi" />
-                                        <x-text-input wire:model="tgl_visitasi_akhir" id="tgl_visitasi_akhir" type="date"
-                                            class="mt-1 block w-full" />
-                                        <x-input-error :messages="$errors->get('tgl_visitasi_akhir')" class="mt-2" />
+
+                                    <div class="col-md-6">
+                                        <x-ui.form-field label="Tanggal Akhir Visitasi" for="tgl_visitasi_akhir" :error="$errors->get('tgl_visitasi_akhir')">
+                                            <x-ui.input model="tgl_visitasi_akhir" id="tgl_visitasi_akhir" type="date" />
+                                        </x-ui.form-field>
                                     </div>
                                 </div>
-                            </div>
+                            </x-ui.modal-body>
 
-                            <div class="mt-6 flex justify-end gap-3">
-                                <x-secondary-button x-on:click="$dispatch('close')">
+                            <x-ui.modal-footer>
+                                <x-ui.button type="button" variant="light" x-on:click="$dispatch('close')">
                                     Batal
-                                </x-secondary-button>
+                                </x-ui.button>
 
-                                <x-primary-button>
+                                <x-ui.button type="submit" variant="primary">
                                     Simpan Perubahan
-                                </x-primary-button>
-                            </div>
+                                </x-ui.button>
+                            </x-ui.modal-footer>
                         </form>
                     </x-modal>
                 </div>

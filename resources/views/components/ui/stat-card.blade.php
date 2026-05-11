@@ -1,0 +1,27 @@
+@props([
+    'label',
+    'value',
+    'variant' => 'primary',
+])
+
+@php
+    $allowed = ['primary', 'success', 'warning', 'danger', 'info'];
+    $variant = in_array($variant, $allowed, true) ? $variant : 'primary';
+@endphp
+
+<x-ui.card {{ $attributes->merge(['class' => 'h-100']) }}>
+    <div class="d-flex align-items-center justify-content-between">
+        <div>
+            <span class="text-muted fw-semibold fs-7">{{ $label }}</span>
+            <div class="fs-2 fw-bold text-gray-900 mt-2">{{ $value }}</div>
+        </div>
+
+        @isset($icon)
+            <div class="symbol symbol-45px">
+                <div class="symbol-label bg-light-{{ $variant }} text-{{ $variant }}">
+                    {{ $icon }}
+                </div>
+            </div>
+        @endisset
+    </div>
+</x-ui.card>

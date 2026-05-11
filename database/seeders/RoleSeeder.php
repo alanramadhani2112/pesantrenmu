@@ -12,10 +12,14 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        $roles = ['admin', 'asesor', 'pesantren'];
+        $roles = [
+            1 => 'admin',
+            2 => 'asesor',
+            3 => 'pesantren',
+        ];
 
-        foreach ($roles as $role) {
-            \App\Models\Role::firstOrCreate(['name' => $role]);
+        foreach ($roles as $id => $role) {
+            \App\Models\Role::updateOrCreate(['id' => $id], ['name' => $role]);
         }
     }
 }

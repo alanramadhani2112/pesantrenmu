@@ -1,0 +1,16 @@
+@props([
+    'model' => 'perPage',
+    'options' => [10, 25, 50, 100],
+])
+
+<div data-ui-table-per-page="metronic" class="d-flex align-items-center gap-3">
+    <span class="text-muted fw-semibold fs-7">Tampilkan</span>
+
+    <select wire:model.live="{{ $model }}" {{ $attributes->merge(['class' => 'form-select form-select-solid form-select-sm w-100px']) }}>
+        @foreach($options as $option)
+            <option value="{{ $option }}">{{ $option }}</option>
+        @endforeach
+    </select>
+
+    <span class="text-muted fw-semibold fs-7">data</span>
+</div>

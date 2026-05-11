@@ -173,27 +173,33 @@ new #[Layout('layouts.app')] class extends Component {
     }
 }; ?>
 
-<div class="py-12" x-data="deleteConfirmation">
+<div x-data="deleteConfirmation" data-module-page="asesor-akreditasi">
     <x-slot name="header">{{ __('Akreditasi') }}</x-slot>
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+
+    <x-ui.page
+        title="Akreditasi"
+        subtitle="Kelola tugas assessment, jadwal visitasi, catatan, dan laporan akreditasi."
+    >
         <x-datatable.layout title="Pengajuan Akreditasi" :records="$this->assessments">
             <x-slot name="filters">
                 <x-datatable.search placeholder="Cari Pesantren..." />
 
-                <select wire:model.live="periodeFilter" class="text-xs border border-gray-100 rounded-lg bg-gray-50/50 py-2 pl-3 pr-8 focus:ring-1 focus:ring-[#1e3a5f] focus:border-[#1e3a5f] text-gray-500 font-bold">
-                    <option value="">Periode</option>
+                <x-ui.filter-select model="periodeFilter" placeholder="Periode">
                     @for($i = date('Y'); $i >= 2024; $i--)
-                    <option value="{{ $i }}">{{ $i }}</option>
+                        <option value="{{ $i }}">{{ $i }}</option>
                     @endfor
-                </select>
+                </x-ui.filter-select>
 
-                <select wire:model.live="statusFilter" class="text-xs border border-gray-100 rounded-lg bg-gray-50/50 py-2 pl-3 pr-8 focus:ring-1 focus:ring-[#1e3a5f] focus:border-[#1e3a5f] text-gray-500 font-bold">
-                    <option value="">Status</option>
-                    <option value="siap">Siap Visitasi</option>
-                    <option value="belum">Belum Visitasi</option>
-                    <option value="revisi">Perlu Revisi</option>
-                    <option value="selesai">Selesai</option>
-                </select>
+                <x-ui.filter-select
+                    model="statusFilter"
+                    placeholder="Status"
+                    :options="[
+                        'siap' => 'Siap Visitasi',
+                        'belum' => 'Belum Visitasi',
+                        'revisi' => 'Perlu Revisi',
+                        'selesai' => 'Selesai',
+                    ]"
+                />
             </x-slot>
 
             <x-slot name="thead">
@@ -219,29 +225,29 @@ new #[Layout('layouts.app')] class extends Component {
                     </td>
                     <td class="py-5 px-4 text-center">
                         @if($item->akreditasi->status == 1)
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight bg-emerald-100 text-emerald-800">
+                        <x-ui.status-badge variant="success" class="text-uppercase">
                             Selesai
-                        </span>
+                        </x-ui.status-badge>
                         @elseif($item->akreditasi->status == 2)
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight bg-red-100 text-red-800">
+                        <x-ui.status-badge variant="danger" class="text-uppercase">
                             Di Tolak
-                        </span>
+                        </x-ui.status-badge>
                         @elseif($item->akreditasi->status == 3)
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight bg-indigo-100 text-indigo-800">
+                        <x-ui.status-badge variant="primary" class="text-uppercase">
                             Validasi
-                        </span>
+                        </x-ui.status-badge>
                         @elseif($item->akreditasi->tgl_visitasi)
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight bg-green-100 text-green-800">
+                        <x-ui.status-badge variant="info" class="text-uppercase">
                             Siap Visitasi
-                        </span>
+                        </x-ui.status-badge>
                         @elseif($item->akreditasi->catatans->whereNotNull('perbaikan')->filter(fn($c) => !empty($c->perbaikan))->isNotEmpty())
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight bg-red-100 text-red-800">
+                        <x-ui.status-badge variant="danger" class="text-uppercase">
                             Perlu Revisi
-                        </span>
+                        </x-ui.status-badge>
                         @else
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight bg-amber-100 text-amber-800">
+                        <x-ui.status-badge variant="warning" class="text-uppercase">
                             Belum Visitasi
-                        </span>
+                        </x-ui.status-badge>
                         @endif
                     </td>
                     <td class="py-5 px-4 text-center text-xs font-bold text-gray-500">
@@ -252,132 +258,76 @@ new #[Layout('layouts.app')] class extends Component {
                         @endif
                     </td>
                     <td class="py-5 px-4">
-                        <button wire:click="openCatatanModal({{ $item->akreditasi->id }})" class="flex items-center gap-2 text-[10px] font-extrabold text-[#111827] hover:text-blue-600 transition-colors uppercase tracking-tight bg-gray-50 py-1 px-2.5 rounded-lg border border-gray-100">
-                            <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            @if($item->akreditasi->catatans->count() > 0)
-                            {{ $item->akreditasi->catatans->count() }} Catatan
-                            @endif
-                        </button>
+                        <x-ui.button wire:click="openCatatanModal({{ $item->akreditasi->id }})" variant="light" size="sm">
+                            <x-ui.icon name="document" class="fs-5 me-1" />
+                            {{ $item->akreditasi->catatans->count() > 0 ? $item->akreditasi->catatans->count() . ' Catatan' : 'Catatan' }}
+                        </x-ui.button>
                     </td>
                     <td class="py-5 px-4 text-right pr-6">
-                        <div class="inline-block text-left" x-data="{ 
-                            open: false,
-                            dropdownPosition: { top: 0, left: 0 },
-                            updatePosition() {
-                                let rect = this.$refs.btn.getBoundingClientRect();
-                                this.dropdownPosition = { 
-                                    top: (rect.bottom + 5) + 'px', 
-                                    left: (rect.right - 176) + 'px' 
-                                };
-                            }
-                        }">
-                            <button x-ref="btn" @click="open = !open; if(open) updatePosition()" @click.away="open = false"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-gray-400 hover:text-gray-700 transition-colors bg-gray-50/50 rounded-lg group-hover:bg-gray-100">
-                                Aksi
-                                <svg class="w-3 h-3 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </button>
-                            <template x-teleport="body">
-                                <div x-show="open"
-                                    x-transition:enter="transition ease-out duration-100"
-                                    x-transition:enter-start="opacity-0 scale-95"
-                                    x-transition:enter-end="opacity-100 scale-100"
-                                    x-transition:leave="transition ease-in duration-75"
-                                    x-transition:leave-start="opacity-100 scale-100"
-                                    x-transition:leave-end="opacity-0 scale-95"
-                                    :style="`position: fixed; top: ${dropdownPosition.top}; left: ${dropdownPosition.left}; z-index: 9999;`"
-                                    class="w-44 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 origin-top-right overflow-hidden shadow-slate-200/50" x-cloak>
+                        <x-ui.action-menu>
+                            <x-ui.action-menu-item :href="route('asesor.akreditasi-detail', $item->akreditasi->uuid)" wire:navigate>
+                                <x-ui.icon name="eye" class="fs-5 text-gray-500" />
+                                Lihat Detail
+                            </x-ui.action-menu-item>
 
-                                    <a href="{{ route('asesor.akreditasi-detail', $item->akreditasi->uuid) }}" wire:navigate
-                                        class="flex items-center w-full px-4 py-2.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50 transition-colors gap-3 bg-blue-50/50">
-                                        <svg class="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <circle cx="12" cy="12" r="3" />
-                                            <circle cx="12" cy="12" r="8" />
-                                        </svg>
-                                        Lihat Detail
-                                    </a>
+                            @if($item->akreditasi->status == 5 && $item->tipe == 1)
+                                <x-ui.action-menu-item wire:click="openAturJadwalModal({{ $item->id }})" variant="primary">
+                                    <x-ui.icon name="timer" class="fs-5" />
+                                    Atur Jadwal Visitasi
+                                </x-ui.action-menu-item>
 
-                                    @if($item->akreditasi->status == 5 && $item->tipe == 1)
-                                    <button wire:click="openAturJadwalModal({{ $item->id }})" @click="open = false"
-                                        class="flex items-center w-full px-4 py-2.5 text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition-colors gap-3">
-                                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            <circle cx="10" cy="14" r="0.5" fill="currentColor" />
-                                            <circle cx="12" cy="14" r="0.5" fill="currentColor" />
-                                            <circle cx="14" cy="14" r="0.5" fill="currentColor" />
-                                            <circle cx="10" cy="16" r="0.5" fill="currentColor" />
-                                            <circle cx="12" cy="16" r="0.5" fill="currentColor" />
-                                            <circle cx="14" cy="16" r="0.5" fill="currentColor" />
-                                        </svg>
-                                        Atur Jadwal Visitasi
-                                    </button>
+                                <x-ui.action-menu-item wire:click="openTolakVisitasiModal({{ $item->id }})" variant="danger">
+                                    <x-ui.icon name="cross-circle" class="fs-5" />
+                                    Tolak Visitasi
+                                </x-ui.action-menu-item>
+                            @endif
 
-                                    <button wire:click="openTolakVisitasiModal({{ $item->id }})" @click="open = false"
-                                        class="flex items-center w-full px-4 py-2.5 text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition-colors gap-3">
-                                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                            <circle cx="12" cy="12" r="9" />
-                                            <path d="M15 9l-6 6M9 9l6 6" stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
-                                        Tolak Visitasi
-                                    </button>
-                                    @endif
+                            @if($item->akreditasi->status == 4 || $item->akreditasi->status == 3 || $item->akreditasi->status == 1 || $item->akreditasi->status == 2)
+                                <x-ui.action-menu-item
+                                    :href="route('asesor.akreditasi-detail', ['uuid' => $item->akreditasi->uuid, 'activeTab' => 'instrumen'])"
+                                    wire:navigate
+                                    variant="primary"
+                                >
+                                    <x-ui.icon name="pencil" class="fs-5" />
+                                    {{ $item->akreditasi->status == 1 || $item->akreditasi->status == 2 ? 'Lihat Nilai' : 'Input Nilai' }}
+                                </x-ui.action-menu-item>
+                            @endif
 
-                                    @if($item->akreditasi->status == 4 || $item->akreditasi->status == 3 || $item->akreditasi->status == 1 || $item->akreditasi->status == 2)
-                                    <a href="{{ route('asesor.akreditasi-detail', ['uuid' => $item->akreditasi->uuid, 'activeTab' => 'instrumen']) }}" wire:navigate
-                                        class="flex items-center w-full px-4 py-2.5 text-[11px] font-bold text-indigo-600 hover:bg-slate-50 transition-colors gap-3 border-t border-gray-50/50">
-                                        <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2-2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                        {{ $item->akreditasi->status == 1 || $item->akreditasi->status == 2 ? 'Lihat Nilai' : 'Input Nilai' }}
-                                    </a>
-                                    @endif
-
-                                    @if($item->akreditasi->status == 3 || $item->akreditasi->status == 1 || $item->akreditasi->status == 2)
-                                    <a href="{{ route('asesor.akreditasi-detail', ['uuid' => $item->akreditasi->uuid, 'activeTab' => 'laporan_visitasi']) }}" wire:navigate
-                                        class="flex items-center w-full px-4 py-2.5 text-[11px] font-bold text-emerald-600 hover:bg-emerald-50 transition-colors gap-3 border-t border-gray-50/50">
-                                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                                        </svg>
-                                        {{ $item->akreditasi->status == 3 ? 'Upload Laporan' : 'Lihat Laporan' }}
-                                    </a>
-                                    @endif
-                                </div>
-                            </template>
-                        </div>
+                            @if($item->akreditasi->status == 3 || $item->akreditasi->status == 1 || $item->akreditasi->status == 2)
+                                <x-ui.action-menu-item
+                                    :href="route('asesor.akreditasi-detail', ['uuid' => $item->akreditasi->uuid, 'activeTab' => 'laporan_visitasi'])"
+                                    wire:navigate
+                                    variant="success"
+                                >
+                                    <x-ui.icon name="document" class="fs-5" />
+                                    {{ $item->akreditasi->status == 3 ? 'Upload Laporan' : 'Lihat Laporan' }}
+                                </x-ui.action-menu-item>
+                            @endif
+                        </x-ui.action-menu>
                     </td>
                 </tr>
                 @endif
                 @empty
                 <tr>
-                    <td colspan="6" class="py-16 text-center">
-                        <div class="flex flex-col items-center gap-2">
-                            <svg class="w-10 h-10 text-gray-400/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <p class="text-xs text-gray-400 font-bold">Belum ada tugas akreditasi ditugaskan.</p>
-                        </div>
+                    <td colspan="6">
+                        <x-ui.empty-state title="Belum ada tugas akreditasi ditugaskan" class="py-15" />
                     </td>
                 </tr>
                 @endforelse
             </x-slot>
         </x-datatable.layout>
-    </div>
+    </x-ui.page>
 
     <!-- Modal Atur Jadwal Visitasi -->
     <x-modal name="atur-jadwal-modal" focusable>
-        <form wire:submit="submitVisitasi" class="p-8">
-            <div class="flex items-center gap-3 mb-2">
-                <div class="w-8 h-8 rounded-lg bg-[#1e3a5f]/10 flex items-center justify-center text-[#1e3a5f]">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                </div>
-                <h2 class="text-xl font-bold text-slate-800">Atur Jadwal Visitasi</h2>
-            </div>
-            <p class="text-xs font-medium text-slate-500 mb-8">Tentukan jadwal visitasi Pesantren.</p>
+        <form x-on:submit.prevent="confirmAction('submitVisitasi', 'Atur jadwal visitasi?', 'Jadwal visitasi akan disimpan.', 'Ya, atur')">
+            <x-ui.modal-header
+                title="Atur Jadwal Visitasi"
+                subtitle="Tentukan jadwal visitasi pesantren."
+                icon="timer"
+            />
+
+            <x-ui.modal-body>
 
             @if($selectedAssessment)
             <div class="bg-gray-50/50 rounded-2xl p-6 border border-slate-100 mb-8">
@@ -393,55 +343,59 @@ new #[Layout('layouts.app')] class extends Component {
             @endif
 
             <div class="space-y-6">
-                <h3 class="text-sm font-black text-slate-800">Input Jadwal</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <x-input-label value="Tanggal Mulai Visitasi" class="text-[11px] font-bold text-slate-500 uppercase tracking-widest !mb-2" />
-                        <x-text-input wire:model="visitasi_tanggal" type="date" class="w-full !rounded-xl !bg-slate-50/50 !border-slate-100" />
-                        <x-input-error :messages="$errors->get('visitasi_tanggal')" class="mt-2" />
+                <h3 class="fw-bold text-gray-900 fs-6 mb-4">Input Jadwal</h3>
+                <div class="row g-5">
+                    <div class="col-md-6">
+                        <x-ui.form-field label="Tanggal Mulai Visitasi" :error="$errors->get('visitasi_tanggal')">
+                            <x-ui.input model="visitasi_tanggal" type="date" />
+                        </x-ui.form-field>
                     </div>
-                    <div>
-                        <x-input-label value="Tanggal Selesai Visitasi" class="text-[11px] font-bold text-slate-500 uppercase tracking-widest !mb-2" />
-                        <x-text-input wire:model="visitasi_tanggal_akhir" type="date" class="w-full !rounded-xl !bg-slate-50/50 !border-slate-100" />
-                        <x-input-error :messages="$errors->get('visitasi_tanggal_akhir')" class="mt-2" />
+                    <div class="col-md-6">
+                        <x-ui.form-field label="Tanggal Selesai Visitasi" :error="$errors->get('visitasi_tanggal_akhir')">
+                            <x-ui.input model="visitasi_tanggal_akhir" type="date" />
+                        </x-ui.form-field>
                     </div>
                 </div>
-                <p class="text-[10px] font-bold text-red-500 leading-relaxed">
-                    Rentang visitasi maksimal 4 hari dan harus berada dalam periode assessment yang telah ditetapkan oleh Admin Pusat.
-                </p>
 
-                <div>
-                    <x-input-label value="Catatan Tambahan" class="text-sm font-black text-slate-800 !mb-4" />
-                    <textarea wire:model="visitasi_catatan" rows="4"
-                        class="w-full rounded-2xl border-slate-100 bg-slate-50/50 text-sm text-slate-600 focus:ring-[#1e3a5f] focus:border-[#1e3a5f] placeholder-slate-300"
-                        placeholder="Contoh: Koordinasi kedatangan dengan pimpinan pesantren pukul 08.00 WIB."></textarea>
+                <div class="notice d-flex bg-light-warning rounded border-warning border border-dashed p-4">
+                    <div class="fw-semibold text-warning fs-7">
+                        Rentang visitasi maksimal 4 hari dan harus berada dalam periode assessment yang telah ditetapkan oleh Admin Pusat.
+                    </div>
                 </div>
+
+                <x-ui.form-field label="Catatan Tambahan">
+                    <x-ui.textarea
+                        model="visitasi_catatan"
+                        rows="4"
+                        placeholder="Contoh: Koordinasi kedatangan dengan pimpinan pesantren pukul 08.00 WIB."
+                    />
+                </x-ui.form-field>
             </div>
 
-            <div class="mt-10 flex flex-col md:flex-row gap-3">
-                <button type="submit" class="flex-1 bg-[#1e3a5f] text-white py-3.5 rounded-xl font-bold text-xs uppercase tracking-[0.2em] shadow-lg shadow-[#1e3a5f]/20 hover:bg-[#162d4a] transition-all">
+            </x-ui.modal-body>
+
+            <x-ui.modal-footer>
+                <x-ui.button type="submit" variant="primary">
                     {{ __('Atur Jadwal Visitasi') }}
-                </button>
-                <button type="button" x-on:click="$dispatch('close')" class="px-8 py-3.5 bg-slate-100 text-slate-400 rounded-xl font-bold text-xs uppercase tracking-[0.2em] hover:bg-slate-200 transition-all">
+                </x-ui.button>
+                <x-ui.button type="button" variant="light" x-on:click="$dispatch('close')">
                     Batal
-                </button>
-            </div>
+                </x-ui.button>
+            </x-ui.modal-footer>
         </form>
     </x-modal>
 
     <!-- Modal Tolak Visitasi -->
     <x-modal name="tolak-visitasi-modal" focusable>
-        <form wire:submit="submitVisitasi" class="p-8">
-            <div class="flex items-center gap-3 mb-2">
-                <div class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center text-red-500">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                        <circle cx="12" cy="12" r="9" />
-                        <path d="M15 9l-6 6M9 9l6 6" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                </div>
-                <h2 class="text-xl font-bold text-slate-800">Tolak Visitasi</h2>
-            </div>
-            <p class="text-xs font-medium text-slate-500 mb-8">Berikan alasan penolakan untuk proses perbaikan dokumen.</p>
+        <form x-on:submit.prevent="confirmAction('submitVisitasi', 'Tolak visitasi?', 'Pesantren akan menerima catatan perbaikan dokumen.', 'Ya, tolak', 'danger')">
+            <x-ui.modal-header
+                title="Tolak Visitasi"
+                subtitle="Berikan alasan penolakan untuk proses perbaikan dokumen."
+                icon="cross-circle"
+                variant="danger"
+            />
+
+            <x-ui.modal-body>
 
             @if($selectedAssessment)
             <div class="bg-gray-50/50 rounded-2xl p-6 border border-slate-100 mb-8">
@@ -457,36 +411,36 @@ new #[Layout('layouts.app')] class extends Component {
             @endif
 
             <div class="space-y-6">
-                <h3 class="text-sm font-black text-slate-800">Dokumen yang Memerlukan Perbaikan</h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    @foreach(['Profil Pesantren', 'IPM', 'Data SDM', 'EPDM'] as $doc)
-                    <label class="relative flex items-center p-3 rounded-xl border border-slate-100 bg-slate-50/50 cursor-pointer hover:bg-slate-100 transition-all select-none">
-                        <input type="checkbox" wire:model="visitasi_perbaikan" value="{{ $doc }}" class="w-4 h-4 rounded border-slate-300 text-[#1e3a5f] focus:ring-[#1e3a5f]" />
-                        <span class="ml-3 text-[11px] font-bold text-slate-600">{{ $doc }}</span>
-                    </label>
-                    @endforeach
-                </div>
-                <p class="text-[10px] font-bold text-red-500 leading-relaxed">
-                    Minimal satu bagian harus dipilih sebelum melanjutkan.
-                </p>
+                <x-ui.form-field label="Dokumen yang Memerlukan Perbaikan" :error="$errors->get('visitasi_perbaikan')">
+                    <div class="row g-3">
+                        @foreach(['Profil Pesantren', 'IPM', 'Data SDM', 'EPDM'] as $doc)
+                            <div class="col-6 col-md-3">
+                                <x-ui.checkbox model="visitasi_perbaikan" :value="$doc" :label="$doc" />
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="form-text">Minimal satu bagian harus dipilih sebelum melanjutkan.</div>
+                </x-ui.form-field>
 
-                <div>
-                    <x-input-label value="Alasan Penolakan" class="text-sm font-black text-slate-800 !mb-4" />
-                    <textarea wire:model="visitasi_catatan" rows="4"
-                        class="w-full rounded-2xl border-slate-100 bg-slate-50/50 text-sm text-slate-600 focus:ring-[#1e3a5f] focus:border-[#1e3a5f] placeholder-slate-300"
-                        placeholder="Jelaskan secara spesifik bagian yang perlu diperbaiki."></textarea>
-                    <x-input-error :messages="$errors->get('visitasi_catatan')" class="mt-2" />
-                </div>
+                <x-ui.form-field label="Alasan Penolakan" :error="$errors->get('visitasi_catatan')">
+                    <x-ui.textarea
+                        model="visitasi_catatan"
+                        rows="4"
+                        placeholder="Jelaskan secara spesifik bagian yang perlu diperbaiki."
+                    />
+                </x-ui.form-field>
             </div>
 
-            <div class="mt-10 flex flex-col md:flex-row gap-3">
-                <button type="submit" class="flex-1 bg-red-500 text-white py-3.5 rounded-xl font-bold text-xs uppercase tracking-[0.2em] shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all">
+            </x-ui.modal-body>
+
+            <x-ui.modal-footer>
+                <x-ui.button type="submit" variant="danger">
                     {{ __('Tolak Visitasi') }}
-                </button>
-                <button type="button" x-on:click="$dispatch('close')" class="px-8 py-3.5 bg-slate-100 text-slate-400 rounded-xl font-bold text-xs uppercase tracking-[0.2em] hover:bg-slate-200 transition-all">
+                </x-ui.button>
+                <x-ui.button type="button" variant="light" x-on:click="$dispatch('close')">
                     Batal
-                </button>
-            </div>
+                </x-ui.button>
+            </x-ui.modal-footer>
         </form>
     </x-modal>
 

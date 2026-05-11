@@ -1,0 +1,134 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Akreditasi;
+use App\Models\Edpm;
+use App\Models\Ipm;
+use App\Models\MasterEdpmButir;
+use App\Models\MasterEdpmKomponen;
+use App\Models\Pesantren;
+use App\Models\SdmPesantren;
+use App\Models\User;
+use App\Services\PesantrenService;
+use Database\Seeders\RoleSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
+use Tests\TestCase;
+
+class PesantrenAkreditasiWorkflowTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->seed(RoleSeeder::class);
+        Notification::fake();
+    }
+
+    public function test_pengajuan_tidak_dibuat_jika_data_pesantren_belum_lengkap(): void
+    {
+        $user = User::factory()->create(['role_id' => 3]);
+
+        $akreditasi = $this->service()->createSubmission($user->id);
+
+        $this->assertNull($akreditasi);
+        $this->assertDatabaseCount('akreditasis', 0);
+    }
+
+    public function test_pengajuan_dibuat_dan_profil_dikunci_jika_data_lengkap(): void
+    {
+        $user = $this->createCompletePesantrenUser();
+
+        $akreditasi = $this->service()->createSubmission($user->id);
+
+        $this->assertNotNull($akreditasi);
+        $this->assertSame(6, $akreditasi->status);
+        $this->assertNull($akreditasi->parent);
+        $this->assertTrue($user->pesantren->fresh()->is_locked);
+        $this->assertDatabaseHas('akreditasis', [
+            'id' => $akreditasi->id,
+            'user_id' => $user->id,
+            'status' => 6,
+        ]);
+    }
+
+    public function test_pengajuan_aktif_tidak_bisa_diduplikasi(): void
+    {
+        $user = $this->createCompletePesantrenUser();
+
+        Akreditasi::create([
+            'user_id' => $user->id,
+            'status' => 5,
+        ]);
+
+        $akreditasi = $this->service()->createSubmission($user->id);
+
+        $this->assertNull($akreditasi);
+        $this->assertSame(1, Akreditasi::where('user_id', $user->id)->count());
+    }
+
+    public function test_pengajuan_ulang_hanya_bisa_dibuat_sekali_untuk_pengajuan_yang_ditolak(): void
+    {
+        $user = $this->createCompletePesantrenUser();
+        $rejected = Akreditasi::create([
+            'user_id' => $user->id,
+            'status' => 2,
+        ]);
+
+        $firstResubmission = $this->service()->createSubmission($user->id, $rejected->id);
+        $secondResubmission = $this->service()->createSubmission($user->id, $rejected->id);
+
+        $this->assertNotNull($firstResubmission);
+        $this->assertSame($rejected->id, $firstResubmission->parent);
+        $this->assertNull($secondResubmission);
+        $this->assertSame(2, Akreditasi::where('user_id', $user->id)->count());
+    }
+
+    private function service(): PesantrenService
+    {
+        return app(PesantrenService::class);
+    }
+
+    private function createCompletePesantrenUser(): User
+    {
+        $user = User::factory()->create(['role_id' => 3]);
+
+        Pesantren::create([
+            'user_id' => $user->id,
+            'nama_pesantren' => 'Pesantren TDD',
+            'is_locked' => false,
+        ]);
+
+        Ipm::create([
+            'user_id' => $user->id,
+            'nsp_file' => 'ipm/nsp.pdf',
+            'lulus_santri_file' => 'ipm/lulus.pdf',
+            'kurikulum_file' => 'ipm/kurikulum.pdf',
+            'buku_ajar_file' => 'ipm/buku-ajar.pdf',
+        ]);
+
+        SdmPesantren::create([
+            'user_id' => $user->id,
+            'tingkat' => 'spm',
+        ]);
+
+        $komponen = MasterEdpmKomponen::create(['nama' => 'Standar Isi']);
+        $butir = MasterEdpmButir::create([
+            'komponen_id' => $komponen->id,
+            'no_sk' => '1',
+            'nomor_butir' => '1.1',
+            'butir_pernyataan' => 'Pesantren memiliki dokumen kurikulum.',
+        ]);
+
+        Edpm::create([
+            'user_id' => $user->id,
+            'butir_id' => $butir->id,
+            'isian' => '4',
+        ]);
+
+        return $user->refresh();
+    }
+}

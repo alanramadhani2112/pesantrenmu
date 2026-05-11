@@ -10,6 +10,7 @@ class Pesantren extends Model
 
     protected $casts = [
         'layanan_satuan_pendidikan' => 'array',
+        'is_locked' => 'boolean',
     ];
 
     protected static function boot()

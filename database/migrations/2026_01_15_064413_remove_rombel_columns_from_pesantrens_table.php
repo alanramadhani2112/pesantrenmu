@@ -11,18 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('pesantrens', function (Blueprint $table) {
-            $table->dropColumn([
-                'rombel_sd',
-                'rombel_mi',
-                'rombel_smp',
-                'rombel_mts',
-                'rombel_sma',
-                'rombel_ma',
-                'rombel_smk',
-                'rombel_spm'
-            ]);
-        });
+        foreach ($this->columns() as $column) {
+            if (Schema::hasColumn('pesantrens', $column)) {
+                Schema::table('pesantrens', function (Blueprint $table) use ($column) {
+                    $table->dropColumn($column);
+                });
+            }
+        }
     }
 
     /**
@@ -30,15 +25,36 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('pesantrens', function (Blueprint $table) {
-            $table->integer('rombel_sd')->default(0);
-            $table->integer('rombel_mi')->default(0);
-            $table->integer('rombel_smp')->default(0);
-            $table->integer('rombel_mts')->default(0);
-            $table->integer('rombel_sma')->default(0);
-            $table->integer('rombel_ma')->default(0);
-            $table->integer('rombel_smk')->default(0);
-            $table->integer('rombel_spm')->default(0);
+        $columns = array_filter(
+            $this->columns(),
+            fn (string $column): bool => ! Schema::hasColumn('pesantrens', $column)
+        );
+
+        if ($columns === []) {
+            return;
+        }
+
+        Schema::table('pesantrens', function (Blueprint $table) use ($columns) {
+            foreach ($columns as $column) {
+                $table->integer($column)->default(0);
+            }
         });
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function columns(): array
+    {
+        return [
+            'rombel_sd',
+            'rombel_mi',
+            'rombel_smp',
+            'rombel_mts',
+            'rombel_sma',
+            'rombel_ma',
+            'rombel_smk',
+            'rombel_spm',
+        ];
     }
 };

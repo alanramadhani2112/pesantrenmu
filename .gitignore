@@ -11,11 +11,13 @@
 /.phpunit.cache
 /.vscode
 /.zed
+/.playwright-cli
 /auth.json
 /node_modules
 /public/build
 /public/hot
 /public/storage
+/output
 /storage/*.key
 /storage/pail
 /vendor

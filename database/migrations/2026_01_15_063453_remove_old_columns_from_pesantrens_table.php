@@ -11,9 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('pesantrens', function (Blueprint $table) {
-            $table->dropColumn(['luas_tanah', 'luas_bangunan']);
-        });
+        foreach (['luas_tanah', 'luas_bangunan'] as $column) {
+            if (Schema::hasColumn('pesantrens', $column)) {
+                Schema::table('pesantrens', function (Blueprint $table) use ($column) {
+                    $table->dropColumn($column);
+                });
+            }
+        }
     }
 
     /**
@@ -21,9 +25,19 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('pesantrens', function (Blueprint $table) {
-            $table->string('luas_tanah')->nullable();
-            $table->string('luas_bangunan')->nullable();
+        $columns = array_filter(
+            ['luas_tanah', 'luas_bangunan'],
+            fn (string $column): bool => ! Schema::hasColumn('pesantrens', $column)
+        );
+
+        if ($columns === []) {
+            return;
+        }
+
+        Schema::table('pesantrens', function (Blueprint $table) use ($columns) {
+            foreach ($columns as $column) {
+                $table->string($column)->nullable();
+            }
         });
     }
 };

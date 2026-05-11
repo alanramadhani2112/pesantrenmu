@@ -127,63 +127,40 @@ new #[Layout('layouts.app')] class extends Component {
     }
 }; ?>
 
-<div class="py-12" x-data="akreditasiPesantren">
+<div x-data="akreditasiPesantren" data-module-page="pesantren-akreditasi">
     <x-slot name="header">
-        <h2 class="font-semibold text-gray-800 leading-tight">
-            {{ __('Akreditasi') }}
-        </h2>
+        {{ __('Akreditasi') }}
     </x-slot>
 
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <x-ui.page
+        title="Akreditasi"
+        subtitle="Pantau pengajuan, status proses, catatan, dan tindak lanjut akreditasi."
+    >
         <x-datatable.layout title="Pengajuan Akreditasi" :records="$this->akreditasis">
             <x-slot name="filters">
-                <div class="flex items-center gap-3">
-                    <div class="relative group">
-                        <select wire:model.live="periodeFilter" class="appearance-none bg-none bg-gray-50 border-none text-slate-500 text-[11px] font-black uppercase tracking-widest rounded-xl focus:ring-0 block pl-4 pr-10 py-2.5 transition-all cursor-pointer hover:bg-gray-100">
-                            <option value="">Periode</option>
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <x-ui.filter-select model="periodeFilter" placeholder="Periode">
                             @for($i = date('Y'); $i >= 2024; $i--)
-                            <option value="{{ $i }}">{{ $i }}</option>
+                                <option value="{{ $i }}">{{ $i }}</option>
                             @endfor
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-300 group-hover:text-slate-400 transition-colors">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </div>
-                    </div>
+                    </x-ui.filter-select>
 
-                    <div class="relative group">
-                        <select wire:model.live="statusFilter" class="appearance-none bg-none bg-gray-50 border-none text-slate-500 text-[11px] font-black uppercase tracking-widest rounded-xl focus:ring-0 block pl-4 pr-10 py-2.5 transition-all cursor-pointer hover:bg-gray-100">
-                            <option value="">Status</option>
-                            <option value="1">Selesai</option>
-                            <option value="2">Ditolak</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-300 group-hover:text-slate-400 transition-colors">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </div>
-                    </div>
+                    <x-ui.filter-select
+                        model="statusFilter"
+                        placeholder="Status"
+                        :options="['1' => 'Selesai', '2' => 'Ditolak']"
+                    />
 
-                    <div class="relative group">
-                        <select wire:model.live="tahapanFilter" class="appearance-none bg-none bg-gray-50 border-none text-slate-500 text-[11px] font-black uppercase tracking-widest rounded-xl focus:ring-0 block pl-4 pr-10 py-2.5 transition-all cursor-pointer hover:bg-gray-100">
-                            <option value="">Tahapan</option>
-                            <option value="visitasi">Visitasi</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-300 group-hover:text-slate-400 transition-colors">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </div>
-                    </div>
+                    <x-ui.filter-select
+                        model="tahapanFilter"
+                        placeholder="Tahapan"
+                        :options="['visitasi' => 'Visitasi']"
+                    />
 
-                    <button @click="confirmCreate"
-                        class="bg-gray-900 text-white px-6 py-2.5 rounded-2xl text-xs font-bold flex items-center gap-2 transition-all ml-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
+                    <x-ui.button x-on:click="confirmCreate" variant="primary" size="sm">
+                        <x-ui.icon name="plus" class="fs-4 me-1" />
                         Buat Pengajuan
-                    </button>
+                    </x-ui.button>
                 </div>
             </x-slot>
 
@@ -206,33 +183,33 @@ new #[Layout('layouts.app')] class extends Component {
                     <td class="py-8 px-4 text-center">
                         @if($item->status == 1)
                         @if($item->masa_berlaku_akhir && \Carbon\Carbon::parse($item->masa_berlaku_akhir)->isPast())
-                        <span class="px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-tight bg-rose-50 text-rose-600">
+                        <x-ui.status-badge variant="danger" class="text-uppercase">
                             Masa Berlaku Habis
-                        </span>
+                        </x-ui.status-badge>
                         @else
-                        <span class="px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-tight bg-emerald-50 text-emerald-600">
+                        <x-ui.status-badge variant="success" class="text-uppercase">
                             Selesai
-                        </span>
+                        </x-ui.status-badge>
                         @endif
                         @elseif($item->status == 2)
-                        <span class="px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-tight bg-rose-50 text-rose-600">
+                        <x-ui.status-badge variant="danger" class="text-uppercase">
                             Ditolak
-                        </span>
+                        </x-ui.status-badge>
                         @else
-                        <span class="px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-tight bg-blue-50 text-blue-600">
+                        <x-ui.status-badge variant="primary" class="text-uppercase">
                             Proses Akreditasi
-                        </span>
+                        </x-ui.status-badge>
                         @endif
                     </td>
                     <td class="py-8 px-4 text-center">
                         @if($item->status == 1 || $item->status == 2)
-                        <span class="px-4 py-1.5 rounded-xl bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-tight">Selesai</span>
+                        <x-ui.status-badge variant="success" class="text-uppercase">Selesai</x-ui.status-badge>
                         @elseif($item->status == 5 && $item->catatans->whereNotNull('perbaikan')->filter(fn($c) => !empty($c->perbaikan))->isNotEmpty())
-                        <span class="px-4 py-1.5 rounded-xl bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-tight">Perlu Perbaikan Dokumen</span>
+                        <x-ui.status-badge variant="warning" class="text-uppercase">Perlu Perbaikan Dokumen</x-ui.status-badge>
                         @elseif($item->tgl_visitasi)
-                        <span class="px-4 py-1.5 rounded-xl bg-green-50 text-green-600 text-[10px] font-black uppercase tracking-tight">Visitasi Dijadwalkan</span>
+                        <x-ui.status-badge variant="info" class="text-uppercase">Visitasi Dijadwalkan</x-ui.status-badge>
                         @else
-                        <span class="text-slate-300 font-bold">-</span>
+                        <x-ui.status-badge variant="secondary">-</x-ui.status-badge>
                         @endif
                     </td>
                     <td class="py-8 px-4 text-center">
@@ -244,117 +221,86 @@ new #[Layout('layouts.app')] class extends Component {
                     </td>
                     <td class="py-8 px-4 text-center">
                         @if($item->peringkat)
-                        <span class="px-4 py-1.5 rounded-xl bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-tight">
+                        <x-ui.status-badge variant="success" class="text-uppercase">
                             {{ $item->peringkat == 'Unggul' ? 'Unggul / Mumtaz' : $item->peringkat }}
-                        </span>
+                        </x-ui.status-badge>
                         @else
                         <span class="text-slate-200 font-bold">-</span>
                         @endif
                     </td>
                     <td class="py-8 px-4 text-center">
-                        <button wire:click="openCatatanModal({{ $item->id }})" class="inline-flex items-center gap-2 group/cat">
-                            <div class="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500 group-hover/cat:bg-amber-100 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                            @if($item->catatans->count() > 0)
-                            <span class="text-[11px] font-black text-slate-500 group-hover/cat:text-amber-600 transition-colors">{{ $item->catatans->count() }} Catatan</span>
-                            @endif
-                        </button>
+                        <x-ui.button wire:click="openCatatanModal({{ $item->id }})" variant="light" size="sm">
+                            <x-ui.icon name="document" class="fs-5 me-1" />
+                            {{ $item->catatans->count() > 0 ? $item->catatans->count() . ' Catatan' : 'Catatan' }}
+                        </x-ui.button>
                     </td>
                     <td class="py-8 px-4 text-right pr-10">
-                        <div class="inline-block text-left" x-data="{ 
-                            open: false,
-                            dropdownPosition: { top: 0, left: 0 },
-                            updatePosition() {
-                                let rect = this.$refs.btn.getBoundingClientRect();
-                                this.dropdownPosition = { 
-                                    top: (rect.bottom + 5) + 'px', 
-                                    left: (rect.right - 192) + 'px' 
-                                };
-                            }
-                        }">
-                            <button x-ref="btn" @click="open = !open; if(open) updatePosition()" @click.away="open = false" type="button" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 text-slate-500 text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-100 transition-all border border-transparent active:border-gray-200">
-                                Aksi
-                                <svg class="w-3 h-3 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </button>
-                            <template x-teleport="body">
-                                <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" :style="`position: fixed; top: ${dropdownPosition.top}; left: ${dropdownPosition.left}; z-index: 9999;`" class="w-48 rounded-2xl shadow-xl bg-white ring-1 ring-black ring-opacity-5 p-2 overflow-hidden shadow-slate-200/50" x-cloak>
-                                    <a href="{{ route('pesantren.akreditasi-detail', $item->uuid) }}" wire:navigate class="flex items-center gap-3 px-4 py-3 text-[11px] font-bold text-slate-600 hover:bg-slate-50 rounded-xl transition-colors">
-                                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                        Lihat Detail
-                                    </a>
-                                    @if ($item->status == 3 && !$item->kartu_kendali)
-                                    <a href="{{ route('pesantren.akreditasi-detail', ['uuid' => $item->uuid, 'activeTab' => 'kartu']) }}" wire:navigate class="flex items-center gap-3 px-4 py-3 text-[11px] font-bold text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                                        </svg>
-                                        Upload Kartu
-                                    </a>
-                                    @endif
-                                    @if ($item->status == 1 && $item->sertifikat_path)
-                                    <a href="{{ Storage::url($item->sertifikat_path) }}" target="_blank" class="flex items-center gap-3 px-4 py-3 text-[11px] font-bold text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
-                                        Download Sertifikat
-                                    </a>
-                                    @endif
-                                    @if ($item->status == 6)
-                                    <button @click="confirmCancel({{ $item->id }}, '{{ $item->created_at->format('Y') }}'); open = false" class="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors text-left">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                        Batalkan Pengajuan
-                                    </button>
-                                    @endif
-                                    @if ($item->status == 2)
-                                    @php
-                                    $isAlreadyResubmitted = \App\Models\Akreditasi::where('parent', $item->id)->exists();
-                                    @endphp
+                        <x-ui.action-menu>
+                            <x-ui.action-menu-item :href="route('pesantren.akreditasi-detail', $item->uuid)" wire:navigate>
+                                <x-ui.icon name="eye" class="fs-5 text-gray-500" />
+                                Lihat Detail
+                            </x-ui.action-menu-item>
 
-                                    @if (!$isAlreadyResubmitted)
-                                    <button @click="confirmResubmit({{ $item->id }}); open = false" class="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-bold text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors text-left border-l-4 border-transparent hover:border-emerald-500">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                        </svg>
+                            @if ($item->status == 3 && !$item->kartu_kendali)
+                                <x-ui.action-menu-item
+                                    :href="route('pesantren.akreditasi-detail', ['uuid' => $item->uuid, 'activeTab' => 'kartu'])"
+                                    wire:navigate
+                                    variant="success"
+                                >
+                                    <x-ui.icon name="arrow-up" class="fs-5" />
+                                    Upload Kartu
+                                </x-ui.action-menu-item>
+                            @endif
+
+                            @if ($item->status == 1 && $item->sertifikat_path)
+                                <x-ui.action-menu-item href="{{ Storage::url($item->sertifikat_path) }}" target="_blank" variant="success">
+                                    <x-ui.icon name="document" class="fs-5" />
+                                    Download Sertifikat
+                                </x-ui.action-menu-item>
+                            @endif
+
+                            @if ($item->status == 6)
+                                <x-ui.action-menu-item
+                                    variant="danger"
+                                    x-on:click="confirmCancel({{ $item->id }}, '{{ $item->created_at->format('Y') }}')"
+                                >
+                                    <x-ui.icon name="cross-circle" class="fs-5" />
+                                    Batalkan Pengajuan
+                                </x-ui.action-menu-item>
+                            @endif
+
+                            @if ($item->status == 2)
+                                @php
+                                    $isAlreadyResubmitted = \App\Models\Akreditasi::where('parent', $item->id)->exists();
+                                @endphp
+
+                                @if (!$isAlreadyResubmitted)
+                                    <x-ui.action-menu-item variant="success" x-on:click="confirmResubmit({{ $item->id }})">
+                                        <x-ui.icon name="check-circle" class="fs-5" />
                                         Ajukan Ulang
-                                    </button>
-                                    @else
-                                    <div class="px-4 py-3 text-[10px] font-bold text-slate-400 bg-slate-50 italic flex items-center gap-2">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        Sudah Diajukan Ulang
+                                    </x-ui.action-menu-item>
+                                @else
+                                    <div class="menu-item">
+                                        <span class="menu-link px-3 py-2 text-muted">
+                                            <x-ui.icon name="check-circle" class="fs-5" />
+                                            Sudah Diajukan Ulang
+                                        </span>
                                     </div>
-                                    @endif
-                                    @endif
-                                </div>
-                            </template>
-                        </div>
+                                @endif
+                            @endif
+                        </x-ui.action-menu>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="py-16 text-center">
-                        <div class="flex flex-col items-center gap-2">
-                            <svg class="w-10 h-10 text-gray-400/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <p class="text-xs text-gray-400 font-bold">Belum ada data pengajuan akreditasi.</p>
-                        </div>
+                    <td colspan="7">
+                        <x-ui.empty-state title="Belum ada data pengajuan akreditasi" class="py-15" />
                     </td>
                 </tr>
                 @endforelse
             </x-slot>
         </x-datatable.layout>
-    </div>
+    </x-ui.page>
 
     <!-- Modal Catatan (View Only) -->
     <x-modal name="catatan-modal" focusable>

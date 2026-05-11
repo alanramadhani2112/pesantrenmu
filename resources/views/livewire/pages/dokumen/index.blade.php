@@ -21,70 +21,86 @@ new #[Layout('layouts.app')] class extends Component {
     }
 }; ?>
 
-<div class="py-12 bg-slate-50/50 min-h-screen">
+@php
+    $pageTitle = match ($this->doc) {
+        'iapm' => 'IAPM',
+        'kartu_kendali' => 'Kartu Kendali',
+        'visitasi' => 'Visitasi',
+        default => 'Daftar Dokumen',
+    };
+@endphp
+
+<div data-module-page="dokumen">
     <x-slot name="header">
-        @if($this->doc == 'iapm') IAPM @elseif($this->doc == 'kartu_kendali') Kartu Kendali @elseif($this->doc == 'visitasi') Visitasi @else Daftar Dokumen @endif
+        {{ $pageTitle }}
     </x-slot>
 
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden">
-            <div class="p-8 md:p-12 text-gray-900">
-                <div class="mb-10">
-                    <h2 class="text-3xl font-black text-slate-800 tracking-tight">@if($this->doc == 'iapm') IAPM @elseif($this->doc == 'kartu_kendali') Kartu Kendali @elseif($this->doc == 'visitasi') Visitasi @else Daftar Dokumen @endif</h2>
-                </div>
+    <x-ui.page
+        :title="$pageTitle"
+        subtitle="Daftar dokumen yang tersedia sesuai hak akses pengguna."
+    >
+        <x-ui.table
+            title="Dokumen Tersedia"
+            subtitle="Buka berkas yang dibutuhkan untuk proses akreditasi."
+            :show-per-page="false"
+        >
+            <x-slot name="thead">
+                <x-ui.table-th>Dokumen</x-ui.table-th>
+                <x-ui.table-th>Format</x-ui.table-th>
+                <x-ui.table-th>Diunggah</x-ui.table-th>
+                <x-ui.table-th align="end">Aksi</x-ui.table-th>
+            </x-slot>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-                    @forelse ($this->documents as $doc)
-                    <div class="group bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-500 flex flex-col h-full relative overflow-hidden">
-                        <!-- File Type Badge -->
-                        <div class="absolute top-8 right-8">
-                            <span class="text-[10px] font-black uppercase tracking-widest text-blue-600 bg-blue-50/50 px-4 py-2 rounded-full border border-blue-100/50">
-                                {{ strtoupper(pathinfo($doc->file_path, PATHINFO_EXTENSION)) }}
-                            </span>
-                        </div>
+            <x-slot name="tbody">
+                @forelse ($this->documents as $doc)
+                    <tr wire:key="dokumen-{{ $doc->id }}">
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="symbol symbol-40px">
+                                    <div class="symbol-label bg-light-primary text-primary">
+                                        <x-ui.icon name="document" class="fs-2" />
+                                    </div>
+                                </div>
 
-                        <!-- Icon -->
-                        <div class="mb-8">
-                            <div class="h-14 w-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform duration-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
+                                <div class="d-flex flex-column">
+                                    <span class="text-gray-900 fw-bold fs-6">{{ $doc->title }}</span>
+                                    <span class="text-muted fw-semibold fs-7">{{ basename($doc->file_path) }}</span>
+                                </div>
                             </div>
-                        </div>
+                        </td>
 
-                        <!-- Title -->
-                        <h3 class="text-xl font-bold text-slate-800 mb-10 leading-[1.4] flex-grow pr-16 group-hover:text-blue-600 transition-colors">
-                            {{ $doc->title }}
-                        </h3>
+                        <td>
+                            <x-ui.badge variant="info">{{ strtoupper(pathinfo($doc->file_path, PATHINFO_EXTENSION)) }}</x-ui.badge>
+                        </td>
 
-                        <!-- Footer -->
-                        <div class="mt-auto pt-8 border-t border-slate-50 flex items-center justify-between">
-                            <div class="flex flex-col">
-                                <span class="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] mb-1.5 leading-none">DIUNGGAH PADA</span>
-                                <span class="text-[13px] font-bold text-slate-500">{{ $doc->created_at->translatedFormat('d M Y') }}</span>
-                            </div>
+                        <td>
+                            <span class="text-gray-700 fw-semibold">{{ $doc->created_at->translatedFormat('d M Y') }}</span>
+                        </td>
 
-                            <a href="{{ Storage::url($doc->file_path) }}" target="_blank" class="inline-flex items-center gap-3 bg-[#1e293b] hover:bg-black text-white px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-md hover:shadow-lg active:scale-95 group/btn">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform group-hover/btn:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                </svg>
+                        <td class="text-end">
+                            <x-ui.button
+                                :href="Storage::url($doc->file_path)"
+                                target="_blank"
+                                variant="primary"
+                                size="sm"
+                            >
+                                <x-ui.icon name="eye" class="fs-4 me-1" />
                                 Buka Berkas
-                            </a>
-                        </div>
-                    </div>
-                    @empty
-                    <div class="col-span-full py-24 text-center bg-slate-50 rounded-[3rem] border border-slate-100">
-                        <div class="mx-auto h-20 w-20 bg-white rounded-3xl shadow-sm flex items-center justify-center text-slate-300 mb-6">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-800">Belum Ada Dokumen</h3>
-                        <p class="text-[15px] font-medium text-slate-400 mt-2">Admin belum membagikan dokumen apa pun kepada Anda.</p>
-                    </div>
-                    @endforelse
-                </div>
-            </div>
-        </div>
-    </div>
+                            </x-ui.button>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4">
+                            <x-ui.empty-state
+                                title="Belum ada dokumen"
+                                description="Admin belum membagikan dokumen untuk kategori ini."
+                                class="py-15"
+                            />
+                        </td>
+                    </tr>
+                @endforelse
+            </x-slot>
+        </x-ui.table>
+    </x-ui.page>
 </div>

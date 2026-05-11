@@ -165,42 +165,38 @@ new #[Layout('layouts.app')] class extends Component {
     }
 }; ?>
 
-<div>
+<div x-data="adminManagement" data-module-page="accounts">
     <x-slot name="header">{{ __('Account Management') }}</x-slot>
 
-    <div class="py-12" x-data="adminManagement">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <x-ui.page
+        title="Accounts"
+        subtitle="Kelola akun admin, asesor, dan pesantren dari satu daftar."
+    >
             <x-datatable.layout title="Manajemen Akun" :records="$this->users">
                 <x-slot name="filters">
-                    <div class="flex flex-wrap items-center gap-1 bg-gray-50/50 p-1 rounded-xl border border-gray-100 mr-2">
-                        <button wire:click="setTab(1)"
-                            class="px-4 py-1.5 text-[11px] font-bold rounded-lg transition-all flex items-center gap-2
-                        {{ $activeTab == 1 ? 'bg-[#1e3a5f] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
+                    <x-ui.tabs>
+                        <x-ui.tab :active="$activeTab == 1" wire:click="setTab(1)">
                             Admin
-                            <span class="py-0.5 px-1.5 rounded-md text-[9px] {{ $activeTab == 1 ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500' }}">{{ $this->getCountByRole(1) }}</span>
-                        </button>
-                        <button wire:click="setTab(2)"
-                            class="px-4 py-1.5 text-[11px] font-bold rounded-lg transition-all flex items-center gap-2
-                        {{ $activeTab == 2 ? 'bg-[#1e3a5f] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
+                            <x-ui.badge variant="primary" class="ms-2">{{ $this->getCountByRole(1) }}</x-ui.badge>
+                        </x-ui.tab>
+
+                        <x-ui.tab :active="$activeTab == 2" wire:click="setTab(2)">
                             Asesor
-                            <span class="py-0.5 px-1.5 rounded-md text-[9px] {{ $activeTab == 2 ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500' }}">{{ $this->getCountByRole(2) }}</span>
-                        </button>
-                        <button wire:click="setTab(3)"
-                            class="px-4 py-1.5 text-[11px] font-bold rounded-lg transition-all flex items-center gap-2
-                        {{ $activeTab == 3 ? 'bg-[#1e3a5f] text-white shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
+                            <x-ui.badge variant="primary" class="ms-2">{{ $this->getCountByRole(2) }}</x-ui.badge>
+                        </x-ui.tab>
+
+                        <x-ui.tab :active="$activeTab == 3" wire:click="setTab(3)">
                             Pesantren
-                            <span class="py-0.5 px-1.5 rounded-md text-[9px] {{ $activeTab == 3 ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500' }}">{{ $this->getCountByRole(3) }}</span>
-                        </button>
-                    </div>
+                            <x-ui.badge variant="primary" class="ms-2">{{ $this->getCountByRole(3) }}</x-ui.badge>
+                        </x-ui.tab>
+                    </x-ui.tabs>
 
                     <x-datatable.search placeholder="Cari nama atau email..." />
 
-                    <button wire:click="createUser" class="bg-[#1e3a5f] text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-[#162d4a] transition-all shadow-sm active:scale-95">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
+                    <x-ui.button wire:click="createUser" variant="primary" size="sm">
+                        <x-ui.icon name="plus" class="fs-4 me-1" />
                         Tambah Akun
-                    </button>
+                    </x-ui.button>
                 </x-slot>
 
                 <x-slot name="thead">
@@ -233,182 +229,95 @@ new #[Layout('layouts.app')] class extends Component {
                             {{ $user->email }}
                         </td>
                         <td class="py-5 px-4 text-center">
-                            @if($user->status)
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-50 text-green-600 uppercase tracking-tight border border-green-100 shadow-sm">
-                                <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                Aktif
-                            </span>
-                            @else
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 uppercase tracking-tight border border-rose-100 shadow-sm">
-                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
-                                Non-Aktif
-                            </span>
-                            @endif
+                            <x-ui.status-badge :variant="$user->status ? 'success' : 'danger'" class="text-uppercase">
+                                {{ $user->status ? 'Aktif' : 'Non-Aktif' }}
+                            </x-ui.status-badge>
                         </td>
                         <td class="py-5 px-4 text-right pr-6">
-                            <div class="inline-block text-left" x-data="{ 
-                                open: false,
-                                dropdownPosition: { top: 0, left: 0 },
-                                updatePosition() {
-                                    let rect = this.$refs.btn.getBoundingClientRect();
-                                    this.dropdownPosition = { 
-                                        top: (rect.bottom + 5) + 'px', 
-                                        left: (rect.right - 176) + 'px' 
-                                    };
-                                }
-                            }">
-                                <button x-ref="btn" @click="open = !open; if(open) updatePosition()" @click.away="open = false"
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-gray-400 hover:text-gray-700 transition-colors bg-gray-50/50 rounded-lg group-hover:bg-gray-100">
-                                    Aksi
-                                    <svg class="w-3 h-3 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </button>
-                                <template x-teleport="body">
-                                    <div x-show="open"
-                                        x-transition:enter="transition ease-out duration-100"
-                                        x-transition:enter-start="opacity-0 scale-95"
-                                        x-transition:enter-end="opacity-100 scale-100"
-                                        x-transition:leave="transition ease-in duration-75"
-                                        x-transition:leave-start="opacity-100 scale-100"
-                                        x-transition:leave-end="opacity-0 scale-95"
-                                        :style="`position: fixed; top: ${dropdownPosition.top}; left: ${dropdownPosition.left}; z-index: 9999;`"
-                                        class="w-44 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 origin-top-right overflow-hidden shadow-slate-200/50" x-cloak>
-                                        <button wire:click="editUser({{ $user->id }})" @click="open = false"
-                                            class="flex items-center w-full px-4 py-2.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50 transition-colors gap-3 text-left">
-                                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
-                                            Edit Akun
-                                        </button>
-                                        @if ($user->id !== auth()->id())
-                                        <button @click="confirmToggleStatus($wire, {{ $user->id }}, {{ $user->status ? 1 : 0 }}, '{{ addslashes($user->name) }}'); open = false"
-                                            class="flex items-center w-full px-4 py-2.5 text-[11px] font-bold {{ $user->status ? 'text-amber-600 hover:bg-amber-50' : 'text-emerald-600 hover:bg-emerald-50' }} transition-colors gap-3 border-t border-gray-50/50 text-left">
-                                            <svg class="w-4 h-4 {{ $user->status ? 'text-amber-400' : 'text-emerald-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                            </svg>
-                                            {{ $user->status ? __('Non-Aktifkan') : __('Aktifkan') }}
-                                        </button>
-                                        <button @click="confirmDeleteUser($wire, {{ $user->id }}, '{{ addslashes($user->name) }}'); open = false"
-                                            class="flex items-center w-full px-4 py-2.5 text-[11px] font-bold text-rose-600 hover:bg-rose-50 transition-colors gap-3 border-t border-gray-50/50 text-left">
-                                            <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                            Hapus Akun
-                                        </button>
-                                        @endif
-                                    </div>
-                                </template>
-                            </div>
+                            <x-ui.action-menu>
+                                <x-ui.action-menu-item wire:click="editUser({{ $user->id }})">
+                                    <x-ui.icon name="pencil" class="fs-5 text-gray-500" />
+                                    Edit Akun
+                                </x-ui.action-menu-item>
+
+                                @if ($user->id !== auth()->id())
+                                    <x-ui.action-menu-item
+                                        :variant="$user->status ? 'warning' : 'success'"
+                                        x-on:click="confirmToggleStatus($wire, {{ $user->id }}, {{ $user->status ? 1 : 0 }}, '{{ addslashes($user->name) }}')"
+                                    >
+                                        <x-ui.icon :name="$user->status ? 'cross-circle' : 'check-circle'" class="fs-5" />
+                                        {{ $user->status ? __('Non-Aktifkan') : __('Aktifkan') }}
+                                    </x-ui.action-menu-item>
+
+                                    <x-ui.action-menu-item
+                                        variant="danger"
+                                        x-on:click="confirmDeleteUser($wire, {{ $user->id }}, '{{ addslashes($user->name) }}')"
+                                    >
+                                        <x-ui.icon name="trash" class="fs-5" />
+                                        Hapus Akun
+                                    </x-ui.action-menu-item>
+                                @endif
+                            </x-ui.action-menu>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="py-16 text-center">
-                            <div class="flex flex-col items-center gap-2">
-                                <svg class="w-10 h-10 text-gray-400/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                <p class="text-xs text-gray-400 font-bold">Data tidak ditemukan.</p>
-                            </div>
+                        <td colspan="5">
+                            <x-ui.empty-state title="Data tidak ditemukan" class="py-15" />
                         </td>
                     </tr>
                     @endforelse
                 </x-slot>
             </x-datatable.layout>
-        </div>
-    </div>
+    </x-ui.page>
 
     <x-modal name="account-modal" :show="$errors->isNotEmpty()" focusable>
-        <form wire:submit="saveAccount" class="p-6">
-            <h2 class="text-lg font-medium text-gray-900">
-                {{ $isEditing ? __('Edit Account') : __('Create Account') }}
-            </h2>
+        <form x-on:submit.prevent="confirmSaveAccount($wire)">
+            <x-ui.modal-header
+                :title="$isEditing ? __('Edit Account') : __('Create Account')"
+                :subtitle="$isEditing ? __('Update account details.') : __('Add a new user account to the system.')"
+                icon="profile-user"
+            />
 
-            <p class="mt-1 text-sm text-gray-600">
-                {{ $isEditing ? __('Update account details.') : __('Add a new user account to the system.') }}
-            </p>
+            <x-ui.modal-body>
+                <x-ui.form-field label="{{ __('Name') }}" for="name" :error="$errors->get('name')">
+                    <x-ui.input model="name" id="name" required autofocus />
+                </x-ui.form-field>
 
-            <div class="mt-6 space-y-4">
-                <div>
-                    <x-input-label for="name" value="{{ __('Name') }}" />
-                    <x-text-input wire:model="name" id="name" type="text" class="mt-1 block w-full" required
-                        autofocus />
-                    <x-input-error :messages="$errors->get('name')" class="mt-2" />
-                </div>
+                <x-ui.form-field label="{{ __('Email') }}" for="email" :error="$errors->get('email')">
+                    <x-ui.input model="email" id="email" type="email" required />
+                </x-ui.form-field>
 
-                <div>
-                    <x-input-label for="email" value="{{ __('Email') }}" />
-                    <x-text-input wire:model="email" id="email" type="email" class="mt-1 block w-full" required />
-                    <x-input-error :messages="$errors->get('email')" class="mt-2" />
-                </div>
-
-                <div>
-                    <x-input-label for="role_id" value="{{ __('Role') }}" />
-                    <select wire:model="role_id" id="role_id"
-                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                        required>
-                        <option value="">Select Role</option>
+                <x-ui.form-field label="{{ __('Role') }}" for="role_id" :error="$errors->get('role_id')">
+                    <x-ui.select model="role_id" id="role_id" placeholder="Select Role" required>
                         @foreach ($roles as $role)
-                        <option value="{{ $role->id }}">{{ $role->name }}</option>
+                            <option value="{{ $role->id }}">{{ $role->name }}</option>
                         @endforeach
-                    </select>
-                    <x-input-error :messages="$errors->get('role_id')" class="mt-2" />
-                </div>
+                    </x-ui.select>
+                </x-ui.form-field>
 
-                <div>
-                    <x-input-label for="password" value="{{ __('Password') }}" />
-                    <x-text-input wire:model="password" id="password" type="password" class="mt-1 block w-full"
-                        :required="!$isEditing" />
-                    @if ($isEditing)
-                    <p class="text-xs text-gray-500 mt-1">Leave blank to keep current password.</p>
-                    @endif
-                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
-                </div>
+                <x-ui.form-field
+                    label="{{ __('Password') }}"
+                    for="password"
+                    :error="$errors->get('password')"
+                    :hint="$isEditing ? 'Leave blank to keep current password.' : null"
+                >
+                    <x-ui.input model="password" id="password" type="password" :required="!$isEditing" />
+                </x-ui.form-field>
 
-                <div class="block mt-4">
-                    <label for="status" class="inline-flex items-center">
-                        <input id="status" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="status" wire:model="status">
-                        <span class="ms-2 text-sm text-gray-600">{{ __('Status Aktif') }}</span>
-                    </label>
-                </div>
-            </div>
+                <x-ui.checkbox model="status" id="status" label="{{ __('Status Aktif') }}" />
+            </x-ui.modal-body>
 
-            <div class="mt-6 flex justify-end">
-                <x-secondary-button x-on:click="$dispatch('close')">
+            <x-ui.modal-footer>
+                <x-ui.button type="button" variant="light" x-on:click="$dispatch('close')">
                     {{ __('Cancel') }}
-                </x-secondary-button>
+                </x-ui.button>
 
-                <x-primary-button class="ms-3">
+                <x-ui.button type="submit" variant="primary">
                     {{ $isEditing ? __('Update') : __('Save') }}
-                </x-primary-button>
-            </div>
+                </x-ui.button>
+            </x-ui.modal-footer>
         </form>
     </x-modal>
 
-    <script>
-        document.addEventListener('livewire:initialized', () => {
-            Livewire.on('swal:success', (data) => {
-                Swal.fire({
-                    title: data[0].title,
-                    text: data[0].text,
-                    icon: 'success',
-                    confirmButtonColor: '#10b981', // emerald-500 matching the theme
-                    confirmButtonText: 'OK',
-                    timer: 3000,
-                    timerProgressBar: true
-                });
-            });
-
-            Livewire.on('swal:error', (data) => {
-                Swal.fire({
-                    title: data[0].title,
-                    text: data[0].text,
-                    icon: 'error',
-                    confirmButtonColor: '#ef4444', // red-500
-                    confirmButtonText: 'OK'
-                });
-            });
-        });
-    </script>
 </div>

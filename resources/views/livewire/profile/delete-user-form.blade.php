@@ -23,7 +23,7 @@ new class extends Component
     }
 }; ?>
 
-<section class="space-y-6">
+<section class="space-y-6" x-data="deleteConfirmation">
     <header>
         <h2 class="text-lg font-medium text-gray-900">
             {{ __('Delete Account') }}
@@ -34,46 +34,50 @@ new class extends Component
         </p>
     </header>
 
-    <x-danger-button
+    <x-ui.button
+        variant="danger"
         x-data=""
         x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
-    >{{ __('Delete Account') }}</x-danger-button>
+    >
+        {{ __('Delete Account') }}
+    </x-ui.button>
 
     <x-modal name="confirm-user-deletion" :show="$errors->isNotEmpty()" focusable>
-        <form wire:submit="deleteUser" class="p-6">
+        <form x-on:submit.prevent="confirmAction('deleteUser', '{{ __('Delete Account') }}?', '{{ __('This action permanently deletes your account and data.') }}', '{{ __('Delete Account') }}', 'danger')">
+            <x-ui.modal-header
+                title="{{ __('Are you sure you want to delete your account?') }}"
+                subtitle="{{ __('This action permanently deletes your account and data.') }}"
+                icon="trash"
+                variant="danger"
+            />
 
-            <h2 class="text-lg font-medium text-gray-900">
-                {{ __('Are you sure you want to delete your account?') }}
-            </h2>
+            <x-ui.modal-body>
+                <x-ui.form-field
+                    label="{{ __('Password') }}"
+                    for="password"
+                    :error="$errors->get('password')"
+                    hint="{{ __('Please enter your password to confirm this action.') }}"
+                    class="mb-0"
+                >
+                    <x-ui.input
+                        model="password"
+                        id="password"
+                        name="password"
+                        type="password"
+                        placeholder="{{ __('Password') }}"
+                    />
+                </x-ui.form-field>
+            </x-ui.modal-body>
 
-            <p class="mt-1 text-sm text-gray-600">
-                {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.') }}
-            </p>
-
-            <div class="mt-6">
-                <x-input-label for="password" value="{{ __('Password') }}" class="sr-only" />
-
-                <x-text-input
-                    wire:model="password"
-                    id="password"
-                    name="password"
-                    type="password"
-                    class="mt-1 block w-3/4"
-                    placeholder="{{ __('Password') }}"
-                />
-
-                <x-input-error :messages="$errors->get('password')" class="mt-2" />
-            </div>
-
-            <div class="mt-6 flex justify-end">
-                <x-secondary-button x-on:click="$dispatch('close')">
+            <x-ui.modal-footer>
+                <x-ui.button type="button" variant="light" x-on:click="$dispatch('close')">
                     {{ __('Cancel') }}
-                </x-secondary-button>
+                </x-ui.button>
 
-                <x-danger-button class="ms-3">
+                <x-ui.button type="submit" variant="danger">
                     {{ __('Delete Account') }}
-                </x-danger-button>
-            </div>
+                </x-ui.button>
+            </x-ui.modal-footer>
         </form>
     </x-modal>
 </section>

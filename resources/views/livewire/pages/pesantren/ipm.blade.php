@@ -61,12 +61,7 @@ new #[Layout('layouts.app')] class extends Component {
     {
         $pesantrenService = app(\App\Services\PesantrenService::class);
         if (auth()->user()->pesantren->is_locked) {
-            $this->js("Swal.fire({
-                icon: 'error',
-                title: 'Akses Ditolak',
-                text: 'Data terkunci karena sedang dalam proses akreditasi.',
-                confirmButtonColor: '#d33'
-            })");
+            $this->dispatch('show-metronic-alert', type: 'error', title: 'Akses Ditolak', message: 'Data terkunci karena sedang dalam proses akreditasi.');
             return;
         }
         $this->validate([

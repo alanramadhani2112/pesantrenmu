@@ -6,6 +6,7 @@ use App\Models\Akreditasi;
 use App\Models\Asesor;
 use App\Models\Pesantren;
 use App\Models\Assessment;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class Home extends Component
@@ -16,6 +17,14 @@ class Home extends Component
         $isAdmin = $user->isAdmin();
         $isPesantren = $user->isPesantren();
         $isAsesor = $user->isAsesor();
+        $stats = [
+            'total_aktif' => 0,
+            'verifikasi' => 0,
+            'assessment' => 0,
+            'visitasi' => 0,
+            'terakreditasi' => 0,
+            'ditolak' => 0,
+        ];
 
         // 1. Stats based on role
         if ($isAdmin) {
@@ -50,7 +59,13 @@ class Home extends Component
         }
 
         // 2. Chart Data
-        $submissionQuery = Akreditasi::selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+        $monthExpression = match (DB::connection()->getDriverName()) {
+            'sqlite' => "CAST(strftime('%m', created_at) AS INTEGER)",
+            'pgsql' => 'EXTRACT(MONTH FROM created_at)',
+            default => 'MONTH(created_at)',
+        };
+
+        $submissionQuery = Akreditasi::selectRaw($monthExpression . ' as month, COUNT(*) as count')
             ->whereYear('created_at', date('Y'));
 
         if ($isPesantren) {
@@ -60,7 +75,12 @@ class Home extends Component
             $submissionQuery->whereHas('assessments', fn($q) => $q->where('asesor_id', $asesorId));
         }
 
-        $monthlySubmissions = $submissionQuery->groupBy('month')->orderBy('month')->get()->pluck('count', 'month')->toArray();
+        $monthlySubmissions = $submissionQuery
+            ->groupByRaw($monthExpression)
+            ->orderByRaw($monthExpression)
+            ->get()
+            ->pluck('count', 'month')
+            ->toArray();
 
         $chartData = [];
         for ($i = 1; $i <= 12; $i++) {

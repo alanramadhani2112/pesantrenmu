@@ -11,14 +11,30 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('pesantrens', function (Blueprint $table) {
-            $table->string('luas_tanah')->nullable()->after('misi');
-            $table->string('luas_bangunan')->nullable()->after('luas_tanah');
-        });
+        $pesantrenColumns = array_filter(
+            ['luas_tanah', 'luas_bangunan'],
+            fn (string $column): bool => ! Schema::hasColumn('pesantrens', $column)
+        );
 
-        Schema::table('pesantren_units', function (Blueprint $table) {
-            $table->dropColumn(['luas_tanah', 'luas_bangunan']);
-        });
+        if ($pesantrenColumns !== []) {
+            Schema::table('pesantrens', function (Blueprint $table) use ($pesantrenColumns) {
+                if (in_array('luas_tanah', $pesantrenColumns, true)) {
+                    $table->string('luas_tanah')->nullable()->after('misi');
+                }
+
+                if (in_array('luas_bangunan', $pesantrenColumns, true)) {
+                    $table->string('luas_bangunan')->nullable()->after('luas_tanah');
+                }
+            });
+        }
+
+        foreach (['luas_tanah', 'luas_bangunan'] as $column) {
+            if (Schema::hasColumn('pesantren_units', $column)) {
+                Schema::table('pesantren_units', function (Blueprint $table) use ($column) {
+                    $table->dropColumn($column);
+                });
+            }
+        }
     }
 
     /**
@@ -26,13 +42,27 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('pesantrens', function (Blueprint $table) {
-            $table->dropColumn(['luas_tanah', 'luas_bangunan']);
-        });
+        foreach (['luas_bangunan', 'luas_tanah'] as $column) {
+            if (Schema::hasColumn('pesantrens', $column)) {
+                Schema::table('pesantrens', function (Blueprint $table) use ($column) {
+                    $table->dropColumn($column);
+                });
+            }
+        }
 
-        Schema::table('pesantren_units', function (Blueprint $table) {
-            $table->string('luas_tanah')->nullable();
-            $table->string('luas_bangunan')->nullable();
+        $unitColumns = array_filter(
+            ['luas_tanah', 'luas_bangunan'],
+            fn (string $column): bool => ! Schema::hasColumn('pesantren_units', $column)
+        );
+
+        if ($unitColumns === []) {
+            return;
+        }
+
+        Schema::table('pesantren_units', function (Blueprint $table) use ($unitColumns) {
+            foreach ($unitColumns as $column) {
+                $table->string($column)->nullable();
+            }
         });
     }
 };

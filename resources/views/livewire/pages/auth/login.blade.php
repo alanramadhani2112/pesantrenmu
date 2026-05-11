@@ -25,47 +25,91 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    <div class="text-center mb-10">
+        <x-ui.badge variant="primary" class="mb-4">Akses Sistem</x-ui.badge>
+        <h1 class="text-gray-900 fw-bolder mb-3">Masuk ke SPM</h1>
+        <div class="text-gray-500 fw-semibold fs-6">Gunakan akun yang sudah terdaftar.</div>
+    </div>
 
-    <form wire:submit="login">
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="form.email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
+    <x-auth-session-status class="alert alert-success mb-6" :status="session('status')" />
+
+    <form wire:submit="login" class="form w-100">
+        <div class="fv-row mb-8">
+            <label for="email" class="form-label fw-bold text-gray-900">Email</label>
+            <div class="position-relative">
+                <i class="ki-duotone ki-sms fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4">
+                    <span class="path1"></span>
+                    <span class="path2"></span>
+                </i>
+                <input
+                    wire:model="form.email"
+                    id="email"
+                    class="form-control form-control-lg form-control-solid ps-12"
+                    type="email"
+                    name="email"
+                    required
+                    autofocus
+                    autocomplete="username"
+                />
+            </div>
+            <x-input-error :messages="$errors->get('form.email')" class="invalid-feedback d-block mt-2" />
         </div>
 
-        <!-- Password -->
-        <div class="mt-4" x-data="{ show: false }">
-            <x-input-label for="password" :value="__('Password')" />
+        <div class="fv-row mb-8" x-data="{ show: false }">
+            <label for="password" class="form-label fw-bold text-gray-900">Password</label>
 
-            <div class="relative">
-                <x-text-input wire:model="form.password" id="password" class="block mt-1 w-full pr-10"
-                                type="password"
-                                x-bind:type="show ? 'text' : 'password'"
-                                name="password"
-                                required autocomplete="current-password" />
-                
-                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
-                    <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5 text-gray-500" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" x-show="!show">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                    <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5 text-gray-500" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" x-show="show" x-cloak>
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                        <line x1="1" y1="1" x2="23" y2="23"></line>
-                    </svg>
+            <div class="position-relative">
+                <i class="ki-duotone ki-lock-2 fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4">
+                    <span class="path1"></span>
+                    <span class="path2"></span>
+                    <span class="path3"></span>
+                    <span class="path4"></span>
+                    <span class="path5"></span>
+                </i>
+                <input
+                    wire:model="form.password"
+                    id="password"
+                    class="form-control form-control-lg form-control-solid ps-12 pe-12"
+                    type="password"
+                    x-bind:type="show ? 'text' : 'password'"
+                    name="password"
+                    required
+                    autocomplete="current-password"
+                />
+
+                <button
+                    type="button"
+                    class="btn btn-icon btn-sm btn-active-light-primary position-absolute top-50 end-0 translate-middle-y me-2"
+                    @click="show = !show"
+                    aria-label="Tampilkan password"
+                >
+                    <i class="ki-duotone ki-eye fs-2 text-gray-500" x-show="!show">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                        <span class="path3"></span>
+                    </i>
+                    <i class="ki-duotone ki-eye-slash fs-2 text-gray-500" x-show="show" x-cloak>
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                        <span class="path3"></span>
+                        <span class="path4"></span>
+                    </i>
                 </button>
             </div>
 
-            <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
+            <x-input-error :messages="$errors->get('form.password')" class="invalid-feedback d-block mt-2" />
         </div>
 
-        <div class="flex items-center justify-center mt-4">
-            <x-primary-button class="mx-auto">
-                {{ __('Log in') }}
-            </x-primary-button>
+        <div class="d-grid">
+            <x-ui.button type="submit" variant="primary" size="lg">
+                <span class="indicator-label d-flex align-items-center justify-content-center gap-2">
+                    Masuk
+                    <i class="ki-duotone ki-arrow-right fs-2 text-white">
+                        <span class="path1"></span>
+                        <span class="path2"></span>
+                    </i>
+                </span>
+            </x-ui.button>
         </div>
     </form>
 

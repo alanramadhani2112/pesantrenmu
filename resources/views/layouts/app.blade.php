@@ -9,57 +9,46 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
     <link rel="icon" type="image/png" href="{{ asset('icon.png') }}">
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Quill WYSIWYG -->
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <!-- Styles -->
+    @livewireStyles
+    <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.css') }}">
+    <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}">
+    @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css', 'resources/js/app.js'])
+    @livewireScriptConfig
 </head>
 
-<body class="font-sans antialiased text-gray-900 bg-gray-50" x-data>
-    <div class="flex h-screen overflow-hidden">
+<body class="font-sans antialiased text-gray-900 bg-gray-50" data-bs-theme="light" x-data>
+    @php
+        $pageTitle = isset($header) ? trim(strip_tags((string) $header)) : __('Dashboard');
+        $pageTitle = $pageTitle !== '' ? $pageTitle : __('Dashboard');
+
+        $breadcrumbItems = [
+            ['label' => __('Dashboard'), 'url' => route('dashboard')],
+        ];
+
+        if (! request()->routeIs('dashboard')) {
+            $breadcrumbItems[] = ['label' => $pageTitle];
+        }
+    @endphp
+
+    <div class="spm-app-shell flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <livewire:layout.navigation />
 
         <!-- Main Content Area -->
         <div id="main-content-scroll" class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
             <!-- Top Header -->
-            <header class="sticky top-0 z-30 flex items-center justify-between h-16 bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8">
+            <header class="spm-topbar sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center">
                     <!-- Mobile Sidebar Toggle -->
-                    <button @click="$store.sidebar.open = !$store.sidebar.open" class="text-gray-500 lg:hidden focus:outline-none focus:text-gray-700">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
+                    <button @click="$store.sidebar.open = !$store.sidebar.open" class="btn btn-sm btn-icon btn-light d-lg-none me-3">
+                        <x-ui.icon name="burger-menu" class="fs-2" />
                     </button>
 
                     <!-- Page Title/Breadcrumbs -->
-                    <div class="ml-4 lg:ml-0 flex flex-col justify-center h-16">
-                        <h2 class="font-extrabold text-xl text-gray-900 tracking-tight leading-none">
-                            Dashboard
-                        </h2>
-                        @if(!request()->routeIs('dashboard'))
-                        <div class="flex items-center text-[11px] text-gray-400 mt-1.5 font-bold tracking-wider">
-                            <a href="{{ route('dashboard') }}" wire:navigate class="hover:text-indigo-600 transition-colors">
-                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                                </svg>
-                            </a>
-                            @isset($header)
-                            <svg class="w-2.5 h-2.5 mx-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                            </svg>
-                            <span class="text-gray-500">{{ $header }}</span>
-                            @endisset
-                        </div>
-                        @endif
+                    <div class="d-flex flex-column justify-content-center">
+                        <h2 class="spm-topbar-title mb-1">{{ $pageTitle }}</h2>
+                        <x-ui.breadcrumb :items="$breadcrumbItems" />
                     </div>
                 </div>
 
@@ -70,11 +59,11 @@
             </header>
 
             <!-- Page Content -->
-            <main class="flex-grow p-4 md:p-6 lg:p-8">
+            <main class="spm-main-content flex-grow p-4 md:p-6 lg:p-8">
                 {{ $slot }}
             </main>
 
-            <footer class="bg-white border-t border-gray-200 py-4 px-6 text-center text-sm text-gray-500">
+            <footer class="spm-footer bg-white border-t border-gray-200 py-4 px-6 text-center text-sm text-gray-500">
                 &copy; {{ date('Y') }} Sistem Penjaminan Mutu (SPM) Muhammadiyah
             </footer>
         </div>
@@ -184,6 +173,9 @@
             </button>
         </div>
     </div>
+
+    <script src="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.js') }}"></script>
+    <script src="{{ asset('vendor/metronic/assets/js/scripts.bundle.js') }}"></script>
 </body>
 
 </html>
