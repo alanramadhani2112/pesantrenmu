@@ -2114,3 +2114,55 @@ a:not(.btn),
     50% { width: 60%; margin-left: 20%; }
     100% { width: 0%; margin-left: 100%; }
 }
+
+/* ===== Dashboard Hero & Quick Actions ===== */
+.spm-dashboard-hero {
+    background: linear-gradient(135deg, var(--spm-primary) 0%, var(--spm-primary-active) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.spm-dashboard-hero::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.spm-dashboard-hero::after {
+    content: "";
+    position: absolute;
+    bottom: -30%;
+    right: 20%;
+    width: 180px;
+    height: 180px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.spm-dashboard-hero > * {
+    position: relative;
+    z-index: 1;
+}
+
+.spm-quick-action {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    border: 1px solid transparent !important;
+}
+
+.spm-quick-action:hover {
+    transform: translateY(-2px);
+    border-color: rgba(var(--spm-primary-rgb), 0.15) !important;
+    box-shadow: 0 6px 20px rgba(var(--spm-primary-rgb), 0.12) !important;
+}
+
+.spm-quick-action:hover .symbol-label {
+    transform: scale(1.05);
+    transition: transform 0.15s ease;
+}

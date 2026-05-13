@@ -100,6 +100,39 @@ class Home extends Component
         $asesorTanpaTugas = $totalAsesor - count($asesorPunyaTugasIds);
         $avgBeban = $totalAsesor > 0 ? round($totalTugasAktif / $totalAsesor, 1) : 0;
 
+        // 4. Greeting based on time
+        $hour = (int) now()->format('H');
+        $greeting = match (true) {
+            $hour >= 4 && $hour < 11 => 'Selamat pagi',
+            $hour >= 11 && $hour < 15 => 'Selamat siang',
+            $hour >= 15 && $hour < 18 => 'Selamat sore',
+            default => 'Selamat malam',
+        };
+
+        // 5. Recent Activity (5 latest)
+        $recentQuery = Akreditasi::with(['user.pesantren'])
+            ->orderBy('updated_at', 'desc')
+            ->limit(5);
+
+        if ($isPesantren) {
+            $recentQuery->where('user_id', $user->id);
+        } elseif ($isAsesor) {
+            $asesorId = $user->asesor?->id ?? 0;
+            $recentQuery->whereHas('assessments', fn($q) => $q->where('asesor_id', $asesorId));
+        }
+
+        $recentActivities = $recentQuery->get()->map(function ($akreditasi) {
+            return [
+                'id' => $akreditasi->id,
+                'uuid' => $akreditasi->uuid,
+                'pesantren_name' => $akreditasi->user->pesantren->nama_pesantren ?? $akreditasi->user->name,
+                'status' => (int) $akreditasi->status,
+                'status_label' => Akreditasi::getStatusLabel($akreditasi->status),
+                'updated_at' => $akreditasi->updated_at,
+                'peringkat' => $akreditasi->peringkat,
+            ];
+        });
+
         return view('livewire.home', compact(
             'isAdmin',
             'isPesantren',
@@ -109,7 +142,9 @@ class Home extends Component
             'totalAsesor',
             'totalTugasAktif',
             'asesorTanpaTugas',
-            'avgBeban'
+            'avgBeban',
+            'greeting',
+            'recentActivities'
         ));
     }
 }

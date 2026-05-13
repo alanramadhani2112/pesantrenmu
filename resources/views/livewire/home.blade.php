@@ -41,6 +41,57 @@
 
     $hasMonthlyData = array_sum($chartData) > 0;
     $hasStatusData = ($stats['terakreditasi'] + $stats['ditolak']) > 0;
+
+    $userName = auth()->user()->name;
+    $firstName = trim(explode(' ', $userName)[0] ?? $userName);
+    $today = \Carbon\Carbon::now()->translatedFormat('l, d F Y');
+
+    $contextualMessage = match (true) {
+        $isAdmin && $stats['verifikasi'] > 0 => "Ada {$stats['verifikasi']} pengajuan menunggu verifikasi.",
+        $isAdmin => 'Semua pengajuan sudah ditindaklanjuti. Tetap pantau kegiatan asesor.',
+        $isPesantren && $stats['ditolak'] > 0 => "Ada {$stats['ditolak']} pengajuan yang perlu direvisi.",
+        $isPesantren && $stats['total_aktif'] > 0 => 'Pengajuan sedang berjalan. Pantau status di halaman pengajuan.',
+        $isPesantren => 'Siapkan data pesantren sebelum memulai pengajuan akreditasi.',
+        $isAsesor && $stats['total_aktif'] > 0 => "Ada {$stats['total_aktif']} tugas yang perlu Anda selesaikan.",
+        $isAsesor => 'Tidak ada tugas aktif saat ini. Nikmati waktu Anda.',
+        default => 'Selamat datang di PesantrenMu.',
+    };
+
+    $quickActions = match (true) {
+        $isAdmin => [
+            ['label' => 'Kelola Akreditasi', 'icon' => 'verify', 'route' => route('admin.akreditasi'), 'variant' => 'primary'],
+            ['label' => 'Data Pesantren', 'icon' => 'home-2', 'route' => route('admin.pesantren.index'), 'variant' => 'info'],
+            ['label' => 'Data Asesor', 'icon' => 'profile-user', 'route' => route('admin.asesor.index'), 'variant' => 'success'],
+            ['label' => 'Master EDPM', 'icon' => 'document', 'route' => route('admin.master-edpm'), 'variant' => 'warning'],
+        ],
+        $isPesantren => [
+            ['label' => 'Profil Pesantren', 'icon' => 'home-2', 'route' => route('pesantren.profile'), 'variant' => 'primary'],
+            ['label' => 'Data IPM', 'icon' => 'check-circle', 'route' => route('pesantren.ipm'), 'variant' => 'info'],
+            ['label' => 'Data SDM', 'icon' => 'profile-user', 'route' => route('pesantren.sdm'), 'variant' => 'success'],
+            ['label' => 'EDPM', 'icon' => 'document', 'route' => route('pesantren.edpm'), 'variant' => 'warning'],
+        ],
+        $isAsesor => [
+            ['label' => 'Tugas Akreditasi', 'icon' => 'verify', 'route' => route('asesor.akreditasi'), 'variant' => 'primary'],
+            ['label' => 'Profil Asesor', 'icon' => 'profile-user', 'route' => route('asesor.profile'), 'variant' => 'info'],
+        ],
+        default => [],
+    };
+
+    $statusVariantMap = [
+        1 => 'success',
+        2 => 'danger',
+        3 => 'warning',
+        4 => 'info',
+        5 => 'info',
+        6 => 'primary',
+    ];
+
+    $recentRouteFor = function ($uuid) use ($isAdmin, $isPesantren, $isAsesor) {
+        if ($isAdmin) return route('admin.akreditasi-detail', $uuid);
+        if ($isPesantren) return route('pesantren.akreditasi-detail', $uuid);
+        if ($isAsesor) return route('asesor.akreditasi-detail', $uuid);
+        return '#';
+    };
 @endphp
 
 <div data-dashboard-page="metronic" x-data='dashboardCharts(@json($chartData), @json($stats))'>
@@ -54,6 +105,47 @@
                 </x-ui.button>
             @endif
         </x-slot>
+
+        {{-- Greeting Hero --}}
+        <div class="spm-dashboard-hero rounded p-6 mb-6">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
+                <div class="d-flex flex-column">
+                    <div class="text-white opacity-75 fw-semibold fs-7 text-uppercase mb-1">{{ $today }}</div>
+                    <h2 class="text-white fw-bolder fs-1 mb-2">{{ $greeting }}, {{ $firstName }}.</h2>
+                    <div class="text-white opacity-75 fw-semibold fs-6">{{ $contextualMessage }}</div>
+                </div>
+
+                @if($primaryAction)
+                    <div class="d-none d-md-block">
+                        <a href="{{ $primaryAction['route'] }}" class="btn btn-light fw-bold">
+                            <x-ui.icon name="arrow-right" class="fs-4 me-1" />
+                            {{ $primaryAction['label'] }}
+                        </a>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        {{-- Quick Actions --}}
+        @if(count($quickActions) > 0)
+            <div class="row g-4 mb-6">
+                @foreach($quickActions as $action)
+                    <div class="col-6 col-md-3">
+                        <a href="{{ $action['route'] }}"
+                           class="card border-0 shadow-sm h-100 text-decoration-none spm-quick-action">
+                            <div class="card-body d-flex flex-column align-items-center text-center p-5">
+                                <div class="symbol symbol-50px mb-3">
+                                    <div class="symbol-label bg-light-{{ $action['variant'] }} text-{{ $action['variant'] }}">
+                                        <x-ui.icon :name="$action['icon']" class="fs-2" />
+                                    </div>
+                                </div>
+                                <span class="fw-bold fs-7 text-gray-900">{{ $action['label'] }}</span>
+                            </div>
+                        </a>
+                    </div>
+                @endforeach
+            </div>
+        @endif
 
         @if($isAdmin)
             <div class="row g-6">
@@ -268,6 +360,77 @@
                             title="Belum ada hasil akhir"
                             description="Ringkasan status akan tersedia setelah pengajuan selesai divalidasi."
                             class="min-h-250px"
+                        />
+                    @endif
+                </x-ui.card>
+            </div>
+        </div>
+
+        {{-- Recent Activity --}}
+        <div class="row g-6 mt-0">
+            <div class="col-12">
+                <x-ui.card
+                    title="Aktivitas Terbaru"
+                    subtitle="{{ $isAdmin ? 'Pengajuan akreditasi terbaru dari seluruh pesantren.' : ($isPesantren ? 'Riwayat pengajuan akreditasi pesantren Anda.' : 'Tugas penilaian terbaru yang ditugaskan kepada Anda.') }}"
+                >
+                    @if($recentActivities->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-row-dashed align-middle gs-0 gy-4 mb-0">
+                                <thead>
+                                    <tr class="text-uppercase fs-8 fw-bold text-muted">
+                                        <th class="min-w-200px">Pesantren</th>
+                                        <th class="min-w-100px">Status</th>
+                                        <th class="min-w-100px">Peringkat</th>
+                                        <th class="min-w-150px">Terakhir Diperbarui</th>
+                                        <th class="text-end"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($recentActivities as $activity)
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="symbol symbol-40px">
+                                                        <div class="symbol-label bg-light-primary text-primary fw-bolder">
+                                                            {{ strtoupper(substr($activity['pesantren_name'], 0, 1)) }}
+                                                        </div>
+                                                    </div>
+                                                    <span class="text-gray-900 fw-bold fs-6">{{ $activity['pesantren_name'] }}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <x-ui.status-badge :variant="$statusVariantMap[$activity['status']] ?? 'secondary'">
+                                                    {{ $activity['status_label'] }}
+                                                </x-ui.status-badge>
+                                            </td>
+                                            <td>
+                                                @if($activity['peringkat'])
+                                                    <span class="fw-bold text-gray-700">{{ $activity['peringkat'] }}</span>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <span class="text-muted fw-semibold fs-7">
+                                                    {{ $activity['updated_at']->translatedFormat('d M Y, H:i') }}
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <x-ui.button :href="$recentRouteFor($activity['uuid'])" variant="light" size="sm">
+                                                    <x-ui.icon name="eye" class="fs-5 me-1" />
+                                                    Detail
+                                                </x-ui.button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <x-ui.empty-state
+                            title="Belum ada aktivitas"
+                            description="Aktivitas terbaru akan muncul setelah ada pengajuan akreditasi."
+                            class="min-h-200px"
                         />
                     @endif
                 </x-ui.card>
