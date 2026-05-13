@@ -102,74 +102,74 @@ new #[Layout('layouts.app')] class extends Component {
 }; ?>
 
 <div x-data="deleteConfirmation" data-module-page="roles">
-    <x-slot name="header">{{ __('Roles') }}</x-slot>
-
-    <x-ui.page
+    <x-ui.index-layout
         title="Roles"
         subtitle="Kelola peran dan parameter akses pengguna sistem."
     >
-            <x-datatable.layout title="Kelola Peran (Roles)" :records="$this->roles">
-                <x-slot name="filters">
-                    <x-datatable.search placeholder="Cari Peran..." />
+        <x-ui.table title="Kelola Peran (Roles)" :records="$this->roles" data-ui-table-adapter="datatable">
+            <x-slot name="filters">
+                <x-datatable.search placeholder="Cari Peran..." />
+            </x-slot>
 
-                    <x-ui.button wire:click="createRole" variant="primary" size="sm">
-                        <x-ui.icon name="plus" class="fs-4 me-1" />
-                        Tambah Peran
-                    </x-ui.button>
-                </x-slot>
+            <x-slot name="toolbar">
+                <x-ui.button wire:click="createRole" variant="primary" size="sm">
+                    <x-ui.icon name="plus" class="fs-4 me-1" />
+                    Tambah Peran
+                </x-ui.button>
+            </x-slot>
 
-                <x-slot name="thead">
-                    <th class="py-3 px-4 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest w-16">NO</th>
-                    <x-datatable.th field="name" :sortField="$sortField" :sortAsc="$sortAsc">
-                        NAMA PERAN
-                    </x-datatable.th>
-                    <x-datatable.th field="parameter" :sortField="$sortField" :sortAsc="$sortAsc">
-                        PARAMETER
-                    </x-datatable.th>
-                    <th class="py-3 px-4 text-right text-[11px] font-bold text-gray-400 uppercase tracking-widest pr-8">AKSI</th>
-                </x-slot>
+            <x-slot name="thead">
+                <x-ui.table-th :min-width="false" class="w-70px">No</x-ui.table-th>
+                <x-datatable.th field="name" :sortField="$sortField" :sortAsc="$sortAsc">
+                    Nama Peran
+                </x-datatable.th>
+                <x-datatable.th field="parameter" :sortField="$sortField" :sortAsc="$sortAsc">
+                    Parameter
+                </x-datatable.th>
+                <x-ui.table-th align="end">Aksi</x-ui.table-th>
+            </x-slot>
 
-                <x-slot name="tbody">
-                    @forelse ($this->roles as $index => $role)
-                    <tr class="hover:bg-gray-50/50 transition-colors duration-150 group border-b border-gray-50 last:border-0" wire:key="role-{{ $role->id }}">
-                        <td class="py-5 px-4 text-sm font-bold text-gray-400">
-                            {{ $this->roles->firstItem() + $index }}
-                        </td>
-                        <td class="py-5 px-4 font-bold text-[#374151] text-sm tracking-tight">
-                            {{ $role->name }}
-                        </td>
-                        <td class="py-5 px-4">
-                            <x-ui.status-badge variant="secondary">{{ $role->parameter }}</x-ui.status-badge>
-                        </td>
-                        <td class="py-5 px-4 text-right pr-6 overflow-visible">
-                            <x-ui.action-menu>
-                                <x-ui.action-menu-item wire:click="editRole({{ $role->id }})">
-                                    <x-ui.icon name="pencil" class="fs-4" />
-                                        Edit Peran
-                                </x-ui.action-menu-item>
+            <x-slot name="tbody">
+                @forelse ($this->roles as $index => $role)
+                <tr wire:key="role-{{ $role->id }}">
+                    <td class="text-muted fw-semibold">
+                        {{ $this->roles->firstItem() + $index }}
+                    </td>
+                    <td class="fw-semibold text-gray-900 fs-6">
+                        {{ $role->name }}
+                    </td>
+                    <td>
+                        <x-ui.status-badge variant="secondary">{{ $role->parameter }}</x-ui.status-badge>
+                    </td>
+                    <td class="text-end overflow-visible">
+                        <x-ui.action-menu>
+                            <x-ui.action-menu-item wire:click="editRole({{ $role->id }})">
+                                <x-ui.icon name="pencil" class="fs-4" />
+                                    Edit Peran
+                            </x-ui.action-menu-item>
 
-                                <x-ui.action-menu-item
-                                    variant="danger"
-                                    x-on:click="confirmDelete({{ $role->id }}, 'deleteRole', 'Hapus peran ini secara permanen?')"
-                                >
-                                    <x-ui.icon name="trash" class="fs-4" />
-                                        Hapus Peran
-                                </x-ui.action-menu-item>
-                            </x-ui.action-menu>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4">
-                            <x-ui.empty-state title="Data tidak ditemukan" class="py-15" />
-                        </td>
-                    </tr>
-                    @endforelse
-                </x-slot>
-            </x-datatable.layout>
-    </x-ui.page>
+                            <x-ui.action-menu-item
+                                variant="danger"
+                                x-on:click="confirmDelete({{ $role->id }}, 'deleteRole', 'Hapus peran ini secara permanen?')"
+                            >
+                                <x-ui.icon name="trash" class="fs-4" />
+                                    Hapus Peran
+                            </x-ui.action-menu-item>
+                        </x-ui.action-menu>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="4">
+                        <x-ui.empty-state title="Data tidak ditemukan" class="py-15" />
+                    </td>
+                </tr>
+                @endforelse
+            </x-slot>
+        </x-ui.table>
+    </x-ui.index-layout>
 
-    <x-modal name="role-modal" :show="$errors->isNotEmpty()" focusable>
+    <x-ui.modal name="role-modal" :show="$errors->isNotEmpty()" focusable>
         <form x-on:submit.prevent="confirmAction('saveRole', 'Simpan peran?', 'Data peran akan disimpan ke sistem.')">
             <x-ui.modal-header
                 :title="$isEditing ? __('Edit Peran') : __('Tambah Peran')"
@@ -210,5 +210,5 @@ new #[Layout('layouts.app')] class extends Component {
                 </x-ui.button>
             </x-ui.modal-footer>
         </form>
-    </x-modal>
+    </x-ui.modal>
 </div>

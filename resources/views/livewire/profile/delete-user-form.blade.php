@@ -42,7 +42,7 @@ new class extends Component
         {{ __('Delete Account') }}
     </x-ui.button>
 
-    <x-modal name="confirm-user-deletion" :show="$errors->isNotEmpty()" focusable>
+    <x-ui.modal name="confirm-user-deletion" :show="$errors->isNotEmpty()" focusable>
         <form x-on:submit.prevent="confirmAction('deleteUser', '{{ __('Delete Account') }}?', '{{ __('This action permanently deletes your account and data.') }}', '{{ __('Delete Account') }}', 'danger')">
             <x-ui.modal-header
                 title="{{ __('Are you sure you want to delete your account?') }}"
@@ -79,5 +79,5 @@ new class extends Component
                 </x-ui.button>
             </x-ui.modal-footer>
         </form>
-    </x-modal>
+    </x-ui.modal>
 </section>

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Models\User;
 use App\Models\Pesantren;
@@ -100,12 +100,12 @@ new #[Layout('layouts.app')] class extends Component {
             {{ __('Pesantren') }}
     </x-slot>
 
-    <x-ui.page
+    <x-ui.index-layout
         title="Pesantren"
         subtitle="Kelola data pesantren, status akun, dan status akreditasi."
     >
-        <x-datatable.layout title="Pesantren" :records="$this->pesantrens">
-            <x-slot name="filters">
+        <x-slot name="toolbar">
+            <x-ui.filter-bar>
                 <x-datatable.search placeholder="Cari Pesantren..." />
 
                 <x-ui.filter-select
@@ -129,30 +129,34 @@ new #[Layout('layouts.app')] class extends Component {
                     <x-ui.icon name="document" class="fs-4 me-1" />
                     Ekspor Data
                 </x-ui.button>
-            </x-slot>
+            </x-ui.filter-bar>
+        </x-slot>
+
+        <x-datatable.layout title="Pesantren" :records="$this->pesantrens">
 
             <x-slot name="thead">
-                <th class="w-12 py-3 px-4">
-                    <input type="checkbox" wire:model.live="selectAll" class="rounded border-gray-300 text-green-600 focus:ring-green-500 bg-gray-100 h-4 w-4">
-                </th>
+                <x-ui.table-th :min-width="false" align="center" class="w-60px">
+                    <x-ui.table-checkbox model="selectAll" label="Pilih semua pesantren" />
+                </x-ui.table-th>
+
                 <x-datatable.th field="name" :sortField="$sortField" :sortAsc="$sortAsc">
-                    NAMA PESANTREN
+                    Nama Pesantren
                 </x-datatable.th>
-                <th class="py-3 px-4 text-center text-[11px] font-bold text-gray-400 uppercase tracking-widest">AKREDITASI</th>
-                <th class="py-3 px-4 text-center text-[11px] font-bold text-gray-400 uppercase tracking-widest">STATUS</th>
-                <th class="py-3 px-4 text-right text-[11px] font-bold text-gray-400 uppercase tracking-widest pr-8">AKSI</th>
+                <x-ui.table-th align="center">Akreditasi</x-ui.table-th>
+                <x-ui.table-th align="center">Status</x-ui.table-th>
+                <x-ui.table-th align="end">Aksi</x-ui.table-th>
             </x-slot>
 
             <x-slot name="tbody">
                 @forelse ($this->pesantrens as $index => $user)
-                <tr class="hover:bg-gray-50/50 transition-colors duration-150 group border-b border-gray-50 last:border-0" wire:key="user-{{ $user->id }}">
-                    <td class="py-5 px-4">
-                        <input type="checkbox" wire:model.live="selectedIds" value="{{ $user->id }}" class="rounded border-gray-300 text-green-600 focus:ring-green-500 bg-gray-100 h-4 w-4">
+                <tr wire:key="user-{{ $user->id }}">
+                    <td class="text-center">
+                        <x-ui.table-checkbox model="selectedIds" :value="$user->id" :label="'Pilih ' . ($user->pesantren->nama_pesantren ?? $user->name)" />
                     </td>
-                    <td class="py-5 px-4">
-                        <span class="text-sm font-bold text-[#374151]">{{ $user->pesantren->nama_pesantren ?? $user->name }}</span>
+                    <td>
+                        <span class="text-gray-900 fw-bold fs-6">{{ $user->pesantren->nama_pesantren ?? $user->name }}</span>
                     </td>
-                    <td class="py-5 px-4 text-center">
+                    <td class="text-center">
                         @php
                         $latestAkreditasi = $user->akreditasis->sortByDesc('created_at')->first();
                         @endphp
@@ -166,15 +170,15 @@ new #[Layout('layouts.app')] class extends Component {
                         <x-ui.status-badge variant="warning">Proses</x-ui.status-badge>
                         @endif
                     </td>
-                    <td class="py-5 px-4 text-center">
+                    <td class="text-center">
                         @if($user->status == 1)
                         <x-ui.status-badge variant="success">Aktif</x-ui.status-badge>
                         @else
                         <x-ui.status-badge variant="danger">Non-Aktif</x-ui.status-badge>
                         @endif
                     </td>
-                    <td class="py-5 px-4 text-right pr-6">
-                        <x-ui.button :href="route('admin.pesantren.detail', $user->uuid)" wire:navigate variant="light" size="sm">
+                    <td class="text-end">
+                        <x-ui.button :href="route('admin.pesantren.detail', $user->uuid)" variant="light" size="sm">
                             <x-ui.icon name="eye" class="fs-4 me-1" />
                             Detail
                         </x-ui.button>
@@ -189,5 +193,5 @@ new #[Layout('layouts.app')] class extends Component {
                 @endforelse
             </x-slot>
         </x-datatable.layout>
-    </x-ui.page>
+    </x-ui.index-layout>
 </div>

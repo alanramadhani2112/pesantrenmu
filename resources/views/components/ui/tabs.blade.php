@@ -1,5 +1,5 @@
 <div data-ui-tabs="metronic" {{ $attributes->merge(['class' => 'spm-tabs']) }}>
-    <ul class="nav nav-stretch nav-line-tabs nav-line-tabs-2x border-transparent fs-6 fw-bold">
+    <ul class="nav nav-stretch nav-line-tabs nav-line-tabs-2x border-transparent fs-6 fw-bold" role="tablist">
         {{ $slot }}
     </ul>
 </div>

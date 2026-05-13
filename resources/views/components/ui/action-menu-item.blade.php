@@ -12,17 +12,17 @@
         'success' => 'text-success',
     ][$variant] ?? '';
 
-    $classes = trim('menu-link px-3 py-2 d-flex align-items-center gap-2 ' . $variantClass);
+    $classes = trim('menu-link px-4 py-2 d-flex align-items-center gap-3 ' . $variantClass);
 @endphp
 
 <div class="menu-item">
     @if($href)
-        <a href="{{ $href }}" {{ $attributes->merge(['class' => $classes]) }}>
+        <a href="{{ $href }}" role="menuitem" {{ $attributes->merge(['class' => $classes]) }}>
             {{ $slot }}
         </a>
     @else
-        <button type="{{ $type }}" {{ $attributes->merge(['class' => $classes . ' border-0 bg-transparent w-100 text-start']) }}>
+        <x-ui.button :type="$type" variant="link" unstyled role="menuitem" {{ $attributes->merge(['class' => $classes . ' border-0 bg-transparent w-100 text-start']) }}>
             {{ $slot }}
-        </button>
+        </x-ui.button>
     @endif
 </div>

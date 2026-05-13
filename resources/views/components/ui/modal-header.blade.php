@@ -32,13 +32,15 @@
     </div>
 
     @if($close)
-        <button
+        <x-ui.button
             type="button"
-            class="btn btn-sm btn-icon btn-light btn-active-light-primary spm-modal-close"
+            variant="light"
+            size="sm"
+            class="btn-icon btn-active-light-primary spm-modal-close"
             x-on:click="$dispatch('close')"
             aria-label="Tutup"
         >
             <x-ui.icon name="cross-circle" class="fs-3" />
-        </button>
+        </x-ui.button>
     @endif
 </div>

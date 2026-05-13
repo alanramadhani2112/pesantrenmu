@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Laravel') }}</title>
-    <link rel="icon" type="image/png" href="{{ asset('icon.png') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand/favicon.svg') }}">
 
     <!-- Styles -->
     @livewireStyles
@@ -17,7 +17,18 @@
     @livewireScriptConfig
 </head>
 
-<body class="font-sans antialiased text-gray-900 bg-gray-50" data-bs-theme="light" x-data>
+<body
+    id="kt_app_body"
+    class="app-default font-sans antialiased text-gray-900"
+    data-bs-theme="light"
+    data-kt-app-header-fixed="true"
+    data-kt-app-header-fixed-mobile="true"
+    data-kt-app-sidebar-enabled="true"
+    data-kt-app-sidebar-fixed="true"
+    data-kt-app-sidebar-push-header="true"
+    data-kt-app-sidebar-push-footer="true"
+    x-data
+>
     @php
         $pageTitle = isset($header) ? trim(strip_tags((string) $header)) : __('Dashboard');
         $pageTitle = $pageTitle !== '' ? $pageTitle : __('Dashboard');
@@ -31,47 +42,42 @@
         }
     @endphp
 
-    <div class="spm-app-shell flex h-screen overflow-hidden">
-        <!-- Sidebar -->
-        <livewire:layout.navigation />
+    <div class="d-flex flex-column flex-root app-root spm-app-shell" id="kt_app_root">
+        <div class="app-page flex-column flex-column-fluid" id="kt_app_page">
+            <x-layout.app-header
+                :page-title="$pageTitle"
+                :breadcrumb-items="$breadcrumbItems"
+                :current-user="auth()->user()"
+                :role-name="auth()->user()?->role?->name ?? 'user'"
+            />
 
-        <!-- Main Content Area -->
-        <div id="main-content-scroll" class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-            <!-- Top Header -->
-            <header class="spm-topbar sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8">
-                <div class="flex items-center">
-                    <!-- Mobile Sidebar Toggle -->
-                    <button @click="$store.sidebar.open = !$store.sidebar.open" class="btn btn-sm btn-icon btn-light d-lg-none me-3">
-                        <x-ui.icon name="burger-menu" class="fs-2" />
-                    </button>
+            <div class="app-wrapper flex-column flex-row-fluid" id="kt_app_wrapper">
+                <livewire:layout.navigation />
 
-                    <!-- Page Title/Breadcrumbs -->
-                    <div class="d-flex flex-column justify-content-center">
-                        <h2 class="spm-topbar-title mb-1">{{ $pageTitle }}</h2>
-                        <x-ui.breadcrumb :items="$breadcrumbItems" />
+                <div class="app-main flex-column flex-row-fluid" id="kt_app_main">
+                    <div class="d-flex flex-column flex-column-fluid">
+                        <main id="kt_app_content" class="app-content flex-column-fluid spm-main-content">
+                            <div id="kt_app_content_container" class="app-container container-fluid">
+                                {{ $slot }}
+                            </div>
+                        </main>
                     </div>
+
+                    <footer class="app-footer spm-footer">
+                        <div class="app-container container-fluid d-flex flex-column flex-md-row flex-center flex-md-stack py-4">
+                            <div class="text-gray-500 fw-semibold fs-7">
+                                &copy; {{ date('Y') }} PesantrenMu &middot; Sistem Penjaminan Mutu
+                            </div>
+                        </div>
+                    </footer>
                 </div>
-
-                <!-- Right Header Actions -->
-                <div class="flex items-center space-x-4">
-                    <livewire:layout.notification-menu />
-                </div>
-            </header>
-
-            <!-- Page Content -->
-            <main class="spm-main-content flex-grow p-4 md:p-6 lg:p-8">
-                {{ $slot }}
-            </main>
-
-            <footer class="spm-footer bg-white border-t border-gray-200 py-4 px-6 text-center text-sm text-gray-500">
-                &copy; {{ date('Y') }} Sistem Penjaminan Mutu (SPM) Muhammadiyah
-            </footer>
+            </div>
         </div>
     </div>
 
     <!-- Notification Toast -->
-    <!-- Notification Toast -->
-    <div x-data="{ 
+    <div
+        x-data="{
                 show: false, 
                 type: 'success',
                 title: '', 
@@ -117,65 +123,55 @@
         x-transition:leave="transition ease-in duration-300"
         x-transition:leave-start="translate-x-0 opacity-100"
         x-transition:leave-end="translate-x-full opacity-0"
-        class="fixed top-6 right-6 p-4 z-[100] max-w-sm w-full"
-        style="display: none;">
+        class="spm-toast-wrapper"
+        style="display: none;"
+    >
+        <div
+            class="card border-0 spm-toast-card"
+            :class="{
+                'spm-toast-success': type === 'success',
+                'spm-toast-danger': type === 'error',
+                'spm-toast-warning': type === 'warning',
+                'spm-toast-info': type === 'info'
+            }"
+        >
+            <div class="card-body d-flex align-items-start gap-4 p-5">
+                <div class="spm-toast-icon flex-shrink-0">
+                    <template x-if="type === 'success'">
+                        <x-ui.icon name="check-circle" class="fs-2 text-success" />
+                    </template>
+                    <template x-if="type === 'error'">
+                        <x-ui.icon name="cross-circle" class="fs-2 text-danger" />
+                    </template>
+                    <template x-if="type === 'warning'">
+                        <x-ui.icon name="information-5" class="fs-2 text-warning" />
+                    </template>
+                    <template x-if="type === 'info' || !type">
+                        <x-ui.icon name="information-2" class="fs-2 text-primary" />
+                    </template>
+                </div>
 
-        <div :class="{
-                'bg-emerald-50 border-emerald-500 text-emerald-900 shadow-emerald-200/50': type === 'success',
-                'bg-rose-50 border-rose-500 text-rose-900 shadow-rose-200/50': type === 'error',
-                'bg-amber-50 border-amber-500 text-amber-900 shadow-amber-200/50': type === 'warning',
-                'bg-white border-indigo-500 text-gray-900 shadow-indigo-200/50': type === 'info'
-            }" class="rounded-xl border-l-8 shadow-2xl p-4 flex items-start gap-4 backdrop-blur-md bg-opacity-95 ring-1 ring-black/5 animate-bounce-short">
+                <div class="flex-grow-1 min-w-0">
+                    <div class="d-flex align-items-start justify-content-between gap-3">
+                        <div class="min-w-0">
+                            <div class="spm-toast-title" x-text="title"></div>
+                            <div class="spm-toast-message" x-text="message"></div>
+                        </div>
 
-            <!-- Icon -->
-            <div class="flex-shrink-0">
-                <template x-if="type === 'success'">
-                    <div class="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                        </svg>
+                        <x-ui.button
+                            type="button"
+                            variant="light"
+                            @click="show = false"
+                            class="btn-sm btn-icon btn-active-light-primary flex-shrink-0"
+                            aria-label="Tutup notifikasi"
+                        >
+                            <x-ui.icon name="cross-circle" class="fs-3 text-gray-500" />
+                        </x-ui.button>
                     </div>
-                </template>
-                <template x-if="type === 'error'">
-                    <div class="h-10 w-10 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </div>
-                </template>
-                <template x-if="type === 'warning'">
-                    <div class="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                    </div>
-                </template>
-                <template x-if="type === 'info' || !type">
-                    <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                </template>
+                </div>
             </div>
-
-            <!-- Content -->
-            <div class="flex-1 pt-0.5">
-                <p class="text-sm font-black uppercase tracking-wider" x-text="title"></p>
-                <p class="mt-1 text-sm font-medium opacity-80" x-text="message"></p>
-            </div>
-
-            <!-- Close Button -->
-            <button @click="show = false" class="text-gray-400 hover:text-gray-600 transition-colors">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
         </div>
     </div>
-
-    <script src="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.js') }}"></script>
-    <script src="{{ asset('vendor/metronic/assets/js/scripts.bundle.js') }}"></script>
 </body>
 
 </html>

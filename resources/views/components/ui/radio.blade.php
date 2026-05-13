@@ -19,7 +19,7 @@
         @if($id) id="{{ $id }}" @endif
         @if($model) wire:model="{{ $model }}" @endif
         @if(!is_null($value)) value="{{ $value }}" @endif
-        {{ $inputAttributes->merge(['class' => 'form-check-input h-20px w-20px']) }}
+        {{ $inputAttributes->merge(['class' => 'form-check-input h-22px w-22px']) }}
     >
 
     @if($label)

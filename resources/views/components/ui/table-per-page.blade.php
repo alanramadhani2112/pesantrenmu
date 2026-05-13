@@ -4,7 +4,7 @@
 ])
 
 <div data-ui-table-per-page="metronic" class="d-flex align-items-center gap-3">
-    <span class="text-muted fw-semibold fs-7">Tampilkan</span>
+    <span class="spm-table-per-page-label">Tampilkan</span>
 
     <select wire:model.live="{{ $model }}" {{ $attributes->merge(['class' => 'form-select form-select-solid form-select-sm w-100px']) }}>
         @foreach($options as $option)
@@ -12,5 +12,5 @@
         @endforeach
     </select>
 
-    <span class="text-muted fw-semibold fs-7">data</span>
+    <span class="spm-table-per-page-label">data</span>
 </div>

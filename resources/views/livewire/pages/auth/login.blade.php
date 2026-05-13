@@ -41,12 +41,12 @@ new #[Layout('layouts.guest')] class extends Component
                     <span class="path1"></span>
                     <span class="path2"></span>
                 </i>
-                <input
-                    wire:model="form.email"
+                <x-ui.input
+                    model="form.email"
                     id="email"
-                    class="form-control form-control-lg form-control-solid ps-12"
                     type="email"
                     name="email"
+                    class="form-control-lg ps-12"
                     required
                     autofocus
                     autocomplete="username"
@@ -66,10 +66,10 @@ new #[Layout('layouts.guest')] class extends Component
                     <span class="path4"></span>
                     <span class="path5"></span>
                 </i>
-                <input
-                    wire:model="form.password"
+                <x-ui.input
+                    model="form.password"
                     id="password"
-                    class="form-control form-control-lg form-control-solid ps-12 pe-12"
+                    class="form-control-lg ps-12 pe-12"
                     type="password"
                     x-bind:type="show ? 'text' : 'password'"
                     name="password"
@@ -77,9 +77,11 @@ new #[Layout('layouts.guest')] class extends Component
                     autocomplete="current-password"
                 />
 
-                <button
+                <x-ui.button
                     type="button"
-                    class="btn btn-icon btn-sm btn-active-light-primary position-absolute top-50 end-0 translate-middle-y me-2"
+                    variant="light"
+                    size="sm"
+                    class="btn-icon btn-active-light-primary position-absolute top-50 end-0 translate-middle-y me-2"
                     @click="show = !show"
                     aria-label="Tampilkan password"
                 >
@@ -94,7 +96,7 @@ new #[Layout('layouts.guest')] class extends Component
                         <span class="path3"></span>
                         <span class="path4"></span>
                     </i>
-                </button>
+                </x-ui.button>
             </div>
 
             <x-input-error :messages="$errors->get('form.password')" class="invalid-feedback d-block mt-2" />

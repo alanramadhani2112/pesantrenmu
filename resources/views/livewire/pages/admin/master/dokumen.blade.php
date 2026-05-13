@@ -132,16 +132,16 @@ new #[Layout('layouts.app')] class extends Component {
 }; ?>
 
 <div x-data="{ ...deleteConfirmation(), ...fileManagement() }" data-module-page="master-dokumen">
-    <x-slot name="header">{{ __('Master Dokumen') }}</x-slot>
-
-    <x-ui.page
+    <x-ui.index-layout
         title="Master Dokumen"
         subtitle="Kelola template dan dokumen pendukung untuk pesantren dan asesor."
     >
-        <x-datatable.layout title="Master Dokumen" :records="$this->documents">
+        <x-ui.table title="Master Dokumen" :records="$this->documents">
             <x-slot name="filters">
                 <x-datatable.search placeholder="Cari Dokumen..." />
+            </x-slot>
 
+            <x-slot name="toolbar">
                 <x-ui.button wire:click="openModal" variant="primary" size="sm">
                     <x-ui.icon name="plus" class="fs-4 me-1" />
                     Tambah Dokumen
@@ -150,58 +150,58 @@ new #[Layout('layouts.app')] class extends Component {
 
             <x-slot name="thead">
                 <x-datatable.th field="title" :sortField="$sortField" :sortAsc="$sortAsc">
-                    NAMA DOKUMEN
+                    Nama Dokumen
                 </x-datatable.th>
                 <x-datatable.th field="type" :sortField="$sortField" :sortAsc="$sortAsc" class="text-center">
-                    TIPE DOKUMEN
+                    Tipe Dokumen
                 </x-datatable.th>
-                <th class="py-3 px-4 text-center text-[11px] font-bold text-gray-400 uppercase tracking-widest">AKSES</th>
-                <th class="py-3 px-4 text-center text-[11px] font-bold text-gray-400 uppercase tracking-widest">STATUS</th>
+                <x-ui.table-th align="center">Akses</x-ui.table-th>
+                <x-ui.table-th align="center">Status</x-ui.table-th>
                 <x-datatable.th field="updated_at" :sortField="$sortField" :sortAsc="$sortAsc" class="text-center">
-                    TERAKHIR DIPERBARUI
+                    Terakhir Diperbarui
                 </x-datatable.th>
-                <th class="py-3 px-4 text-right text-[11px] font-bold text-gray-400 uppercase tracking-widest pr-8">AKSI</th>
+                <x-ui.table-th align="end">Aksi</x-ui.table-th>
             </x-slot>
 
             <x-slot name="tbody">
                 @forelse ($this->documents as $doc)
-                <tr class="hover:bg-gray-50/50 transition-colors duration-150 group border-b border-gray-50 last:border-0" wire:key="doc-{{ $doc->id }}">
-                    <td class="py-5 px-4 font-bold text-[#374151] text-sm tracking-tight">
+                <tr wire:key="doc-{{ $doc->id }}">
+                    <td class="fw-semibold text-gray-900 fs-6">
                         {{ $doc->title }}
                     </td>
-                    <td class="py-5 px-4 text-center">
+                    <td class="text-center">
                         @if($doc->type === 'iapm')
-                        <x-ui.status-badge variant="warning" class="text-uppercase">IAPM</x-ui.status-badge>
+                        <x-ui.status-badge variant="warning">IAPM</x-ui.status-badge>
                         @elseif($doc->type === 'kartu_kendali')
-                        <x-ui.status-badge variant="primary" class="text-uppercase">Kartu Kendali</x-ui.status-badge>
+                        <x-ui.status-badge variant="primary">Kartu Kendali</x-ui.status-badge>
                         @elseif($doc->type === 'visitasi')
-                        <x-ui.status-badge variant="info" class="text-uppercase">Visitasi</x-ui.status-badge>
+                        <x-ui.status-badge variant="info">Visitasi</x-ui.status-badge>
                         @else
                         <x-ui.status-badge variant="secondary">-</x-ui.status-badge>
                         @endif
                     </td>
-                    <td class="py-5 px-4 text-center">
-                        <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                    <td class="text-center">
+                        <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap">
                             @if($doc->is_pesantren)
-                            <x-ui.status-badge variant="primary" class="text-uppercase">Pesantren</x-ui.status-badge>
+                            <x-ui.status-badge variant="primary">Pesantren</x-ui.status-badge>
                             @endif
                             @if($doc->is_asesor)
-                            <x-ui.status-badge variant="info" class="text-uppercase">Asesor</x-ui.status-badge>
+                            <x-ui.status-badge variant="info">Asesor</x-ui.status-badge>
                             @endif
                             @if(!$doc->is_pesantren && !$doc->is_asesor)
                             <x-ui.status-badge variant="secondary">NONE</x-ui.status-badge>
                             @endif
                         </div>
                     </td>
-                    <td class="py-5 px-4 text-center">
-                        <x-ui.status-badge :variant="$doc->status == 1 ? 'success' : 'danger'" class="text-uppercase">
+                    <td class="text-center">
+                        <x-ui.status-badge :variant="$doc->status == 1 ? 'success' : 'danger'">
                             {{ $doc->status == 1 ? 'Aktif' : 'Non-Aktif' }}
                         </x-ui.status-badge>
                     </td>
-                    <td class="py-5 px-4 text-center">
-                        <span class="text-[11px] font-bold text-gray-500 tracking-tight whitespace-nowrap">{{ $doc->updated_at->translatedFormat('d M Y • H:i') }} WIB</span>
+                    <td class="text-center">
+                        <span class="text-muted fw-semibold text-nowrap">{{ $doc->updated_at->translatedFormat('d M Y • H:i') }} WIB</span>
                     </td>
-                    <td class="py-5 px-4 text-right pr-6">
+                    <td class="text-end">
                         <x-ui.action-menu>
                             <x-ui.action-menu-item href="{{ Storage::url($doc->file_path) }}" target="_blank">
                                 <x-ui.icon name="eye" class="fs-5 text-gray-500" />
@@ -231,11 +231,11 @@ new #[Layout('layouts.app')] class extends Component {
                 </tr>
                 @endforelse
             </x-slot>
-        </x-datatable.layout>
-    </x-ui.page>
+        </x-ui.table>
+    </x-ui.index-layout>
 
     <!-- Modal Form -->
-    <x-modal name="document-modal" maxWidth="lg">
+    <x-ui.modal name="document-modal" maxWidth="lg">
         <form x-on:submit.prevent="confirmSave($wire)">
             <x-ui.modal-header
                 :title="$documentId ? 'Edit Dokumen' : 'Tambah Dokumen Baru'"
@@ -320,5 +320,5 @@ new #[Layout('layouts.app')] class extends Component {
                 </x-ui.button>
             </x-ui.modal-footer>
         </form>
-    </x-modal>
+    </x-ui.modal>
 </div>

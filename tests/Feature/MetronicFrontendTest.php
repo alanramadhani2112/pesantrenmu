@@ -19,12 +19,22 @@ class MetronicFrontendTest extends TestCase
 
     public function test_login_page_loads_metronic_foundation_assets(): void
     {
+        $this->withoutVite();
+
         $this->get('/login')
             ->assertOk()
             ->assertSee('vendor/metronic/assets/plugins/global/plugins.bundle.css', false)
             ->assertSee('vendor/metronic/assets/css/style.bundle.css', false)
-            ->assertSee('build/assets/app-', false)
+            ->assertDontSee('vendor/metronic/assets/plugins/global/plugins.bundle.js', false)
+            ->assertDontSee('vendor/metronic/assets/js/scripts.bundle.js', false)
             ->assertDontSee('fonts.bunny.net', false);
+    }
+
+    public function test_unused_full_metronic_public_assets_are_removed(): void
+    {
+        $this->assertDirectoryDoesNotExist(public_path('assets'));
+        $this->assertFileExists(public_path('vendor/metronic/assets/css/style.bundle.css'));
+        $this->assertFileExists(public_path('vendor/metronic/assets/plugins/global/plugins.bundle.css'));
     }
 
     public function test_metronic_ui_components_render_reusable_classes(): void
@@ -51,6 +61,7 @@ class MetronicFrontendTest extends TestCase
                 <x-ui.textarea model="notes">Catatan</x-ui.textarea>
                 <x-ui.checkbox model="status" label="Aktif" />
                 <x-ui.radio model="status" value="1" label="Aktif" />
+                <x-ui.table-checkbox model="selectedIds" value="1" label="Pilih data" />
                 <x-ui.file-upload model="file" id="file" hint="PDF atau DOC" />
             </x-ui.modal-body>
             <x-ui.modal-footer>
@@ -86,7 +97,9 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('data-ui-checkbox="metronic"', $html);
         $this->assertStringContainsString('data-ui-radio="metronic"', $html);
         $this->assertStringContainsString('form-check form-check-custom form-check-solid', $html);
-        $this->assertStringContainsString('form-check-input h-20px w-20px', $html);
+        $this->assertStringContainsString('form-check-input h-22px w-22px', $html);
+        $this->assertStringContainsString('data-ui-table-checkbox="metronic"', $html);
+        $this->assertStringContainsString('wire:model.live="selectedIds"', $html);
         $this->assertStringContainsString('data-ui-file-upload="metronic"', $html);
     }
 
@@ -113,7 +126,10 @@ class MetronicFrontendTest extends TestCase
         $css = file_get_contents(resource_path('css/metronic-overrides.css'));
 
         $this->assertStringContainsString('--bs-font-sans-serif: "Inter"', $css);
+        $this->assertStringContainsString('font-size: 15px;', $css);
         $this->assertStringContainsString('.spm-page-title', $css);
+        $this->assertStringContainsString('[data-ui-table="metronic"] .table tbody td', $css);
+        $this->assertStringContainsString('[data-ui-table-checkbox="metronic"]', $css);
         $this->assertStringContainsString('.spm-card-title', $css);
         $this->assertStringContainsString('#nprogress', $css);
         $this->assertStringContainsString('display: none !important;', $css);
@@ -143,6 +159,7 @@ class MetronicFrontendTest extends TestCase
 
         $this->assertStringContainsString('data-ui-table="metronic"', $html);
         $this->assertStringContainsString('table table-row-dashed', $html);
+        $this->assertStringContainsString('spm-datatable', $html);
         $this->assertStringContainsString('form-control form-control-solid', $html);
         $this->assertStringContainsString('wire:model.live.debounce.300ms="search"', $html);
         $this->assertStringContainsString("wire:click=\"sortBy('created_at')\"", $html);
@@ -296,6 +313,38 @@ class MetronicFrontendTest extends TestCase
         }
     }
 
+    public function test_module_list_tables_do_not_use_legacy_tailwind_table_scaffolding(): void
+    {
+        $views = [
+            'resources/views/livewire/pages/admin/akreditasi.blade.php',
+            'resources/views/livewire/pages/admin/pesantren/index.blade.php',
+            'resources/views/livewire/pages/admin/asesor/index.blade.php',
+            'resources/views/livewire/pages/accounts/index.blade.php',
+            'resources/views/livewire/pages/roles/index.blade.php',
+            'resources/views/livewire/pages/admin/master/dokumen.blade.php',
+            'resources/views/livewire/pages/pesantren/akreditasi.blade.php',
+            'resources/views/livewire/pages/asesor/akreditasi.blade.php',
+        ];
+
+        foreach ($views as $path) {
+            $view = file_get_contents(base_path($path));
+
+            foreach (['py-5 px-4', 'py-8 px', '<tr class="hover:bg-gray', 'rounded border-gray-300', 'h-4 w-4'] as $legacyMarker) {
+                $this->assertStringNotContainsString($legacyMarker, $view, "{$path} should not contain legacy table marker {$legacyMarker}");
+            }
+        }
+
+        foreach ([
+            'resources/views/livewire/pages/admin/akreditasi.blade.php',
+            'resources/views/livewire/pages/admin/pesantren/index.blade.php',
+            'resources/views/livewire/pages/admin/asesor/index.blade.php',
+        ] as $path) {
+            $view = file_get_contents(base_path($path));
+
+            $this->assertStringContainsString('<x-ui.table-checkbox', $view, "{$path} should use the reusable Metronic table checkbox.");
+        }
+    }
+
     public function test_form_modal_views_use_reusable_metronic_form_controls(): void
     {
         $componentExpectations = [
@@ -351,6 +400,41 @@ class MetronicFrontendTest extends TestCase
         }
     }
 
+    public function test_metronic_accessibility_contract_for_tabs_menu_and_modal(): void
+    {
+        $html = Blade::render(<<<'BLADE'
+            <x-ui.tabs>
+                <x-ui.tab :active="true">Overview</x-ui.tab>
+                <x-ui.tab>Detail</x-ui.tab>
+            </x-ui.tabs>
+
+            <x-ui.action-menu label="Aksi Data" menu-id="aksi-data-menu">
+                <x-ui.action-menu-item href="/items/1/edit">Edit</x-ui.action-menu-item>
+                <x-ui.action-menu-item type="button">Hapus</x-ui.action-menu-item>
+            </x-ui.action-menu>
+
+            <x-ui.modal name="sample-modal" :show="true" maxWidth="lg" focusable>
+                <x-ui.modal-body>Isi modal</x-ui.modal-body>
+            </x-ui.modal>
+            BLADE);
+
+        $this->assertStringContainsString('role="tablist"', $html);
+        $this->assertStringContainsString('data-ui-tab="metronic"', $html);
+        $this->assertStringContainsString('role="tab"', $html);
+        $this->assertStringContainsString('aria-selected="true"', $html);
+        $this->assertStringContainsString('aria-selected="false"', $html);
+
+        $this->assertStringContainsString('data-ui-action-menu="metronic"', $html);
+        $this->assertStringContainsString('aria-controls="aksi-data-menu"', $html);
+        $this->assertStringContainsString('id="aksi-data-menu"', $html);
+        $this->assertStringContainsString('role="menu"', $html);
+        $this->assertStringContainsString('role="menuitem"', $html);
+
+        $this->assertStringContainsString('data-ui-modal="metronic"', $html);
+        $this->assertStringContainsString('role="dialog"', $html);
+        $this->assertStringContainsString('aria-modal="true"', $html);
+    }
+
     public function test_sweetalert_actions_use_metronic_helper_without_inline_blade_alerts(): void
     {
         $script = file_get_contents(resource_path('js/app.js'));
@@ -376,6 +460,7 @@ class MetronicFrontendTest extends TestCase
 
     public function test_dashboard_uses_reusable_metronic_components_for_each_role(): void
     {
+        $this->withoutVite();
         $this->seed(RoleSeeder::class);
         $pesantren = User::factory()->create(['role_id' => 3]);
         $asesorUser = User::factory()->create(['role_id' => 2]);
@@ -425,12 +510,13 @@ class MetronicFrontendTest extends TestCase
 
             $response
                 ->assertOk()
-                ->assertSee('build/assets/app-', false)
                 ->assertDontSee('fonts.bunny.net', false)
                 ->assertSee('data-ui-sidebar="metronic"', false)
                 ->assertSee('data-ui-sidebar-section="metronic"', false)
+                ->assertSee('id="kt_app_header"', false)
+                ->assertDontSee('id="kt_app_toolbar"', false)
                 ->assertSee('data-ui-breadcrumb="metronic"', false)
-                ->assertSee('spm-topbar-title', false)
+                ->assertSee('spm-header-title', false)
                 ->assertSee('data-dashboard-page="metronic"', false)
                 ->assertSee('data-ui-page="metronic"', false)
                 ->assertSee('data-ui-badge="metronic"', false)
@@ -536,6 +622,187 @@ class MetronicFrontendTest extends TestCase
                 ->assertSee($marker, false)
                 ->assertSee('spm-page-title', false)
                 ->assertSee('data-ui-table="metronic"', false);
+        }
+    }
+
+    public function test_detail_pages_render_metronic_detail_foundation(): void
+    {
+        $this->seed(\Database\Seeders\DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@spm.test')->firstOrFail();
+        $pesantren = User::query()->where('email', 'pesantren@spm.test')->firstOrFail();
+        $asesor = User::query()->where('email', 'asesor@spm.test')->firstOrFail();
+        $akreditasi = Akreditasi::query()->where('user_id', $pesantren->id)->firstOrFail();
+
+        $pages = [
+            [$admin, "/admin/pesantren/{$pesantren->uuid}", [
+                'data-ui-page="metronic"',
+                'data-ui-section-card="metronic"',
+                'data-ui-simple-table="metronic"',
+                'data-ui-document-item="metronic"',
+                'data-ui-detail-item="metronic"',
+            ]],
+            [$admin, "/admin/akreditasi/{$akreditasi->uuid}", [
+                'data-ui-page="metronic"',
+                'data-ui-tabs="metronic"',
+                'data-ui-section-card="metronic"',
+                'data-ui-simple-table="metronic"',
+                'data-ui-document-item="metronic"',
+            ]],
+            [$pesantren, "/pesantren/akreditasi/{$akreditasi->uuid}", [
+                'data-ui-page="metronic"',
+                'data-ui-tabs="metronic"',
+                'data-ui-section-card="metronic"',
+                'data-ui-simple-table="metronic"',
+                'data-ui-document-item="metronic"',
+            ]],
+            [$asesor, "/asesor/akreditasi/{$akreditasi->uuid}", [
+                'data-ui-page="metronic"',
+                'data-ui-tabs="metronic"',
+                'data-ui-section-card="metronic"',
+                'data-ui-simple-table="metronic"',
+                'data-ui-document-item="metronic"',
+            ]],
+        ];
+
+        foreach ($pages as [$user, $uri, $markers]) {
+            $response = $this->actingAs($user)->get($uri)->assertOk();
+
+            foreach ($markers as $marker) {
+                $response->assertSee($marker, false);
+            }
+        }
+    }
+
+    public function test_pesantren_input_pages_render_reusable_metronic_form_foundation(): void
+    {
+        $this->seed(\Database\Seeders\DatabaseSeeder::class);
+        $pesantren = User::query()->where('email', 'pesantren@spm.test')->firstOrFail();
+
+        $pages = [
+            '/pesantren/ipm' => [
+                'data-module-page="pesantren-ipm"',
+                'data-ui-page="metronic"',
+                'data-ui-section-card="metronic"',
+                'data-ui-form-field="metronic"',
+                'data-ui-file-upload="metronic"',
+                'data-ui-document-item="metronic"',
+            ],
+            '/pesantren/sdm' => [
+                'data-module-page="pesantren-sdm"',
+                'data-ui-page="metronic"',
+                'data-ui-section-card="metronic"',
+                'data-ui-simple-table="metronic"',
+                'data-ui-input="metronic"',
+            ],
+            '/pesantren/edpm' => [
+                'data-module-page="pesantren-edpm"',
+                'data-ui-page="metronic"',
+                'data-ui-section-card="metronic"',
+                'data-ui-simple-table="metronic"',
+                'data-ui-select="metronic"',
+                'data-ui-input="metronic"',
+            ],
+        ];
+
+        foreach ($pages as $uri => $markers) {
+            $response = $this->actingAs($pesantren)->get($uri)->assertOk();
+
+            foreach ($markers as $marker) {
+                $response->assertSee($marker, false);
+            }
+        }
+    }
+
+    public function test_detail_and_input_views_use_reusable_metronic_components_without_legacy_markup(): void
+    {
+        $views = [
+            'resources/views/livewire/pages/admin/pesantren/detail.blade.php' => [
+                '<x-ui.page',
+                '<x-ui.section-card',
+                '<x-ui.detail-item',
+                '<x-ui.simple-table',
+                '<x-ui.document-item',
+                '<x-ui.button',
+            ],
+            'resources/views/livewire/pages/admin/akreditasi-detail.blade.php' => [
+                '<x-ui.page',
+                '<x-ui.tabs',
+                '<x-ui.section-card',
+                '<x-ui.simple-table',
+                '<x-ui.document-item',
+                '<x-ui.form-field',
+                '<x-ui.button',
+            ],
+            'resources/views/livewire/pages/pesantren/akreditasi-detail.blade.php' => [
+                '<x-ui.page',
+                '<x-ui.tabs',
+                '<x-ui.section-card',
+                '<x-ui.simple-table',
+                '<x-ui.document-item',
+                '<x-ui.form-field',
+                '<x-ui.button',
+            ],
+            'resources/views/livewire/pages/asesor/akreditasi-detail.blade.php' => [
+                '<x-ui.page',
+                '<x-ui.tabs',
+                '<x-ui.section-card',
+                '<x-ui.simple-table',
+                '<x-ui.document-item',
+                '<x-ui.form-field',
+                '<x-ui.button',
+            ],
+            'resources/views/livewire/pages/pesantren/ipm.blade.php' => [
+                '<x-ui.page',
+                '<x-ui.section-card',
+                '<x-ui.form-field',
+                '<x-ui.file-upload',
+                '<x-ui.document-item',
+                '<x-ui.button',
+            ],
+            'resources/views/livewire/pages/pesantren/sdm.blade.php' => [
+                '<x-ui.page',
+                '<x-ui.section-card',
+                '<x-ui.simple-table',
+                '<x-ui.input',
+                '<x-ui.button',
+            ],
+            'resources/views/livewire/pages/pesantren/edpm.blade.php' => [
+                '<x-ui.page',
+                '<x-ui.section-card',
+                '<x-ui.simple-table',
+                '<x-ui.select',
+                '<x-ui.input',
+                '<x-ui.textarea',
+                '<x-ui.button',
+            ],
+        ];
+
+        $legacyMarkers = [
+            '<svg',
+            'rounded-[',
+            'rounded-2xl',
+            'rounded-3xl',
+            'bg-gradient',
+            'border-l-4',
+            '<button type="button"',
+            '<button type="submit"',
+            '<input type="file"',
+            '<x-input-label',
+            '<x-text-input',
+            'x-input-error',
+        ];
+
+        foreach ($views as $path => $expectedComponents) {
+            $view = file_get_contents(base_path($path));
+
+            foreach ($expectedComponents as $component) {
+                $this->assertStringContainsString($component, $view, "{$path} should use {$component}");
+            }
+
+            foreach ($legacyMarkers as $marker) {
+                $this->assertStringNotContainsString($marker, $view, "{$path} should not contain legacy UI marker {$marker}");
+            }
         }
     }
 }

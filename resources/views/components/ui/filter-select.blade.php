@@ -2,7 +2,7 @@
     'model' => null,
     'placeholder' => null,
     'options' => [],
-    'size' => 'sm',
+    'size' => 'md',
 ])
 
 @php
@@ -12,7 +12,7 @@
         'lg' => 'form-select-lg',
     ];
 
-    $classes = trim('form-select form-select-solid w-auto min-w-150px ' . ($sizes[$size] ?? 'form-select-sm'));
+    $classes = trim('form-select form-select-solid w-auto min-w-175px ' . ($sizes[$size] ?? ''));
 @endphp
 
 <select

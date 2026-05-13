@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Models\Akreditasi;
 use App\Models\Pesantren;
@@ -128,14 +128,92 @@ new #[Layout('layouts.app')] class extends Component {
 }; ?>
 
 <div x-data="akreditasiPesantren" data-module-page="pesantren-akreditasi">
-    <x-slot name="header">
-        {{ __('Akreditasi') }}
-    </x-slot>
+    <x-slot name="header">{{ __('Akreditasi') }}</x-slot>
 
     <x-ui.page
         title="Akreditasi"
-        subtitle="Pantau pengajuan, status proses, catatan, dan tindak lanjut akreditasi."
+        subtitle="Pantau pengajuan, status proses, catatan, dan tindak lanjut akreditasi pesantren."
     >
+        @php
+            $akreditasiRecords = $this->akreditasis;
+            $akreditasiCollection = method_exists($akreditasiRecords, 'getCollection')
+                ? $akreditasiRecords->getCollection()
+                : collect($akreditasiRecords);
+            $totalPengajuan = method_exists($akreditasiRecords, 'total')
+                ? $akreditasiRecords->total()
+                : $akreditasiCollection->count();
+            $pengajuanProses = $akreditasiCollection->whereNotIn('status', [1, 2])->count();
+            $pengajuanDitolak = $akreditasiCollection->where('status', 2)->count();
+        @endphp
+
+        <div class="row g-6 mb-6">
+            <div class="col-12 col-xl-8">
+                <x-ui.card
+                    title="Ruang Kendali Pengajuan"
+                    subtitle="Ikuti progres akreditasi pesantren dari kesiapan data sampai tindak lanjut catatan."
+                    class="h-100"
+                >
+                    <div class="row g-4">
+                        <div class="col-12 col-md-4">
+                            <div class="border border-dashed border-gray-300 rounded-3 p-5 h-100">
+                                <x-ui.badge variant="primary" class="mb-4">Total Pengajuan</x-ui.badge>
+                                <div class="fs-2 fw-bold text-gray-900 mb-1">{{ $totalPengajuan }}</div>
+                                <div class="text-muted fw-semibold fs-7">Riwayat pengajuan akreditasi yang tampil pada daftar.</div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <div class="border border-dashed border-gray-300 rounded-3 p-5 h-100">
+                                <x-ui.badge variant="info" class="mb-4">Sedang Diproses</x-ui.badge>
+                                <div class="fs-2 fw-bold text-gray-900 mb-1">{{ $pengajuanProses }}</div>
+                                <div class="text-muted fw-semibold fs-7">Pengajuan yang masih diproses atau belum ditolak.</div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <div class="border border-dashed border-gray-300 rounded-3 p-5 h-100">
+                                <x-ui.badge variant="warning" class="mb-4">Perlu Tindak Lanjut</x-ui.badge>
+                                <div class="fs-2 fw-bold text-gray-900 mb-1">{{ $pengajuanDitolak }}</div>
+                                <div class="text-muted fw-semibold fs-7">Cek catatan lalu ajukan ulang bila masih dibuka.</div>
+                            </div>
+                        </div>
+                    </div>
+                </x-ui.card>
+            </div>
+
+            <div class="col-12 col-xl-4">
+                <x-ui.card
+                    title="Langkah Pesantren"
+                    subtitle="Aksi utama tetap mengikuti tombol dan menu yang sudah tersedia di proses akreditasi pesantren."
+                    class="h-100"
+                >
+                    <div class="d-flex flex-column gap-4">
+                        <div class="d-flex align-items-start gap-3">
+                            <span class="badge badge-circle badge-light-primary">1</span>
+                            <div>
+                                <div class="fw-bold text-gray-900">Lengkapi data</div>
+                                <div class="text-muted fs-7">Pastikan profil, IPM, SDM, dan EDPM siap sebelum membuat pengajuan akreditasi.</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start gap-3">
+                            <span class="badge badge-circle badge-light-primary">2</span>
+                            <div>
+                                <div class="fw-bold text-gray-900">Pantau status</div>
+                                <div class="text-muted fs-7">Gunakan filter periode, status, dan tahapan untuk membaca progres pengajuan.</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start gap-3">
+                            <span class="badge badge-circle badge-light-primary">3</span>
+                            <div>
+                                <div class="fw-bold text-gray-900">Tindak lanjuti catatan</div>
+                                <div class="text-muted fs-7">Buka catatan, unggah dokumen, atau ajukan ulang dari menu aksi.</div>
+                            </div>
+                        </div>
+                    </div>
+                </x-ui.card>
+            </div>
+        </div>
+
         <x-datatable.layout title="Pengajuan Akreditasi" :records="$this->akreditasis">
             <x-slot name="filters">
                 <div class="d-flex flex-wrap align-items-center gap-3">
@@ -165,78 +243,78 @@ new #[Layout('layouts.app')] class extends Component {
             </x-slot>
 
             <x-slot name="thead">
-                <th class="py-3 px-4 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest pl-10">PERIODE</th>
-                <th class="py-3 px-4 text-center text-[11px] font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">STATUS</th>
-                <th class="py-3 px-4 text-center text-[11px] font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">TAHAP AKREDITASI</th>
-                <th class="py-3 px-4 text-center text-[11px] font-bold text-gray-400 uppercase tracking-widest">NILAI</th>
-                <th class="py-3 px-4 text-center text-[11px] font-bold text-gray-400 uppercase tracking-widest">PERINGKAT</th>
-                <th class="py-3 px-4 text-center text-[11px] font-bold text-gray-400 uppercase tracking-widest">CATATAN</th>
-                <th class="py-3 px-4 text-right text-[11px] font-bold text-gray-400 uppercase tracking-widest pr-10">AKSI</th>
+                <x-ui.table-th>Periode</x-ui.table-th>
+                <x-ui.table-th align="center">Status</x-ui.table-th>
+                <x-ui.table-th align="center">Tahap Akreditasi</x-ui.table-th>
+                <x-ui.table-th align="center">Nilai</x-ui.table-th>
+                <x-ui.table-th align="center">Peringkat</x-ui.table-th>
+                <x-ui.table-th align="center">Catatan</x-ui.table-th>
+                <x-ui.table-th align="end">Aksi</x-ui.table-th>
             </x-slot>
 
             <x-slot name="tbody">
                 @forelse ($this->akreditasis as $index => $item)
-                <tr class="hover:bg-gray-50/50 transition-colors duration-150 group border-b border-gray-50 last:border-0" wire:key="akred-{{ $item->id }}">
-                    <td class="py-8 px-4 pl-10">
-                        <span class="text-sm font-black text-slate-700">{{ $item->created_at->format('Y') }}</span>
+                <tr wire:key="akred-{{ $item->id }}">
+                    <td>
+                        <span class="text-gray-900 fw-bold fs-6">{{ $item->created_at->format('Y') }}</span>
                     </td>
-                    <td class="py-8 px-4 text-center">
+                    <td class="text-center">
                         @if($item->status == 1)
                         @if($item->masa_berlaku_akhir && \Carbon\Carbon::parse($item->masa_berlaku_akhir)->isPast())
-                        <x-ui.status-badge variant="danger" class="text-uppercase">
+                        <x-ui.status-badge variant="danger">
                             Masa Berlaku Habis
                         </x-ui.status-badge>
                         @else
-                        <x-ui.status-badge variant="success" class="text-uppercase">
+                        <x-ui.status-badge variant="success">
                             Selesai
                         </x-ui.status-badge>
                         @endif
                         @elseif($item->status == 2)
-                        <x-ui.status-badge variant="danger" class="text-uppercase">
+                        <x-ui.status-badge variant="danger">
                             Ditolak
                         </x-ui.status-badge>
                         @else
-                        <x-ui.status-badge variant="primary" class="text-uppercase">
+                        <x-ui.status-badge variant="primary">
                             Proses Akreditasi
                         </x-ui.status-badge>
                         @endif
                     </td>
-                    <td class="py-8 px-4 text-center">
+                    <td class="text-center">
                         @if($item->status == 1 || $item->status == 2)
-                        <x-ui.status-badge variant="success" class="text-uppercase">Selesai</x-ui.status-badge>
+                        <x-ui.status-badge variant="success">Selesai</x-ui.status-badge>
                         @elseif($item->status == 5 && $item->catatans->whereNotNull('perbaikan')->filter(fn($c) => !empty($c->perbaikan))->isNotEmpty())
-                        <x-ui.status-badge variant="warning" class="text-uppercase">Perlu Perbaikan Dokumen</x-ui.status-badge>
+                        <x-ui.status-badge variant="warning">Perlu Perbaikan Dokumen</x-ui.status-badge>
                         @elseif($item->tgl_visitasi)
-                        <x-ui.status-badge variant="info" class="text-uppercase">Visitasi Dijadwalkan</x-ui.status-badge>
+                        <x-ui.status-badge variant="info">Visitasi Dijadwalkan</x-ui.status-badge>
                         @else
                         <x-ui.status-badge variant="secondary">-</x-ui.status-badge>
                         @endif
                     </td>
-                    <td class="py-8 px-4 text-center">
+                    <td class="text-center">
                         @if($item->nilai)
-                        <span class="text-lg font-black text-emerald-500">{{ $item->nilai }}</span>
+                        <span class="fw-bold text-success fs-5">{{ $item->nilai }}</span>
                         @else
-                        <span class="text-slate-200 font-bold">-</span>
+                        <span class="text-muted fw-bold">-</span>
                         @endif
                     </td>
-                    <td class="py-8 px-4 text-center">
+                    <td class="text-center">
                         @if($item->peringkat)
-                        <x-ui.status-badge variant="success" class="text-uppercase">
+                        <x-ui.status-badge variant="success">
                             {{ $item->peringkat == 'Unggul' ? 'Unggul / Mumtaz' : $item->peringkat }}
                         </x-ui.status-badge>
                         @else
-                        <span class="text-slate-200 font-bold">-</span>
+                        <span class="text-muted fw-bold">-</span>
                         @endif
                     </td>
-                    <td class="py-8 px-4 text-center">
+                    <td class="text-center">
                         <x-ui.button wire:click="openCatatanModal({{ $item->id }})" variant="light" size="sm">
                             <x-ui.icon name="document" class="fs-5 me-1" />
                             {{ $item->catatans->count() > 0 ? $item->catatans->count() . ' Catatan' : 'Catatan' }}
                         </x-ui.button>
                     </td>
-                    <td class="py-8 px-4 text-right pr-10">
+                    <td class="text-end">
                         <x-ui.action-menu>
-                            <x-ui.action-menu-item :href="route('pesantren.akreditasi-detail', $item->uuid)" wire:navigate>
+                            <x-ui.action-menu-item :href="route('pesantren.akreditasi-detail', $item->uuid)">
                                 <x-ui.icon name="eye" class="fs-5 text-gray-500" />
                                 Lihat Detail
                             </x-ui.action-menu-item>
@@ -244,11 +322,10 @@ new #[Layout('layouts.app')] class extends Component {
                             @if ($item->status == 3 && !$item->kartu_kendali)
                                 <x-ui.action-menu-item
                                     :href="route('pesantren.akreditasi-detail', ['uuid' => $item->uuid, 'activeTab' => 'kartu'])"
-                                    wire:navigate
                                     variant="success"
                                 >
                                     <x-ui.icon name="arrow-up" class="fs-5" />
-                                    Upload Kartu
+                                    Unggah Kartu Kendali
                                 </x-ui.action-menu-item>
                             @endif
 
@@ -303,8 +380,8 @@ new #[Layout('layouts.app')] class extends Component {
     </x-ui.page>
 
     <!-- Modal Catatan (View Only) -->
-    <x-modal name="catatan-modal" focusable>
-        <div class="p-0 overflow-hidden rounded-3xl">
+    <x-ui.modal name="catatan-modal" focusable>
+        <div class="p-0 overflow-hidden rounded-3xl spm-modal-content-scroll">
             @if($selectedAkreditasiNotes)
             @php
             $latestCatatan = $selectedAkreditasiNotes->catatans->sortByDesc('created_at')->first();
@@ -316,14 +393,14 @@ new #[Layout('layouts.app')] class extends Component {
                     <h2 class="text-xl font-bold text-[#1e3a5f]">
                         {{ $isRejection ? 'Catatan Penolakan Visitasi' : 'Catatan Penerimaan Visitasi' }}
                     </h2>
-                    <button x-on:click="$dispatch('close')" class="text-slate-300 hover:text-slate-500 transition-colors">
+                    <x-ui.button type="button" variant="light" size="sm" x-on:click="$dispatch('close')" class="btn-icon btn-active-light-primary text-slate-300 hover:text-slate-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                    </button>
+                    </x-ui.button>
                 </div>
 
-                <div class="space-y-8 max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar">
+                <div class="space-y-8 pr-2 custom-scrollbar">
                     @forelse($selectedAkreditasiNotes->catatans->sortByDesc('created_at') as $catatan)
                     @php
                     $isNoteRejection = !empty($catatan->perbaikan);
@@ -424,5 +501,5 @@ new #[Layout('layouts.app')] class extends Component {
             </div>
             @endif
         </div>
-    </x-modal>
+    </x-ui.modal>
 </div>

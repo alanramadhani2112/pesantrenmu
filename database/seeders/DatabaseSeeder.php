@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Akreditasi;
+use App\Models\Assessment;
 use App\Models\Asesor;
 use App\Models\Edpm;
 use App\Models\Ipm;
@@ -150,7 +151,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        Asesor::updateOrCreate(
+        $asesor = Asesor::updateOrCreate(
             ['user_id' => $user->id],
             [
                 'nama_dengan_gelar' => 'Dr. Asesor Demo, M.Pd.',
@@ -182,6 +183,25 @@ class DatabaseSeeder extends Seeder
                 'karya_publikasi' => [],
             ]
         );
+
+        $akreditasi = Akreditasi::query()
+            ->where('user_id', User::where('email', 'pesantren@spm.test')->value('id'))
+            ->whereNull('parent')
+            ->first();
+
+        if ($akreditasi) {
+            Assessment::updateOrCreate(
+                [
+                    'akreditasi_id' => $akreditasi->id,
+                    'asesor_id' => $asesor->id,
+                    'tipe' => 1,
+                ],
+                [
+                    'tanggal_mulai' => now()->subDays(2)->toDateString(),
+                    'tanggal_berakhir' => now()->addDays(2)->toDateString(),
+                ]
+            );
+        }
 
         return $user;
     }

@@ -20,10 +20,10 @@
 
 <th {{ $attributes->merge(['class' => $classes]) }}>
     @if($field)
-        <button type="button" wire:click="sortBy('{{ $field }}')" class="btn btn-sm btn-flush fw-bold text-gray-500 text-hover-primary text-uppercase p-0">
+        <x-ui.button type="button" variant="light" unstyled wire:click="sortBy('{{ $field }}')" class="btn-flush fw-semibold text-gray-700 text-hover-primary p-0 d-inline-flex align-items-center gap-1">
             <span>{{ $slot }}</span>
             <x-ui.icon :name="$icon" class="fs-7 ms-1 {{ $isActive ? 'text-primary' : 'text-gray-400' }}" />
-        </button>
+        </x-ui.button>
     @else
         <span>{{ $slot }}</span>
     @endif

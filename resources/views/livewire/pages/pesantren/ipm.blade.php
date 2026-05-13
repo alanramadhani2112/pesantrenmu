@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Models\Ipm;
 use Livewire\Attributes\Layout;
@@ -11,13 +11,11 @@ new #[Layout('layouts.app')] class extends Component {
 
     public $ipm;
 
-    // Form fields (files)
     public $nsp_file_upload;
     public $lulus_santri_file_upload;
     public $kurikulum_file_upload;
     public $buku_ajar_file_upload;
 
-    // Existing file paths
     public $existing_files = [];
 
     public function mount()
@@ -64,6 +62,7 @@ new #[Layout('layouts.app')] class extends Component {
             $this->dispatch('show-metronic-alert', type: 'error', title: 'Akses Ditolak', message: 'Data terkunci karena sedang dalam proses akreditasi.');
             return;
         }
+
         $this->validate([
             'nsp_file_upload' => 'nullable|mimes:pdf|max:2048',
             'lulus_santri_file_upload' => 'nullable|mimes:pdf|max:2048',
@@ -84,6 +83,7 @@ new #[Layout('layouts.app')] class extends Component {
                 if ($this->ipm->$dbField) {
                     Storage::disk('public')->delete($this->ipm->$dbField);
                 }
+
                 $data[$dbField] = $this->$property->store('ipm_docs', 'public');
                 $this->existing_files[$dbField] = $data[$dbField];
             }
@@ -97,134 +97,155 @@ new #[Layout('layouts.app')] class extends Component {
     }
 }; ?>
 
-<div class="py-12">
-    <x-slot name="header">{{ __('Indek Pemenuhan Mutlak (IPM)') }}</x-slot>
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        @php $isLocked = auth()->user()->pesantren->is_locked; @endphp
+@php
+    $isLocked = auth()->user()->pesantren->is_locked;
+    $criteria = [
+        [
+            'property' => 'nsp_file_upload',
+            'label' => '1. Pesantren telah memiliki izin operasional Kementerian Agama (Nomor Statistik Pesantren / NSP).',
+            'description' => 'Unggah bukti legalitas operasional yang berlaku.',
+            'field' => 'nsp_file',
+        ],
+        [
+            'property' => 'lulus_santri_file_upload',
+            'label' => '2. Pesantren pernah meluluskan santri dan/atau memiliki santri kelas akhir.',
+            'description' => 'Unggah bukti kelulusan atau kelas akhir.',
+            'field' => 'lulus_santri_file',
+        ],
+        [
+            'property' => 'kurikulum_file_upload',
+            'label' => '3. Pesantren menyelenggarakan kurikulum Dirasah Islamiyah sesuai standar LP2 PPM.',
+            'description' => 'Unggah dokumen kurikulum yang digunakan.',
+            'field' => 'kurikulum_file',
+        ],
+        [
+            'property' => 'buku_ajar_file_upload',
+            'label' => '4. Pesantren menggunakan buku ajar Dirasah Islamiyah terbitan LP2 PPM.',
+            'description' => 'Unggah buku ajar atau referensi resmi yang dipakai.',
+            'field' => 'buku_ajar_file',
+        ],
+    ];
+@endphp
 
-        @if($isLocked)
-        <div class="mb-6 flex items-center gap-4 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 shadow-sm">
-            <div class="flex-shrink-0 w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-            </div>
-            <div>
-                <p class="text-sm font-black text-amber-800 uppercase tracking-wide">Data Terkunci</p>
-                <p class="text-xs text-amber-700 mt-0.5">Data IPM tidak dapat diubah karena pesantren sedang dalam proses akreditasi.</p>
-            </div>
+<x-slot name="header">{{ __('Indek Pemenuhan Mutlak (IPM)') }}</x-slot>
+
+<x-ui.page
+    title="Indikator Pemenuhan Mutlak (IPM)"
+    subtitle="Unggah dokumen pendukung untuk empat kriteria pemenuhan mutlak."
+    data-module-page="pesantren-ipm"
+    x-data="ipmManagement"
+>
+    <x-slot:toolbar>
+        <x-ui.status-badge :variant="$isLocked ? 'warning' : 'success'">
+            {{ $isLocked ? 'Terkunci' : 'Aktif' }}
+        </x-ui.status-badge>
+
+        <x-ui.button :href="route('pesantren.profile')" variant="light">
+            <x-ui.icon name="exit-right" class="fs-4 me-1" />
+            Kembali
+        </x-ui.button>
+    </x-slot:toolbar>
+
+    @php
+        $completedCriteria = collect($criteria)->filter(fn ($item) => filled($existing_files[$item['field']] ?? null))->count();
+    @endphp
+
+    <div class="row g-5 mb-6">
+        <div class="col-lg-4">
+            <x-ui.stat-card label="Status IPM" value="{{ $isLocked ? 'Terkunci' : 'Aktif' }}" variant="{{ $isLocked ? 'warning' : 'success' }}">
+                <x-slot:icon><x-ui.icon name="shield-tick" class="fs-2" /></x-slot:icon>
+            </x-ui.stat-card>
         </div>
-        @endif
 
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg {{ $isLocked ? 'opacity-90' : '' }}">
-            <div class="p-6 text-gray-900">
-                <header class="mb-6">
-                    <h2 class="text-lg font-medium text-gray-900">
-                        {{ __('Indek Pemenuhan Mutlak (IPM)') }}
-                    </h2>
-                    <p class="mt-1 text-sm text-gray-600">
-                        {{ __('Silakan unggah dokumen pendukung untuk setiap kriteria pemenuhan mutlak di bawah ini.') }}
-                    </p>
-                </header>
+        <div class="col-lg-4">
+            <x-ui.stat-card label="Kriteria Terisi" value="{{ $completedCriteria }} / {{ count($criteria) }}" variant="info">
+                <x-slot:icon><x-ui.icon name="document" class="fs-2" /></x-slot:icon>
+            </x-ui.stat-card>
+        </div>
 
-                <form x-on:submit.prevent="{{ $isLocked ? '' : 'confirmSave($wire)' }}" class="space-y-6" x-data="ipmManagement">
-                    <p class="text-xs text-red-600 italic font-medium">* Format Berkas wajib PDF dan Ukuran Maksimal 2MB</p>
-
-                    <!-- Kriteria 1 -->
-                    <div class="p-4 border rounded-lg {{ $isLocked ? 'bg-gray-100 border-gray-200' : 'bg-gray-50' }}">
-                        <label class="block text-sm font-medium {{ $isLocked ? 'text-gray-400' : 'text-gray-700' }} mb-2">
-                            1. Pesantren telah memiliki izin operasional Kementerian Agama (Nomor Statistik Pesantren – NSP) yang dibuktikan dengan mengunggah dalam SPM-PesantrenMu.
-                        </label>
-                        <input type="file"
-                            accept="application/pdf"
-                            @if(!$isLocked) x-on:change="if(validate($event)) { $wire.upload('nsp_file_upload', $event.target.files[0]) }" @endif
-                            {{ $isLocked ? 'disabled' : '' }}
-                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold {{ $isLocked ? 'opacity-40 cursor-not-allowed file:cursor-not-allowed file:bg-gray-100 file:text-gray-400 pointer-events-none' : 'file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100' }}" />
-                        <x-input-error :messages="$errors->get('nsp_file_upload')" class="mt-2" />
-                        @if($existing_files['nsp_file'])
-                        <div class="mt-2 text-xs text-green-600">
-                            Berkas terunggah: <a href="{{ Storage::url($existing_files['nsp_file']) }}" target="_blank" class="underline font-bold">Lihat Dokumen</a>
-                        </div>
-                        @endif
-                    </div>
-
-                    <!-- Kriteria 2 -->
-                    <div class="p-4 border rounded-lg {{ $isLocked ? 'bg-gray-100 border-gray-200' : 'bg-gray-50' }}">
-                        <label class="block text-sm font-medium {{ $isLocked ? 'text-gray-400' : 'text-gray-700' }} mb-2">
-                            2. Pesantren pernah meluluskan santri dan/atau memiliki santri kelas akhir.
-                        </label>
-                        <input type="file"
-                            accept="application/pdf"
-                            @if(!$isLocked) x-on:change="if(validate($event)) { $wire.upload('lulus_santri_file_upload', $event.target.files[0]) }" @endif
-                            {{ $isLocked ? 'disabled' : '' }}
-                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold {{ $isLocked ? 'opacity-40 cursor-not-allowed file:cursor-not-allowed file:bg-gray-100 file:text-gray-400 pointer-events-none' : 'file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100' }}" />
-                        <x-input-error :messages="$errors->get('lulus_santri_file_upload')" class="mt-2" />
-                        @if($existing_files['lulus_santri_file'])
-                        <div class="mt-2 text-xs text-green-600">
-                            Berkas terunggah: <a href="{{ Storage::url($existing_files['lulus_santri_file']) }}" target="_blank" class="underline font-bold">Lihat Dokumen</a>
-                        </div>
-                        @endif
-                    </div>
-
-                    <!-- Kriteria 3 -->
-                    <div class="p-4 border rounded-lg {{ $isLocked ? 'bg-gray-100 border-gray-200' : 'bg-gray-50' }}">
-                        <label class="block text-sm font-medium {{ $isLocked ? 'text-gray-400' : 'text-gray-700' }} mb-2">
-                            3. Pesantren memiliki dan menyelenggarakan kurikulum Dirasah Islamiyah sesuai standar kurikulum LP2 PPM di seluruh kelas.
-                        </label>
-                        <input type="file"
-                            accept="application/pdf"
-                            @if(!$isLocked) x-on:change="if(validate($event)) { $wire.upload('kurikulum_file_upload', $event.target.files[0]) }" @endif
-                            {{ $isLocked ? 'disabled' : '' }}
-                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold {{ $isLocked ? 'opacity-40 cursor-not-allowed file:cursor-not-allowed file:bg-gray-100 file:text-gray-400 pointer-events-none' : 'file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100' }}" />
-                        <x-input-error :messages="$errors->get('kurikulum_file_upload')" class="mt-2" />
-                        @if($existing_files['kurikulum_file'])
-                        <div class="mt-2 text-xs text-green-600">
-                            Berkas terunggah: <a href="{{ Storage::url($existing_files['kurikulum_file']) }}" target="_blank" class="underline font-bold">Lihat Dokumen</a>
-                        </div>
-                        @endif
-                    </div>
-
-                    <!-- Kriteria 4 -->
-                    <div class="p-4 border rounded-lg {{ $isLocked ? 'bg-gray-100 border-gray-200' : 'bg-gray-50' }}">
-                        <label class="block text-sm font-medium {{ $isLocked ? 'text-gray-400' : 'text-gray-700' }} mb-2">
-                            4. Pesantren menggunakan buku ajar Dirasah Islamiyah terbitan LP2 PPM.
-                        </label>
-                        <input type="file"
-                            accept="application/pdf"
-                            @if(!$isLocked) x-on:change="if(validate($event)) { $wire.upload('buku_ajar_file_upload', $event.target.files[0]) }" @endif
-                            {{ $isLocked ? 'disabled' : '' }}
-                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold {{ $isLocked ? 'opacity-40 cursor-not-allowed file:cursor-not-allowed file:bg-gray-100 file:text-gray-400 pointer-events-none' : 'file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100' }}" />
-                        <x-input-error :messages="$errors->get('buku_ajar_file_upload')" class="mt-2" />
-                        @if($existing_files['buku_ajar_file'])
-                        <div class="mt-2 text-xs text-green-600">
-                            Berkas terunggah: <a href="{{ Storage::url($existing_files['buku_ajar_file']) }}" target="_blank" class="underline font-bold">Lihat Dokumen</a>
-                        </div>
-                        @endif
-                    </div>
-
-                    <div class="flex items-center gap-4">
-                        @if($isLocked)
-                        <button type="button" disabled
-                            class="px-10 py-3 rounded-2xl bg-gray-300 text-gray-400 text-[11px] font-black uppercase tracking-[0.2em] cursor-not-allowed flex items-center justify-center gap-3 select-none">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                            Data Terkunci
-                        </button>
-                        @else
-                        <button type="submit" wire:loading.attr="disabled"
-                            class="px-10 py-3 rounded-2xl bg-gray-900 text-white text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3">
-                            <svg wire:loading wire:target="save" class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span wire:loading.remove wire:target="save">{{ __('Simpan Perubahan') }}</span>
-                            <span wire:loading wire:target="save">{{ __('Memproses...') }}</span>
-                        </button>
-                        @endif
-                    </div>
-                </form>
-            </div>
+        <div class="col-lg-4">
+            <x-ui.stat-card label="Langkah Berikut" value="{{ $completedCriteria === count($criteria) ? 'Siap Simpan' : 'Lanjut Unggah' }}" variant="primary">
+                <x-slot:icon><x-ui.icon name="arrow-right" class="fs-2" /></x-slot:icon>
+            </x-ui.stat-card>
         </div>
     </div>
-</div>
+
+    @if($isLocked)
+        <div class="spm-inline-alert">
+            <x-ui.icon name="shield-tick" class="fs-2 text-warning" />
+            <div>
+                <div class="spm-inline-alert-title">Data Terkunci</div>
+                <div class="spm-inline-alert-text">Data IPM tidak dapat diubah karena pesantren sedang dalam proses akreditasi.</div>
+            </div>
+        </div>
+    @endif
+
+    <form x-on:submit.prevent="confirmSave($wire)" class="d-flex flex-column gap-6">
+        <x-ui.section-card
+            title="Dokumen IPM"
+            subtitle="Setiap kriteria menggunakan satu unggahan PDF dengan ukuran maksimal 2 MB."
+        >
+            <div class="p-6">
+                <div class="spm-input-grid">
+                    @foreach($criteria as $item)
+                        @php
+                            $existingFile = $existing_files[$item['field']] ?? null;
+                            $inputId = 'ipm-' . $item['property'];
+                        @endphp
+
+                        <div class="spm-input-card">
+                            <div class="d-flex flex-column gap-4">
+                                <x-ui.form-field
+                                    :label="$item['label']"
+                                    :for="$inputId"
+                                    :error="$errors->get($item['property'])"
+                                    :hint="$item['description']"
+                                >
+                                    <x-ui.file-upload
+                                        :model="$item['property']"
+                                        :id="$inputId"
+                                        accept="application/pdf"
+                                        :placeholder="$existingFile ? basename($existingFile) : 'Belum ada file'"
+                                        :disabled="$isLocked"
+                                        hint="PDF maksimal 2 MB"
+                                    />
+                                </x-ui.form-field>
+
+                                @if($existingFile)
+                                    <div class="spm-document-list">
+                                        <x-ui.document-item
+                                            label="Berkas saat ini"
+                                            :href="Storage::url($existingFile)"
+                                            description="Klik untuk membuka file yang sudah tersimpan."
+                                        />
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </x-ui.section-card>
+
+        <div class="spm-action-panel d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
+            <div>
+                <h3 class="spm-card-title mb-1">Simpan Perubahan</h3>
+                <div class="text-muted fw-semibold fs-7">Seluruh kontrol memakai komponen Metronic yang reusable.</div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                @if($isLocked)
+                    <x-ui.button type="button" variant="warning" disabled>
+                        <x-ui.icon name="lock" class="fs-4 me-1" />
+                        Data Terkunci
+                    </x-ui.button>
+                @else
+                    <x-ui.button type="submit" variant="primary" wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="save">Simpan Perubahan</span>
+                        <span wire:loading wire:target="save">Memproses...</span>
+                    </x-ui.button>
+                @endif
+            </div>
+        </div>
+    </form>
+</x-ui.page>

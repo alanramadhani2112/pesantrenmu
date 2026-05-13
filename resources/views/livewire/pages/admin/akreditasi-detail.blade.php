@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Models\Akreditasi;
 use App\Models\Pesantren;
@@ -13,6 +13,7 @@ use Livewire\Attributes\Layout;
 use Livewire\WithFileUploads;
 use Livewire\Volt\Component;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 new #[Layout('layouts.app')] class extends Component {
     use WithFileUploads;
@@ -430,987 +431,745 @@ new #[Layout('layouts.app')] class extends Component {
     }
 }; ?>
 
+@php
+    $statusVariant = match ((int) $akreditasi->status) {
+        1 => 'success',
+        2 => 'danger',
+        3 => 'warning',
+        4 => 'info',
+        default => 'primary',
+    };
 
-<div class="py-12" x-data="{ ...akreditasiManagement(), ...adminManagement() }">
-    <x-slot name="header">{{ __('Detail Akreditasi') }}</x-slot>
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6 text-gray-900">
-                <div class="mb-6 flex items-center justify-between">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800">Detail Akreditasi (Admin):
-                            {{ $pesantren->nama_pesantren ?? $akreditasi->user->name }}
-                        </h2>
-                        <p class="text-sm text-gray-500">Status Saat Ini: <span
-                                class="font-semibold {{ Akreditasi::getStatusBadgeClass($akreditasi->status) }} px-2 py-0.5 rounded text-[10px]">{{ Akreditasi::getStatusLabel($akreditasi->status) }}</span>
-                        </p>
-                    </div>
-                    <a href="{{ route('admin.akreditasi') }}"
-                        class="text-indigo-600 hover:text-indigo-900 font-medium">&larr; Kembali</a>
-                </div>
+    $dokumenUtama = [
+        'status_kepemilikan_tanah' => 'Status Kepemilikan Tanah',
+        'sertifikat_nsp' => 'Sertifikat NSP',
+        'rk_anggaran' => 'Rencana Kerja Anggaran',
+        'silabus_rpp' => 'Silabus dan RPP',
+        'peraturan_kepegawaian' => 'Peraturan Kepegawaian',
+        'file_lk_iapm' => 'File LK Penilaian IAPM',
+        'laporan_tahunan' => 'Laporan Tahunan',
+    ];
 
-                <!-- Tabs -->
-                <div class="mb-4 border-b border-gray-200">
-                    <ul class="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500">
-                        <li class="me-2">
-                            <button wire:click="setTab('profil')"
-                                class="inline-block p-4 border-b-2 rounded-t-lg {{ $activeTab === 'profil' ? 'text-indigo-600 border-indigo-600' : 'border-transparent hover:text-gray-600 hover:border-gray-300' }}">Profil</button>
-                        </li>
-                        <li class="me-2">
-                            <button wire:click="setTab('ipm')"
-                                class="inline-block p-4 border-b-2 rounded-t-lg {{ $activeTab === 'ipm' ? 'text-indigo-600 border-indigo-600' : 'border-transparent hover:text-gray-600 hover:border-gray-300' }}">IPM</button>
-                        </li>
-                        <li class="me-2">
-                            <button wire:click="setTab('sdm')"
-                                class="inline-block p-4 border-b-2 rounded-t-lg {{ $activeTab === 'sdm' ? 'text-indigo-600 border-indigo-600' : 'border-transparent hover:text-gray-600 hover:border-gray-300' }}">SDM</button>
-                        </li>
-                        <li class="me-2">
-                            <button wire:click="setTab('edpm_pesantren')"
-                                class="inline-block p-4 border-b-2 rounded-t-lg {{ $activeTab === 'edpm_pesantren' ? 'text-indigo-600 border-indigo-600' : 'border-transparent hover:text-gray-600 hover:border-gray-300' }}">EDPM</button>
-                        </li>
-                        <li class="me-2">
-                            <button wire:click="setTab('instrumen')"
-                                class="inline-block p-4 border-b-2 rounded-t-lg {{ $activeTab === 'instrumen' ? 'text-indigo-600 border-indigo-600' : 'border-transparent hover:text-gray-600 hover:border-gray-300' }}">NA</button>
-                        </li>
-                        <li class="me-2">
-                            <button wire:click="setTab('laporan_visitasi')"
-                                class="inline-block p-4 border-b-2 rounded-t-lg {{ $activeTab === 'laporan_visitasi' ? 'text-indigo-600 border-indigo-600' : 'border-transparent hover:text-gray-600 hover:border-gray-300' }}">Laporan Visitasi</button>
-                        </li>
-                    </ul>
-                </div>
+    $dokumenSekunder = [
+        'dok_profil' => 'Dokumen Profil',
+        'dok_nsp' => 'Dokumen NSP',
+        'dok_renstra' => 'Dokumen Renstra',
+        'dok_rk_anggaran' => 'Dokumen RK Anggaran',
+        'dok_kurikulum' => 'Dokumen Kurikulum',
+        'dok_silabus_rpp' => 'Dokumen Silabus & RPP',
+        'dok_kepengasuhan' => 'Dokumen Kepengasuhan',
+        'dok_peraturan_kepegawaian' => 'Dokumen Peraturan Kepegawaian',
+        'dok_sarpras' => 'Dokumen Sarpras',
+        'dok_laporan_tahunan' => 'Dokumen Laporan Tahunan',
+        'dok_sop' => 'Dokumen SOP',
+    ];
 
-                <!-- Tab Contents -->
-                <div class="mt-6">
-                    @if ($activeTab === 'profil')
-                    <div class="space-y-6 mb-3">
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="text-lg font-bold text-gray-800 border-l-4 border-indigo-500 pl-3 uppercase">Profil Pesantren</h3>
+    $ipmItems = [
+        'nsp_file' => '1. Izin operasional Kementerian Agama (NSP)',
+        'lulus_santri_file' => '2. Pernah meluluskan santri / memiliki santri kelas akhir',
+        'kurikulum_file' => '3. Menyelenggarakan kurikulum Dirasah Islamiyah',
+        'buku_ajar_file' => '4. Menggunakan buku ajar terbitan LP2 PPM',
+    ];
+@endphp
+
+<x-slot name="header">{{ __('Detail Akreditasi') }}</x-slot>
+
+<x-ui.page
+    title="Detail Akreditasi"
+    subtitle="{{ $pesantren?->nama_pesantren ?? $akreditasi->user->name }}"
+    x-data="{ ...akreditasiManagement(), ...adminManagement() }"
+>
+    <x-slot:toolbar>
+        <x-ui.status-badge :variant="$statusVariant">
+            {{ Akreditasi::getStatusLabel($akreditasi->status) }}
+        </x-ui.status-badge>
+
+        <x-ui.button :href="route('admin.akreditasi')" variant="light">
+            <x-ui.icon name="exit-right" class="fs-4 me-1" />
+            Kembali
+        </x-ui.button>
+    </x-slot:toolbar>
+
+    <div class="row g-5 mb-6">
+        <div class="col-lg-4">
+            <x-ui.stat-card label="Status Pengajuan" value="{{ Akreditasi::getStatusLabel($akreditasi->status) }}" variant="{{ $statusVariant }}">
+                <x-slot:icon><x-ui.icon name="shield-tick" class="fs-2" /></x-slot:icon>
+            </x-ui.stat-card>
+        </div>
+
+        <div class="col-lg-4">
+            <x-ui.stat-card label="Tim Penilai" value="{{ $akreditasi->assessments->count() }} Asesor" variant="info">
+                <x-slot:icon><x-ui.icon name="profile-user" class="fs-2" /></x-slot:icon>
+            </x-ui.stat-card>
+        </div>
+
+        <div class="col-lg-4">
+            <x-ui.stat-card label="Jadwal Visitasi" value="{{ $akreditasi->tgl_visitasi ? \Carbon\Carbon::parse($akreditasi->tgl_visitasi)->format('d M Y') : 'Belum Dijadwalkan' }}" variant="success">
+                <x-slot:icon><x-ui.icon name="calendar" class="fs-2" /></x-slot:icon>
+            </x-ui.stat-card>
+        </div>
+    </div>
+
+    <x-ui.card flush>
+        <div class="px-6 pt-5">
+            <x-ui.tabs>
+                <x-ui.tab wire:click="setTab('profil')" :active="$activeTab === 'profil'">Profil</x-ui.tab>
+                <x-ui.tab wire:click="setTab('ipm')" :active="$activeTab === 'ipm'">IPM</x-ui.tab>
+                <x-ui.tab wire:click="setTab('sdm')" :active="$activeTab === 'sdm'">SDM</x-ui.tab>
+                <x-ui.tab wire:click="setTab('edpm_pesantren')" :active="$activeTab === 'edpm_pesantren'">EDPM</x-ui.tab>
+                <x-ui.tab wire:click="setTab('instrumen')" :active="$activeTab === 'instrumen'">NA</x-ui.tab>
+                <x-ui.tab wire:click="setTab('laporan_visitasi')" :active="$activeTab === 'laporan_visitasi'">Laporan Visitasi</x-ui.tab>
+            </x-ui.tabs>
+        </div>
+
+        <div class="p-6">
+            @if ($activeTab === 'profil')
+                <div class="d-flex flex-column gap-6">
+                    <x-ui.section-card title="Profil Pesantren" subtitle="Identitas pesantren dan status akses data.">
+                        <x-slot:toolbar>
                             @if($pesantren)
-                            <button wire:click="toggleLock" wire:loading.attr="disabled"
-                                class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-lg font-bold text-[10px] uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-offset-2 transition ease-in-out duration-150 {{ $pesantren->is_locked ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 focus:ring-amber-500' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-500' }}">
-                                <svg wire:loading.remove wire:target="toggleLock" class="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
-                                </svg>
-                                <svg wire:loading wire:target="toggleLock" class="animate-spin -ml-1 mr-2 h-3 w-3 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                {{ $pesantren->is_locked ? 'Buka Kunci Data' : 'Kunci Data' }}
-                            </button>
+                                <x-ui.button
+                                    type="button"
+                                    wire:click="toggleLock"
+                                    wire:loading.attr="disabled"
+                                    :variant="$pesantren?->is_locked ? 'warning' : 'light'"
+                                    size="sm"
+                                >
+                                    <x-ui.icon name="shield-tick" class="fs-4 me-1" wire:loading.remove wire:target="toggleLock" />
+                                    <span wire:loading.remove wire:target="toggleLock">
+                                        {{ $pesantren?->is_locked ? 'Buka Kunci Data' : 'Kunci Data' }}
+                                    </span>
+                                    <span wire:loading wire:target="toggleLock">Memproses...</span>
+                                </x-ui.button>
                             @endif
+                        </x-slot:toolbar>
+
+                        <div class="p-6">
+                            <div class="row g-5">
+                                <x-ui.detail-item label="Nama Pesantren" value="{{ $pesantren->nama_pesantren ?? '-' }}" />
+                                <x-ui.detail-item label="NSP" value="{{ $pesantren->ns_pesantren ?? '-' }}" />
+                                <x-ui.detail-item label="Alamat" span="2">
+                                    <div class="spm-detail-block spm-detail-value-muted">{{ $pesantren->alamat ?? '-' }}</div>
+                                </x-ui.detail-item>
+                                <x-ui.detail-item label="Kota/Kabupaten" value="{{ $pesantren->kota_kabupaten ?? '-' }}" />
+                                <x-ui.detail-item label="Provinsi" value="{{ $pesantren->provinsi ?? '-' }}" />
+                                <x-ui.detail-item label="Nama Mudir" value="{{ $pesantren->nama_mudir ?? '-' }}" />
+                                <x-ui.detail-item label="Tahun Pendirian" value="{{ $pesantren->tahun_pendirian ?? '-' }}" />
+                            </div>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-6 rounded-lg">
-                            <div>
-                                <p class="text-xs font-bold text-gray-500 uppercase">Nama Pesantren</p>
-                                <p class="text-gray-900">{{ $pesantren->nama_pesantren ?? '-' }}</p>
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-gray-500 uppercase">NSP</p>
-                                <p class="text-gray-900">{{ $pesantren->ns_pesantren ?? '-' }}</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <p class="text-xs font-bold text-gray-500 uppercase">Alamat</p>
-                                <p class="text-gray-900">{{ $pesantren->alamat ?? '-' }}</p>
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-gray-500 uppercase">Kota/Kabupaten</p>
-                                <p class="text-gray-900">{{ $pesantren->kota_kabupaten ?? '-' }}</p>
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-gray-500 uppercase">Provinsi</p>
-                                <p class="text-gray-900">{{ $pesantren->provinsi ?? '-' }}</p>
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-gray-500 uppercase">Nama Mudir</p>
-                                <p class="text-gray-900">{{ $pesantren->nama_mudir ?? '-' }}</p>
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-gray-500 uppercase">Tahun Pendirian</p>
-                                <p class="text-gray-900">{{ $pesantren->tahun_pendirian ?? '-' }}</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <p class="text-xs font-bold text-gray-500 uppercase mb-2">Layanan Satuan Pendidikan</p>
-                                @if($pesantren->units && $pesantren->units->count() > 0)
-                                <div class="overflow-x-auto border rounded-lg">
-                                    <table class="min-w-full divide-y divide-gray-200">
-                                        <thead class="bg-gray-50">
-                                            <tr>
-                                                <th class="px-3 py-2 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Unit</th>
-                                                <th class="px-3 py-2 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Jml Rombel</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="bg-white divide-y divide-gray-200">
-                                            @foreach($pesantren->units as $unit)
-                                            <tr>
-                                                <td class="px-3 py-2 whitespace-nowrap text-sm font-bold text-gray-900 uppercase">{{ $unit->unit }}</td>
-                                                <td class="px-3 py-2 whitespace-nowrap text-sm text-center text-gray-700">{{ $unit->jumlah_rombel }}</td>
-                                            </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
+                    </x-ui.section-card>
+
+                    <x-ui.section-card title="Layanan & Fasilitas" subtitle="Unit layanan pendidikan dan luas sarana.">
+                        <div class="p-6">
+                            <div class="row g-6">
+                                <div class="col-lg-7">
+                                    @if($pesantren && $pesantren->units && $pesantren->units->count() > 0)
+                                        <x-ui.simple-table dense>
+                                            <thead>
+                                                <tr>
+                                                    <th class="ps-4">Unit</th>
+                                                    <th class="text-end pe-4">Jumlah Rombel</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($pesantren->units as $unit)
+                                                    <tr>
+                                                        <td class="ps-4 text-uppercase fw-bold">{{ $unit->unit }}</td>
+                                                        <td class="text-end pe-4">
+                                                            <x-ui.badge variant="success">{{ $unit->jumlah_rombel }} Rombel</x-ui.badge>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </x-ui.simple-table>
+                                    @else
+                                        <x-ui.empty-state title="Belum Ada Unit" description="Data unit pendidikan belum diisi." />
+                                    @endif
                                 </div>
-                                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
-                                    <div>
-                                        <p class="text-xs font-bold text-gray-500 uppercase">Total Luas Tanah (m²)</p>
-                                        <p class="text-gray-900 font-bold">{{ $pesantren->luas_tanah ?? '-' }}</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs font-bold text-gray-500 uppercase">Total Luas Bangunan (m²)</p>
-                                        <p class="text-gray-900 font-bold">{{ $pesantren->luas_bangunan ?? '-' }}</p>
+
+                                <div class="col-lg-5">
+                                    <div class="d-flex flex-column gap-4">
+                                        <x-ui.stat-card label="Total Luas Tanah" value="{{ $pesantren->luas_tanah ?? '-' }} m2" variant="success">
+                                            <x-slot:icon><x-ui.icon name="geolocation" class="fs-2" /></x-slot:icon>
+                                        </x-ui.stat-card>
+                                        <x-ui.stat-card label="Total Luas Bangunan" value="{{ $pesantren->luas_bangunan ?? '-' }} m2" variant="info">
+                                            <x-slot:icon><x-ui.icon name="category" class="fs-2" /></x-slot:icon>
+                                        </x-ui.stat-card>
                                     </div>
                                 </div>
-                                @else
-                                <p class="text-gray-900 italic text-sm">Belum ada data unit pendidikan.</p>
+                            </div>
+                        </div>
+                    </x-ui.section-card>
+
+                    <x-ui.section-card title="Dokumen Pesantren" subtitle="Dokumen utama dan dokumen pendukung profil.">
+                        <div class="p-6">
+                            <div class="row g-5">
+                                <div class="col-lg-6">
+                                    <div class="spm-detail-label mb-3">Dokumen Utama</div>
+                                    <div class="spm-document-list">
+                                        @foreach($dokumenUtama as $field => $label)
+                                            <x-ui.document-item :label="$label" :href="$pesantren && $pesantren->$field ? Storage::url($pesantren->$field) : null" />
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="spm-detail-label mb-3">Dokumen Sekunder</div>
+                                    <div class="spm-document-list">
+                                        @foreach($dokumenSekunder as $field => $label)
+                                            <x-ui.document-item :label="$label" :href="$pesantren && $pesantren->$field ? Storage::url($pesantren->$field) : null" />
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.section-card>
+
+                    <x-ui.section-card title="Asesor & Visitasi" subtitle="Tim penilai dan jadwal penilaian.">
+                        <div class="p-6">
+                            <div class="row g-5">
+                                @forelse ($akreditasi->assessments as $assessment)
+                                    <x-ui.detail-item label="{{ $assessment->tipe == 1 ? 'Ketua' : 'Anggota' }}" value="{{ $assessment->asesor->user->name ?? '-' }}" />
+                                @empty
+                                    <div class="col-12">
+                                        <x-ui.empty-state title="Belum Ada Asesor" description="Asesor belum ditugaskan untuk pengajuan ini." />
+                                    </div>
+                                @endforelse
+
+                                @if ($akreditasi->assessments->isNotEmpty())
+                                    @php $mainAssessment = $akreditasi->assessments->first(); @endphp
+                                    <x-ui.detail-item label="Penilaian Mulai" value="{{ \Carbon\Carbon::parse($mainAssessment->tanggal_mulai)->format('d M Y') }}" />
+                                    <x-ui.detail-item label="Penilaian Berakhir" value="{{ \Carbon\Carbon::parse($mainAssessment->tanggal_berakhir)->format('d M Y') }}" />
+                                @endif
+
+                                @if ($akreditasi->tgl_visitasi)
+                                    <x-ui.detail-item label="Visitasi Mulai" value="{{ \Carbon\Carbon::parse($akreditasi->tgl_visitasi)->format('d M Y') }}" />
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-end justify-content-between gap-3">
+                                            <div class="spm-detail-item">
+                                                <div class="spm-detail-label">Visitasi Berakhir</div>
+                                                <div class="spm-detail-value">
+                                                    {{ \Carbon\Carbon::parse($akreditasi->tgl_visitasi_akhir ?? $akreditasi->tgl_visitasi)->format('d M Y') }}
+                                                </div>
+                                            </div>
+
+                                            @if(in_array($akreditasi->status, [1, 2]))
+                                                <x-ui.status-badge variant="secondary">Reschedule Terkunci</x-ui.status-badge>
+                                            @else
+                                                <x-ui.button type="button" wire:click="openVisitasiEditModal" variant="light" size="sm">
+                                                    Reschedule
+                                                </x-ui.button>
+                                            @endif
+                                        </div>
+                                    </div>
                                 @endif
                             </div>
                         </div>
-                    </div>
+                    </x-ui.section-card>
+                </div>
+            @endif
 
-                    <!-- Dokumen Section -->
-                    <div class="space-y-6">
-                        @php
-                        $dokumenUtama = [
-                        'status_kepemilikan_tanah' => 'Status Kepemilikan Tanah',
-                        'sertifikat_nsp' => 'Sertifikat NSP',
-                        'rk_anggaran' => 'Rencana Kerja Anggaran',
-                        'silabus_rpp' => 'Silabus dan RPP',
-                        'peraturan_kepegawaian' => 'Peraturan Kepegawaian',
-                        'file_lk_iapm' => 'File LK Penilaian IAPM',
-                        'laporan_tahunan' => 'Laporan Tahunan',
-                        ];
-
-                        $dokumenSekunder = [
-                        'dok_profil' => 'Dokumen Profil',
-                        'dok_nsp' => 'Dokumen NSP',
-                        'dok_renstra' => 'Dokumen Renstra',
-                        'dok_rk_anggaran' => 'Dokumen RK Anggaran',
-                        'dok_kurikulum' => 'Dokumen Kurikulum',
-                        'dok_silabus_rpp' => 'Dokumen Silabus & RPP',
-                        'dok_kepengasuhan' => 'Dokumen Kepengasuhan',
-                        'dok_peraturan_kepegawaian' => 'Dokumen Peraturan Kepegawaian',
-                        'dok_sarpras' => 'Dokumen Sarpras',
-                        'dok_laporan_tahunan' => 'Dokumen Laporan Tahunan',
-                        'dok_sop' => 'Dokumen SOP',
-                        ];
-                        @endphp
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-lg">
-                            <!-- Dokumen Utama -->
-                            <div>
-                                <h4 class="text-sm font-bold text-gray-500 uppercase mb-3 border-b pb-1">Dokumen Utama</h4>
-                                <div class="space-y-2">
-                                    @foreach($dokumenUtama as $field => $label)
-                                    <div class="flex justify-between items-center bg-white p-2 rounded border border-gray-100">
-                                        <span class="text-xs font-medium text-gray-700">{{ $label }}</span>
-                                        @if($pesantren->$field)
-                                        <a href="{{ Storage::url($pesantren->$field) }}" target="_blank" class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-1 rounded hover:bg-indigo-100 font-bold uppercase">Lihat</a>
-                                        @else
-                                        <span class="text-[10px] text-gray-400 italic"> - </span>
-                                        @endif
-                                    </div>
-                                    @endforeach
-                                </div>
-                            </div>
-
-                            <!-- Dokumen Sekunder -->
-                            <div>
-                                <h4 class="text-sm font-bold text-gray-500 uppercase mb-3 border-b pb-1">Dokumen Sekunder</h4>
-                                <div class="space-y-2">
-                                    @foreach($dokumenSekunder as $field => $label)
-                                    <div class="flex justify-between items-center bg-white p-2 rounded border border-gray-100">
-                                        <span class="text-xs font-medium text-gray-700">{{ $label }}</span>
-                                        @if($pesantren->$field)
-                                        <a href="{{ Storage::url($pesantren->$field) }}" target="_blank" class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-1 rounded hover:bg-indigo-100 font-bold uppercase">Lihat</a>
-                                        @else
-                                        <span class="text-[10px] text-gray-400 italic"> - </span>
-                                        @endif
-                                    </div>
-                                    @endforeach
-                                </div>
-                            </div>
+            @if ($activeTab === 'ipm')
+                <x-ui.section-card title="Indikator Pemenuhan Mutlak" subtitle="Status dokumen IPM dari pesantren.">
+                    <div class="p-6">
+                        <div class="spm-document-list">
+                            @foreach ($ipmItems as $field => $label)
+                                <x-ui.document-item :label="$label" :href="$ipm && $ipm->$field ? Storage::url($ipm->$field) : null" />
+                            @endforeach
                         </div>
                     </div>
+                </x-ui.section-card>
+            @endif
 
-                    <div class="space-y-6">
-                        <h3 class="text-lg font-bold text-gray-800 border-l-4 border-indigo-500 pl-3">ASESOR</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-6 rounded-lg">
-                            @forelse ($akreditasi->assessments as $assessment)
-                            <div>
-                                <p class="text-xs font-bold text-gray-500 uppercase">
-                                    {{ $assessment->tipe == 1 ? 'Ketua' : 'Anggota' }}
-                                </p>
-                                <p class="text-gray-900 font-medium">
-                                    {{ $assessment->asesor->user->name ?? '-' }}
-                                </p>
-                            </div>
-                            @empty
-                            <div class="md:col-span-2">
-                                <p class="text-gray-500 italic text-sm">Belum ada asesor ditugaskan</p>
-                            </div>
-                            @endforelse
+            @if ($activeTab === 'sdm')
+                <x-ui.section-card title="Data SDM Pesantren" subtitle="Rekap santri, ustadz, pamong, musyrif, dan tenaga kependidikan.">
+                    <div class="p-6">
+                        <x-ui.simple-table tableClass="spm-wide-table">
+                            <thead>
+                                <tr class="text-center">
+                                    <th rowspan="2" class="ps-4">No.</th>
+                                    <th rowspan="2" class="text-start">Bentuk</th>
+                                    <th colspan="2">Santri</th>
+                                    <th colspan="2">Ustadz Dirosah</th>
+                                    <th colspan="2">Ustadz Non Dirosah</th>
+                                    <th colspan="2">Pamong</th>
+                                    <th colspan="2">Musyrif/Ah</th>
+                                    <th colspan="2" class="pe-4">Tenaga Kependidikan</th>
+                                </tr>
+                                <tr class="text-center">
+                                    @for($i = 0; $i < 6; $i++)
+                                        <th>L</th>
+                                        <th>P</th>
+                                    @endfor
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($levels as $index => $level)
+                                    <tr class="text-center">
+                                        <td class="ps-4 fw-bold">{{ $index + 1 }}</td>
+                                        <td class="text-start text-uppercase fw-bold">{{ $level }}</td>
+                                        @foreach($fields as $field)
+                                            <td>{{ $sdm[$level]->$field ?? 0 }}</td>
+                                        @endforeach
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot>
+                                <tr class="text-center">
+                                    <td colspan="2" class="ps-4 text-uppercase text-start">Jumlah</td>
+                                    @foreach($fields as $field)
+                                        <td>{{ $this->getTotal($field) }}</td>
+                                    @endforeach
+                                </tr>
+                            </tfoot>
+                        </x-ui.simple-table>
+                    </div>
+                </x-ui.section-card>
+            @endif
 
-                            @if ($akreditasi->assessments->isNotEmpty())
-                            @php $mainAssessment = $akreditasi->assessments->first(); @endphp
-                            <div>
-                                <p class="text-xs font-bold text-gray-500 uppercase">Assessment Mulai</p>
-                                <p class="text-gray-900 font-medium">
-                                    {{ \Carbon\Carbon::parse($mainAssessment->tanggal_mulai)->format('d M Y') }}
-                                </p>
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-gray-500 uppercase">Assessment Berakhir</p>
-                                <p class="text-gray-900 font-medium">
-                                    {{ \Carbon\Carbon::parse($mainAssessment->tanggal_berakhir)->format('d M Y') }}
-                                </p>
-                            </div>
-                            @endif
-
-                            @if ($akreditasi->tgl_visitasi)
-                            <div class="col-span-2 mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-                                <div class="flex gap-8">
-                                    <div>
-                                        <p class="text-xs font-bold text-indigo-500 uppercase">Visitasi Mulai</p>
-                                        <p class="text-indigo-700 font-bold">
-                                            {{ \Carbon\Carbon::parse($akreditasi->tgl_visitasi)->format('d M Y') }}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs font-bold text-indigo-500 uppercase">Visitasi Berakhir</p>
-                                        <p class="text-indigo-700 font-bold">
-                                            {{ \Carbon\Carbon::parse($akreditasi->tgl_visitasi_akhir ?? $akreditasi->tgl_visitasi)->format('d M Y') }}
-                                        </p>
-                                    </div>
-                                </div>
-                                @if(in_array($akreditasi->status, [1, 2]))
-                                <span class="px-3 py-1.5 text-[10px] font-bold bg-gray-100 text-gray-400 rounded-lg uppercase tracking-wider cursor-not-allowed inline-flex items-center gap-1.5 select-none" title="Akreditasi telah selesai, reschedule tidak tersedia">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                    </svg>
-                                    Reschedule
-                                </span>
-                                @else
-                                <button type="button" wire:click="openVisitasiEditModal" class="px-3 py-1.5 text-[10px] font-bold bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 uppercase tracking-wider">
-                                    Reschedule
-                                </button>
-                                @endif
-                            </div>
-                            @endif
+            @if ($activeTab === 'edpm_pesantren')
+                <div class="d-flex flex-column gap-6">
+                    <x-ui.section-card title="EDPM Pesantren" subtitle="Isian evaluasi diri dan bukti yang dikirim pesantren.">
+                        <div class="p-6">
+                            <x-ui.simple-table tableClass="spm-edpm-review-table">
+                                <thead>
+                                    <tr>
+                                        <th class="ps-4 w-100px">No Butir</th>
+                                        <th>Pernyataan</th>
+                                        <th class="text-center w-125px">Isian</th>
+                                        <th class="text-center pe-4 w-150px">Bukti</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($komponens as $komponen)
+                                        @foreach ($komponen->butirs as $butir)
+                                            <tr>
+                                                <td class="ps-4 fw-bold text-primary">{{ $butir->nomor_butir }}</td>
+                                                <td class="spm-edpm-statement">{{ $butir->butir_pernyataan }}</td>
+                                                <td class="text-center">
+                                                    <x-ui.badge variant="warning">{{ $pesantrenEvaluasis[$butir->id] }}</x-ui.badge>
+                                                </td>
+                                                <td class="text-center pe-4">
+                                                    @if(!empty($pesantrenLinks[$butir->id]))
+                                                        <x-ui.button :href="$pesantrenLinks[$butir->id]" target="_blank" variant="light" size="sm">Bukti</x-ui.button>
+                                                    @else
+                                                        <x-ui.status-badge variant="secondary">-</x-ui.status-badge>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @endforeach
+                                </tbody>
+                            </x-ui.simple-table>
                         </div>
-                        @endif
+                    </x-ui.section-card>
 
-                        @if ($activeTab === 'ipm')
-                        <div class="space-y-6">
-                            <div class="space-y-4">
-                                @php
-                                $ipmItems = [
-                                'nsp_file' => '1. Izin operasional Kementerian Agama (NSP)',
-                                'lulus_santri_file' =>
-                                '2. Pernah meluluskan santri / memiliki santri kelas akhir',
-                                'kurikulum_file' => '3. Menyelenggarakan kurikulum Dirasah Islamiyah',
-                                'buku_ajar_file' => '4. Menggunakan buku ajar terbitan LP2 PPM',
-                                ];
-                                @endphp
-                                @foreach ($ipmItems as $field => $label)
-                                <div class="p-4 border rounded-lg bg-gray-50 flex justify-between items-center">
-                                    <span class="text-sm text-gray-700 font-medium">{{ $label }}</span>
-                                    <div>
-                                        @if ($ipm && $ipm->$field)
-                                        <a href="{{ Storage::url($ipm->$field) }}" target="_blank"
-                                            class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded text-xs font-bold hover:bg-indigo-200">Lihat
-                                            Dokumen</a>
-                                        @else
-                                        <span class="text-red-500 text-xs italic">Belum diunggah</span>
-                                        @endif
+                    <x-ui.section-card title="Catatan Kinerja Satuan Pendidikan" subtitle="Catatan pesantren per komponen EDPM.">
+                        <div class="p-6">
+                            <div class="row g-5">
+                                @foreach ($komponens as $komponen)
+                                    <div class="col-lg-6">
+                                        <div class="spm-soft-panel h-100">
+                                            <div class="spm-detail-label">{{ $komponen->nama }}</div>
+                                            <div class="spm-detail-value spm-detail-value-muted">
+                                                {{ $pesantrenCatatans[$komponen->id] ?: 'Tidak ada catatan.' }}
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
                                 @endforeach
                             </div>
                         </div>
-                        @endif
+                    </x-ui.section-card>
+                </div>
+            @endif
 
-                        @if ($activeTab === 'sdm')
-                        <div class="space-y-6">
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full border-collapse border border-gray-300 text-xs md:text-sm">
-                                    <thead class="bg-gray-100 uppercase font-bold text-[10px]">
-                                        <tr>
-                                            <th rowspan="2" class="border border-gray-300 px-2 py-2">NO.</th>
-                                            <th rowspan="2" class="border border-gray-300 px-2 py-2">BENTUK</th>
-                                            <th colspan="2" class="border border-gray-300 px-2 py-1 bg-green-50">SANTRI</th>
-                                            <th colspan="2" class="border border-gray-300 px-2 py-1 bg-blue-50">USTADZ DIROSAH</th>
-                                            <th colspan="2" class="border border-gray-300 px-2 py-1 bg-indigo-50">USTADZ NON DIROSAH</th>
-                                            <th colspan="2" class="border border-gray-300 px-2 py-1 bg-yellow-50">PAMONG</th>
-                                            <th colspan="2" class="border border-gray-300 px-2 py-1 bg-orange-50">MUSYRIF/AH</th>
-                                            <th colspan="2" class="border border-gray-300 px-2 py-1 bg-purple-50">TENAGA KEPENDIDIKAN</th>
-                                        </tr>
-                                        <tr class="bg-gray-50 text-center">
-                                            <th class="border border-gray-300">L</th>
-                                            <th class="border border-gray-300">P</th>
-                                            <th class="border border-gray-300">L</th>
-                                            <th class="border border-gray-300">P</th>
-                                            <th class="border border-gray-300">L</th>
-                                            <th class="border border-gray-300">P</th>
-                                            <th class="border border-gray-300">L</th>
-                                            <th class="border border-gray-300">P</th>
-                                            <th class="border border-gray-300">L</th>
-                                            <th class="border border-gray-300">P</th>
-                                            <th class="border border-gray-300">L</th>
-                                            <th class="border border-gray-300">P</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($levels as $index => $level)
-                                        <tr class="text-center">
-                                            <td class="border border-gray-300 px-2 py-1 font-bold">
-                                                {{ $index + 1 }}
-                                            </td>
-                                            <td class="border border-gray-300 px-2 py-1 font-bold text-left uppercase">
-                                                {{ $level }}
-                                            </td>
-                                            @foreach($fields as $field)
-                                            <td class="border border-gray-300 px-2 py-1">
-                                                {{ $sdm[$level]->$field ?? 0 }}
-                                            </td>
-                                            @endforeach
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                    <tfoot class="bg-blue-50 font-bold text-center">
-                                        <tr>
-                                            <td colspan="2" class="border border-gray-300 px-4 py-2 uppercase">JUMLAH</td>
-                                            @foreach($fields as $field)
-                                            <td class="border border-gray-300 px-2 py-2">
-                                                {{ $this->getTotal($field) }}
-                                            </td>
-                                            @endforeach
-                                        </tr>
-                                    </tfoot>
-                                </table>
+            @if ($activeTab === 'instrumen')
+                <div class="d-flex flex-column gap-6">
+                    @if ($akreditasi->status == 3 && (empty($akreditasi->kartu_kendali) || empty($akreditasi->laporan_visitasi_file)))
+                        <div class="spm-inline-alert">
+                            <span class="symbol symbol-35px">
+                                <span class="symbol-label bg-light-warning text-warning">
+                                    <x-ui.icon name="timer" class="fs-3" />
+                                </span>
+                            </span>
+                            <div>
+                                <div class="spm-inline-alert-title">Kelengkapan Dokumen Wajib</div>
+                                <div class="spm-inline-alert-text">
+                                    Nilai NV hanya dapat disimpan apabila Kartu Kendali dan Laporan Visitasi telah diunggah.
+                                </div>
                             </div>
                         </div>
-                        @endif
+                    @endif
 
-                        @if ($activeTab === 'edpm_pesantren')
-                        <div class="space-y-6">
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full border-collapse border border-gray-300 text-xs md:text-sm">
-                                    <thead class="bg-gray-100 uppercase">
-                                        <tr>
-                                            <th class="border border-gray-300 px-2 py-2">No Butir</th>
-                                            <th class="border border-gray-300 px-4 py-2 text-left">Pernyataan</th>
-                                            <th class="border border-gray-300 px-4 py-2">Isian Pesantren</th>
-                                            <th class="border border-gray-300 px-4 py-2">Bukti Pesantren</th>
-
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($komponens as $komponen)
-                                        @php $butirsCount = count($komponen->butirs); @endphp
-                                        @foreach ($komponen->butirs as $idx => $butir)
-                                        <tr>
-                                            <td class="border border-gray-300 px-2 py-2 text-center font-bold">
-                                                {{ $butir->nomor_butir }}
-                                            </td>
-                                            <td class="border border-gray-300 px-4 py-2">
-                                                {{ $butir->butir_pernyataan }}
-                                            </td>
-                                            <td
-                                                class="border border-gray-300 px-4 py-2 font-medium bg-yellow-50 text-indigo-700 text-center">
-                                                {{ $pesantrenEvaluasis[$butir->id] }}
-                                            </td>
-                                            <td class="border border-gray-300 px-4 py-2 text-center text-[10px]">
-                                                @if(!empty($pesantrenLinks[$butir->id]))
-                                                <a href="{{ $pesantrenLinks[$butir->id] }}" target="_blank" class="text-indigo-600 font-bold hover:underline break-all uppercase" title="{{ $pesantrenLinks[$butir->id] }}">LIHAT BUKTI</a>
-                                                @else
-                                                <span class="text-gray-400 italic">-</span>
-                                                @endif
-                                            </td>
-
-                                        </tr>
-                                        @endforeach
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="mt-8 space-y-4">
-                                <h3 class="text-sm font-bold text-gray-700 border-l-4 border-gray-400 pl-3 uppercase">
-                                    Catatan Kinerja Satuan Pendidikan (Per Komponen)
-                                </h3>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <x-ui.section-card title="Nilai Akhir" subtitle="Perbandingan NA asesor, NK, NV admin, catatan butir, dan rekomendasi.">
+                        <div class="p-6">
+                            <x-ui.simple-table tableClass="spm-score-table">
+                                <thead>
+                                    <tr>
+                                        <th class="ps-4 w-150px">Komponen</th>
+                                        <th class="text-center w-80px">No SK</th>
+                                        <th class="text-center w-90px">No Butir</th>
+                                        <th>Pernyataan</th>
+                                        <th class="text-center w-80px">NA 1</th>
+                                        <th class="text-center w-80px">NA 2</th>
+                                        <th class="text-center w-80px">NK</th>
+                                        <th class="text-center w-110px">NV</th>
+                                        <th class="w-220px">Catatan Butir</th>
+                                        <th class="pe-4 w-260px">Rekomendasi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                     @foreach ($komponens as $komponen)
-                                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                                        <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">{{ $komponen->nama }}</h4>
-                                        <div class="text-sm text-gray-800 leading-relaxed">
-                                            {{ $pesantrenCatatans[$komponen->id] ?: 'Tidak ada catatan.' }}
-                                        </div>
-                                    </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
-                        @endif
-
-                        @if ($activeTab === 'instrumen')
-                        <div class="space-y-6">
-                            @if ($akreditasi->status == 3 && (empty($akreditasi->kartu_kendali) || empty($akreditasi->laporan_visitasi_file)))
-                            <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 flex items-start space-x-3 mb-6">
-                                <div class="flex-shrink-0">
-                                    <div class="w-5 h-5 bg-amber-200 rounded-full flex items-center justify-center">
-                                        <svg class="w-3.5 h-3.5 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </div>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="text-xs font-bold text-amber-900 uppercase tracking-tight">Kelengkapan Dokumen Wajib</h4>
-                                    <p class="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
-                                        Nilai NV (Nilai Verifikasi) hanya dapat disimpan apabila <b>Kartu Kendali</b> dan <b>Laporan Visitasi</b> telah diunggah ke dalam sistem.
-                                    </p>
-                                </div>
-                            </div>
-                            @endif
-
-                            <div class="overflow-x-auto mt-4">
-                                <table class="min-w-full border-collapse border border-gray-300 text-xs md:text-sm">
-                                    <thead class="bg-gray-100 font-bold uppercase">
-                                        <tr>
-                                            <th class="border border-gray-300 px-2 py-3 w-24">Komponen</th>
-                                            <th class="border border-gray-300 px-1 py-3 w-12 text-center">No SK</th>
-                                            <th class="border border-gray-300 px-1 py-3 w-12 text-center">No Butir</th>
-                                            <th class="border border-gray-300 px-2 py-3 text-left">Pernyataan</th>
-                                            <th class="border border-gray-300 px-2 py-3 text-center w-20">NA 1</th>
-                                            <th class="border border-gray-300 px-2 py-3 text-center w-20 bg-green-50">
-                                                NA 2</th>
-                                            <th class="border border-gray-300 px-2 py-3 text-center w-20 bg-amber-50">
-                                                NK</th>
-                                            <th class="border border-gray-300 px-2 py-3 text-center w-20 bg-purple-50">
-                                                NV</th>
-                                            <th
-                                                class="border border-gray-300 px-2 py-3 text-center w-48 bg-blue-50 text-[10px]">
-                                                CATATAN BUTIR (NK)</th>
-                                            <th class="border border-gray-300 px-2 py-3 text-left w-64 bg-indigo-50">
-                                                RINGKASAN REKOMENDASI KOMPONEN</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($komponens as $komponen)
                                         @php $butirsCount = count($komponen->butirs); @endphp
                                         @foreach ($komponen->butirs as $index => $butir)
-                                        <tr class="hover:bg-gray-50">
-                                            @if ($index === 0)
-                                            <td rowspan="{{ $butirsCount }}"
-                                                class="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-50 align-middle uppercase text-indigo-700">
-                                                {{ $komponen->nama }}
-                                            </td>
-                                            @endif
-                                            <td
-                                                class="border border-gray-300 px-1 py-2 text-center text-gray-500">
-                                                {{ $butir->no_sk }}
-                                            </td>
-                                            <td class="border border-gray-300 px-1 py-2 text-center font-bold">
-                                                {{ $butir->nomor_butir }}
-                                            </td>
-                                            <td class="border border-gray-300 px-2 py-2">
-                                                {{ $butir->butir_pernyataan }}
-                                            </td>
-                                            <td class="border border-gray-300 px-2 py-2 text-center font-bold">
-                                                {{ $asesor1Evaluasis[$butir->id] ?? '' }}
-                                            </td>
-                                            <td
-                                                class="border border-gray-300 px-2 py-2 text-center font-bold bg-green-50/30">
-                                                {{ $asesor2Evaluasis[$butir->id] ?? '' }}
-                                            </td>
-                                            <td
-                                                class="border border-gray-300 px-2 py-2 text-center font-bold bg-amber-50/30 text-amber-900">
-                                                {{ $asesor1Nks[$butir->id] ?? '' }}
-                                            </td>
-                                            <td class="border border-gray-300 p-0 bg-purple-50/10">
-                                                @if ($akreditasi->status == 3)
-                                                <select wire:model.live="adminNvs.{{ $butir->id }}"
-                                                    class="w-full border-0 p-2 text-xs focus:ring-2 focus:ring-purple-500 bg-white">
-                                                    <option value="">Pilih...</option>
-                                                    <option value="1">1</option>
-                                                    <option value="2">2</option>
-                                                    <option value="3">3</option>
-                                                    <option value="4">4</option>
-                                                </select>
-                                                @error('adminNvs.' . $butir->id)
-                                                <span class="text-red-500 text-[10px] px-2 pb-1 block whitespace-nowrap">{{ $message }}</span>
-                                                @enderror
-                                                @else
-                                                <div
-                                                    class="px-2 py-2 text-center font-bold text-purple-900">
-                                                    {{ $adminNvs[$butir->id] ?? '' }}
-                                                </div>
-                                                @endif
-                                            </td>
-                                            <td
-                                                class="border border-gray-300 px-2 py-2 text-[9px] italic bg-blue-50/20 text-blue-900">
-                                                {{ $asesor1ButirCatatans[$butir->id] ?? '' }}
-                                            </td>
-                                            @if ($index === 0)
-                                            <td rowspan="{{ $butirsCount }}"
-                                                class="border border-gray-300 px-2 py-2 bg-indigo-50/20 align-top text-[10px] text-gray-700">
-                                                {!! $asesor1Catatans[$komponen->id] ?? '-' !!}
-                                            </td>
-                                            @endif
-                                        </tr>
-                                        @endforeach
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            @if ($akreditasi->status == 3 || $akreditasi->status == 1)
-                            @if ($akreditasi->status == 3)
-                            <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                                <div class="flex justify-between items-center">
-                                    <div>
-                                        <h3 class="text-sm font-bold text-purple-900 mb-1">Nilai Verifikasi (NV)
-                                        </h3>
-                                        <p class="text-xs text-purple-700">Silakan input nilai verifikasi untuk
-                                            setiap butir penilaian.</p>
-                                    </div>
-                                    <x-ui.button type="button" @click="confirmSaveNV($wire)" wire:loading.attr="disabled" variant="primary">
-                                        <svg wire:loading wire:target="saveAdminNv" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        <span>Simpan NV</span>
-                                    </x-ui.button>
-                                </div>
-                            </div>
-                            @endif
-                            {{-- Ringkasan Data --}}
-                            <div
-                                class="mt-8 bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-lg border border-indigo-200">
-                                <h3 class="text-lg font-bold text-indigo-900 mb-4 border-b-2 border-indigo-300 pb-2">
-                                    📊 RINGKASAN DATA PENILAIAN
-                                </h3>
-
-                                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                                    <table class="min-w-full text-xs">
-                                        <thead class="bg-gray-100">
                                             <tr>
-                                                <th class="border border-gray-300 px-3 py-2 text-left font-bold">Komponen</th>
-                                                <th class="border border-gray-300 px-3 py-2 text-center font-bold">Skor Maksimum<br>(Cmaks)</th>
-                                                <th class="border border-gray-300 px-3 py-2 text-center font-bold">Capaian Indikator<br>(CI)</th>
-                                                <th class="border border-gray-300 px-3 py-2 text-center font-bold">Bobot Komponen<br>(BK)</th>
-                                                <th class="border border-gray-300 px-3 py-2 text-center font-bold">Skor Komponen</th>
-                                                <th class="border border-gray-300 px-3 py-2 text-center font-bold">Total Skor</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @php
-                                            $totalCmaks = 0;
-                                            $totalCI = 0;
-                                            $totalBK = 0;
-                                            $totalSkorKomponen = 0;
-                                            $grandTotalSkor = 0;
-
-                                            // Hardcoded bobot komponen
-                                            $bobotKomponen = [
-                                            'MUTU LULUSAN' => 35,
-                                            'PROSES PEMBELAJARAN' => 29,
-                                            'MUTU USTAZ' => 18,
-                                            'MANAJEMEN PESANTREN' => 18,
-                                            'INDIKATOR PEMENUHAN RELATIF' => 97,
-                                            ];
-                                            @endphp
-
-                                            @php
-                                            $iprNullComponents = $komponens->filter(function($k) { return is_null($k->ipr); });
-                                            $iprNotNullComponents = $komponens->filter(function($k) { return !is_null($k->ipr); });
-
-                                            // Calculate total for null IPR components
-                                            $totalSkorIprNull = 0;
-                                            foreach ($iprNullComponents as $k) {
-                                            $b = $bobotKomponen[$k->nama] ?? 0;
-                                            $c_total = count($k->butirs) * 4;
-                                            $c_ci = 0;
-                                            foreach ($k->butirs as $butir) {
-                                            $c_ci += (int)($adminNvs[$butir->id] ?? 0);
-                                            }
-                                            if ($c_total > 0) {
-                                            $totalSkorIprNull += round(($c_ci / $c_total) * $b);
-                                            }
-                                            }
-                                            @endphp
-
-                                            @foreach ($komponens as $index => $komponen)
-                                            @php
-                                            // Hitung Cmaks
-                                            $totalButir = count($komponen->butirs);
-                                            $nilaiMaksimalNk = 4;
-                                            $cmaksKomponen = $totalButir * $nilaiMaksimalNk;
-
-                                            // Hitung CI (sum NV)
-                                            $sumNvKomponen = 0;
-                                            foreach ($komponen->butirs as $butir) {
-                                            $nvValue = $adminNvs[$butir->id] ?? 0;
-                                            $sumNvKomponen += (int) $nvValue;
-                                            }
-
-                                            // Ambil BK
-                                            $bkValue = $bobotKomponen[$komponen->nama] ?? 0;
-
-                                            // Hitung Skor Komponen
-                                            $isIpr = !is_null($komponen->ipr);
-                                            $faktor = $isIpr ? 100 : $bkValue;
-
-                                            $skorKomponen = 0;
-                                            if ($cmaksKomponen > 0) {
-                                            $skorKomponen = round(($sumNvKomponen / $cmaksKomponen) * $faktor);
-                                            }
-                                            @endphp
-
-                                            <tr class="hover:bg-gray-50">
-                                                <td class="border border-gray-300 px-3 py-2 font-medium text-gray-700">
-                                                    {{ $komponen->nama }}
-                                                </td>
-                                                <td class="border border-gray-300 px-3 py-2 text-center text-indigo-700 font-bold">
-                                                    {{ $cmaksKomponen }}
-                                                </td>
-                                                <td class="border border-gray-300 px-3 py-2 text-center text-purple-700 font-bold">
-                                                    {{ $sumNvKomponen }}
-                                                </td>
-                                                <td class="border border-gray-300 px-3 py-2 text-center text-orange-700 font-bold">
-                                                    {{ $bkValue }}
-                                                </td>
-                                                <td class="border border-gray-300 px-3 py-2 text-center text-blue-700 font-mono text-[10px]">
-                                                    {{ $skorKomponen }}
-                                                </td>
-
                                                 @if ($index === 0)
-                                                <td rowspan="{{ $iprNullComponents->count() }}" class="border border-gray-300 px-3 py-2 text-center text-green-900 font-bold text-lg bg-green-50 align-middle">
-                                                    {{ $totalSkorIprNull }}
+                                                    <td rowspan="{{ $butirsCount }}" class="ps-4 fw-bold text-primary text-uppercase align-middle">
+                                                        {{ $komponen->nama }}
+                                                    </td>
+                                                @endif
+                                                <td class="text-center text-muted">{{ $butir->no_sk }}</td>
+                                                <td class="text-center fw-bold">{{ $butir->nomor_butir }}</td>
+                                                <td class="spm-edpm-statement">{{ $butir->butir_pernyataan }}</td>
+                                                <td class="text-center fw-bold">{{ $asesor1Evaluasis[$butir->id] ?? '' }}</td>
+                                                <td class="text-center fw-bold">{{ $asesor2Evaluasis[$butir->id] ?? '' }}</td>
+                                                <td class="text-center fw-bold text-warning">{{ $asesor1Nks[$butir->id] ?? '' }}</td>
+                                                <td class="text-center">
+                                                    @if ($akreditasi->status == 3)
+                                                        <x-ui.select
+                                                            model="adminNvs.{{ $butir->id }}"
+                                                            modifier="live"
+                                                            :options="['1' => '1', '2' => '2', '3' => '3', '4' => '4']"
+                                                            placeholder="Pilih"
+                                                            size="sm"
+                                                            class="spm-score-control mx-auto"
+                                                        />
+                                                        @error('adminNvs.' . $butir->id)
+                                                            <div class="invalid-feedback d-block fs-9">{{ $message }}</div>
+                                                        @enderror
+                                                    @else
+                                                        <x-ui.badge variant="primary">{{ $adminNvs[$butir->id] ?? '' }}</x-ui.badge>
+                                                    @endif
                                                 </td>
-                                                @elseif ($index === $iprNullComponents->count())
-                                                <td class="border border-gray-300 px-3 py-2 text-center text-green-900 font-bold text-lg bg-green-100 align-middle">
-                                                    {{ $skorKomponen }}
-                                                </td>
+                                                <td class="fs-8 text-muted">{{ $asesor1ButirCatatans[$butir->id] ?? '' }}</td>
+                                                @if ($index === 0)
+                                                    <td rowspan="{{ $butirsCount }}" class="pe-4 fs-8 text-gray-700 align-top">
+                                                        {!! $asesor1Catatans[$komponen->id] ?? '-' !!}
+                                                    </td>
                                                 @endif
                                             </tr>
-                                            @endforeach
+                                        @endforeach
+                                    @endforeach
+                                </tbody>
+                            </x-ui.simple-table>
+                        </div>
+                    </x-ui.section-card>
 
-                                            @php
-                                            // Calculate total for not-null IPR components
-                                            $totalSkorIprNotNull = 0;
-                                            foreach ($iprNotNullComponents as $k) {
-                                            // For IPR not null, factor is 100
-                                            $c_total = count($k->butirs) * 4;
-                                            $c_ci = 0;
-                                            foreach ($k->butirs as $butir) {
-                                            $c_ci += (int)($adminNvs[$butir->id] ?? 0);
-                                            }
-                                            if ($c_total > 0) {
-                                            $totalSkorIprNotNull += round(($c_ci / $c_total) * 100);
-                                            }
-                                            }
-                                            @endphp
-                                            {{-- Total Row Removed as requested by specific layout --}}
-                                        </tbody>
-                                    </table>
-                                </div>
+                    @if ($akreditasi->status == 3)
+                        <div class="spm-action-panel d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
+                            <div>
+                                <h3 class="spm-card-title mb-1">Nilai Verifikasi (NV)</h3>
+                                <div class="text-muted fw-semibold fs-7">Simpan nilai verifikasi setelah semua butir lengkap.</div>
+                            </div>
+                            <x-ui.button type="button" @click="confirmSaveNV($wire)" wire:loading.attr="disabled" variant="primary">
+                                <span wire:loading.remove wire:target="saveAdminNv">Simpan NV</span>
+                                <span wire:loading wire:target="saveAdminNv">Menyimpan...</span>
+                            </x-ui.button>
+                        </div>
+                    @endif
 
-                                {{-- Hasil Akhir & Peringkat --}}
+                    @if ($akreditasi->status == 3 || $akreditasi->status == 1)
+                        <x-ui.section-card title="Ringkasan Data Penilaian" subtitle="Perhitungan skor komponen dan hasil akhir.">
+                            <div class="p-6">
                                 @php
-                                $nilaiAkreditasi = round((0.7 * $totalSkorIprNull) + (0.3 * $totalSkorIprNotNull));
+                                    $totalCmaks = 0;
+                                    $totalCI = 0;
+                                    $totalBK = 0;
+                                    $totalSkorKomponen = 0;
+                                    $grandTotalSkor = 0;
 
-                                $peringkat = 'NA';
-                                if ($nilaiAkreditasi >= 86) {
-                                $peringkat = 'Unggul';
-                                } elseif ($nilaiAkreditasi >= 70) {
-                                $peringkat = 'Baik';
-                                } elseif ($nilaiAkreditasi >= 0) {
-                                $peringkat = 'Cukup';
-                                }
+                                    $bobotKomponen = [
+                                        'MUTU LULUSAN' => 35,
+                                        'PROSES PEMBELAJARAN' => 29,
+                                        'MUTU USTAZ' => 18,
+                                        'MANAJEMEN PESANTREN' => 18,
+                                        'INDIKATOR PEMENUHAN RELATIF' => 97,
+                                    ];
 
-                                // Set color based on peringkat
-                                $peringkatColor = match($peringkat) {
-                                'Unggul' => 'text-green-600 bg-green-50 border-green-200',
-                                'Baik' => 'text-blue-600 bg-blue-50 border-blue-200',
-                                'Cukup' => 'text-yellow-600 bg-yellow-50 border-yellow-200',
-                                default => 'text-gray-600 bg-gray-50 border-gray-200',
-                                };
+                                    $iprNullComponents = $komponens->filter(function($k) { return is_null($k->ipr); });
+                                    $iprNotNullComponents = $komponens->filter(function($k) { return !is_null($k->ipr); });
+
+                                    $totalSkorIprNull = 0;
+                                    foreach ($iprNullComponents as $k) {
+                                        $b = $bobotKomponen[$k->nama] ?? 0;
+                                        $c_total = count($k->butirs) * 4;
+                                        $c_ci = 0;
+                                        foreach ($k->butirs as $butir) {
+                                            $c_ci += (int)($adminNvs[$butir->id] ?? 0);
+                                        }
+                                        if ($c_total > 0) {
+                                            $totalSkorIprNull += round(($c_ci / $c_total) * $b);
+                                        }
+                                    }
                                 @endphp
 
-                                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div class="bg-indigo-50 rounded-lg p-4 border border-indigo-200">
-                                        <h4 class="text-xs font-bold text-indigo-800 uppercase mb-1">Nilai Akreditasi</h4>
-                                        <div class="text-2xl font-bold text-indigo-900">
-                                            {{ $nilaiAkreditasi }}
+                                <x-ui.simple-table tableClass="spm-wide-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="ps-4">Komponen</th>
+                                            <th class="text-center">Cmaks</th>
+                                            <th class="text-center">CI</th>
+                                            <th class="text-center">BK</th>
+                                            <th class="text-center">Skor Komponen</th>
+                                            <th class="text-center pe-4">Total Skor</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($komponens as $index => $komponen)
+                                            @php
+                                                $totalButir = count($komponen->butirs);
+                                                $cmaksKomponen = $totalButir * 4;
+                                                $sumNvKomponen = 0;
+                                                foreach ($komponen->butirs as $butir) {
+                                                    $sumNvKomponen += (int) ($adminNvs[$butir->id] ?? 0);
+                                                }
+                                                $bkValue = $bobotKomponen[$komponen->nama] ?? 0;
+                                                $isIpr = !is_null($komponen->ipr);
+                                                $faktor = $isIpr ? 100 : $bkValue;
+                                                $skorKomponen = $cmaksKomponen > 0 ? round(($sumNvKomponen / $cmaksKomponen) * $faktor) : 0;
+                                            @endphp
+
+                                            <tr>
+                                                <td class="ps-4 fw-bold">{{ $komponen->nama }}</td>
+                                                <td class="text-center fw-bold">{{ $cmaksKomponen }}</td>
+                                                <td class="text-center fw-bold text-primary">{{ $sumNvKomponen }}</td>
+                                                <td class="text-center fw-bold text-warning">{{ $bkValue }}</td>
+                                                <td class="text-center fw-bold">{{ $skorKomponen }}</td>
+
+                                                @if ($index === 0)
+                                                    <td rowspan="{{ $iprNullComponents->count() }}" class="text-center pe-4 fw-bold fs-4 text-success align-middle">
+                                                        {{ $totalSkorIprNull }}
+                                                    </td>
+                                                @elseif ($index === $iprNullComponents->count())
+                                                    <td class="text-center pe-4 fw-bold fs-4 text-success align-middle">
+                                                        {{ $skorKomponen }}
+                                                    </td>
+                                                @endif
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </x-ui.simple-table>
+
+                                @php
+                                    $totalSkorIprNotNull = 0;
+                                    foreach ($iprNotNullComponents as $k) {
+                                        $c_total = count($k->butirs) * 4;
+                                        $c_ci = 0;
+                                        foreach ($k->butirs as $butir) {
+                                            $c_ci += (int)($adminNvs[$butir->id] ?? 0);
+                                        }
+                                        if ($c_total > 0) {
+                                            $totalSkorIprNotNull += round(($c_ci / $c_total) * 100);
+                                        }
+                                    }
+
+                                    $nilaiAkreditasi = round((0.7 * $totalSkorIprNull) + (0.3 * $totalSkorIprNotNull));
+                                    $peringkat = 'NA';
+                                    if ($nilaiAkreditasi >= 86) {
+                                        $peringkat = 'Unggul';
+                                    } elseif ($nilaiAkreditasi >= 70) {
+                                        $peringkat = 'Baik';
+                                    } elseif ($nilaiAkreditasi >= 0) {
+                                        $peringkat = 'Cukup';
+                                    }
+                                @endphp
+
+                                <div class="row g-5 mt-2">
+                                    <div class="col-md-6">
+                                        <div class="spm-result-metric">
+                                            <div class="spm-detail-label">Nilai Akreditasi</div>
+                                            <div class="fs-2 fw-bold text-primary">{{ $nilaiAkreditasi }}</div>
                                         </div>
                                     </div>
-
-                                    <div class="{{ $peringkatColor }} rounded-lg p-4 border">
-                                        <h4 class="text-xs font-bold uppercase mb-1 opacity-80">Peringkat Akreditasi</h4>
-                                        <div class="text-2xl font-bold">
-                                            {{ $peringkat }}
+                                    <div class="col-md-6">
+                                        <div class="spm-result-metric">
+                                            <div class="spm-detail-label">Peringkat Akreditasi</div>
+                                            <div class="fs-2 fw-bold text-gray-900">{{ $peringkat }}</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            @if ($akreditasi->status == 3)
-                            <div class="mt-8 pt-6 border-t border-gray-200">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <!-- Approve Form -->
-                                    <div class="bg-green-50 p-6 rounded-lg border border-green-200">
-                                        <h4 class="text-sm font-bold text-green-900 mb-4 uppercase">Setujui Akreditasi</h4>
-                                        <form @submit.prevent="confirmApprove($wire)">
-                                            <div class="space-y-4">
-                                                <x-ui.form-field label="Nomor SK" for="nomor_sk" :error="$errors->get('nomor_sk')">
-                                                    <x-ui.input
-                                                        model="nomor_sk"
-                                                        id="nomor_sk"
-                                                        placeholder="Masukkan nomor SK resmi..."
-                                                        required
-                                                    />
-                                                </x-ui.form-field>
-
-                                                <x-ui.form-field label="Upload Sertifikat (PDF)" for="sertifikat_file" :error="$errors->get('sertifikat_file')">
-                                                    <x-ui.input
-                                                        model="sertifikat_file"
-                                                        id="sertifikat_file"
-                                                        type="file"
-                                                        accept="application/pdf"
-                                                        required
-                                                    />
-                                                    <div wire:loading wire:target="sertifikat_file" class="text-[10px] text-indigo-600 font-bold mt-1">Mengunggah...</div>
-                                                </x-ui.form-field>
-
-                                                <div class="grid grid-cols-2 gap-4">
-                                                    <x-ui.form-field label="Mulai Berlaku" for="masa_berlaku" :error="$errors->get('masa_berlaku')">
-                                                        <x-ui.input model="masa_berlaku" id="masa_berlaku" type="date" required />
-                                                    </x-ui.form-field>
-
-                                                    <x-ui.form-field label="Akhir Berlaku" for="masa_berlaku_akhir" :error="$errors->get('masa_berlaku_akhir')">
-                                                        <x-ui.input model="masa_berlaku_akhir" id="masa_berlaku_akhir" type="date" required />
-                                                    </x-ui.form-field>
-                                                </div>
-                                                <div class="flex justify-end">
-                                                    <x-ui.button type="submit" variant="success" wire:loading.attr="disabled">
-                                                        <svg wire:loading wire:target="approve" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                        </svg>
-                                                        <span>Setujui & Simpan</span>
-                                                    </x-ui.button>
-                                                </div>
-                                            </div>
-                                        </form>
-                                    </div>
-
-                                    <!-- Reject Form -->
-                                    <div class="bg-red-50 p-6 rounded-lg border border-red-200">
-                                        <h4 class="text-sm font-bold text-red-900 mb-4 uppercase">Tolak Akreditasi</h4>
-                                        <form @submit.prevent="confirmReject($wire)">
-                                            <div class="space-y-4">
-                                                <x-ui.form-field label="Catatan Penolakan" for="catatan_admin" :error="$errors->get('catatan_admin')">
-                                                    <x-ui.textarea
-                                                        model="catatan_admin"
-                                                        id="catatan_admin"
-                                                        rows="3"
-                                                        required
-                                                        placeholder="Masukkan alasan penolakan..."
-                                                    />
-                                                </x-ui.form-field>
-
-                                                <div class="mt-6 flex justify-end">
-                                                    <x-ui.button type="submit" variant="danger" wire:loading.attr="disabled">
-                                                        <svg wire:loading wire:target="reject" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                        </svg>
-                                                        <span>Tolak Pengajuan</span>
-                                                    </x-ui.button>
-                                                </div>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                            @endif
-                            @endif
-                        </div>
-                        <!-- Floating Navigation Buttons for NA Tab -->
-                        <div class="fixed bottom-8 right-8 flex flex-col gap-3 z-50">
-                            <button type="button"
-                                onclick="document.getElementById('main-content-scroll').scrollTo({top: 0, behavior: 'smooth'})"
-                                class="flex items-center justify-center w-12 h-12 bg-indigo-600 text-white rounded-full shadow-xl hover:bg-indigo-700 hover:scale-110 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-300"
-                                title="Scroll Ke Atas">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-                                </svg>
-                            </button>
-                            <button type="button"
-                                onclick="const el = document.getElementById('main-content-scroll'); el.scrollTo({top: el.scrollHeight, behavior: 'smooth'})"
-                                class="flex items-center justify-center w-12 h-12 bg-indigo-600 text-white rounded-full shadow-xl hover:bg-indigo-700 hover:scale-110 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-300"
-                                title="Scroll Ke Bawah">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </button>
-                        </div>
-                        @endif
-                    </div>
-
-                    {{-- Kartu Kendali Section --}}
-                    @if($akreditasi->status >= 3)
-                    <div class="mt-6 bg-amber-50 p-6 rounded-lg border border-amber-200">
-                        <h4 class="text-sm font-bold text-amber-900 uppercase mb-3 border-b border-amber-200 pb-1 flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            Kartu Kendali
-                        </h4>
-                        <div class="flex justify-between items-center bg-white p-3 rounded border border-amber-100 shadow-sm">
-                            <div class="text-xs">
-                                <p class="font-bold text-gray-700">Dokumen Kartu Kendali</p>
-                                <p class="text-gray-500">Diunggah oleh pesantren untuk validasi.</p>
-                            </div>
-                            @if($akreditasi->kartu_kendali)
-                            <a href="{{ Storage::url($akreditasi->kartu_kendali) }}" target="_blank"
-                                class="bg-amber-600 text-white px-4 py-2 rounded text-xs font-bold hover:bg-amber-700 shadow-sm flex items-center gap-2">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                                </svg>
-                                UNDUH KARTU KENDALI
-                            </a>
-                            @else
-                            <span class="text-xs text-red-500 italic font-medium flex items-center gap-1">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Belum diunggah oleh pesantren
-                            </span>
-                            @endif
-                        </div>
-                    </div>
+                        </x-ui.section-card>
                     @endif
 
-                    {{-- Laporan Visitasi Section --}}
-                    @if($activeTab === 'laporan_visitasi')
-                    <div class="mt-6 space-y-6">
-                        <div class="bg-indigo-50/50 p-8 rounded-[2rem] border border-indigo-100/50 mb-8 relative overflow-hidden">
-                            <div class="absolute top-0 right-0 p-8 opacity-10">
-                                <svg class="w-32 h-32 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                            <div class="flex items-start gap-6 relative z-10">
-                                <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-200 shrink-0">
-                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h3 class="text-xl font-bold text-indigo-900 mb-2 leading-tight">Laporan Hasil Visitasi Asesor</h3>
-                                    <p class="text-indigo-700/80 text-sm font-medium leading-relaxed max-w-2xl">
-                                        Dokumen laporan hasil visitasi yang telah diunggah oleh Tim Asesor (Ketua & Anggota) untuk divalidasi oleh Admin Pusat.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+                    @if ($akreditasi->status == 3)
+                        <div class="row g-6">
+                            <div class="col-lg-6">
+                                <x-ui.section-card title="Setujui Akreditasi" subtitle="Lengkapi SK dan sertifikat final.">
+                                    <form @submit.prevent="confirmApprove($wire)" class="p-6">
+                                        <x-ui.form-field label="Nomor SK" for="nomor_sk" :error="$errors->get('nomor_sk')">
+                                            <x-ui.input model="nomor_sk" id="nomor_sk" placeholder="Masukkan nomor SK resmi..." required />
+                                        </x-ui.form-field>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Report Asesor 1 -->
-                            <div class="bg-white border border-slate-100 p-8 rounded-[2rem] shadow-sm flex flex-col items-center text-center relative overflow-hidden">
-                                @if($akreditasi->laporan_visitasi_file)
-                                <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                </div>
-                                <h4 class="text-sm font-black text-slate-800 mb-1 uppercase tracking-widest">Laporan Ketua</h4>
-                                <p class="text-[10px] font-bold text-emerald-600 mb-6 uppercase">Sudah Diunggah</p>
+                                        <x-ui.form-field label="Unggah Sertifikat (PDF)" for="sertifikat_file" :error="$errors->get('sertifikat_file')">
+                                            <x-ui.file-upload
+                                                model="sertifikat_file"
+                                                id="sertifikat_file"
+                                                accept="application/pdf"
+                                                :file="$sertifikat_file"
+                                                placeholder="Pilih file sertifikat"
+                                                hint="PDF maksimal 10MB"
+                                            />
+                                            <div wire:loading wire:target="sertifikat_file" class="text-primary fw-bold fs-8 mt-2">Mengunggah...</div>
+                                        </x-ui.form-field>
 
-                                <a href="{{ Storage::url($akreditasi->laporan_visitasi_file) }}" target="_blank" class="inline-flex items-center gap-2 bg-[#1e293b] hover:bg-black text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-md hover:shadow-lg active:scale-95 group">
-                                    <svg class="w-4 h-4 group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                    </svg>
-                                    Unduh Laporan
-                                </a>
-                                @else
-                                <div class="w-16 h-16 bg-slate-50 text-slate-300 rounded-2xl flex items-center justify-center mb-6 border border-dashed border-slate-200">
-                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <h4 class="text-sm font-black text-slate-400 mb-1 uppercase tracking-widest">Laporan Ketua</h4>
-                                <p class="text-[10px] font-bold text-slate-400 mb-6 uppercase italic">Belum Tersedia</p>
-                                @endif
+                                        <div class="row g-5">
+                                            <div class="col-md-6">
+                                                <x-ui.form-field label="Mulai Berlaku" for="masa_berlaku" :error="$errors->get('masa_berlaku')">
+                                                    <x-ui.input model="masa_berlaku" id="masa_berlaku" type="date" required />
+                                                </x-ui.form-field>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <x-ui.form-field label="Akhir Berlaku" for="masa_berlaku_akhir" :error="$errors->get('masa_berlaku_akhir')">
+                                                    <x-ui.input model="masa_berlaku_akhir" id="masa_berlaku_akhir" type="date" required />
+                                                </x-ui.form-field>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-end">
+                                            <x-ui.button type="submit" variant="success" wire:loading.attr="disabled">
+                                                <span wire:loading.remove wire:target="approve">Setujui & Simpan</span>
+                                                <span wire:loading wire:target="approve">Memproses...</span>
+                                            </x-ui.button>
+                                        </div>
+                                    </form>
+                                </x-ui.section-card>
                             </div>
 
-                            <!-- Report Asesor 2 -->
-                            <div class="bg-white border border-slate-100 p-8 rounded-[2rem] shadow-sm flex flex-col items-center text-center relative overflow-hidden">
-                                @if($akreditasi->laporan_visitasi_file_2)
-                                <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                </div>
-                                <h4 class="text-sm font-black text-slate-800 mb-1 uppercase tracking-widest">Laporan Anggota</h4>
-                                <p class="text-[10px] font-bold text-emerald-600 mb-6 uppercase">Sudah Diunggah</p>
+                            <div class="col-lg-6">
+                                <x-ui.section-card title="Tolak Akreditasi" subtitle="Berikan catatan penolakan yang jelas.">
+                                    <form @submit.prevent="confirmReject($wire)" class="p-6">
+                                        <x-ui.form-field label="Catatan Penolakan" for="catatan_admin" :error="$errors->get('catatan_admin')">
+                                            <x-ui.textarea
+                                                model="catatan_admin"
+                                                id="catatan_admin"
+                                                rows="5"
+                                                required
+                                                placeholder="Masukkan alasan penolakan..."
+                                            />
+                                        </x-ui.form-field>
 
-                                <a href="{{ Storage::url($akreditasi->laporan_visitasi_file_2) }}" target="_blank" class="inline-flex items-center gap-2 bg-[#1e293b] hover:bg-black text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-md hover:shadow-lg active:scale-95 group">
-                                    <svg class="w-4 h-4 group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                    </svg>
-                                    Unduh Laporan
-                                </a>
-                                @else
-                                <div class="w-16 h-16 bg-slate-50 text-slate-300 rounded-2xl flex items-center justify-center mb-6 border border-dashed border-slate-200">
-                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <h4 class="text-sm font-black text-slate-400 mb-1 uppercase tracking-widest">Laporan Anggota</h4>
-                                <p class="text-[10px] font-bold text-slate-400 mb-6 uppercase italic">Belum Tersedia</p>
-                                @endif
+                                        <div class="d-flex justify-content-end">
+                                            <x-ui.button type="submit" variant="danger" wire:loading.attr="disabled">
+                                                <span wire:loading.remove wire:target="reject">Tolak Pengajuan</span>
+                                                <span wire:loading wire:target="reject">Memproses...</span>
+                                            </x-ui.button>
+                                        </div>
+                                    </form>
+                                </x-ui.section-card>
                             </div>
                         </div>
-                    </div>
                     @endif
-                    <!-- Modal Reschedule Visitasi -->
-                    <x-modal name="visitasi-edit-modal" focusable>
-                        <form x-on:submit.prevent="confirmRescheduleVisitasi($wire)">
-                            <x-ui.modal-header
-                                title="Reschedule Jadwal Visitasi"
-                                subtitle="Perbarui jadwal visitasi dalam rentang assessment."
-                                icon="timer"
-                            />
 
-                            <x-ui.modal-body>
-                                <div class="row g-5">
-                                    <div class="col-md-6">
-                                        <x-ui.form-field label="Tanggal Mulai Visitasi" for="tgl_visitasi" :error="$errors->get('tgl_visitasi')">
-                                            <x-ui.input model="tgl_visitasi" id="tgl_visitasi" type="date" />
-                                        </x-ui.form-field>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <x-ui.form-field label="Tanggal Akhir Visitasi" for="tgl_visitasi_akhir" :error="$errors->get('tgl_visitasi_akhir')">
-                                            <x-ui.input model="tgl_visitasi_akhir" id="tgl_visitasi_akhir" type="date" />
-                                        </x-ui.form-field>
-                                    </div>
-                                </div>
-                            </x-ui.modal-body>
-
-                            <x-ui.modal-footer>
-                                <x-ui.button type="button" variant="light" x-on:click="$dispatch('close')">
-                                    Batal
-                                </x-ui.button>
-
-                                <x-ui.button type="submit" variant="primary">
-                                    Simpan Perubahan
-                                </x-ui.button>
-                            </x-ui.modal-footer>
-                        </form>
-                    </x-modal>
+                    <div class="spm-scroll-actions">
+                        <x-ui.button
+                            type="button"
+                            variant="primary"
+                            class="btn-icon"
+                            title="Scroll ke atas"
+                            onclick="document.getElementById('main-content-scroll')?.scrollTo({top: 0, behavior: 'smooth'})"
+                        >
+                            <x-ui.icon name="arrow-up" class="fs-2" />
+                        </x-ui.button>
+                        <x-ui.button
+                            type="button"
+                            variant="primary"
+                            class="btn-icon"
+                            title="Scroll ke bawah"
+                            onclick="const el = document.getElementById('main-content-scroll'); el?.scrollTo({top: el.scrollHeight, behavior: 'smooth'})"
+                        >
+                            <x-ui.icon name="arrow-down" class="fs-2" />
+                        </x-ui.button>
+                    </div>
                 </div>
-            </div>
+            @endif
+
+            @if($activeTab === 'laporan_visitasi')
+                <div class="d-flex flex-column gap-6">
+                    @if($akreditasi->status >= 3)
+                        <x-ui.section-card title="Kartu Kendali" subtitle="Dokumen kontrol validasi dari pesantren.">
+                            <div class="p-6">
+                                <div class="spm-document-list">
+                                    <x-ui.document-item
+                                        label="Dokumen Kartu Kendali"
+                                        :href="$akreditasi->kartu_kendali ? Storage::url($akreditasi->kartu_kendali) : null"
+                                        description="Diunggah oleh pesantren untuk validasi."
+                                    />
+                                </div>
+                            </div>
+                        </x-ui.section-card>
+                    @endif
+
+                    <x-ui.section-card title="Laporan Hasil Visitasi" subtitle="Dokumen laporan dari ketua dan anggota asesor.">
+                        <div class="p-6">
+                            <div class="row g-5">
+                                <div class="col-lg-6">
+                                    <div class="spm-document-list">
+                                        <x-ui.document-item
+                                            label="Laporan Ketua"
+                                            :href="$akreditasi->laporan_visitasi_file ? Storage::url($akreditasi->laporan_visitasi_file) : null"
+                                        />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="spm-document-list">
+                                        <x-ui.document-item
+                                            label="Laporan Anggota"
+                                            :href="$akreditasi->laporan_visitasi_file_2 ? Storage::url($akreditasi->laporan_visitasi_file_2) : null"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </x-ui.section-card>
+                </div>
+            @endif
         </div>
-    </div>
-</div>
+
+        <x-ui.modal name="visitasi-edit-modal" focusable>
+            <form x-on:submit.prevent="confirmRescheduleVisitasi($wire)">
+                <x-ui.modal-header
+                    title="Reschedule Jadwal Visitasi"
+                    subtitle="Perbarui jadwal visitasi dalam rentang penilaian."
+                    icon="timer"
+                />
+
+                <x-ui.modal-body>
+                    <div class="row g-5">
+                        <div class="col-md-6">
+                            <x-ui.form-field label="Tanggal Mulai Visitasi" for="tgl_visitasi" :error="$errors->get('tgl_visitasi')">
+                                <x-ui.input model="tgl_visitasi" id="tgl_visitasi" type="date" />
+                            </x-ui.form-field>
+                        </div>
+
+                        <div class="col-md-6">
+                            <x-ui.form-field label="Tanggal Akhir Visitasi" for="tgl_visitasi_akhir" :error="$errors->get('tgl_visitasi_akhir')">
+                                <x-ui.input model="tgl_visitasi_akhir" id="tgl_visitasi_akhir" type="date" />
+                            </x-ui.form-field>
+                        </div>
+                    </div>
+                </x-ui.modal-body>
+
+                <x-ui.modal-footer>
+                    <x-ui.button type="button" variant="light" x-on:click="$dispatch('close')">
+                        Batal
+                    </x-ui.button>
+
+                    <x-ui.button type="submit" variant="primary">
+                        Simpan Perubahan
+                    </x-ui.button>
+                </x-ui.modal-footer>
+            </form>
+        </x-ui.modal>
+    </x-ui.card>
+</x-ui.page>

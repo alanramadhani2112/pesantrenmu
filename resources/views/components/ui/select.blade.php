@@ -4,6 +4,8 @@
     'placeholder' => null,
     'options' => [],
     'size' => 'md',
+    'modifier' => null,
+    'disabled' => false,
 ])
 
 @php
@@ -21,7 +23,8 @@
 <select
     data-ui-select="metronic"
     @if($id) id="{{ $id }}" @endif
-    @if($model) wire:model="{{ $model }}" @endif
+    @if($model) wire:model{{ $modifier ? '.' . $modifier : '' }}="{{ $model }}" @endif
+    @disabled($disabled)
     {{ $attributes->merge(['class' => $classes]) }}
 >
     @if($placeholder)

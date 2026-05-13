@@ -24,7 +24,7 @@
         'lg' => 'btn-lg',
     ];
 
-    $classes = trim('btn btn-icon ' . ($variants[$variant] ?? $variants['light']) . ' ' . ($sizes[$size] ?? 'btn-sm'));
+    $classes = trim('btn btn-icon fw-semibold ' . ($variants[$variant] ?? $variants['light']) . ' ' . ($sizes[$size] ?? 'btn-sm'));
 @endphp
 
 @if($href)
@@ -38,13 +38,15 @@
         <x-ui.icon :name="$icon" class="fs-3" />
     </a>
 @else
-    <button
-        type="{{ $type }}"
+    <x-ui.button
+        :type="$type"
+        variant="link"
+        unstyled
         data-ui-icon-button="metronic"
         aria-label="{{ $label }}"
         title="{{ $label }}"
         {{ $attributes->merge(['class' => $classes]) }}
     >
         <x-ui.icon :name="$icon" class="fs-3" />
-    </button>
+    </x-ui.button>
 @endif

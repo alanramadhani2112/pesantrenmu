@@ -168,110 +168,115 @@ new #[Layout('layouts.app')] class extends Component {
 <div x-data="adminManagement" data-module-page="accounts">
     <x-slot name="header">{{ __('Account Management') }}</x-slot>
 
-    <x-ui.page
+    <x-ui.index-layout
         title="Accounts"
         subtitle="Kelola akun admin, asesor, dan pesantren dari satu daftar."
     >
-            <x-datatable.layout title="Manajemen Akun" :records="$this->users">
-                <x-slot name="filters">
-                    <x-ui.tabs>
-                        <x-ui.tab :active="$activeTab == 1" wire:click="setTab(1)">
-                            Admin
-                            <x-ui.badge variant="primary" class="ms-2">{{ $this->getCountByRole(1) }}</x-ui.badge>
-                        </x-ui.tab>
+        <x-ui.table title="Manajemen Akun" :records="$this->users">
+            <x-slot name="filters">
+                <x-ui.tabs>
+                    <x-ui.tab :active="$activeTab == 1" wire:click="setTab(1)">
+                        Admin
+                        <x-ui.badge variant="primary" class="ms-2">{{ $this->getCountByRole(1) }}</x-ui.badge>
+                    </x-ui.tab>
 
-                        <x-ui.tab :active="$activeTab == 2" wire:click="setTab(2)">
-                            Asesor
-                            <x-ui.badge variant="primary" class="ms-2">{{ $this->getCountByRole(2) }}</x-ui.badge>
-                        </x-ui.tab>
+                    <x-ui.tab :active="$activeTab == 2" wire:click="setTab(2)">
+                        Asesor
+                        <x-ui.badge variant="primary" class="ms-2">{{ $this->getCountByRole(2) }}</x-ui.badge>
+                    </x-ui.tab>
 
-                        <x-ui.tab :active="$activeTab == 3" wire:click="setTab(3)">
-                            Pesantren
-                            <x-ui.badge variant="primary" class="ms-2">{{ $this->getCountByRole(3) }}</x-ui.badge>
-                        </x-ui.tab>
-                    </x-ui.tabs>
+                    <x-ui.tab :active="$activeTab == 3" wire:click="setTab(3)">
+                        Pesantren
+                        <x-ui.badge variant="primary" class="ms-2">{{ $this->getCountByRole(3) }}</x-ui.badge>
+                    </x-ui.tab>
+                </x-ui.tabs>
 
-                    <x-datatable.search placeholder="Cari nama atau email..." />
+                <x-datatable.search placeholder="Cari nama atau email..." />
+            </x-slot>
 
-                    <x-ui.button wire:click="createUser" variant="primary" size="sm">
-                        <x-ui.icon name="plus" class="fs-4 me-1" />
-                        Tambah Akun
-                    </x-ui.button>
-                </x-slot>
+            <x-slot name="toolbar">
+                <x-ui.button wire:click="createUser" variant="primary" size="sm">
+                    <x-ui.icon name="plus" class="fs-4 me-1" />
+                    Tambah Akun
+                </x-ui.button>
+            </x-slot>
 
-                <x-slot name="thead">
-                    <th class="py-3 px-4 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest w-16">NO</th>
-                    <x-datatable.th field="name" :sortField="$sortField" :sortAsc="$sortAsc">
-                        PENGGUNA
-                    </x-datatable.th>
-                    <x-datatable.th field="email" :sortField="$sortField" :sortAsc="$sortAsc">
-                        EMAIL
-                    </x-datatable.th>
-                    <th class="py-3 px-4 text-center text-[11px] font-bold text-gray-400 uppercase tracking-widest">STATUS</th>
-                    <th class="py-3 px-4 text-right text-[11px] font-bold text-gray-400 uppercase tracking-widest pr-8">AKSI</th>
-                </x-slot>
+            <x-slot name="thead">
+                <x-ui.table-th :min-width="false" class="w-70px">No</x-ui.table-th>
+                <x-datatable.th field="name" :sortField="$sortField" :sortAsc="$sortAsc">
+                    Pengguna
+                </x-datatable.th>
+                <x-datatable.th field="email" :sortField="$sortField" :sortAsc="$sortAsc">
+                    Email
+                </x-datatable.th>
+                <x-ui.table-th align="center">Status</x-ui.table-th>
+                <x-ui.table-th align="end">Aksi</x-ui.table-th>
+            </x-slot>
 
-                <x-slot name="tbody">
-                    @forelse ($this->users as $index => $user)
-                    <tr class="hover:bg-gray-50/50 transition-colors duration-150 group border-b border-gray-50 last:border-0" wire:key="user-{{ $user->id }}">
-                        <td class="py-5 px-4 text-xs font-bold text-gray-400">
-                            {{ $this->users->firstItem() + $index }}
-                        </td>
-                        <td class="py-5 px-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-[#1e3a5f] font-bold text-xs ring-1 ring-slate-200 shadow-sm uppercase">
+            <x-slot name="tbody">
+                @forelse ($this->users as $index => $user)
+                <tr wire:key="user-{{ $user->id }}">
+                    <td class="text-muted fw-semibold">
+                        {{ $this->users->firstItem() + $index }}
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="symbol symbol-40px">
+                                <div class="symbol-label bg-light-primary text-primary fw-bold text-uppercase">
                                     {{ substr($user->name, 0, 2) }}
                                 </div>
-                                <span class="text-sm font-bold text-[#374151]">{{ $user->name }}</span>
                             </div>
-                        </td>
-                        <td class="py-5 px-4 text-xs font-bold text-gray-500">
-                            {{ $user->email }}
-                        </td>
-                        <td class="py-5 px-4 text-center">
-                            <x-ui.status-badge :variant="$user->status ? 'success' : 'danger'" class="text-uppercase">
-                                {{ $user->status ? 'Aktif' : 'Non-Aktif' }}
-                            </x-ui.status-badge>
-                        </td>
-                        <td class="py-5 px-4 text-right pr-6">
-                            <x-ui.action-menu>
-                                <x-ui.action-menu-item wire:click="editUser({{ $user->id }})">
-                                    <x-ui.icon name="pencil" class="fs-5 text-gray-500" />
-                                    Edit Akun
+
+                            <span class="text-gray-900 fw-semibold fs-6">{{ $user->name }}</span>
+                        </div>
+                    </td>
+                    <td class="text-muted fw-semibold">
+                        {{ $user->email }}
+                    </td>
+                    <td class="text-center">
+                        <x-ui.status-badge :variant="$user->status ? 'success' : 'danger'">
+                            {{ $user->status ? 'Aktif' : 'Non-Aktif' }}
+                        </x-ui.status-badge>
+                    </td>
+                    <td class="text-end">
+                        <x-ui.action-menu>
+                            <x-ui.action-menu-item wire:click="editUser({{ $user->id }})">
+                                <x-ui.icon name="pencil" class="fs-5 text-gray-500" />
+                                Edit Akun
+                            </x-ui.action-menu-item>
+
+                            @if ($user->id !== auth()->id())
+                                <x-ui.action-menu-item
+                                    :variant="$user->status ? 'warning' : 'success'"
+                                    x-on:click="confirmToggleStatus($wire, {{ $user->id }}, {{ $user->status ? 1 : 0 }}, '{{ addslashes($user->name) }}')"
+                                >
+                                    <x-ui.icon :name="$user->status ? 'cross-circle' : 'check-circle'" class="fs-5" />
+                                    {{ $user->status ? __('Non-Aktifkan') : __('Aktifkan') }}
                                 </x-ui.action-menu-item>
 
-                                @if ($user->id !== auth()->id())
-                                    <x-ui.action-menu-item
-                                        :variant="$user->status ? 'warning' : 'success'"
-                                        x-on:click="confirmToggleStatus($wire, {{ $user->id }}, {{ $user->status ? 1 : 0 }}, '{{ addslashes($user->name) }}')"
-                                    >
-                                        <x-ui.icon :name="$user->status ? 'cross-circle' : 'check-circle'" class="fs-5" />
-                                        {{ $user->status ? __('Non-Aktifkan') : __('Aktifkan') }}
-                                    </x-ui.action-menu-item>
+                                <x-ui.action-menu-item
+                                    variant="danger"
+                                    x-on:click="confirmDeleteUser($wire, {{ $user->id }}, '{{ addslashes($user->name) }}')"
+                                >
+                                    <x-ui.icon name="trash" class="fs-5" />
+                                    Hapus Akun
+                                </x-ui.action-menu-item>
+                            @endif
+                        </x-ui.action-menu>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="5">
+                        <x-ui.empty-state title="Data tidak ditemukan" class="py-15" />
+                    </td>
+                </tr>
+                @endforelse
+            </x-slot>
+        </x-ui.table>
+    </x-ui.index-layout>
 
-                                    <x-ui.action-menu-item
-                                        variant="danger"
-                                        x-on:click="confirmDeleteUser($wire, {{ $user->id }}, '{{ addslashes($user->name) }}')"
-                                    >
-                                        <x-ui.icon name="trash" class="fs-5" />
-                                        Hapus Akun
-                                    </x-ui.action-menu-item>
-                                @endif
-                            </x-ui.action-menu>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5">
-                            <x-ui.empty-state title="Data tidak ditemukan" class="py-15" />
-                        </td>
-                    </tr>
-                    @endforelse
-                </x-slot>
-            </x-datatable.layout>
-    </x-ui.page>
-
-    <x-modal name="account-modal" :show="$errors->isNotEmpty()" focusable>
+    <x-ui.modal name="account-modal" :show="$errors->isNotEmpty()" focusable>
         <form x-on:submit.prevent="confirmSaveAccount($wire)">
             <x-ui.modal-header
                 :title="$isEditing ? __('Edit Account') : __('Create Account')"
@@ -318,6 +323,6 @@ new #[Layout('layouts.app')] class extends Component {
                 </x-ui.button>
             </x-ui.modal-footer>
         </form>
-    </x-modal>
+    </x-ui.modal>
 
 </div>

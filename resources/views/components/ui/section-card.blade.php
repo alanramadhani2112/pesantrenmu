@@ -11,7 +11,7 @@
 
                 <div>
                     @if($title)
-                        <h3 class="spm-card-title text-gray-900 text-uppercase mb-1">{{ $title }}</h3>
+                        <h3 class="spm-card-title text-gray-900 mb-1">{{ $title }}</h3>
                     @endif
 
                     @if($subtitle)

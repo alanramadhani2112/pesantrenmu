@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Models\Akreditasi;
 use App\Models\Asesor;
@@ -178,8 +178,88 @@ new #[Layout('layouts.app')] class extends Component {
 
     <x-ui.page
         title="Akreditasi"
-        subtitle="Kelola tugas assessment, jadwal visitasi, catatan, dan laporan akreditasi."
+        subtitle="Kelola tugas penilaian, jadwal visitasi, catatan, dan laporan akreditasi pesantren."
     >
+        @php
+            $assessmentRecords = $this->assessments;
+            $assessmentCollection = method_exists($assessmentRecords, 'getCollection')
+                ? $assessmentRecords->getCollection()
+                : collect($assessmentRecords);
+            $totalTugas = method_exists($assessmentRecords, 'total')
+                ? $assessmentRecords->total()
+                : $assessmentCollection->count();
+            $assessmentAktif = $assessmentCollection->filter(fn ($item) => $item->akreditasi && (int) $item->akreditasi->status === 5)->count();
+            $visitasiAktif = $assessmentCollection->filter(fn ($item) => $item->akreditasi && in_array((int) $item->akreditasi->status, [3, 4], true))->count();
+        @endphp
+
+        <div class="row g-6 mb-6">
+            <div class="col-12 col-xl-8">
+                <x-ui.card
+                    title="Prioritas Tugas Asesor"
+                    subtitle="Mulai dari tugas yang sedang aktif, lalu lanjutkan ke instrumen dan laporan visitasi."
+                    class="h-100"
+                >
+                    <div class="row g-4">
+                        <div class="col-12 col-md-4">
+                            <div class="border border-dashed border-gray-300 rounded-3 p-5 h-100">
+                                <x-ui.badge variant="primary" class="mb-4">Total Tugas</x-ui.badge>
+                                <div class="fs-2 fw-bold text-gray-900 mb-1">{{ $totalTugas }}</div>
+                                <div class="text-muted fw-semibold fs-7">Daftar pengajuan akreditasi yang ditugaskan ke asesor.</div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <div class="border border-dashed border-gray-300 rounded-3 p-5 h-100">
+                                <x-ui.badge variant="warning" class="mb-4">Penilaian</x-ui.badge>
+                                <div class="fs-2 fw-bold text-gray-900 mb-1">{{ $assessmentAktif }}</div>
+                                <div class="text-muted fw-semibold fs-7">Tugas yang perlu dilanjutkan ke pengisian instrumen akreditasi.</div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <div class="border border-dashed border-gray-300 rounded-3 p-5 h-100">
+                                <x-ui.badge variant="info" class="mb-4">Visitasi</x-ui.badge>
+                                <div class="fs-2 fw-bold text-gray-900 mb-1">{{ $visitasiAktif }}</div>
+                                <div class="text-muted fw-semibold fs-7">Jadwal dan laporan visitasi yang perlu diselesaikan.</div>
+                            </div>
+                        </div>
+                    </div>
+                </x-ui.card>
+            </div>
+
+            <div class="col-12 col-xl-4">
+                <x-ui.card
+                    title="Alur Kerja Asesor"
+                    subtitle="Aksi utama tetap berada di menu tiap baris tugas akreditasi."
+                    class="h-100"
+                >
+                    <div class="d-flex flex-column gap-4">
+                        <div class="d-flex align-items-start gap-3">
+                            <span class="badge badge-circle badge-light-primary">1</span>
+                            <div>
+                                <div class="fw-bold text-gray-900">Buka detail</div>
+                                <div class="text-muted fs-7">Cek profil pesantren, instrumen, dan catatan sebelum memberi penilaian.</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start gap-3">
+                            <span class="badge badge-circle badge-light-primary">2</span>
+                            <div>
+                                <div class="fw-bold text-gray-900">Isi instrumen</div>
+                                <div class="text-muted fs-7">Gunakan aksi input nilai saat status pengajuan sudah memungkinkan.</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start gap-3">
+                            <span class="badge badge-circle badge-light-primary">3</span>
+                            <div>
+                                <div class="fw-bold text-gray-900">Selesaikan visitasi</div>
+                                <div class="text-muted fs-7">Atur jadwal, unggah laporan, dan tindak lanjuti revisi dari menu aksi.</div>
+                            </div>
+                        </div>
+                    </div>
+                </x-ui.card>
+            </div>
+        </div>
+
         <x-datatable.layout title="Pengajuan Akreditasi" :records="$this->assessments">
             <x-slot name="filters">
                 <x-datatable.search placeholder="Cari Pesantren..." />
@@ -203,69 +283,69 @@ new #[Layout('layouts.app')] class extends Component {
             </x-slot>
 
             <x-slot name="thead">
-                <th class="py-3 px-4 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest pl-6">PESANTREN</th>
-                <th class="py-3 px-4 text-center text-[11px] font-bold text-gray-400 uppercase tracking-widest">JADWAL ASESSMENT</th>
-                <th class="py-3 px-4 text-center text-[11px] font-bold text-gray-400 uppercase tracking-widest">STATUS</th>
-                <th class="py-3 px-4 text-center text-[11px] font-bold text-gray-400 uppercase tracking-widest">JADWAL VISITASI</th>
-                <th class="py-3 px-4 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest">CATATAN</th>
-                <th class="py-3 px-4 text-right text-[11px] font-bold text-gray-400 uppercase tracking-widest pr-8">AKSI</th>
+                <x-ui.table-th>Pesantren</x-ui.table-th>
+                <x-ui.table-th align="center">Jadwal Assessment</x-ui.table-th>
+                <x-ui.table-th align="center">Status</x-ui.table-th>
+                <x-ui.table-th align="center">Jadwal Visitasi</x-ui.table-th>
+                <x-ui.table-th>Catatan</x-ui.table-th>
+                <x-ui.table-th align="end">Aksi</x-ui.table-th>
             </x-slot>
 
             <x-slot name="tbody">
                 @forelse ($this->assessments as $index => $item)
                 @if($item->akreditasi)
-                <tr class="hover:bg-gray-50/50 transition-colors duration-150 group border-b border-gray-50 last:border-0" wire:key="ass-{{ $item->id }}">
-                    <td class="py-5 px-4 pl-6">
-                        <span class="text-sm font-bold text-[#374151]">{{ $item->akreditasi->user?->pesantren?->nama_pesantren ?? $item->akreditasi->user?->name ?? 'N/A' }}</span>
+                <tr wire:key="ass-{{ $item->id }}">
+                    <td>
+                        <span class="text-gray-900 fw-bold fs-6">{{ $item->akreditasi->user?->pesantren?->nama_pesantren ?? $item->akreditasi->user?->name ?? 'N/A' }}</span>
                     </td>
-                    <td class="py-5 px-4 text-center">
-                        <span class="text-xs font-bold text-gray-500">
-                            {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d') }}–{{ \Carbon\Carbon::parse($item->tanggal_berakhir)->format('d M Y') }}
+                    <td class="text-center">
+                        <span class="text-muted fw-semibold">
+                            {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d') }}â€“{{ \Carbon\Carbon::parse($item->tanggal_berakhir)->format('d M Y') }}
                         </span>
                     </td>
-                    <td class="py-5 px-4 text-center">
+                    <td class="text-center">
                         @if($item->akreditasi->status == 1)
-                        <x-ui.status-badge variant="success" class="text-uppercase">
+                        <x-ui.status-badge variant="success">
                             Selesai
                         </x-ui.status-badge>
                         @elseif($item->akreditasi->status == 2)
-                        <x-ui.status-badge variant="danger" class="text-uppercase">
+                        <x-ui.status-badge variant="danger">
                             Di Tolak
                         </x-ui.status-badge>
                         @elseif($item->akreditasi->status == 3)
-                        <x-ui.status-badge variant="primary" class="text-uppercase">
+                        <x-ui.status-badge variant="primary">
                             Validasi
                         </x-ui.status-badge>
                         @elseif($item->akreditasi->tgl_visitasi)
-                        <x-ui.status-badge variant="info" class="text-uppercase">
+                        <x-ui.status-badge variant="info">
                             Siap Visitasi
                         </x-ui.status-badge>
                         @elseif($item->akreditasi->catatans->whereNotNull('perbaikan')->filter(fn($c) => !empty($c->perbaikan))->isNotEmpty())
-                        <x-ui.status-badge variant="danger" class="text-uppercase">
+                        <x-ui.status-badge variant="danger">
                             Perlu Revisi
                         </x-ui.status-badge>
                         @else
-                        <x-ui.status-badge variant="warning" class="text-uppercase">
+                        <x-ui.status-badge variant="warning">
                             Belum Visitasi
                         </x-ui.status-badge>
                         @endif
                     </td>
-                    <td class="py-5 px-4 text-center text-xs font-bold text-gray-500">
+                    <td class="text-center text-muted fw-semibold">
                         @if($item->akreditasi->tgl_visitasi)
-                        {{ \Carbon\Carbon::parse($item->akreditasi->tgl_visitasi)->format('d') }}–{{ \Carbon\Carbon::parse($item->akreditasi->tgl_visitasi_akhir)->format('d M Y') }}
+                        {{ \Carbon\Carbon::parse($item->akreditasi->tgl_visitasi)->format('d') }}â€“{{ \Carbon\Carbon::parse($item->akreditasi->tgl_visitasi_akhir)->format('d M Y') }}
                         @else
-                        <span class="text-gray-300">Belum Dijadwalkan</span>
+                        <span class="text-muted">Belum Dijadwalkan</span>
                         @endif
                     </td>
-                    <td class="py-5 px-4">
+                    <td>
                         <x-ui.button wire:click="openCatatanModal({{ $item->akreditasi->id }})" variant="light" size="sm">
                             <x-ui.icon name="document" class="fs-5 me-1" />
                             {{ $item->akreditasi->catatans->count() > 0 ? $item->akreditasi->catatans->count() . ' Catatan' : 'Catatan' }}
                         </x-ui.button>
                     </td>
-                    <td class="py-5 px-4 text-right pr-6">
+                    <td class="text-end">
                         <x-ui.action-menu>
-                            <x-ui.action-menu-item :href="route('asesor.akreditasi-detail', $item->akreditasi->uuid)" wire:navigate>
+                            <x-ui.action-menu-item :href="route('asesor.akreditasi-detail', $item->akreditasi->uuid)">
                                 <x-ui.icon name="eye" class="fs-5 text-gray-500" />
                                 Lihat Detail
                             </x-ui.action-menu-item>
@@ -285,22 +365,20 @@ new #[Layout('layouts.app')] class extends Component {
                             @if($item->akreditasi->status == 4 || $item->akreditasi->status == 3 || $item->akreditasi->status == 1 || $item->akreditasi->status == 2)
                                 <x-ui.action-menu-item
                                     :href="route('asesor.akreditasi-detail', ['uuid' => $item->akreditasi->uuid, 'activeTab' => 'instrumen'])"
-                                    wire:navigate
                                     variant="primary"
                                 >
                                     <x-ui.icon name="pencil" class="fs-5" />
-                                    {{ $item->akreditasi->status == 1 || $item->akreditasi->status == 2 ? 'Lihat Nilai' : 'Input Nilai' }}
+                                    {{ $item->akreditasi->status == 1 || $item->akreditasi->status == 2 ? 'Lihat Nilai Akreditasi' : 'Input Nilai Akreditasi' }}
                                 </x-ui.action-menu-item>
                             @endif
 
                             @if($item->akreditasi->status == 3 || $item->akreditasi->status == 1 || $item->akreditasi->status == 2)
                                 <x-ui.action-menu-item
                                     :href="route('asesor.akreditasi-detail', ['uuid' => $item->akreditasi->uuid, 'activeTab' => 'laporan_visitasi'])"
-                                    wire:navigate
                                     variant="success"
                                 >
                                     <x-ui.icon name="document" class="fs-5" />
-                                    {{ $item->akreditasi->status == 3 ? 'Upload Laporan' : 'Lihat Laporan' }}
+                                    {{ $item->akreditasi->status == 3 ? 'Unggah Laporan' : 'Lihat Laporan Visitasi' }}
                                 </x-ui.action-menu-item>
                             @endif
                         </x-ui.action-menu>
@@ -319,7 +397,7 @@ new #[Layout('layouts.app')] class extends Component {
     </x-ui.page>
 
     <!-- Modal Atur Jadwal Visitasi -->
-    <x-modal name="atur-jadwal-modal" focusable>
+    <x-ui.modal name="atur-jadwal-modal" focusable>
         <form x-on:submit.prevent="confirmAction('submitVisitasi', 'Atur jadwal visitasi?', 'Jadwal visitasi akan disimpan.', 'Ya, atur')">
             <x-ui.modal-header
                 title="Atur Jadwal Visitasi"
@@ -336,8 +414,8 @@ new #[Layout('layouts.app')] class extends Component {
                     <p class="text-sm font-black text-[#1e3a5f]">{{ $selectedAssessment->akreditasi->user?->pesantren?->nama_pesantren ?? $selectedAssessment->akreditasi->user?->name }}</p>
                 </div>
                 <div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Jadwal Assessment</p>
-                    <p class="text-sm font-black text-[#1e3a5f]">{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_mulai)->format('d') }}–{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_berakhir)->format('d F Y') }}</p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Jadwal Penilaian</p>
+                    <p class="text-sm font-black text-[#1e3a5f]">{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_mulai)->format('d') }}â€“{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_berakhir)->format('d F Y') }}</p>
                 </div>
             </div>
             @endif
@@ -359,7 +437,7 @@ new #[Layout('layouts.app')] class extends Component {
 
                 <div class="notice d-flex bg-light-warning rounded border-warning border border-dashed p-4">
                     <div class="fw-semibold text-warning fs-7">
-                        Rentang visitasi maksimal 4 hari dan harus berada dalam periode assessment yang telah ditetapkan oleh Admin Pusat.
+                        Rentang visitasi maksimal 4 hari dan harus berada dalam periode penilaian yang telah ditetapkan oleh Admin Pusat.
                     </div>
                 </div>
 
@@ -383,10 +461,10 @@ new #[Layout('layouts.app')] class extends Component {
                 </x-ui.button>
             </x-ui.modal-footer>
         </form>
-    </x-modal>
+    </x-ui.modal>
 
     <!-- Modal Tolak Visitasi -->
-    <x-modal name="tolak-visitasi-modal" focusable>
+    <x-ui.modal name="tolak-visitasi-modal" focusable>
         <form x-on:submit.prevent="confirmAction('submitVisitasi', 'Tolak visitasi?', 'Pesantren akan menerima catatan perbaikan dokumen.', 'Ya, tolak', 'danger')">
             <x-ui.modal-header
                 title="Tolak Visitasi"
@@ -405,7 +483,7 @@ new #[Layout('layouts.app')] class extends Component {
                 </div>
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Jadwal Assessment</p>
-                    <p class="text-sm font-black text-[#1e3a5f]">{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_mulai)->format('d') }}–{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_berakhir)->format('d F Y') }}</p>
+                    <p class="text-sm font-black text-[#1e3a5f]">{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_mulai)->format('d') }}â€“{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_berakhir)->format('d F Y') }}</p>
                 </div>
             </div>
             @endif
@@ -442,11 +520,11 @@ new #[Layout('layouts.app')] class extends Component {
                 </x-ui.button>
             </x-ui.modal-footer>
         </form>
-    </x-modal>
+    </x-ui.modal>
 
     <!-- Modal Catatan (View Only) -->
-    <x-modal name="catatan-modal" focusable>
-        <div class="p-0 overflow-hidden rounded-3xl">
+    <x-ui.modal name="catatan-modal" focusable>
+        <div class="p-0 overflow-hidden rounded-3xl spm-modal-content-scroll">
             @if($selectedAkreditasiNotes)
             @php
             $latestCatatan = $selectedAkreditasiNotes->catatans->sortByDesc('created_at')->first();
@@ -458,14 +536,14 @@ new #[Layout('layouts.app')] class extends Component {
                     <h2 class="text-xl font-bold text-[#1e3a5f]">
                         {{ $isRejection ? 'Catatan Penolakan Visitasi' : 'Catatan Penerimaan Visitasi' }}
                     </h2>
-                    <button x-on:click="$dispatch('close')" class="text-slate-300 hover:text-slate-500 transition-colors">
+                    <x-ui.button type="button" variant="light" size="sm" x-on:click="$dispatch('close')" class="btn-icon btn-active-light-primary text-slate-300 hover:text-slate-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                    </button>
+                    </x-ui.button>
                 </div>
 
-                <div class="space-y-8 max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar">
+                <div class="space-y-8 pr-2 custom-scrollbar">
                     @forelse($selectedAkreditasiNotes->catatans->sortByDesc('created_at') as $catatan)
                     @php
                     $isNoteRejection = !empty($catatan->perbaikan);
@@ -566,5 +644,5 @@ new #[Layout('layouts.app')] class extends Component {
             </div>
             @endif
         </div>
-    </x-modal>
+    </x-ui.modal>
 </div>

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Models\Akreditasi;
 use App\Models\Asesor;
@@ -172,7 +172,7 @@ new #[Layout('layouts.app')] class extends Component {
                 'tanggal_berakhir' => $this->tanggal_berakhir,
             ]);
 
-            session()->flash('status', 'Pengajuan berhasil diverifikasi. Status berubah menjadi Assessment.');
+            session()->flash('status', 'Pengajuan berhasil diverifikasi. Status berubah menjadi tahap penilaian.');
         } else {
             $this->validate([
                 'catatan_penolakan' => 'required|string|min:10',
@@ -197,12 +197,95 @@ new #[Layout('layouts.app')] class extends Component {
 
     <x-ui.page
         title="Akreditasi"
-        subtitle="Kelola pengajuan, assessment, visitasi, dan tindak lanjut pesantren dari satu daftar kerja."
+        subtitle="Kelola pengajuan, penilaian, visitasi, dan tindak lanjut pesantren dari satu daftar akreditasi."
     >
         <x-slot name="toolbar">
             <x-ui.badge variant="primary">Admin</x-ui.badge>
             <x-ui.badge variant="warning">Aktif: {{ $this->countPengajuan + $this->countAssessment + $this->countVisitasi }}</x-ui.badge>
         </x-slot>
+
+        <div class="row g-6 mb-6">
+            <div class="col-12 col-xl-8">
+                <x-ui.card
+                    title="Prioritas Operasional"
+                    subtitle="Gunakan ringkasan ini untuk menentukan antrean pengajuan yang perlu diproses terlebih dahulu."
+                    class="h-100"
+                >
+                    <div class="row g-4">
+                        <div class="col-12 col-md-4">
+                            <div class="border border-dashed border-gray-300 rounded-3 p-5 h-100">
+                                <div class="d-flex align-items-center justify-content-between mb-4">
+                                    <x-ui.badge variant="primary">Verifikasi</x-ui.badge>
+                                    <span class="fs-2 fw-bold text-gray-900">{{ $this->countPengajuan }}</span>
+                                </div>
+                                <div class="text-muted fw-semibold fs-7 mb-4">Pengajuan baru yang menunggu keputusan admin.</div>
+                                <x-ui.button type="button" wire:click="$set('statusFilter', 'pengajuan')" variant="light-primary" size="sm" class="w-100">
+                                    Buka Pengajuan
+                                </x-ui.button>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <div class="border border-dashed border-gray-300 rounded-3 p-5 h-100">
+                                <div class="d-flex align-items-center justify-content-between mb-4">
+                                    <x-ui.badge variant="warning">Penilaian</x-ui.badge>
+                                    <span class="fs-2 fw-bold text-gray-900">{{ $this->countAssessment }}</span>
+                                </div>
+                                <div class="text-muted fw-semibold fs-7 mb-4">Proses penilaian yang perlu dipantau progresnya.</div>
+                                <x-ui.button type="button" wire:click="$set('statusFilter', 'assessment')" variant="light-warning" size="sm" class="w-100">
+                                    Pantau Proses
+                                </x-ui.button>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <div class="border border-dashed border-gray-300 rounded-3 p-5 h-100">
+                                <div class="d-flex align-items-center justify-content-between mb-4">
+                                    <x-ui.badge variant="info">Visitasi</x-ui.badge>
+                                    <span class="fs-2 fw-bold text-gray-900">{{ $this->countVisitasi }}</span>
+                                </div>
+                                <div class="text-muted fw-semibold fs-7 mb-4">Jadwal visitasi dan tindak lanjut lapangan.</div>
+                                <x-ui.button type="button" wire:click="$set('statusFilter', 'visitasi')" variant="light-info" size="sm" class="w-100">
+                                    Lihat Jadwal
+                                </x-ui.button>
+                            </div>
+                        </div>
+                    </div>
+                </x-ui.card>
+            </div>
+
+            <div class="col-12 col-xl-4">
+                <x-ui.card
+                    title="Mode Kerja Admin"
+                    subtitle="Alur keputusan tetap mengikuti proses yang sudah berjalan."
+                    class="h-100"
+                >
+                    <div class="d-flex flex-column gap-4">
+                        <div class="d-flex align-items-start gap-3">
+                            <span class="badge badge-circle badge-light-primary">1</span>
+                            <div>
+                                <div class="fw-bold text-gray-900">Pilih tahap proses</div>
+                                <div class="text-muted fs-7">Gunakan tab Pengajuan, Penilaian, atau Visitasi.</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start gap-3">
+                            <span class="badge badge-circle badge-light-primary">2</span>
+                            <div>
+                                <div class="fw-bold text-gray-900">Cari pesantren</div>
+                                <div class="text-muted fs-7">Persempit daftar akreditasi sebelum membuka aksi.</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start gap-3">
+                            <span class="badge badge-circle badge-light-primary">3</span>
+                            <div>
+                                <div class="fw-bold text-gray-900">Tindak lanjuti</div>
+                                <div class="text-muted fs-7">Verifikasi, detail, catatan, ekspor, dan hapus tetap di tabel.</div>
+                            </div>
+                        </div>
+                    </div>
+                </x-ui.card>
+            </div>
+        </div>
 
         <x-ui.table
             title="Daftar Pengajuan"
@@ -212,17 +295,17 @@ new #[Layout('layouts.app')] class extends Component {
         >
             <x-slot name="filters">
                 <div class="d-flex flex-wrap align-items-center gap-2">
-                    <button type="button" wire:click="$set('statusFilter', 'pengajuan')" class="btn btn-sm {{ $statusFilter === 'pengajuan' ? 'btn-primary' : 'btn-light' }}">
+                    <x-ui.button type="button" wire:click="$set('statusFilter', 'pengajuan')" :variant="$statusFilter === 'pengajuan' ? 'primary' : 'light'" size="sm">
                         Pengajuan ({{ $this->countPengajuan }})
-                    </button>
+                    </x-ui.button>
 
-                    <button type="button" wire:click="$set('statusFilter', 'assessment')" class="btn btn-sm {{ $statusFilter === 'assessment' ? 'btn-primary' : 'btn-light' }}">
-                        Assessment ({{ $this->countAssessment }})
-                    </button>
+            <x-ui.button type="button" wire:click="$set('statusFilter', 'assessment')" :variant="$statusFilter === 'assessment' ? 'primary' : 'light'" size="sm">
+                        Penilaian ({{ $this->countAssessment }})
+                    </x-ui.button>
 
-                    <button type="button" wire:click="$set('statusFilter', 'visitasi')" class="btn btn-sm {{ $statusFilter === 'visitasi' ? 'btn-primary' : 'btn-light' }}">
+                    <x-ui.button type="button" wire:click="$set('statusFilter', 'visitasi')" :variant="$statusFilter === 'visitasi' ? 'primary' : 'light'" size="sm">
                         Visitasi ({{ $this->countVisitasi }})
-                    </button>
+                    </x-ui.button>
                 </div>
 
                 <x-ui.table-search placeholder="Cari Pesantren..." />
@@ -234,11 +317,9 @@ new #[Layout('layouts.app')] class extends Component {
             </x-slot>
 
             <x-slot name="thead">
-                <th class="w-50px">
-                    <div class="form-check form-check-sm form-check-custom form-check-solid">
-                        <input type="checkbox" wire:model.live="selectAll" class="form-check-input">
-                    </div>
-                </th>
+                <x-ui.table-th :min-width="false" align="center" class="w-60px">
+                    <x-ui.table-checkbox model="selectAll" label="Pilih semua pengajuan" />
+                </x-ui.table-th>
 
                 <x-ui.table-th field="user_id" :sortField="$sortField" :sortAsc="$sortAsc">Pesantren</x-ui.table-th>
                 <x-ui.table-th field="created_at" :sortField="$sortField" :sortAsc="$sortAsc">Tahap Akreditasi</x-ui.table-th>
@@ -259,7 +340,7 @@ new #[Layout('layouts.app')] class extends Component {
                             'variant' => 'primary',
                         ],
                         5 => [
-                            'label' => 'Assessment',
+                            'label' => 'Penilaian',
                             'date' => $item->assessment1 ? \Carbon\Carbon::parse($item->assessment1->tanggal_mulai)->format('d/m/y') : '-',
                             'variant' => 'warning',
                         ],
@@ -281,10 +362,8 @@ new #[Layout('layouts.app')] class extends Component {
                 @endphp
 
                 <tr wire:key="akred-{{ $item->id }}">
-                    <td>
-                        <div class="form-check form-check-sm form-check-custom form-check-solid">
-                            <input type="checkbox" wire:model.live="selectedIds" value="{{ $item->id }}" class="form-check-input">
-                        </div>
+                    <td class="text-center">
+                        <x-ui.table-checkbox model="selectedIds" :value="$item->id" :label="'Pilih pengajuan ' . ($item->user->pesantren->nama_pesantren ?? $item->user->name)" />
                     </td>
 
                     <td>
@@ -320,10 +399,10 @@ new #[Layout('layouts.app')] class extends Component {
                     </td>
 
                     <td>
-                        <button type="button" wire:click="openCatatanModal({{ $item->id }})" class="btn btn-sm btn-light-warning">
+                        <x-ui.button type="button" wire:click="openCatatanModal({{ $item->id }})" variant="light-warning" size="sm">
                             <x-ui.icon name="document" class="fs-4 me-1" />
                             {{ $item->catatans->count() }} Catatan
-                        </button>
+                        </x-ui.button>
                     </td>
 
                     <td class="text-end">
@@ -335,7 +414,7 @@ new #[Layout('layouts.app')] class extends Component {
                                 </x-ui.action-menu-item>
                             @endif
 
-                            <x-ui.action-menu-item :href="route('admin.akreditasi-detail', $item->uuid)" wire:navigate>
+                            <x-ui.action-menu-item :href="route('admin.akreditasi-detail', $item->uuid)">
                                 <x-ui.icon name="eye" class="fs-4" />
                                 Lihat Detail
                             </x-ui.action-menu-item>
@@ -366,7 +445,7 @@ new #[Layout('layouts.app')] class extends Component {
     </x-ui.page>
 
     <!-- Modal Verifikasi -->
-    <x-modal name="verifikasi-modal" focusable>
+    <x-ui.modal name="verifikasi-modal" focusable>
         <form x-on:submit.prevent="confirmVerifikasiPengajuan($wire)">
             <x-ui.modal-header
                 title="Verifikasi Pengajuan Akreditasi"
@@ -422,13 +501,13 @@ new #[Layout('layouts.app')] class extends Component {
                         </div>
 
                         <div class="col-md-6">
-                            <x-ui.form-field label="Tanggal Mulai Assessment" for="tanggal_mulai" :error="$errors->get('tanggal_mulai')">
+            <x-ui.form-field label="Tanggal Mulai Penilaian" for="tanggal_mulai" :error="$errors->get('tanggal_mulai')">
                                 <x-ui.input model="tanggal_mulai" id="tanggal_mulai" type="date" />
                             </x-ui.form-field>
                         </div>
 
                         <div class="col-md-6">
-                            <x-ui.form-field label="Tanggal Berakhir Assessment" for="tanggal_berakhir" :error="$errors->get('tanggal_berakhir')">
+            <x-ui.form-field label="Tanggal Berakhir Penilaian" for="tanggal_berakhir" :error="$errors->get('tanggal_berakhir')">
                                 <x-ui.input model="tanggal_berakhir" id="tanggal_berakhir" type="date" />
                             </x-ui.form-field>
                         </div>
@@ -464,11 +543,11 @@ new #[Layout('layouts.app')] class extends Component {
                 </x-ui.button>
             </x-ui.modal-footer>
         </form>
-    </x-modal>
+    </x-ui.modal>
 
     <!-- Modal Catatan (View Only) -->
-    <x-modal name="catatan-modal" focusable>
-        <div class="p-0 overflow-hidden rounded-3xl">
+    <x-ui.modal name="catatan-modal" focusable>
+        <div class="p-0 overflow-hidden rounded-3xl spm-modal-content-scroll">
             @if($selectedAkreditasiNotes)
             @php
             $latestCatatan = $selectedAkreditasiNotes->catatans->sortByDesc('created_at')->first();
@@ -480,14 +559,14 @@ new #[Layout('layouts.app')] class extends Component {
                     <h2 class="text-xl font-bold text-[#1e3a5f]">
                         {{ $isRejection ? 'Catatan Penolakan Visitasi' : 'Catatan Akreditasi' }}
                     </h2>
-                    <button x-on:click="$dispatch('close')" class="text-slate-300 hover:text-slate-500 transition-colors">
+                    <x-ui.button type="button" variant="light" size="sm" x-on:click="$dispatch('close')" class="btn-icon btn-active-light-primary text-slate-300 hover:text-slate-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                    </button>
+                    </x-ui.button>
                 </div>
 
-                <div class="space-y-8 max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar">
+                <div class="space-y-8 pr-2 custom-scrollbar">
                     @forelse($selectedAkreditasiNotes->catatans->sortByDesc('created_at') as $catatan)
                     @php
                     $isNoteRejection = !empty($catatan->perbaikan);
@@ -576,5 +655,5 @@ new #[Layout('layouts.app')] class extends Component {
             </div>
             @endif
         </div>
-    </x-modal>
+    </x-ui.modal>
 </div>

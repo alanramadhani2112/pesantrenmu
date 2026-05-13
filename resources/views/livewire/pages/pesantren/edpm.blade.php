@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Models\MasterEdpmKomponen;
 use App\Models\Edpm;
@@ -9,9 +9,9 @@ use Illuminate\Support\Str;
 
 new #[Layout('layouts.app')] class extends Component {
     public $komponens;
-    public $evaluasis = []; // butir_id => isian
-    public $links = [];     // butir_id => link
-    public $catatans = [];  // komponen_id => catatan
+    public $evaluasis = [];
+    public $links = [];
+    public $catatans = [];
     public $activeStep = 0;
 
     public function mount()
@@ -43,7 +43,6 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function nextStep()
     {
-        // Validation for current step
         if (isset($this->komponens[$this->activeStep])) {
             $currentKomponen = $this->komponens[$this->activeStep];
             $rules = [];
@@ -140,7 +139,6 @@ new #[Layout('layouts.app')] class extends Component {
             return;
         }
 
-        // Validate formats if present, but don't require values
         $this->validate([
             'evaluasis.*' => 'nullable|numeric|min:1|max:4',
             'links.*' => 'nullable|url',
@@ -154,244 +152,265 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function isStepComplete($index)
     {
-        if (!isset($this->komponens[$index])) return false;
+        if (!isset($this->komponens[$index])) {
+            return false;
+        }
 
         foreach ($this->komponens[$index]->butirs as $butir) {
-            // Check if evaluation value exists and is not empty or null
             if (!isset($this->evaluasis[$butir->id]) || $this->evaluasis[$butir->id] === '') {
                 return false;
             }
+
             if (!isset($this->links[$butir->id]) || $this->links[$butir->id] === '') {
                 return false;
             }
         }
+
         return true;
     }
 }; ?>
 
-<div class="py-12" x-data="edpmManagement">
-    <x-slot name="header">{{ __('Evaluasi Data Pesantren Muhammadiyah (EDPM)') }}</x-slot>
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6 text-gray-900 overflow-x-auto">
-                <header class="mb-6">
-                    <h2 class="text-lg md:text-xl font-bold text-gray-800 border-l-4 border-indigo-600 pl-3">
-                        {{ __('Evaluasi Data Pesantren Muhammadiyah (EDPM)') }}
-                    </h2>
-                </header>
+@php
+    $isLocked = auth()->user()->pesantren->is_locked;
+    $currentKomponen = $komponens[$activeStep] ?? null;
+    $komponenCount = is_countable($komponens ?? null) ? count($komponens) : 0;
+@endphp
 
-                @php $isLocked = auth()->user()->pesantren->is_locked; @endphp
+<x-slot name="header">{{ __('Evaluasi Data Pesantren Muhammadiyah (EDPM)') }}</x-slot>
 
-                @if($isLocked)
-                <div class="mb-6 flex items-center gap-4 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 shadow-sm">
-                    <div class="flex-shrink-0 w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-sm font-black text-amber-800 uppercase tracking-wide">Data Terkunci</p>
-                        <p class="text-xs text-amber-700 mt-0.5">Data EDPM tidak dapat diubah karena pesantren sedang dalam proses akreditasi.</p>
-                    </div>
-                </div>
-                @endif
+<x-ui.page
+    title="Evaluasi Data Pesantren Muhammadiyah (EDPM)"
+    subtitle="Susun evaluasi per komponen, tautan bukti, dan catatan kinerja dengan komponen Metronic reusable."
+    data-module-page="pesantren-edpm"
+    x-data="edpmManagement"
+>
+    <x-slot:toolbar>
+        <x-ui.status-badge :variant="$isLocked ? 'warning' : 'success'">
+            {{ $isLocked ? 'Terkunci' : 'Aktif' }}
+        </x-ui.status-badge>
 
-                @if($komponens && count($komponens) > 0)
-                <!-- Stepper Headers -->
-                <div class="mb-8 overflow-x-auto md:overflow-hidden pb-16 md:pb-20">
-                    <div class="flex items-center justify-between md:justify-center md:flex-wrap gap-y-16 md:gap-y-20 relative min-w-[600px] md:min-w-full px-2">
-                        <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 -z-10 md:hidden"></div>
-                        @foreach($komponens as $index => $komponen)
-                        @php
-                        $isActive = $activeStep === $index;
-                        $isComplete = $this->isStepComplete($index);
+        <x-ui.button :href="route('pesantren.profile')" variant="light">
+            <x-ui.icon name="exit-right" class="fs-4 me-1" />
+            Kembali
+        </x-ui.button>
+    </x-slot:toolbar>
 
-                        // Determain classes based on state
-                        if ($isActive) {
-                        $circleClasses = 'bg-indigo-600 text-white border-indigo-600 ring-2 ring-indigo-200';
-                        $textClasses = 'text-indigo-600';
-                        } elseif ($isComplete) {
-                        $circleClasses = 'bg-green-100 text-green-600 border-green-500';
-                        $textClasses = 'text-green-600';
-                        } else {
-                        $circleClasses = 'bg-white text-gray-400 border-gray-300';
-                        $textClasses = 'text-gray-400';
-                        }
-                        @endphp
-                        <div class="relative flex flex-col items-center group cursor-default bg-white px-2 md:w-1/4 lg:w-1/6">
-                            <div class="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-bold text-xs md:text-sm border-2 transition-colors {{ $circleClasses }} z-10 mb-2">
-                                {{ $index + 1 }}
-                            </div>
-                            <span class="text-[10px] md:text-xs font-semibold text-center w-full px-1 {{ $textClasses }} leading-tight">
-                                {{ $komponen->nama }}
-                            </span>
-                        </div>
-                        @endforeach
-                    </div>
+    <div class="row g-5 mb-6">
+        <div class="col-lg-4">
+            <x-ui.stat-card label="Status EDPM" value="{{ $isLocked ? 'Terkunci' : 'Aktif' }}" variant="{{ $isLocked ? 'warning' : 'success' }}">
+                <x-slot:icon><x-ui.icon name="shield-tick" class="fs-2" /></x-slot:icon>
+            </x-ui.stat-card>
+        </div>
 
-                </div>
+        <div class="col-lg-4">
+            <x-ui.stat-card label="Komponen Aktif" value="{{ $komponenCount }} Komponen" variant="info">
+                <x-slot:icon><x-ui.icon name="menu" class="fs-2" /></x-slot:icon>
+            </x-ui.stat-card>
+        </div>
 
-                <div class="mt-4 mb-4">
-                    <h3 class="text-base md:text-lg font-semibold text-gray-800 text-center border-b pb-2">
-                        {{ $komponens[$activeStep]->nama ?? '' }}
-                    </h3>
-                </div>
-
-                <form wire:submit.prevent>
-                    <div class="space-y-6">
-                        @if(isset($komponens[$activeStep]))
-                        @php
-                        $currentKomponen = $komponens[$activeStep];
-                        @endphp
-
-                        <!-- List Butir as Cards -->
-                        <div class="grid gap-6">
-                            @forelse($currentKomponen->butirs as $butir)
-                            <div class="bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 md:p-6">
-                                <div class="flex flex-col md:flex-row md:items-start gap-4">
-                                    <!-- Badges -->
-                                    <div class="flex flex-row md:flex-col gap-2 shrink-0">
-                                        <div class="bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1 rounded text-center whitespace-nowrap">
-                                            SK: {{ $butir->no_sk }}
-                                        </div>
-                                        <div class="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1 rounded text-center whitespace-nowrap">
-                                            No. {{ $butir->nomor_butir }}
-                                        </div>
-                                    </div>
-
-                                    <!-- Content -->
-                                    <div class="grow">
-                                        <p class="text-sm md:text-base text-gray-800 leading-relaxed mb-4">
-                                            {{ $butir->butir_pernyataan }}
-                                        </p>
-
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                                                <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Pilih Nilai Evaluasi:</label>
-                                                <select wire:model.live="evaluasis.{{ $butir->id }}"
-                                                    @disabled($isLocked)
-                                                    class="w-full border-gray-300 rounded-md text-sm focus:border-indigo-500 focus:ring-indigo-500 shadow-sm @error('evaluasis.'.$butir->id) border-red-300 ring-red-200 @enderror {{ $isLocked ? 'opacity-50 cursor-not-allowed bg-gray-100' : '' }}">
-                                                    <option value="">-- Pilih Nilai --</option>
-                                                    <option value="1">1</option>
-                                                    <option value="2">2</option>
-                                                    <option value="3">3</option>
-                                                    <option value="4">4</option>
-                                                </select>
-                                                @error('evaluasis.'.$butir->id)
-                                                <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p>
-                                                @enderror
-                                            </div>
-
-                                            <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                                                <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Tautan Bukti (Wajib):</label>
-                                                <input type="url" wire:model.live="links.{{ $butir->id }}"
-                                                    placeholder="https://..."
-                                                    @disabled($isLocked)
-                                                    class="w-full border-gray-300 rounded-md text-sm focus:border-indigo-500 focus:ring-indigo-500 shadow-sm @error('links.'.$butir->id) border-red-300 ring-red-200 @enderror {{ $isLocked ? 'opacity-50 cursor-not-allowed bg-gray-100' : '' }}">
-                                                @error('links.'.$butir->id)
-                                                <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            @empty
-                            <div class="text-center py-10 text-gray-500 italic border-2 border-dashed rounded-lg">
-                                Belum ada butir pernyataan untuk komponen ini.
-                            </div>
-                            @endforelse
-                        </div>
-
-                        <!-- Catatan Section (Only on Last Step) -->
-                        @if($activeStep === count($komponens) - 1)
-                        <div class="mt-12 space-y-4">
-                            <h3 class="text-lg font-bold text-gray-900 border-l-4 border-blue-500 pl-3">
-                                Catatan & Deskripsi Kinerja
-                            </h3>
-                            <p class="text-sm text-gray-600 mb-4">
-                                Mohon lengkapi catatan evaluasi untuk setiap komponen berikut sebelum menyimpan.
-                            </p>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                @foreach($komponens as $komponen)
-                                <div class="bg-blue-50 border border-blue-100 rounded-lg p-4">
-                                    <label class="block text-sm font-bold text-gray-800 mb-2">
-                                        {{ $komponen->nama }}
-                                    </label>
-                                    <textarea wire:model.live="catatans.{{ $komponen->id }}"
-                                        @disabled($isLocked)
-                                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm min-h-[100px] {{ $isLocked ? 'opacity-50 cursor-not-allowed bg-gray-100' : '' }}"
-                                        placeholder="Catatan untuk {{ strtolower($komponen->nama) }}..."></textarea>
-                                </div>
-                                @endforeach
-                            </div>
-                        </div>
-                        @endif
-                        @endif
-                    </div>
-
-                    <div class="mt-8 flex flex-col md:flex-row items-center justify-between gap-4 border-t pt-6">
-                        <!-- Prev Button -->
-                        <button type="button" wire:click="prevStep"
-                            class="w-full md:w-auto bg-gray-100/50 text-gray-600 font-bold py-3 px-8 rounded-2xl transition-all {{ ($activeStep === 0 || $isLocked) ? 'opacity-50 cursor-not-allowed' : '' }}"
-                            {{ ($activeStep === 0 || $isLocked) ? 'disabled' : '' }}>
-                            &laquo; Sebelumnya
-                        </button>
-
-                        <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                            @if($isLocked)
-                            <!-- Locked State Buttons -->
-                            <button type="button" disabled
-                                class="w-full md:w-auto bg-gray-300 text-gray-400 text-[11px] font-black py-3 px-10 rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest cursor-not-allowed select-none">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                                Data Terkunci
-                            </button>
-                            @else
-                            <!-- Draft Button -->
-                            <button type="button" wire:click="saveDraft" wire:loading.attr="disabled"
-                                class="w-full md:w-auto bg-amber-500 text-white font-bold py-3 px-8 rounded-2xl transition-all flex items-center justify-center gap-2">
-                                <svg wire:loading.remove wire:target="saveDraft" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                                </svg>
-                                <svg wire:loading wire:target="saveDraft" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span>Simpan Draft</span>
-                            </button>
-
-                            <!-- Next / Save Button -->
-                            @if ($activeStep === count($komponens) - 1)
-                            <button type="button" @click="confirmSimpan($wire)" wire:loading.attr="disabled"
-                                class="w-full md:w-auto bg-gray-900 text-white text-[11px] font-black py-3 px-10 rounded-2xl flex items-center justify-center gap-2 uppercase tracking-widest transition-all">
-                                <span>Simpan Permanen EDPM</span>
-                            </button>
-                            @else
-                            <button type="button" @click="validateAndNext($wire)" wire:loading.attr="disabled"
-                                class="w-full md:w-auto bg-indigo-600 text-white font-bold py-3 px-8 rounded-2xl flex items-center justify-center gap-2 transition-all">
-                                <span>Selanjutnya</span>
-                                <svg wire:loading.remove wire:target="nextStep" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                                <svg wire:loading wire:target="nextStep" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                            </button>
-                            @endif
-                            @endif
-                        </div>
-                    </div>
-                </form>
-                @else
-                <div class="text-center py-10">
-                    <p class="text-gray-500 italic">Data komponen EDPM belum tersedia.</p>
-                </div>
-                @endif
-            </div>
+        <div class="col-lg-4">
+            <x-ui.stat-card label="Langkah Saat Ini" value="{{ $currentKomponen?->nama ?? 'Belum Ada Komponen' }}" variant="primary">
+                <x-slot:icon><x-ui.icon name="layers" class="fs-2" /></x-slot:icon>
+            </x-ui.stat-card>
         </div>
     </div>
 
-</div>
+    @if($isLocked)
+        <div class="spm-inline-alert">
+            <x-ui.icon name="shield-tick" class="fs-2 text-warning" />
+            <div>
+                <div class="spm-inline-alert-title">Data Terkunci</div>
+                <div class="spm-inline-alert-text">Data EDPM tidak dapat diubah karena pesantren sedang dalam proses akreditasi.</div>
+            </div>
+        </div>
+    @endif
+
+    @if($komponenCount > 0)
+        <x-ui.section-card title="Tahapan EDPM" subtitle="Pilih komponen untuk mengisi nilai evaluasi dan tautan bukti.">
+            <div class="p-6">
+                <div class="spm-edpm-stepper">
+                    @foreach($komponens as $index => $komponen)
+                        @php
+                            $isActive = $activeStep === $index;
+                            $isComplete = $this->isStepComplete($index);
+                            $variant = $isActive ? 'primary' : ($isComplete ? 'success' : 'light');
+                            $badgeClass = $isActive ? 'badge badge-light-primary' : ($isComplete ? 'badge badge-light-success' : 'badge badge-light-secondary');
+                        @endphp
+
+                        <x-ui.button
+                            type="button"
+                            wire:click="setStep({{ $index }})"
+                            :variant="$variant"
+                            class="w-100"
+                            size="sm"
+                        >
+                            <span class="{{ $badgeClass }} me-3">{{ $index + 1 }}</span>
+                            <span class="d-flex flex-column text-start min-w-0">
+                                <span class="fw-bold text-truncate">{{ $komponen->nama }}</span>
+                                <span class="fs-8 opacity-75 text-truncate">{{ count($komponen->butirs) }} butir</span>
+                            </span>
+                        </x-ui.button>
+                    @endforeach
+                </div>
+            </div>
+        </x-ui.section-card>
+
+        @if($currentKomponen)
+            <x-ui.section-card
+                :title="$currentKomponen->nama"
+                subtitle="Isi evaluasi, tautan bukti, dan catatan untuk komponen yang sedang aktif."
+            >
+                <x-slot:toolbar>
+                    <x-ui.status-badge :variant="$this->isStepComplete($activeStep) ? 'success' : 'warning'">
+                        {{ $this->isStepComplete($activeStep) ? 'Lengkap' : 'Perlu Diisi' }}
+                    </x-ui.status-badge>
+                </x-slot:toolbar>
+
+                <div class="p-6">
+                    <x-ui.simple-table tableClass="spm-edpm-table">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Butir</th>
+                                <th>Pernyataan</th>
+                                <th style="min-width: 220px;">Evaluasi</th>
+                                <th style="min-width: 320px;" class="pe-4">Tautan Bukti</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($currentKomponen->butirs as $butir)
+                                <tr>
+                                    <td class="ps-4 align-top">
+                                        <div class="fw-bold text-gray-900">{{ $butir->nomor_butir }}</div>
+                                        <div class="text-muted fs-8">SK {{ $butir->no_sk }}</div>
+                                    </td>
+                                    <td class="align-top">
+                                        <div class="spm-edpm-statement">{{ $butir->butir_pernyataan }}</div>
+                                    </td>
+                                    <td class="align-top">
+                                        <x-ui.form-field
+                                            label="Nilai"
+                                            :for="'evaluasis-' . $butir->id"
+                                            :error="$errors->get('evaluasis.' . $butir->id)"
+                                        >
+                                            <x-ui.select
+                                                :id="'evaluasis-' . $butir->id"
+                                                :model="'evaluasis.' . $butir->id"
+                                                modifier="live"
+                                                placeholder="Pilih nilai"
+                                                :options="[1 => '1', 2 => '2', 3 => '3', 4 => '4']"
+                                                class="spm-score-control"
+                                                :disabled="$isLocked"
+                                            />
+                                        </x-ui.form-field>
+                                    </td>
+                                    <td class="align-top pe-4">
+                                        <x-ui.form-field
+                                            label="Tautan bukti"
+                                            :for="'links-' . $butir->id"
+                                            :error="$errors->get('links.' . $butir->id)"
+                                        >
+                                            <x-ui.input
+                                                type="url"
+                                                :id="'links-' . $butir->id"
+                                                :model="'links.' . $butir->id"
+                                                modifier="live"
+                                                placeholder="https://..."
+                                                :disabled="$isLocked"
+                                            />
+                                        </x-ui.form-field>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </x-ui.simple-table>
+                </div>
+            </x-ui.section-card>
+
+            @if ($activeStep === $komponenCount - 1)
+                <x-ui.section-card title="Catatan Kinerja Satuan Pendidikan" subtitle="Lengkapi catatan evaluasi untuk setiap komponen.">
+                    <div class="p-6">
+                        <div class="spm-input-grid">
+                            @foreach($komponens as $komponen)
+                                <x-ui.form-field
+                                    :label="$komponen->nama"
+                                    :for="'catatans-' . $komponen->id"
+                                    :error="$errors->get('catatans.' . $komponen->id)"
+                                >
+                                    <x-ui.textarea
+                                        :id="'catatans-' . $komponen->id"
+                                        :model="'catatans.' . $komponen->id"
+                                        modifier="live"
+                                        rows="4"
+                                        placeholder="Catatan untuk {{ $komponen->nama }}"
+                                        :disabled="$isLocked"
+                                    />
+                                </x-ui.form-field>
+                            @endforeach
+                        </div>
+                    </div>
+                </x-ui.section-card>
+            @endif
+
+            <div class="spm-action-panel d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-4">
+                <div>
+                    <h3 class="spm-card-title mb-1">Aksi EDPM</h3>
+                    <div class="text-muted fw-semibold fs-7">
+                        Gunakan draf untuk menyimpan sementara, lalu finalkan setelah semua komponen lengkap.
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center gap-2">
+                    <x-ui.button
+                        type="button"
+                        variant="light"
+                        wire:click="prevStep"
+                        wire:loading.attr="disabled"
+                        :disabled="$activeStep === 0 || $isLocked"
+                    >
+                        Sebelumnya
+                    </x-ui.button>
+
+                    @if(!$isLocked)
+                        <x-ui.button
+                            type="button"
+                            variant="warning"
+                            wire:loading.attr="disabled"
+                            @click="confirmSaveDraft($wire)"
+                        >
+                            <span wire:loading.remove wire:target="saveDraft">Simpan Draf</span>
+                            <span wire:loading wire:target="saveDraft">Memproses...</span>
+                        </x-ui.button>
+                    @endif
+
+                    @if($activeStep === $komponenCount - 1)
+                        <x-ui.button
+                            type="button"
+                            variant="success"
+                            wire:loading.attr="disabled"
+                            @click="confirmSimpan($wire)"
+                            :disabled="$isLocked"
+                        >
+                            <span wire:loading.remove wire:target="save">Simpan Permanen</span>
+                            <span wire:loading wire:target="save">Memproses...</span>
+                        </x-ui.button>
+                    @else
+                        <x-ui.button
+                            type="button"
+                            variant="primary"
+                            wire:loading.attr="disabled"
+                            @click="validateAndNext($wire)"
+                            :disabled="$isLocked"
+                        >
+                            <span wire:loading.remove wire:target="nextStep">Selanjutnya</span>
+                            <span wire:loading wire:target="nextStep">Memproses...</span>
+                        </x-ui.button>
+                    @endif
+                </div>
+            </div>
+        @endif
+    @else
+        <x-ui.card>
+            <x-ui.empty-state title="Data Komponen Belum Tersedia" description="Pesantren ini belum memiliki komponen EDPM yang dapat diisi." />
+        </x-ui.card>
+    @endif
+</x-ui.page>

@@ -14,6 +14,7 @@
 /.playwright-cli
 /auth.json
 /node_modules
+/public/assets
 /public/build
 /public/hot
 /public/storage
@@ -24,4 +25,5 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+tmp_*.txt
 spm.sql

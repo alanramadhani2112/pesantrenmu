@@ -13,6 +13,8 @@
         'geolocation' => 2,
         'check-circle' => 2,
         'cross-circle' => 2,
+        'information-2' => 3,
+        'information-5' => 3,
         'magnifier' => 2,
         'arrow-up' => 2,
         'arrow-down' => 2,

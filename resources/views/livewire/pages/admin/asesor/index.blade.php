@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Models\User;
 use App\Models\Asesor;
@@ -114,12 +114,12 @@ new #[Layout('layouts.app')] class extends Component {
             {{ __('Asesor') }}
     </x-slot>
 
-    <x-ui.page
+    <x-ui.index-layout
         title="Asesor"
         subtitle="Kelola asesor, penugasan aktif, dan status ketersediaan."
     >
-        <x-datatable.layout title="Asesor" :records="$this->asesors">
-            <x-slot name="filters">
+        <x-slot name="toolbar">
+            <x-ui.filter-bar>
                 <x-datatable.search placeholder="Cari Asesor..." />
 
                 <x-ui.filter-select
@@ -144,27 +144,32 @@ new #[Layout('layouts.app')] class extends Component {
                     <x-ui.icon name="document" class="fs-4 me-1" />
                     Ekspor Data
                 </x-ui.button>
-            </x-slot>
+            </x-ui.filter-bar>
+        </x-slot>
+
+        <x-datatable.layout title="Asesor" :records="$this->asesors">
 
             <x-slot name="thead">
-                <th class="w-12 py-3 px-4">
-                    <input type="checkbox" wire:model.live="selectAll" class="rounded border-gray-300 text-green-600 focus:ring-green-500 bg-gray-100 h-4 w-4">
-                </th>
+                <x-ui.table-th :min-width="false" align="center" class="w-60px">
+                    <x-ui.table-checkbox model="selectAll" label="Pilih semua asesor" />
+                </x-ui.table-th>
+
                 <x-datatable.th field="name" :sortField="$sortField" :sortAsc="$sortAsc">
-                    ASESOR
+                    Asesor
                 </x-datatable.th>
-                <th class="py-3 px-4 text-left text-[11px] font-bold text-gray-400 uppercase tracking-widest">PESANTREN DITANGANI</th>
-                <th class="py-3 px-4 text-center text-[11px] font-bold text-gray-400 uppercase tracking-widest">PERAN ASESOR</th>
-                <th class="py-3 px-4 text-center text-[11px] font-bold text-gray-400 uppercase tracking-widest">STATUS PENUGASAN</th>
-                <th class="py-3 px-4 text-center text-[11px] font-bold text-gray-400 uppercase tracking-widest">STATUS</th>
-                <th class="py-3 px-4 text-right text-[11px] font-bold text-gray-400 uppercase tracking-widest pr-8">AKSI</th>
+                <x-ui.table-th>Pesantren Ditangani</x-ui.table-th>
+                <x-ui.table-th align="center">Peran Asesor</x-ui.table-th>
+                <x-ui.table-th align="center">Status Penugasan</x-ui.table-th>
+                <x-ui.table-th align="center">Status</x-ui.table-th>
+                <x-ui.table-th align="end">Aksi</x-ui.table-th>
             </x-slot>
 
             <x-slot name="tbody">
                 @if (session('status'))
                 <tr>
-                    <td colspan="7" class="px-4 py-2">
-                        <div class="p-3 bg-green-50 text-green-700 rounded-xl border border-green-100 text-[11px] font-bold uppercase tracking-tight">
+                    <td colspan="7">
+                        <div class="alert alert-success d-flex align-items-center p-4 mb-0">
+                            <x-ui.icon name="check-circle" class="fs-3 me-3" />
                             {{ session('status') }}
                         </div>
                     </td>
@@ -172,30 +177,30 @@ new #[Layout('layouts.app')] class extends Component {
                 @endif
 
                 @forelse ($this->asesors as $user)
-                <tr class="hover:bg-gray-50/50 transition-colors duration-150 group border-b border-gray-50 last:border-0" wire:key="asesor-{{ $user->id }}">
-                    <td class="py-5 px-4">
-                        <input type="checkbox" wire:model.live="selectedIds" value="{{ $user->id }}" class="rounded border-gray-300 text-green-600 focus:ring-green-500 bg-gray-100 h-4 w-4">
+                <tr wire:key="asesor-{{ $user->id }}">
+                    <td class="text-center">
+                        <x-ui.table-checkbox model="selectedIds" :value="$user->id" :label="'Pilih ' . $user->name" />
                     </td>
-                    <td class="py-5 px-4">
-                        <span class="text-sm font-bold text-[#374151]">{{ $user->name }}</span>
+                    <td>
+                        <span class="text-gray-900 fw-bold fs-6">{{ $user->name }}</span>
                     </td>
-                    <td class="py-5 px-4">
+                    <td>
                         @php
                         $latestTask = $user->asesor?->assessments->sortByDesc('created_at')->first();
                         $pesantrenName = $latestTask?->akreditasi?->user?->pesantren?->nama_pesantren ?? '-';
                         @endphp
-                        <span class="text-[11px] font-bold text-gray-500">{{ $pesantrenName }}</span>
+                        <span class="text-muted fw-semibold">{{ $pesantrenName }}</span>
                     </td>
-                    <td class="py-5 px-4 text-center">
+                    <td class="text-center">
                         @if ($latestTask)
-                        <x-ui.status-badge :variant="$latestTask->tipe == 1 ? 'primary' : 'info'" class="text-uppercase">
+                        <x-ui.status-badge :variant="$latestTask->tipe == 1 ? 'primary' : 'info'">
                             {{ $latestTask->tipe == 1 ? 'Ketua' : 'Anggota' }}
                         </x-ui.status-badge>
                         @else
-                        <span class="text-[11px] font-bold text-gray-400">-</span>
+                        <span class="text-muted fw-bold">-</span>
                         @endif
                     </td>
-                    <td class="py-5 px-4 text-center">
+                    <td class="text-center">
                         @if ($latestTask)
                         @php
                         $statusAkreditasi = $latestTask->akreditasi?->status;
@@ -210,23 +215,23 @@ new #[Layout('layouts.app')] class extends Component {
                         $penugasanVariant = 'secondary';
                         }
                         @endphp
-                        <x-ui.status-badge :variant="$penugasanVariant" class="text-uppercase">
+                        <x-ui.status-badge :variant="$penugasanVariant">
                             {{ $penugasanText }}
                         </x-ui.status-badge>
                         @else
-                        <span class="text-[11px] font-bold text-gray-400">-</span>
+                        <span class="text-muted fw-bold">-</span>
                         @endif
                     </td>
-                    <td class="py-5 px-4 text-center">
+                    <td class="text-center">
                         @if($user->status == 1)
-                        <x-ui.status-badge variant="success" class="text-uppercase">Aktif</x-ui.status-badge>
+                        <x-ui.status-badge variant="success">Aktif</x-ui.status-badge>
                         @else
-                        <x-ui.status-badge variant="danger" class="text-uppercase">Non-Aktif</x-ui.status-badge>
+                        <x-ui.status-badge variant="danger">Non-Aktif</x-ui.status-badge>
                         @endif
                     </td>
-                    <td class="py-5 px-4 text-right pr-6">
+                    <td class="text-end">
                         <x-ui.action-menu>
-                            <x-ui.action-menu-item :href="route('admin.asesor.detail', $user->uuid)" wire:navigate>
+                            <x-ui.action-menu-item :href="route('admin.asesor.detail', $user->uuid)">
                                 <x-ui.icon name="eye" class="fs-5 text-gray-500" />
                                 Lihat Detail
                             </x-ui.action-menu-item>
@@ -250,5 +255,5 @@ new #[Layout('layouts.app')] class extends Component {
                 @endforelse
             </x-slot>
         </x-datatable.layout>
-    </x-ui.page>
+    </x-ui.index-layout>
 </div>

@@ -17,15 +17,22 @@
     ];
 
     $iconName = $iconMap[$icon] ?? 'menu';
-    $classes = 'spm-sidebar-link' . ($active ? ' active' : '') . ($icon === 'none' ? ' spm-sidebar-link-child' : '');
+    $isChild = $icon === 'none';
+    $classes = 'spm-sidebar-link' . ($active ? ' active' : '') . ($isChild ? ' spm-sidebar-link-child' : '') . ' menu-link';
 @endphp
 
-<a {{ $attributes->merge(['class' => $classes]) }} wire:navigate>
-    @if($icon !== 'none')
-        <span class="spm-sidebar-icon">
+<div class="menu-item">
+    <a {{ $attributes->merge(['class' => $classes]) }}>
+        @if($isChild)
+            <span class="menu-bullet">
+                <span class="bullet bullet-dot"></span>
+            </span>
+        @else
+        <span class="spm-sidebar-icon menu-icon">
             <x-ui.icon :name="$iconName" class="fs-2" />
         </span>
-    @endif
+        @endif
 
-    <span class="spm-sidebar-title truncate">{{ $slot }}</span>
-</a>
+        <span class="spm-sidebar-title menu-title truncate">{{ $slot }}</span>
+    </a>
+</div>

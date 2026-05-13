@@ -5,22 +5,22 @@
     'showPerPage' => true,
 ])
 
-<div data-ui-table="metronic" {{ $attributes->merge(['class' => 'card']) }}>
+<div data-ui-table="metronic" {{ $attributes->merge(['class' => 'card spm-table-shell']) }}>
     @if($title || $subtitle || isset($filters))
-        <div class="card-header border-0 pt-6">
+        <div class="card-header border-0 pt-6 pb-4">
             <div class="card-title d-flex flex-column">
                 @if($title)
-                    <h3 class="fw-bold text-gray-900 mb-1">{{ $title }}</h3>
+                    <h3 class="spm-card-title mb-1">{{ $title }}</h3>
                 @endif
 
                 @if($subtitle)
-                    <span class="text-muted fw-semibold fs-7">{{ $subtitle }}</span>
+                    <span class="spm-card-subtitle text-muted">{{ $subtitle }}</span>
                 @endif
             </div>
 
             @isset($filters)
                 <div class="card-toolbar">
-                    <div class="d-flex flex-wrap align-items-center justify-content-end gap-3">
+                    <div class="d-flex flex-wrap align-items-center justify-content-lg-end gap-3">
                         {{ $filters }}
                     </div>
                 </div>
@@ -38,7 +38,7 @@
                 </div>
 
                 @isset($toolbar)
-                    <div class="d-flex flex-wrap align-items-center justify-content-end gap-2">
+                    <div class="d-flex flex-wrap align-items-center justify-content-md-end gap-2">
                         {{ $toolbar }}
                     </div>
                 @endisset
@@ -46,13 +46,13 @@
         @endif
 
         <div class="table-responsive">
-            <table class="table table-row-dashed align-middle gs-0 gy-4 mb-0">
+            <table class="table table-row-dashed align-middle gs-0 gy-4 mb-0 spm-datatable spm-table spm-table--list">
                 <thead>
-                    <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0">
+                    <tr class="text-start text-gray-500 fw-semibold gs-0 spm-table-head">
                         {{ $thead }}
                     </tr>
                 </thead>
-                <tbody class="fw-semibold text-gray-700">
+                <tbody class="fw-normal text-gray-700 spm-table-body">
                     {{ $tbody }}
                 </tbody>
             </table>

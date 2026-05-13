@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Support\Facades\Password;
 use Livewire\Attributes\Layout;
@@ -37,25 +37,38 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
+    <div class="text-center mb-10">
+        <x-ui.badge variant="warning" class="mb-4">Lupa Password</x-ui.badge>
+        <h1 class="text-gray-900 fw-bolder mb-3">Reset Password</h1>
+        <div class="text-gray-500 fw-semibold fs-6">Masukkan email Anda untuk menerima link reset password.</div>
     </div>
 
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    @if (session('status'))
+    <div class="alert alert-success d-flex align-items-center gap-3 mb-6">
+        <i class="ki-duotone ki-check-circle fs-2x text-success"><span class="path1"></span><span class="path2"></span></i>
+        <span class="fw-semibold">{{ session('status') }}</span>
+    </div>
+    @endif
 
-    <form wire:submit="sendPasswordResetLink">
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+    <form wire:submit="sendPasswordResetLink" class="form w-100">
+        <x-ui.form-field class="mb-8" label="Email" for="email" :error="$errors->get('email')">
+            <div class="position-relative">
+                <i class="ki-duotone ki-sms fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4"><span class="path1"></span><span class="path2"></span></i>
+                <x-ui.input model="email" id="email" type="email" name="email"
+                       class="form-control-lg ps-12"
+                       required autofocus />
+            </div>
+        </x-ui.form-field>
+
+        <div class="d-grid mb-6">
+            <x-ui.button type="submit" variant="primary" size="lg">Kirim Link Reset</x-ui.button>
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
+        <div class="text-center">
+            <a href="{{ route('login') }}" class="link-primary fw-bold fs-6">
+                <i class="ki-duotone ki-arrow-left fs-4 me-1"><span class="path1"></span><span class="path2"></span></i>
+                Kembali ke Login
+            </a>
         </div>
     </form>
 </div>

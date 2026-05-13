@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -34,29 +34,24 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
+    <div class="text-center mb-10">
+        <x-ui.badge variant="warning" class="mb-4">Area Aman</x-ui.badge>
+        <h1 class="text-gray-900 fw-bolder mb-3">Konfirmasi Password</h1>
+        <div class="text-gray-500 fw-semibold fs-6">Masukkan password Anda untuk melanjutkan.</div>
     </div>
 
-    <form wire:submit="confirmPassword">
-        <!-- Password -->
-        <div>
-            <x-input-label for="password" :value="__('Password')" />
+    <form wire:submit="confirmPassword" class="form w-100">
+        <x-ui.form-field class="mb-8" label="Password" for="password" :error="$errors->get('password')">
+            <div class="position-relative">
+                <i class="ki-duotone ki-lock-2 fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
+                <x-ui.input model="password" id="password" type="password" name="password"
+                       class="form-control-lg ps-12"
+                       required autocomplete="current-password" />
+            </div>
+        </x-ui.form-field>
 
-            <x-text-input wire:model="password"
-                          id="password"
-                          class="block mt-1 w-full"
-                          type="password"
-                          name="password"
-                          required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <div class="flex justify-end mt-4">
-            <x-primary-button>
-                {{ __('Confirm') }}
-            </x-primary-button>
+        <div class="d-grid">
+            <x-ui.button type="submit" variant="primary" size="lg">Konfirmasi</x-ui.button>
         </div>
     </form>
 </div>

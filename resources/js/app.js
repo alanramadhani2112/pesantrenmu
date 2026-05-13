@@ -412,6 +412,15 @@ window.edpmManagement = () => ({
     validateAndNext(wire) {
         callWire(wire, 'nextStep');
     },
+    confirmSaveDraft(wire) {
+        ask({
+            title: 'Simpan draf EDPM?',
+            text: 'Nilai dan tautan bukti yang sudah diisi akan disimpan sebagai draf.',
+            confirmButtonText: 'Ya, simpan draf',
+        }).then((result) => {
+            if (result.isConfirmed) callWire(wire, 'saveDraft');
+        });
+    },
     confirmSimpan(wire) {
         ask({
             title: 'Simpan EDPM permanen?',

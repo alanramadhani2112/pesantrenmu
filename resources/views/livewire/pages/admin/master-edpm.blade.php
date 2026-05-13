@@ -156,9 +156,7 @@ new #[Layout('layouts.app')] class extends Component {
 }; ?>
 
 <div x-data="deleteConfirmation" data-module-page="master-edpm">
-    <x-slot name="header">{{ __('Master Komponen') }}</x-slot>
-
-    <x-ui.page
+    <x-ui.index-layout
         title="Master Komponen"
         subtitle="Kelola komponen dan butir pernyataan EDPM/IPR."
     >
@@ -271,10 +269,10 @@ new #[Layout('layouts.app')] class extends Component {
                 />
             @endforelse
         </div>
-    </x-ui.page>
+    </x-ui.index-layout>
 
     <!-- Modal Komponen -->
-    <x-modal name="edpm-komponen-modal" focusable>
+    <x-ui.modal name="edpm-komponen-modal" focusable>
         <form x-on:submit.prevent="confirmAction('saveKomponen', 'Simpan komponen?', 'Komponen EDPM/IPR akan disimpan.')">
             <x-ui.modal-header
                 :title="$modalTitle"
@@ -318,10 +316,10 @@ new #[Layout('layouts.app')] class extends Component {
                 <x-ui.button type="submit" variant="primary">Simpan</x-ui.button>
             </x-ui.modal-footer>
         </form>
-    </x-modal>
+    </x-ui.modal>
 
     <!-- Modal Butir -->
-    <x-modal name="edpm-butir-modal" focusable>
+    <x-ui.modal name="edpm-butir-modal" focusable>
         <form x-on:submit.prevent="confirmAction('saveButir', 'Simpan butir?', 'Butir pernyataan akan disimpan.')">
             <x-ui.modal-header
                 :title="$modalTitle"
@@ -376,5 +374,5 @@ new #[Layout('layouts.app')] class extends Component {
                 <x-ui.button type="submit" variant="primary">Simpan Butir</x-ui.button>
             </x-ui.modal-footer>
         </form>
-    </x-modal>
+    </x-ui.modal>
 </div>

@@ -11,7 +11,7 @@
 
 <div data-ui-form-field="metronic" {{ $attributes->merge(['class' => 'fv-row spm-form-field']) }}>
     @if($label)
-        <label @if($for) for="{{ $for }}" @endif class="form-label fw-bold text-gray-700 fs-7">
+        <label @if($for) for="{{ $for }}" @endif class="form-label fw-semibold text-gray-700 fs-7">
             {{ $label }}
         </label>
     @endif

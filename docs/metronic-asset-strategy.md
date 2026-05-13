@@ -35,6 +35,8 @@ public/vendor/metronic/assets/plugins/global
 public/vendor/metronic/assets/media/logos
 ```
 
+Folder full theme lama di `public/assets` sudah dihapus dari project karena tidak direferensikan oleh view/app dan membuat repo membawa sekitar 78 MB asset tidak terpakai.
+
 Jumlah awal:
 
 ```text
@@ -60,16 +62,21 @@ Metronic style bundle CSS
 Vite app.css
 Vite metronic-overrides.css
 Vite app.js
-Metronic plugins JS
-Metronic scripts JS
 ```
 
-Urutan ini menjaga komponen Metronic tersedia, sementara brand override SPM tetap menang setelah bundle Metronic.
+Urutan ini menjaga visual component Metronic tersedia, sementara brand override SPM tetap menang setelah bundle Metronic.
+
+Catatan trim terbaru:
+
+- `layouts.app`, `layouts.guest`, dan `welcome.blade.php` tidak lagi memuat `plugins.bundle.js` dan `scripts.bundle.js`; halaman tersebut cukup memakai CSS Metronic + Vite.
+- Dropdown/action menu memakai Blade + Alpine dengan class Metronic, sehingga tidak bergantung pada `data-kt-menu` atau inisialisasi `KTMenu`.
+- Notifikasi tidak lagi melakukan polling Livewire setiap 15 detik; daftar notifikasi di-refresh saat tombol notifikasi dibuka.
+- Jangan mengembalikan `public/assets`; gunakan `public/vendor/metronic/assets` sebagai satu-satunya lokasi asset Metronic runtime.
 
 ## Livewire Compatibility Rules
 
 - Jangan start Alpine atau Livewire dua kali.
-- Metronic init dipanggil ulang dari `resources/js/app.js` setelah `DOMContentLoaded`, `livewire:initialized`, dan `livewire:navigated`.
+- Metronic init di `resources/js/app.js` bersifat defensif/opsional. Jangan menambah dependency baru ke `plugins.bundle.js` atau `scripts.bundle.js` tanpa alasan fitur yang jelas.
 - Komponen yang bisa dibuat dengan Blade/Livewire native tidak perlu memaksa plugin Metronic JS.
 - Modal, dropdown, tooltip, drawer, dan menu harus diuji setelah Livewire update.
 
