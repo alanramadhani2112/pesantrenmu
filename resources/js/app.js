@@ -528,8 +528,18 @@ window.dashboardCharts = (chartData = [], stats = {}) => ({
         this.$nextTick(() => {
             if (!window.Chart) return;
 
+            const brandPrimary = '#005533';
+            const brandPrimaryHover = '#006b40';
+            const brandSuccess = '#10b981';
+            const brandDanger = '#ef4444';
+
             const monthly = document.getElementById('monthlyChart');
             if (monthly) {
+                const ctx = monthly.getContext('2d');
+                const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                gradient.addColorStop(0, 'rgba(0, 85, 51, 0.25)');
+                gradient.addColorStop(1, 'rgba(0, 85, 51, 0.02)');
+
                 new window.Chart(monthly, {
                     type: 'line',
                     data: {
@@ -537,13 +547,52 @@ window.dashboardCharts = (chartData = [], stats = {}) => ({
                         datasets: [{
                             label: 'Pengajuan',
                             data: chartData,
-                            borderColor: '#1e3a5f',
-                            backgroundColor: 'rgba(30, 58, 95, 0.12)',
+                            borderColor: brandPrimary,
+                            backgroundColor: gradient,
                             fill: true,
-                            tension: 0.35,
+                            tension: 0.4,
+                            borderWidth: 2.5,
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: brandPrimary,
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            pointHoverBackgroundColor: brandPrimary,
+                            pointHoverBorderColor: '#ffffff',
+                            pointHoverBorderWidth: 3,
                         }],
                     },
-                    options: { responsive: true, maintainAspectRatio: false },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: brandPrimary,
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                padding: 12,
+                                cornerRadius: 8,
+                                displayColors: false,
+                                titleFont: { weight: 'bold', size: 13 },
+                                bodyFont: { size: 12 },
+                                callbacks: {
+                                    label: (ctx) => ` ${ctx.parsed.y} pengajuan`,
+                                },
+                            },
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#7e8299', font: { size: 11, weight: '600' } },
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
+                                ticks: { color: '#7e8299', font: { size: 11 }, stepSize: 1, precision: 0 },
+                            },
+                        },
+                    },
                 });
             }
 
@@ -555,15 +604,29 @@ window.dashboardCharts = (chartData = [], stats = {}) => ({
                         labels: ['Terakreditasi', 'Ditolak'],
                         datasets: [{
                             data: [stats.terakreditasi ?? 0, stats.ditolak ?? 0],
-                            backgroundColor: ['#10b981', '#ef4444'],
-                            borderWidth: 0,
+                            backgroundColor: [brandSuccess, brandDanger],
+                            hoverBackgroundColor: ['#0ea372', '#dc3545'],
+                            borderWidth: 4,
+                            borderColor: '#ffffff',
+                            hoverOffset: 8,
                         }],
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         cutout: '72%',
-                        plugins: { legend: { display: false } },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: brandPrimary,
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                padding: 12,
+                                cornerRadius: 8,
+                                titleFont: { weight: 'bold', size: 13 },
+                                bodyFont: { size: 12 },
+                            },
+                        },
                     },
                 });
             }

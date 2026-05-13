@@ -327,7 +327,18 @@
                             title="Belum ada pengajuan tahun ini"
                             description="Data grafik akan muncul setelah pengajuan akreditasi mulai masuk."
                             class="min-h-300px"
-                        />
+                        >
+                            <x-slot name="icon">
+                                <x-ui.icon name="chart-line-up" class="fs-2x" />
+                            </x-slot>
+                            @if($isPesantren)
+                                <x-slot name="action">
+                                    <x-ui.button :href="route('pesantren.akreditasi')" variant="primary" size="sm">
+                                        Mulai Pengajuan
+                                    </x-ui.button>
+                                </x-slot>
+                            @endif
+                        </x-ui.empty-state>
                     @endif
                 </x-ui.card>
             </div>
@@ -360,7 +371,12 @@
                             title="Belum ada hasil akhir"
                             description="Ringkasan status akan tersedia setelah pengajuan selesai divalidasi."
                             class="min-h-250px"
-                        />
+                            variant="info"
+                        >
+                            <x-slot name="icon">
+                                <x-ui.icon name="chart-pie-simple" class="fs-2x" />
+                            </x-slot>
+                        </x-ui.empty-state>
                     @endif
                 </x-ui.card>
             </div>
@@ -431,7 +447,25 @@
                             title="Belum ada aktivitas"
                             description="Aktivitas terbaru akan muncul setelah ada pengajuan akreditasi."
                             class="min-h-200px"
-                        />
+                            variant="info"
+                        >
+                            <x-slot name="icon">
+                                <x-ui.icon name="time" class="fs-2x" />
+                            </x-slot>
+                            @if($isAdmin)
+                                <x-slot name="action">
+                                    <x-ui.button :href="route('admin.pesantren.index')" variant="primary" size="sm">
+                                        Kelola Data Pesantren
+                                    </x-ui.button>
+                                </x-slot>
+                            @elseif($isPesantren)
+                                <x-slot name="action">
+                                    <x-ui.button :href="route('pesantren.akreditasi')" variant="primary" size="sm">
+                                        Buat Pengajuan
+                                    </x-ui.button>
+                                </x-slot>
+                            @endif
+                        </x-ui.empty-state>
                     @endif
                 </x-ui.card>
             </div>
