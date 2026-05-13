@@ -107,17 +107,17 @@
         </x-slot>
 
         {{-- Greeting Hero --}}
-        <div class="spm-dashboard-hero rounded p-6 mb-6">
+        <div class="spm-dashboard-hero rounded p-5 p-md-6 mb-6">
             <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
-                <div class="d-flex flex-column">
-                    <div class="text-white opacity-75 fw-semibold fs-7 text-uppercase mb-1">{{ $today }}</div>
-                    <h2 class="text-white fw-bolder fs-1 mb-2">{{ $greeting }}, {{ $firstName }}.</h2>
-                    <div class="text-white opacity-75 fw-semibold fs-6">{{ $contextualMessage }}</div>
+                <div class="d-flex flex-column flex-grow-1">
+                    <div class="text-white opacity-75 fw-semibold fs-8 fs-md-7 text-uppercase mb-1">{{ $today }}</div>
+                    <h2 class="text-white fw-bolder fs-2 fs-md-1 mb-2">{{ $greeting }}, {{ $firstName }}.</h2>
+                    <div class="text-white opacity-75 fw-semibold fs-7 fs-md-6">{{ $contextualMessage }}</div>
                 </div>
 
                 @if($primaryAction)
-                    <div class="d-none d-md-block">
-                        <a href="{{ $primaryAction['route'] }}" class="btn btn-light fw-bold">
+                    <div class="flex-shrink-0">
+                        <a href="{{ $primaryAction['route'] }}" class="btn btn-light btn-sm btn-md-md fw-bold w-100 w-md-auto">
                             <x-ui.icon name="arrow-right" class="fs-4 me-1" />
                             {{ $primaryAction['label'] }}
                         </a>
@@ -128,18 +128,18 @@
 
         {{-- Quick Actions --}}
         @if(count($quickActions) > 0)
-            <div class="row g-4 mb-6">
+            <div class="row g-3 g-md-4 mb-6">
                 @foreach($quickActions as $action)
-                    <div class="col-6 col-md-3">
+                    <div class="col-6 col-md-4 col-lg-3">
                         <a href="{{ $action['route'] }}"
                            class="card border-0 shadow-sm h-100 text-decoration-none spm-quick-action">
-                            <div class="card-body d-flex flex-column align-items-center text-center p-5">
-                                <div class="symbol symbol-50px mb-3">
+                            <div class="card-body d-flex flex-column align-items-center text-center p-4 p-md-5">
+                                <div class="symbol symbol-40px symbol-md-50px mb-3">
                                     <div class="symbol-label bg-light-{{ $action['variant'] }} text-{{ $action['variant'] }}">
-                                        <x-ui.icon :name="$action['icon']" class="fs-2" />
+                                        <x-ui.icon :name="$action['icon']" class="fs-3 fs-md-2" />
                                     </div>
                                 </div>
-                                <span class="fw-bold fs-7 text-gray-900">{{ $action['label'] }}</span>
+                                <span class="fw-bold fs-8 fs-md-7 text-gray-900">{{ $action['label'] }}</span>
                             </div>
                         </a>
                     </div>
@@ -149,10 +149,10 @@
 
         @if($isAdmin)
             <div class="row g-6">
-                <div class="col-12 col-xl-8">
+                <div class="col-12 col-lg-7 col-xl-8">
                     <x-ui.card title="Perlu Ditindaklanjuti" subtitle="Prioritas proses aktif yang membutuhkan perhatian admin." class="h-100">
                         <div class="row g-5">
-                            <div class="col-12 col-md-4">
+                            <div class="col-sm-6 col-md-4">
                                 <div class="rounded border border-dashed border-warning bg-light-warning p-5 h-100">
                                     <x-ui.badge variant="warning" class="mb-4">Verifikasi</x-ui.badge>
                                     <div class="fs-2x fw-bolder text-gray-900 mb-1">{{ $stats['verifikasi'] }}</div>
@@ -161,7 +161,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-12 col-md-4">
+                            <div class="col-sm-6 col-md-4">
                                 <div class="rounded border border-dashed border-info bg-light-info p-5 h-100">
                                     <x-ui.badge variant="info" class="mb-4">Penilaian</x-ui.badge>
                                     <div class="fs-2x fw-bolder text-gray-900 mb-1">{{ $stats['assessment'] }}</div>
@@ -170,7 +170,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-12 col-md-4">
+                            <div class="col-sm-6 col-md-4">
                                 <div class="rounded border border-dashed border-primary bg-light-primary p-5 h-100">
                                     <x-ui.badge variant="primary" class="mb-4">Visitasi</x-ui.badge>
                                     <div class="fs-2x fw-bolder text-gray-900 mb-1">{{ $stats['visitasi'] }}</div>
@@ -182,7 +182,7 @@
                     </x-ui.card>
                 </div>
 
-                <div class="col-12 col-xl-4">
+                <div class="col-12 col-lg-5 col-xl-4">
                     <x-ui.card title="Monitoring Asesor" subtitle="Distribusi dan kapasitas tugas aktif." class="h-100">
                         <div class="d-flex flex-column">
                             <x-ui.metric-row label="Total Asesor Aktif" :value="$totalAsesor" variant="primary" icon="profile-user" />
@@ -195,10 +195,10 @@
             </div>
         @elseif($isPesantren)
             <div class="row g-6">
-                <div class="col-12 col-xl-8">
+                <div class="col-12 col-lg-7 col-xl-8">
                     <x-ui.card title="Kesiapan Pengajuan" subtitle="Ikuti status kesiapan sebelum masuk ke pengajuan akreditasi." class="h-100">
                         <div class="row g-5 align-items-stretch">
-                            <div class="col-12 col-md-4">
+                            <div class="col-sm-6 col-md-4">
                                 <div class="rounded border border-dashed border-primary bg-light-primary p-5 h-100">
                                     <x-ui.icon name="document" class="fs-2x text-primary mb-4" />
                                     <div class="fw-bold text-gray-900 mb-1">Lengkapi Data</div>
@@ -206,7 +206,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-12 col-md-4">
+                            <div class="col-sm-6 col-md-4">
                                 <div class="rounded border border-dashed {{ $stats['total_aktif'] > 0 ? 'border-info bg-light-info' : 'border-success bg-light-success' }} p-5 h-100">
                                     <x-ui.icon name="check-circle" class="fs-2x {{ $stats['total_aktif'] > 0 ? 'text-info' : 'text-success' }} mb-4" />
                                     <div class="fw-bold text-gray-900 mb-1">{{ $stats['total_aktif'] > 0 ? 'Sedang Diproses' : 'Siap Cek Pengajuan' }}</div>
@@ -214,7 +214,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-12 col-md-4">
+                            <div class="col-sm-6 col-md-4">
                                 <div class="rounded border border-dashed {{ $stats['ditolak'] > 0 ? 'border-warning bg-light-warning' : 'border-gray-300 bg-light' }} p-5 h-100">
                                     <x-ui.icon name="document" class="fs-2x {{ $stats['ditolak'] > 0 ? 'text-warning' : 'text-muted' }} mb-4" />
                                     <div class="fw-bold text-gray-900 mb-1">{{ $stats['ditolak'] > 0 ? 'Ada Revisi' : 'Belum Ada Revisi' }}</div>
@@ -235,7 +235,7 @@
                     </x-ui.card>
                 </div>
 
-                <div class="col-12 col-xl-4">
+                <div class="col-12 col-lg-5 col-xl-4">
                     <x-ui.card title="Status Pengajuan Aktif" subtitle="Ringkasan tahapan yang sedang berjalan." class="h-100">
                         <div class="d-flex flex-column">
                             <x-ui.metric-row label="Pengajuan Aktif" :value="$stats['total_aktif']" variant="primary" icon="abstract-26" />
@@ -248,10 +248,10 @@
             </div>
         @elseif($isAsesor)
             <div class="row g-6">
-                <div class="col-12 col-xl-8">
+                <div class="col-12 col-lg-7 col-xl-8">
                     <x-ui.card title="Tugas Aktif" subtitle="Prioritaskan penilaian dan visitasi yang sedang berjalan." class="h-100">
                         <div class="row g-5">
-                            <div class="col-12 col-md-4">
+                            <div class="col-sm-6 col-md-4">
                                 <div class="rounded border border-dashed border-primary bg-light-primary p-5 h-100">
                                     <x-ui.badge variant="primary" class="mb-4">Total Tugas</x-ui.badge>
                                     <div class="fs-2x fw-bolder text-gray-900 mb-1">{{ $stats['total_aktif'] }}</div>
@@ -260,7 +260,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-12 col-md-4">
+                            <div class="col-sm-6 col-md-4">
                                 <div class="rounded border border-dashed border-info bg-light-info p-5 h-100">
                                     <x-ui.badge variant="info" class="mb-4">Penilaian</x-ui.badge>
                                     <div class="fs-2x fw-bolder text-gray-900 mb-1">{{ $stats['assessment'] }}</div>
@@ -269,7 +269,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-12 col-md-4">
+                            <div class="col-sm-6 col-md-4">
                                 <div class="rounded border border-dashed border-warning bg-light-warning p-5 h-100">
                                     <x-ui.badge variant="warning" class="mb-4">Visitasi</x-ui.badge>
                                     <div class="fs-2x fw-bolder text-gray-900 mb-1">{{ $stats['visitasi'] }}</div>
@@ -281,7 +281,7 @@
                     </x-ui.card>
                 </div>
 
-                <div class="col-12 col-xl-4">
+                <div class="col-12 col-lg-5 col-xl-4">
                     <x-ui.card title="Ringkasan Pekerjaan" subtitle="Status pekerjaan asesor saat ini." class="h-100">
                         <div class="d-flex flex-column">
                             <x-ui.metric-row label="Tugas Aktif" :value="$stats['total_aktif']" variant="primary" icon="abstract-26" />
@@ -296,7 +296,7 @@
 
         <div class="row g-6 mt-0">
             @foreach($statCards as $card)
-                <div class="col-12 col-sm-6 col-xl-4">
+                <div class="col-6 col-lg-4">
                     <x-ui.stat-card
                         class="spm-dashboard-stat"
                         :label="$card['label']"
@@ -312,7 +312,7 @@
         </div>
 
         <div class="row g-6 mt-0">
-            <div class="col-12 col-xl-8">
+            <div class="col-12 col-lg-7 col-xl-8">
                 <x-ui.card title="Pengajuan Akreditasi per Bulan" subtitle="Tren pengajuan tahun {{ date('Y') }}" class="h-100">
                     <x-slot name="toolbar">
                         <x-ui.badge variant="primary">{{ date('Y') }}</x-ui.badge>
@@ -343,7 +343,7 @@
                 </x-ui.card>
             </div>
 
-            <div class="col-12 col-xl-4">
+            <div class="col-12 col-lg-5 col-xl-4">
                 <x-ui.card title="Distribusi Status" subtitle="Hasil akhir pengajuan akreditasi." class="h-100">
                     @if($hasStatusData)
                         <div class="d-flex flex-column align-items-center justify-content-center">
@@ -396,8 +396,8 @@
                                     <tr class="text-uppercase fs-8 fw-bold text-muted">
                                         <th class="min-w-200px">Pesantren</th>
                                         <th class="min-w-100px">Status</th>
-                                        <th class="min-w-100px">Peringkat</th>
-                                        <th class="min-w-150px">Terakhir Diperbarui</th>
+                                        <th class="min-w-100px d-none d-md-table-cell">Peringkat</th>
+                                        <th class="min-w-150px d-none d-sm-table-cell">Terakhir Diperbarui</th>
                                         <th class="text-end"></th>
                                     </tr>
                                 </thead>
@@ -406,12 +406,17 @@
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center gap-3">
-                                                    <div class="symbol symbol-40px">
+                                                    <div class="symbol symbol-40px flex-shrink-0">
                                                         <div class="symbol-label bg-light-primary text-primary fw-bolder">
                                                             {{ strtoupper(substr($activity['pesantren_name'], 0, 1)) }}
                                                         </div>
                                                     </div>
-                                                    <span class="text-gray-900 fw-bold fs-6">{{ $activity['pesantren_name'] }}</span>
+                                                    <div class="d-flex flex-column min-w-0">
+                                                        <span class="text-gray-900 fw-bold fs-7 fs-md-6 text-truncate">{{ $activity['pesantren_name'] }}</span>
+                                                        <span class="text-muted fw-semibold fs-8 d-sm-none">
+                                                            {{ $activity['updated_at']->translatedFormat('d M Y') }}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td>
@@ -419,22 +424,22 @@
                                                     {{ $activity['status_label'] }}
                                                 </x-ui.status-badge>
                                             </td>
-                                            <td>
+                                            <td class="d-none d-md-table-cell">
                                                 @if($activity['peringkat'])
                                                     <span class="fw-bold text-gray-700">{{ $activity['peringkat'] }}</span>
                                                 @else
                                                     <span class="text-muted">-</span>
                                                 @endif
                                             </td>
-                                            <td>
+                                            <td class="d-none d-sm-table-cell">
                                                 <span class="text-muted fw-semibold fs-7">
                                                     {{ $activity['updated_at']->translatedFormat('d M Y, H:i') }}
                                                 </span>
                                             </td>
                                             <td class="text-end">
-                                                <x-ui.button :href="$recentRouteFor($activity['uuid'])" variant="light" size="sm">
-                                                    <x-ui.icon name="eye" class="fs-5 me-1" />
-                                                    Detail
+                                                <x-ui.button :href="$recentRouteFor($activity['uuid'])" variant="light" size="sm" class="btn-icon btn-sm-auto">
+                                                    <x-ui.icon name="eye" class="fs-5" />
+                                                    <span class="d-none d-sm-inline ms-1">Detail</span>
                                                 </x-ui.button>
                                             </td>
                                         </tr>

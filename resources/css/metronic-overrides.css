@@ -2166,3 +2166,39 @@ a:not(.btn),
     transform: scale(1.05);
     transition: transform 0.15s ease;
 }
+
+/* ===== Responsive Utility Helpers ===== */
+@media (min-width: 768px) {
+    .fs-md-1 { font-size: 1.75rem !important; }
+    .fs-md-2 { font-size: 1.5rem !important; }
+    .fs-md-6 { font-size: 1.075rem !important; }
+    .fs-md-7 { font-size: 0.95rem !important; }
+    .w-md-auto { width: auto !important; }
+    .symbol-md-50px { width: 50px !important; height: 50px !important; }
+}
+
+@media (min-width: 576px) {
+    .btn-sm-auto { width: auto !important; }
+}
+
+/* Hero banner adjustments on mobile */
+@media (max-width: 767.98px) {
+    .spm-dashboard-hero {
+        padding: 1.5rem !important;
+    }
+    .spm-dashboard-hero::before {
+        width: 200px;
+        height: 200px;
+    }
+    .spm-dashboard-hero::after {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+/* Quick action cards more compact on mobile */
+@media (max-width: 575.98px) {
+    .spm-quick-action .card-body {
+        padding: 1rem !important;
+    }
+}
