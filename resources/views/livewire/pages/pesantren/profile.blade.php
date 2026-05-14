@@ -220,6 +220,15 @@ new #[Layout('layouts.app')] class extends Component {
         ];
     }
 
+    public function getAllDocFields(): array
+    {
+        $result = [];
+        foreach (array_merge($this->mainDocs, $this->secondaryDocs) as $prop => $label) {
+            $result[str_replace('_file', '', $prop)] = $label;
+        }
+        return $result;
+    }
+
     public function save()
     {
         $this->validate([
@@ -341,7 +350,7 @@ new #[Layout('layouts.app')] class extends Component {
             </x-ui.button>
         @else
             <x-ui.button type="button" wire:click="toggleEdit" variant="primary"
-                {{ $pesantren->is_locked ? 'disabled' : '' }}>
+                @disabled($pesantren->is_locked)>
                 <x-ui.icon name="pencil" class="fs-4 me-1" /> Edit Profil
             </x-ui.button>
         @endif
@@ -727,14 +736,11 @@ new #[Layout('layouts.app')] class extends Component {
                 <x-ui.section-card title="Dokumen Pesantren" subtitle="Status unggahan dokumen pendukung.">
                     <div class="p-6">
                         @php
-                            $allDocFields = [];
-                            foreach(array_merge($mainDocs ?? [], $secondaryDocs ?? []) as $prop => $label) {
-                                $dbField = str_replace('_file', '', $prop);
-                                $allDocFields[$dbField] = $label;
-                            }
+                            $allDocFields = $this->getAllDocFields();
+                            $docChunks = array_chunk($allDocFields, (int)ceil(count($allDocFields)/2), true);
                         @endphp
                         <div class="row g-5">
-                            @foreach(array_chunk($allDocFields, (int)ceil(count($allDocFields)/2), true) as $chunk)
+                            @foreach($docChunks as $chunk)
                             <div class="col-lg-6">
                                 <div class="spm-document-list">
                                     @foreach($chunk as $field => $label)
