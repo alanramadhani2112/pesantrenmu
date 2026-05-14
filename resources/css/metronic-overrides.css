@@ -2574,3 +2574,20 @@ a:not(.btn),
         color: black !important;
     }
 }
+
+/* ===== Readiness Progress Tracker ===== */
+.spm-readiness-item {
+    transition: background-color 0.15s ease;
+}
+
+.spm-readiness-item:hover {
+    background-color: #f8fafc;
+}
+
+.spm-readiness-item-pending:hover {
+    background-color: rgba(var(--spm-primary-rgb), 0.03);
+}
+
+.spm-readiness-item:last-child {
+    border-bottom: none !important;
+}

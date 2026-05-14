@@ -133,6 +133,31 @@ class Home extends Component
             ];
         });
 
+        // 6. Pesantren Readiness Checklist
+        $readiness = [];
+        if ($isPesantren) {
+            $pesantren = $user->pesantren;
+            $ipm = $pesantren ? DB::table('ipms')->where('user_id', $user->id)->first() : null;
+            $sdmCount = $pesantren ? DB::table('sdm_pesantrens')->where('pesantren_id', $pesantren->id)->count() : 0;
+            $edpmCount = $pesantren ? DB::table('edpms')->where('user_id', $user->id)->count() : 0;
+
+            $docFields = ['status_kepemilikan_tanah','sertifikat_nsp','rk_anggaran','silabus_rpp','peraturan_kepegawaian','file_lk_iapm','laporan_tahunan','dok_profil','dok_nsp','dok_renstra','dok_rk_anggaran','dok_kurikulum','dok_silabus_rpp','dok_kepengasuhan','dok_peraturan_kepegawaian','dok_sarpras','dok_laporan_tahunan','dok_sop'];
+            $docFilled = 0;
+            if ($pesantren) {
+                foreach ($docFields as $field) {
+                    if (!empty($pesantren->$field)) $docFilled++;
+                }
+            }
+
+            $readiness = [
+                ['key' => 'profil', 'label' => 'Profil Pesantren', 'done' => $pesantren && !empty($pesantren->nama_pesantren) && !empty($pesantren->alamat), 'route' => 'pesantren.profile'],
+                ['key' => 'ipm', 'label' => 'Data IPM', 'done' => $ipm && (!empty($ipm->nsp_file) || !empty($ipm->lulus_santri_file)), 'route' => 'pesantren.ipm'],
+                ['key' => 'sdm', 'label' => 'Data SDM', 'done' => $sdmCount > 0, 'route' => 'pesantren.sdm'],
+                ['key' => 'edpm', 'label' => 'Evaluasi Diri (EDPM)', 'done' => $edpmCount > 0, 'route' => 'pesantren.edpm'],
+                ['key' => 'dokumen', 'label' => "Dokumen ($docFilled/" . count($docFields) . ")", 'done' => $docFilled >= 7, 'route' => 'pesantren.profile'],
+            ];
+        }
+
         return view('livewire.home', compact(
             'isAdmin',
             'isPesantren',
@@ -144,7 +169,8 @@ class Home extends Component
             'asesorTanpaTugas',
             'avgBeban',
             'greeting',
-            'recentActivities'
+            'recentActivities',
+            'readiness'
         ));
     }
 }

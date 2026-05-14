@@ -1,9 +1,9 @@
 @php
     $roleLabel = $isAdmin ? 'Admin' : ($isPesantren ? 'Pesantren' : 'Asesor');
     $pageSubtitle = match (true) {
-        $isAdmin => 'Pantau antrean verifikasi, penilaian, visitasi, dan beban kerja asesor.',
-        $isPesantren => 'Lihat kesiapan data, status pengajuan, dan tindak lanjut yang perlu dilakukan.',
-        $isAsesor => 'Prioritaskan tugas penilaian dan visitasi yang sedang berjalan.',
+        $isAdmin => 'Kelola pengajuan akreditasi dan pantau kinerja asesor.',
+        $isPesantren => 'Pantau kesiapan data dan status pengajuan akreditasi Anda.',
+        $isAsesor => 'Selesaikan tugas penilaian dan visitasi yang ditugaskan.',
         default => 'Ringkasan aktivitas akreditasi pesantren.',
     };
 
@@ -16,25 +16,25 @@
 
     $statCards = match (true) {
         $isAdmin => [
-            ['label' => 'Menunggu Verifikasi', 'value' => $stats['verifikasi'], 'variant' => 'warning', 'icon' => 'timer'],
-            ['label' => 'Tahap Penilaian', 'value' => $stats['assessment'], 'variant' => 'info', 'icon' => 'document'],
-            ['label' => 'Tahap Visitasi', 'value' => $stats['visitasi'], 'variant' => 'warning', 'icon' => 'geolocation'],
-            ['label' => 'Total Pengajuan Aktif', 'value' => $stats['total_aktif'], 'variant' => 'primary', 'icon' => 'abstract-26'],
-            ['label' => 'Terakreditasi', 'value' => $stats['terakreditasi'], 'variant' => 'success', 'icon' => 'check-circle'],
-            ['label' => 'Ditolak / Perlu Revisi', 'value' => $stats['ditolak'], 'variant' => 'danger', 'icon' => 'cross-circle'],
+            ['label' => 'Perlu Anda Verifikasi', 'value' => $stats['verifikasi'], 'variant' => 'warning', 'icon' => 'timer'],
+            ['label' => 'Sedang Dinilai Asesor', 'value' => $stats['assessment'], 'variant' => 'info', 'icon' => 'document'],
+            ['label' => 'Proses Visitasi', 'value' => $stats['visitasi'], 'variant' => 'warning', 'icon' => 'geolocation'],
+            ['label' => 'Pengajuan Berjalan', 'value' => $stats['total_aktif'], 'variant' => 'primary', 'icon' => 'abstract-26'],
+            ['label' => 'Berhasil Terakreditasi', 'value' => $stats['terakreditasi'], 'variant' => 'success', 'icon' => 'check-circle'],
+            ['label' => 'Perlu Diperbaiki', 'value' => $stats['ditolak'], 'variant' => 'danger', 'icon' => 'cross-circle'],
         ],
         $isPesantren => [
-            ['label' => 'Pengajuan Aktif', 'value' => $stats['total_aktif'], 'variant' => 'primary', 'icon' => 'abstract-26'],
-            ['label' => 'Tahap Penilaian', 'value' => $stats['assessment'], 'variant' => 'info', 'icon' => 'document'],
-            ['label' => 'Tahap Visitasi', 'value' => $stats['visitasi'], 'variant' => 'warning', 'icon' => 'geolocation'],
-            ['label' => 'Terakreditasi', 'value' => $stats['terakreditasi'], 'variant' => 'success', 'icon' => 'check-circle'],
-            ['label' => 'Ditolak / Perlu Revisi', 'value' => $stats['ditolak'], 'variant' => 'danger', 'icon' => 'cross-circle'],
+            ['label' => 'Pengajuan Berjalan', 'value' => $stats['total_aktif'], 'variant' => 'primary', 'icon' => 'abstract-26'],
+            ['label' => 'Sedang Dinilai Asesor', 'value' => $stats['assessment'], 'variant' => 'info', 'icon' => 'document'],
+            ['label' => 'Proses Visitasi', 'value' => $stats['visitasi'], 'variant' => 'warning', 'icon' => 'geolocation'],
+            ['label' => 'Berhasil Terakreditasi', 'value' => $stats['terakreditasi'], 'variant' => 'success', 'icon' => 'check-circle'],
+            ['label' => 'Perlu Diperbaiki', 'value' => $stats['ditolak'], 'variant' => 'danger', 'icon' => 'cross-circle'],
         ],
         $isAsesor => [
-            ['label' => 'Tugas Aktif', 'value' => $stats['total_aktif'], 'variant' => 'primary', 'icon' => 'abstract-26'],
-            ['label' => 'Perlu Penilaian', 'value' => $stats['assessment'], 'variant' => 'info', 'icon' => 'document'],
-            ['label' => 'Tahap Visitasi', 'value' => $stats['visitasi'], 'variant' => 'warning', 'icon' => 'geolocation'],
-            ['label' => 'Selesai', 'value' => $stats['terakreditasi'], 'variant' => 'success', 'icon' => 'check-circle'],
+            ['label' => 'Tugas Aktif Anda', 'value' => $stats['total_aktif'], 'variant' => 'primary', 'icon' => 'abstract-26'],
+            ['label' => 'Perlu Anda Nilai', 'value' => $stats['assessment'], 'variant' => 'info', 'icon' => 'document'],
+            ['label' => 'Jadwal Visitasi', 'value' => $stats['visitasi'], 'variant' => 'warning', 'icon' => 'geolocation'],
+            ['label' => 'Tugas Selesai', 'value' => $stats['terakreditasi'], 'variant' => 'success', 'icon' => 'check-circle'],
         ],
         default => [],
     };
@@ -47,13 +47,13 @@
     $today = \Carbon\Carbon::now()->translatedFormat('l, d F Y');
 
     $contextualMessage = match (true) {
-        $isAdmin && $stats['verifikasi'] > 0 => "Ada {$stats['verifikasi']} pengajuan menunggu verifikasi.",
-        $isAdmin => 'Semua pengajuan sudah ditindaklanjuti. Tetap pantau kegiatan asesor.',
-        $isPesantren && $stats['ditolak'] > 0 => "Ada {$stats['ditolak']} pengajuan yang perlu direvisi.",
-        $isPesantren && $stats['total_aktif'] > 0 => 'Pengajuan sedang berjalan. Pantau status di halaman pengajuan.',
-        $isPesantren => 'Siapkan data pesantren sebelum memulai pengajuan akreditasi.',
-        $isAsesor && $stats['total_aktif'] > 0 => "Ada {$stats['total_aktif']} tugas yang perlu Anda selesaikan.",
-        $isAsesor => 'Tidak ada tugas aktif saat ini. Nikmati waktu Anda.',
+        $isAdmin && $stats['verifikasi'] > 0 => "Ada {$stats['verifikasi']} pengajuan yang perlu Anda verifikasi hari ini.",
+        $isAdmin => 'Semua pengajuan sudah ditindaklanjuti. Sistem berjalan normal.',
+        $isPesantren && $stats['ditolak'] > 0 => "Ada {$stats['ditolak']} pengajuan yang perlu diperbaiki. Cek catatan dari asesor.",
+        $isPesantren && $stats['total_aktif'] > 0 => 'Pengajuan Anda sedang diproses. Pantau perkembangannya di halaman pengajuan.',
+        $isPesantren => 'Lengkapi data pesantren Anda untuk memulai pengajuan akreditasi.',
+        $isAsesor && $stats['total_aktif'] > 0 => "Anda memiliki {$stats['total_aktif']} tugas yang perlu diselesaikan.",
+        $isAsesor => 'Belum ada tugas baru. Anda akan diberitahu saat ada penugasan.',
         default => 'Selamat datang di PesantrenMu.',
     };
 
@@ -194,54 +194,83 @@
                 </div>
             </div>
         @elseif($isPesantren)
+            {{-- Pesantren: Readiness Progress Tracker --}}
             <div class="row g-6">
                 <div class="col-12 col-lg-7 col-xl-8">
-                    <x-ui.card title="Kesiapan Pengajuan" subtitle="Ikuti status kesiapan sebelum masuk ke pengajuan akreditasi." class="h-100">
-                        <div class="row g-5 align-items-stretch">
-                            <div class="col-sm-6 col-md-4">
-                                <div class="rounded border border-dashed border-primary bg-light-primary p-5 h-100">
-                                    <x-ui.icon name="document" class="fs-2x text-primary mb-4" />
-                                    <div class="fw-bold text-gray-900 mb-1">Lengkapi Data</div>
-                                    <div class="text-muted fw-semibold fs-7">Profil, IPM, SDM, EDPM, dan dokumen dicek otomatis saat pengajuan.</div>
+                    <x-ui.card title="Kesiapan Pengajuan Akreditasi" subtitle="Lengkapi semua data berikut sebelum mengajukan akreditasi.">
+                        <div class="d-flex flex-column gap-0">
+                            @php
+                                $doneCount = collect($readiness)->where('done', true)->count();
+                                $totalSteps = count($readiness);
+                                $progressPercent = $totalSteps > 0 ? round(($doneCount / $totalSteps) * 100) : 0;
+                            @endphp
+
+                            <div class="d-flex align-items-center justify-content-between px-6 pt-4 pb-3">
+                                <div>
+                                    <span class="fw-bold text-gray-900 fs-6">{{ $doneCount }}/{{ $totalSteps }} langkah selesai</span>
+                                </div>
+                                <span class="fw-bolder fs-6 {{ $progressPercent === 100 ? 'text-success' : 'text-primary' }}">{{ $progressPercent }}%</span>
+                            </div>
+
+                            <div class="px-6 pb-4">
+                                <div class="progress h-8px">
+                                    <div class="progress-bar {{ $progressPercent === 100 ? 'bg-success' : 'bg-primary' }}" style="width: {{ $progressPercent }}%"></div>
                                 </div>
                             </div>
 
-                            <div class="col-sm-6 col-md-4">
-                                <div class="rounded border border-dashed {{ $stats['total_aktif'] > 0 ? 'border-info bg-light-info' : 'border-success bg-light-success' }} p-5 h-100">
-                                    <x-ui.icon name="check-circle" class="fs-2x {{ $stats['total_aktif'] > 0 ? 'text-info' : 'text-success' }} mb-4" />
-                                    <div class="fw-bold text-gray-900 mb-1">{{ $stats['total_aktif'] > 0 ? 'Sedang Diproses' : 'Siap Cek Pengajuan' }}</div>
-                                    <div class="text-muted fw-semibold fs-7">{{ $stats['total_aktif'] > 0 ? 'Pantau tahapan aktif dan tunggu instruksi berikutnya.' : 'Mulai pengajuan untuk mengecek kelengkapan data.' }}</div>
+                            <div class="separator"></div>
+
+                            @foreach($readiness as $step)
+                                <a href="{{ route($step['route']) }}" class="d-flex align-items-center gap-4 px-6 py-4 text-decoration-none border-bottom border-dashed spm-readiness-item {{ $step['done'] ? '' : 'spm-readiness-item-pending' }}">
+                                    <div class="symbol symbol-35px flex-shrink-0">
+                                        @if($step['done'])
+                                            <span class="symbol-label bg-light-success text-success rounded-circle">
+                                                <x-ui.icon name="check" class="fs-4" />
+                                            </span>
+                                        @else
+                                            <span class="symbol-label bg-light-warning text-warning rounded-circle">
+                                                <x-ui.icon name="information" class="fs-4" />
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div class="flex-grow-1 min-w-0">
+                                        <span class="fw-semibold fs-7 {{ $step['done'] ? 'text-gray-600' : 'text-gray-900' }}">{{ $step['label'] }}</span>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        @if($step['done'])
+                                            <x-ui.badge variant="success">Lengkap</x-ui.badge>
+                                        @else
+                                            <span class="text-primary fw-bold fs-8">Lengkapi →</span>
+                                        @endif
+                                    </div>
+                                </a>
+                            @endforeach
+
+                            @if($progressPercent === 100)
+                                <div class="px-6 py-5 bg-light-success">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <x-ui.icon name="check-circle" class="fs-2x text-success" />
+                                        <div>
+                                            <div class="fw-bold text-gray-900">Data Anda sudah lengkap!</div>
+                                            <div class="text-muted fs-7">Anda bisa mengajukan akreditasi sekarang.</div>
+                                        </div>
+                                        <x-ui.button :href="route('pesantren.akreditasi')" variant="success" size="sm" class="ms-auto">
+                                            Ajukan Akreditasi
+                                        </x-ui.button>
+                                    </div>
                                 </div>
-                            </div>
-
-                            <div class="col-sm-6 col-md-4">
-                                <div class="rounded border border-dashed {{ $stats['ditolak'] > 0 ? 'border-warning bg-light-warning' : 'border-gray-300 bg-light' }} p-5 h-100">
-                                    <x-ui.icon name="document" class="fs-2x {{ $stats['ditolak'] > 0 ? 'text-warning' : 'text-muted' }} mb-4" />
-                                    <div class="fw-bold text-gray-900 mb-1">{{ $stats['ditolak'] > 0 ? 'Ada Revisi' : 'Belum Ada Revisi' }}</div>
-                                    <div class="text-muted fw-semibold fs-7">Catatan dan revisi dapat dilihat dari detail pengajuan.</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="separator separator-dashed my-6"></div>
-
-                        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
-                            <div>
-                                <div class="fw-bold text-gray-900">Langkah berikutnya</div>
-                                <div class="text-muted fw-semibold fs-7">Gunakan halaman pengajuan untuk membuat, memantau, atau menindaklanjuti akreditasi.</div>
-                            </div>
-                            <x-ui.button :href="route('pesantren.akreditasi')" variant="primary" size="sm">Buka Pengajuan</x-ui.button>
+                            @endif
                         </div>
                     </x-ui.card>
                 </div>
 
                 <div class="col-12 col-lg-5 col-xl-4">
-                    <x-ui.card title="Status Pengajuan Aktif" subtitle="Ringkasan tahapan yang sedang berjalan." class="h-100">
+                    <x-ui.card title="Status Pengajuan" subtitle="Ringkasan pengajuan akreditasi Anda." class="h-100">
                         <div class="d-flex flex-column">
-                            <x-ui.metric-row label="Pengajuan Aktif" :value="$stats['total_aktif']" variant="primary" icon="abstract-26" />
-                            <x-ui.metric-row label="Tahap Penilaian" :value="$stats['assessment']" variant="info" icon="document" />
-                            <x-ui.metric-row label="Tahap Visitasi" :value="$stats['visitasi']" variant="warning" icon="geolocation" />
-                            <x-ui.metric-row label="Perlu Revisi" :value="$stats['ditolak']" variant="danger" icon="cross-circle" class="border-bottom-0" />
+                            <x-ui.metric-row label="Pengajuan Berjalan" :value="$stats['total_aktif']" variant="primary" icon="abstract-26" />
+                            <x-ui.metric-row label="Sedang Dinilai" :value="$stats['assessment']" variant="info" icon="document" />
+                            <x-ui.metric-row label="Proses Visitasi" :value="$stats['visitasi']" variant="warning" icon="geolocation" />
+                            <x-ui.metric-row label="Perlu Diperbaiki" :value="$stats['ditolak']" variant="danger" icon="cross-circle" class="border-bottom-0" />
                         </div>
                     </x-ui.card>
                 </div>
