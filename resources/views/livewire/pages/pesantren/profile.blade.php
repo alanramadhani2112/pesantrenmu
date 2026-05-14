@@ -220,15 +220,6 @@ new #[Layout('layouts.app')] class extends Component {
         ];
     }
 
-    public function getAllDocFields(): array
-    {
-        $result = [];
-        foreach (array_merge($this->mainDocs, $this->secondaryDocs) as $prop => $label) {
-            $result[str_replace('_file', '', $prop)] = $label;
-        }
-        return $result;
-    }
-
     public function save()
     {
         $this->validate([
@@ -335,429 +326,521 @@ new #[Layout('layouts.app')] class extends Component {
     }
 }; ?>
 
-<x-slot name="header">{{ __('Profil Pesantren') }}</x-slot>
-
-<x-ui.page title="Profil Pesantren" subtitle="Kelola informasi data pesantren, layanan pendidikan, dan dokumen.">
-    <x-slot:toolbar>
+<div class="py-12" x-data="fileManagement()">
+    <x-slot name="header">{{ __('Profil Pesantren') }}</x-slot>
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         @if($pesantren->is_locked)
-            <x-ui.status-badge variant="danger">
-                <x-ui.icon name="lock" class="fs-6 me-1" /> Data Terkunci
-            </x-ui.status-badge>
-        @endif
-        @if($isEditing)
-            <x-ui.button type="button" wire:click="toggleEdit" variant="light">
-                <x-ui.icon name="cross" class="fs-4 me-1" /> Batal Edit
-            </x-ui.button>
-        @else
-            <x-ui.button type="button" wire:click="toggleEdit" variant="primary"
-                @disabled($pesantren->is_locked)>
-                <x-ui.icon name="pencil" class="fs-4 me-1" /> Edit Profil
-            </x-ui.button>
-        @endif
-    </x-slot:toolbar>
-
-    @if($pesantren->is_locked && !$isEditing)
-    <div class="alert alert-danger d-flex align-items-center gap-3 mb-6">
-        <x-ui.icon name="shield-cross" class="fs-2x text-danger" />
-        <div>
-            <div class="fw-bold">DATA TERKUNCI</div>
-            <div class="fs-7">Data profil tidak dapat diubah karena sedang dalam proses akreditasi.</div>
+        <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-red-700">
+                        <span class="font-bold">DATA TERKUNCI!</span> Data profil tidak dapat diubah karena sedang dalam proses akreditasi.
+                        Hubungi admin jika Anda perlu melakukan perubahan mendesak.
+                    </p>
+                </div>
+            </div>
         </div>
-    </div>
-    @endif
+        @endif
 
-    @if($isEditing)
-    {{-- ===== EDIT MODE ===== --}}
-    <form wire:submit="save">
-        <div class="d-flex flex-column gap-6">
-
-            {{-- Profil Pesantren --}}
-            <x-ui.section-card title="Profil Pesantren" subtitle="Identitas utama dan narasi kelembagaan.">
-                <div class="p-6">
-                    <div class="row g-5">
-                        <div class="col-md-6">
-                            <x-ui.form-field label="Nama Pesantren" required>
-                                <x-ui.input wire:model="nama_pesantren" />
-                                @error('nama_pesantren') <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
-                            </x-ui.form-field>
-                        </div>
-                        <div class="col-md-6">
-                            <x-ui.form-field label="Nomor Statistik Pesantren (NSP)">
-                                <x-ui.input wire:model="ns_pesantren" />
-                            </x-ui.form-field>
-                        </div>
-                        <div class="col-12">
-                            <x-ui.form-field label="Alamat Lengkap">
-                                <x-ui.textarea wire:model="alamat" rows="2" />
-                            </x-ui.form-field>
-                        </div>
-
-                        {{-- Wilayah Selector --}}
-                        <div class="col-12"
-                            x-data="wilayahSelector({
-                                selectedProvinsiKode: $wire.entangle('provinsi_kode'),
-                                selectedKabupatenKode: $wire.entangle('kabupaten_kode'),
-                                selectedProvinsiNama: $wire.entangle('provinsi'),
-                                selectedKabupatenNama: $wire.entangle('kota_kabupaten')
-                            })">
-                            <div class="row g-5">
-                                <div class="col-md-6">
-                                    <x-ui.form-field label="Provinsi">
-                                        <div class="position-relative">
-                                            <input type="text" x-model="provinsiSearch"
-                                                placeholder="Cari Provinsi..."
-                                                @focus="showProvinsiConfig = true"
-                                                @click.outside="showProvinsiConfig = false"
-                                                class="form-control form-control-solid" />
-                                            <div x-show="showProvinsiConfig && filteredProvinsi.length > 0"
-                                                 class="position-absolute w-100 mt-1 bg-white border rounded shadow-sm"
-                                                 style="z-index:50;max-height:200px;overflow-y:auto;">
-                                                <template x-for="item in filteredProvinsi" :key="item.kode">
-                                                    <div @click="selectProvinsi(item)" class="px-4 py-2 cursor-pointer fs-7 hover-bg-light" x-text="item.nama"></div>
-                                                </template>
-                                            </div>
-                                        </div>
-                                    </x-ui.form-field>
-                                </div>
-                                <div class="col-md-6">
-                                    <x-ui.form-field label="Kota / Kabupaten">
-                                        <div class="position-relative">
-                                            <input type="text" x-model="kabupatenSearch"
-                                                placeholder="Cari Kota/Kabupaten..."
-                                                @focus="showKabupatenConfig = true"
-                                                @click.outside="showKabupatenConfig = false"
-                                                x-bindx-bindx-bind:disabled="!currentProvinsiKode"
-                                                class="form-control form-control-solid" />
-                                            <div x-show="showKabupatenConfig && filteredKabupaten.length > 0"
-                                                 class="position-absolute w-100 mt-1 bg-white border rounded shadow-sm"
-                                                 style="z-index:50;max-height:200px;overflow-y:auto;">
-                                                <template x-for="item in filteredKabupaten" :key="item.kode">
-                                                    <div @click="selectKabupaten(item)" class="px-4 py-2 cursor-pointer fs-7 hover-bg-light" x-text="item.nama"></div>
-                                                </template>
-                                            </div>
-                                        </div>
-                                    </x-ui.form-field>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <x-ui.form-field label="Tahun Pendirian">
-                                <x-ui.input wire:model="tahun_pendirian" />
-                            </x-ui.form-field>
-                        </div>
-                        <div class="col-md-4">
-                            <x-ui.form-field label="Nama Mudir">
-                                <x-ui.input wire:model="nama_mudir" />
-                            </x-ui.form-field>
-                        </div>
-                        <div class="col-md-4">
-                            <x-ui.form-field label="Pendidikan Terakhir Mudir">
-                                <x-ui.input wire:model="jenjang_pendidikan_mudir" />
-                            </x-ui.form-field>
-                        </div>
-                        <div class="col-md-4">
-                            <x-ui.form-field label="No. Telp Pesantren">
-                                <x-ui.input wire:model="telp_pesantren" />
-                            </x-ui.form-field>
-                        </div>
-                        <div class="col-md-4">
-                            <x-ui.form-field label="No. HP / WA">
-                                <x-ui.input wire:model="hp_wa" />
-                            </x-ui.form-field>
-                        </div>
-                        <div class="col-md-4">
-                            <x-ui.form-field label="Email Pesantren">
-                                <x-ui.input wire:model="email_pesantren" type="email" />
-                                @error('email_pesantren') <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
-                            </x-ui.form-field>
-                        </div>
-                        <div class="col-md-6">
-                            <x-ui.form-field label="Persyarikatan Penyelenggara">
-                                <x-ui.input wire:model="persyarikatan" />
-                            </x-ui.form-field>
-                        </div>
-                        <div class="col-12">
-                            <x-ui.form-field label="Visi Pesantren">
-                                <x-ui.textarea wire:model="visi" rows="3" />
-                            </x-ui.form-field>
-                        </div>
-                        <div class="col-12">
-                            <x-ui.form-field label="Misi Pesantren">
-                                <x-ui.textarea wire:model="misi" rows="3" />
-                            </x-ui.form-field>
-                        </div>
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="p-6 text-gray-900">
+                <!-- Header with Toggle Button -->
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b pb-4 gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Profil Pesantren</h2>
+                        <p class="text-sm text-gray-500">Kelola informasi data pesantren Anda.</p>
+                    </div>
+                    <div>
+                        <button wire:click="toggleEdit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition duration-150">
+                            {{ $isEditing ? 'Batal Edit' : 'Edit Profil' }}
+                        </button>
                     </div>
                 </div>
-            </x-ui.section-card>
 
-            {{-- Data Pesantren --}}
-            <x-ui.section-card title="Data Pesantren" subtitle="Layanan satuan pendidikan dan kapasitas sarana.">
-                <div class="p-6">
-                    <div class="row g-5">
-                        <div class="col-12">
-                            <x-ui.form-field label="Layanan Satuan Pendidikan yang Dimiliki">
-                                <div class="d-flex flex-wrap gap-3 mt-2">
-                                    @foreach(['sd','mi','smp','mts','sma','ma','smk','satuan_pesantren_muadalah_(SPM)'] as $item)
-                                    <label class="d-flex align-items-center gap-2 border rounded px-3 py-2 cursor-pointer {{ in_array($item, (array)$layanan_satuan_pendidikan) ? 'border-primary bg-light-primary' : 'border-gray-300' }}">
-                                        <input type="checkbox" wire:model.live="layanan_satuan_pendidikan" value="{{ $item }}" class="form-check-input">
-                                        <span class="fw-bold fs-8 text-uppercase">{{ str_replace('_', ' ', $item) }}</span>
+                @if($isEditing)
+                <form @submit.prevent="confirmSave($wire)">
+                    <!-- Section: Profil -->
+                    <div class="mb-8 border-b pb-4">
+                        <h3 class="text-lg font-bold mb-4 text-indigo-600">PROFIL PESANTREN</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <x-input-label for="nama_pesantren" value="Nama Pesantren" />
+                                <x-text-input wire:model="nama_pesantren" id="nama_pesantren" type="text" class="mt-1 block w-full" />
+                            </div>
+                            <div>
+                                <x-input-label for="ns_pesantren" value="Nomor Statistik Pesantren" />
+                                <x-text-input wire:model="ns_pesantren" id="ns_pesantren" type="text" class="mt-1 block w-full" />
+                            </div>
+                            <div class="md:col-span-2">
+                                <x-input-label for="alamat" value="Alamat" />
+                                <textarea wire:model="alamat" id="alamat" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"></textarea>
+                            </div>
+                            <div x-data="wilayahSelector({
+                                selectedProvinsiKode: @entangle('provinsi_kode'),
+                                selectedKabupatenKode: @entangle('kabupaten_kode'),
+                                selectedProvinsiNama: @entangle('provinsi'),
+                                selectedKabupatenNama: @entangle('kota_kabupaten')
+                            })" class="grid grid-cols-1 md:grid-cols-2 gap-4 col-span-1 md:col-span-2">
+                                <div class="relative">
+                                    <x-input-label for="provinsi" value="Provinsi" />
+                                    <div class="relative mt-1">
+                                        <input type="text"
+                                            x-model="provinsiSearch"
+                                            placeholder="Cari Provinsi..."
+                                            @focus="showProvinsiConfig = true"
+                                            @click.outside="showProvinsiConfig = false"
+                                            class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                        <div x-show="showProvinsiConfig && filteredProvinsi.length > 0" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                            <ul>
+                                                <template x-for="item in filteredProvinsi" :key="item.kode">
+                                                    <li @click="selectProvinsi(item)" class="px-4 py-2 hover:bg-indigo-50 cursor-pointer text-sm" x-text="item.nama"></li>
+                                                </template>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <x-input-label for="kota_kabupaten" value="Kota/Kabupaten" />
+                                    <div class="relative mt-1">
+                                        <input type="text"
+                                            x-model="kabupatenSearch"
+                                            placeholder="Cari Kota/Kabupaten..."
+                                            @focus="showKabupatenConfig = true"
+                                            @click.outside="showKabupatenConfig = false"
+                                            class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm disabled:bg-gray-100"
+                                            x-bind:disabled="!selectedProvinsiKode">
+                                        <div x-show="showKabupatenConfig && filteredKabupaten.length > 0" class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                            <ul>
+                                                <template x-for="item in filteredKabupaten" :key="item.kode">
+                                                    <li @click="selectKabupaten(item)" class="px-4 py-2 hover:bg-indigo-50 cursor-pointer text-sm" x-text="item.nama"></li>
+                                                </template>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <x-input-label for="tahun_pendirian" value="Tahun Pendirian" />
+                                <x-text-input wire:model="tahun_pendirian" id="tahun_pendirian" type="text" class="mt-1 block w-full" />
+                            </div>
+                            <div>
+                                <x-input-label for="nama_mudir" value="Nama Mudir Pesantren" />
+                                <x-text-input wire:model="nama_mudir" id="nama_mudir" type="text" class="mt-1 block w-full" />
+                            </div>
+                            <div>
+                                <x-input-label for="jenjang_pendidikan_mudir" value="Jenjang Pendidikan Terakhir Mudir" />
+                                <x-text-input wire:model="jenjang_pendidikan_mudir" id="jenjang_pendidikan_mudir" type="text" class="mt-1 block w-full" />
+                            </div>
+                            <div>
+                                <x-input-label for="telp_pesantren" value="No. Telp Pesantren" />
+                                <x-text-input wire:model="telp_pesantren" id="telp_pesantren" type="text" class="mt-1 block w-full" />
+                            </div>
+                            <div>
+                                <x-input-label for="hp_wa" value="No. HP/WA" />
+                                <x-text-input wire:model="hp_wa" id="hp_wa" type="text" class="mt-1 block w-full" />
+                            </div>
+                            <div>
+                                <x-input-label for="email_pesantren" value="Email Pesantren (G-Mail)" />
+                                <x-text-input wire:model="email_pesantren" id="email_pesantren" type="email" class="mt-1 block w-full" />
+                            </div>
+                            <div>
+                                <x-input-label for="persyarikatan" value="Persyarikatan Penyelenggara" />
+                                <x-text-input wire:model="persyarikatan" id="persyarikatan" type="text" class="mt-1 block w-full" />
+                            </div>
+                            <div class="md:col-span-2">
+                                <x-input-label for="visi" value="Visi Pesantren" />
+                                <textarea wire:model="visi" id="visi" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"></textarea>
+                            </div>
+                            <div class="md:col-span-2">
+                                <x-input-label for="misi" value="Misi Pesantren" />
+                                <textarea wire:model="misi" id="misi" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: DATA PESANTREN -->
+                    <div class="mb-8 border-b pb-4">
+                        <h3 class="text-lg font-bold mb-4 text-indigo-600">DATA PESANTREN</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-3">
+                                <x-input-label for="layanan_satuan_pendidikan" value="Layanan Satuan Pendidikan yang Dimiliki" />
+                                <div class="mt-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
+                                    @foreach(['sd', 'mi', 'smp', 'mts', 'sma', 'ma', 'smk','satuan_pesantren_muadalah_(SPM)'] as $item)
+                                    <label class="inline-flex items-center p-2 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors {{ in_array($item, (array)$layanan_satuan_pendidikan) ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200' }}">
+                                        <input type="checkbox" wire:model.live="layanan_satuan_pendidikan" value="{{ $item }}" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                        <span class="ml-2 uppercase font-medium text-gray-700 text-xs">{{ str_replace('_', ' ', $item) }}</span>
                                     </label>
                                     @endforeach
                                 </div>
-                            </x-ui.form-field>
-                        </div>
+                            </div>
 
-                        @if(count($layanan_satuan_pendidikan) > 0)
-                        <div class="col-12">
-                            <div class="fw-bold fs-7 mb-3">Jumlah Rombel per Unit</div>
-                            <div class="row g-4">
+
+                            @if(count($layanan_satuan_pendidikan) > 0)
+                            <div class="md:col-span-3 mt-4 space-y-4">
+                                <h4 class="font-bold text-gray-700 border-b pb-2">Detail Luas Tanah & Bangunan per Unit</h4>
                                 @foreach($layanan_satuan_pendidikan as $unit)
-                                <div class="col-md-3">
-                                    <x-ui.form-field :label="'Unit ' . strtoupper(str_replace('_', ' ', $unit))">
-                                        <x-ui.input wire:model="units_data.{{ $unit }}.jumlah_rombel" type="number" placeholder="0" />
-                                    </x-ui.form-field>
+                                <div class="grid grid-cols-1 md:grid-cols-1 gap-3 border p-4 rounded-lg bg-gray-50 relative">
+                                    <div class="absolute -top-3 left-4 bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded border border-indigo-200 uppercase">
+                                        UNIT {{ str_replace('_', ' ', $unit) }}
+                                    </div>
+                                    <div class="mt-2">
+                                        <x-input-label for="units_data.{{ $unit }}.jumlah_rombel" value="Jumlah Rombel" />
+                                        <x-text-input wire:model="units_data.{{ $unit }}.jumlah_rombel" type="number" class="mt-1 block w-full" placeholder="0" />
+                                    </div>
                                 </div>
                                 @endforeach
                             </div>
-                        </div>
-                        @endif
-
-                        <div class="col-md-6">
-                            <x-ui.form-field label="Luas Tanah (m²)">
-                                <x-ui.input wire:model="luas_tanah" placeholder="0" />
-                            </x-ui.form-field>
-                        </div>
-                        <div class="col-md-6">
-                            <x-ui.form-field label="Luas Bangunan (m²)">
-                                <x-ui.input wire:model="luas_bangunan" placeholder="0" />
-                            </x-ui.form-field>
-                        </div>
-                    </div>
-                </div>
-            </x-ui.section-card>
-
-            {{-- Dokumen Utama --}}
-            <x-ui.section-card title="Dokumen Utama" subtitle="Berkas wajib untuk proses akreditasi.">
-                <div class="p-6">
-                    <div class="row g-5">
-                        @foreach($mainDocs as $prop => $label)
-                        @php $dbField = str_replace('_file', '', $prop); @endphp
-                        <div class="col-md-6">
-                            <x-ui.form-field :label="$label">
-                                <label for="doc_{{ $prop }}" class="d-flex flex-column align-items-center justify-content-center border border-2 border-dashed rounded p-4 cursor-pointer hover-border-primary" style="min-height:100px;">
-                                    @if($$prop)
-                                        <x-ui.icon name="document" class="fs-2x text-success mb-2" />
-                                        <span class="fs-8 fw-bold text-success">{{ $$prop->getClientOriginalName() }}</span>
-                                        <span class="fs-9 text-muted">Siap diunggah</span>
-                                    @elseif(!empty($existing_files[$dbField]))
-                                        <x-ui.icon name="document" class="fs-2x text-primary mb-2" />
-                                        <span class="fs-8 fw-bold text-muted">File terunggah</span>
-                                        <span class="fs-9 text-primary">Klik untuk ganti</span>
-                                    @else
-                                        <x-ui.icon name="cloud-upload" class="fs-2x text-muted mb-2" />
-                                        <span class="fs-8 text-muted">Klik untuk unggah</span>
-                                        <span class="fs-9 text-muted">PDF/JPG/PNG, maks 2MB</span>
-                                    @endif
-                                    <input type="file" id="doc_{{ $prop }}"
-                                        wire:model="{{ $prop }}"
-                                        accept="application/pdf,image/png,image/jpeg"
-                                        class="d-none" />
-                                </label>
-                                @if(!empty($existing_files[$dbField]))
-                                <a href="{{ Storage::url($existing_files[$dbField]) }}" target="_blank"
-                                   class="d-flex align-items-center gap-1 fs-8 text-primary fw-bold mt-2">
-                                    <x-ui.icon name="eye" class="fs-6" /> Lihat file saat ini
-                                </a>
-                                @endif
-                                @error($prop) <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
-                            </x-ui.form-field>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-            </x-ui.section-card>
-
-            {{-- Dokumen Sekunder --}}
-            <x-ui.section-card title="Dokumen Sekunder" subtitle="Dokumen pendukung kelembagaan pesantren.">
-                <div class="p-6">
-                    <div class="row g-5">
-                        @foreach($secondaryDocs as $prop => $label)
-                        @php $dbField = str_replace('_file', '', $prop); @endphp
-                        <div class="col-md-6">
-                            <x-ui.form-field :label="$label">
-                                <label for="doc2_{{ $prop }}" class="d-flex flex-column align-items-center justify-content-center border border-2 border-dashed rounded p-4 cursor-pointer hover-border-primary" style="min-height:100px;">
-                                    @if($$prop)
-                                        <x-ui.icon name="document" class="fs-2x text-success mb-2" />
-                                        <span class="fs-8 fw-bold text-success">{{ $$prop->getClientOriginalName() }}</span>
-                                        <span class="fs-9 text-muted">Siap diunggah</span>
-                                    @elseif(!empty($existing_files[$dbField]))
-                                        <x-ui.icon name="document" class="fs-2x text-primary mb-2" />
-                                        <span class="fs-8 fw-bold text-muted">File terunggah</span>
-                                        <span class="fs-9 text-primary">Klik untuk ganti</span>
-                                    @else
-                                        <x-ui.icon name="cloud-upload" class="fs-2x text-muted mb-2" />
-                                        <span class="fs-8 text-muted">Klik untuk unggah</span>
-                                        <span class="fs-9 text-muted">PDF/JPG/PNG, maks 2MB</span>
-                                    @endif
-                                    <input type="file" id="doc2_{{ $prop }}"
-                                        wire:model="{{ $prop }}"
-                                        accept="application/pdf,image/png,image/jpeg"
-                                        class="d-none" />
-                                </label>
-                                @if(!empty($existing_files[$dbField]))
-                                <a href="{{ Storage::url($existing_files[$dbField]) }}" target="_blank"
-                                   class="d-flex align-items-center gap-1 fs-8 text-primary fw-bold mt-2">
-                                    <x-ui.icon name="eye" class="fs-6" /> Lihat file saat ini
-                                </a>
-                                @endif
-                                @error($prop) <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
-                            </x-ui.form-field>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-            </x-ui.section-card>
-
-            {{-- Save Bar --}}
-            <div class="d-flex align-items-center justify-content-end gap-3 p-5 bg-light rounded">
-                <x-ui.button type="button" wire:click="toggleEdit" variant="light">Batal</x-ui.button>
-                <x-ui.button type="submit" variant="primary"
-                    wire:loading.attr="disabled" wire:target="save">
-                    <span wire:loading.remove wire:target="save">
-                        <x-ui.icon name="check" class="fs-5 me-1" /> Simpan Profil
-                    </span>
-                    <span wire:loading wire:target="save">Memproses...</span>
-                </x-ui.button>
-            </div>
-
-        </div>
-    </form>
-
-    @else
-    {{-- ===== VIEW MODE ===== --}}
-    <div class="row g-6">
-        <div class="col-xl-4">
-            <div class="d-flex flex-column gap-6">
-                <x-ui.card>
-                    <div class="d-flex flex-column align-items-center text-center">
-                        <div class="spm-profile-avatar d-flex align-items-center justify-content-center mb-5">
-                            {{ substr($nama_pesantren ?? 'P', 0, 1) }}
-                        </div>
-                        <h2 class="spm-card-title fs-4 mb-1">{{ $nama_pesantren ?: '-' }}</h2>
-                        <div class="text-muted fw-bold fs-8 text-uppercase mb-4">NSP: {{ $ns_pesantren ?: '-' }}</div>
-                        <div class="d-flex flex-wrap justify-content-center gap-2">
-                            <x-ui.status-badge variant="success">Aktif</x-ui.status-badge>
-                            @if($pesantren->is_locked)
-                                <x-ui.status-badge variant="danger">
-                                    <x-ui.icon name="lock" class="fs-7 me-1" /> Terkunci
-                                </x-ui.status-badge>
                             @endif
                         </div>
                     </div>
-                </x-ui.card>
 
-                <x-ui.section-card title="Informasi Kontak">
-                    <div class="p-6">
-                        <div class="row g-5">
-                            <x-ui.detail-item label="Email Pesantren" :value="$email_pesantren ?: '-'" span="2" />
-                            <x-ui.detail-item label="No. Telp / WA" :value="($telp_pesantren ?: '-') . ' / ' . ($hp_wa ?: '-')" span="2" />
-                            <x-ui.detail-item label="Lokasi" :value="($kota_kabupaten ?: '-') . ', ' . ($provinsi ?: '-')" span="2" />
-                        </div>
-                    </div>
-                </x-ui.section-card>
-            </div>
-        </div>
-
-        <div class="col-xl-8">
-            <div class="d-flex flex-column gap-6">
-                <x-ui.section-card title="Profil Pesantren" subtitle="Identitas utama dan narasi kelembagaan.">
-                    <div class="p-6">
-                        <div class="row g-5">
-                            <x-ui.detail-item label="Tahun Pendirian" :value="$tahun_pendirian ?: '-'" />
-                            <x-ui.detail-item label="Nama Mudir" :value="$nama_mudir ?: '-'" />
-                            <x-ui.detail-item label="Pendidikan Mudir" :value="$jenjang_pendidikan_mudir ?: '-'" />
-                            <x-ui.detail-item label="Persyarikatan" :value="$persyarikatan ?: '-'" />
-                            <x-ui.detail-item label="Alamat Lengkap" span="2">
-                                <div class="spm-detail-block spm-detail-value-muted">{{ $alamat ?: '-' }}</div>
-                            </x-ui.detail-item>
-                            <x-ui.detail-item label="Visi" span="2">
-                                <div class="spm-detail-block spm-detail-value-muted whitespace-pre-line">{{ $visi ?: '-' }}</div>
-                            </x-ui.detail-item>
-                            <x-ui.detail-item label="Misi" span="2">
-                                <div class="spm-detail-block spm-detail-value-muted whitespace-pre-line">{{ $misi ?: '-' }}</div>
-                            </x-ui.detail-item>
-                        </div>
-                    </div>
-                </x-ui.section-card>
-
-                <x-ui.section-card title="Data & Fasilitas" subtitle="Layanan pendidikan dan kapasitas sarana.">
-                    <div class="p-6">
-                        <div class="row g-6">
-                            <div class="col-lg-7">
-                                <div class="spm-detail-label mb-3">Layanan Pendidikan</div>
-                                @if($pesantren->units && $pesantren->units->count() > 0)
-                                    <x-ui.simple-table dense>
-                                        <thead>
-                                            <tr>
-                                                <th class="ps-4">Unit</th>
-                                                <th class="text-end pe-4">Jumlah Rombel</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($pesantren->units as $unit)
-                                            <tr>
-                                                <td class="ps-4 text-uppercase fw-bold">{{ str_replace('_', ' ', $unit->unit) }}</td>
-                                                <td class="text-end pe-4">
-                                                    <x-ui.badge variant="success">{{ $unit->jumlah_rombel ?? 0 }} Rombel</x-ui.badge>
-                                                </td>
-                                            </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </x-ui.simple-table>
-                                @else
-                                    <x-ui.empty-state title="Belum Ada Unit" description="Data unit satuan pendidikan belum diisi." />
-                                @endif
+                    <!-- Section: DATA LUAS BANGUNAN -->
+                    <div class="mb-8 border-b pb-4">
+                        <h3 class="text-lg font-bold mb-4 text-indigo-600">DATA LUAS BANGUNAN</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <x-input-label for="luas_tanah" value="Luas Tanah (m┬▓)" />
+                                <x-text-input wire:model="luas_tanah" id="luas_tanah" type="text" class="mt-1 block w-full" placeholder="0" />
                             </div>
-                            <div class="col-lg-5">
-                                <div class="d-flex flex-column gap-4">
-                                    <x-ui.stat-card label="Luas Tanah" value="{{ $luas_tanah ?: '0' }} m²" variant="success">
-                                        <x-slot:icon><x-ui.icon name="geolocation" class="fs-2" /></x-slot:icon>
-                                    </x-ui.stat-card>
-                                    <x-ui.stat-card label="Luas Bangunan" value="{{ $luas_bangunan ?: '0' }} m²" variant="info">
-                                        <x-slot:icon><x-ui.icon name="category" class="fs-2" /></x-slot:icon>
-                                    </x-ui.stat-card>
-                                </div>
+                            <div>
+                                <x-input-label for="luas_bangunan" value="Luas Bangunan (m┬▓)" />
+                                <x-text-input wire:model="luas_bangunan" id="luas_bangunan" type="text" class="mt-1 block w-full" placeholder="0" />
                             </div>
                         </div>
                     </div>
-                </x-ui.section-card>
 
-                <x-ui.section-card title="Dokumen Pesantren" subtitle="Status unggahan dokumen pendukung.">
-                    <div class="p-6">
-                        @php
-                            $allDocFields = $this->getAllDocFields();
-                            $docChunks = array_chunk($allDocFields, (int)ceil(count($allDocFields)/2), true);
-                        @endphp
-                        <div class="row g-5">
-                            @foreach($docChunks as $chunk)
-                            <div class="col-lg-6">
-                                <div class="spm-document-list">
-                                    @foreach($chunk as $field => $label)
-                                        <x-ui.document-item
-                                            :label="$label"
-                                            :href="!empty($existing_files[$field]) ? Storage::url($existing_files[$field]) : null"
-                                        />
-                                    @endforeach
+                    <!-- Section: DOKUMEN UTAMA -->
+                    <div class="mb-8 border-b pb-4">
+                        <h3 class="text-lg font-bold mb-4 text-indigo-600">DOKUMEN UTAMA</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            @foreach($mainDocs as $prop => $label)
+                            <div>
+                                <x-input-label for="{{ $prop }}" value="{{ $label }}" class="font-bold text-gray-700" />
+                                @php $dbField = str_replace('_file', '', $prop); @endphp
+                                <div class="flex flex-col gap-2 mt-1">
+                                    <label class="flex flex-col items-center justify-center h-40 w-full border-2 border-dashed border-gray-200 rounded-xl hover:border-amber-400 hover:bg-amber-50 transition-all cursor-pointer group">
+                                        @if(${$prop})
+                                        @if(in_array(${$prop}->getMimeType(), ['image/jpeg', 'image/png', 'image/jpg']))
+                                        <img src="{{ ${$prop}->temporaryUrl() }}" class="h-32 w-auto object-contain rounded-lg shadow-sm" alt="Preview">
+                                        @else
+                                        <div class="flex flex-col items-center animate-fadeIn">
+                                            <svg class="w-12 h-12 text-red-500 mb-2" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+                                            </svg>
+                                            <span class="text-[10px] text-gray-600 font-bold uppercase truncate max-w-[150px]">{{ ${$prop}->getClientOriginalName() }}</span>
+                                            <span class="text-[9px] text-emerald-500 font-medium">Siap Diunggah</span>
+                                        </div>
+                                        @endif
+                                        @elseif(isset($existing_files[$dbField]) && $existing_files[$dbField])
+                                        <div class="flex flex-col items-center opacity-70 group-hover:opacity-100 transition-opacity">
+                                            <svg class="w-12 h-12 text-indigo-500 mb-2" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+                                            </svg>
+                                            <span class="text-[10px] text-gray-500 font-bold uppercase">FILE TERUNGGAH</span>
+                                            <span class="text-[9px] text-indigo-400 font-medium">Klik untuk Ganti</span>
+                                        </div>
+                                        @else
+                                        <svg class="w-8 h-8 text-gray-400 group-hover:text-amber-500 mb-2 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                        </svg>
+                                        <span class="text-xs text-gray-500 group-hover:text-amber-600 font-medium text-center px-4">Upload File</span>
+                                        <span class="text-[9px] text-gray-400 mt-1">PDF/IMG (Max 2MB)</span>
+                                        @endif
+                                        <input type="file"
+                                            x-on:change="if(validate($event)) { $wire.upload('{{ $prop }}', $event.target.files[0]) }"
+                                            accept="application/pdf,image/png,image/jpeg"
+                                            class="hidden" />
+                                    </label>
+                                    @if(isset($existing_files[$dbField]) && $existing_files[$dbField])
+                                    <a href="{{ Storage::url($existing_files[$dbField]) }}" target="_blank" class="flex items-center gap-2 text-[10px] text-emerald-600 font-bold hover:underline justify-center mt-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        LIHAT FILE SAAT INI
+                                    </a>
+                                    @endif
+                                    <x-input-error :messages="$errors->get($prop)" />
                                 </div>
                             </div>
                             @endforeach
                         </div>
                     </div>
-                </x-ui.section-card>
+
+                    <!-- Section: DOKUMEN SEKUNDER -->
+                    <div class="mb-8 border-b pb-4">
+                        <h3 class="text-lg font-bold mb-4 text-indigo-600">DOKUMEN SEKUNDER</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            @foreach($secondaryDocs as $prop => $label)
+                            <div>
+                                <x-input-label for="{{ $prop }}" value="{{ $label }}" class="font-bold text-gray-700" />
+                                @php $dbField = str_replace('_file', '', $prop); @endphp
+                                <div class="flex flex-col gap-2 mt-1">
+                                    <label class="flex flex-col items-center justify-center h-40 w-full border-2 border-dashed border-gray-200 rounded-xl hover:border-amber-400 hover:bg-amber-50 transition-all cursor-pointer group">
+                                        @if(${$prop})
+                                        @if(in_array(${$prop}->getMimeType(), ['image/jpeg', 'image/png', 'image/jpg']))
+                                        <img src="{{ ${$prop}->temporaryUrl() }}" class="h-32 w-auto object-contain rounded-lg shadow-sm" alt="Preview">
+                                        @else
+                                        <div class="flex flex-col items-center animate-fadeIn">
+                                            <svg class="w-12 h-12 text-red-500 mb-2" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+                                            </svg>
+                                            <span class="text-[10px] text-gray-600 font-bold uppercase truncate max-w-[150px]">{{ ${$prop}->getClientOriginalName() }}</span>
+                                            <span class="text-[9px] text-emerald-500 font-medium">Siap Diunggah</span>
+                                        </div>
+                                        @endif
+                                        @elseif(isset($existing_files[$dbField]) && $existing_files[$dbField])
+                                        <div class="flex flex-col items-center opacity-70 group-hover:opacity-100 transition-opacity">
+                                            <svg class="w-12 h-12 text-indigo-500 mb-2" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+                                            </svg>
+                                            <span class="text-[10px] text-gray-500 font-bold uppercase">FILE TERUNGGAH</span>
+                                            <span class="text-[9px] text-indigo-400 font-medium">Klik untuk Ganti</span>
+                                        </div>
+                                        @else
+                                        <svg class="w-8 h-8 text-gray-400 group-hover:text-amber-500 mb-2 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                        </svg>
+                                        <span class="text-xs text-gray-500 group-hover:text-amber-600 font-medium text-center px-4">Upload File</span>
+                                        <span class="text-[9px] text-gray-400 mt-1">PDF/IMG (Max 2MB)</span>
+                                        @endif
+                                        <input type="file"
+                                            x-on:change="if(validate($event)) { $wire.upload('{{ $prop }}', $event.target.files[0]) }"
+                                            accept="application/pdf,image/png,image/jpeg"
+                                            class="hidden" />
+                                    </label>
+                                    @if(isset($existing_files[$dbField]) && $existing_files[$dbField])
+                                    <a href="{{ Storage::url($existing_files[$dbField]) }}" target="_blank" class="flex items-center gap-2 text-[10px] text-emerald-600 font-bold hover:underline justify-center mt-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        LIHAT FILE SAAT INI
+                                    </a>
+                                    @endif
+                                    <x-input-error :messages="$errors->get($prop)" />
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end mt-4">
+                        <button type="button" wire:click="toggleEdit" class="px-8 py-3 rounded-2xl bg-white border border-slate-200 text-slate-500 text-[11px] font-black uppercase tracking-[0.2em] transition-all mr-3">Batal</button>
+                        <button type="button" @click="confirmSave($wire)" wire:loading.attr="disabled"
+                            class="px-10 py-3 rounded-2xl bg-gray-900 text-white text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-3">
+                            <svg wire:loading wire:target="save" class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span wire:loading.remove wire:target="save">{{ __('Simpan Perubahan') }}</span>
+                            <span wire:loading wire:target="save">{{ __('Memproses...') }}</span>
+                        </button>
+                    </div>
+                </form>
+                @else
+                <!-- View Mode Content -->
+                <div class="space-y-8">
+                    <!-- Section A: Profil Pesantren -->
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100 p-8">
+                        <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                            <div class="p-2 bg-indigo-50 rounded-lg">
+                                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800 uppercase tracking-wide">A. PROFIL PESANTREN</h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
+                            <div class="space-y-1">
+                                <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Nama Pesantren</span>
+                                <p class="text-gray-800 font-medium text-lg border-b border-gray-100 pb-2">{{ $nama_pesantren ?: '-' }}</p>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">NS Pesantren</span>
+                                <p class="text-gray-800 font-medium text-lg border-b border-gray-100 pb-2">{{ $ns_pesantren ?: '-' }}</p>
+                            </div>
+                            <div class="space-y-1 md:col-span-2">
+                                <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Alamat</span>
+                                <p class="text-gray-800 font-medium text-lg border-b border-gray-100 pb-2">{{ $alamat ?: '-' }}</p>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Provinsi</span>
+                                <p class="text-gray-800 font-medium text-lg border-b border-gray-100 pb-2">{{ $provinsi ?: '-' }}</p>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Kota / Kabupaten</span>
+                                <p class="text-gray-800 font-medium text-lg border-b border-gray-100 pb-2">{{ $kota_kabupaten ?: '-' }}</p>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Tahun Pendirian</span>
+                                <p class="text-gray-800 font-medium text-lg border-b border-gray-100 pb-2">{{ $tahun_pendirian ?: '-' }}</p>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Nama Mudir</span>
+                                <p class="text-gray-800 font-medium text-lg border-b border-gray-100 pb-2">{{ $nama_mudir ?: '-' }}</p>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Jenjang Pendidikan Mudir</span>
+                                <p class="text-gray-800 font-medium text-lg border-b border-gray-100 pb-2">{{ $jenjang_pendidikan_mudir ?: '-' }}</p>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">No. Telp Pesantren</span>
+                                <p class="text-gray-800 font-medium text-lg border-b border-gray-100 pb-2">{{ $telp_pesantren ?: '-' }}</p>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">No. HP / WA</span>
+                                <p class="text-gray-800 font-medium text-lg border-b border-gray-100 pb-2">{{ $hp_wa ?: '-' }}</p>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Email Pesantren</span>
+                                <p class="text-gray-800 font-medium text-lg border-b border-gray-100 pb-2">{{ $email_pesantren ?: '-' }}</p>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Persyarikatan</span>
+                                <p class="text-gray-800 font-medium text-lg border-b border-gray-100 pb-2">{{ $persyarikatan ?: '-' }}</p>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Akreditasi</span>
+                                <p class="text-gray-800 font-medium text-lg border-b border-gray-100 pb-2">
+                                    @php
+                                    $latestAkreditasi = auth()->user()->akreditasis()->latest()->first();
+                                    @endphp
+                                    @if (!$latestAkreditasi)
+                                    -
+                                    @elseif ($latestAkreditasi->status == 1)
+                                    <span class="px-2 py-0.5 rounded text-sm font-bold bg-indigo-100 text-indigo-700 border border-indigo-200 uppercase">
+                                        {{ $latestAkreditasi->peringkat ?? 'Berhasil' }}
+                                    </span>
+                                    @else
+                                    <span class="px-2 py-0.5 rounded text-sm font-bold bg-amber-100 text-amber-700 border border-amber-200 uppercase">
+                                        Proses
+                                    </span>
+                                    @endif
+                                </p>
+                            </div>
+                            <div class="space-y-1 md:col-span-2">
+                                <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Visi</span>
+                                <p class="text-gray-800 font-medium text-lg border-b border-gray-100 pb-2 whitespace-pre-line">{{ $visi ?: '-' }}</p>
+                            </div>
+                            <div class="space-y-1 md:col-span-2">
+                                <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Misi</span>
+                                <p class="text-gray-800 font-medium text-lg border-b border-gray-100 pb-2 whitespace-pre-line">{{ $misi ?: '-' }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section B: Data & Fasilitas -->
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100 p-8">
+                        <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                            <div class="p-2 bg-emerald-50 rounded-lg">
+                                <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800 uppercase tracking-wide">B. DATA & FASILITAS</h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <!-- Satuan Pendidikan -->
+                            <div>
+                                <h4 class="font-bold text-gray-700 mb-3 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Layanan Pendidikan</h4>
+                                @if(count($layanan_satuan_pendidikan) > 0)
+                                <div class="space-y-3">
+                                    @foreach($layanan_satuan_pendidikan as $unit)
+                                    <div class="flex justify-between items-center bg-gray-50 px-4 py-3 rounded-lg border border-gray-100">
+                                        <span class="text-sm font-bold uppercase text-gray-700">{{ str_replace('_', ' ', $unit) }}</span>
+                                        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-100">{{ $units_data[$unit]['jumlah_rombel'] ?? 0 }} Rombel</span>
+                                    </div>
+                                    @endforeach
+                                </div>
+                                @else
+                                <p class="text-gray-400 italic text-sm">Belum ada data layanan pendidikan.</p>
+                                @endif
+                            </div>
+
+                            <!-- Luas Tanah & Bangunan -->
+                            <div>
+                                <h4 class="font-bold text-gray-700 mb-3 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Luas Wilayah</h4>
+                                <div class="grid grid-cols-1 gap-4">
+                                    <div class="p-4 bg-gradient-to-r from-emerald-50 to-white rounded-xl border border-emerald-100">
+                                        <div class="flex items-center gap-3">
+                                            <div class="p-2 bg-emerald-100 rounded-full text-emerald-600">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <span class="block text-xs font-bold text-emerald-600 uppercase tracking-wider">Luas Tanah</span>
+                                                <p class="text-xl font-bold text-gray-800">{{ $luas_tanah ?: '0' }} <span class="text-sm font-normal text-gray-500">m┬▓</span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="p-4 bg-gradient-to-r from-sky-50 to-white rounded-xl border border-sky-100">
+                                        <div class="flex items-center gap-3">
+                                            <div class="p-2 bg-sky-100 rounded-full text-sky-600">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <span class="block text-xs font-bold text-sky-600 uppercase tracking-wider">Luas Bangunan</span>
+                                                <p class="text-xl font-bold text-gray-800">{{ $luas_bangunan ?: '0' }} <span class="text-sm font-normal text-gray-500">m┬▓</span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section C: Dokumen -->
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100 p-8">
+                        <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                            <div class="p-2 bg-amber-50 rounded-lg">
+                                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800 uppercase tracking-wide">C. DOKUMEN TERSIMPAN</h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            @foreach(array_merge($mainDocs ?? [], $secondaryDocs ?? []) as $prop => $label)
+                            @php $dbField = str_replace('_file', '', $prop); @endphp
+                            @if(isset($existing_files[$dbField]) && $existing_files[$dbField])
+                            <a href="{{ Storage::url($existing_files[$dbField]) }}" target="_blank" class="flex items-center p-4 bg-gray-50 border border-gray-200 rounded-xl hover:bg-white hover:shadow-md transition-all group">
+                                <div class="w-10 h-10 bg-red-100 text-red-600 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform flex-shrink-0">
+                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" />
+                                    </svg>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <p class="font-bold text-gray-700 text-sm truncate" title="{{ $label }}">{{ $label }}</p>
+                                    <p class="text-xs text-green-500 font-medium">Tersedia ΓÇó Klik Lihat</p>
+                                </div>
+                            </a>
+                            @endif
+                            @endforeach
+                        </div>
+                        @if(empty(array_filter($existing_files)))
+                        <div class="text-center py-8">
+                            <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <p class="text-gray-400 italic">Belum ada dokumen yang diunggah.</p>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
     </div>
-    @endif
-
-</x-ui.page>
+</div>
