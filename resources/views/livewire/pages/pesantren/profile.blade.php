@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use App\Models\Pesantren;
 use Livewire\Attributes\Layout;
@@ -555,15 +555,7 @@ new #[Layout('layouts.app')] class extends Component {
                         @php $dbField = str_replace('_file', '', $prop); @endphp
                         <div class="col-md-6">
                             <x-ui.form-field :label="$label">
-                                <x-ui.file-upload
-                                    :id="$prop"
-                                    accept="application/pdf,image/png,image/jpeg"
-                                    :file="$$prop"
-                                    placeholder="Klik untuk unggah"
-                                    :change-action="\"if(validate(\$event)) { \$wire.upload('{$prop}', \$event.target.files[0]) }\""
-                                    label-class="d-flex flex-column align-items-center justify-content-center border border-2 border-dashed rounded p-4 cursor-pointer hover-border-primary"
-                                    label-style="min-height:100px;"
-                                >
+                                <label for="{{ $prop }}" class="d-flex flex-column align-items-center justify-content-center border border-2 border-dashed rounded p-4 cursor-pointer hover-border-primary" style="min-height:100px;">
                                     @if($$prop)
                                         <x-ui.icon name="document" class="fs-2x text-success mb-2" />
                                         <span class="fs-8 fw-bold text-success">{{ $$prop->getClientOriginalName() }}</span>
@@ -577,7 +569,12 @@ new #[Layout('layouts.app')] class extends Component {
                                         <span class="fs-8 text-muted">Klik untuk unggah</span>
                                         <span class="fs-9 text-muted">PDF/JPG/PNG, maks 2MB</span>
                                     @endif
-                                </x-ui.file-upload>
+                                    <input type="file"
+                                        x-on:change="if(validate($event)) { $wire.upload('{{ $prop }}', $event.target.files[0]) }"
+                                        accept="application/pdf,image/png,image/jpeg"
+                                        id="{{ $prop }}"
+                                        class="d-none" />
+                                </label>
                                 @if(isset($existing_files[$dbField]) && $existing_files[$dbField])
                                 <a href="{{ Storage::url($existing_files[$dbField]) }}" target="_blank"
                                    class="d-flex align-items-center gap-1 fs-8 text-primary fw-bold mt-2">
@@ -591,7 +588,7 @@ new #[Layout('layouts.app')] class extends Component {
                     </div>
                 </div>
             </x-ui.section-card>
-
+            {{-- Dokumen Sekunder --}}
             {{-- Dokumen Sekunder --}}
             <x-ui.section-card title="Dokumen Sekunder" subtitle="Dokumen pendukung kelembagaan pesantren.">
                 <div class="p-6">
@@ -600,15 +597,7 @@ new #[Layout('layouts.app')] class extends Component {
                         @php $dbField = str_replace('_file', '', $prop); @endphp
                         <div class="col-md-6">
                             <x-ui.form-field :label="$label">
-                                <x-ui.file-upload
-                                    :id="$prop"
-                                    accept="application/pdf,image/png,image/jpeg"
-                                    :file="$$prop"
-                                    placeholder="Klik untuk unggah"
-                                    :change-action="\"if(validate(\$event)) { \$wire.upload('{$prop}', \$event.target.files[0]) }\""
-                                    label-class="d-flex flex-column align-items-center justify-content-center border border-2 border-dashed rounded p-4 cursor-pointer hover-border-primary"
-                                    label-style="min-height:100px;"
-                                >
+                                <label for="{{ $prop }}" class="d-flex flex-column align-items-center justify-content-center border border-2 border-dashed rounded p-4 cursor-pointer hover-border-primary" style="min-height:100px;">
                                     @if($$prop)
                                         <x-ui.icon name="document" class="fs-2x text-success mb-2" />
                                         <span class="fs-8 fw-bold text-success">{{ $$prop->getClientOriginalName() }}</span>
@@ -622,7 +611,12 @@ new #[Layout('layouts.app')] class extends Component {
                                         <span class="fs-8 text-muted">Klik untuk unggah</span>
                                         <span class="fs-9 text-muted">PDF/JPG/PNG, maks 2MB</span>
                                     @endif
-                                </x-ui.file-upload>
+                                    <input type="file"
+                                        x-on:change="if(validate($event)) { $wire.upload('{{ $prop }}', $event.target.files[0]) }"
+                                        accept="application/pdf,image/png,image/jpeg"
+                                        id="{{ $prop }}"
+                                        class="d-none" />
+                                </label>
                                 @if(isset($existing_files[$dbField]) && $existing_files[$dbField])
                                 <a href="{{ Storage::url($existing_files[$dbField]) }}" target="_blank"
                                    class="d-flex align-items-center gap-1 fs-8 text-primary fw-bold mt-2">
