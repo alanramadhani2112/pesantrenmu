@@ -1788,10 +1788,10 @@ a:not(.btn),
 }
 
 .spm-modal-overlay {
-    align-items: flex-start;
+    align-items: center;
     padding-top: 24px;
     padding-bottom: 24px;
-    z-index: 1095 !important;
+    z-index: 1050 !important;
 }
 
 .spm-modal-panel {
@@ -1807,7 +1807,7 @@ a:not(.btn),
     max-height: calc(100dvh - 48px);
     overflow: hidden;
     position: relative;
-    z-index: 1096;
+    z-index: 1051;
 }
 
 .spm-modal-panel > form,
@@ -2306,22 +2306,7 @@ a:not(.btn),
     transform: translateY(-1px);
 }
 
-/* ===== Modal: Vertical Center ===== */
-.spm-modal-overlay {
-    align-items: center !important;
-}
-
-.spm-modal-panel {
-    margin-top: auto;
-    margin-bottom: auto;
-    max-height: calc(100vh - 3rem);
-    display: flex;
-    flex-direction: column;
-}
-
-.spm-modal-panel > * {
-    flex-shrink: 0;
-}
+/* ===== Modal: Vertical Center (handled in main .spm-modal-overlay above) ===== */
 
 /* When content overflows, scroll within modal body */
 .spm-modal-panel .spm-modal-body,
