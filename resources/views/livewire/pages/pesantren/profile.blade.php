@@ -326,6 +326,8 @@ new #[Layout('layouts.app')] class extends Component {
     }
 }; ?>
 
+<x-slot name="header">{{ __('Profil Pesantren') }}</x-slot>
+
 <x-ui.page title="Profil Pesantren" subtitle="Kelola informasi data pesantren, layanan pendidikan, dan dokumen.">
     <x-slot:toolbar>
         @if($pesantren->is_locked)
@@ -338,45 +340,26 @@ new #[Layout('layouts.app')] class extends Component {
                 <x-ui.icon name="cross" class="fs-4 me-1" /> Batal Edit
             </x-ui.button>
         @else
-            <x-ui.button type="button" wire:click="toggleEdit" variant="primary" :disabled="$pesantren->is_locked">
+            <x-ui.button type="button" wire:click="toggleEdit" variant="primary"
+                {{ $pesantren->is_locked ? 'disabled' : '' }}>
                 <x-ui.icon name="pencil" class="fs-4 me-1" /> Edit Profil
             </x-ui.button>
         @endif
     </x-slot:toolbar>
-
-    <div class="row g-5 mb-6">
-        <div class="col-lg-4">
-            <x-ui.stat-card label="Status Profil" value="{{ $pesantren->is_locked ? 'Terkunci' : 'Aktif' }}" variant="{{ $pesantren->is_locked ? 'warning' : 'success' }}">
-                <x-slot:icon><x-ui.icon name="shield-tick" class="fs-2" /></x-slot:icon>
-            </x-ui.stat-card>
-        </div>
-
-        <div class="col-lg-4">
-            <x-ui.stat-card label="Mode Kerja" value="{{ $isEditing ? 'Sedang Diedit' : 'Siap Diperbarui' }}" variant="info">
-                <x-slot:icon><x-ui.icon name="pencil" class="fs-2" /></x-slot:icon>
-            </x-ui.stat-card>
-        </div>
-
-        <div class="col-lg-4">
-            <x-ui.stat-card label="Dokumen Tersedia" value="{{ count(array_filter($existing_files ?? [])) }} Berkas" variant="primary">
-                <x-slot:icon><x-ui.icon name="folder" class="fs-2" /></x-slot:icon>
-            </x-ui.stat-card>
-        </div>
-    </div>
 
     @if($pesantren->is_locked && !$isEditing)
     <div class="alert alert-danger d-flex align-items-center gap-3 mb-6">
         <x-ui.icon name="shield-cross" class="fs-2x text-danger" />
         <div>
             <div class="fw-bold">DATA TERKUNCI</div>
-            <div class="fs-7">Data profil tidak dapat diubah karena sedang dalam proses akreditasi. Hubungi admin jika perlu perubahan mendesak.</div>
+            <div class="fs-7">Data profil tidak dapat diubah karena sedang dalam proses akreditasi.</div>
         </div>
     </div>
     @endif
 
     @if($isEditing)
     {{-- ===== EDIT MODE ===== --}}
-    <form wire:submit="save" x-data="fileManagement()">
+    <form wire:submit="save">
         <div class="d-flex flex-column gap-6">
 
             {{-- Profil Pesantren --}}
@@ -400,22 +383,23 @@ new #[Layout('layouts.app')] class extends Component {
                             </x-ui.form-field>
                         </div>
 
-                        {{-- Wilayah --}}
-                        <div class="col-12" x-data="wilayahSelector({
-                            selectedProvinsiKode: @entangle('provinsi_kode'),
-                            selectedKabupatenKode: @entangle('kabupaten_kode'),
-                            selectedProvinsiNama: @entangle('provinsi'),
-                            selectedKabupatenNama: @entangle('kota_kabupaten')
-                        })">
+                        {{-- Wilayah Selector --}}
+                        <div class="col-12"
+                            x-data="wilayahSelector({
+                                selectedProvinsiKode: $wire.entangle('provinsi_kode'),
+                                selectedKabupatenKode: $wire.entangle('kabupaten_kode'),
+                                selectedProvinsiNama: $wire.entangle('provinsi'),
+                                selectedKabupatenNama: $wire.entangle('kota_kabupaten')
+                            })">
                             <div class="row g-5">
                                 <div class="col-md-6">
                                     <x-ui.form-field label="Provinsi">
                                         <div class="position-relative">
-                                            <x-ui.input type="text"
-                                                x-model="provinsiSearch"
+                                            <input type="text" x-model="provinsiSearch"
                                                 placeholder="Cari Provinsi..."
                                                 @focus="showProvinsiConfig = true"
-                                                @click.outside="showProvinsiConfig = false" />
+                                                @click.outside="showProvinsiConfig = false"
+                                                class="form-control form-control-solid" />
                                             <div x-show="showProvinsiConfig && filteredProvinsi.length > 0"
                                                  class="position-absolute w-100 mt-1 bg-white border rounded shadow-sm"
                                                  style="z-index:50;max-height:200px;overflow-y:auto;">
@@ -429,12 +413,12 @@ new #[Layout('layouts.app')] class extends Component {
                                 <div class="col-md-6">
                                     <x-ui.form-field label="Kota / Kabupaten">
                                         <div class="position-relative">
-                                            <x-ui.input type="text"
-                                                x-model="kabupatenSearch"
+                                            <input type="text" x-model="kabupatenSearch"
                                                 placeholder="Cari Kota/Kabupaten..."
                                                 @focus="showKabupatenConfig = true"
                                                 @click.outside="showKabupatenConfig = false"
-                                                :disabled="!selectedProvinsiKode" />
+                                                x-bindx-bind:disabled="!currentProvinsiKode"
+                                                class="form-control form-control-solid" />
                                             <div x-show="showKabupatenConfig && filteredKabupaten.length > 0"
                                                  class="position-absolute w-100 mt-1 bg-white border rounded shadow-sm"
                                                  style="z-index:50;max-height:200px;overflow-y:auto;">
@@ -506,12 +490,10 @@ new #[Layout('layouts.app')] class extends Component {
                             <x-ui.form-field label="Layanan Satuan Pendidikan yang Dimiliki">
                                 <div class="d-flex flex-wrap gap-3 mt-2">
                                     @foreach(['sd','mi','smp','mts','sma','ma','smk','satuan_pesantren_muadalah_(SPM)'] as $item)
-                                    <x-ui.checkbox
-                                        wire:model.live="layanan_satuan_pendidikan"
-                                        value="{{ $item }}"
-                                        label="{{ str_replace('_', ' ', $item) }}"
-                                        class="d-flex align-items-center gap-2 border rounded px-3 py-2 cursor-pointer {{ in_array($item, (array) $layanan_satuan_pendidikan) ? 'border-primary bg-light-primary' : 'border-gray-300' }}"
-                                    />
+                                    <label class="d-flex align-items-center gap-2 border rounded px-3 py-2 cursor-pointer {{ in_array($item, (array)$layanan_satuan_pendidikan) ? 'border-primary bg-light-primary' : 'border-gray-300' }}">
+                                        <input type="checkbox" wire:model.live="layanan_satuan_pendidikan" value="{{ $item }}" class="form-check-input">
+                                        <span class="fw-bold fs-8 text-uppercase">{{ str_replace('_', ' ', $item) }}</span>
+                                    </label>
                                     @endforeach
                                 </div>
                             </x-ui.form-field>
@@ -524,8 +506,7 @@ new #[Layout('layouts.app')] class extends Component {
                                 @foreach($layanan_satuan_pendidikan as $unit)
                                 <div class="col-md-3">
                                     <x-ui.form-field :label="'Unit ' . strtoupper(str_replace('_', ' ', $unit))">
-                                        <x-ui.input wire:model="units_data.{{ $unit }}.jumlah_rombel"
-                                                    type="number" placeholder="0" />
+                                        <x-ui.input wire:model="units_data.{{ $unit }}.jumlah_rombel" type="number" placeholder="0" />
                                     </x-ui.form-field>
                                 </div>
                                 @endforeach
@@ -555,12 +536,12 @@ new #[Layout('layouts.app')] class extends Component {
                         @php $dbField = str_replace('_file', '', $prop); @endphp
                         <div class="col-md-6">
                             <x-ui.form-field :label="$label">
-                                <label for="{{ $prop }}" class="d-flex flex-column align-items-center justify-content-center border border-2 border-dashed rounded p-4 cursor-pointer hover-border-primary" style="min-height:100px;">
+                                <label for="doc_{{ $prop }}" class="d-flex flex-column align-items-center justify-content-center border border-2 border-dashed rounded p-4 cursor-pointer hover-border-primary" style="min-height:100px;">
                                     @if($$prop)
                                         <x-ui.icon name="document" class="fs-2x text-success mb-2" />
                                         <span class="fs-8 fw-bold text-success">{{ $$prop->getClientOriginalName() }}</span>
                                         <span class="fs-9 text-muted">Siap diunggah</span>
-                                    @elseif(isset($existing_files[$dbField]) && $existing_files[$dbField])
+                                    @elseif(!empty($existing_files[$dbField]))
                                         <x-ui.icon name="document" class="fs-2x text-primary mb-2" />
                                         <span class="fs-8 fw-bold text-muted">File terunggah</span>
                                         <span class="fs-9 text-primary">Klik untuk ganti</span>
@@ -569,13 +550,12 @@ new #[Layout('layouts.app')] class extends Component {
                                         <span class="fs-8 text-muted">Klik untuk unggah</span>
                                         <span class="fs-9 text-muted">PDF/JPG/PNG, maks 2MB</span>
                                     @endif
-                                    <input type="file"
-                                        x-on:change="if(validate($event)) { $wire.upload('{{ $prop }}', $event.target.files[0]) }"
+                                    <input type="file" id="doc_{{ $prop }}"
+                                        wire:model="{{ $prop }}"
                                         accept="application/pdf,image/png,image/jpeg"
-                                        id="{{ $prop }}"
                                         class="d-none" />
                                 </label>
-                                @if(isset($existing_files[$dbField]) && $existing_files[$dbField])
+                                @if(!empty($existing_files[$dbField]))
                                 <a href="{{ Storage::url($existing_files[$dbField]) }}" target="_blank"
                                    class="d-flex align-items-center gap-1 fs-8 text-primary fw-bold mt-2">
                                     <x-ui.icon name="eye" class="fs-6" /> Lihat file saat ini
@@ -588,7 +568,7 @@ new #[Layout('layouts.app')] class extends Component {
                     </div>
                 </div>
             </x-ui.section-card>
-            {{-- Dokumen Sekunder --}}
+
             {{-- Dokumen Sekunder --}}
             <x-ui.section-card title="Dokumen Sekunder" subtitle="Dokumen pendukung kelembagaan pesantren.">
                 <div class="p-6">
@@ -597,12 +577,12 @@ new #[Layout('layouts.app')] class extends Component {
                         @php $dbField = str_replace('_file', '', $prop); @endphp
                         <div class="col-md-6">
                             <x-ui.form-field :label="$label">
-                                <label for="{{ $prop }}" class="d-flex flex-column align-items-center justify-content-center border border-2 border-dashed rounded p-4 cursor-pointer hover-border-primary" style="min-height:100px;">
+                                <label for="doc2_{{ $prop }}" class="d-flex flex-column align-items-center justify-content-center border border-2 border-dashed rounded p-4 cursor-pointer hover-border-primary" style="min-height:100px;">
                                     @if($$prop)
                                         <x-ui.icon name="document" class="fs-2x text-success mb-2" />
                                         <span class="fs-8 fw-bold text-success">{{ $$prop->getClientOriginalName() }}</span>
                                         <span class="fs-9 text-muted">Siap diunggah</span>
-                                    @elseif(isset($existing_files[$dbField]) && $existing_files[$dbField])
+                                    @elseif(!empty($existing_files[$dbField]))
                                         <x-ui.icon name="document" class="fs-2x text-primary mb-2" />
                                         <span class="fs-8 fw-bold text-muted">File terunggah</span>
                                         <span class="fs-9 text-primary">Klik untuk ganti</span>
@@ -611,13 +591,12 @@ new #[Layout('layouts.app')] class extends Component {
                                         <span class="fs-8 text-muted">Klik untuk unggah</span>
                                         <span class="fs-9 text-muted">PDF/JPG/PNG, maks 2MB</span>
                                     @endif
-                                    <input type="file"
-                                        x-on:change="if(validate($event)) { $wire.upload('{{ $prop }}', $event.target.files[0]) }"
+                                    <input type="file" id="doc2_{{ $prop }}"
+                                        wire:model="{{ $prop }}"
                                         accept="application/pdf,image/png,image/jpeg"
-                                        id="{{ $prop }}"
                                         class="d-none" />
                                 </label>
-                                @if(isset($existing_files[$dbField]) && $existing_files[$dbField])
+                                @if(!empty($existing_files[$dbField]))
                                 <a href="{{ Storage::url($existing_files[$dbField]) }}" target="_blank"
                                    class="d-flex align-items-center gap-1 fs-8 text-primary fw-bold mt-2">
                                     <x-ui.icon name="eye" class="fs-6" /> Lihat file saat ini
@@ -648,16 +627,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     @else
     {{-- ===== VIEW MODE ===== --}}
-    @php
-        $allDocs = array_merge(
-            array_keys($mainDocs ?? []),
-            array_keys($secondaryDocs ?? [])
-        );
-        $docLabels = array_merge($mainDocs ?? [], $secondaryDocs ?? []);
-    @endphp
-
     <div class="row g-6">
-        {{-- Sidebar --}}
         <div class="col-xl-4">
             <div class="d-flex flex-column gap-6">
                 <x-ui.card>
@@ -682,20 +652,16 @@ new #[Layout('layouts.app')] class extends Component {
                     <div class="p-6">
                         <div class="row g-5">
                             <x-ui.detail-item label="Email Pesantren" :value="$email_pesantren ?: '-'" span="2" />
-                            <x-ui.detail-item label="No. Telp / WA"
-                                :value="($telp_pesantren ?: '-') . ' / ' . ($hp_wa ?: '-')" span="2" />
-                            <x-ui.detail-item label="Lokasi"
-                                :value="($kota_kabupaten ?: '-') . ', ' . ($provinsi ?: '-')" span="2" />
+                            <x-ui.detail-item label="No. Telp / WA" :value="($telp_pesantren ?: '-') . ' / ' . ($hp_wa ?: '-')" span="2" />
+                            <x-ui.detail-item label="Lokasi" :value="($kota_kabupaten ?: '-') . ', ' . ($provinsi ?: '-')" span="2" />
                         </div>
                     </div>
                 </x-ui.section-card>
             </div>
         </div>
 
-        {{-- Main --}}
         <div class="col-xl-8">
             <div class="d-flex flex-column gap-6">
-
                 <x-ui.section-card title="Profil Pesantren" subtitle="Identitas utama dan narasi kelembagaan.">
                     <div class="p-6">
                         <div class="row g-5">
@@ -768,13 +734,13 @@ new #[Layout('layouts.app')] class extends Component {
                             }
                         @endphp
                         <div class="row g-5">
-                            @foreach(array_chunk($allDocFields, ceil(count($allDocFields)/2), true) as $chunk)
+                            @foreach(array_chunk($allDocFields, (int)ceil(count($allDocFields)/2), true) as $chunk)
                             <div class="col-lg-6">
                                 <div class="spm-document-list">
                                     @foreach($chunk as $field => $label)
                                         <x-ui.document-item
                                             :label="$label"
-                                            :href="$existing_files[$field] ? Storage::url($existing_files[$field]) : null"
+                                            :href="!empty($existing_files[$field]) ? Storage::url($existing_files[$field]) : null"
                                         />
                                     @endforeach
                                 </div>
@@ -783,7 +749,6 @@ new #[Layout('layouts.app')] class extends Component {
                         </div>
                     </div>
                 </x-ui.section-card>
-
             </div>
         </div>
     </div>

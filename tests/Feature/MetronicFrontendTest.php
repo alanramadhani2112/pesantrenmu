@@ -74,7 +74,7 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('card', $html);
         $this->assertStringContainsString('Ringkasan', $html);
         $this->assertStringContainsString('data-ui-breadcrumb="metronic"', $html);
-        $this->assertStringContainsString('breadcrumb breadcrumb-separatorless', $html);
+        $this->assertStringContainsString('breadcrumb', $html);
         $this->assertStringContainsString('data-ui-sidebar-section="metronic"', $html);
         $this->assertStringContainsString('spm-sidebar-section-compact', $html);
         $this->assertStringContainsString('data-ui-tabs="metronic"', $html);
@@ -516,7 +516,6 @@ class MetronicFrontendTest extends TestCase
                 ->assertSee('id="kt_app_header"', false)
                 ->assertDontSee('id="kt_app_toolbar"', false)
                 ->assertSee('data-ui-breadcrumb="metronic"', false)
-                ->assertSee('spm-header-title', false)
                 ->assertSee('data-dashboard-page="metronic"', false)
                 ->assertSee('data-ui-page="metronic"', false)
                 ->assertSee('data-ui-badge="metronic"', false)

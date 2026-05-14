@@ -58,7 +58,7 @@
             </table>
         </div>
 
-        @if($records)
+        @if($records && method_exists($records, 'links'))
             <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4 pt-6">
                 <div class="text-muted fw-semibold fs-7">
                     Menampilkan {{ $records->firstItem() ?? 0 }} sampai {{ $records->lastItem() ?? 0 }} dari {{ $records->total() ?? 0 }} data

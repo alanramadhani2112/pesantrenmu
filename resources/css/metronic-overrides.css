@@ -2414,3 +2414,42 @@ a:not(.btn),
 @media (min-width: 768px) {
     .h-md-35px { height: 35px !important; }
 }
+
+/* ===== Tab Navigation Polish ===== */
+.spm-tabs .nav-link {
+    color: #7e8299;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.75rem 0;
+    margin-right: 2rem;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.spm-tabs .nav-link:hover {
+    color: var(--spm-primary);
+}
+
+.spm-tabs .nav-link.active {
+    color: var(--spm-primary) !important;
+    border-bottom-color: var(--spm-primary) !important;
+}
+
+/* Breadcrumb dot separator */
+.breadcrumb-dot .breadcrumb-item + .breadcrumb-item::before {
+    content: "\2022";
+    color: #b5b5c3;
+    font-size: 0.6rem;
+    vertical-align: middle;
+    padding: 0 0.5rem;
+}
+
+.breadcrumb-dot .breadcrumb-item a {
+    color: #7e8299;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.breadcrumb-dot .breadcrumb-item a:hover {
+    color: var(--spm-primary);
+}
