@@ -6,10 +6,12 @@
     'size' => 'md',
     'modifier' => null,
     'disabled' => false,
+    'invalid' => false,
 ])
 
 @php
     $id ??= $model;
+    $hasError = $invalid || ($model && isset($errors) && $errors->has($model));
 
     $sizes = [
         'sm' => 'form-select-sm',
@@ -17,7 +19,7 @@
         'lg' => 'form-select-lg',
     ];
 
-    $classes = trim('form-select form-select-solid ' . ($sizes[$size] ?? ''));
+    $classes = trim('form-select form-select-solid ' . ($sizes[$size] ?? '') . ($hasError ? ' is-invalid' : ''));
 @endphp
 
 <select

@@ -12,9 +12,14 @@
 ])
 
 @php
-    $fileName = $file && method_exists($file, 'getClientOriginalName')
+    // Auto-detect file from $model if $file not explicitly provided
+    if (!$file && $model && isset($__data) && isset($__data[$model])) {
+        $file = $__data[$model];
+    }
+    $fileName = $file && is_object($file) && method_exists($file, 'getClientOriginalName')
         ? $file->getClientOriginalName()
         : $placeholder;
+    $hasFile = $file && is_object($file) && method_exists($file, 'getClientOriginalName');
     $hasCustomTrigger = trim((string) $slot) !== '';
 @endphp
 
@@ -34,17 +39,26 @@
             {{ $slot }}
         @else
             <span class="symbol symbol-40px">
-                <span class="symbol-label bg-white text-primary">
-                    <x-ui.icon name="arrow-up" class="fs-2" />
+                <span class="symbol-label {{ $hasFile ? 'bg-light-success text-success' : 'bg-white text-primary' }}">
+                    <x-ui.icon :name="$hasFile ? 'check-circle' : 'arrow-up'" class="fs-2" />
                 </span>
             </span>
 
-            <span class="d-flex flex-column min-w-0">
-                <span class="fw-bold text-gray-700">{{ $fileName }}</span>
-                @if($hint)
+            <span class="d-flex flex-column min-w-0 flex-grow-1">
+                <span class="fw-bold text-gray-700 text-truncate">{{ $fileName }}</span>
+                @if($hasFile)
+                    <span class="text-success fw-semibold fs-8">File siap diunggah</span>
+                @elseif($hint)
                     <span class="text-muted fw-semibold fs-8">{{ $hint }}</span>
                 @endif
             </span>
+
+            @if($hasFile)
+                <span class="fs-3 text-muted ms-2 cursor-pointer"
+                    onclick="event.preventDefault(); document.getElementById('{{ $id }}').value = '';{{ $model ? " Livewire.find(this.closest('[wire\\\\:id]').getAttribute('wire:id')).set('" . $model . "', null);" : '' }}">
+                    <x-ui.icon name="cross-circle" class="fs-3" />
+                </span>
+            @endif
         @endif
     </label>
 </div>
