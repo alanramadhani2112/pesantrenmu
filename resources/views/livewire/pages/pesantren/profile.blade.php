@@ -426,7 +426,7 @@ new #[Layout('layouts.app')] class extends Component {
                                                 placeholder="Cari Kota/Kabupaten..."
                                                 @focus="showKabupatenConfig = true"
                                                 @click.outside="showKabupatenConfig = false"
-                                                x-bindx-bind:disabled="!currentProvinsiKode"
+                                                x-bindx-bindx-bind:disabled="!currentProvinsiKode"
                                                 class="form-control form-control-solid" />
                                             <div x-show="showKabupatenConfig && filteredKabupaten.length > 0"
                                                  class="position-absolute w-100 mt-1 bg-white border rounded shadow-sm"

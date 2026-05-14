@@ -403,8 +403,8 @@ new #[Layout('layouts.app')] class extends Component {
 
                         {{-- Wilayah selector --}}
                         <div class="col-12" x-data="wilayahSelector({
-                            selectedProvinsiNama: @entangle('provinsi'),
-                            selectedKabupatenNama: @entangle('kota_kabupaten')
+                            selectedProvinsiNama: $wire.entangle('provinsi'),
+                            selectedKabupatenNama: $wire.entangle('kota_kabupaten')
                         })">
                             <div class="row g-5">
                                 <div class="col-md-6">
@@ -435,7 +435,7 @@ new #[Layout('layouts.app')] class extends Component {
                                                 placeholder="Cari Kota/Kabupaten..."
                                                 @focus="showKabupatenConfig = true"
                                                 @click.outside="showKabupatenConfig = false"
-                                                x-bindx-bind:disabled="!currentProvinsiKode" />
+                                                x-bindx-bindx-bind:disabled="!currentProvinsiKode" />
                                             <div x-show="showKabupatenConfig && filteredKabupaten.length > 0"
                                                  class="position-absolute w-100 mt-1 bg-white border rounded shadow-sm"
                                                  style="z-index:50;max-height:200px;overflow-y:auto;">
