@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>@hasSection('title')@yield('title') — {{ config('app.name', 'PesantrenMu') }}@else{{ config('app.name', 'PesantrenMu') }}@endif</title>
+    <meta name="description" content="Sistem Penjaminan Mutu PesantrenMu — Platform akreditasi pesantren Muhammadiyah.">
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand/favicon.svg') }}">
 
     <!-- Styles -->

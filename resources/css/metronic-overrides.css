@@ -2488,3 +2488,89 @@ a:not(.btn),
     25% { transform: translateX(-4px); }
     75% { transform: translateX(4px); }
 }
+
+/* ===== Print Styles ===== */
+@media print {
+    /* Hide non-essential elements */
+    .spm-app-sidebar,
+    .spm-sidebar-backdrop,
+    .spm-topbar,
+    .app-sidebar,
+    .app-header,
+    .spm-footer,
+    .spm-toast-wrapper,
+    .spm-scroll-actions,
+    [data-ui-action-menu],
+    .btn,
+    .pagination-indonesia,
+    .card-toolbar,
+    .spm-quick-action,
+    .spm-dashboard-hero .btn {
+        display: none !important;
+    }
+
+    /* Reset layout */
+    body {
+        background: white !important;
+        font-size: 12pt;
+    }
+
+    .spm-app-shell {
+        display: block !important;
+        overflow: visible !important;
+    }
+
+    #main-content-scroll {
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+    .spm-main-content {
+        padding: 0 !important;
+    }
+
+    /* Cards and sections */
+    .card,
+    .spm-table-shell {
+        border: 1px solid #dee2e6 !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+    }
+
+    /* Tables */
+    .table-responsive {
+        overflow: visible !important;
+    }
+
+    table {
+        font-size: 10pt;
+    }
+
+    /* Page title visible */
+    .spm-page-title {
+        visibility: visible !important;
+        position: static !important;
+        clip: auto !important;
+        width: auto !important;
+        height: auto !important;
+        font-size: 18pt;
+        margin-bottom: 8pt;
+    }
+
+    /* Links show URL */
+    a[href]::after {
+        content: none;
+    }
+
+    /* Dashboard hero - show as simple header */
+    .spm-dashboard-hero {
+        background: none !important;
+        color: black !important;
+        padding: 0 !important;
+        margin-bottom: 12pt !important;
+    }
+
+    .spm-dashboard-hero * {
+        color: black !important;
+    }
+}

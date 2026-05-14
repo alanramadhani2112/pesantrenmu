@@ -5,6 +5,8 @@
     'showHeading' => false,
 ])
 
+@section('title', $title)
+
 <div data-ui-page="metronic" {{ $attributes->merge(['class' => 'd-flex flex-column ' . ($compact ? 'gap-4' : 'gap-6') . ' spm-page']) }}>
     <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between {{ $compact ? 'gap-3' : 'gap-4' }}">
         <div>
