@@ -54,7 +54,7 @@ $metronicWidthClass = [
     x-on:keydown.tab.prevent="$event.shiftKey || nextFocusable().focus()"
     x-on:keydown.shift.tab.prevent="prevFocusable().focus()"
     x-show="show"
-    class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-4 py-6 sm:px-6 lg:px-8 spm-modal-overlay"
+    class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto px-4 py-6 sm:px-6 lg:px-8 spm-modal-overlay"
     style="display: {{ $show ? 'block' : 'none' }};">
     <div
         x-show="show"
