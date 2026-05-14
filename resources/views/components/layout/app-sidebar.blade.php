@@ -48,12 +48,14 @@
     <div class="app-sidebar-menu flex-column-fluid">
         <div id="kt_app_sidebar_menu_wrapper" class="app-sidebar-wrapper hover-scroll-y">
             <div class="menu menu-column menu-rounded menu-sub-indention menu-state-title-primary fw-semibold px-3" id="kt_app_sidebar_menu" data-kt-menu="true" data-kt-menu-expand="false">
+                <x-ui.sidebar-section :compact="true">UTAMA</x-ui.sidebar-section>
+
                 <x-sidebar-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" icon="grid">
-                    {{ __('Dashboards') }}
+                    {{ __('Dashboard') }}
                 </x-sidebar-link>
 
                 @if ($isAdmin)
-                    <x-ui.sidebar-section>ADMINISTRASI</x-ui.sidebar-section>
+                    <x-ui.sidebar-section>OPERASIONAL</x-ui.sidebar-section>
 
                     <x-sidebar-link :href="route('admin.akreditasi')" :active="request()->routeIs('admin.akreditasi*')" icon="shield">
                         {{ __('Akreditasi') }}
@@ -67,15 +69,15 @@
                         {{ __('Asesor') }}
                     </x-sidebar-link>
 
-                    <x-ui.sidebar-section :compact="true">MASTER DATA</x-ui.sidebar-section>
+                    <x-ui.sidebar-section>MASTER DATA</x-ui.sidebar-section>
 
                     <x-layout.sidebar-group
-                        title="Referensi Data"
+                        title="Referensi"
                         icon="data"
                         :open="request()->routeIs('admin.master-edpm') || request()->routeIs('admin.master-dokumen')"
                     >
                         <x-sidebar-link :href="route('admin.master-edpm')" :active="request()->routeIs('admin.master-edpm')" icon="none">
-                            {{ __('Komponen') }}
+                            {{ __('Komponen EDPM') }}
                         </x-sidebar-link>
 
                         <x-sidebar-link :href="route('admin.master-dokumen')" :active="request()->routeIs('admin.master-dokumen')" icon="none">
@@ -84,7 +86,7 @@
                     </x-layout.sidebar-group>
 
                     <x-layout.sidebar-group
-                        title="Manajemen"
+                        title="Manajemen Akses"
                         icon="setting-2"
                         :open="request()->routeIs('roles.*') || request()->routeIs('accounts.*')"
                     >
@@ -93,12 +95,14 @@
                         </x-sidebar-link>
 
                         <x-sidebar-link :href="route('accounts.index')" :active="request()->routeIs('accounts.*')" icon="none">
-                            {{ __('Accounts') }}
+                            {{ __('Akun Pengguna') }}
                         </x-sidebar-link>
                     </x-layout.sidebar-group>
                 @endif
 
                 @if ($isPesantren)
+                    <x-ui.sidebar-section>DATA PESANTREN</x-ui.sidebar-section>
+
                     <x-sidebar-link :href="route('pesantren.profile')" :active="request()->routeIs('pesantren.profile')" icon="hat">
                         {{ __('Profil Pesantren') }}
                     </x-sidebar-link>
@@ -118,7 +122,7 @@
                     </x-sidebar-link>
 
                     <x-sidebar-link :href="route('pesantren.akreditasi')" :active="request()->routeIs('pesantren.akreditasi*')" icon="shield-lock">
-                        {{ __('Akreditasi') }}
+                        {{ __('Pengajuan') }}
                     </x-sidebar-link>
 
                     <x-ui.sidebar-section>DOKUMEN</x-ui.sidebar-section>
@@ -132,11 +136,13 @@
                     </x-sidebar-link>
 
                     <x-sidebar-link :href="route('documents.index', ['doc' => 'all'])" :active="request()->fullUrlIs(route('documents.index', ['doc' => 'all']))" icon="document-stack">
-                        {{ __('Daftar Dokumen') }}
+                        {{ __('Semua Dokumen') }}
                     </x-sidebar-link>
                 @endif
 
                 @if ($isAsesor)
+                    <x-ui.sidebar-section>DATA ASESOR</x-ui.sidebar-section>
+
                     <x-sidebar-link :href="route('asesor.profile')" :active="request()->routeIs('asesor.profile')" icon="users">
                         {{ __('Profil Asesor') }}
                     </x-sidebar-link>
@@ -144,7 +150,7 @@
                     <x-ui.sidebar-section>AKREDITASI</x-ui.sidebar-section>
 
                     <x-sidebar-link :href="route('asesor.akreditasi')" :active="request()->routeIs('asesor.akreditasi*')" icon="shield-lock">
-                        {{ __('Akreditasi') }}
+                        {{ __('Tugas') }}
                     </x-sidebar-link>
 
                     <x-ui.sidebar-section>DOKUMEN</x-ui.sidebar-section>
@@ -154,7 +160,7 @@
                     </x-sidebar-link>
 
                     <x-sidebar-link :href="route('documents.index', ['doc' => 'visitasi'])" :active="request()->fullUrlIs(route('documents.index', ['doc' => 'visitasi']))" icon="document-stack">
-                        {{ __('Visitasi') }}
+                        {{ __('Panduan Visitasi') }}
                     </x-sidebar-link>
                 @endif
             </div>

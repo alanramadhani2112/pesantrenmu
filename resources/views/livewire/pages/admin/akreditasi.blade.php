@@ -308,7 +308,7 @@ new #[Layout('layouts.app')] class extends Component {
                     </x-ui.button>
                 </div>
 
-                <x-ui.table-search placeholder="Cari Pesantren..." />
+                <x-datatable.search placeholder="Cari Pesantren..." />
 
                 <x-ui.button wire:click="export" variant="primary" size="sm">
                     <x-ui.icon name="document" class="fs-4 me-1" />
