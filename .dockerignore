@@ -1,0 +1,57 @@
+# VCS
+.git
+.gitignore
+.gitattributes
+.github
+
+# Local env / caches
+.env
+.env.*
+!.env.example
+.phpunit.result.cache
+.phpunit.cache
+.pest.cache
+.idea
+.vscode
+.fleet
+*.log
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Node / Vite
+node_modules
+public/build
+public/hot
+
+# PHP / Composer
+vendor
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/framework/testing/*
+storage/logs/*
+bootstrap/cache/*.php
+
+# Tests / dev artifacts
+tests
+phpunit.xml
+phpunit.xml.dist
+.editorconfig
+.styleci.yml
+pint.json
+
+# Docker meta
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Deployment / secrets
+*.pem
+*.key
+*.crt
+auth.json
+
+# Laragon / local
+*.local.*
