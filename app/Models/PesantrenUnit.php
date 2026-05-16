@@ -6,7 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class PesantrenUnit extends Model
 {
-    protected $guarded = [];
+    /**
+     * Mass-assignable attributes.
+     *
+     * Audit fix C-2 (P0): explicit allowlist replaces $guarded = [].
+     * Callers MUST set `pesantren_id` server-side from the tenant's own
+     * record, never from request input.
+     */
+    protected $fillable = [
+        'pesantren_id',
+        'unit',
+        'jumlah_rombel',
+    ];
 
     public function pesantren()
     {

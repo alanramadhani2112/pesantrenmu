@@ -4,18 +4,48 @@ namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use NotificationChannels\WebPush\WebPushMessage;
 use NotificationChannels\WebPush\WebPushChannel;
+use NotificationChannels\WebPush\WebPushMessage;
 
-class AkreditasiNotification extends Notification
+/**
+ * AkreditasiNotification
+ *
+ * Audit fix PR-1 (P0): implements ShouldQueue so the WebPush + database +
+ * broadcast channels run on the queue worker instead of blocking the user
+ * request thread. If the WebPush provider hiccups, the user-facing request
+ * still returns fast; the notification will retry on the failed_jobs table.
+ *
+ * Operational requirement: a queue worker must be running in production
+ * (`php artisan queue:work --tries=3`). When QUEUE_CONNECTION=sync (e.g. in
+ * tests or local dev) the dispatch falls back to inline execution, so this
+ * change is safe to apply across all environments.
+ */
+class AkreditasiNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    /**
+     * Number of times the notification job may be attempted before it lands
+     * in failed_jobs. Three attempts is enough to ride out brief WebPush
+     * provider blips without spamming users on a permanent outage.
+     */
+    public int $tries = 3;
+
+    /**
+     * Backoff in seconds between attempts: 10s, 30s, 60s.
+     */
+    public function backoff(): array
+    {
+        return [10, 30, 60];
+    }
+
     public $type;
+
     public $message;
+
     public $url;
+
     public $title;
 
     /**
