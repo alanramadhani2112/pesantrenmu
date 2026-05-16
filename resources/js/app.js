@@ -471,6 +471,8 @@ window.wilayahSelector = (config = {}) => ({
     selectedKabupatenNama: config.selectedKabupatenNama ?? '',
     showProvinsiConfig: false,
     showKabupatenConfig: false,
+    showProvinsiDropdown: false,
+    showKabupatenDropdown: false,
     get currentProvinsiKode() {
         if (this.selectedProvinsiKode) return this.selectedProvinsiKode;
         return this.provinsiList.find((item) => item.nama === this.selectedProvinsiNama)?.kode ?? '';
@@ -500,6 +502,7 @@ window.wilayahSelector = (config = {}) => ({
         this.selectedKabupatenNama = '';
         this.kabupatenSearch = '';
         this.showProvinsiConfig = false;
+        this.showProvinsiDropdown = false;
         this.loadKabupaten(item.kode);
     },
     selectKabupaten(item) {
@@ -507,6 +510,7 @@ window.wilayahSelector = (config = {}) => ({
         this.selectedKabupatenNama = item.nama;
         this.kabupatenSearch = item.nama;
         this.showKabupatenConfig = false;
+        this.showKabupatenDropdown = false;
     },
     async loadKabupaten(kode) {
         if (!kode) return;

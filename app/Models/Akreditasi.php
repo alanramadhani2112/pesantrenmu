@@ -3,8 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\AkreditasiEdpm;
 use App\Models\AkreditasiEdpmCatatan;
@@ -46,10 +50,22 @@ class Akreditasi extends Model
         });
 
         static::deleting(function ($akreditasi) {
-            $akreditasi->assessments()->delete();
-            AkreditasiEdpm::where('akreditasi_id', $akreditasi->id)->delete();
-            AkreditasiEdpmCatatan::where('akreditasi_id', $akreditasi->id)->delete();
+            DB::transaction(function () use ($akreditasi) {
+                $akreditasi->assessments()->delete();
+                AkreditasiEdpm::where('akreditasi_id', $akreditasi->id)->delete();
+                AkreditasiEdpmCatatan::where('akreditasi_id', $akreditasi->id)->delete();
+            });
         });
+    }
+
+    public function parentAkreditasi()
+    {
+        return $this->belongsTo(Akreditasi::class, 'parent');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Akreditasi::class, 'parent');
     }
 
     public function user()
@@ -99,5 +115,40 @@ class Akreditasi extends Model
             6 => 'bg-gray-100 text-gray-800',
             default => 'bg-gray-100 text-gray-800',
         };
+    }
+
+    /**
+     * Get all rejections for this akreditasi.
+     */
+    public function rejections(): HasMany
+    {
+        return $this->hasMany(AkreditasiRejection::class);
+    }
+
+    /**
+     * Get the active rejection (asesor type, pending status, latest).
+     */
+    public function activeRejection(): HasOne
+    {
+        return $this->hasOne(AkreditasiRejection::class)
+            ->where('type', 'asesor')
+            ->where('status', 'pending')
+            ->latest();
+    }
+
+    /**
+     * Get all bandings (appeals) for this akreditasi.
+     */
+    public function bandings(): HasMany
+    {
+        return $this->hasMany(Banding::class);
+    }
+
+    /**
+     * Get the active banding (pending or under_review, latest).
+     */
+    public function activeBanding(): HasOne
+    {
+        return $this->hasOne(Banding::class)->whereIn('status', ['pending', 'under_review'])->latest();
     }
 }

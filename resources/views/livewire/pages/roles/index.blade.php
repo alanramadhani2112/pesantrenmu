@@ -39,9 +39,9 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function mount()
     {
-        if (!auth()->user()->isAdmin()) {
-            abort(403);
-        }
+        if (!auth()->user()->canAccessAdminArea()) {
+                    abort(403);
+                }
     }
 
     public function getRolesProperty()
@@ -106,7 +106,7 @@ new #[Layout('layouts.app')] class extends Component {
         title="Roles"
         subtitle="Kelola peran dan parameter akses pengguna sistem."
     >
-        <x-ui.table title="Kelola Peran (Roles)" :records="$this->roles" data-ui-table-adapter="datatable">
+        <x-datatable.layout title="Kelola Peran (Roles)" :records="$this->roles">
             <x-slot name="filters">
                 <x-datatable.search placeholder="Cari Peran..." />
             </x-slot>
@@ -166,7 +166,7 @@ new #[Layout('layouts.app')] class extends Component {
                 </tr>
                 @endforelse
             </x-slot>
-        </x-ui.table>
+        </x-datatable.layout>
     </x-ui.index-layout>
 
     <x-ui.modal name="role-modal" :show="$errors->isNotEmpty()" focusable>

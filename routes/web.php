@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Livewire\Volt\Volt;
 
 Route::view('/', 'welcome');
 
@@ -12,85 +13,114 @@ Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
 
-\Livewire\Volt\Volt::route('roles', 'pages.roles.index')
+Volt::route('roles', 'pages.roles.index')
     ->middleware(['auth', 'verified'])
     ->name('roles.index');
 
-\Livewire\Volt\Volt::route('accounts', 'pages.accounts.index')
+Volt::route('accounts', 'pages.accounts.index')
     ->middleware(['auth', 'verified'])
     ->name('accounts.index');
 
-\Livewire\Volt\Volt::route('pesantren/profile', 'pages.pesantren.profile')
-    ->middleware(['auth', 'verified'])
-    ->name('pesantren.profile');
-
-\Livewire\Volt\Volt::route('pesantren/ipm', 'pages.pesantren.ipm')
-    ->middleware(['auth', 'verified'])
-    ->name('pesantren.ipm');
-
-\Livewire\Volt\Volt::route('pesantren/sdm', 'pages.pesantren.sdm')
-    ->middleware(['auth', 'verified'])
-    ->name('pesantren.sdm');
-
-\Livewire\Volt\Volt::route('pesantren/edpm', 'pages.pesantren.edpm')
-    ->middleware(['auth', 'verified'])
-    ->name('pesantren.edpm');
-
-\Livewire\Volt\Volt::route('pesantren/akreditasi', 'pages.pesantren.akreditasi')
-    ->middleware(['auth', 'verified'])
-    ->name('pesantren.akreditasi');
-
-\Livewire\Volt\Volt::route('pesantren/akreditasi/{uuid}', 'pages.pesantren.akreditasi-detail')
-    ->middleware(['auth', 'verified'])
-    ->name('pesantren.akreditasi-detail');
-
-\Livewire\Volt\Volt::route('asesor/profile', 'pages.asesor.profile')
-    ->middleware(['auth', 'verified'])
-    ->name('asesor.profile');
-
-\Livewire\Volt\Volt::route('asesor/akreditasi', 'pages.asesor.akreditasi')
-    ->middleware(['auth', 'verified'])
-    ->name('asesor.akreditasi');
-
-Route::get('asesor/akreditasi/{uuid}', \App\Livewire\Pages\Asesor\AkreditasiDetail::class)
-    ->middleware(['auth', 'verified'])
-    ->name('asesor.akreditasi-detail');
-
-\Livewire\Volt\Volt::route('admin/master-edpm', 'pages.admin.master-edpm')
-    ->middleware(['auth', 'verified'])
-    ->name('admin.master-edpm');
-
-\Livewire\Volt\Volt::route('admin/master-document', 'pages.admin.master.dokumen')
-    ->middleware(['auth', 'verified'])
-    ->name('admin.master-dokumen');
-
-\Livewire\Volt\Volt::route('documents/{doc?}', 'pages.dokumen.index')
+Volt::route('documents/{doc?}', 'pages.dokumen.index')
     ->middleware(['auth', 'verified'])
     ->name('documents.index');
 
-\Livewire\Volt\Volt::route('admin/akreditasi', 'pages.admin.akreditasi')
-    ->middleware(['auth', 'verified'])
-    ->name('admin.akreditasi');
+/*
+|--------------------------------------------------------------------------
+| Admin routes
+|--------------------------------------------------------------------------
+| Group khusus untuk role `admin`. Middleware `role:admin` (alias didaftar
+| di bootstrap/app.php) memberikan defense-in-depth lapis pertama, sehingga
+| user dengan role lain langsung di-abort 403 sebelum masuk komponen
+| Livewire (lihat design.md Stream 3.1).
+*/
+Route::middleware(['auth', 'verified', 'role:admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Volt::route('master-edpm', 'pages.admin.master-edpm')
+            ->name('master-edpm');
 
-\Livewire\Volt\Volt::route('admin/asesor', 'pages.admin.asesor.index')
-    ->middleware(['auth', 'verified'])
-    ->name('admin.asesor.index');
+        Volt::route('master-kategori-dokumen', 'pages.admin.master.kategori-dokumen')
+            ->name('master-kategori-dokumen');
 
-\Livewire\Volt\Volt::route('admin/asesor/{uuid}', 'pages.admin.asesor.detail')
-    ->middleware(['auth', 'verified'])
-    ->name('admin.asesor.detail');
+        Volt::route('master-document', 'pages.admin.master.dokumen')
+            ->name('master-dokumen');
 
-\Livewire\Volt\Volt::route('admin/pesantren', 'pages.admin.pesantren.index')
-    ->middleware(['auth', 'verified'])
-    ->name('admin.pesantren.index');
+        Volt::route('master-role-permission', 'pages.admin.master.role-permission')
+            ->name('master-role-permission');
 
-\Livewire\Volt\Volt::route('admin/pesantren/{uuid}', 'pages.admin.pesantren.detail')
-    ->middleware(['auth', 'verified'])
-    ->name('admin.pesantren.detail');
+        Volt::route('akreditasi', 'pages.admin.akreditasi')
+            ->name('akreditasi');
 
-\Livewire\Volt\Volt::route('admin/akreditasi/{uuid}', 'pages.admin.akreditasi-detail')
-    ->middleware(['auth', 'verified'])
-    ->name('admin.akreditasi-detail');
+        Volt::route('akreditasi/{uuid}', 'pages.admin.akreditasi-detail')
+            ->name('akreditasi-detail');
+
+        Volt::route('asesor', 'pages.admin.asesor.index')
+            ->name('asesor.index');
+
+        Volt::route('asesor/{uuid}', 'pages.admin.asesor.detail')
+            ->name('asesor.detail');
+
+        Volt::route('banding', 'pages.admin.banding')
+            ->name('banding');
+
+        Volt::route('banding/{id}', 'pages.admin.banding-detail')
+            ->name('banding-detail');
+
+        Volt::route('pesantren', 'pages.admin.pesantren.index')
+            ->name('pesantren.index');
+
+        Volt::route('pesantren/{uuid}', 'pages.admin.pesantren.detail')
+            ->name('pesantren.detail');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Asesor routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'verified', 'role:asesor'])
+    ->prefix('asesor')
+    ->name('asesor.')
+    ->group(function () {
+        Volt::route('profile', 'pages.asesor.profile')
+            ->name('profile');
+
+        Volt::route('akreditasi', 'pages.asesor.akreditasi')
+            ->name('akreditasi');
+
+        Route::get('akreditasi/{uuid}', \App\Livewire\Pages\Asesor\AkreditasiDetail::class)
+            ->name('akreditasi-detail');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Pesantren routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'verified', 'role:pesantren'])
+    ->prefix('pesantren')
+    ->name('pesantren.')
+    ->group(function () {
+        Volt::route('profile', 'pages.pesantren.profile')
+            ->name('profile');
+
+        Volt::route('ipm', 'pages.pesantren.ipm')
+            ->name('ipm');
+
+        Volt::route('sdm', 'pages.pesantren.sdm')
+            ->name('sdm');
+
+        Volt::route('edpm', 'pages.pesantren.edpm')
+            ->name('edpm');
+
+        Volt::route('akreditasi', 'pages.pesantren.akreditasi')
+            ->name('akreditasi');
+
+        Volt::route('akreditasi/{uuid}', 'pages.pesantren.akreditasi-detail')
+            ->name('akreditasi-detail');
+    });
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/sso/sso.php';

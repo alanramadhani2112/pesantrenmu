@@ -16,4 +16,17 @@ interface DocumentRepositoryInterface
     public function update(int $id, array $data): bool;
 
     public function delete(int $id): bool;
+
+    /**
+     * Active documents visible to the given role, optionally filtered by category slug.
+     *
+     * @param  string|null  $role  one of 'admin', 'asesor', 'pesantren', null
+     * @param  string|null  $categorySlug  the document_categories.slug, or 'all' / null for unfiltered
+     */
+    public function getActiveForRole(
+        ?string $role,
+        ?string $categorySlug = null,
+        ?string $search = null,
+        int $perPage = 10
+    ): LengthAwarePaginator;
 }

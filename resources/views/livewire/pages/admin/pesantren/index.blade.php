@@ -104,35 +104,36 @@ new #[Layout('layouts.app')] class extends Component {
         title="Pesantren"
         subtitle="Kelola data pesantren, status akun, dan status akreditasi."
     >
-        <x-slot name="toolbar">
-            <x-ui.filter-bar>
-                <x-datatable.search placeholder="Cari Pesantren..." />
+        <x-datatable.layout title="Pesantren" :records="$this->pesantrens">
+            <x-slot name="filters">
+                <x-ui.filter-bar>
+                    <x-datatable.search placeholder="Cari Pesantren..." />
 
-                <x-ui.filter-select
-                    model="filterAkreditasi"
-                    placeholder="Semua Akreditasi"
-                    :options="[
-                        'terakreditasi' => 'Unggul',
-                        'proses' => 'Proses Akreditasi',
-                        'belum' => 'Belum Terakreditasi',
-                        'ditolak' => 'Tidak Terakreditasi',
-                    ]"
-                />
+                    <x-ui.filter-select
+                        model="filterAkreditasi"
+                        placeholder="Semua Akreditasi"
+                        :options="[
+                            'terakreditasi' => 'Unggul',
+                            'proses' => 'Proses Akreditasi',
+                            'belum' => 'Belum Terakreditasi',
+                            'ditolak' => 'Tidak Terakreditasi',
+                        ]"
+                    />
 
-                <x-ui.filter-select
-                    model="filterStatus"
-                    placeholder="Semua Status"
-                    :options="['1' => 'Aktif', '0' => 'Tidak Aktif']"
-                />
+                    <x-ui.filter-select
+                        model="filterStatus"
+                        placeholder="Semua Status"
+                        :options="['1' => 'Aktif', '0' => 'Tidak Aktif']"
+                    />
+                </x-ui.filter-bar>
+            </x-slot>
 
+            <x-slot name="toolbar">
                 <x-ui.button wire:click="export" variant="primary" size="sm">
                     <x-ui.icon name="document" class="fs-4 me-1" />
                     Ekspor Data
                 </x-ui.button>
-            </x-ui.filter-bar>
-        </x-slot>
-
-        <x-datatable.layout title="Pesantren" :records="$this->pesantrens">
+            </x-slot>
 
             <x-slot name="thead">
                 <x-ui.table-th :min-width="false" align="center" class="w-60px">

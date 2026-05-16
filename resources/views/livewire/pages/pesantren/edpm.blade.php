@@ -3,11 +3,13 @@
 use App\Models\MasterEdpmKomponen;
 use App\Models\Edpm;
 use App\Models\EdpmCatatan;
+use App\Traits\ChecksSectionLock;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use Illuminate\Support\Str;
 
 new #[Layout('layouts.app')] class extends Component {
+    use ChecksSectionLock;
     public $komponens;
     public $evaluasis = [];
     public $links = [];
@@ -91,7 +93,7 @@ new #[Layout('layouts.app')] class extends Component {
     public function save()
     {
         $pesantrenService = app(\App\Services\PesantrenService::class);
-        if (auth()->user()->pesantren->is_locked) {
+        if (!$this->hasAnyEdpmButirEditable()) {
             $this->dispatch('show-metronic-alert', type: 'error', title: 'Akses Ditolak', message: 'Data terkunci karena sedang dalam proses akreditasi.');
             return;
         }
@@ -134,7 +136,7 @@ new #[Layout('layouts.app')] class extends Component {
     public function saveDraft()
     {
         $pesantrenService = app(\App\Services\PesantrenService::class);
-        if (auth()->user()->pesantren->is_locked) {
+        if (!$this->hasAnyEdpmButirEditable()) {
             $this->dispatch('show-metronic-alert', type: 'error', title: 'Akses Ditolak', message: 'Data terkunci karena sedang dalam proses akreditasi.');
             return;
         }
@@ -168,6 +170,36 @@ new #[Layout('layouts.app')] class extends Component {
 
         return true;
     }
+
+    /**
+     * Check if any EDPM butir is editable (either pesantren not locked or butir unlocked).
+     */
+    protected function hasAnyEdpmButirEditable(): bool
+    {
+        $pesantren = auth()->user()->pesantren;
+        if (!$pesantren || !$pesantren->is_locked) {
+            return true;
+        }
+
+        // Check if any butir is unlocked
+        foreach ($this->komponens as $komponen) {
+            foreach ($komponen->butirs as $butir) {
+                if ($this->isSectionEditable('edpm.butir.' . $butir->id)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if a specific butir is editable.
+     */
+    public function isButirEditable(int $butirId): bool
+    {
+        return $this->isSectionEditable('edpm.butir.' . $butirId);
+    }
 }; ?>
 
 @php
@@ -180,7 +212,7 @@ new #[Layout('layouts.app')] class extends Component {
 
 <x-ui.page
     title="Evaluasi Data Pesantren Muhammadiyah (EDPM)"
-    subtitle="Susun evaluasi per komponen, tautan bukti, dan catatan kinerja dengan komponen Metronic reusable."
+    subtitle="Susun evaluasi per komponen, tautan bukti, dan catatan kinerja."
     data-module-page="pesantren-edpm"
     x-data="edpmManagement"
 >
@@ -216,13 +248,24 @@ new #[Layout('layouts.app')] class extends Component {
     </div>
 
     @if($isLocked)
-        <div class="spm-inline-alert">
-            <x-ui.icon name="shield-tick" class="fs-2 text-warning" />
-            <div>
-                <div class="spm-inline-alert-title">Data Terkunci</div>
-                <div class="spm-inline-alert-text">Data EDPM tidak dapat diubah karena pesantren sedang dalam proses akreditasi.</div>
+        @php $hasAnyEdpmEditable = $this->hasAnyEdpmButirEditable(); @endphp
+        @if($hasAnyEdpmEditable)
+            <div class="spm-inline-alert" style="border-left: 4px solid #f59e0b; background: #fffbeb; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+                <x-ui.icon name="shield-tick" class="fs-2 text-warning" />
+                <div>
+                    <div class="spm-inline-alert-title">🔓 Koreksi Tersedia</div>
+                    <div class="spm-inline-alert-text">Beberapa butir EDPM dibuka untuk perbaikan. Butir yang ditandai 🔓 dapat diedit.</div>
+                </div>
             </div>
-        </div>
+        @else
+            <div class="spm-inline-alert">
+                <x-ui.icon name="shield-tick" class="fs-2 text-warning" />
+                <div>
+                    <div class="spm-inline-alert-title">🔒 Data Terkunci</div>
+                    <div class="spm-inline-alert-text">Data EDPM tidak dapat diubah karena pesantren sedang dalam proses akreditasi.</div>
+                </div>
+            </div>
+        @endif
     @endif
 
     @if($komponenCount > 0)
@@ -278,9 +321,12 @@ new #[Layout('layouts.app')] class extends Component {
                         </thead>
                         <tbody>
                             @foreach($currentKomponen->butirs as $butir)
-                                <tr>
+                                @php $butirEditable = $this->isButirEditable($butir->id); @endphp
+                                <tr class="{{ ($isLocked && $butirEditable) ? 'bg-warning bg-opacity-10' : '' }}">
                                     <td class="ps-4 align-top">
-                                        <div class="fw-bold text-gray-900">{{ $butir->nomor_butir }}</div>
+                                        <div class="fw-bold text-gray-900">
+                                            {{ $isLocked ? ($butirEditable ? '🔓 ' : '🔒 ') : '' }}{{ $butir->nomor_butir }}
+                                        </div>
                                         <div class="text-muted fs-8">SK {{ $butir->no_sk }}</div>
                                     </td>
                                     <td class="align-top">
@@ -299,7 +345,7 @@ new #[Layout('layouts.app')] class extends Component {
                                                 placeholder="Pilih nilai"
                                                 :options="[1 => '1', 2 => '2', 3 => '3', 4 => '4']"
                                                 class="spm-score-control"
-                                                :disabled="$isLocked"
+                                                :disabled="$isLocked && !$butirEditable"
                                             />
                                         </x-ui.form-field>
                                     </td>
@@ -315,7 +361,7 @@ new #[Layout('layouts.app')] class extends Component {
                                                 :model="'links.' . $butir->id"
                                                 modifier="live"
                                                 placeholder="https://..."
-                                                :disabled="$isLocked"
+                                                :disabled="$isLocked && !$butirEditable"
                                             />
                                         </x-ui.form-field>
                                     </td>
@@ -331,6 +377,11 @@ new #[Layout('layouts.app')] class extends Component {
                     <div class="p-6">
                         <div class="spm-input-grid">
                             @foreach($komponens as $komponen)
+                                @php $komponenHasUnlocked = false;
+                                    foreach ($komponen->butirs as $b) {
+                                        if ($this->isButirEditable($b->id)) { $komponenHasUnlocked = true; break; }
+                                    }
+                                @endphp
                                 <x-ui.form-field
                                     :label="$komponen->nama"
                                     :for="'catatans-' . $komponen->id"
@@ -342,7 +393,7 @@ new #[Layout('layouts.app')] class extends Component {
                                         modifier="live"
                                         rows="4"
                                         placeholder="Catatan untuk {{ $komponen->nama }}"
-                                        :disabled="$isLocked"
+                                        :disabled="$isLocked && !$komponenHasUnlocked"
                                     />
                                 </x-ui.form-field>
                             @endforeach
@@ -365,12 +416,12 @@ new #[Layout('layouts.app')] class extends Component {
                         variant="light"
                         wire:click="prevStep"
                         wire:loading.attr="disabled"
-                        :disabled="$activeStep === 0 || $isLocked"
+                        :disabled="$activeStep === 0 || ($isLocked && !$this->hasAnyEdpmButirEditable())"
                     >
                         Sebelumnya
                     </x-ui.button>
 
-                    @if(!$isLocked)
+                    @if(!$isLocked || $this->hasAnyEdpmButirEditable())
                         <x-ui.button
                             type="button"
                             variant="warning"
@@ -388,7 +439,7 @@ new #[Layout('layouts.app')] class extends Component {
                             variant="success"
                             wire:loading.attr="disabled"
                             @click="confirmSimpan($wire)"
-                            :disabled="$isLocked"
+                            :disabled="$isLocked && !$this->hasAnyEdpmButirEditable()"
                         >
                             <span wire:loading.remove wire:target="save">Simpan Permanen</span>
                             <span wire:loading wire:target="save">Memproses...</span>
@@ -399,7 +450,7 @@ new #[Layout('layouts.app')] class extends Component {
                             variant="primary"
                             wire:loading.attr="disabled"
                             @click="validateAndNext($wire)"
-                            :disabled="$isLocked"
+                            :disabled="$isLocked && !$this->hasAnyEdpmButirEditable()"
                         >
                             <span wire:loading.remove wire:target="nextStep">Selanjutnya</span>
                             <span wire:loading wire:target="nextStep">Memproses...</span>

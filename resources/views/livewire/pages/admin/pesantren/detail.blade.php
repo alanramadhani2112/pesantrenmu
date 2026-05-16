@@ -4,6 +4,7 @@ use App\Models\User;
 use App\Models\Pesantren;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 new #[Layout('layouts.app')] class extends Component {
@@ -12,6 +13,10 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function mount($uuid)
     {
+        if (!Auth::user()?->isAdmin()) {
+            abort(403);
+        }
+
         $pesantrenService = app(\App\Services\PesantrenService::class);
         $this->user = $pesantrenService->findUserDetail($uuid);
 

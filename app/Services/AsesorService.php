@@ -3,9 +3,12 @@
 namespace App\Services;
 
 use App\Repositories\Contracts\AkreditasiRepositoryInterface;
+use App\Services\RejectionService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Models\Assessment;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Notifications\AkreditasiNotification;
 use App\Models\User;
 
@@ -70,78 +73,110 @@ class AsesorService
 
     public function processVisitasi(int $akreditasiId, int $userId, array $data, string $action): bool
     {
+        $isAssignedAsesor1 = Assessment::where('akreditasi_id', $akreditasiId)
+            ->whereHas('asesor', fn($q) => $q->where('user_id', $userId))
+            ->where('tipe', 1)
+            ->exists();
+
+        if (!$isAssignedAsesor1) {
+            Log::warning('processVisitasi unauthorized asesor', [
+                'user_id' => $userId,
+                'akreditasi_id' => $akreditasiId,
+            ]);
+            return false;
+        }
+
         $akreditasi = $this->akreditasiRepository->find($akreditasiId);
         if (!$akreditasi) return false;
 
-        $asesorUser = User::find($userId);
-        $asesorName = $asesorUser->name;
-        $admins = User::whereHas('role', function ($q) { $q->where('id', 1); })->get();
+        if ($action === 'tolak') {
+            $rejectionService = app(RejectionService::class);
+            $result = $rejectionService->createRejection(
+                $akreditasiId,
+                $userId,
+                $data['rejected_items'],
+                $data['catatan']
+            );
+            return $result['success'];
+        }
 
-        if ($action === 'terima') {
-            $this->akreditasiRepository->update($akreditasiId, [
-                'status' => 4, // Visitasi
-                'tgl_visitasi' => $data['tanggal'],
-                'tgl_visitasi_akhir' => $data['tanggal_akhir'],
-            ]);
+        if ($action === 'accept_perbaikan') {
+            $rejectionService = app(RejectionService::class);
+            $result = $rejectionService->acceptPerbaikan($akreditasiId, $userId);
+            return $result['success'];
+        }
 
-            if (!empty($data['catatan'])) {
+        return DB::transaction(function () use ($akreditasi, $akreditasiId, $userId, $data, $action) {
+            $asesorUser = User::find($userId);
+            $asesorName = $asesorUser->name;
+            $admins = User::whereHas('role', function ($q) { $q->where('id', 1); })->get();
+
+            if ($action === 'terima') {
+                $this->akreditasiRepository->update($akreditasiId, [
+                    'status' => 4, // Visitasi
+                    'tgl_visitasi' => $data['tanggal'],
+                    'tgl_visitasi_akhir' => $data['tanggal_akhir'],
+                ]);
+
+                if (!empty($data['catatan'])) {
+                    $this->akreditasiRepository->addCatatan([
+                        'akreditasi_id' => $akreditasiId,
+                        'user_id' => $userId,
+                        'tipe' => 'visitasi',
+                        'catatan' => $data['catatan'],
+                    ]);
+                }
+
+                $rangeStr = \Carbon\Carbon::parse($data['tanggal'])->format('d/m/Y');
+                if ($data['tanggal'] != $data['tanggal_akhir']) {
+                    $rangeStr .= ' s/d ' . \Carbon\Carbon::parse($data['tanggal_akhir'])->format('d/m/Y');
+                }
+
+                // Notify Pesantren
+                $akreditasi->user->notify(new AkreditasiNotification(
+                    'visitasi_diterima',
+                    'Jadwal Visitasi Ditetapkan',
+                    "Asesor $asesorName telah menjadwalkan visitasi pada tanggal $rangeStr.",
+                    route('pesantren.akreditasi')
+                ));
+
+                // Notify Admin
+                Notification::send($admins, new AkreditasiNotification(
+                    'visitasi_diterima',
+                    'Jadwal Visitasi Ditetapkan',
+                    "Asesor $asesorName telah menetapkan jadwal visitasi untuk pesantren " . ($akreditasi->user?->pesantren?->nama_pesantren ?? $akreditasi->user->name) . " pada tanggal $rangeStr.",
+                    route('admin.akreditasi')
+                ));
+            } else {
+                $this->akreditasiRepository->update($akreditasiId, ['status' => 5]); // Kembali ke Assessment (penjadwalan)
+
                 $this->akreditasiRepository->addCatatan([
                     'akreditasi_id' => $akreditasiId,
                     'user_id' => $userId,
                     'tipe' => 'visitasi',
                     'catatan' => $data['catatan'],
+                    'perbaikan' => implode(', ', $data['perbaikan']),
                 ]);
+
+                // Notify Pesantren
+                $akreditasi->user->notify(new AkreditasiNotification(
+                    'visitasi_ditolak',
+                    'Pengajuan Visitasi Ditolak',
+                    "Asesor $asesorName menolak jadwal visitasi dengan catatan: " . $data['catatan'] . ". Silahkan periksa catatan perbaikan.",
+                    route('pesantren.akreditasi')
+                ));
+
+                // Notify Admin
+                Notification::send($admins, new AkreditasiNotification(
+                    'visitasi_ditolak',
+                    'Visitasi Ditolak Asesor',
+                    "Asesor $asesorName menolak visitasi untuk pesantren " . ($akreditasi->user?->pesantren?->nama_pesantren ?? $akreditasi->user->name) . ".",
+                    route('admin.akreditasi')
+                ));
             }
 
-            $rangeStr = \Carbon\Carbon::parse($data['tanggal'])->format('d/m/Y');
-            if ($data['tanggal'] != $data['tanggal_akhir']) {
-                $rangeStr .= ' s/d ' . \Carbon\Carbon::parse($data['tanggal_akhir'])->format('d/m/Y');
-            }
-
-            // Notify Pesantren
-            $akreditasi->user->notify(new AkreditasiNotification(
-                'visitasi_diterima',
-                'Jadwal Visitasi Ditetapkan',
-                "Asesor $asesorName telah menjadwalkan visitasi pada tanggal $rangeStr.",
-                route('pesantren.akreditasi')
-            ));
-
-            // Notify Admin
-            Notification::send($admins, new AkreditasiNotification(
-                'visitasi_diterima',
-                'Jadwal Visitasi Ditetapkan',
-                "Asesor $asesorName telah menetapkan jadwal visitasi untuk pesantren " . ($akreditasi->user?->pesantren?->nama_pesantren ?? $akreditasi->user->name) . " pada tanggal $rangeStr.",
-                route('admin.akreditasi')
-            ));
-        } else {
-            $this->akreditasiRepository->update($akreditasiId, ['status' => 5]); // Kembali ke Assessment (penjadwalan)
-
-            $this->akreditasiRepository->addCatatan([
-                'akreditasi_id' => $akreditasiId,
-                'user_id' => $userId,
-                'tipe' => 'visitasi',
-                'catatan' => $data['catatan'],
-                'perbaikan' => implode(', ', $data['perbaikan']),
-            ]);
-
-            // Notify Pesantren
-            $akreditasi->user->notify(new AkreditasiNotification(
-                'visitasi_ditolak',
-                'Pengajuan Visitasi Ditolak',
-                "Asesor $asesorName menolak jadwal visitasi dengan catatan: " . $data['catatan'] . ". Silahkan periksa catatan perbaikan.",
-                route('pesantren.akreditasi')
-            ));
-
-            // Notify Admin
-            Notification::send($admins, new AkreditasiNotification(
-                'visitasi_ditolak',
-                'Visitasi Ditolak Asesor',
-                "Asesor $asesorName menolak visitasi untuk pesantren " . ($akreditasi->user?->pesantren?->nama_pesantren ?? $akreditasi->user->name) . ".",
-                route('admin.akreditasi')
-            ));
-        }
-
-        return true;
+            return true;
+        });
     }
 
     public function getEdpmEvaluationData(int $akreditasiId, int $asesorId, int $asesorTipe): array
@@ -243,46 +278,106 @@ class AsesorService
         }
     }
 
-    public function finalizeVerification(int $akreditasiId): bool
+    public function finalizeVerification(int $akreditasiId, int $userId): bool
     {
+        // Precondition 1: Hanya asesor 1 (ketua) yang ditugaskan boleh finalisasi
+        $asesor1Assessment = Assessment::where('akreditasi_id', $akreditasiId)
+            ->where('tipe', 1)
+            ->whereHas('asesor', fn($q) => $q->where('user_id', $userId))
+            ->first();
+
+        if (!$asesor1Assessment) {
+            Log::warning('finalizeVerification unauthorized asesor', [
+                'user_id' => $userId,
+                'akreditasi_id' => $akreditasiId,
+            ]);
+            return false;
+        }
+
         $akreditasi = $this->akreditasiRepository->find($akreditasiId);
         if (!$akreditasi) return false;
 
-        $akreditasi->update(['status' => 3]); // Validasi Central
+        // Precondition 2: Kelengkapan butir di server (defense-in-depth)
+        $totalButir = \App\Models\MasterEdpmButir::count();
 
-        $user = auth()->user();
-        $admins = User::whereHas('role', function ($q) { $q->where('id', 1); })->get();
-        $pesantrenName = $akreditasi->user?->pesantren?->nama_pesantren ?? $akreditasi->user?->name;
+        $asesor2Assessment = Assessment::where('akreditasi_id', $akreditasiId)
+            ->where('tipe', 2)
+            ->first();
 
-        // Notify Admin
-        Notification::send($admins, new AkreditasiNotification(
-            'assessment_selesai', 
-            'Pemberitahuan: Assessment Selesai', 
-            "Assessment untuk $pesantrenName telah diselesaikan oleh $user->name. Menunggu unggahan Laporan Visitasi.", 
-            route('admin.akreditasi-detail', $akreditasi->uuid)
-        ));
+        // Asesor 1: NA (isian) dan NK harus terisi untuk semua butir
+        $asesor1FilledNa = \App\Models\AkreditasiEdpm::where('akreditasi_id', $akreditasiId)
+            ->where('asesor_id', $asesor1Assessment->asesor_id)
+            ->whereNotNull('isian')
+            ->count();
+        $asesor1FilledNk = \App\Models\AkreditasiEdpm::where('akreditasi_id', $akreditasiId)
+            ->where('asesor_id', $asesor1Assessment->asesor_id)
+            ->whereNotNull('nk')
+            ->count();
 
-        // Notify Assessors
-        $asesors = collect();
-        if ($akreditasi->assessment1?->asesor?->user) $asesors->push($akreditasi->assessment1->asesor->user);
-        if ($akreditasi->assessment2?->asesor?->user) $asesors->push($akreditasi->assessment2->asesor->user);
+        if ($asesor1FilledNa < $totalButir || $asesor1FilledNk < $totalButir) {
+            Log::warning('finalizeVerification incomplete asesor1 data', [
+                'akreditasi_id' => $akreditasiId,
+                'total_butir' => $totalButir,
+                'asesor1_filled_na' => $asesor1FilledNa,
+                'asesor1_filled_nk' => $asesor1FilledNk,
+            ]);
+            return false;
+        }
 
-        Notification::send($asesors->unique('id'), new AkreditasiNotification(
-            'input_laporan',
-            'Instruksi: Unggah Laporan Visitasi',
-            "Assessment untuk $pesantrenName telah diverifikasi. Silakan ketua/anggota segera unggah Laporan Visitasi di tab yang tersedia.",
-            route('asesor.akreditasi-detail', $akreditasi->uuid)
-        ));
+        // Asesor 2 (bila ditugaskan): NA (isian) harus terisi untuk semua butir
+        if ($asesor2Assessment) {
+            $asesor2FilledNa = \App\Models\AkreditasiEdpm::where('akreditasi_id', $akreditasiId)
+                ->where('asesor_id', $asesor2Assessment->asesor_id)
+                ->whereNotNull('isian')
+                ->count();
 
-        // Notify Pesantren
-        $akreditasi->user->notify(new AkreditasiNotification(
-            'validasi', 
-            'Update Status: Validasi', 
-            'Assessment telah selesai. Silakan unduh Kartu Kendali di menu dokumen, kemudian unggah kembali di menu akreditasi untuk melanjutkan proses validasi.', 
-            route('pesantren.akreditasi')
-        ));
+            if ($asesor2FilledNa < $totalButir) {
+                Log::warning('finalizeVerification incomplete asesor2 data', [
+                    'akreditasi_id' => $akreditasiId,
+                    'total_butir' => $totalButir,
+                    'asesor2_filled_na' => $asesor2FilledNa,
+                ]);
+                return false;
+            }
+        }
 
-        return true;
+        return DB::transaction(function () use ($akreditasi, $userId) {
+            $akreditasi->update(['status' => 3]); // Validasi Central
+
+            $user = User::find($userId);
+            $admins = User::whereHas('role', function ($q) { $q->where('id', 1); })->get();
+            $pesantrenName = $akreditasi->user?->pesantren?->nama_pesantren ?? $akreditasi->user?->name;
+
+            // Notify Admin
+            Notification::send($admins, new AkreditasiNotification(
+                'assessment_selesai',
+                'Pemberitahuan: Assessment Selesai',
+                "Assessment untuk $pesantrenName telah diselesaikan oleh $user->name. Menunggu unggahan Laporan Visitasi.",
+                route('admin.akreditasi-detail', $akreditasi->uuid)
+            ));
+
+            // Notify Assessors
+            $asesors = collect();
+            if ($akreditasi->assessment1?->asesor?->user) $asesors->push($akreditasi->assessment1->asesor->user);
+            if ($akreditasi->assessment2?->asesor?->user) $asesors->push($akreditasi->assessment2->asesor->user);
+
+            Notification::send($asesors->unique('id'), new AkreditasiNotification(
+                'input_laporan',
+                'Instruksi: Unggah Laporan Visitasi',
+                "Assessment untuk $pesantrenName telah diverifikasi. Silakan ketua/anggota segera unggah Laporan Visitasi di tab yang tersedia.",
+                route('asesor.akreditasi-detail', $akreditasi->uuid)
+            ));
+
+            // Notify Pesantren
+            $akreditasi->user->notify(new AkreditasiNotification(
+                'validasi',
+                'Update Status: Validasi',
+                'Assessment telah selesai. Silakan unduh Kartu Kendali di menu dokumen, kemudian unggah kembali di menu akreditasi untuk melanjutkan proses validasi.',
+                route('pesantren.akreditasi')
+            ));
+
+            return true;
+        });
     }
 
     public function getAkreditasiDetailAsesor(string $uuid, int $userId): array

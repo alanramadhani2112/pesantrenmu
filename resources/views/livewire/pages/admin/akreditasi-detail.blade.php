@@ -9,6 +9,7 @@ use App\Models\Edpm;
 use App\Models\EdpmCatatan;
 use App\Models\AkreditasiEdpm;
 use App\Models\AkreditasiEdpmCatatan;
+use App\Services\ResubmissionService;
 use Livewire\Attributes\Layout;
 use Livewire\WithFileUploads;
 use Livewire\Volt\Component;
@@ -52,6 +53,14 @@ new #[Layout('layouts.app')] class extends Component {
     // Admin NV (Nilai Verifikasi)
     public $adminNvs = [];
 
+    // Resubmission chain data
+    public $chainTimeline = [];
+    public $resubmissionStatus = null;
+
+    // Rejection data
+    public $rejectionCategories = [];
+    public $rejectionStatus = [];
+
     public $activeTab = 'profil';
     public $levels = [];
     public $fields = [
@@ -73,9 +82,9 @@ new #[Layout('layouts.app')] class extends Component {
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        if (!$user->isAdmin()) {
-            abort(403);
-        }
+        if (!$user->canAccessAdminArea()) {
+                    abort(403);
+                }
 
         $akreditasiService = app(\App\Services\AkreditasiService::class);
         $pesantrenService = app(\App\Services\PesantrenService::class);
@@ -146,6 +155,18 @@ new #[Layout('layouts.app')] class extends Component {
         $this->masa_berlaku_akhir = $this->akreditasi->masa_berlaku_akhir;
         $this->tgl_visitasi = $this->akreditasi->tgl_visitasi;
         $this->tgl_visitasi_akhir = $this->akreditasi->tgl_visitasi_akhir;
+
+        // Load resubmission chain timeline data
+        $resubmissionService = app(ResubmissionService::class);
+        $hasChain = $this->akreditasi->parent !== null || Akreditasi::where('parent', $this->akreditasi->id)->exists();
+        if ($hasChain) {
+            $this->chainTimeline = $resubmissionService->getChainTimeline($this->akreditasi->id);
+            $this->resubmissionStatus = $resubmissionService->getResubmissionStatus($this->akreditasi->id);
+        }
+
+        // Load rejection status data
+        $rejectionService = app(\App\Services\RejectionService::class);
+        $this->rejectionStatus = $rejectionService->getRejectionStatus($this->akreditasi->id);
     }
 
     public function toggleLock()
@@ -384,16 +405,40 @@ new #[Layout('layouts.app')] class extends Component {
         }
 
         $this->validate([
-            'catatan_admin' => 'required|string',
+            'rejectionCategories' => 'required|array|min:1',
+            'rejectionCategories.*.category' => 'required|string|in:nilai_tidak_memenuhi,laporan_tidak_lengkap,kartu_kendali_tidak_sesuai,inkonsistensi_data,lainnya',
+            'rejectionCategories.*.explanation' => 'required|string|min:10|max:2000',
+        ], [
+            'rejectionCategories.required' => 'Pilih minimal satu kategori penolakan.',
+            'rejectionCategories.min' => 'Pilih minimal satu kategori penolakan.',
+            'rejectionCategories.*.category.required' => 'Kategori wajib dipilih.',
+            'rejectionCategories.*.category.in' => 'Kategori tidak valid.',
+            'rejectionCategories.*.explanation.required' => 'Penjelasan wajib diisi untuk setiap kategori.',
+            'rejectionCategories.*.explanation.min' => 'Penjelasan minimal 10 karakter.',
         ]);
 
         $akreditasiService = app(\App\Services\AkreditasiService::class);
-        $akreditasiService->finalizeAkreditasi($this->akreditasi->id, [
-            'catatan' => $this->catatan_admin,
+        $result = $akreditasiService->finalizeAkreditasi($this->akreditasi->id, [
+            'rejection_categories' => $this->rejectionCategories,
         ], false);
 
-        session()->flash('status', 'Akreditasi telah ditolak.');
-        return redirect()->route('admin.akreditasi');
+        if ($result) {
+            session()->flash('status', 'Akreditasi telah ditolak.');
+            return redirect()->route('admin.akreditasi');
+        } else {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Penolakan gagal diproses.');
+        }
+    }
+
+    public function addRejectionCategory()
+    {
+        $this->rejectionCategories[] = ['category' => '', 'explanation' => ''];
+    }
+
+    public function removeRejectionCategory($index)
+    {
+        unset($this->rejectionCategories[$index]);
+        $this->rejectionCategories = array_values($this->rejectionCategories);
     }
 
     public function getTotal($field)
@@ -484,6 +529,12 @@ new #[Layout('layouts.app')] class extends Component {
             {{ Akreditasi::getStatusLabel($akreditasi->status) }}
         </x-ui.status-badge>
 
+        @if($resubmissionStatus)
+            <x-ui.badge variant="warning">
+                Pengajuan Ulang: {{ $resubmissionStatus['count'] }}/{{ $resubmissionStatus['limit'] }}
+            </x-ui.badge>
+        @endif
+
         <x-ui.button :href="route('admin.akreditasi')" variant="light">
             <x-ui.icon name="exit-right" class="fs-4 me-1" />
             Kembali
@@ -510,6 +561,111 @@ new #[Layout('layouts.app')] class extends Component {
         </div>
     </div>
 
+    {{-- Rejection History and Admin Final Rejection Detail --}}
+    @if(!empty($rejectionStatus) && ($rejectionStatus['count'] > 0 || $rejectionStatus['history']->count() > 0))
+        <div class="mb-6">
+            {{-- Admin Final Rejection Detail --}}
+            @php
+                $adminFinalRejection = $rejectionStatus['history']->where('type', 'admin_final')->first();
+            @endphp
+            @if($adminFinalRejection)
+                <x-ui.section-card title="Detail Penolakan Final (Admin)" subtitle="Penolakan terstruktur oleh Admin pada tahap Validasi." class="mb-4">
+                    <div class="p-6">
+                        <div class="d-flex flex-column gap-4">
+                            @foreach($adminFinalRejection->categories ?? [] as $entry)
+                                <div class="spm-soft-panel">
+                                    <div class="spm-detail-label">
+                                        {{ config('akreditasi.final_rejection_categories.' . ($entry['category'] ?? ''), $entry['category'] ?? '-') }}
+                                    </div>
+                                    <div class="spm-detail-value spm-detail-value-muted">{{ $entry['explanation'] ?? '-' }}</div>
+                                </div>
+                            @endforeach
+                            <div class="text-muted fs-8">
+                                Ditolak pada: {{ $adminFinalRejection->created_at->format('d F Y H:i') }}
+                            </div>
+                        </div>
+                    </div>
+                </x-ui.section-card>
+            @endif
+
+            {{-- Rejection History --}}
+            @if($rejectionStatus['history']->count() > 0)
+                <x-ui.section-card title="Riwayat Penolakan" subtitle="Catatan penolakan asesor dan admin untuk pengajuan ini.">
+                    <div class="p-6">
+                        <div class="d-flex flex-column gap-4">
+                            @foreach($rejectionStatus['history'] as $rejection)
+                                <div class="spm-soft-panel">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <div class="fw-bold">
+                                            @if($rejection->type === 'admin_final')
+                                                Penolakan Final (Admin)
+                                            @else
+                                                Penolakan Asesor #{{ $rejection->rejection_number }}
+                                            @endif
+                                        </div>
+                                        <x-ui.badge variant="{{ match($rejection->status) {
+                                            'pending' => 'warning',
+                                            'submitted' => 'info',
+                                            'accepted' => 'success',
+                                            'expired' => 'danger',
+                                            'limit_reached' => 'danger',
+                                            'final' => 'danger',
+                                            default => 'secondary',
+                                        } }}">
+                                            {{ match($rejection->status) {
+                                                'pending' => 'Menunggu Perbaikan',
+                                                'submitted' => 'Perbaikan Dikirim',
+                                                'accepted' => 'Diterima',
+                                                'expired' => 'Kadaluarsa',
+                                                'limit_reached' => 'Batas Tercapai',
+                                                'final' => 'Final',
+                                                default => $rejection->status,
+                                            } }}
+                                        </x-ui.badge>
+                                    </div>
+                                    @if($rejection->type === 'asesor' && $rejection->items)
+                                        <div class="mb-2">
+                                            <span class="text-muted fs-8">Item ditolak:</span>
+                                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                                @foreach($rejection->items as $item)
+                                                    <x-ui.badge variant="light">{{ $item }}</x-ui.badge>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+                                    @if($rejection->explanation)
+                                        <div class="mb-2">
+                                            <span class="text-muted fs-8">Catatan:</span>
+                                            <div class="fs-7">{{ $rejection->explanation }}</div>
+                                        </div>
+                                    @endif
+                                    @if($rejection->type === 'admin_final' && $rejection->categories)
+                                        <div class="mb-2">
+                                            <span class="text-muted fs-8">Kategori:</span>
+                                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                                @foreach($rejection->categories as $cat)
+                                                    <x-ui.badge variant="danger">
+                                                        {{ config('akreditasi.final_rejection_categories.' . ($cat['category'] ?? ''), $cat['category'] ?? '-') }}
+                                                    </x-ui.badge>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+                                    <div class="d-flex gap-3 text-muted fs-8">
+                                        <span>Tanggal: {{ $rejection->created_at->format('d M Y H:i') }}</span>
+                                        @if($rejection->perbaikan_submitted_at)
+                                            <span>Perbaikan dikirim: {{ $rejection->perbaikan_submitted_at->format('d M Y H:i') }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </x-ui.section-card>
+            @endif
+        </div>
+    @endif
+
     <x-ui.card flush>
         <div class="px-6 pt-5">
             <x-ui.tabs>
@@ -519,6 +675,9 @@ new #[Layout('layouts.app')] class extends Component {
                 <x-ui.tab wire:click="setTab('edpm_pesantren')" :active="$activeTab === 'edpm_pesantren'">EDPM</x-ui.tab>
                 <x-ui.tab wire:click="setTab('instrumen')" :active="$activeTab === 'instrumen'">NA</x-ui.tab>
                 <x-ui.tab wire:click="setTab('laporan_visitasi')" :active="$activeTab === 'laporan_visitasi'">Laporan Visitasi</x-ui.tab>
+                @if(count($chainTimeline) > 0)
+                    <x-ui.tab wire:click="setTab('riwayat')" :active="$activeTab === 'riwayat'">Riwayat Pengajuan</x-ui.tab>
+                @endif
             </x-ui.tabs>
         </div>
 
@@ -677,6 +836,59 @@ new #[Layout('layouts.app')] class extends Component {
                                 <x-ui.document-item :label="$label" :href="$ipm && $ipm->$field ? Storage::url($ipm->$field) : null" />
                             @endforeach
                         </div>
+                    </div>
+                </x-ui.section-card>
+            @endif
+
+            @if ($activeTab === 'riwayat' && count($chainTimeline) > 0)
+                <x-ui.section-card title="Riwayat Pengajuan" subtitle="Timeline pengajuan akreditasi dalam rantai pengajuan ulang.">
+                    <div class="p-6">
+                        <x-ui.simple-table dense>
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">#</th>
+                                    <th>Tanggal Pengajuan</th>
+                                    <th>Status</th>
+                                    <th>Alasan Penolakan</th>
+                                    <th>Waktu Antar Pengajuan</th>
+                                    <th class="text-end pe-4">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($chainTimeline as $index => $entry)
+                                    @php
+                                        $entryStatusVariant = match ((int) $entry->status) {
+                                            1 => 'success',
+                                            2 => 'danger',
+                                            3 => 'warning',
+                                            4 => 'info',
+                                            default => 'primary',
+                                        };
+                                        $timeElapsed = null;
+                                        if ($index > 0) {
+                                            $prevEntry = $chainTimeline[$index - 1];
+                                            $timeElapsed = \Carbon\Carbon::parse($prevEntry->created_at)->diffForHumans(\Carbon\Carbon::parse($entry->created_at), true);
+                                        }
+                                    @endphp
+                                    <tr class="{{ $entry->id === $akreditasi->id ? 'bg-light-primary' : '' }}">
+                                        <td class="ps-4 fw-bold">{{ $index + 1 }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($entry->created_at)->format('d M Y H:i') }}</td>
+                                        <td>
+                                            <x-ui.badge :variant="$entryStatusVariant">
+                                                {{ Akreditasi::getStatusLabel($entry->status) }}
+                                            </x-ui.badge>
+                                        </td>
+                                        <td>{{ (int) $entry->status === 2 ? ($entry->catatan ?? '-') : '-' }}</td>
+                                        <td>{{ $timeElapsed ?? '-' }}</td>
+                                        <td class="text-end pe-4">
+                                            <a href="{{ route('admin.akreditasi-detail', $entry->uuid) }}" class="btn btn-sm btn-light-primary">
+                                                <x-ui.icon name="eye" class="fs-4" />
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </x-ui.simple-table>
                     </div>
                 </x-ui.section-card>
             @endif
@@ -1047,17 +1259,50 @@ new #[Layout('layouts.app')] class extends Component {
                             </div>
 
                             <div class="col-lg-6">
-                                <x-ui.section-card title="Tolak Akreditasi" subtitle="Berikan catatan penolakan yang jelas.">
-                                    <form @submit.prevent="confirmReject($wire)" class="p-6">
-                                        <x-ui.form-field label="Catatan Penolakan" for="catatan_admin" :error="$errors->get('catatan_admin')">
-                                            <x-ui.textarea
-                                                model="catatan_admin"
-                                                id="catatan_admin"
-                                                rows="5"
-                                                required
-                                                placeholder="Masukkan alasan penolakan..."
-                                            />
-                                        </x-ui.form-field>
+                                <x-ui.section-card title="Tolak Akreditasi" subtitle="Pilih kategori dan berikan penjelasan per kategori.">
+                                    <form wire:submit="reject" class="p-6">
+                                        <div class="mb-4">
+                                            <div class="spm-detail-label mb-2">Kategori Penolakan <span class="text-danger">*</span></div>
+
+                                            @foreach($rejectionCategories as $index => $entry)
+                                                <div class="spm-soft-panel mb-3">
+                                                    <div class="d-flex align-items-start justify-content-between gap-2">
+                                                        <div class="flex-grow-1">
+                                                            <select wire:model="rejectionCategories.{{ $index }}.category" class="form-select form-select-sm mb-2">
+                                                                <option value="">-- Pilih Kategori --</option>
+                                                                @foreach(config('akreditasi.final_rejection_categories', []) as $key => $label)
+                                                                    <option value="{{ $key }}">{{ $label }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                            @error("rejectionCategories.{$index}.category")
+                                                                <div class="text-danger fs-8">{{ $message }}</div>
+                                                            @enderror
+
+                                                            <textarea
+                                                                wire:model="rejectionCategories.{{ $index }}.explanation"
+                                                                class="form-control form-control-sm"
+                                                                rows="3"
+                                                                placeholder="Penjelasan detail (min 10 karakter)..."
+                                                            ></textarea>
+                                                            @error("rejectionCategories.{$index}.explanation")
+                                                                <div class="text-danger fs-8">{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
+                                                        <x-ui.button type="button" variant="light-danger" size="sm" wire:click="removeRejectionCategory({{ $index }})">
+                                                            <x-ui.icon name="cross" class="fs-6" />
+                                                        </x-ui.button>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+
+                                            @error('rejectionCategories')
+                                                <div class="text-danger fs-8 mb-2">{{ $message }}</div>
+                                            @enderror
+
+                                            <x-ui.button type="button" wire:click="addRejectionCategory" variant="light" size="sm">
+                                                + Tambah Kategori
+                                            </x-ui.button>
+                                        </div>
 
                                         <div class="d-flex justify-content-end">
                                             <x-ui.button type="submit" variant="danger" wire:loading.attr="disabled">

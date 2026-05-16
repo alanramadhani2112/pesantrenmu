@@ -1,6 +1,7 @@
 ﻿<?php
 
 use App\Models\Ipm;
+use App\Traits\ChecksSectionLock;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use Livewire\WithFileUploads;
@@ -8,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 
 new #[Layout('layouts.app')] class extends Component {
     use WithFileUploads;
+    use ChecksSectionLock;
 
     public $ipm;
 
@@ -58,7 +60,18 @@ new #[Layout('layouts.app')] class extends Component {
     public function save()
     {
         $pesantrenService = app(\App\Services\PesantrenService::class);
-        if (auth()->user()->pesantren->is_locked) {
+
+        // Check if any IPM sub-item is editable
+        $ipmSubItems = ['ipm.nsp', 'ipm.kurikulum', 'ipm.buku_ajar', 'ipm.lulus_santri'];
+        $anyEditable = false;
+        foreach ($ipmSubItems as $subItem) {
+            if ($this->isSectionEditable($subItem)) {
+                $anyEditable = true;
+                break;
+            }
+        }
+
+        if (!$anyEditable) {
             $this->dispatch('show-metronic-alert', type: 'error', title: 'Akses Ditolak', message: 'Data terkunci karena sedang dalam proses akreditasi.');
             return;
         }
@@ -99,30 +112,40 @@ new #[Layout('layouts.app')] class extends Component {
 
 @php
     $isLocked = auth()->user()->pesantren->is_locked;
+    $ipmSections = [
+        'nsp_file_upload' => 'ipm.nsp',
+        'lulus_santri_file_upload' => 'ipm.lulus_santri',
+        'kurikulum_file_upload' => 'ipm.kurikulum',
+        'buku_ajar_file_upload' => 'ipm.buku_ajar',
+    ];
     $criteria = [
         [
             'property' => 'nsp_file_upload',
             'label' => '1. Pesantren telah memiliki izin operasional Kementerian Agama (Nomor Statistik Pesantren / NSP).',
             'description' => 'Unggah bukti legalitas operasional yang berlaku.',
             'field' => 'nsp_file',
+            'section' => 'ipm.nsp',
         ],
         [
             'property' => 'lulus_santri_file_upload',
             'label' => '2. Pesantren pernah meluluskan santri dan/atau memiliki santri kelas akhir.',
             'description' => 'Unggah bukti kelulusan atau kelas akhir.',
             'field' => 'lulus_santri_file',
+            'section' => 'ipm.lulus_santri',
         ],
         [
             'property' => 'kurikulum_file_upload',
             'label' => '3. Pesantren menyelenggarakan kurikulum Dirasah Islamiyah sesuai standar LP2 PPM.',
             'description' => 'Unggah dokumen kurikulum yang digunakan.',
             'field' => 'kurikulum_file',
+            'section' => 'ipm.kurikulum',
         ],
         [
             'property' => 'buku_ajar_file_upload',
             'label' => '4. Pesantren menggunakan buku ajar Dirasah Islamiyah terbitan LP2 PPM.',
             'description' => 'Unggah buku ajar atau referensi resmi yang dipakai.',
             'field' => 'buku_ajar_file',
+            'section' => 'ipm.buku_ajar',
         ],
     ];
 @endphp
@@ -171,13 +194,32 @@ new #[Layout('layouts.app')] class extends Component {
     </div>
 
     @if($isLocked)
-        <div class="spm-inline-alert">
-            <x-ui.icon name="shield-tick" class="fs-2 text-warning" />
-            <div>
-                <div class="spm-inline-alert-title">Data Terkunci</div>
-                <div class="spm-inline-alert-text">Data IPM tidak dapat diubah karena pesantren sedang dalam proses akreditasi.</div>
+        @php
+            $anyUnlocked = false;
+            foreach ($ipmSections as $prop => $section) {
+                if ($this->isSectionEditable($section)) {
+                    $anyUnlocked = true;
+                    break;
+                }
+            }
+        @endphp
+        @if($anyUnlocked)
+            <div class="spm-inline-alert" style="border-left: 4px solid #f59e0b; background: #fffbeb; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+                <x-ui.icon name="shield-tick" class="fs-2 text-warning" />
+                <div>
+                    <div class="spm-inline-alert-title">Koreksi Tersedia</div>
+                    <div class="spm-inline-alert-text">Beberapa item IPM dibuka untuk perbaikan. Item yang ditandai 🔓 dapat diedit.</div>
+                </div>
             </div>
-        </div>
+        @else
+            <div class="spm-inline-alert">
+                <x-ui.icon name="shield-tick" class="fs-2 text-warning" />
+                <div>
+                    <div class="spm-inline-alert-title">Data Terkunci</div>
+                    <div class="spm-inline-alert-text">Data IPM tidak dapat diubah karena pesantren sedang dalam proses akreditasi.</div>
+                </div>
+            </div>
+        @endif
     @endif
 
     <form x-on:submit.prevent="confirmSave($wire)" class="d-flex flex-column gap-6">
@@ -191,12 +233,14 @@ new #[Layout('layouts.app')] class extends Component {
                         @php
                             $existingFile = $existing_files[$item['field']] ?? null;
                             $inputId = 'ipm-' . $item['property'];
+                            $sectionStatus = $this->getSectionLockStatus($item['section']);
+                            $itemDisabled = $sectionStatus === 'locked';
                         @endphp
 
-                        <div class="spm-input-card">
+                        <div class="spm-input-card {{ $sectionStatus === 'unlocked_for_correction' ? 'border-warning bg-warning bg-opacity-10' : '' }}">
                             <div class="d-flex flex-column gap-4">
                                 <x-ui.form-field
-                                    :label="$item['label']"
+                                    :label="($sectionStatus === 'locked' ? '🔒 ' : ($sectionStatus === 'unlocked_for_correction' ? '🔓 ' : '')) . $item['label']"
                                     :for="$inputId"
                                     :error="$errors->get($item['property'])"
                                     :hint="$item['description']"
@@ -206,7 +250,7 @@ new #[Layout('layouts.app')] class extends Component {
                                         :id="$inputId"
                                         accept="application/pdf"
                                         :placeholder="$existingFile ? basename($existingFile) : 'Belum ada file'"
-                                        :disabled="$isLocked"
+                                        :disabled="$itemDisabled"
                                         hint="PDF maksimal 2 MB"
                                     />
                                 </x-ui.form-field>
@@ -230,11 +274,20 @@ new #[Layout('layouts.app')] class extends Component {
         <div class="spm-action-panel d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
             <div>
                 <h3 class="spm-card-title mb-1">Simpan Perubahan</h3>
-                <div class="text-muted fw-semibold fs-7">Seluruh kontrol memakai komponen Metronic yang reusable.</div>
+                <div class="text-muted fw-semibold fs-7">Pastikan semua dokumen IPM telah diunggah sebelum menyimpan.</div>
             </div>
 
             <div class="d-flex align-items-center gap-2">
-                @if($isLocked)
+                @php
+                    $anyIpmEditable = false;
+                    foreach ($ipmSections as $prop => $section) {
+                        if ($this->isSectionEditable($section)) {
+                            $anyIpmEditable = true;
+                            break;
+                        }
+                    }
+                @endphp
+                @if(!$anyIpmEditable)
                     <x-ui.button type="button" variant="warning" disabled>
                         <x-ui.icon name="lock" class="fs-4 me-1" />
                         Data Terkunci

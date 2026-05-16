@@ -52,6 +52,10 @@ class AppServiceProvider extends ServiceProvider
             \App\Repositories\Contracts\RoleRepositoryInterface::class,
             \App\Repositories\Eloquent\RoleRepository::class
         );
+        $this->app->bind(
+            \App\Repositories\Contracts\RejectionRepositoryInterface::class,
+            \App\Repositories\Eloquent\RejectionRepository::class
+        );
     }
 
     /**

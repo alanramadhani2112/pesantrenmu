@@ -26,9 +26,9 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function mount()
     {
-        if (!auth()->user()->isAdmin()) {
-            abort(403);
-        }
+        if (!auth()->user()->canAccessAdminArea()) {
+                    abort(403);
+                }
         $roleService = app(\App\Services\RoleService::class);
         $this->roles = $roleService->getAllRoles();
     }
@@ -172,7 +172,7 @@ new #[Layout('layouts.app')] class extends Component {
         title="Accounts"
         subtitle="Kelola akun admin, asesor, dan pesantren dari satu daftar."
     >
-        <x-ui.table title="Manajemen Akun" :records="$this->users">
+        <x-datatable.layout title="Manajemen Akun" :records="$this->users">
             <x-slot name="filters">
                 <x-ui.tabs>
                     <x-ui.tab :active="$activeTab == 1" wire:click="setTab(1)">
@@ -273,7 +273,7 @@ new #[Layout('layouts.app')] class extends Component {
                 </tr>
                 @endforelse
             </x-slot>
-        </x-ui.table>
+        </x-datatable.layout>
     </x-ui.index-layout>
 
     <x-ui.modal name="account-modal" :show="$errors->isNotEmpty()" focusable>

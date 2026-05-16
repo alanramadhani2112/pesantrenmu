@@ -2,48 +2,98 @@
 
 use Livewire\Volt\Component;
 use Livewire\Attributes\Layout;
+use App\Models\DocumentCategory;
 
 new #[Layout('layouts.app')] class extends Component {
+    use \Livewire\WithPagination;
+
     public $doc = 'all';
+    public $search = '';
+    public $perPage = 10;
 
     public function mount($doc = 'all')
     {
         $this->doc = $doc;
     }
 
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedPerPage()
+    {
+        $this->resetPage();
+    }
+
+    /**
+     * Resolve the role-scope used for visibility filtering.
+     * Admin sees every active category; asesor and pesantren are
+     * scoped to their visibility lane; anyone else is denied.
+     */
+    public function getRoleScopeProperty(): ?string
+    {
+        /** @var \App\Models\User|null $user */
+        $user = auth()->user();
+        if (!$user) {
+            return null;
+        }
+
+        return match (true) {
+            $user->canAccessAdminArea() => 'admin',
+            $user->isAsesor() => 'asesor',
+            $user->isPesantren() => 'pesantren',
+            default => null,
+        };
+    }
+
     public function getDocumentsProperty()
     {
         $documentService = app(\App\Services\DocumentService::class);
-        /** @var \App\Models\User $user */
-        $user = auth()->user();
-        $role = $user->isAsesor() ? 'asesor' : ($user->isPesantren() ? 'pesantren' : null);
-        return $documentService->getActiveDocuments($role, $this->doc);
+        return $documentService->getActiveDocuments(
+            $this->roleScope,
+            $this->doc,
+            $this->search,
+            $this->perPage
+        );
+    }
+
+    /**
+     * Resolve the human-friendly page title for the active doc filter.
+     * Falls back to the DocumentCategory name if a slug is selected, so
+     * newly-created categories show a meaningful heading without code edits.
+     */
+    public function getPageTitleProperty(): string
+    {
+        if ($this->doc === 'all' || $this->doc === '') {
+            return 'Daftar Dokumen';
+        }
+
+        $category = DocumentCategory::query()
+            ->where('slug', $this->doc)
+            ->value('name');
+
+        return $category ?: 'Daftar Dokumen';
     }
 }; ?>
 
-@php
-    $pageTitle = match ($this->doc) {
-        'iapm' => 'IAPM',
-        'kartu_kendali' => 'Kartu Kendali',
-        'visitasi' => 'Visitasi',
-        default => 'Daftar Dokumen',
-    };
-@endphp
-
 <div data-module-page="dokumen">
     <x-slot name="header">
-        {{ $pageTitle }}
+        {{ $this->pageTitle }}
     </x-slot>
 
     <x-ui.page
-        :title="$pageTitle"
+        :title="$this->pageTitle"
         subtitle="Daftar dokumen yang tersedia sesuai hak akses pengguna."
     >
-        <x-ui.table
+        <x-datatable.layout
             title="Dokumen Tersedia"
             subtitle="Buka berkas yang dibutuhkan untuk proses akreditasi."
-            :show-per-page="false"
         >
+            <x-slot name="filters">
+                <x-datatable.search placeholder="Cari dokumen..." />
+            </x-slot>
+
             <x-slot name="thead">
                 <x-ui.table-th>Dokumen</x-ui.table-th>
                 <x-ui.table-th>Format</x-ui.table-th>
@@ -101,6 +151,6 @@ new #[Layout('layouts.app')] class extends Component {
                     </tr>
                 @endforelse
             </x-slot>
-        </x-ui.table>
+        </x-datatable.layout>
     </x-ui.page>
 </div>

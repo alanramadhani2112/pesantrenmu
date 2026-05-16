@@ -224,3 +224,47 @@ Tidak ada lagi halaman yang memakai raw Tailwind atau pola Breeze lama di area o
 ## Kesimpulan
 
 Pengerjaan sejauh ini berhasil menggeser project dari tampilan campuran menjadi fondasi Metronic yang lebih enterprise, lebih besar secara visual, dan lebih rapi secara UX. Fokus berikutnya tinggal menjaga konsistensi itu saat menambah atau memperluas modul baru.
+
+---
+
+## Update: Audit Konsistensi Tabel, Button & Flow Hardening (15 Mei 2026)
+
+Audit menyeluruh dilakukan terhadap 25 temuan yang dikelompokkan dalam 3 stream paralel, dieksekusi dalam 4 wave.
+
+### Wave 1 — CRITICAL Flow Fixes
+
+- **Route middleware role** — `EnsureUserHasRole` middleware ditambahkan dan diterapkan pada group `/admin`, `/asesor`, `/pesantren`.
+- **Defense-in-depth** — `abort(403)` ditambahkan di `mount()` pada `admin/asesor/detail` dan `admin/pesantren/detail`.
+- **Service hardening** — ownership check pada `uploadKartuKendali`, `processVisitasi`, `finalizeAkreditasi`.
+- **Status counts** — kunci `'visitasi'` dikoreksi dari `[1,2,3,4]` menjadi `[3,4]`.
+
+### Wave 2 — HIGH Flow Fixes
+
+- **Transaction wrapping** — `approvePengajuan`, `rejectPengajuan`, `deleteSubmission`, `banding`, `finalizeVerification` dibungkus `DB::transaction`.
+- **Precondition checks** — status == 6 untuk approve/reject, status == 2 untuk banding, asesor 1 ownership untuk finalizeVerification.
+- **`PesantrenService::deleteSubmission`** — method baru menggantikan raw `delete()` di Livewire dengan null-safety dan cek `hasActiveAkreditasi`.
+- **Soft-delete cascade** — migration `softDeletes()` pada 3 tabel child, trait `SoftDeletes` pada 3 model, hook `deleting` di `Akreditasi` dibungkus transaksi.
+- **Validasi banding** — `required|string|min:10|max:1000` di Livewire + defense-in-depth di service.
+
+### Wave 3 — Tabel & Button Standardisasi (Medium)
+
+- **9 halaman list page** distandarkan ke `<x-datatable.layout>` + `<x-ui.index-layout>`.
+- **Header tabel** — sortable pakai `<x-datatable.th>`, non-sortable pakai `<x-ui.table-th>`.
+- **Filter** — semua dipindah ke `<x-slot:filters>` di `<x-datatable.layout>`.
+- **Button refactor** — `label-class="btn ..."` mentah di asesor/profile diganti `<x-ui.icon-button>`.
+- **Modal close** — 3 modal Catatan sudah pakai `<x-ui.icon-button icon="cross">`.
+- **Badge perbaikan** — inline SVG + Tailwind diganti `<x-ui.badge variant="warning">` + `<x-ui.icon>`.
+
+### Wave 4 — Cleanup (Low)
+
+- **Class marker** — `.spm-admin-akreditasi-table` dihapus (sudah tidak ada referensi).
+- **Tailwind utility audit** — `text-slate-*`, `bg-amber-*`, `bg-emerald-*` pada modal Catatan (3 halaman akreditasi) diganti dengan `text-gray-*`, `bg-light-warning`, `bg-light-success`, dan `<x-ui.badge>`.
+
+### Validasi
+
+- `php artisan test --no-ansi` — **56 tests, 692 assertions, 0 failures**.
+- 2 test baru ditambahkan: `AkreditasiSoftDeleteTest` (soft-delete cascade verification).
+
+### Status
+
+Semua 4 wave selesai. Sisa: manual smoke test 3 role dan beberapa feature test opsional (ditandai `*` di tasks.md).

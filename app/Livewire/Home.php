@@ -14,7 +14,7 @@ class Home extends Component
     public function render()
     {
         $user = auth()->user();
-        $isAdmin = $user->isAdmin();
+        $isAdmin = $user->canAccessAdminArea();
         $isPesantren = $user->isPesantren();
         $isAsesor = $user->isAsesor();
         $stats = [
@@ -137,9 +137,9 @@ class Home extends Component
         $readiness = [];
         if ($isPesantren) {
             $pesantren = $user->pesantren;
-            $ipm = $pesantren ? DB::table('ipms')->where('user_id', $user->id)->first() : null;
-            $sdmCount = $pesantren ? DB::table('sdm_pesantrens')->where('pesantren_id', $pesantren->id)->count() : 0;
-            $edpmCount = $pesantren ? DB::table('edpms')->where('user_id', $user->id)->count() : 0;
+            $ipm = $pesantren ? $user->ipm : null;
+            $sdmCount = $pesantren ? $user->sdm()->count() : 0;
+            $edpmCount = $pesantren ? $user->edpms()->count() : 0;
 
             $docFields = ['status_kepemilikan_tanah','sertifikat_nsp','rk_anggaran','silabus_rpp','peraturan_kepegawaian','file_lk_iapm','laporan_tahunan','dok_profil','dok_nsp','dok_renstra','dok_rk_anggaran','dok_kurikulum','dok_silabus_rpp','dok_kepengasuhan','dok_peraturan_kepegawaian','dok_sarpras','dok_laporan_tahunan','dok_sop'];
             $docFilled = 0;

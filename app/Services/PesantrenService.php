@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Models\Pesantren;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PesantrenService
 {
@@ -121,6 +123,22 @@ class PesantrenService
             return null;
         }
 
+        if ($parentId) {
+            $resubmissionService = app(ResubmissionService::class);
+            $eligibility = $resubmissionService->checkResubmissionEligibility($parentId);
+
+            if (!$eligibility['allowed']) {
+                Log::info('Resubmission blocked', [
+                    'user_id' => $userId,
+                    'akreditasi_id' => $parentId,
+                    'reason' => $eligibility['error_code'],
+                    'chain_count' => $eligibility['error_data']['count'] ?? null,
+                    'limit' => $eligibility['error_data']['limit'] ?? config('akreditasi.resubmission_limit'),
+                ]);
+                return null;
+            }
+        }
+
         $akreditasi = \App\Models\Akreditasi::create([
             'user_id' => $userId,
             'status' => 6, // Pengajuan
@@ -145,16 +163,46 @@ class PesantrenService
         return $akreditasi;
     }
 
-    public function deleteSubmission(int $id, int $userId): void
+    public function deleteSubmission(int $id, int $userId): bool
     {
-        $akreditasi = \App\Models\Akreditasi::where('user_id', $userId)->findOrFail($id);
-        $akreditasi->delete();
-
-        // Unlock Data
-        $user = User::find($userId);
-        if ($user && $user->pesantren) {
-            $user->pesantren->update(['is_locked' => false]);
+        $akreditasi = \App\Models\Akreditasi::find($id);
+        if (!$akreditasi) {
+            return false;
         }
+
+        if ($akreditasi->user_id !== $userId) {
+            Log::warning('deleteSubmission ownership mismatch', [
+                'user_id' => $userId,
+                'akreditasi_id' => $id,
+                'owner_id' => $akreditasi->user_id,
+            ]);
+            return false;
+        }
+
+        if ((int) $akreditasi->status !== 6) {
+            return false;
+        }
+
+        // Reject if a child resubmission already references this akreditasi.
+        if (\App\Models\Akreditasi::where('parent', $id)->exists()) {
+            return false;
+        }
+
+        return DB::transaction(function () use ($akreditasi, $userId) {
+            $akreditasi->delete();
+
+            // Unlock pesantren data only when no other active akreditasi remains.
+            $hasOtherActive = \App\Models\Akreditasi::where('user_id', $userId)
+                ->whereIn('status', [3, 4, 5, 6])
+                ->exists();
+
+            if (!$hasOtherActive) {
+                $user = User::find($userId);
+                $user?->pesantren?->update(['is_locked' => false]);
+            }
+
+            return true;
+        });
     }
 
     public function cancelSubmission(int $id, int $userId): void
@@ -174,10 +222,43 @@ class PesantrenService
 
     public function submitAppeals(int $id, int $userId, string $alasan): bool
     {
-        $akreditasi = \App\Models\Akreditasi::where('user_id', $userId)->findOrFail($id);
+        // Defense-in-depth length validation
+        $trimmed = trim($alasan);
+        if (mb_strlen($trimmed) < 10 || mb_strlen($alasan) > 1000) {
+            return false;
+        }
 
-        if ($akreditasi->status == 2 && $akreditasi->assessments()->exists()) {
+        $akreditasi = \App\Models\Akreditasi::where('user_id', $userId)->find($id);
+        if (!$akreditasi) {
+            Log::warning('submitAppeals ownership mismatch or not found', [
+                'user_id' => $userId,
+                'akreditasi_id' => $id,
+            ]);
+            return false;
+        }
+
+        if ((int) $akreditasi->status !== 2) {
+            return false;
+        }
+
+        if (!$akreditasi->assessments()->exists()) {
+            return false;
+        }
+
+        // Check banding eligibility before proceeding
+        $bandingService = app(BandingService::class);
+        $eligibility = $bandingService->checkBandingEligibility($id);
+
+        if (!$eligibility['allowed']) {
+            return false;
+        }
+
+        return DB::transaction(function () use ($akreditasi, $userId, $alasan) {
             $akreditasi->update(['status' => 3, 'catatan' => $alasan]);
+
+            // Create banding record
+            $bandingService = app(BandingService::class);
+            $bandingService->createBanding($akreditasi->id, $userId, $alasan);
 
             // Notify Admin
             $admins = User::whereHas('role', fn($q) => $q->where('id', 1))->get();
@@ -188,9 +269,9 @@ class PesantrenService
                 'Pesantren ' . ($user->pesantren->nama_pesantren ?? $user->name) . ' telah mengajukan banding akreditasi.',
                 route('admin.akreditasi')
             ));
+
             return true;
-        }
-        return false;
+        });
     }
 
     public function getProfile(int $userId): Pesantren
@@ -201,14 +282,25 @@ class PesantrenService
     public function updateProfile(int $userId, array $data, array $units = []): bool
     {
         $pesantren = $this->getProfile($userId);
-        if ($pesantren->is_locked) return false;
+        if ($pesantren->is_locked) {
+            // Check if 'profil' section is unlocked via rejection
+            $rejectionService = app(\App\Services\RejectionService::class);
+            $akreditasi = \App\Models\Akreditasi::where('user_id', $userId)->where('status', 5)->latest()->first();
+            if (!$akreditasi || !$rejectionService->isSectionUnlocked($akreditasi->id, 'profil')) {
+                return false;
+            }
+        }
 
         $pesantren->update($data);
 
-        // Save Units Data
-        if (!empty($units)) {
+        // Save Units Data — always sync (including full clear when nothing selected)
+        $selectedUnits = array_column($units, 'unit');
+
+        if (empty($selectedUnits)) {
+            // No layanan selected: remove all unit rows
+            $pesantren->units()->delete();
+        } else {
             // Delete units not in selected list
-            $selectedUnits = array_column($units, 'unit');
             $pesantren->units()->whereNotIn('unit', $selectedUnits)->delete();
 
             // Update or create selected units
@@ -235,7 +327,39 @@ class PesantrenService
     public function saveEdpmEvaluation(int $userId, array $evaluasis, array $links, array $catatans): bool
     {
         $pesantren = $this->getProfile($userId);
-        if ($pesantren->is_locked) return false;
+        if ($pesantren->is_locked) {
+            // Check if any EDPM butir is unlocked via rejection
+            $rejectionService = app(\App\Services\RejectionService::class);
+            $akreditasi = \App\Models\Akreditasi::where('user_id', $userId)->where('status', 5)->latest()->first();
+            if (!$akreditasi) {
+                return false;
+            }
+
+            // Filter to only allow unlocked butir entries
+            $allIds = array_unique(array_merge(array_keys($evaluasis), array_keys($links)));
+            $hasUnlocked = false;
+            foreach ($allIds as $butirId) {
+                if ($rejectionService->isSectionUnlocked($akreditasi->id, 'edpm.butir.' . $butirId)) {
+                    $hasUnlocked = true;
+                    $isian = $evaluasis[$butirId] ?? null;
+                    $link = $links[$butirId] ?? null;
+                    $this->edpmRepository->saveEdpm(
+                        ['user_id' => $userId, 'butir_id' => $butirId],
+                        ['isian' => $isian === '' ? null : $isian, 'link' => $link === '' ? null : $link]
+                    );
+                }
+            }
+
+            // Save catatans for komponen that have at least one unlocked butir
+            foreach ($catatans as $komponenId => $catatan) {
+                $this->edpmRepository->saveCatatan(
+                    ['user_id' => $userId, 'komponen_id' => $komponenId],
+                    ['catatan' => $catatan]
+                );
+            }
+
+            return $hasUnlocked;
+        }
 
         $allIds = array_unique(array_merge(array_keys($evaluasis), array_keys($links)));
         foreach ($allIds as $butirId) {
@@ -260,7 +384,43 @@ class PesantrenService
     public function saveEdpmDraft(int $userId, array $evaluasis, array $links, array $catatans): bool
     {
         $pesantren = $this->getProfile($userId);
-        if ($pesantren->is_locked) return false;
+        if ($pesantren->is_locked) {
+            // Check if any EDPM butir is unlocked via rejection
+            $rejectionService = app(\App\Services\RejectionService::class);
+            $akreditasi = \App\Models\Akreditasi::where('user_id', $userId)->where('status', 5)->latest()->first();
+            if (!$akreditasi) {
+                return false;
+            }
+
+            // Filter to only allow unlocked butir entries
+            $allIds = array_unique(array_merge(array_keys($evaluasis), array_keys($links)));
+            $hasUnlocked = false;
+            foreach ($allIds as $butirId) {
+                if ($rejectionService->isSectionUnlocked($akreditasi->id, 'edpm.butir.' . $butirId)) {
+                    $hasUnlocked = true;
+                    $isian = $evaluasis[$butirId] ?? null;
+                    $link = $links[$butirId] ?? null;
+
+                    if (($isian !== '' && $isian !== null) || ($link !== '' && $link !== null)) {
+                        $this->edpmRepository->saveEdpm(
+                            ['user_id' => $userId, 'butir_id' => $butirId],
+                            ['isian' => $isian === '' ? null : $isian, 'link' => $link === '' ? null : $link]
+                        );
+                    }
+                }
+            }
+
+            foreach ($catatans as $komponenId => $catatan) {
+                if ($catatan !== '' && $catatan !== null) {
+                    $this->edpmRepository->saveCatatan(
+                        ['user_id' => $userId, 'komponen_id' => $komponenId],
+                        ['catatan' => $catatan]
+                    );
+                }
+            }
+
+            return $hasUnlocked;
+        }
 
         $allIds = array_unique(array_merge(array_keys($evaluasis), array_keys($links)));
         foreach ($allIds as $butirId) {
@@ -295,7 +455,36 @@ class PesantrenService
     public function updateIpm(int $userId, array $data): bool
     {
         $pesantren = $this->getProfile($userId);
-        if ($pesantren->is_locked) return false;
+        if ($pesantren->is_locked) {
+            // Check if any IPM sub-item is unlocked via rejection
+            $rejectionService = app(\App\Services\RejectionService::class);
+            $akreditasi = \App\Models\Akreditasi::where('user_id', $userId)->where('status', 5)->latest()->first();
+            if (!$akreditasi) {
+                return false;
+            }
+
+            // Filter data to only allow unlocked sub-items
+            $ipmSectionMap = [
+                'nsp_file' => 'ipm.nsp',
+                'kurikulum_file' => 'ipm.kurikulum',
+                'buku_ajar_file' => 'ipm.buku_ajar',
+                'lulus_santri_file' => 'ipm.lulus_santri',
+            ];
+
+            $allowedData = [];
+            foreach ($data as $key => $value) {
+                $section = $ipmSectionMap[$key] ?? null;
+                if ($section && $rejectionService->isSectionUnlocked($akreditasi->id, $section)) {
+                    $allowedData[$key] = $value;
+                }
+            }
+
+            if (empty($allowedData)) {
+                return false;
+            }
+
+            return $this->ipmRepository->updateByUserId($userId, $allowedData);
+        }
 
         return $this->ipmRepository->updateByUserId($userId, $data);
     }
@@ -308,7 +497,14 @@ class PesantrenService
     public function updateSdm(int $userId, string $tingkat, array $data): bool
     {
         $pesantren = $this->getProfile($userId);
-        if ($pesantren->is_locked) return false;
+        if ($pesantren->is_locked) {
+            // Check if 'sdm' section is unlocked via rejection
+            $rejectionService = app(\App\Services\RejectionService::class);
+            $akreditasi = \App\Models\Akreditasi::where('user_id', $userId)->where('status', 5)->latest()->first();
+            if (!$akreditasi || !$rejectionService->isSectionUnlocked($akreditasi->id, 'sdm')) {
+                return false;
+            }
+        }
 
         $this->sdmRepository->updateOrUpdateSdm($userId, $tingkat, $data);
         return true;
@@ -377,22 +573,39 @@ class PesantrenService
         ];
     }
 
-    public function uploadKartuKendali(int $akreditasiId, string $filePath): bool
+    public function uploadKartuKendali(int $akreditasiId, int $userId, string $filePath): bool
     {
-        $akreditasi = \App\Models\Akreditasi::findOrFail($akreditasiId);
-        if ($akreditasi->status != 3) return false;
+        $akreditasi = \App\Models\Akreditasi::find($akreditasiId);
+        if (!$akreditasi) {
+            return false;
+        }
 
-        $akreditasi->update(['kartu_kendali' => $filePath]);
+        if ($akreditasi->user_id !== $userId) {
+            Log::warning('uploadKartuKendali ownership mismatch', [
+                'user_id' => $userId,
+                'akreditasi_id' => $akreditasiId,
+                'owner_id' => $akreditasi->user_id,
+            ]);
+            return false;
+        }
 
-        // Notify Admin
-        $admins = \App\Models\User::whereHas('role', fn($q) => $q->where('id', 1))->get();
-        \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\AkreditasiNotification(
-            'kartu_kendali_diunggah',
-            'Kartu Kendali Diunggah',
-            'Pesantren ' . ($akreditasi->user->pesantren->nama_pesantren ?? $akreditasi->user->name) . ' telah mengunggah kembali Kartu Kendali.',
-            route('admin.akreditasi-detail', $akreditasi->uuid)
-        ));
+        if ($akreditasi->status != 3) {
+            return false;
+        }
 
-        return true;
+        return DB::transaction(function () use ($akreditasi, $filePath) {
+            $akreditasi->update(['kartu_kendali' => $filePath]);
+
+            // Notify Admin
+            $admins = \App\Models\User::whereHas('role', fn($q) => $q->where('id', 1))->get();
+            \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\AkreditasiNotification(
+                'kartu_kendali_diunggah',
+                'Kartu Kendali Diunggah',
+                'Pesantren ' . ($akreditasi->user->pesantren->nama_pesantren ?? $akreditasi->user->name) . ' telah mengunggah kembali Kartu Kendali.',
+                route('admin.akreditasi-detail', $akreditasi->uuid)
+            ));
+
+            return true;
+        });
     }
 }

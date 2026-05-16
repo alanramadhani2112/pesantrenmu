@@ -291,11 +291,16 @@ new #[Layout('layouts.app')] class extends Component {
                                     accept="image/*"
                                     :file="$foto_upload"
                                     placeholder="Ganti Foto"
-                                    class="position-absolute bottom-0 end-0"
-                                    label-class="btn btn-sm btn-primary rounded-circle p-2 cursor-pointer"
-                                >
-                                    <x-ui.icon name="camera" class="fs-5" />
-                                </x-ui.file-upload>
+                                    class="d-none"
+                                />
+                                <x-ui.icon-button
+                                    icon="camera"
+                                    label="Ganti Foto"
+                                    variant="primary"
+                                    size="sm"
+                                    class="position-absolute bottom-0 end-0 rounded-circle"
+                                    x-on:click="document.getElementById('foto_upload').click()"
+                                />
                             </div>
                             <div class="text-muted fs-8 text-center">JPG/PNG, maks 1MB</div>
                             @error('foto_upload') <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
@@ -706,10 +711,9 @@ new #[Layout('layouts.app')] class extends Component {
                                     @endif
                                 </x-ui.file-upload>
                                 @if($existing_files[$doc['existing_key']])
-                                <a href="{{ Storage::url($existing_files[$doc['existing_key']]) }}" target="_blank"
-                                   class="d-flex align-items-center gap-1 fs-8 text-primary fw-bold mt-2">
-                                    <x-ui.icon name="eye" class="fs-6" /> Lihat file saat ini
-                                </a>
+                                <x-ui.button :href="Storage::url($existing_files[$doc['existing_key']])" target="_blank" variant="light-primary" size="sm" class="mt-2">
+                                    <x-ui.icon name="eye" class="fs-6 me-1" /> Lihat file saat ini
+                                </x-ui.button>
                                 @endif
                                 @error($prop) <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
                             </x-ui.form-field>
@@ -881,9 +885,9 @@ new #[Layout('layouts.app')] class extends Component {
                                     <div class="d-flex align-items-center justify-content-between py-3 border-bottom border-dashed">
                                         <span class="fw-semibold fs-7 text-truncate pe-3">{{ $item['judul'] }}</span>
                                         @if(!empty($item['link']))
-                                            <a href="{{ $item['link'] }}" target="_blank" class="btn btn-sm btn-light-primary">
+                                            <x-ui.button :href="$item['link']" target="_blank" variant="light-primary" size="sm">
                                                 <x-ui.icon name="exit-right" class="fs-5" />
-                                            </a>
+                                            </x-ui.button>
                                         @endif
                                     </div>
                                 @empty

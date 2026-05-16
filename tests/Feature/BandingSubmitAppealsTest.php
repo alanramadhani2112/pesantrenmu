@@ -1,0 +1,176 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Akreditasi;
+use App\Models\Asesor;
+use App\Models\Assessment;
+use App\Models\Banding;
+use App\Models\Pesantren;
+use App\Models\User;
+use App\Services\PesantrenService;
+use Database\Seeders\RoleSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
+use Tests\TestCase;
+
+class BandingSubmitAppealsTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected PesantrenService $pesantrenService;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(RoleSeeder::class);
+        $this->pesantrenService = app(PesantrenService::class);
+        Notification::fake();
+    }
+
+    /**
+     * Helper: create a pesantren user with a rejected akreditasi that has assessments.
+     */
+    private function createPesantrenWithRejectedAkreditasi(): array
+    {
+        $user = User::factory()->create(['role_id' => 3]);
+        Pesantren::create([
+            'user_id' => $user->id,
+            'nama_pesantren' => 'Pesantren Banding Test',
+            'is_locked' => false,
+        ]);
+
+        // Create an admin user for notifications
+        User::factory()->create(['role_id' => 1]);
+
+        $akreditasi = Akreditasi::create([
+            'user_id' => $user->id,
+            'status' => 2, // Ditolak
+        ]);
+
+        // Create an asesor and assessment so the assessments check passes
+        $asesorUser = User::factory()->create(['role_id' => 2]);
+        $asesor = Asesor::create([
+            'user_id' => $asesorUser->id,
+            'nama_dengan_gelar' => 'Dr. Asesor Test, M.Pd.',
+            'nama_tanpa_gelar' => 'Asesor Test',
+        ]);
+
+        Assessment::create([
+            'akreditasi_id' => $akreditasi->id,
+            'asesor_id' => $asesor->id,
+            'tipe' => 1,
+            'tanggal_mulai' => now()->subDays(30),
+            'tanggal_berakhir' => now()->subDays(15),
+        ]);
+
+        return ['user' => $user, 'akreditasi' => $akreditasi];
+    }
+
+    /**
+     * Task 6.3: submitAppeals returns false when banding limit is reached.
+     */
+    public function test_submit_appeals_returns_false_when_banding_limit_reached(): void
+    {
+        $data = $this->createPesantrenWithRejectedAkreditasi();
+        $user = $data['user'];
+        $akreditasi = $data['akreditasi'];
+
+        // Set banding limit to 1
+        config(['akreditasi.banding_limit' => 1]);
+
+        // Create an existing banding record to exhaust the limit
+        Banding::create([
+            'akreditasi_id' => $akreditasi->id,
+            'user_id' => $user->id,
+            'status' => 'rejected',
+            'alasan' => 'Previous banding attempt that was rejected.',
+        ]);
+
+        // Attempt to submit another appeal — should be blocked
+        $result = $this->pesantrenService->submitAppeals(
+            $akreditasi->id,
+            $user->id,
+            'Kami ingin mengajukan banding kembali karena ada bukti baru.'
+        );
+
+        $this->assertFalse($result);
+
+        // Verify akreditasi status remains unchanged at 2
+        $akreditasi->refresh();
+        $this->assertEquals(2, (int) $akreditasi->status);
+
+        // Verify no new banding record was created
+        $this->assertEquals(1, Banding::where('akreditasi_id', $akreditasi->id)->count());
+    }
+
+    /**
+     * Task 6.4: submitAppeals creates Banding record alongside existing status change (backward compatibility).
+     */
+    public function test_submit_appeals_creates_banding_record_alongside_status_change(): void
+    {
+        $data = $this->createPesantrenWithRejectedAkreditasi();
+        $user = $data['user'];
+        $akreditasi = $data['akreditasi'];
+
+        $alasan = 'Kami merasa penilaian tidak adil dan meminta peninjauan ulang.';
+
+        $result = $this->pesantrenService->submitAppeals(
+            $akreditasi->id,
+            $user->id,
+            $alasan
+        );
+
+        $this->assertTrue($result);
+
+        // Verify a Banding record was created
+        $banding = Banding::where('akreditasi_id', $akreditasi->id)->first();
+        $this->assertNotNull($banding);
+        $this->assertEquals('pending', $banding->status);
+        $this->assertEquals($user->id, $banding->user_id);
+        $this->assertEquals($alasan, $banding->alasan);
+        $this->assertEquals($akreditasi->id, $banding->akreditasi_id);
+
+        // Verify akreditasi status was also changed (backward compatibility)
+        $akreditasi->refresh();
+        $this->assertEquals(3, (int) $akreditasi->status);
+        $this->assertEquals($alasan, $akreditasi->catatan);
+    }
+
+    /**
+     * Task 6.5: submitAppeals still changes akreditasi status from 2 to 3 (regression test).
+     */
+    public function test_submit_appeals_changes_akreditasi_status_from_2_to_3(): void
+    {
+        $data = $this->createPesantrenWithRejectedAkreditasi();
+        $user = $data['user'];
+        $akreditasi = $data['akreditasi'];
+
+        $alasan = 'Dokumen kami belum diperiksa dengan benar oleh asesor.';
+
+        // Verify initial status is 2
+        $this->assertEquals(2, (int) $akreditasi->status);
+
+        $result = $this->pesantrenService->submitAppeals(
+            $akreditasi->id,
+            $user->id,
+            $alasan
+        );
+
+        $this->assertTrue($result);
+
+        // Verify status changed from 2 to 3
+        $akreditasi->refresh();
+        $this->assertEquals(3, (int) $akreditasi->status);
+
+        // Verify catatan was set
+        $this->assertEquals($alasan, $akreditasi->catatan);
+
+        // Verify in database
+        $this->assertDatabaseHas('akreditasis', [
+            'id' => $akreditasi->id,
+            'status' => 3,
+            'catatan' => $alasan,
+        ]);
+    }
+}

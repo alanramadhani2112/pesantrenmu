@@ -118,36 +118,37 @@ new #[Layout('layouts.app')] class extends Component {
         title="Asesor"
         subtitle="Kelola asesor, penugasan aktif, dan status ketersediaan."
     >
-        <x-slot name="toolbar">
-            <x-ui.filter-bar>
-                <x-datatable.search placeholder="Cari Asesor..." />
+        <x-datatable.layout title="Asesor" :records="$this->asesors">
+            <x-slot name="filters">
+                <x-ui.filter-bar>
+                    <x-datatable.search placeholder="Cari Asesor..." />
 
-                <x-ui.filter-select
-                    model="filterPeran"
-                    placeholder="Semua Peran"
-                    :options="['1' => 'Ketua Asesor', '2' => 'Anggota Asesor']"
-                />
+                    <x-ui.filter-select
+                        model="filterPeran"
+                        placeholder="Semua Peran"
+                        :options="['1' => 'Ketua Asesor', '2' => 'Anggota Asesor']"
+                    />
 
-                <x-ui.filter-select
-                    model="filterPenugasan"
-                    placeholder="Semua Penugasan"
-                    :options="['bertugas' => 'Sedang Bertugas', 'bebas' => 'Bebas Tugas']"
-                />
+                    <x-ui.filter-select
+                        model="filterPenugasan"
+                        placeholder="Semua Penugasan"
+                        :options="['bertugas' => 'Sedang Bertugas', 'bebas' => 'Bebas Tugas']"
+                    />
 
-                <x-ui.filter-select
-                    model="filterStatus"
-                    placeholder="Semua Status"
-                    :options="['1' => 'Aktif', '0' => 'Tidak Aktif']"
-                />
+                    <x-ui.filter-select
+                        model="filterStatus"
+                        placeholder="Semua Status"
+                        :options="['1' => 'Aktif', '0' => 'Tidak Aktif']"
+                    />
+                </x-ui.filter-bar>
+            </x-slot>
 
+            <x-slot name="toolbar">
                 <x-ui.button wire:click="export" variant="primary" size="sm">
                     <x-ui.icon name="document" class="fs-4 me-1" />
                     Ekspor Data
                 </x-ui.button>
-            </x-ui.filter-bar>
-        </x-slot>
-
-        <x-datatable.layout title="Asesor" :records="$this->asesors">
+            </x-slot>
 
             <x-slot name="thead">
                 <x-ui.table-th :min-width="false" align="center" class="w-60px">

@@ -495,7 +495,7 @@
                                 <div class="spm-soft-panel h-100">
                                     <div class="spm-detail-label">Langkah 1</div>
                                     <div class="spm-detail-value">Unduh template laporan visitasi dari menu dokumen.</div>
-                                    <x-ui.button :href="route('documents.index', ['doc' => 'visitasi'])" variant="light" size="sm" class="mt-4">Buka Dokumen</x-ui.button>
+                                    <x-ui.button :href="route('documents.index', ['doc' => 'visitasi'])" variant="light" size="sm" class="mt-4">Unduh Template</x-ui.button>
                                 </div>
                             </div>
                             <div class="col-lg-4">
@@ -543,6 +543,190 @@
                         </div>
                     </div>
                 </x-ui.section-card>
+            @endif
+
+            {{-- Rejection Section for Asesor 1 --}}
+            @if($asesorTipe == 1 && !empty($rejectionStatus))
+                {{-- Rejection count and remaining attempts --}}
+                @if($rejectionStatus['count'] > 0 || $rejectionStatus['active'])
+                    <div class="mt-6">
+                        <x-ui.section-card title="Status Penolakan" subtitle="Informasi penolakan dan sisa kesempatan.">
+                            <div class="p-6">
+                                <div class="d-flex align-items-center gap-3 mb-4">
+                                    <span class="fw-semibold">Penolakan:</span>
+                                    <x-ui.badge variant="{{ $rejectionStatus['count'] >= $rejectionStatus['limit'] ? 'danger' : 'info' }}">
+                                        {{ $rejectionStatus['count'] }} dari {{ $rejectionStatus['limit'] }}
+                                    </x-ui.badge>
+                                    @if($rejectionStatus['limit'] - $rejectionStatus['count'] > 0)
+                                        <span class="text-muted fs-8">(Sisa {{ $rejectionStatus['limit'] - $rejectionStatus['count'] }} kesempatan)</span>
+                                    @endif
+                                </div>
+
+                                {{-- Accept/Reject options after perbaikan submission --}}
+                                @if($rejectionStatus['active'] && $rejectionStatus['active']->status === 'submitted')
+                                    <div class="spm-inline-alert mb-4" style="background: #d1ecf1; border: 1px solid #17a2b8; border-radius: 8px; padding: 16px;">
+                                        <x-ui.icon name="information-2" class="fs-2 text-info" />
+                                        <div class="flex-grow-1">
+                                            <div class="spm-inline-alert-title">Perbaikan Telah Dikirim</div>
+                                            <div class="spm-inline-alert-text">
+                                                Pesantren telah mengirim perbaikan. Silakan review dan pilih tindakan.
+                                            </div>
+                                            @if($rejectionStatus['active']->items)
+                                                <div class="mt-2">
+                                                    <span class="text-muted fs-8">Item yang diperbaiki:</span>
+                                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                                        @foreach($rejectionStatus['active']->items as $item)
+                                                            <x-ui.badge variant="light">{{ $item }}</x-ui.badge>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endif
+                                            <div class="d-flex gap-2 mt-3">
+                                                <x-ui.button wire:click="acceptPerbaikan" wire:loading.attr="disabled" variant="success" size="sm">
+                                                    <span wire:loading.remove wire:target="acceptPerbaikan">Terima Perbaikan</span>
+                                                    <span wire:loading wire:target="acceptPerbaikan">Memproses...</span>
+                                                </x-ui.button>
+                                                <x-ui.button wire:click="rejectAgain" variant="danger" size="sm">
+                                                    Tolak Lagi
+                                                </x-ui.button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                {{-- Rejection History --}}
+                                @if($rejectionStatus['history']->count() > 0)
+                                    <div class="spm-detail-label mb-3">Riwayat Penolakan</div>
+                                    <div class="d-flex flex-column gap-3">
+                                        @foreach($rejectionStatus['history'] as $rejection)
+                                            <div class="spm-soft-panel">
+                                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                                    <div class="fw-bold">
+                                                        @if($rejection->type === 'admin_final')
+                                                            Penolakan Final (Admin)
+                                                        @else
+                                                            Penolakan #{{ $rejection->rejection_number }}
+                                                        @endif
+                                                    </div>
+                                                    <x-ui.badge variant="{{ match($rejection->status) {
+                                                        'pending' => 'warning',
+                                                        'submitted' => 'info',
+                                                        'accepted' => 'success',
+                                                        'expired' => 'danger',
+                                                        'limit_reached' => 'danger',
+                                                        'final' => 'danger',
+                                                        default => 'secondary',
+                                                    } }}">
+                                                        {{ match($rejection->status) {
+                                                            'pending' => 'Menunggu Perbaikan',
+                                                            'submitted' => 'Perbaikan Dikirim',
+                                                            'accepted' => 'Diterima',
+                                                            'expired' => 'Kadaluarsa',
+                                                            'limit_reached' => 'Batas Tercapai',
+                                                            'final' => 'Final',
+                                                            default => $rejection->status,
+                                                        } }}
+                                                    </x-ui.badge>
+                                                </div>
+                                                @if($rejection->items)
+                                                    <div class="mb-2">
+                                                        <span class="text-muted fs-8">Item ditolak:</span>
+                                                        <div class="d-flex flex-wrap gap-1 mt-1">
+                                                            @foreach($rejection->items as $item)
+                                                                <x-ui.badge variant="light">{{ $item }}</x-ui.badge>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                                @if($rejection->explanation)
+                                                    <div class="mb-2">
+                                                        <span class="text-muted fs-8">Catatan:</span>
+                                                        <div class="fs-7">{{ $rejection->explanation }}</div>
+                                                    </div>
+                                                @endif
+                                                <div class="d-flex gap-3 text-muted fs-8">
+                                                    <span>Tanggal: {{ $rejection->created_at->format('d M Y H:i') }}</span>
+                                                    @if($rejection->perbaikan_submitted_at)
+                                                        <span>Perbaikan dikirim: {{ $rejection->perbaikan_submitted_at->format('d M Y H:i') }}</span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        </x-ui.section-card>
+                    </div>
+                @endif
+
+                {{-- Structured Rejection Form (visible when status=5 and no active pending/submitted rejection) --}}
+                @if((int) $akreditasi->status === 5 && (!$rejectionStatus['active'] || !in_array($rejectionStatus['active']->status, ['pending', 'submitted'])) && $rejectionStatus['count'] < $rejectionStatus['limit'])
+                    <div class="mt-6">
+                        <x-ui.section-card title="Form Penolakan Dokumen" subtitle="Pilih item yang perlu diperbaiki dan berikan catatan.">
+                            <form wire:submit="submitRejection" class="p-6">
+                                <div class="mb-4">
+                                    <div class="spm-detail-label mb-2">Pilih Item yang Ditolak <span class="text-danger">*</span></div>
+                                    <div class="row g-3">
+                                        @foreach($selectableItems as $section)
+                                            <div class="col-lg-6">
+                                                <div class="spm-soft-panel">
+                                                    @if(empty($section['children']))
+                                                        <label class="d-flex align-items-center gap-2 cursor-pointer">
+                                                            <input type="checkbox" wire:model="rejectedItems" value="{{ $section['id'] }}" class="form-check-input">
+                                                            <span class="fw-bold">{{ $section['label'] }}</span>
+                                                        </label>
+                                                    @else
+                                                        <div class="fw-bold mb-2">{{ $section['label'] }}</div>
+                                                        <div class="d-flex flex-column gap-2 ps-3">
+                                                            @foreach($section['children'] as $child)
+                                                                @if(empty($child['children']))
+                                                                    <label class="d-flex align-items-center gap-2 cursor-pointer">
+                                                                        <input type="checkbox" wire:model="rejectedItems" value="{{ $child['id'] }}" class="form-check-input">
+                                                                        <span>{{ $child['label'] }}</span>
+                                                                    </label>
+                                                                @else
+                                                                    <div class="fw-semibold mt-1">{{ $child['label'] }}</div>
+                                                                    <div class="d-flex flex-column gap-1 ps-3">
+                                                                        @foreach($child['children'] as $subChild)
+                                                                            <label class="d-flex align-items-center gap-2 cursor-pointer">
+                                                                                <input type="checkbox" wire:model="rejectedItems" value="{{ $subChild['id'] }}" class="form-check-input">
+                                                                                <span class="fs-8">{{ $subChild['label'] }}</span>
+                                                                            </label>
+                                                                        @endforeach
+                                                                    </div>
+                                                                @endif
+                                                            @endforeach
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    @error('rejectedItems')
+                                        <div class="text-danger fs-8 mt-2">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <x-ui.form-field label="Catatan Penolakan" for="rejectionExplanation" :error="$errors->get('rejectionExplanation')">
+                                    <x-ui.textarea
+                                        model="rejectionExplanation"
+                                        id="rejectionExplanation"
+                                        rows="4"
+                                        required
+                                        placeholder="Jelaskan alasan penolakan (minimal 10 karakter)..."
+                                    />
+                                </x-ui.form-field>
+
+                                <div class="d-flex justify-content-end">
+                                    <x-ui.button type="submit" variant="danger" wire:loading.attr="disabled">
+                                        <span wire:loading.remove wire:target="submitRejection">Kirim Penolakan</span>
+                                        <span wire:loading wire:target="submitRejection">Memproses...</span>
+                                    </x-ui.button>
+                                </div>
+                            </form>
+                        </x-ui.section-card>
+                    </div>
+                @endif
             @endif
         </div>
     </x-ui.card>

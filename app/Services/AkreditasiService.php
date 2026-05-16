@@ -7,6 +7,7 @@ use App\Models\Assessment;
 use App\Models\AkreditasiCatatan;
 use App\Models\Asesor;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Models\Akreditasi;
@@ -31,7 +32,7 @@ class AkreditasiService
         return [
             'pengajuan' => $this->akreditasiRepository->getCountByStatus(6),
             'assessment' => $this->akreditasiRepository->getCountByStatus(5),
-            'visitasi' => $this->akreditasiRepository->getCountByStatus([1, 2, 3, 4]), // This logic from blade was status <= 4
+            'visitasi' => $this->akreditasiRepository->getCountByStatus([3, 4]), // Status 3 (Validasi) + 4 (Visitasi); 1=Berhasil & 2=Ditolak excluded.
         ];
     }
 
@@ -57,35 +58,39 @@ class AkreditasiService
 
     public function approvePengajuan(int $id, array $data): void
     {
-        Assessment::where('akreditasi_id', $id)->delete();
+        $akreditasi = $this->akreditasiRepository->find($id);
+        if (!$akreditasi || $akreditasi->status !== 6) {
+            throw new \DomainException('Status bukan Pengajuan');
+        }
 
-        // Create Asesor 1
-        Assessment::create([
-            'akreditasi_id' => $id,
-            'asesor_id' => $data['asesor_id1'],
-            'tipe' => 1,
-            'tanggal_mulai' => $data['tanggal_mulai'],
-            'tanggal_berakhir' => $data['tanggal_berakhir'],
-        ]);
+        DB::transaction(function () use ($akreditasi, $id, $data) {
+            Assessment::where('akreditasi_id', $id)->delete();
 
-        // Create Asesor 2 if selected
-        if (!empty($data['asesor_id2'])) {
+            // Create Asesor 1
             Assessment::create([
                 'akreditasi_id' => $id,
-                'asesor_id' => $data['asesor_id2'],
-                'tipe' => 2,
+                'asesor_id' => $data['asesor_id1'],
+                'tipe' => 1,
                 'tanggal_mulai' => $data['tanggal_mulai'],
                 'tanggal_berakhir' => $data['tanggal_berakhir'],
             ]);
-        }
 
-        $akreditasi = $this->akreditasiRepository->find($id);
-        if ($akreditasi) {
+            // Create Asesor 2 if selected
+            if (!empty($data['asesor_id2'])) {
+                Assessment::create([
+                    'akreditasi_id' => $id,
+                    'asesor_id' => $data['asesor_id2'],
+                    'tipe' => 2,
+                    'tanggal_mulai' => $data['tanggal_mulai'],
+                    'tanggal_berakhir' => $data['tanggal_berakhir'],
+                ]);
+            }
+
             $akreditasi->update(['status' => 5]); // Assessment stage
 
             // Notifications logic...
             $this->notifyApprove($akreditasi, $data);
-        }
+        });
     }
 
     protected function notifyApprove(Akreditasi $akreditasi, array $data)
@@ -107,19 +112,7 @@ class AkreditasiService
 
     public function rejectPengajuan(int $id, string $reason): void
     {
-        $akreditasi = $this->akreditasiRepository->find($id);
-        if ($akreditasi) {
-            $akreditasi->update(['status' => 6]); // Back to pengajuan with notes
-
-            AkreditasiCatatan::create([
-                'akreditasi_id' => $id,
-                'user_id' => Auth::id(),
-                'tipe' => 'pengajuan',
-                'catatan' => $reason,
-            ]);
-
-            $akreditasi->user->notify(new \App\Notifications\AkreditasiNotification('di stop', 'Pengajuan Perlu Perbaikan', 'Pengajuan akreditasi Anda ditolak oleh admin. Catatan: ' . $reason . '. Silahkan perbaiki dokumen dan ajukan kembali.', route('pesantren.akreditasi')));
-        }
+        throw new \DomainException('Rejection at status 6 (Pengajuan) is no longer permitted.');
     }
 
     public function rescheduleVisitasi(int $id, string $start, string $end): bool
@@ -139,33 +132,43 @@ class AkreditasiService
         $akreditasi = $this->akreditasiRepository->find($id);
         if (!$akreditasi) return false;
 
-        if ($isApprove) {
-            $updateData = [
-                'status' => 1,
-                'nomor_sk' => $data['nomor_sk'],
-                'masa_berlaku' => $data['masa_berlaku'],
-                'masa_berlaku_akhir' => $data['masa_berlaku_akhir'],
-                'nilai' => $data['nilai'],
-                'peringkat' => $data['peringkat'],
-            ];
-
-            if (isset($data['sertifikat_file'])) {
-                $path = $data['sertifikat_file']->store('akreditasi/sertifikat', 'public');
-                $updateData['sertifikat_path'] = $path;
-            }
-
-            $akreditasi->update($updateData);
-            
-            // Notifications...
-            $this->notifyFinalize($akreditasi, true);
-        } else {
-            $akreditasi->update([
-                'status' => 2,
-                'catatan' => $data['catatan'],
-            ]);
-            $this->notifyFinalize($akreditasi, false);
+        if ($akreditasi->status !== 3) {
+            return false;
         }
-        return true;
+
+        return DB::transaction(function () use ($akreditasi, $data, $isApprove) {
+            if ($isApprove) {
+                $updateData = [
+                    'status' => 1,
+                    'nomor_sk' => $data['nomor_sk'],
+                    'masa_berlaku' => $data['masa_berlaku'],
+                    'masa_berlaku_akhir' => $data['masa_berlaku_akhir'],
+                    'nilai' => $data['nilai'],
+                    'peringkat' => $data['peringkat'],
+                ];
+
+                if (isset($data['sertifikat_file'])) {
+                    $path = $data['sertifikat_file']->store('akreditasi/sertifikat', 'public');
+                    $updateData['sertifikat_path'] = $path;
+                }
+
+                $akreditasi->update($updateData);
+
+                // Notifications...
+                $this->notifyFinalize($akreditasi, true);
+            } else {
+                $rejectionService = app(RejectionService::class);
+                $result = $rejectionService->createFinalRejection(
+                    $akreditasi->id,
+                    Auth::id(),
+                    $data['rejection_categories']
+                );
+                if (!$result['success']) {
+                    return false;
+                }
+            }
+            return true;
+        });
     }
 
     protected function notifyFinalize(Akreditasi $akreditasi, bool $isApprove)

@@ -27,9 +27,9 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function mount()
     {
-        if (!auth()->user()->isAdmin()) {
-            abort(403);
-        }
+        if (!auth()->user()->canAccessAdminArea()) {
+                    abort(403);
+                }
         $this->loadData();
     }
 

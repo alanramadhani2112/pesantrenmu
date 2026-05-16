@@ -117,10 +117,10 @@
 
                 @if($primaryAction)
                     <div class="flex-shrink-0">
-                        <a href="{{ $primaryAction['route'] }}" class="btn btn-light btn-sm btn-md-md fw-bold w-100 w-md-auto">
+                        <x-ui.button :href="$primaryAction['route']" variant="light" size="sm" class="btn-md-md w-100 w-md-auto">
                             <x-ui.icon name="arrow-right" class="fs-4 me-1" />
                             {{ $primaryAction['label'] }}
-                        </a>
+                        </x-ui.button>
                     </div>
                 @endif
             </div>

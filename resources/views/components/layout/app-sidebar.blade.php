@@ -8,6 +8,50 @@
     $isPesantren = $currentUser?->isPesantren() ?? false;
     $isAsesor = $currentUser?->isAsesor() ?? false;
     $initial = strtoupper(substr($currentUser?->name ?? 'U', 0, 1));
+
+    // Get menu configuration from SidebarMenuService
+    $menuService = app(\App\Services\SidebarMenuService::class);
+    $sections = $menuService->getMenuForRole($currentUser?->role_id ?? 0);
+
+    // Get progress data for Pesantren users
+    $progressData = [];
+    if ($isPesantren && $currentUser) {
+        try {
+            $progressService = app(\App\Services\SidebarProgressService::class);
+            $progressData = $progressService->getProgressForUser($currentUser->id);
+        } catch (\Throwable $e) {
+            $progressData = [];
+        }
+    }
+
+    // Map progress keys to menu item keys
+    $progressKeyMap = [
+        'profil_pesantren' => 'profil',
+        'ipm' => 'ipm',
+        'data_sdm' => 'sdm',
+    ];
+
+    // Compute badge counts for items with show_badge=true
+    $badgeCounts = [];
+    if ($isAdmin || $isAsesor) {
+        try {
+            if ($isAdmin) {
+                $badgeCounts['akreditasi_admin'] = \App\Models\Akreditasi::where('status', 6)->count();
+                $badgeCounts['banding'] = \App\Models\Banding::where('status', 'pending')->count();
+            } elseif ($isAsesor) {
+                $asesor = $currentUser->asesor;
+                if ($asesor) {
+                    $badgeCounts['daftar_tugas'] = \App\Models\Akreditasi::whereIn('status', [4, 5])
+                        ->whereHas('assessments', function ($query) use ($asesor) {
+                            $query->where('asesor_id', $asesor->id);
+                        })
+                        ->count();
+                }
+            }
+        } catch (\Throwable $e) {
+            $badgeCounts = [];
+        }
+    }
 @endphp
 
 <div class="spm-sidebar-host" style="display: contents;">
@@ -48,121 +92,64 @@
     <div class="app-sidebar-menu flex-column-fluid">
         <div id="kt_app_sidebar_menu_wrapper" class="app-sidebar-wrapper hover-scroll-y">
             <div class="menu menu-column menu-rounded menu-sub-indention menu-state-title-primary fw-semibold px-3" id="kt_app_sidebar_menu" data-kt-menu="true" data-kt-menu-expand="false">
-                <x-ui.sidebar-section :compact="true">UTAMA</x-ui.sidebar-section>
 
-                <x-sidebar-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" icon="grid">
-                    {{ __('Dashboard') }}
-                </x-sidebar-link>
+                @foreach($sections as $section)
+                    <x-sidebar-section :label="$section['label']" />
 
-                @if ($isAdmin)
-                    <x-ui.sidebar-section>OPERASIONAL</x-ui.sidebar-section>
+                    @foreach($section['items'] as $item)
+                        @php
+                            $isComingSoon = (bool) ($item['coming_soon'] ?? false);
+                            $badgeText = $item['badge_text'] ?? null;
 
-                    <x-sidebar-link :href="route('admin.akreditasi')" :active="request()->routeIs('admin.akreditasi*')" icon="shield">
-                        {{ __('Akreditasi') }}
-                    </x-sidebar-link>
+                            // Determine the href (skip route resolution for Soon items).
+                            if ($isComingSoon) {
+                                $href = '#';
+                                $isActive = false;
+                            } else {
+                                $routeParams = $item['route_params'] ?? [];
+                                $href = route($item['route'], $routeParams);
 
-                    <x-sidebar-link :href="route('admin.pesantren.index')" :active="request()->routeIs('admin.pesantren.*')" icon="users">
-                        {{ __('Pesantren') }}
-                    </x-sidebar-link>
+                                $activePattern = $item['active_pattern'];
+                                if (str_contains($activePattern, 'documents.index.')) {
+                                    $isActive = request()->fullUrlIs($href);
+                                } elseif (str_ends_with($activePattern, '*')) {
+                                    $isActive = request()->routeIs($activePattern);
+                                } else {
+                                    $isActive = request()->routeIs($activePattern);
+                                }
+                            }
 
-                    <x-sidebar-link :href="route('admin.asesor.index')" :active="request()->routeIs('admin.asesor.*')" icon="user-circle">
-                        {{ __('Asesor') }}
-                    </x-sidebar-link>
+                            // Determine progress status (only for Pesantren items with show_progress)
+                            $progressStatus = null;
+                            if (($item['show_progress'] ?? false) && $isPesantren) {
+                                $progressKey = $progressKeyMap[$item['key']] ?? null;
+                                if ($progressKey) {
+                                    $progressStatus = $progressData[$progressKey] ?? null;
+                                }
+                            }
 
-                    <x-ui.sidebar-section>MASTER DATA</x-ui.sidebar-section>
+                            // Badge count for items with show_badge=true
+                            $badgeCount = null;
+                            if ($item['show_badge'] ?? false) {
+                                $badgeCount = $badgeCounts[$item['key']] ?? null;
+                            }
+                        @endphp
 
-                    <x-layout.sidebar-group
-                        title="Referensi"
-                        icon="data"
-                        :open="request()->routeIs('admin.master-edpm') || request()->routeIs('admin.master-dokumen')"
-                    >
-                        <x-sidebar-link :href="route('admin.master-edpm')" :active="request()->routeIs('admin.master-edpm')" icon="none">
-                            {{ __('Komponen EDPM') }}
+                        <x-sidebar-link
+                            :href="$href"
+                            :active="$isActive"
+                            :icon="$item['icon']"
+                            :progressStatus="$progressStatus"
+                            :badgeCount="$badgeCount"
+                            :tooltip="$item['tooltip']"
+                            :badgeText="$badgeText"
+                            :disabled="$isComingSoon"
+                        >
+                            {{ $item['label'] }}
                         </x-sidebar-link>
+                    @endforeach
+                @endforeach
 
-                        <x-sidebar-link :href="route('admin.master-dokumen')" :active="request()->routeIs('admin.master-dokumen')" icon="none">
-                            {{ __('Dokumen') }}
-                        </x-sidebar-link>
-                    </x-layout.sidebar-group>
-
-                    <x-layout.sidebar-group
-                        title="Manajemen Akses"
-                        icon="setting-2"
-                        :open="request()->routeIs('roles.*') || request()->routeIs('accounts.*')"
-                    >
-                        <x-sidebar-link :href="route('roles.index')" :active="request()->routeIs('roles.*')" icon="none">
-                            {{ __('Role') }}
-                        </x-sidebar-link>
-
-                        <x-sidebar-link :href="route('accounts.index')" :active="request()->routeIs('accounts.*')" icon="none">
-                            {{ __('Akun Pengguna') }}
-                        </x-sidebar-link>
-                    </x-layout.sidebar-group>
-                @endif
-
-                @if ($isPesantren)
-                    <x-ui.sidebar-section>DATA PESANTREN</x-ui.sidebar-section>
-
-                    <x-sidebar-link :href="route('pesantren.profile')" :active="request()->routeIs('pesantren.profile')" icon="hat">
-                        {{ __('Profil Pesantren') }}
-                    </x-sidebar-link>
-
-                    <x-sidebar-link :href="route('pesantren.ipm')" :active="request()->routeIs('pesantren.ipm')" icon="document">
-                        {{ __('IPM') }}
-                    </x-sidebar-link>
-
-                    <x-sidebar-link :href="route('pesantren.sdm')" :active="request()->routeIs('pesantren.sdm')" icon="users">
-                        {{ __('Data SDM') }}
-                    </x-sidebar-link>
-
-                    <x-ui.sidebar-section>AKREDITASI</x-ui.sidebar-section>
-
-                    <x-sidebar-link :href="route('pesantren.edpm')" :active="request()->routeIs('pesantren.edpm')" icon="paper">
-                        {{ __('EDPM') }}
-                    </x-sidebar-link>
-
-                    <x-sidebar-link :href="route('pesantren.akreditasi')" :active="request()->routeIs('pesantren.akreditasi*')" icon="shield-lock">
-                        {{ __('Pengajuan') }}
-                    </x-sidebar-link>
-
-                    <x-ui.sidebar-section>DOKUMEN</x-ui.sidebar-section>
-
-                    <x-sidebar-link :href="route('documents.index', ['doc' => 'iapm'])" :active="request()->fullUrlIs(route('documents.index', ['doc' => 'iapm']))" icon="document-stack">
-                        {{ __('IAPM') }}
-                    </x-sidebar-link>
-
-                    <x-sidebar-link :href="route('documents.index', ['doc' => 'kartu_kendali'])" :active="request()->fullUrlIs(route('documents.index', ['doc' => 'kartu_kendali']))" icon="document-stack">
-                        {{ __('Kartu Kendali') }}
-                    </x-sidebar-link>
-
-                    <x-sidebar-link :href="route('documents.index', ['doc' => 'all'])" :active="request()->fullUrlIs(route('documents.index', ['doc' => 'all']))" icon="document-stack">
-                        {{ __('Semua Dokumen') }}
-                    </x-sidebar-link>
-                @endif
-
-                @if ($isAsesor)
-                    <x-ui.sidebar-section>DATA ASESOR</x-ui.sidebar-section>
-
-                    <x-sidebar-link :href="route('asesor.profile')" :active="request()->routeIs('asesor.profile')" icon="users">
-                        {{ __('Profil Asesor') }}
-                    </x-sidebar-link>
-
-                    <x-ui.sidebar-section>AKREDITASI</x-ui.sidebar-section>
-
-                    <x-sidebar-link :href="route('asesor.akreditasi')" :active="request()->routeIs('asesor.akreditasi*')" icon="shield-lock">
-                        {{ __('Tugas') }}
-                    </x-sidebar-link>
-
-                    <x-ui.sidebar-section>DOKUMEN</x-ui.sidebar-section>
-
-                    <x-sidebar-link :href="route('documents.index', ['doc' => 'iapm'])" :active="request()->fullUrlIs(route('documents.index', ['doc' => 'iapm']))" icon="document-stack">
-                        {{ __('IAPM') }}
-                    </x-sidebar-link>
-
-                    <x-sidebar-link :href="route('documents.index', ['doc' => 'visitasi'])" :active="request()->fullUrlIs(route('documents.index', ['doc' => 'visitasi']))" icon="document-stack">
-                        {{ __('Panduan Visitasi') }}
-                    </x-sidebar-link>
-                @endif
             </div>
         </div>
     </div>
@@ -180,4 +167,10 @@
         </a>
     </div>
     </div>
+
+    {{-- SidebarBadges Livewire component for dynamic badge count updates --}}
+    <livewire:layout.sidebar-badges />
+
+    {{-- OnboardingGuide Livewire component for onboarding modal --}}
+    <livewire:layout.onboarding-guide />
 </div>

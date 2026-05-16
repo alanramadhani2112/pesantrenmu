@@ -27,3 +27,12 @@ Homestead.yaml
 Thumbs.db
 tmp_*.txt
 spm.sql
+
+# Local dev artifacts
+.kiro/
+.audit-findings/
+.playwright-mcp/
+.sisyphus/run-continuation/
+*.png
+-w
+

@@ -89,9 +89,9 @@ new #[Layout('layouts.app')] class extends Component {
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        if (!$user->isAdmin()) {
-            abort(403);
-        }
+        if (!$user->canAccessAdminArea()) {
+                    abort(403);
+                }
     }
 
     public function getAkreditasisProperty()
@@ -165,12 +165,18 @@ new #[Layout('layouts.app')] class extends Component {
                 'tanggal_berakhir' => 'required|date|after_or_equal:tanggal_mulai',
             ]);
 
-            $akreditasiService->approvePengajuan($this->akreditasi_id, [
-                'asesor_id1' => $this->asesor_id1,
-                'asesor_id2' => $this->asesor_id2,
-                'tanggal_mulai' => $this->tanggal_mulai,
-                'tanggal_berakhir' => $this->tanggal_berakhir,
-            ]);
+            try {
+                $akreditasiService->approvePengajuan($this->akreditasi_id, [
+                    'asesor_id1' => $this->asesor_id1,
+                    'asesor_id2' => $this->asesor_id2,
+                    'tanggal_mulai' => $this->tanggal_mulai,
+                    'tanggal_berakhir' => $this->tanggal_berakhir,
+                ]);
+            } catch (\DomainException $e) {
+                session()->flash('error', 'Gagal memverifikasi pengajuan: ' . $e->getMessage() . '.');
+                $this->dispatch('close-modal', 'verifikasi-modal');
+                return;
+            }
 
             session()->flash('status', 'Pengajuan berhasil diverifikasi. Status berubah menjadi tahap penilaian.');
         } else {
@@ -178,7 +184,13 @@ new #[Layout('layouts.app')] class extends Component {
                 'catatan_penolakan' => 'required|string|min:10',
             ]);
 
-            $akreditasiService->rejectPengajuan($this->akreditasi_id, $this->catatan_penolakan);
+            try {
+                $akreditasiService->rejectPengajuan($this->akreditasi_id, $this->catatan_penolakan);
+            } catch (\DomainException $e) {
+                session()->flash('error', 'Gagal menolak pengajuan: ' . $e->getMessage() . '.');
+                $this->dispatch('close-modal', 'verifikasi-modal');
+                return;
+            }
 
             session()->flash('status', 'Pengajuan berhasil ditolak (Stop) dan dialihkan untuk perbaikan.');
         }
@@ -195,7 +207,7 @@ new #[Layout('layouts.app')] class extends Component {
 <div data-admin-akreditasi-page="metronic" x-data="{ ...deleteConfirmation(), ...adminManagement() }">
     <x-slot name="header">{{ __('Akreditasi') }}</x-slot>
 
-    <x-ui.page
+    <x-ui.index-layout
         title="Akreditasi"
         subtitle="Kelola pengajuan, penilaian, visitasi, dan tindak lanjut pesantren dari satu daftar akreditasi."
     >
@@ -287,11 +299,10 @@ new #[Layout('layouts.app')] class extends Component {
             </div>
         </div>
 
-        <x-ui.table
+        <x-datatable.layout
             title="Daftar Pengajuan"
             subtitle="Filter berdasarkan tahap, cari pesantren, lalu tindak lanjuti item yang membutuhkan keputusan."
             :records="$this->akreditasis"
-            class="spm-admin-akreditasi-table"
         >
             <x-slot name="filters">
                 <div class="d-flex flex-wrap align-items-center gap-2">
@@ -321,8 +332,8 @@ new #[Layout('layouts.app')] class extends Component {
                     <x-ui.table-checkbox model="selectAll" label="Pilih semua pengajuan" />
                 </x-ui.table-th>
 
-                <x-ui.table-th field="user_id" :sortField="$sortField" :sortAsc="$sortAsc">Pesantren</x-ui.table-th>
-                <x-ui.table-th field="created_at" :sortField="$sortField" :sortAsc="$sortAsc">Tahap Akreditasi</x-ui.table-th>
+                <x-datatable.th field="user_id" :sortField="$sortField" :sortAsc="$sortAsc">Pesantren</x-datatable.th>
+                <x-datatable.th field="created_at" :sortField="$sortField" :sortAsc="$sortAsc">Tahap Akreditasi</x-datatable.th>
                 <x-ui.table-th align="center">Nilai</x-ui.table-th>
                 <x-ui.table-th align="center">Peringkat</x-ui.table-th>
                 <x-ui.table-th align="center">Status</x-ui.table-th>
@@ -375,7 +386,12 @@ new #[Layout('layouts.app')] class extends Component {
 
                     <td>
                         <div class="d-flex flex-column gap-1">
-                            <x-ui.badge :variant="$stage['variant']">{{ $stage['label'] }}</x-ui.badge>
+                            <div class="d-flex align-items-center gap-2">
+                                <x-ui.badge :variant="$stage['variant']">{{ $stage['label'] }}</x-ui.badge>
+                                @if($item->parent)
+                                    <x-ui.badge variant="warning">Pengajuan Ulang</x-ui.badge>
+                                @endif
+                            </div>
                             <span class="text-muted fw-semibold fs-7">
                                 {{ $stage['date'] }}
 
@@ -441,8 +457,8 @@ new #[Layout('layouts.app')] class extends Component {
                 </tr>
                 @endforelse
             </x-slot>
-        </x-ui.table>
-    </x-ui.page>
+        </x-datatable.layout>
+    </x-ui.index-layout>
 
     <!-- Modal Verifikasi -->
     <x-ui.modal name="verifikasi-modal" focusable>
@@ -559,11 +575,7 @@ new #[Layout('layouts.app')] class extends Component {
                     <h2 class="text-xl font-bold text-[#1e3a5f]">
                         {{ $isRejection ? 'Catatan Penolakan Visitasi' : 'Catatan Akreditasi' }}
                     </h2>
-                    <x-ui.button type="button" variant="light" size="sm" x-on:click="$dispatch('close')" class="btn-icon btn-active-light-primary text-slate-300 hover:text-slate-500">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </x-ui.button>
+                    <x-ui.icon-button icon="cross" label="Tutup" variant="light" size="sm" x-on:click="$dispatch('close')" />
                 </div>
 
                 <div class="space-y-8 pr-2 custom-scrollbar">
@@ -577,7 +589,7 @@ new #[Layout('layouts.app')] class extends Component {
                                 class="w-12 h-12 rounded-2xl border-2 border-white shadow-sm object-cover" alt="Avatar">
                             <div>
                                 <h3 class="text-sm font-black text-[#1e3a5f]">{{ $catatan->user->name }}</h3>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                                     {{ $catatan->user->isAsesor() ? 'Ketua Asesor' : ($catatan->user->isAdmin() ? 'Administrator Pusat' : 'Pihak Berwenang') }}
                                 </p>
                             </div>
@@ -585,14 +597,16 @@ new #[Layout('layouts.app')] class extends Component {
 
                         <div class="grid grid-cols-2 gap-4 mb-6">
                             <div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tipe Catatan:</p>
-                                <span class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-tight {{ $isNoteRejection ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600' }}">
-                                    {{ $catatan->tipe ?? 'Umum' }}
-                                </span>
+                                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Tipe Catatan:</p>
+                                @if($isNoteRejection)
+                                <x-ui.badge variant="warning">{{ $catatan->tipe ?? 'Umum' }}</x-ui.badge>
+                                @else
+                                <x-ui.badge variant="info">{{ $catatan->tipe ?? 'Umum' }}</x-ui.badge>
+                                @endif
                             </div>
                             <div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tanggal:</p>
-                                <p class="text-[11px] font-black text-slate-700">
+                                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Tanggal:</p>
+                                <p class="text-[11px] font-black text-gray-700">
                                     {{ $catatan->created_at->translatedFormat('d F Y H:i') }}
                                 </p>
                             </div>
@@ -600,45 +614,19 @@ new #[Layout('layouts.app')] class extends Component {
 
                         @if($isNoteRejection)
                         <div class="mb-6">
-                            <p class="text-[11px] font-black text-slate-800 mb-3">Dokumen yang memerlukan perbaikan</p>
+                            <p class="text-[11px] font-black text-gray-800 mb-3">Dokumen yang memerlukan perbaikan</p>
                             <div class="flex flex-wrap gap-2">
                                 @foreach(explode(', ', $catatan->perbaikan) as $p)
-                                <div class="flex items-center gap-2 px-3 py-2 bg-amber-500 rounded-xl text-white">
-                                    @switch($p)
-                                    @case('Profil Pesantren')
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                    @break
-                                    @case('IPM')
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                    @break
-                                    @case('Data SDM')
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                    @break
-                                    @case('EPDM')
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                    @break
-                                    @default
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                    @endswitch
-                                    <span class="text-[10px] font-black uppercase tracking-tight">{{ $p }}</span>
-                                </div>
+                                <x-ui.badge variant="warning" class="text-uppercase">
+                                    <x-ui.icon name="document" class="fs-7 me-1" />{{ $p }}
+                                </x-ui.badge>
                                 @endforeach
                             </div>
                         </div>
                         @endif
 
-                        <div class="rounded-3xl p-6 {{ $isNoteRejection ? 'bg-amber-50 text-slate-700' : 'bg-blue-50 text-slate-700' }}">
-                            <div class="text-xs leading-relaxed font-medium space-y-4 prose-sm prose-slate max-w-none">
+                        <div class="rounded-3xl p-6 {{ $isNoteRejection ? 'bg-light-warning' : 'bg-light-info' }}">
+                            <div class="text-xs leading-relaxed font-medium space-y-4 prose-sm max-w-none text-gray-700">
                                 {!! nl2br(e($catatan->catatan)) !!}
                             </div>
                         </div>

@@ -23,10 +23,13 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(RoleSeeder::class);
+        $this->call(PermissionSeeder::class);
 
         if (MasterEdpmButir::count() === 0) {
             $this->call(MasterEdpmSeeder::class);
         }
+
+        $this->call(DocumentCategorySeeder::class);
 
         $this->seedAdmin();
         $this->seedPesantren();

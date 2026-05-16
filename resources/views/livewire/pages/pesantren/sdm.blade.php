@@ -2,11 +2,13 @@
 
 use App\Models\SdmPesantren;
 use App\Models\Pesantren;
+use App\Traits\ChecksSectionLock;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use Illuminate\Support\Str;
 
 new #[Layout('layouts.app')] class extends Component {
+    use ChecksSectionLock;
     public $data = [];
     public $levels = [];
     public $unitIds = [];
@@ -60,7 +62,7 @@ new #[Layout('layouts.app')] class extends Component {
     public function save()
     {
         $pesantrenService = app(\App\Services\PesantrenService::class);
-        if (auth()->user()->pesantren->is_locked) {
+        if (!$this->isSectionEditable('sdm')) {
             $this->dispatch('show-metronic-alert', type: 'error', title: 'Akses Ditolak', message: 'Data terkunci karena sedang dalam proses akreditasi.');
             return;
         }
@@ -92,6 +94,7 @@ new #[Layout('layouts.app')] class extends Component {
 
 @php
     $isLocked = auth()->user()->pesantren->is_locked;
+    $sdmLockStatus = $this->getSectionLockStatus('sdm');
 @endphp
 
 <x-slot name="header">{{ __('Data SDM Pesantren') }}</x-slot>
@@ -139,17 +142,27 @@ new #[Layout('layouts.app')] class extends Component {
     </div>
 
     @if($isLocked)
-        <div class="spm-inline-alert">
-            <x-ui.icon name="shield-tick" class="fs-2 text-warning" />
-            <div>
-                <div class="spm-inline-alert-title">Data Terkunci</div>
-                <div class="spm-inline-alert-text">Status data sedang dalam proses akreditasi dan tidak dapat diubah untuk sementara waktu.</div>
+        @if($sdmLockStatus === 'unlocked_for_correction')
+            <div class="spm-inline-alert" style="border-left: 4px solid #f59e0b; background: #fffbeb; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
+                <x-ui.icon name="shield-tick" class="fs-2 text-warning" />
+                <div>
+                    <div class="spm-inline-alert-title">🔓 Koreksi Tersedia</div>
+                    <div class="spm-inline-alert-text">Data SDM dibuka untuk perbaikan sesuai catatan asesor.</div>
+                </div>
             </div>
-        </div>
+        @else
+            <div class="spm-inline-alert">
+                <x-ui.icon name="shield-tick" class="fs-2 text-warning" />
+                <div>
+                    <div class="spm-inline-alert-title">🔒 Data Terkunci</div>
+                    <div class="spm-inline-alert-text">Status data sedang dalam proses akreditasi dan tidak dapat diubah untuk sementara waktu.</div>
+                </div>
+            </div>
+        @endif
     @endif
 
     <form x-on:submit.prevent="confirmSave($wire)" class="d-flex flex-column gap-6">
-        @forelse($categories as $category)
+        @foreach($categories as $category)
             <x-ui.section-card
                 :title="$category['label']"
                 subtitle="Input rekap per unit layanan pendidikan."
@@ -161,6 +174,7 @@ new #[Layout('layouts.app')] class extends Component {
                 </x-slot:toolbar>
 
                 <div class="p-6">
+                    @if(count($levels) > 0)
                     <x-ui.simple-table dense tableClass="spm-sdm-table">
                         <thead>
                             <tr>
@@ -192,7 +206,7 @@ new #[Layout('layouts.app')] class extends Component {
                                             placeholder="0"
                                             min="0"
                                             step="1"
-                                            :disabled="$isLocked"
+                                            :disabled="$sdmLockStatus === 'locked'"
                                         />
                                     </td>
                                     <td class="text-center">
@@ -205,7 +219,7 @@ new #[Layout('layouts.app')] class extends Component {
                                             placeholder="0"
                                             min="0"
                                             step="1"
-                                            :disabled="$isLocked"
+                                            :disabled="$sdmLockStatus === 'locked'"
                                         />
                                     </td>
                                     <td class="text-center pe-4">
@@ -231,25 +245,32 @@ new #[Layout('layouts.app')] class extends Component {
                             </tr>
                         </tfoot>
                     </x-ui.simple-table>
+                    @else
+                        <div class="text-center py-6">
+                            <x-ui.icon name="information-2" class="fs-2hx text-gray-400 mb-3 d-block mx-auto" />
+                            <div class="fw-bold text-gray-700 fs-6 mb-1">Belum ada unit pendidikan</div>
+                            <div class="text-muted fs-7 mb-4">Pilih layanan satuan pendidikan di halaman Profil terlebih dahulu agar data SDM bisa diinput per unit.</div>
+                            <x-ui.button :href="route('pesantren.profile')" variant="light-primary" size="sm">
+                                <x-ui.icon name="pencil" class="fs-5 me-1" />
+                                Atur di Profil
+                            </x-ui.button>
+                        </div>
+                    @endif
                 </div>
             </x-ui.section-card>
-        @empty
-            <x-ui.card>
-                <x-ui.empty-state title="Belum Ada Data" description="Pesantren ini belum memiliki unit layanan yang bisa direkap." />
-            </x-ui.card>
-        @endforelse
+        @endforeach
 
         <div class="spm-action-panel d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
             <div>
                 <h3 class="spm-card-title mb-1">Simpan Rekap SDM</h3>
-                <div class="text-muted fw-semibold fs-7">Tampilan, label, dan kontrol mengikuti komponen Metronic reusable.</div>
+                <div class="text-muted fw-semibold fs-7">Pastikan data SDM telah diisi lengkap sebelum menyimpan.</div>
             </div>
 
             <div class="d-flex align-items-center gap-2">
-                @if($isLocked)
+                @if($sdmLockStatus === 'locked')
                     <x-ui.button type="button" variant="warning" disabled>
                         <x-ui.icon name="shield-tick" class="fs-4 me-1" />
-                        Data Terkunci
+                        🔒 Data Terkunci
                     </x-ui.button>
                 @else
                     <x-ui.button type="submit" variant="primary" wire:loading.attr="disabled">

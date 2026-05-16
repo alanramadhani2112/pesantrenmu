@@ -103,6 +103,45 @@ class User extends Authenticatable
         return $this->role?->id === 3;
     }
 
+    /**
+     * Super admin = god mode. Mutually exclusive with isAdmin().
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->role?->id === 4;
+    }
+
+    /**
+     * Check if user has a given permission key.
+     *
+     * Super admin always returns true (bypasses everything).
+     * Other roles consult the role_permission pivot.
+     */
+    public function hasPermission(string $key): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        if (! $this->role) {
+            return false;
+        }
+
+        return $this->role
+            ->permissions()
+            ->where('permissions.key', $key)
+            ->exists();
+    }
+
+    /**
+     * Convenience guard: user can access admin-area pages.
+     * Both classic admin (id=1) and super admin (id=4) qualify.
+     */
+    public function canAccessAdminArea(): bool
+    {
+        return $this->isAdmin() || $this->isSuperAdmin();
+    }
+
     public function pesantren()
     {
         return $this->hasOne(Pesantren::class);
@@ -146,5 +185,10 @@ class User extends Authenticatable
     public function documents()
     {
         return $this->belongsToMany(Document::class);
+    }
+
+    public function onboarding()
+    {
+        return $this->hasOne(UserOnboarding::class);
     }
 }

@@ -59,6 +59,12 @@ class AkreditasiDetail extends Component
     public $activeTab = 'profil';
     public $isLocked = false;
 
+    // Rejection form properties
+    public $rejectedItems = [];
+    public $rejectionExplanation = '';
+    public $selectableItems = [];
+    public $rejectionStatus = [];
+
     // Overall Accreditation Scores
 
 
@@ -117,6 +123,13 @@ class AkreditasiDetail extends Component
             if (!isset($this->pesantrenCatatans[$komponen->id])) {
                 $this->pesantrenCatatans[$komponen->id] = '-';
             }
+        }
+
+        // Load rejection data for Asesor 1
+        if ($this->asesorTipe == 1) {
+            $rejectionService = app(\App\Services\RejectionService::class);
+            $this->rejectionStatus = $rejectionService->getRejectionStatus($this->akreditasi->id);
+            $this->selectableItems = $rejectionService->getSelectableItems($this->akreditasi->id);
         }
     }
 
@@ -212,7 +225,7 @@ class AkreditasiDetail extends Component
         if (!$this->saveAsesorEdpm(isFinal: true)) return;
 
         $asesorService = app(\App\Services\AsesorService::class);
-        if ($asesorService->finalizeVerification($this->akreditasi->id)) {
+        if ($asesorService->finalizeVerification($this->akreditasi->id, Auth::id())) {
             session()->flash('status', 'Assessment berhasil diselesaikan. Status berubah menjadi Validasi Admin.');
             return redirect()->route('asesor.akreditasi');
         }
@@ -253,6 +266,66 @@ class AkreditasiDetail extends Component
             $total += (int)($this->sdm[$level]->$field ?? 0);
         }
         return $total;
+    }
+
+    public function submitRejection()
+    {
+        if ($this->asesorTipe != 1) {
+            abort(403);
+        }
+
+        $this->validate([
+            'rejectedItems' => 'required|array|min:1',
+            'rejectionExplanation' => 'required|string|min:10|max:2000',
+        ], [
+            'rejectedItems.required' => 'Pilih minimal satu item yang ditolak.',
+            'rejectedItems.min' => 'Pilih minimal satu item yang ditolak.',
+            'rejectionExplanation.required' => 'Catatan penolakan wajib diisi.',
+            'rejectionExplanation.min' => 'Catatan penolakan minimal 10 karakter.',
+        ]);
+
+        $asesorService = app(\App\Services\AsesorService::class);
+        $result = $asesorService->processVisitasi($this->akreditasi->id, \Illuminate\Support\Facades\Auth::id(), [
+            'rejected_items' => $this->rejectedItems,
+            'catatan' => $this->rejectionExplanation,
+        ], 'tolak');
+
+        if ($result) {
+            $this->reset(['rejectedItems', 'rejectionExplanation']);
+            // Reload rejection status
+            $rejectionService = app(\App\Services\RejectionService::class);
+            $this->rejectionStatus = $rejectionService->getRejectionStatus($this->akreditasi->id);
+            $this->akreditasi->refresh();
+
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Penolakan berhasil dikirim.');
+        } else {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Penolakan gagal diproses.');
+        }
+    }
+
+    public function acceptPerbaikan()
+    {
+        if ($this->asesorTipe != 1) {
+            abort(403);
+        }
+
+        $rejectionService = app(\App\Services\RejectionService::class);
+        $result = $rejectionService->acceptPerbaikan($this->akreditasi->id, \Illuminate\Support\Facades\Auth::id());
+
+        if ($result['success']) {
+            $this->rejectionStatus = $rejectionService->getRejectionStatus($this->akreditasi->id);
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Perbaikan diterima. Proses visitasi dapat dilanjutkan.');
+        } else {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Gagal menerima perbaikan.');
+        }
+    }
+
+    public function rejectAgain()
+    {
+        // Reset form and let asesor fill in new rejection
+        $this->reset(['rejectedItems', 'rejectionExplanation']);
+        $this->activeTab = 'profil';
+        $this->dispatch('notification-received', type: 'info', title: 'Info', message: 'Silakan isi form penolakan baru di bagian bawah halaman.');
     }
 
     public function render()
