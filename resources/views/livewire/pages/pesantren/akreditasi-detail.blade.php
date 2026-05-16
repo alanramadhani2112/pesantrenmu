@@ -1,23 +1,30 @@
-﻿<?php
+<?php
 
+use App\Services\BandingService;
+use App\Services\PesantrenService;
+use App\Services\RejectionService;
+use App\Services\ResubmissionService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Volt\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Storage;
-use App\Services\ResubmissionService;
-use App\Services\PesantrenService;
-use App\Services\BandingService;
-use App\Services\RejectionService;
 
-new #[Layout('layouts.app')] class extends Component {
+new #[Layout('layouts.app')] class extends Component
+{
     public $akreditasi;
+
     public $pesantren;
+
     public $ipm;
+
     public $sdm;
+
     public $komponens;
+
     public $levels = [];
+
     public $fields = [
         'santri_l',
         'santri_p',
@@ -34,23 +41,34 @@ new #[Layout('layouts.app')] class extends Component {
     ];
 
     public $pesantrenEvaluasis = [];
+
     public $pesantrenCatatans = [];
+
     public $pesantrenLinks = [];
 
     public $asesor1Evaluasis = [];
+
     public $asesor2Evaluasis = [];
+
     public $asesor1Nks = [];
+
     public $adminNvs = [];
+
     public $asesorButirCatatans = [];
+
     public $asesorCatatans = [];
 
     #[Url]
     public $activeTab = 'profil';
+
     public $kartu_kendali_file;
+
     public $visitasiTemplate;
 
     public $resubmissionStatus = [];
+
     public $bandingStatus = null;
+
     public $bandingEligibility = [];
 
     // Rejection status data
@@ -70,6 +88,9 @@ new #[Layout('layouts.app')] class extends Component {
         $this->komponens = $data['komponens'];
         $this->visitasiTemplate = $data['visitasiTemplate'];
 
+        // Tenant boundary: only owner pesantren / assigned asesor / admin can view
+        Gate::authorize('view', $this->akreditasi);
+
         if ($this->pesantren && $this->pesantren->relationLoaded('units')) {
             $this->levels = $this->pesantren->units->pluck('unit')->toArray();
         }
@@ -80,7 +101,7 @@ new #[Layout('layouts.app')] class extends Component {
         $this->pesantrenCatatans = $data['pesantren_edpm']['catatans']->toArray();
 
         // Assessor 1
-        if (!empty($data['asesor1'])) {
+        if (! empty($data['asesor1'])) {
             $this->asesor1Evaluasis = $data['asesor1']['evaluasis'];
             $this->asesor1Nks = $data['asesor1']['nks'];
             $this->adminNvs = $data['asesor1']['nvs'];
@@ -89,13 +110,13 @@ new #[Layout('layouts.app')] class extends Component {
         }
 
         // Assessor 2
-        if (!empty($data['asesor2'])) {
+        if (! empty($data['asesor2'])) {
             $this->asesor2Evaluasis = $data['asesor2']['evaluasis'];
         }
 
         // Ensure all components have entries in catatans
         foreach ($this->komponens as $komponen) {
-            if (!isset($this->pesantrenCatatans[$komponen->id])) {
+            if (! isset($this->pesantrenCatatans[$komponen->id])) {
                 $this->pesantrenCatatans[$komponen->id] = '';
             }
         }
@@ -135,17 +156,20 @@ new #[Layout('layouts.app')] class extends Component {
     {
         $total = 0;
         foreach ($this->levels as $level) {
-            $total += (int)($this->sdm[$level]->$field ?? 0);
+            $total += (int) ($this->sdm[$level]->$field ?? 0);
         }
+
         return $total;
     }
 
     public function submitPerbaikan()
     {
+        Gate::authorize('update', $this->akreditasi);
+
         $rejectionService = app(RejectionService::class);
         $result = $rejectionService->submitPerbaikan($this->akreditasi->id, Auth::id());
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             $this->dispatch(
                 'notification-received',
                 type: 'error',
@@ -156,6 +180,7 @@ new #[Layout('layouts.app')] class extends Component {
                     default => 'Terjadi kesalahan saat mengirim perbaikan.',
                 }
             );
+
             return;
         }
 
@@ -172,8 +197,10 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function uploadKartuKendali()
     {
+        Gate::authorize('update', $this->akreditasi);
+
         $pesantrenService = app(\App\Services\PesantrenService::class);
-        
+
         if ($this->akreditasi->status != 3) {
             return;
         }
@@ -190,13 +217,14 @@ new #[Layout('layouts.app')] class extends Component {
 
         $success = $pesantrenService->uploadKartuKendali($this->akreditasi->id, Auth::id(), $path);
 
-        if (!$success) {
+        if (! $success) {
             $this->dispatch(
                 'notification-received',
                 type: 'error',
                 title: 'Gagal',
                 message: 'Anda tidak memiliki akses ke pengajuan ini.'
             );
+
             return;
         }
 
@@ -212,6 +240,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function resubmit()
     {
+        Gate::authorize('update', $this->akreditasi);
+
         $pesantrenService = app(PesantrenService::class);
         $resubmissionService = app(ResubmissionService::class);
 
@@ -221,7 +251,7 @@ new #[Layout('layouts.app')] class extends Component {
             // Get the eligibility info to determine the error message
             $eligibility = $resubmissionService->checkResubmissionEligibility($this->akreditasi->id);
 
-            if (!$eligibility['allowed'] && $eligibility['error_code']) {
+            if (! $eligibility['allowed'] && $eligibility['error_code']) {
                 $message = $resubmissionService->getErrorMessage($eligibility['error_code'], $eligibility['error_data']);
             } else {
                 $message = 'Pengajuan ulang gagal. Silakan periksa kelengkapan data Anda.';
@@ -233,6 +263,7 @@ new #[Layout('layouts.app')] class extends Component {
                 title: 'Gagal',
                 message: $message
             );
+
             return;
         }
 

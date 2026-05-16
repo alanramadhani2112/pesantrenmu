@@ -3,25 +3,32 @@
 use App\Models\Banding;
 use App\Models\User;
 use App\Services\BandingService;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
-use Illuminate\Support\Facades\Auth;
 
-new #[Layout('layouts.app')] class extends Component {
+new #[Layout('layouts.app')] class extends Component
+{
     public Banding $banding;
+
     public $selectedReviewerId = '';
+
     public $keputusan = '';
+
     public $showAssignModal = false;
+
     public $showDecisionModal = false;
+
     public $decisionType = '';
 
     public function mount(int $id)
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        if (!$user->canAccessAdminArea()) {
-                    abort(403);
-                }
+        if (! $user->canAccessAdminArea()) {
+            abort(403);
+        }
 
         $this->banding = Banding::with([
             'akreditasi.assessments',
@@ -29,6 +36,9 @@ new #[Layout('layouts.app')] class extends Component {
             'akreditasi.user.pesantren',
             'reviewer',
         ])->findOrFail($id);
+
+        // Tenant boundary: only admin (and super admin via Gate::before) may review banding
+        Gate::authorize('review', $this->banding);
     }
 
     public function getAdminUsersProperty()
@@ -59,6 +69,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function assignReviewer()
     {
+        Gate::authorize('review', $this->banding);
+
         if (empty($this->selectedReviewerId)) {
             return;
         }
@@ -75,6 +87,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function reassignReviewer()
     {
+        Gate::authorize('review', $this->banding);
+
         if (empty($this->selectedReviewerId)) {
             return;
         }
@@ -91,8 +105,11 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function acceptBanding()
     {
+        Gate::authorize('review', $this->banding);
+
         if (mb_strlen($this->keputusan) < 10) {
             $this->addError('keputusan', 'Penjelasan keputusan minimal 10 karakter.');
+
             return;
         }
 
@@ -108,8 +125,11 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function rejectBanding()
     {
+        Gate::authorize('review', $this->banding);
+
         if (mb_strlen($this->keputusan) < 10) {
             $this->addError('keputusan', 'Penjelasan keputusan minimal 10 karakter.');
+
             return;
         }
 

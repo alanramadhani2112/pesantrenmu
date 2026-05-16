@@ -1,53 +1,66 @@
-﻿<?php
+<?php
 
 use App\Models\Akreditasi;
-use App\Models\Pesantren;
-use App\Models\Ipm;
-use App\Models\SdmPesantren;
-use App\Models\MasterEdpmKomponen;
 use App\Models\Edpm;
-use App\Models\EdpmCatatan;
-use App\Models\AkreditasiEdpm;
-use App\Models\AkreditasiEdpmCatatan;
+use App\Models\Pesantren;
 use App\Services\ResubmissionService;
-use Livewire\Attributes\Layout;
-use Livewire\WithFileUploads;
-use Livewire\Volt\Component;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Layout;
+use Livewire\Volt\Component;
+use Livewire\WithFileUploads;
 
-new #[Layout('layouts.app')] class extends Component {
+new #[Layout('layouts.app')] class extends Component
+{
     use WithFileUploads;
+
     public $akreditasi;
+
     public $pesantren;
+
     public $ipm;
+
     public $sdm;
+
     public $komponens;
 
     // Pesantren's EDPM data (read only)
     public $pesantrenEvaluasis = [];
+
     public $pesantrenCatatans = [];
+
     public $pesantrenLinks = [];
 
     // Assessor 1 EDPM evaluation
     public $asesor1Evaluasis = [];
+
     public $asesor1Catatans = [];
+
     public $asesor1Nks = [];
+
     public $asesor1CatatanNks = [];
+
     public $asesor1ButirCatatans = [];
 
     // Assessor 2 EDPM evaluation
     public $asesor2Evaluasis = [];
+
     public $asesor2Catatans = [];
+
     public $asesor2ButirCatatans = [];
 
     public $tgl_visitasi;
+
     public $tgl_visitasi_akhir;
 
     public $nomor_sk;
+
     public $sertifikat_file;
+
     public $masa_berlaku;
+
     public $masa_berlaku_akhir;
+
     public $catatan_admin;
 
     // Admin NV (Nilai Verifikasi)
@@ -55,14 +68,18 @@ new #[Layout('layouts.app')] class extends Component {
 
     // Resubmission chain data
     public $chainTimeline = [];
+
     public $resubmissionStatus = null;
 
     // Rejection data
     public $rejectionCategories = [];
+
     public $rejectionStatus = [];
 
     public $activeTab = 'profil';
+
     public $levels = [];
+
     public $fields = [
         'santri_l',
         'santri_p',
@@ -82,18 +99,21 @@ new #[Layout('layouts.app')] class extends Component {
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        if (!$user->canAccessAdminArea()) {
-                    abort(403);
-                }
+        if (! $user->canAccessAdminArea()) {
+            abort(403);
+        }
 
         $akreditasiService = app(\App\Services\AkreditasiService::class);
         $pesantrenService = app(\App\Services\PesantrenService::class);
 
         $this->akreditasi = $akreditasiService->findAkreditasi($uuid, ['user.pesantren', 'assessments.asesor.user', 'assessment1', 'assessment2']);
 
-        if (!$this->akreditasi) {
+        if (! $this->akreditasi) {
             abort(404);
         }
+
+        // Tenant boundary: admin / super admin only (super admin via Gate::before)
+        Gate::authorize('view', $this->akreditasi);
 
         $userId = $this->akreditasi->user_id;
         $this->pesantren = $pesantrenService->getProfile($userId);
@@ -102,7 +122,7 @@ new #[Layout('layouts.app')] class extends Component {
         if ($this->pesantren && $this->pesantren->relationLoaded('units')) {
             $this->levels = $this->pesantren->units->pluck('unit')->toArray();
         }
-        
+
         $pEdpmData = $pesantrenService->getEdpmData($userId);
         $this->komponens = $pEdpmData['komponens'];
 
@@ -173,12 +193,12 @@ new #[Layout('layouts.app')] class extends Component {
     {
         if ($this->pesantren) {
             $prevLocked = $this->pesantren->is_locked;
-            $this->pesantren->is_locked = !$this->pesantren->is_locked;
+            $this->pesantren->is_locked = ! $this->pesantren->is_locked;
             $this->pesantren->save();
 
             $status = $this->pesantren->is_locked ? 'terkunci' : 'terbuka';
 
-            if ($prevLocked && !$this->pesantren->is_locked) {
+            if ($prevLocked && ! $this->pesantren->is_locked) {
                 // Notifikasi ke pesantren saat data dibuka kuncinya
                 $this->akreditasi->user->notify(new \App\Notifications\AkreditasiNotification(
                     'buka_kunci',
@@ -203,7 +223,7 @@ new #[Layout('layouts.app')] class extends Component {
     public function saveVisitasiReschedule()
     {
         $akreditasiService = app(\App\Services\AkreditasiService::class);
-        
+
         $this->validate([
             'tgl_visitasi' => 'required|date',
             'tgl_visitasi_akhir' => 'required|date|after_or_equal:tgl_visitasi',
@@ -214,7 +234,7 @@ new #[Layout('layouts.app')] class extends Component {
             $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Jadwal Visitasi berhasil diperbarui.');
             $this->akreditasi->refresh();
         } else {
-             $this->dispatch('notification-received', type: 'error', title: 'Gagal!', message: 'Jadwal Visitasi gagal diperbarui.');
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal!', message: 'Jadwal Visitasi gagal diperbarui.');
         }
     }
 
@@ -240,6 +260,7 @@ new #[Layout('layouts.app')] class extends Component {
                 $attributes["adminNvs.{$b->id}"] = "Nilai NV Butir {$b->nomor_butir}";
             }
         }
+
         return $attributes;
     }
 
@@ -247,6 +268,7 @@ new #[Layout('layouts.app')] class extends Component {
     {
         if ($this->akreditasi->status != 3) {
             session()->flash('error', 'Data tidak dapat diubah karena status bukan Validasi.');
+
             return;
         }
 
@@ -258,6 +280,7 @@ new #[Layout('layouts.app')] class extends Component {
                 title: 'Data Belum Lengkap',
                 message: 'Nilai NV belum dapat disimpan karena Kartu Kendali atau Laporan Visitasi belum diunggah.'
             );
+
             return;
         }
 
@@ -284,19 +307,20 @@ new #[Layout('layouts.app')] class extends Component {
                 }
             }
 
-            $htmlList = '<ul class="text-left list-disc pl-5 mt-2 space-y-1 text-[11px]">' . implode('', array_unique($missingItems)) . '</ul>';
+            $htmlList = '<ul class="text-left list-disc pl-5 mt-2 space-y-1 text-[11px]">'.implode('', array_unique($missingItems)).'</ul>';
 
             $this->dispatch(
                 'validation-failed',
                 title: 'Nilai NV Belum Lengkap',
-                html: "Mohon lengkapi nilai verifikasi berikut sebelum menyimpan:<br>" . $htmlList
+                html: 'Mohon lengkapi nilai verifikasi berikut sebelum menyimpan:<br>'.$htmlList
             );
             throw $e;
         }
 
         $asesor1Id = $this->akreditasi->assessment1->asesor_id ?? null;
-        if (!$asesor1Id) {
+        if (! $asesor1Id) {
             session()->flash('error', 'Asesor 1 tidak ditemukan.');
+
             return;
         }
 
@@ -327,7 +351,7 @@ new #[Layout('layouts.app')] class extends Component {
             return is_null($k->ipr);
         });
         $iprNotNullComponents = $this->komponens->filter(function ($k) {
-            return !is_null($k->ipr);
+            return ! is_null($k->ipr);
         });
 
         $totalSkorIprNull = 0;
@@ -336,7 +360,7 @@ new #[Layout('layouts.app')] class extends Component {
             $c_total = count($k->butirs) * 4;
             $c_ci = 0;
             foreach ($k->butirs as $butir) {
-                $c_ci += (int)($this->adminNvs[$butir->id] ?? 0);
+                $c_ci += (int) ($this->adminNvs[$butir->id] ?? 0);
             }
             if ($c_total > 0) {
                 $totalSkorIprNull += round(($c_ci / $c_total) * $b);
@@ -348,7 +372,7 @@ new #[Layout('layouts.app')] class extends Component {
             $c_total = count($k->butirs) * 4;
             $c_ci = 0;
             foreach ($k->butirs as $butir) {
-                $c_ci += (int)($this->adminNvs[$butir->id] ?? 0);
+                $c_ci += (int) ($this->adminNvs[$butir->id] ?? 0);
             }
             if ($c_total > 0) {
                 $totalSkorIprNotNull += round(($c_ci / $c_total) * 100);
@@ -371,7 +395,9 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function approve()
     {
-        if (!$this->checkScores()) {
+        Gate::authorize('finalize', $this->akreditasi);
+
+        if (! $this->checkScores()) {
             return;
         }
 
@@ -384,7 +410,7 @@ new #[Layout('layouts.app')] class extends Component {
 
         $results = $this->determineResults();
         $akreditasiService = app(\App\Services\AkreditasiService::class);
-        
+
         $akreditasiService->finalizeAkreditasi($this->akreditasi->id, [
             'nomor_sk' => $this->nomor_sk,
             'sertifikat_file' => $this->sertifikat_file,
@@ -395,12 +421,15 @@ new #[Layout('layouts.app')] class extends Component {
         ], true);
 
         session()->flash('status', 'Akreditasi berhasil disetujui.');
+
         return redirect()->route('admin.akreditasi');
     }
 
     public function reject()
     {
-        if (!$this->checkScores()) {
+        Gate::authorize('finalize', $this->akreditasi);
+
+        if (! $this->checkScores()) {
             return;
         }
 
@@ -424,6 +453,7 @@ new #[Layout('layouts.app')] class extends Component {
 
         if ($result) {
             session()->flash('status', 'Akreditasi telah ditolak.');
+
             return redirect()->route('admin.akreditasi');
         } else {
             $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Penolakan gagal diproses.');
@@ -445,8 +475,9 @@ new #[Layout('layouts.app')] class extends Component {
     {
         $total = 0;
         foreach ($this->levels as $level) {
-            $total += (int)($this->sdm[$level]->$field ?? 0);
+            $total += (int) ($this->sdm[$level]->$field ?? 0);
         }
+
         return $total;
     }
 
@@ -469,6 +500,7 @@ new #[Layout('layouts.app')] class extends Component {
                 title: 'Data Belum Lengkap',
                 message: 'Tidak dapat memproses akreditasi. Pastikan nilai NK (Asesor) dan NV (Admin) telah diisi untuk semua butir.'
             );
+
             return false;
         }
 
