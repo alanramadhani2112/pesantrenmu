@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers\Sso;
 
-use \Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use App\Services\Sso\UserService;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Services\Sso\UserService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class SsoController extends Controller
 {
     /**
      * Authenticating SSO request to the parent application
-     * 
      */
     public function preflight(Request $request)
     {
@@ -23,15 +22,14 @@ class SsoController extends Controller
             'redirect_uri' => route('sso.callback'),
             'response_type' => 'code',
             'scope' => '',
-            'state' => $state
+            'state' => $state,
         ]);
 
-        return redirect(config('sso.server_url') . "oauth/authorize?{$query}");
+        return redirect(config('sso.server_url')."oauth/authorize?{$query}");
     }
 
     /**
      * Authenticating user
-     * 
      */
     public function auth(Request $request)
     {
@@ -43,13 +41,13 @@ class SsoController extends Controller
                 \InvalidArgumentException::class
             );
         } catch (\InvalidArgumentException $e) {
-            Log::error("Invalid state");
+            Log::error('Invalid state');
+
             return redirect()->route('login')->with('error', 'Invalid state, it may be expired, please try again');
         }
 
-
         $response = \Illuminate\Support\Facades\Http::asForm()->post(
-            config('sso.server_url') . 'oauth/token',
+            config('sso.server_url').'oauth/token',
             [
                 'grant_type' => 'authorization_code',
                 'client_id' => config('sso.client_id'),
@@ -61,16 +59,32 @@ class SsoController extends Controller
 
         $data = $response->json();
 
-        echo "<title>Authenticate SSO</title>Authenticate SSO, please wait...";
-        return "<script>setTimeout(function() { window.location.href = '" . route('sso.login', $data['access_token']) . "'; }, 1e3);</script>";
+        if (! $response->successful() || empty($data['access_token'])) {
+            Log::error('SSO token exchange failed', ['status' => $response->status()]);
+
+            return redirect()->route('login')->with('error', 'SSO authentication failed, please try again');
+        }
+
+        $request->session()->put('sso_access_token', $data['access_token']);
+
+        return redirect()->route('sso.login');
     }
 
-    public function login(string $token)
+    public function login(Request $request)
     {
+        $token = $request->session()->pull('sso_access_token');
+
+        if (empty($token)) {
+            Log::error('SSO login called without token in session');
+
+            return redirect()->route('login')->with('error', 'SSO session expired, please try again');
+        }
+
         $user = UserService::getUser($token);
 
         if (empty($user)) {
-            Log::error("User not found");
+            Log::error('User not found');
+
             return redirect(route('login'))->with('error', 'The credential is invalid, please use another user');
         }
 
