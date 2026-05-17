@@ -3,6 +3,7 @@
 use App\Models\Akreditasi;
 use App\Models\Edpm;
 use App\Models\Pesantren;
+use App\Services\DeadlineService;
 use App\Services\ResubmissionService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -76,7 +77,20 @@ new #[Layout('layouts.app')] class extends Component
 
     public $rejectionStatus = [];
 
+    // Progress tracking (status 5 only)
+    public $asesor1NaProgress = null;
+    public $asesor1NkProgress = null;
+    public $asesor2NaProgress = null;
+
     public $activeTab = 'profil';
+
+    // Reassignment
+    public $reassignAsesorId = '';
+    public $isOverdue = false;
+    public $availableAsesorsForReassignment = [];
+
+    // Concurrent access handling
+    public string $akreditasiUpdatedAt = '';
 
     public $levels = [];
 
@@ -187,6 +201,59 @@ new #[Layout('layouts.app')] class extends Component
         // Load rejection status data
         $rejectionService = app(\App\Services\RejectionService::class);
         $this->rejectionStatus = $rejectionService->getRejectionStatus($this->akreditasi->id);
+
+        // Load progress data for status 5 (Assessment phase)
+        if ($this->akreditasi->status == 5) {
+            $progressTracker = app(\App\Services\ProgressTracker::class);
+            $progress = $progressTracker->getAkreditasiProgress($this->akreditasi->id);
+            $this->asesor1NaProgress = $progress['asesor1_na'];
+            $this->asesor1NkProgress = $progress['asesor1_nk'];
+            $this->asesor2NaProgress = $progress['asesor2_na'];
+        }
+
+        // Check overdue status for reassignment feature
+        $deadlineService = app(DeadlineService::class);
+        $primaryAssessment = $this->akreditasi->assessments->firstWhere('tipe', 1)
+            ?? $this->akreditasi->assessments->first();
+        if ($primaryAssessment) {
+            $this->isOverdue = $deadlineService->isOverdue($primaryAssessment);
+            if ($this->isOverdue) {
+                $this->availableAsesorsForReassignment = $deadlineService
+                    ->getAvailableAsesorsForReassignment($primaryAssessment)
+                    ->toArray();
+            }
+        }
+
+        // Concurrent access: store updated_at for optimistic locking
+        $this->akreditasiUpdatedAt = $this->akreditasi->updated_at->toISOString();
+    }
+
+    /**
+     * Poll for status changes (called by wire:poll).
+     */
+    public function checkForUpdates(): void
+    {
+        $fresh = Akreditasi::find($this->akreditasi->id);
+        if (! $fresh) {
+            return;
+        }
+
+        $freshUpdatedAt = $fresh->updated_at->toISOString();
+
+        if ($freshUpdatedAt !== $this->akreditasiUpdatedAt) {
+            $oldStatus = $this->akreditasi->status;
+            $this->akreditasi = $fresh;
+            $this->akreditasiUpdatedAt = $freshUpdatedAt;
+
+            if ($oldStatus !== $fresh->status) {
+                $this->dispatch('notification-received',
+                    type: 'warning',
+                    title: 'Status Diperbarui',
+                    message: 'Status akreditasi telah diperbarui oleh pengguna lain. Status saat ini: '
+                        . Akreditasi::getStatusLabel($fresh->status)
+                );
+            }
+        }
     }
 
     public function toggleLock()
@@ -397,6 +464,11 @@ new #[Layout('layouts.app')] class extends Component
     {
         Gate::authorize('finalize', $this->akreditasi);
 
+        if (in_array($this->akreditasi->status, [1, 2])) {
+            $this->dispatch('notification-received', type: 'warning', title: 'Tidak Dapat Diproses', message: 'Akreditasi telah diproses oleh admin lain.');
+            return;
+        }
+
         if (! $this->checkScores()) {
             return;
         }
@@ -411,23 +483,38 @@ new #[Layout('layouts.app')] class extends Component
         $results = $this->determineResults();
         $akreditasiService = app(\App\Services\AkreditasiService::class);
 
-        $akreditasiService->finalizeAkreditasi($this->akreditasi->id, [
-            'nomor_sk' => $this->nomor_sk,
-            'sertifikat_file' => $this->sertifikat_file,
-            'masa_berlaku' => $this->masa_berlaku,
-            'masa_berlaku_akhir' => $this->masa_berlaku_akhir,
-            'nilai' => $results['nilai'],
-            'peringkat' => $results['peringkat'],
-        ], true);
+        try {
+            $akreditasiService->finalizeAkreditasi($this->akreditasi->id, [
+                'nomor_sk' => $this->nomor_sk,
+                'sertifikat_file' => $this->sertifikat_file,
+                'masa_berlaku' => $this->masa_berlaku,
+                'masa_berlaku_akhir' => $this->masa_berlaku_akhir,
+                'nilai' => $results['nilai'],
+                'peringkat' => $results['peringkat'],
+            ], true, $this->akreditasiUpdatedAt);
 
-        session()->flash('status', 'Akreditasi berhasil disetujui.');
+            session()->flash('status', 'Akreditasi berhasil disetujui.');
 
-        return redirect()->route('admin.akreditasi');
+            return redirect()->route('admin.akreditasi');
+        } catch (\App\Exceptions\ConflictException $e) {
+            $this->akreditasi->refresh();
+            $this->akreditasiUpdatedAt = $this->akreditasi->updated_at->toISOString();
+            $this->dispatch('notification-received',
+                type: 'error',
+                title: 'Konflik Terdeteksi',
+                message: "Akreditasi telah dimodifikasi oleh pengguna lain. Status saat ini: {$e->getStatusLabel()}. Silakan muat ulang halaman untuk melihat data terbaru."
+            );
+        }
     }
 
     public function reject()
     {
         Gate::authorize('finalize', $this->akreditasi);
+
+        if (in_array($this->akreditasi->status, [1, 2])) {
+            $this->dispatch('notification-received', type: 'warning', title: 'Tidak Dapat Diproses', message: 'Akreditasi telah diproses oleh admin lain.');
+            return;
+        }
 
         if (! $this->checkScores()) {
             return;
@@ -447,16 +534,27 @@ new #[Layout('layouts.app')] class extends Component
         ]);
 
         $akreditasiService = app(\App\Services\AkreditasiService::class);
-        $result = $akreditasiService->finalizeAkreditasi($this->akreditasi->id, [
-            'rejection_categories' => $this->rejectionCategories,
-        ], false);
 
-        if ($result) {
-            session()->flash('status', 'Akreditasi telah ditolak.');
+        try {
+            $result = $akreditasiService->finalizeAkreditasi($this->akreditasi->id, [
+                'rejection_categories' => $this->rejectionCategories,
+            ], false, $this->akreditasiUpdatedAt);
 
-            return redirect()->route('admin.akreditasi');
-        } else {
-            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Penolakan gagal diproses.');
+            if ($result) {
+                session()->flash('status', 'Akreditasi telah ditolak.');
+
+                return redirect()->route('admin.akreditasi');
+            } else {
+                $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Penolakan gagal diproses.');
+            }
+        } catch (\App\Exceptions\ConflictException $e) {
+            $this->akreditasi->refresh();
+            $this->akreditasiUpdatedAt = $this->akreditasi->updated_at->toISOString();
+            $this->dispatch('notification-received',
+                type: 'error',
+                title: 'Konflik Terdeteksi',
+                message: "Akreditasi telah dimodifikasi oleh pengguna lain. Status saat ini: {$e->getStatusLabel()}. Silakan muat ulang halaman untuk melihat data terbaru."
+            );
         }
     }
 
@@ -505,6 +603,58 @@ new #[Layout('layouts.app')] class extends Component
         }
 
         return true;
+    }
+
+    public function openReassignModal(): void
+    {
+        $this->reassignAsesorId = '';
+        $this->resetErrorBag();
+        $this->dispatch('open-modal', 'reassign-asesor-modal');
+    }
+
+    public function reassignAsesor(): void
+    {
+        $this->validate([
+            'reassignAsesorId' => 'required|integer|exists:asesors,id',
+        ], [
+            'reassignAsesorId.required' => 'Pilih asesor pengganti.',
+            'reassignAsesorId.exists' => 'Asesor tidak ditemukan.',
+        ]);
+
+        $deadlineService = app(DeadlineService::class);
+
+        $primaryAssessment = $this->akreditasi->assessments->firstWhere('tipe', 1)
+            ?? $this->akreditasi->assessments->first();
+
+        if (! $primaryAssessment) {
+            session()->flash('error', 'Assessment tidak ditemukan.');
+            $this->dispatch('close-modal', 'reassign-asesor-modal');
+            return;
+        }
+
+        try {
+            $deadlineService->reassignAsesor($primaryAssessment, (int) $this->reassignAsesorId);
+
+            // Refresh akreditasi data
+            $akreditasiService = app(\App\Services\AkreditasiService::class);
+            $this->akreditasi = $akreditasiService->findAkreditasi(
+                $this->akreditasi->uuid,
+                ['user.pesantren', 'assessments.asesor.user', 'assessment1', 'assessment2']
+            );
+
+            // Refresh overdue status
+            $primaryAssessment->refresh();
+            $this->isOverdue = $deadlineService->isOverdue($primaryAssessment);
+            $this->availableAsesorsForReassignment = $this->isOverdue
+                ? $deadlineService->getAvailableAsesorsForReassignment($primaryAssessment)->toArray()
+                : [];
+
+            $this->dispatch('close-modal', 'reassign-asesor-modal');
+            session()->flash('status', 'Asesor berhasil diganti. Deadline baru telah ditetapkan.');
+        } catch (\DomainException $e) {
+            session()->flash('error', 'Gagal mengganti asesor: ' . $e->getMessage());
+            $this->dispatch('close-modal', 'reassign-asesor-modal');
+        }
     }
 }; ?>
 
@@ -555,7 +705,9 @@ new #[Layout('layouts.app')] class extends Component
     title="Detail Akreditasi"
     subtitle="{{ $pesantren?->nama_pesantren ?? $akreditasi->user->name }}"
     x-data="{ ...akreditasiManagement(), ...adminManagement() }"
+    wire:poll.10s="checkForUpdates"
 >
+    <x-akreditasi.presence-indicator :akreditasi-id="$akreditasi->id" />
     <x-slot:toolbar>
         <x-ui.status-badge :variant="$statusVariant">
             {{ Akreditasi::getStatusLabel($akreditasi->status) }}
@@ -567,11 +719,47 @@ new #[Layout('layouts.app')] class extends Component
             </x-ui.badge>
         @endif
 
+        @if($isOverdue)
+            <x-ui.badge variant="danger">
+                <x-ui.icon name="warning-2" class="fs-6 me-1" />
+                Terlambat
+            </x-ui.badge>
+        @endif
+
+        @if(in_array($akreditasi->status, [4, 5]))
+            <x-ui.button
+                type="button"
+                wire:click="openReassignModal"
+                :variant="$isOverdue ? 'danger' : 'light'"
+                :disabled="!$isOverdue"
+                size="sm"
+                data-testid="reassign-asesor-btn"
+            >
+                <x-ui.icon name="arrows-circle" class="fs-4 me-1" />
+                Ganti Asesor
+            </x-ui.button>
+        @endif
+
         <x-ui.button :href="route('admin.akreditasi')" variant="light">
             <x-ui.icon name="exit-right" class="fs-4 me-1" />
             Kembali
         </x-ui.button>
     </x-slot:toolbar>
+
+    {{-- Flash messages --}}
+    @if (session('status'))
+        <div class="alert alert-success d-flex align-items-center mb-6" role="alert">
+            <x-ui.icon name="check-circle" class="fs-4 me-3 text-success" />
+            <div>{{ session('status') }}</div>
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert alert-danger d-flex align-items-center mb-6" role="alert">
+            <x-ui.icon name="warning-2" class="fs-4 me-3 text-danger" />
+            <div>{{ session('error') }}</div>
+        </div>
+    @endif
 
     <div class="row g-5 mb-6">
         <div class="col-lg-4">
@@ -710,6 +898,7 @@ new #[Layout('layouts.app')] class extends Component
                 @if(count($chainTimeline) > 0)
                     <x-ui.tab wire:click="setTab('riwayat')" :active="$activeTab === 'riwayat'">Riwayat Pengajuan</x-ui.tab>
                 @endif
+                <x-ui.tab wire:click="setTab('audit_trail')" :active="$activeTab === 'audit_trail'">Audit Trail</x-ui.tab>
             </x-ui.tabs>
         </div>
 
@@ -1045,6 +1234,70 @@ new #[Layout('layouts.app')] class extends Component
                         </div>
                     @endif
 
+                    {{-- Task 4.2: Progress indicators for status 5 (Assessment phase) --}}
+                    @if ($akreditasi->status == 5 && ($asesor1NaProgress || $asesor2NaProgress))
+                        <x-ui.section-card title="Progress Penilaian Asesor" subtitle="Kelengkapan pengisian butir oleh masing-masing asesor.">
+                            <div class="p-6">
+                                <div class="row g-5">
+                                    @if ($asesor1NaProgress)
+                                        @php $c1Na = $asesor1NaProgress['percentage'] >= 100 ? 'green' : ($asesor1NaProgress['percentage'] >= 50 ? 'amber' : 'red'); @endphp
+                                        <div class="col-lg-4">
+                                            <x-progress-indicator
+                                                :filled="$asesor1NaProgress['filled']"
+                                                :total="$asesor1NaProgress['total']"
+                                                :percentage="$asesor1NaProgress['percentage']"
+                                                label="NA1 (Asesor 1)"
+                                                :color="$c1Na"
+                                            />
+                                        </div>
+                                    @endif
+                                    @if ($asesor1NkProgress)
+                                        @php $c1Nk = $asesor1NkProgress['percentage'] >= 100 ? 'green' : ($asesor1NkProgress['percentage'] >= 50 ? 'amber' : 'red'); @endphp
+                                        <div class="col-lg-4">
+                                            <x-progress-indicator
+                                                :filled="$asesor1NkProgress['filled']"
+                                                :total="$asesor1NkProgress['total']"
+                                                :percentage="$asesor1NkProgress['percentage']"
+                                                label="NK (Asesor 1)"
+                                                :color="$c1Nk"
+                                            />
+                                        </div>
+                                    @endif
+                                    @if ($asesor2NaProgress)
+                                        @php $c2Na = $asesor2NaProgress['percentage'] >= 100 ? 'green' : ($asesor2NaProgress['percentage'] >= 50 ? 'amber' : 'red'); @endphp
+                                        <div class="col-lg-4">
+                                            <x-progress-indicator
+                                                :filled="$asesor2NaProgress['filled']"
+                                                :total="$asesor2NaProgress['total']"
+                                                :percentage="$asesor2NaProgress['percentage']"
+                                                label="NA2 (Asesor 2)"
+                                                :color="$c2Na"
+                                            />
+                                        </div>
+                                    @endif
+                                </div>
+
+                                {{-- Blocking badges --}}
+                                @php
+                                    $blockers = [];
+                                    if ($asesor1NaProgress && $asesor1NaProgress['percentage'] < 100) $blockers[] = 'Menunggu Asesor 1 (NA1)';
+                                    if ($asesor1NkProgress && $asesor1NkProgress['percentage'] < 100) $blockers[] = 'Menunggu Asesor 1 (NK)';
+                                    if ($asesor2NaProgress && $asesor2NaProgress['percentage'] < 100) $blockers[] = 'Menunggu Asesor 2 (NA2)';
+                                @endphp
+                                @if (!empty($blockers))
+                                    <div class="d-flex flex-wrap gap-2 mt-4">
+                                        @foreach ($blockers as $blocker)
+                                            <x-ui.badge variant="warning">
+                                                <x-ui.icon name="timer" class="fs-7 me-1" />
+                                                {{ $blocker }}
+                                            </x-ui.badge>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        </x-ui.section-card>
+                    @endif
+
                     <x-ui.section-card title="Nilai Akhir" subtitle="Perbandingan NA asesor, NK, NV admin, catatan butir, dan rekomendasi.">
                         <div class="p-6">
                             <x-ui.simple-table tableClass="spm-score-table">
@@ -1250,6 +1503,14 @@ new #[Layout('layouts.app')] class extends Component
                         <div class="row g-6">
                             <div class="col-lg-6">
                                 <x-ui.section-card title="Setujui Akreditasi" subtitle="Lengkapi SK dan sertifikat final.">
+                                    @if(in_array($akreditasi->status, [1, 2]))
+                                        <div class="p-6">
+                                            <div class="alert alert-warning d-flex align-items-center gap-3">
+                                                <x-ui.icon name="warning-2" class="fs-4" />
+                                                <span>Akreditasi telah diproses oleh admin lain. Muat ulang halaman untuk melihat status terbaru.</span>
+                                            </div>
+                                        </div>
+                                    @else
                                     <form @submit.prevent="confirmApprove($wire)" class="p-6">
                                         <x-ui.form-field label="Nomor SK" for="nomor_sk" :error="$errors->get('nomor_sk')">
                                             <x-ui.input model="nomor_sk" id="nomor_sk" placeholder="Masukkan nomor SK resmi..." required />
@@ -1287,11 +1548,20 @@ new #[Layout('layouts.app')] class extends Component
                                             </x-ui.button>
                                         </div>
                                     </form>
+                                    @endif
                                 </x-ui.section-card>
                             </div>
 
                             <div class="col-lg-6">
                                 <x-ui.section-card title="Tolak Akreditasi" subtitle="Pilih kategori dan berikan penjelasan per kategori.">
+                                    @if(in_array($akreditasi->status, [1, 2]))
+                                        <div class="p-6">
+                                            <div class="alert alert-warning d-flex align-items-center gap-3">
+                                                <x-ui.icon name="warning-2" class="fs-4" />
+                                                <span>Akreditasi telah diproses oleh admin lain. Muat ulang halaman untuk melihat status terbaru.</span>
+                                            </div>
+                                        </div>
+                                    @else
                                     <form wire:submit="reject" class="p-6">
                                         <div class="mb-4">
                                             <div class="spm-detail-label mb-2">Kategori Penolakan <span class="text-danger">*</span></div>
@@ -1343,6 +1613,7 @@ new #[Layout('layouts.app')] class extends Component
                                             </x-ui.button>
                                         </div>
                                     </form>
+                                    @endif
                                 </x-ui.section-card>
                             </div>
                         </div>
@@ -1411,6 +1682,10 @@ new #[Layout('layouts.app')] class extends Component
                     </x-ui.section-card>
                 </div>
             @endif
+
+            @if($activeTab === 'audit_trail')
+                <livewire:pages.admin.audit-timeline :akreditasiId="$akreditasi->id" />
+            @endif
         </div>
 
         <x-ui.modal name="visitasi-edit-modal" focusable>
@@ -1449,4 +1724,50 @@ new #[Layout('layouts.app')] class extends Component
             </form>
         </x-ui.modal>
     </x-ui.card>
+
+    {{-- Reassign Asesor Modal --}}
+    <x-ui.modal name="reassign-asesor-modal" focusable>
+        <form wire:submit.prevent="reassignAsesor">
+            <x-ui.modal-header
+                title="Ganti Asesor"
+                subtitle="Pilih asesor pengganti untuk akreditasi yang telah melewati deadline."
+                icon="arrows-circle"
+            />
+
+            <x-ui.modal-body>
+                <div class="notice d-flex bg-light-danger rounded border-danger border border-dashed p-4 mb-6">
+                    <x-ui.icon name="warning-2" class="fs-2 text-danger me-4" />
+                    <div class="d-flex flex-column">
+                        <h4 class="mb-1 text-danger">Akreditasi Terlambat</h4>
+                        <span class="fs-7 text-gray-700">Asesor saat ini belum menyelesaikan tugasnya setelah melewati deadline. Pilih asesor pengganti untuk melanjutkan proses akreditasi.</span>
+                    </div>
+                </div>
+
+                <x-ui.form-field label="Asesor Pengganti" for="reassignAsesorId" :error="$errors->get('reassignAsesorId')">
+                    <x-ui.select model="reassignAsesorId" id="reassignAsesorId" placeholder="Pilih Asesor Pengganti">
+                        @foreach ($availableAsesorsForReassignment as $asesor)
+                            <option value="{{ $asesor['id'] }}">
+                                {{ $asesor['nama_dengan_gelar'] ?? ($asesor['user']['name'] ?? 'Asesor #' . $asesor['id']) }}
+                            </option>
+                        @endforeach
+                    </x-ui.select>
+                </x-ui.form-field>
+
+                <div class="text-muted fs-7 mt-3">
+                    <x-ui.icon name="information-5" class="fs-6 me-1" />
+                    Setelah penggantian, deadline baru akan ditetapkan berdasarkan konfigurasi sistem.
+                </div>
+            </x-ui.modal-body>
+
+            <x-ui.modal-footer>
+                <x-ui.button type="button" variant="light" x-on:click="$dispatch('close')">
+                    Batal
+                </x-ui.button>
+                <x-ui.button type="submit" variant="danger" wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="reassignAsesor">Ganti Asesor</span>
+                    <span wire:loading wire:target="reassignAsesor">Memproses...</span>
+                </x-ui.button>
+            </x-ui.modal-footer>
+        </form>
+    </x-ui.modal>
 </x-ui.page>

@@ -47,7 +47,9 @@
     title="Visitasi Akreditasi"
     subtitle="{{ $pesantren?->nama_pesantren ?? $akreditasi->user->name }}"
     x-data="{ ...akreditasiManagement(), ...asesorManagement() }"
+    wire:poll.10s="checkForUpdates"
 >
+    <x-akreditasi.presence-indicator :akreditasi-id="$akreditasi->id" />
     <x-slot:toolbar>
         <x-ui.status-badge :variant="$statusVariant">
             {{ Akreditasi::getStatusLabel($akreditasi->status) }}
@@ -319,6 +321,94 @@
                         </div>
                     @endif
 
+                    {{-- Progress Indicators (status 4 or 5) --}}
+                    @if (($akreditasi->status == 4 || $akreditasi->status == 5) && ($asesor1NaProgress || $asesor2NaProgress))
+                        <x-ui.section-card title="Progress Penilaian" subtitle="Kelengkapan pengisian butir oleh masing-masing asesor.">
+                            <div class="p-6">
+                                <div class="row g-5">
+                                    @if ($asesorTipe == 1)
+                                        {{-- Asesor 1 sees their own NA and NK progress --}}
+                                        @if ($asesor1NaProgress)
+                                            @php $color1Na = $asesor1NaProgress['percentage'] >= 100 ? 'green' : ($asesor1NaProgress['percentage'] >= 50 ? 'amber' : 'red'); @endphp
+                                            <div class="col-lg-4">
+                                                <x-progress-indicator
+                                                    :filled="$asesor1NaProgress['filled']"
+                                                    :total="$asesor1NaProgress['total']"
+                                                    :percentage="$asesor1NaProgress['percentage']"
+                                                    label="NA Anda (Asesor 1)"
+                                                    :color="$color1Na"
+                                                />
+                                            </div>
+                                        @endif
+                                        @if ($asesor1NkProgress)
+                                            @php $color1Nk = $asesor1NkProgress['percentage'] >= 100 ? 'green' : ($asesor1NkProgress['percentage'] >= 50 ? 'amber' : 'red'); @endphp
+                                            <div class="col-lg-4">
+                                                <x-progress-indicator
+                                                    :filled="$asesor1NkProgress['filled']"
+                                                    :total="$asesor1NkProgress['total']"
+                                                    :percentage="$asesor1NkProgress['percentage']"
+                                                    label="NK Anda (Asesor 1)"
+                                                    :color="$color1Nk"
+                                                />
+                                            </div>
+                                        @endif
+                                        @if ($asesor2NaProgress)
+                                            @php $color2Na = $asesor2NaProgress['percentage'] >= 100 ? 'green' : ($asesor2NaProgress['percentage'] >= 50 ? 'amber' : 'red'); @endphp
+                                            <div class="col-lg-4">
+                                                <x-progress-indicator
+                                                    :filled="$asesor2NaProgress['filled']"
+                                                    :total="$asesor2NaProgress['total']"
+                                                    :percentage="$asesor2NaProgress['percentage']"
+                                                    label="NA Asesor 2"
+                                                    :color="$color2Na"
+                                                />
+                                            </div>
+                                        @endif
+
+                                        {{-- Task 3.5: Blocking message when Asesor 2 is incomplete --}}
+                                        @if ($asesor2NaProgress && $asesor2NaProgress['percentage'] < 100)
+                                            <div class="col-12">
+                                                <div class="alert alert-warning d-flex align-items-center gap-3 mb-0">
+                                                    <x-ui.icon name="information-2" class="fs-2 text-warning flex-shrink-0" />
+                                                    <div>
+                                                        <div class="fw-bold">Menunggu Asesor 2</div>
+                                                        <div class="fs-8">Asesor 2 belum menyelesaikan penilaian NA2 ({{ $asesor2NaProgress['filled'] }}/{{ $asesor2NaProgress['total'] }} butir, {{ number_format($asesor2NaProgress['percentage'], 0) }}%). Finalisasi tidak dapat dilakukan sampai Asesor 2 menyelesaikan penilaiannya.</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @else
+                                        {{-- Asesor 2 sees their own NA progress --}}
+                                        @if ($asesor2NaProgress)
+                                            @php $color2Na = $asesor2NaProgress['percentage'] >= 100 ? 'green' : ($asesor2NaProgress['percentage'] >= 50 ? 'amber' : 'red'); @endphp
+                                            <div class="col-lg-6">
+                                                <x-progress-indicator
+                                                    :filled="$asesor2NaProgress['filled']"
+                                                    :total="$asesor2NaProgress['total']"
+                                                    :percentage="$asesor2NaProgress['percentage']"
+                                                    label="NA Anda (Asesor 2)"
+                                                    :color="$color2Na"
+                                                />
+                                            </div>
+                                        @endif
+                                        @if ($asesor1NaProgress)
+                                            @php $color1Na = $asesor1NaProgress['percentage'] >= 100 ? 'green' : ($asesor1NaProgress['percentage'] >= 50 ? 'amber' : 'red'); @endphp
+                                            <div class="col-lg-6">
+                                                <x-progress-indicator
+                                                    :filled="$asesor1NaProgress['filled']"
+                                                    :total="$asesor1NaProgress['total']"
+                                                    :percentage="$asesor1NaProgress['percentage']"
+                                                    label="NA Asesor 1"
+                                                    :color="$color1Na"
+                                                />
+                                            </div>
+                                        @endif
+                                    @endif
+                                </div>
+                            </div>
+                        </x-ui.section-card>
+                    @endif
+
                     <form wire:submit="saveAsesorEdpm" class="d-flex flex-column gap-6">
                         <x-ui.section-card title="Penilaian Asesor" subtitle="Isi NA, NK, dan catatan butir sesuai peran asesor.">
                             <div class="p-6">
@@ -438,6 +528,56 @@
                         @endif
                     </form>
 
+                    {{-- Task 6.1 & 6.2: Dismissible finalization error alert --}}
+                    <div
+                        x-data="{ show: false, errorType: '', details: null }"
+                        x-on:finalization-failed.window="
+                            errorType = $event.detail.error;
+                            details = $event.detail.details;
+                            show = true;
+                            $nextTick(() => $el.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+                        "
+                        x-show="show"
+                        x-transition
+                        class="alert alert-danger d-flex align-items-start gap-3"
+                        role="alert"
+                    >
+                        <x-ui.icon name="cross-circle" class="fs-2 text-danger flex-shrink-0 mt-1" />
+                        <div class="flex-grow-1">
+                            <div class="fw-bold mb-1">Finalisasi Gagal</div>
+                            <div class="fs-8">
+                                <template x-if="errorType === 'asesor2_incomplete'">
+                                    <span>
+                                        Asesor 2 belum menyelesaikan penilaian NA2
+                                        <template x-if="details">
+                                            (<span x-text="details.filled"></span>/<span x-text="details.total"></span> butir, <span x-text="Math.round(details.percentage)"></span>%)
+                                        </template>.
+                                    </span>
+                                </template>
+                                <template x-if="errorType === 'asesor1_na_incomplete'">
+                                    <span>
+                                        Data NA1 Anda belum lengkap
+                                        <template x-if="details">
+                                            (<span x-text="details.filled"></span>/<span x-text="details.total"></span> butir)
+                                        </template>.
+                                    </span>
+                                </template>
+                                <template x-if="errorType === 'asesor1_nk_incomplete'">
+                                    <span>
+                                        Data NK Anda belum lengkap
+                                        <template x-if="details">
+                                            (<span x-text="details.filled"></span>/<span x-text="details.total"></span> butir)
+                                        </template>.
+                                    </span>
+                                </template>
+                                <template x-if="!['asesor2_incomplete','asesor1_na_incomplete','asesor1_nk_incomplete'].includes(errorType)">
+                                    <span>Terjadi kesalahan saat finalisasi. Silakan coba lagi.</span>
+                                </template>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" @click="show = false" aria-label="Tutup"></button>
+                    </div>
+
                     <div class="spm-action-panel d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
                         <div>
                             <h3 class="spm-card-title mb-1">Evaluasi Asesor</h3>
@@ -452,9 +592,17 @@
                                 @endif
 
                                 @if($asesorTipe == 1)
-                                    <x-ui.button type="button" @click="confirmVerification($wire)" wire:loading.attr="disabled" variant="primary">
-                                        Selesaikan & Verifikasi
-                                    </x-ui.button>
+                                    @if(in_array($akreditasi->status, [1, 2, 3]))
+                                        <span title="Akreditasi telah diproses oleh admin lain">
+                                            <x-ui.button type="button" variant="primary" :disabled="true">
+                                                Selesaikan & Verifikasi
+                                            </x-ui.button>
+                                        </span>
+                                    @else
+                                        <x-ui.button type="button" @click="confirmVerification($wire)" wire:loading.attr="disabled" variant="primary">
+                                            Selesaikan & Verifikasi
+                                        </x-ui.button>
+                                    @endif
                                 @else
                                     <x-ui.button type="button" @click="confirmAsesor2Final($wire)" wire:loading.attr="disabled" variant="primary">
                                         Selesaikan Final
