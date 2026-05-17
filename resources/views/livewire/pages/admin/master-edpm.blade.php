@@ -182,8 +182,8 @@ new #[Layout('layouts.app')] class extends Component {
         @php
             $filteredKomponens = $komponens->filter(function ($komponen) use ($activeTab) {
                 return $activeTab === 'ipr'
-                    ? $komponen->nama === 'INDIKATOR PEMENUHAN RELATIF'
-                    : $komponen->nama !== 'INDIKATOR PEMENUHAN RELATIF';
+                    ? (bool) $komponen->ipr
+                    : ! (bool) $komponen->ipr;
             });
         @endphp
 

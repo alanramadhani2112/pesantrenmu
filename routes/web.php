@@ -73,6 +73,12 @@ Route::middleware(['auth', 'verified', 'role:admin'])
 
         Volt::route('pesantren/{uuid}', 'pages.admin.pesantren.detail')
             ->name('pesantren.detail');
+
+        Route::get('failed-notifications', \App\Livewire\Pages\Admin\FailedNotificationDashboard::class)
+            ->name('failed-notifications');
+
+        Volt::route('trash', 'pages.admin.trash')
+            ->name('trash');
     });
 
 /*

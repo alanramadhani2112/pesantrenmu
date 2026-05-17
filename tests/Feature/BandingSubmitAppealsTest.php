@@ -113,6 +113,8 @@ class BandingSubmitAppealsTest extends TestCase
         $user = $data['user'];
         $akreditasi = $data['akreditasi'];
 
+        $this->actingAs($user);
+
         $alasan = 'Kami merasa penilaian tidak adil dan meminta peninjauan ulang.';
 
         $result = $this->pesantrenService->submitAppeals(
@@ -138,6 +140,37 @@ class BandingSubmitAppealsTest extends TestCase
     }
 
     /**
+     * Task 11.3: submitAppeals fails (returns false) when alasan is shorter than 10 characters.
+     *
+     * Requirements: 2.15
+     */
+    public function test_pesantren_banding_requires_alasan_min_10_chars(): void
+    {
+        $data = $this->createPesantrenWithRejectedAkreditasi();
+        $user = $data['user'];
+        $akreditasi = $data['akreditasi'];
+
+        // Alasan with only 9 characters — below the minimum
+        $shortAlasan = 'Terlalu!.'; // 9 chars
+        $this->assertLessThan(10, mb_strlen(trim($shortAlasan)));
+
+        $result = $this->pesantrenService->submitAppeals(
+            $akreditasi->id,
+            $user->id,
+            $shortAlasan
+        );
+
+        $this->assertFalse($result);
+
+        // Status must remain at 2 (Ditolak)
+        $akreditasi->refresh();
+        $this->assertEquals(2, (int) $akreditasi->status);
+
+        // No banding record should have been created
+        $this->assertDatabaseMissing('bandings', ['akreditasi_id' => $akreditasi->id]);
+    }
+
+    /**
      * Task 6.5: submitAppeals still changes akreditasi status from 2 to 3 (regression test).
      */
     public function test_submit_appeals_changes_akreditasi_status_from_2_to_3(): void
@@ -145,6 +178,8 @@ class BandingSubmitAppealsTest extends TestCase
         $data = $this->createPesantrenWithRejectedAkreditasi();
         $user = $data['user'];
         $akreditasi = $data['akreditasi'];
+
+        $this->actingAs($user);
 
         $alasan = 'Dokumen kami belum diperiksa dengan benar oleh asesor.';
 

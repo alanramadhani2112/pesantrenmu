@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Production hardening (audit fix PR-6).
+ * Production hardening (audit fix PR-6, extended PR-7).
  *
  * Menambahkan security headers dasar ke setiap response HTML.
  * Headers di-skip untuk asset / file binary supaya download kartu kendali,
@@ -20,11 +20,14 @@ use Symfony\Component\HttpFoundation\Response;
  * dulu sebelum CSP bisa diaktifkan tanpa breakage).
  *
  * Headers:
- * - Strict-Transport-Security : paksa HTTPS (hanya untuk request HTTPS)
- * - X-Content-Type-Options    : cegah MIME sniffing
- * - X-Frame-Options           : cegah clickjacking via <iframe>
- * - Referrer-Policy           : batasi info referrer ke cross-origin
- * - Permissions-Policy        : matikan API browser yang tidak dipakai
+ * - Strict-Transport-Security      : paksa HTTPS (hanya untuk request HTTPS)
+ * - X-Content-Type-Options         : cegah MIME sniffing
+ * - X-Frame-Options                : cegah clickjacking via <iframe>
+ * - X-XSS-Protection               : nonaktifkan XSS auditor lama (modern best practice)
+ * - Referrer-Policy                : batasi info referrer ke cross-origin
+ * - Permissions-Policy             : matikan API browser yang tidak dipakai
+ * - Cross-Origin-Opener-Policy     : isolasi browsing context dari popup cross-origin
+ * - Cross-Origin-Resource-Policy   : cegah embedding resource oleh origin lain
  */
 class SecurityHeaders
 {
@@ -49,11 +52,18 @@ class SecurityHeaders
 
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
+        // Nonaktifkan XSS auditor browser lama — modern browsers sudah tidak pakai,
+        // dan mode=block justru bisa dieksploitasi untuk data exfiltration.
+        $response->headers->set('X-XSS-Protection', '0');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set(
             'Permissions-Policy',
-            'camera=(), microphone=(), geolocation=(), payment=()'
+            'camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=()'
         );
+        // Isolasi window/tab dari cross-origin popup (mitigasi Spectre + XS-Leaks)
+        $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
+        // Cegah resource di-embed oleh origin lain tanpa izin eksplisit
+        $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');
 
         return $response;
     }

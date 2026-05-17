@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Akreditasi;
+use App\Observers\AkreditasiObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
 
@@ -64,5 +66,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // URL::forceScheme('https');
+
+        Akreditasi::observe(AkreditasiObserver::class);
     }
 }
