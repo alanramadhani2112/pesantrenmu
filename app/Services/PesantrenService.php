@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Pesantren;
 use App\Models\User;
 use App\Repositories\Contracts\PesantrenRepositoryInterface;
+use App\Services\AuditTrailService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -22,18 +23,22 @@ class PesantrenService
 
     protected $sdmRepository;
 
+    protected AuditTrailService $auditTrailService;
+
     public function __construct(
         PesantrenRepositoryInterface $pesantrenRepository,
         \App\Repositories\Contracts\AkreditasiRepositoryInterface $akreditasiRepository,
         \App\Repositories\Contracts\EdpmRepositoryInterface $edpmRepository,
         \App\Repositories\Contracts\IpmRepositoryInterface $ipmRepository,
-        \App\Repositories\Contracts\SdmRepositoryInterface $sdmRepository
+        \App\Repositories\Contracts\SdmRepositoryInterface $sdmRepository,
+        AuditTrailService $auditTrailService
     ) {
         $this->pesantrenRepository = $pesantrenRepository;
         $this->akreditasiRepository = $akreditasiRepository;
         $this->edpmRepository = $edpmRepository;
         $this->ipmRepository = $ipmRepository;
         $this->sdmRepository = $sdmRepository;
+        $this->auditTrailService = $auditTrailService;
     }
 
     public function getPaginatedData(?string $search = null, ?string $filterStatus = '', ?string $filterAkreditasi = '', int $perPage = 10, string $sortField = 'name', bool $sortAsc = true): LengthAwarePaginator
@@ -270,14 +275,27 @@ class PesantrenService
             return false;
         }
 
-        return DB::transaction(function () use ($akreditasi, $userId, $alasan) {
+        $result = DB::transaction(function () use ($akreditasi, $userId, $alasan) {
             $akreditasi->update(['status' => 3, 'catatan' => $alasan]);
 
             // Create banding record
             $bandingService = app(BandingService::class);
             $bandingService->createBanding($akreditasi->id, $userId, $alasan);
 
-            // Notify Admin
+            // Audit trail: log banding submission
+            $this->auditTrailService->log(
+                akreditasiId: $akreditasi->id,
+                actionType: 'banding_submitted',
+                metadata: [
+                    'alasan' => $alasan,
+                ]
+            );
+
+            return true;
+        });
+
+        // Dispatch notifications AFTER transaction commits (non-blocking)
+        if ($result) {
             $admins = User::whereHas('role', fn ($q) => $q->where('id', 1))->get();
             $user = User::find($userId);
             \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\AkreditasiNotification(
@@ -286,9 +304,9 @@ class PesantrenService
                 'Pesantren '.($user->pesantren->nama_pesantren ?? $user->name).' telah mengajukan banding akreditasi.',
                 route('admin.akreditasi')
             ));
+        }
 
-            return true;
-        });
+        return (bool) $result;
     }
 
     public function getProfile(int $userId): Pesantren
@@ -642,10 +660,14 @@ class PesantrenService
             return false;
         }
 
-        return DB::transaction(function () use ($akreditasi, $filePath) {
+        $result = DB::transaction(function () use ($akreditasi, $filePath) {
             $akreditasi->update(['kartu_kendali' => $filePath]);
 
-            // Notify Admin
+            return true;
+        });
+
+        // Dispatch notifications AFTER transaction commits (non-blocking)
+        if ($result) {
             $admins = \App\Models\User::whereHas('role', fn ($q) => $q->where('id', 1))->get();
             \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\AkreditasiNotification(
                 'kartu_kendali_diunggah',
@@ -653,8 +675,8 @@ class PesantrenService
                 'Pesantren '.($akreditasi->user->pesantren->nama_pesantren ?? $akreditasi->user->name).' telah mengunggah kembali Kartu Kendali.',
                 route('admin.akreditasi-detail', $akreditasi->uuid)
             ));
+        }
 
-            return true;
-        });
+        return (bool) $result;
     }
 }

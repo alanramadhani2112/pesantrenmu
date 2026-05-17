@@ -4,6 +4,7 @@ use App\Models\Akreditasi;
 use App\Models\Asesor;
 use App\Models\Assessment;
 use App\Models\AkreditasiCatatan;
+use App\Services\DeadlineService;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use Illuminate\Support\Facades\Auth;
@@ -97,6 +98,28 @@ new #[Layout('layouts.app')] class extends Component {
     public function getAkreditasisProperty()
     {
         $akreditasiService = app(\App\Services\AkreditasiService::class);
+
+        if ($this->statusFilter === 'overdue') {
+            // For overdue filter, get all assessment/visitasi phase items and filter by overdue
+            $deadlineService = app(DeadlineService::class);
+            $overdueIds = $deadlineService->getOverdueAkreditasi()->pluck('id')->toArray();
+
+            $query = \App\Models\Akreditasi::with(['user.pesantren', 'assessments', 'catatans.user', 'assessment1'])
+                ->whereIn('id', $overdueIds);
+
+            if ($this->search) {
+                $query->whereHas('user', function ($q) {
+                    $q->where('name', 'like', '%' . $this->search . '%')
+                        ->orWhereHas('pesantren', function ($q2) {
+                            $q2->where('nama_pesantren', 'like', '%' . $this->search . '%');
+                        });
+                });
+            }
+
+            return $query->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc')
+                ->paginate($this->perPage);
+        }
+
         return $akreditasiService->getPaginatedAkreditasis(
             $this->statusFilter,
             $this->search,
@@ -122,6 +145,28 @@ new #[Layout('layouts.app')] class extends Component {
     {
         $akreditasiService = app(\App\Services\AkreditasiService::class);
         return $akreditasiService->getStatusCounts()['visitasi'];
+    }
+
+    public function getCountOverdueProperty()
+    {
+        $akreditasiService = app(\App\Services\AkreditasiService::class);
+        return $akreditasiService->getStatusCounts()['overdue'];
+    }
+
+    public function getOverdueMapProperty(): array
+    {
+        $deadlineService = app(DeadlineService::class);
+        $overdueAkreditasi = $deadlineService->getOverdueAkreditasi();
+        $map = [];
+        foreach ($overdueAkreditasi as $akreditasi) {
+            // Find the primary assessment (tipe=1) for days overdue calculation
+            $primaryAssessment = $akreditasi->assessments->firstWhere('tipe', 1)
+                ?? $akreditasi->assessments->first();
+            if ($primaryAssessment) {
+                $map[$akreditasi->id] = $deadlineService->getDaysOverdue($primaryAssessment);
+            }
+        }
+        return $map;
     }
 
     public function getAsesorsProperty()
@@ -214,6 +259,9 @@ new #[Layout('layouts.app')] class extends Component {
         <x-slot name="toolbar">
             <x-ui.badge variant="primary">Admin</x-ui.badge>
             <x-ui.badge variant="warning">Aktif: {{ $this->countPengajuan + $this->countAssessment + $this->countVisitasi }}</x-ui.badge>
+            @if($this->countOverdue > 0)
+                <x-ui.badge variant="danger">Terlambat: {{ $this->countOverdue }}</x-ui.badge>
+            @endif
         </x-slot>
 
         <div class="row g-6 mb-6">
@@ -310,12 +358,17 @@ new #[Layout('layouts.app')] class extends Component {
                         Pengajuan ({{ $this->countPengajuan }})
                     </x-ui.button>
 
-            <x-ui.button type="button" wire:click="$set('statusFilter', 'assessment')" :variant="$statusFilter === 'assessment' ? 'primary' : 'light'" size="sm">
+                    <x-ui.button type="button" wire:click="$set('statusFilter', 'assessment')" :variant="$statusFilter === 'assessment' ? 'primary' : 'light'" size="sm">
                         Penilaian ({{ $this->countAssessment }})
                     </x-ui.button>
 
                     <x-ui.button type="button" wire:click="$set('statusFilter', 'visitasi')" :variant="$statusFilter === 'visitasi' ? 'primary' : 'light'" size="sm">
                         Visitasi ({{ $this->countVisitasi }})
+                    </x-ui.button>
+
+                    <x-ui.button type="button" wire:click="$set('statusFilter', 'overdue')" :variant="$statusFilter === 'overdue' ? 'danger' : 'light-danger'" size="sm">
+                        <x-ui.icon name="warning-2" class="fs-6 me-1" />
+                        Terlambat ({{ $this->countOverdue }})
                     </x-ui.button>
                 </div>
 
@@ -411,7 +464,29 @@ new #[Layout('layouts.app')] class extends Component {
                     </td>
 
                     <td class="text-center">
-                        <x-ui.badge :variant="$statusVariant">{{ $statusLabel }}</x-ui.badge>
+                        <div class="d-flex flex-column align-items-center gap-1">
+                            <x-ui.badge :variant="$statusVariant">{{ $statusLabel }}</x-ui.badge>
+                            @if ($item->status == 5)
+                                @php
+                                    $progressTracker = app(\App\Services\ProgressTracker::class);
+                                    $blockingStatus = $progressTracker->getBlockingStatus($item->id);
+                                @endphp
+                                @if ($blockingStatus['blocked'])
+                                    @foreach ($blockingStatus['blockers'] as $blocker)
+                                        @if ($blocker === 'asesor2_na')
+                                            <x-ui.badge variant="warning" class="fs-9">Menunggu Asesor 2</x-ui.badge>
+                                        @elseif ($blocker === 'asesor1_na' || $blocker === 'asesor1_nk')
+                                            <x-ui.badge variant="warning" class="fs-9">Menunggu Asesor 1</x-ui.badge>
+                                        @endif
+                                    @endforeach
+                                @endif
+                            @endif
+                            @if (isset($this->overdueMap[$item->id]))
+                                <x-ui.badge variant="danger" class="fs-9">
+                                    Terlambat {{ $this->overdueMap[$item->id] }} hari
+                                </x-ui.badge>
+                            @endif
+                        </div>
                     </td>
 
                     <td>

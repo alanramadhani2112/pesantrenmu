@@ -38,6 +38,8 @@
             if ($isAdmin) {
                 $badgeCounts['akreditasi_admin'] = \App\Models\Akreditasi::where('status', 6)->count();
                 $badgeCounts['banding'] = \App\Models\Banding::where('status', 'pending')->count();
+                $badgeCounts['failed_notifications'] = \App\Models\FailedNotification::where('status', 'pending')->count();
+                $badgeCounts['trash'] = \App\Models\Akreditasi::onlyTrashed()->count();
             } elseif ($isAsesor) {
                 $asesor = $currentUser->asesor;
                 if ($asesor) {

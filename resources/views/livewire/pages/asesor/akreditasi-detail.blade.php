@@ -575,7 +575,7 @@
                                 </template>
                             </div>
                         </div>
-                        <button type="button" class="btn-close" @click="show = false" aria-label="Tutup"></button>
+                        <x-ui.button unstyled type="button" class="btn-close" @click="show = false" aria-label="Tutup"></x-ui.button>
                     </div>
 
                     <div class="spm-action-panel d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">

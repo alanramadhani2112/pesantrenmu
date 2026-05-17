@@ -15,6 +15,15 @@ class Assessment extends Model
         'tipe',
         'tanggal_mulai',
         'tanggal_berakhir',
+        'last_reminder_sent_at',
+        'last_escalation_sent_at',
+    ];
+
+    protected $casts = [
+        'tanggal_mulai' => 'datetime',
+        'tanggal_berakhir' => 'datetime',
+        'last_reminder_sent_at' => 'datetime',
+        'last_escalation_sent_at' => 'datetime',
     ];
 
     public function akreditasi()

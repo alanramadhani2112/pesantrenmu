@@ -78,7 +78,7 @@ class OnboardingService
      * @param int $roleId
      * @return array<int, array{key: string, label: string, route: string, completion_type: string}>
      */
-    public function getStepsForRole(int $roleId): array
+    public function getStepsForRole(?int $roleId): array
     {
         return match ($roleId) {
             self::ROLE_PESANTREN => $this->getPesantrenSteps(),
@@ -95,7 +95,7 @@ class OnboardingService
      * @param int $roleId
      * @return array<string, bool>
      */
-    public function getStepCompletionStatus(int $userId, int $roleId): array
+    public function getStepCompletionStatus(int $userId, ?int $roleId): array
     {
         $steps = $this->getStepsForRole($roleId);
         $status = [];

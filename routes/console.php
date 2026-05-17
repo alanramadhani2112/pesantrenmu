@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 Schedule::command('banding:check-deadlines')->daily();
 Schedule::command('perbaikan:check-deadlines')->daily();
+Schedule::command('reminders:asesor2')->daily();
+Schedule::command('akreditasi:check-deadlines')->daily();
+Schedule::command('trash:purge')->daily();

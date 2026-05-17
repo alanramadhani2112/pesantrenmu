@@ -22,4 +22,13 @@ return [
         'inkonsistensi_data' => 'Inkonsistensi Data',
         'lainnya' => 'Lainnya',
     ],
+
+    // Concurrent access handling
+    'polling_interval' => (int) env('AKREDITASI_POLLING_INTERVAL', 10),
+    'presence_enabled' => (bool) env('AKREDITASI_PRESENCE_ENABLED', false),
+
+    // Trash retention
+    'trash' => [
+        'retention_days' => (int) env('TRASH_RETENTION_DAYS', 90),
+    ],
 ];

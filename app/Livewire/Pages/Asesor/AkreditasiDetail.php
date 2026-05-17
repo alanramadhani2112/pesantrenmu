@@ -72,6 +72,11 @@ class AkreditasiDetail extends Component
 
     public $asesorTipe;
 
+    // Progress tracking
+    public $asesor1NaProgress = null;
+    public $asesor1NkProgress = null;
+    public $asesor2NaProgress = null;
+
     #[Url]
     public $activeTab = 'profil';
 
@@ -79,6 +84,9 @@ class AkreditasiDetail extends Component
 
     // Rejection form properties
     public $rejectedItems = [];
+
+    // Concurrent access handling
+    public string $akreditasiUpdatedAt = '';
 
     public $rejectionExplanation = '';
 
@@ -153,6 +161,45 @@ class AkreditasiDetail extends Component
             $rejectionService = app(\App\Services\RejectionService::class);
             $this->rejectionStatus = $rejectionService->getRejectionStatus($this->akreditasi->id);
             $this->selectableItems = $rejectionService->getSelectableItems($this->akreditasi->id);
+        }
+
+        // Load progress data (for status 4 and 5)
+        if ($this->akreditasi->status == 4 || $this->akreditasi->status == 5) {
+            $progress = $data['progress'] ?? [];
+            $this->asesor1NaProgress = $progress['asesor1_na'] ?? null;
+            $this->asesor1NkProgress = $progress['asesor1_nk'] ?? null;
+            $this->asesor2NaProgress = $progress['asesor2_na'] ?? null;
+        }
+
+        // Concurrent access: store updated_at for optimistic locking
+        $this->akreditasiUpdatedAt = $this->akreditasi->updated_at->toISOString();
+    }
+
+    /**
+     * Poll for status changes (called by wire:poll).
+     */
+    public function checkForUpdates(): void
+    {
+        $fresh = \App\Models\Akreditasi::find($this->akreditasi->id);
+        if (! $fresh) {
+            return;
+        }
+
+        $freshUpdatedAt = $fresh->updated_at->toISOString();
+
+        if ($freshUpdatedAt !== $this->akreditasiUpdatedAt) {
+            $oldStatus = $this->akreditasi->status;
+            $this->akreditasi = $fresh;
+            $this->akreditasiUpdatedAt = $freshUpdatedAt;
+
+            if ($oldStatus !== $fresh->status) {
+                $this->dispatch('notification-received',
+                    type: 'warning',
+                    title: 'Status Diperbarui',
+                    message: 'Status akreditasi telah diperbarui oleh pengguna lain. Status saat ini: '
+                        . \App\Models\Akreditasi::getStatusLabel($fresh->status)
+                );
+            }
         }
     }
 
@@ -261,11 +308,28 @@ class AkreditasiDetail extends Component
         }
 
         $asesorService = app(\App\Services\AsesorService::class);
-        if ($asesorService->finalizeVerification($this->akreditasi->id, Auth::id())) {
+
+        try {
+            $result = $asesorService->finalizeVerification($this->akreditasi->id, Auth::id(), $this->akreditasiUpdatedAt);
+        } catch (\App\Exceptions\ConflictException $e) {
+            $this->akreditasi->refresh();
+            $this->akreditasiUpdatedAt = $this->akreditasi->updated_at->toISOString();
+            $this->dispatch('notification-received',
+                type: 'error',
+                title: 'Konflik Terdeteksi',
+                message: "Akreditasi telah dimodifikasi oleh pengguna lain. Status saat ini: {$e->getStatusLabel()}. Silakan muat ulang halaman untuk melihat data terbaru."
+            );
+            return;
+        }
+
+        if ($result['success']) {
             session()->flash('status', 'Assessment berhasil diselesaikan. Status berubah menjadi Validasi Admin.');
 
             return redirect()->route('asesor.akreditasi');
         }
+
+        // Dispatch error event with error type and details for UI feedback
+        $this->dispatch('finalization-failed', error: $result['error'], details: $result['details']);
     }
 
     public function uploadLaporanVisitasi()

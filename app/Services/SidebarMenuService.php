@@ -334,6 +334,26 @@ class SidebarMenuService
                 'label' => 'Administrasi Sistem',
                 'items' => [
                     [
+                        'key' => 'failed_notifications',
+                        'label' => 'Notifikasi Gagal',
+                        'route' => 'admin.failed-notifications',
+                        'icon' => 'notification-bing',
+                        'active_pattern' => 'admin.failed-notifications',
+                        'tooltip' => 'Pantau dan kelola notifikasi yang gagal terkirim',
+                        'show_progress' => false,
+                        'show_badge' => true,
+                    ],
+                    [
+                        'key' => 'trash',
+                        'label' => 'Sampah Akreditasi',
+                        'route' => 'admin.trash',
+                        'icon' => 'trash',
+                        'active_pattern' => 'admin.trash',
+                        'tooltip' => 'Kelola data akreditasi terhapus dengan masa retensi sebelum dihapus permanen',
+                        'show_progress' => false,
+                        'show_badge' => true,
+                    ],
+                    [
                         'key' => 'akun_pengguna',
                         'label' => 'Akun Pengguna',
                         'route' => 'accounts.index',
@@ -500,6 +520,8 @@ class SidebarMenuService
             'master_dokumen' => 'Kelola katalog dokumen wajib yang diunggah pesantren dan asesor',
             'akun_pengguna' => 'Kelola akun admin, asesor, dan pesantren beserta status aktivasinya',
             'peran_hak_akses' => 'Kelola peran (role) yang tersedia di sistem',
+            'failed_notifications' => 'Pantau dan kelola notifikasi yang gagal terkirim',
+            'trash' => 'Kelola data akreditasi terhapus dengan masa retensi sebelum dihapus permanen',
 
             // Asesor tooltips
             'profil_asesor' => 'Kelola data profil dan informasi asesor Anda',
