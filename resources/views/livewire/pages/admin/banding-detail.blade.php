@@ -69,6 +69,7 @@ new #[Layout('layouts.app')] class extends Component
 
     public function assignReviewer()
     {
+        Gate::authorize('banding.review');
         Gate::authorize('review', $this->banding);
 
         if (empty($this->selectedReviewerId)) {
@@ -87,6 +88,7 @@ new #[Layout('layouts.app')] class extends Component
 
     public function reassignReviewer()
     {
+        Gate::authorize('banding.review');
         Gate::authorize('review', $this->banding);
 
         if (empty($this->selectedReviewerId)) {
@@ -105,6 +107,7 @@ new #[Layout('layouts.app')] class extends Component
 
     public function acceptBanding()
     {
+        Gate::authorize('banding.decide');
         Gate::authorize('review', $this->banding);
 
         if (mb_strlen($this->keputusan) < 10) {
@@ -125,6 +128,7 @@ new #[Layout('layouts.app')] class extends Component
 
     public function rejectBanding()
     {
+        Gate::authorize('banding.decide');
         Gate::authorize('review', $this->banding);
 
         if (mb_strlen($this->keputusan) < 10) {

@@ -2591,3 +2591,127 @@ a:not(.btn),
 .spm-readiness-item:last-child {
     border-bottom: none !important;
 }
+
+
+/* ===== FIX: Sidebar scroll, header precision, card clean ===== */
+
+/* 1. Fix sidebar scroll — pastikan sidebar bisa scroll penuh */
+.spm-app-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 105;
+    width: var(--bs-app-sidebar-width, 280px);
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.spm-app-sidebar .app-sidebar-menu {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.spm-app-sidebar .app-sidebar-wrapper {
+    height: 100%;
+    max-height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #dbe3ee transparent;
+}
+
+.spm-app-sidebar .app-sidebar-wrapper::-webkit-scrollbar {
+    width: 4px;
+}
+
+.spm-app-sidebar .app-sidebar-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.spm-app-sidebar .app-sidebar-wrapper::-webkit-scrollbar-thumb {
+    background-color: #dbe3ee;
+    border-radius: 4px;
+}
+
+@media (min-width: 992px) {
+    .spm-app-sidebar {
+        position: fixed !important;
+        display: flex !important;
+        transform: none !important;
+    }
+}
+
+/* 2. Fix header + breadcrumb — presisi dan clean */
+.spm-app-header .page-title {
+    gap: 0 !important;
+    line-height: 1;
+}
+
+.spm-header-title {
+    margin: 0;
+    padding: 0;
+    font-size: 17px !important;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.spm-breadcrumb {
+    margin-top: 2px;
+}
+
+.spm-breadcrumb .breadcrumb {
+    margin: 0;
+    padding: 0;
+}
+
+.spm-breadcrumb .breadcrumb-item,
+.spm-breadcrumb .breadcrumb-item a,
+.spm-breadcrumb .breadcrumb-item span {
+    font-size: 12px;
+    font-weight: 500;
+    color: #94a3b8;
+}
+
+.spm-breadcrumb .breadcrumb-item a:hover {
+    color: var(--spm-primary);
+}
+
+/* 3. Card — hapus semua shadow, clean flat enterprise */
+.spm-main-content .card,
+.spm-section-card,
+.spm-edpm-component-card,
+.spm-quick-action,
+.card {
+    box-shadow: none !important;
+}
+
+.spm-quick-action:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    border-color: #e8edf4 !important;
+}
+
+.spm-edpm-component-card {
+    box-shadow: none !important;
+}
+
+/* Hapus hover shadow dari semua card */
+.card:hover,
+.spm-section-card:hover,
+.spm-edpm-component-card:hover,
+.spm-quick-action:hover {
+    box-shadow: none !important;
+}
+
+/* Dashboard stat card — flat */
+.spm-dashboard-stat {
+    box-shadow: none !important;
+}
+
+.spm-dashboard-stat:hover {
+    box-shadow: none !important;
+    transform: none !important;
+}

@@ -169,16 +169,6 @@ new #[Layout('layouts.app')] class extends Component {
         </x-ui.button>
     </x-slot:toolbar>
 
-    <x-ui.page-help
-        title="Panduan Indikator Pemenuhan Mutlak (IPM)"
-        :items="[
-            'IPM terdiri dari 4 kriteria wajib yang harus dipenuhi sebelum akreditasi',
-            'Upload dokumen pendukung untuk setiap kriteria dalam format PDF atau gambar',
-            'Pastikan dokumen yang diunggah masih berlaku dan dapat dibaca dengan jelas',
-            'Semua kriteria harus terisi sebelum pengajuan akreditasi dapat diproses',
-        ]"
-        dismiss-key="help-pesantren-ipm"
-    />
 
     @php
         $completedCriteria = collect($criteria)->filter(fn ($item) => filled($existing_files[$item['field']] ?? null))->count();

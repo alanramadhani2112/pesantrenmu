@@ -4,6 +4,7 @@ namespace App\Services\Sso;
 
 use App\Models\Profile;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class UserService
@@ -14,10 +15,11 @@ class UserService
     {
         self::$token = $token;
 
-        $req = \Illuminate\Support\Facades\Http::withHeaders([
-            'Accept' => 'application/json',
-            'Authorization' => 'Bearer ' . self::$token,
-        ])->get(config('sso.server_url') . 'api/user');
+        $req = \Illuminate\Support\Facades\Http::timeout(config('sso.timeout', 10))
+            ->withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . self::$token,
+            ])->get(config('sso.server_url') . 'api/user');
 
 
         if ($req->successful()) {
@@ -53,13 +55,39 @@ class UserService
                 'name' => $user_data['name'],
                 'password' => \Illuminate\Support\Facades\Hash::make(Str::random()),
                 'uuid' => str()->uuid(),
-                'role_id' => $role_id
+                'role_id' => $role_id,
+                'sso_linked_at' => now(),
+                'sso_sync_role' => true,
+            ]);
+
+            Log::info('sso.user_created', [
+                'email' => $user_data['email'],
+                'user_id' => $user->id,
+                'role_id' => $role_id,
             ]);
         } else {
-            $user->update([
+            $updateData = [
                 'email' => $user_data['email'],
                 'name' => $user_data['name'],
-                'role_id' => $role_id
+            ];
+
+            // Only sync role if sso_sync_role is true
+            if ($user->sso_sync_role) {
+                $updateData['role_id'] = $role_id;
+            }
+
+            // Set sso_linked_at only on first SSO login
+            if (is_null($user->sso_linked_at)) {
+                $updateData['sso_linked_at'] = now();
+            }
+
+            $user->update($updateData);
+
+            Log::info('sso.user_linked', [
+                'email' => $user_data['email'],
+                'user_id' => $user->id,
+                'role_id' => $role_id,
+                'role_synced' => $user->sso_sync_role,
             ]);
         }
 

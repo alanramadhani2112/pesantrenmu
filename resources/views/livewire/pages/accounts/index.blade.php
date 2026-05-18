@@ -3,6 +3,7 @@
 use App\Models\User;
 use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
@@ -16,6 +17,7 @@ new #[Layout('layouts.app')] class extends Component {
     public $password;
     public $role_id;
     public $status = true; // Default to true (active)
+    public $sso_sync_role = true;
     public $userId;
     public $search = '';
     public $perPage = 10;
@@ -84,6 +86,7 @@ new #[Layout('layouts.app')] class extends Component {
         $this->password = '';
         $this->role_id = '';
         $this->status = true;
+        $this->sso_sync_role = true;
         $this->userId = null;
         $this->isEditing = false;
         $this->resetErrorBag();
@@ -110,6 +113,7 @@ new #[Layout('layouts.app')] class extends Component {
         $this->email = $user->email;
         $this->role_id = $user->role_id;
         $this->status = $user->status == 1;
+        $this->sso_sync_role = (bool) $user->sso_sync_role;
         $this->password = '';
         $this->isEditing = true;
         $this->dispatch('open-modal', 'account-modal');
@@ -117,19 +121,23 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function saveAccount()
     {
+        Gate::authorize('account.create');
+
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,' . ($this->userId ?? 'NULL')],
             'role_id' => ['required', 'exists:roles,id'],
             'status' => ['boolean'],
-            'password' => ['nullable', 'string']
+            'sso_sync_role' => ['boolean'],
+            'password' => ['nullable', 'string'],
         ];
 
-        if (!$this->isEditing) {
-            $rules['password'] = ['required', 'string'];
-        }
-
         $validatedData = $this->validate($rules);
+
+        // If creating and no password provided, generate a random one
+        if (!$this->isEditing && empty($validatedData['password'])) {
+            $validatedData['password'] = \Illuminate\Support\Str::random(16);
+        }
 
         $userService = app(\App\Services\UserService::class);
         $userService->saveAccount($validatedData, $this->userId);
@@ -143,6 +151,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function deleteUser($id)
     {
+        Gate::authorize('account.delete');
+
         $userService = app(\App\Services\UserService::class);
         if ($userService->deleteAccount($id)) {
             $this->dispatch('swal:success', title: 'Berhasil!', text: 'Data Akun berhasil dihapus.');
@@ -153,10 +163,32 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function toggleStatus($id)
     {
+        Gate::authorize('account.toggle');
+
         $userService = app(\App\Services\UserService::class);
         if ($userService->toggleAccountStatus($id)) {
             $this->dispatch('swal:success', title: 'Berhasil!', text: 'Status akun berhasil diubah.');
         }
+    }
+
+    public function unlinkSso($id)
+    {
+        Gate::authorize('account.create');
+
+        $user = User::find($id);
+
+        if (!$user) {
+            $this->dispatch('swal:error', title: 'Gagal!', text: 'Data tidak ditemukan.');
+            return;
+        }
+
+        // Delete profile data (SSO profile)
+        $user->profile_data()->delete();
+
+        // Reset sso_linked_at
+        $user->update(['sso_linked_at' => null]);
+
+        $this->dispatch('swal:success', title: 'Berhasil!', text: 'SSO berhasil di-unlink dari akun ' . $user->name . '.');
     }
 
     public function setTab($tab)
@@ -227,7 +259,17 @@ new #[Layout('layouts.app')] class extends Component {
                                 </div>
                             </div>
 
-                            <span class="text-gray-900 fw-semibold fs-6">{{ $user->name }}</span>
+                            <div class="d-flex flex-column gap-1">
+                                <span class="text-gray-900 fw-semibold fs-6">{{ $user->name }}</span>
+                                @if ($user->sso_linked_at)
+                                    <span class="badge badge-light-success fs-8 fw-semibold">
+                                        <i class="ki-duotone ki-shield-tick fs-7 me-1">
+                                            <span class="path1"></span><span class="path2"></span>
+                                        </i>
+                                        Linked to Muhammadiyah ID
+                                    </span>
+                                @endif
+                            </div>
                         </div>
                     </td>
                     <td class="text-muted fw-semibold">
@@ -244,6 +286,16 @@ new #[Layout('layouts.app')] class extends Component {
                                 <x-ui.icon name="pencil" class="fs-5 text-gray-500" />
                                 Edit Akun
                             </x-ui.action-menu-item>
+
+                            @if ($user->sso_linked_at)
+                                <x-ui.action-menu-item
+                                    variant="warning"
+                                    x-on:click="confirmUnlinkSso($wire, {{ $user->id }}, '{{ addslashes($user->name) }}')"
+                                >
+                                    <x-ui.icon name="disconnect" class="fs-5" />
+                                    Unlink SSO
+                                </x-ui.action-menu-item>
+                            @endif
 
                             @if ($user->id !== auth()->id())
                                 <x-ui.action-menu-item
@@ -305,10 +357,21 @@ new #[Layout('layouts.app')] class extends Component {
                     label="{{ __('Password') }}"
                     for="password"
                     :error="$errors->get('password')"
-                    :hint="$isEditing ? 'Leave blank to keep current password.' : null"
+                    :hint="$isEditing ? __('Leave blank to keep current password.') : __('Leave blank to auto-generate. User can also log in via SSO without a password.')"
                 >
-                    <x-ui.input model="password" id="password" type="password" :required="!$isEditing" />
+                    <x-ui.input model="password" id="password" type="password" />
                 </x-ui.form-field>
+
+                @if ($isEditing)
+                    <x-ui.form-field
+                        label="{{ __('Sync Role dari SSO') }}"
+                        for="sso_sync_role"
+                        :error="$errors->get('sso_sync_role')"
+                        hint="{{ __('Jika aktif, role akan di-sync dari SSO saat login. Jika non-aktif, role yang diset admin akan dipertahankan.') }}"
+                    >
+                        <x-ui.checkbox model="sso_sync_role" id="sso_sync_role" label="{{ __('Sync role dari SSO') }}" />
+                    </x-ui.form-field>
+                @endif
 
                 <x-ui.checkbox model="status" id="status" label="{{ __('Status Aktif') }}" />
             </x-ui.modal-body>

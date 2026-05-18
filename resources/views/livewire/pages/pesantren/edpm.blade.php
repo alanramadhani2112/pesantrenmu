@@ -227,17 +227,6 @@ new #[Layout('layouts.app')] class extends Component {
         </x-ui.button>
     </x-slot:toolbar>
 
-    <x-ui.page-help
-        title="Panduan Evaluasi Data Pesantren Muhammadiyah (EDPM)"
-        :items="[
-            'EDPM mengevaluasi kinerja pesantren berdasarkan komponen-komponen yang telah ditetapkan',
-            'Isi setiap komponen dengan data yang akurat dan sertakan tautan bukti pendukung',
-            'Tambahkan catatan kinerja untuk menjelaskan kondisi dan upaya perbaikan',
-            'Data EDPM akan menjadi dasar penilaian komprehensif dalam akreditasi',
-        ]"
-        dismiss-key="help-pesantren-edpm"
-    />
-
     <div class="row g-5 mb-6">
         <div class="col-lg-4">
             <x-ui.stat-card label="Status EDPM" value="{{ $isLocked ? 'Terkunci' : 'Aktif' }}" variant="{{ $isLocked ? 'warning' : 'success' }}" icon="shield-tick" />

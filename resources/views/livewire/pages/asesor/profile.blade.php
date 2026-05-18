@@ -210,19 +210,28 @@ new #[Layout('layouts.app')] class extends Component {
             'karya_publikasi' => $this->karya_publikasi,
         ];
 
-        $fileFields = [
-            'foto' => 'foto_upload',
+        // foto stays on public disk (non-sensitive)
+        if ($this->foto_upload) {
+            if ($this->asesor->foto) {
+                Storage::disk('public')->delete($this->asesor->foto);
+            }
+            $data['foto'] = $this->foto_upload->store('asesor_docs', 'public');
+            $this->existing_files['foto'] = $data['foto'];
+        }
+
+        // KTP / ijazah / kartu_nbm are PII — stored on local (private) disk
+        $privateFields = [
             'ktp_file' => 'ktp_file_upload',
             'ijazah_file' => 'ijazah_file_upload',
             'kartu_nbm_file' => 'kartu_nbm_file_upload',
         ];
 
-        foreach ($fileFields as $dbField => $property) {
+        foreach ($privateFields as $dbField => $property) {
             if ($this->$property) {
                 if ($this->asesor->$dbField) {
-                    Storage::disk('public')->delete($this->asesor->$dbField);
+                    Storage::disk('local')->delete($this->asesor->$dbField);
                 }
-                $data[$dbField] = $this->$property->store('asesor_docs', 'public');
+                $data[$dbField] = $this->$property->store('asesor_private_docs', 'local');
                 $this->existing_files[$dbField] = $data[$dbField];
             }
         }
@@ -260,17 +269,6 @@ new #[Layout('layouts.app')] class extends Component {
             </x-ui.button>
         @endif
     </x-slot:toolbar>
-
-    <x-ui.page-help
-        title="Panduan Profil Asesor"
-        :items="[
-            'Lengkapi data identitas, pendidikan, dan pengalaman asesor dengan akurat',
-            'Upload foto profil dan dokumen sertifikasi yang masih berlaku',
-            'Data profil Anda akan digunakan sebagai referensi dalam penugasan akreditasi',
-            'Pastikan nomor WhatsApp aktif agar dapat dihubungi terkait tugas visitasi',
-        ]"
-        dismiss-key="help-asesor-profil"
-    />
 
     @if($isEditing)
     {{-- ===== EDIT MODE ===== --}}
@@ -923,7 +921,7 @@ new #[Layout('layouts.app')] class extends Component {
                             @foreach($viewDocs as $field => $label)
                                 <x-ui.document-item
                                     :label="$label"
-                                    :href="$existing_files[$field] ? Storage::url($existing_files[$field]) : null"
+                                    :href="$existing_files[$field] ? route('secure.asesor-docs', ['asesorId' => $asesor->id, 'field' => $field]) : null"
                                 />
                             @endforeach
                         </div>

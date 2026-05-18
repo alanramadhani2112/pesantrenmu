@@ -144,17 +144,6 @@ new #[Layout('layouts.app')] class extends Component {
         title="Akreditasi"
         subtitle="Pantau pengajuan, status proses, catatan, dan tindak lanjut akreditasi pesantren."
     >
-        <x-ui.page-help
-            title="Panduan Pengajuan Akreditasi"
-            :items="[
-                'Pastikan data profil, IPM, SDM, dan EDPM sudah lengkap sebelum mengajukan akreditasi',
-                'Klik tombol Ajukan Akreditasi untuk memulai proses penilaian oleh asesor',
-                'Pantau status pengajuan secara berkala — notifikasi akan dikirim saat ada pembaruan',
-                'Jika pengajuan ditolak, Anda dapat mengajukan banding dalam batas waktu yang ditentukan',
-            ]"
-            dismiss-key="help-pesantren-akreditasi"
-        />
-
         @php
             $akreditasiRecords = $this->akreditasis;
             $akreditasiCollection = method_exists($akreditasiRecords, 'getCollection')

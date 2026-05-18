@@ -7,18 +7,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * Permission represents a single feature-level capability key
- * (e.g. "documents.manage"). Roles are linked to permissions via the
+ * (e.g. "akreditasi.approve"). Roles are linked to permissions via the
  * `role_permission` pivot table. Super admin bypasses the pivot entirely.
  */
 class Permission extends Model
 {
-    public const GROUP_DOCUMENTS = 'documents';
     public const GROUP_AKREDITASI = 'akreditasi';
-    public const GROUP_USERS = 'users';
+    public const GROUP_ASESOR = 'asesor';
+    public const GROUP_PESANTREN = 'pesantren';
     public const GROUP_BANDING = 'banding';
-    public const GROUP_PROFILE = 'profile';
-    public const GROUP_DASHBOARD = 'dashboard';
-    public const GROUP_SYSTEM = 'system';
+    public const GROUP_MASTER = 'master';
+    public const GROUP_ACCOUNT = 'account';
+    public const GROUP_TRASH = 'trash';
+    public const GROUP_NOTIFICATION = 'notification';
 
     protected $fillable = [
         'key',

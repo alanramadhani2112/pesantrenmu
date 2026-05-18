@@ -2,6 +2,7 @@
 
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
+use Illuminate\Support\Facades\Gate;
 
 new #[Layout('layouts.app')] class extends Component {
     use \Livewire\WithPagination;
@@ -80,6 +81,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function saveRole()
     {
+        Gate::authorize('master.role');
+
         $this->validate([
             'name' => 'required|string|max:255|unique:roles,name,' . ($this->roleId ?? 'NULL'),
             'parameter' => 'required|string|max:255|unique:roles,parameter,' . ($this->roleId ?? 'NULL'),
@@ -95,6 +98,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function deleteRole($id)
     {
+        Gate::authorize('master.role');
+
         $roleService = app(\App\Services\RoleService::class);
         $roleService->deleteRole($id);
         session()->flash('status', 'Role berhasil dihapus.');

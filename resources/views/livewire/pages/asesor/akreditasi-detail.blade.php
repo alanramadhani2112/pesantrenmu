@@ -61,17 +61,6 @@
         </x-ui.button>
     </x-slot:toolbar>
 
-    <x-ui.page-help
-        title="Panduan Visitasi Akreditasi"
-        :items="[
-            'Periksa data profil, IPM, SDM, dan EDPM pesantren sebelum memulai penilaian',
-            'Isi skor dan catatan untuk setiap komponen penilaian secara teliti',
-            'Gunakan fitur catatan untuk mendokumentasikan temuan selama visitasi',
-            'Kirim laporan akhir setelah semua komponen terisi dan diverifikasi',
-        ]"
-        dismiss-key="help-asesor-akreditasi-detail"
-    />
-
     <div class="row g-5 mb-6">
         <div class="col-lg-4">
             <x-ui.stat-card label="Status Tugas" value="{{ Akreditasi::getStatusLabel($akreditasi->status) }}" variant="{{ $statusVariant }}" icon="shield-tick" />

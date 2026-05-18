@@ -5,6 +5,7 @@ use App\Models\Asesor;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Gate;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AsesorExport;
 
@@ -61,6 +62,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function toggleStatus($userId)
     {
+        Gate::authorize('asesor.manage');
+
         $asesorService = app(\App\Services\AsesorService::class);
         if ($asesorService->toggleStatus($userId)) {
             session()->flash('status', 'Status asesor berhasil diperbarui.');
@@ -118,17 +121,6 @@ new #[Layout('layouts.app')] class extends Component {
         title="Asesor"
         subtitle="Kelola asesor, penugasan aktif, dan status ketersediaan."
     >
-        <x-ui.page-help
-            title="Panduan Manajemen Asesor"
-            :items="[
-                'Daftar menampilkan semua asesor beserta status penugasan dan ketersediaannya',
-                'Gunakan filter peran untuk membedakan Ketua Asesor dan Anggota Asesor',
-                'Assign asesor ke akreditasi melalui halaman detail akreditasi pesantren',
-                'Export data asesor ke Excel untuk keperluan pelaporan dan dokumentasi',
-            ]"
-            dismiss-key="help-admin-asesor"
-        />
-
         <x-datatable.layout title="Asesor" :records="$this->asesors">
             <x-slot name="filters">
                 <x-ui.filter-bar>

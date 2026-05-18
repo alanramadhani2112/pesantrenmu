@@ -34,16 +34,16 @@ class SidebarMenuService
     {
         return match ($roleId) {
             self::ROLE_SUPER_ADMIN => $this->getSuperAdminMenu(),
-            self::ROLE_ADMIN => $this->withComingSoon($this->getAdminMenu(), 'admin'),
-            self::ROLE_ASESOR => $this->withComingSoon($this->getAsesorMenu(), 'asesor'),
-            self::ROLE_PESANTREN => $this->withComingSoon($this->getPesantrenMenu(), 'pesantren'),
+            self::ROLE_ADMIN => $this->getAdminMenu(),
+            self::ROLE_ASESOR => $this->getAsesorMenu(),
+            self::ROLE_PESANTREN => $this->getPesantrenMenu(),
             default => [],
         };
     }
 
     /**
      * Super admin sees the full admin menu plus an exclusive
-     * "Peran & Hak Akses" CRUD entry, then the global Coming Soon group.
+     * "Peran & Hak Akses" CRUD entry.
      */
     private function getSuperAdminMenu(): array
     {
@@ -66,82 +66,9 @@ class SidebarMenuService
             }
         }
 
-        return $this->withComingSoon($menu, 'super_admin');
-    }
-
-    /**
-     * Append the "Coming Soon" group containing roadmap items for the role.
-     *
-     * @param  array<int, array<string, mixed>>  $menu
-     */
-    private function withComingSoon(array $menu, string $roleScope): array
-    {
-        $items = $this->buildComingSoonItems($roleScope);
-        if (empty($items)) {
-            return $menu;
-        }
-
-        $menu[] = [
-            'label' => 'Coming Soon',
-            'items' => $items,
-        ];
-
         return $menu;
     }
 
-    /**
-     * Build the disabled "Soon" roadmap items per role scope.
-     *
-     * Items are intentionally rendered as disabled links with a "Soon" badge
-     * so users can see what is planned for the next development cycle.
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    private function buildComingSoonItems(string $roleScope): array
-    {
-        $catalog = match ($roleScope) {
-            'pesantren' => [
-                ['key' => 'soon_sertifikat_digital', 'label' => 'Sertifikat Akreditasi Digital', 'icon' => 'award', 'tooltip' => 'Unduh sertifikat akreditasi digital lengkap dengan QR verifikasi (segera hadir).'],
-                ['key' => 'soon_forum_mutu', 'label' => 'Forum Mutu Antar-Pesantren', 'icon' => 'messages', 'tooltip' => 'Diskusi dan berbagi praktik baik penjaminan mutu antar pesantren (segera hadir).'],
-                ['key' => 'soon_self_assessment', 'label' => 'Self-Assessment Mandiri', 'icon' => 'check-circle', 'tooltip' => 'Evaluasi diri pra-akreditasi sebelum pengajuan resmi (segera hadir).'],
-                ['key' => 'soon_benchmark', 'label' => 'Benchmark Pesantren Sejenis', 'icon' => 'chart-line-up', 'tooltip' => 'Bandingkan capaian Anda dengan pesantren sejenis secara anonim (segera hadir).'],
-            ],
-            'asesor' => [
-                ['key' => 'soon_visitasi_cerdas', 'label' => 'Penjadwalan Visitasi Cerdas', 'icon' => 'calendar-tick', 'tooltip' => 'Saran jadwal visitasi otomatis berdasarkan lokasi dan kalender Anda (segera hadir).'],
-                ['key' => 'soon_mobile_companion', 'label' => 'Mobile Companion Visitasi', 'icon' => 'phone', 'tooltip' => 'Aplikasi pendamping visitasi offline-first untuk lapangan (segera hadir).'],
-                ['key' => 'soon_sertifikat_cpd', 'label' => 'Sertifikat Asesor & CPD', 'icon' => 'medal-star', 'tooltip' => 'Pelacakan jam Continuing Professional Development asesor (segera hadir).'],
-            ],
-            'admin', 'super_admin' => [
-                ['key' => 'soon_analytics_nasional', 'label' => 'Dashboard Analytics Nasional', 'icon' => 'chart-pie-simple', 'tooltip' => 'Heatmap dan tren akreditasi nasional (segera hadir).'],
-                ['key' => 'soon_broadcast', 'label' => 'Broadcast Notifikasi', 'icon' => 'notification', 'tooltip' => 'Pengumuman terjadwal per role dan wilayah (segera hadir).'],
-                ['key' => 'soon_export_compliance', 'label' => 'Export Laporan Kemenag/BAN', 'icon' => 'file-down', 'tooltip' => 'Ekspor laporan dalam format Kemenag dan BAN-PT (segera hadir).'],
-            ],
-            default => [],
-        };
-
-        // Universal item available to every role.
-        $catalog[] = [
-            'key' => 'soon_help_center',
-            'label' => 'Pusat Bantuan & FAQ',
-            'icon' => 'information',
-            'tooltip' => 'Knowledge base dan tanya jawab seputar penggunaan sistem (segera hadir).',
-        ];
-
-        return array_map(static function (array $item): array {
-            return [
-                'key' => $item['key'],
-                'label' => $item['label'],
-                'route' => null,
-                'icon' => $item['icon'],
-                'active_pattern' => '__never__',
-                'tooltip' => $item['tooltip'],
-                'show_progress' => false,
-                'show_badge' => false,
-                'coming_soon' => true,
-                'badge_text' => 'Soon',
-            ];
-        }, $catalog);
-    }
 
     /**
      * Returns tooltip text for a given menu item key.

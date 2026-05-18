@@ -8,6 +8,7 @@ use App\Services\DeadlineService;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\AkreditasiExport;
 
@@ -177,6 +178,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function delete($id)
     {
+        Gate::authorize('akreditasi.delete');
+
         $akreditasiService = app(\App\Services\AkreditasiService::class);
         if ($akreditasiService->deleteAkreditasi($id)) {
             session()->flash('status', 'Pengajuan akreditasi berhasil dihapus.');
@@ -200,6 +203,12 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function verifikasi()
     {
+        if ($this->action_type === 'approve') {
+            Gate::authorize('akreditasi.approve');
+        } else {
+            Gate::authorize('akreditasi.reject');
+        }
+
         $akreditasiService = app(\App\Services\AkreditasiService::class);
 
         if ($this->action_type === 'approve') {
@@ -263,17 +272,6 @@ new #[Layout('layouts.app')] class extends Component {
                 <x-ui.badge variant="danger">Terlambat: {{ $this->countOverdue }}</x-ui.badge>
             @endif
         </x-slot>
-
-        <x-ui.page-help
-            title="Panduan Manajemen Akreditasi"
-            :items="[
-                'Gunakan tab Pengajuan, Penilaian, dan Visitasi untuk memfilter akreditasi per tahap',
-                'Tinjau prioritas operasional di panel kiri untuk menentukan antrean yang perlu diproses',
-                'Assign asesor ke pengajuan yang masuk sebelum proses penilaian dapat dimulai',
-                'Monitor status terlambat (overdue) dan segera tindak lanjuti agar proses tidak terhambat',
-            ]"
-            dismiss-key="help-admin-akreditasi"
-        />
 
         <div class="row g-6 mb-6">
             <div class="col-12 col-xl-8">

@@ -22,13 +22,24 @@ new class extends Component {
 
             $onboardingService = app(OnboardingService::class);
 
+            // Hanya tampilkan otomatis bila onboarding belum selesai/dilewati
+            // DAN semua langkah belum selesai (jangan pop-up "Selamat" tiba-tiba)
             if (!$onboardingService->shouldShowOnboarding($user->id)) {
                 return;
             }
 
-            $this->showModal = true;
             $this->steps = $onboardingService->getStepsForRole($user->role_id);
             $this->completionStatus = $onboardingService->getStepCompletionStatus($user->id, $user->role_id);
+
+            // Jangan auto-pop bila semua langkah sudah selesai
+            $allDone = !in_array(false, $this->completionStatus, true) && !empty($this->completionStatus);
+            if ($allDone) {
+                // Tandai selesai secara otomatis, tidak perlu tampilkan modal
+                $onboardingService->completeOnboarding($user->id);
+                return;
+            }
+
+            $this->showModal = true;
         } catch (\Exception $e) {
             Log::error('OnboardingGuide: Failed to load onboarding state', [
                 'error' => $e->getMessage(),

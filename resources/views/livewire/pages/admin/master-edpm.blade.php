@@ -4,6 +4,7 @@ use App\Models\MasterEdpmKomponen;
 use App\Models\MasterEdpmButir;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
+use Illuminate\Support\Facades\Gate;
 
 new #[Layout('layouts.app')] class extends Component {
     public $komponens;
@@ -83,6 +84,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function saveKomponen()
     {
+        Gate::authorize('master.edpm');
+
         $this->validate(['komponen_nama' => 'required|string|max:255']);
 
         $masterEdpmService = app(\App\Services\MasterEdpmService::class);
@@ -98,6 +101,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function deleteKomponen($id)
     {
+        Gate::authorize('master.edpm');
+
         $masterEdpmService = app(\App\Services\MasterEdpmService::class);
         $masterEdpmService->deleteKomponen($id);
         $this->loadData();
@@ -128,6 +133,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function saveButir()
     {
+        Gate::authorize('master.edpm');
+
         $this->validate([
             'butir_nomor_butir' => 'required|string',
             'butir_pernyataan' => 'required|string',
@@ -148,6 +155,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function deleteButir($id)
     {
+        Gate::authorize('master.edpm');
+
         $masterEdpmService = app(\App\Services\MasterEdpmService::class);
         $masterEdpmService->deleteButir($id);
         $this->loadData();
@@ -178,6 +187,74 @@ new #[Layout('layouts.app')] class extends Component {
                 Komponen IPR
             </x-ui.tab>
         </x-ui.tabs>
+
+        {{-- Guide Perhitungan --}}
+        <div class="row g-5 mb-6">
+            <div class="col-12 col-xl-7">
+                <x-ui.card title="Formula Perhitungan Skor Akreditasi" subtitle="Rumus yang diterapkan sistem untuk menghitung nilai akhir akreditasi pesantren." class="h-100">
+                    <div class="d-flex flex-column gap-4">
+                        <div class="spm-soft-panel">
+                            <div class="spm-detail-label">Skor per Komponen EDPM</div>
+                            <div class="spm-detail-value fw-bold font-monospace">Skor = (Ci / Cmaks) × BK</div>
+                            <div class="text-muted fs-8 mt-1">Ci = total skor butir, Cmaks = jumlah butir × 4, BK = bobot komponen</div>
+                        </div>
+
+                        <div class="spm-soft-panel">
+                            <div class="spm-detail-label">Skor Akhir</div>
+                            <div class="spm-detail-value fw-bold font-monospace">Nilai = (EDPM × 70%) + (IPR × 30%)</div>
+                            <div class="text-muted fs-8 mt-1">EDPM = rata-rata skor 4 komponen, IPR = skor komponen IPR skala ratusan</div>
+                        </div>
+
+                        <div class="spm-soft-panel">
+                            <div class="spm-detail-label">Peringkat Akreditasi</div>
+                            <div class="d-flex flex-wrap gap-2 mt-1">
+                                <span class="badge badge-light-success">A (Unggul): 86–100</span>
+                                <span class="badge badge-light-primary">B (Baik Sekali): 71–85</span>
+                                <span class="badge badge-light-warning">C (Baik): &lt; 70</span>
+                            </div>
+                        </div>
+                    </div>
+                </x-ui.card>
+            </div>
+
+            <div class="col-12 col-xl-5">
+                <x-ui.card title="Bobot Komponen" subtitle="Bobot yang digunakan dalam perhitungan skor akhir." class="h-100">
+                    <x-ui.simple-table dense>
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Komponen</th>
+                                <th class="text-center">Bobot (BK)</th>
+                                <th class="text-center pe-4">Kontribusi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="ps-4 fw-semibold">Mutu Lulusan</td>
+                                <td class="text-center">35</td>
+                                <td class="text-center pe-4" rowspan="4"><span class="badge badge-light-primary">70%</span></td>
+                            </tr>
+                            <tr>
+                                <td class="ps-4 fw-semibold">Proses Pembelajaran</td>
+                                <td class="text-center">29</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-4 fw-semibold">Mutu Ustaz</td>
+                                <td class="text-center">18</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-4 fw-semibold">Manajemen Pesantren</td>
+                                <td class="text-center">18</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-4 fw-semibold">Indikator Pemenuhan Relatif</td>
+                                <td class="text-center">100</td>
+                                <td class="text-center pe-4"><span class="badge badge-light-success">30%</span></td>
+                            </tr>
+                        </tbody>
+                    </x-ui.simple-table>
+                </x-ui.card>
+            </div>
+        </div>
 
         @php
             $filteredKomponens = $komponens->filter(function ($komponen) use ($activeTab) {

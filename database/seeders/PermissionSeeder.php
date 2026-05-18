@@ -3,14 +3,13 @@
 namespace Database\Seeders;
 
 use App\Models\Permission;
-use App\Models\Role;
 use Illuminate\Database\Seeder;
 
 class PermissionSeeder extends Seeder
 {
     /**
-     * Seed the 18 canonical permission keys and the default role
-     * mapping. Idempotent: safe to re-run.
+     * Seed all granular permission keys into the permissions table.
+     * Idempotent: safe to re-run (uses updateOrCreate).
      *
      * Super admin (id=4) is NOT mapped here. The hasPermission()
      * shortcut on User returns true for super admin without consulting
@@ -19,37 +18,48 @@ class PermissionSeeder extends Seeder
     public function run(): void
     {
         $catalog = [
-            // documents group
-            ['documents.manage', 'Kelola Dokumen', Permission::GROUP_DOCUMENTS, 'Upload, edit, dan hapus dokumen di katalog dokumen wajib.'],
-            ['document_categories.manage', 'Kelola Kategori Dokumen', Permission::GROUP_DOCUMENTS, 'CRUD master kategori dokumen termasuk pengaturan visibilitas.'],
+            // Akreditasi group
+            ['akreditasi.view', 'Lihat Akreditasi', 'akreditasi', 'Melihat daftar dan detail akreditasi.'],
+            ['akreditasi.approve', 'Approve Akreditasi', 'akreditasi', 'Menyetujui hasil akreditasi.'],
+            ['akreditasi.reject', 'Reject Akreditasi', 'akreditasi', 'Menolak hasil akreditasi.'],
+            ['akreditasi.delete', 'Hapus Akreditasi', 'akreditasi', 'Menghapus data akreditasi.'],
+            ['akreditasi.finalize', 'Finalisasi Akreditasi', 'akreditasi', 'Memfinalisasi proses akreditasi.'],
 
-            // akreditasi group
-            ['edpm.manage', 'Kelola EDPM', Permission::GROUP_AKREDITASI, 'Mengisi dan mengelola Evaluasi Diri Penjaminan Mutu pesantren.'],
-            ['edpm.review', 'Tinjau EDPM', Permission::GROUP_AKREDITASI, 'Memberikan catatan dan melakukan review terhadap EDPM.'],
-            ['akreditasi.assign', 'Ajukan Akreditasi', Permission::GROUP_AKREDITASI, 'Mengajukan permohonan akreditasi pesantren.'],
-            ['akreditasi.review', 'Review Akreditasi', Permission::GROUP_AKREDITASI, 'Melakukan visitasi, penilaian, dan pelaporan akreditasi.'],
-            ['master_data.view', 'Akses Master Data', Permission::GROUP_AKREDITASI, 'Mengakses menu master data sistem akreditasi.'],
+            // Asesor group
+            ['asesor.view', 'Lihat Asesor', 'asesor', 'Melihat daftar dan detail asesor.'],
+            ['asesor.assign', 'Assign Asesor', 'asesor', 'Menugaskan asesor ke akreditasi.'],
+            ['asesor.manage', 'Kelola Asesor', 'asesor', 'Tambah, edit, dan kelola data asesor.'],
 
-            // users group
-            ['asesor.manage', 'Kelola Asesor', Permission::GROUP_USERS, 'Tambah, edit, dan kelola data asesor.'],
-            ['pesantren.manage', 'Kelola Pesantren', Permission::GROUP_USERS, 'Tambah, edit, dan kelola data pesantren.'],
-            ['users.manage', 'Kelola Akun Pengguna', Permission::GROUP_USERS, 'Mengelola akun pengguna lintas role.'],
-            ['roles.manage', 'Kelola Role', Permission::GROUP_USERS, 'CRUD role sistem (super admin only).'],
-            ['permissions.manage', 'Kelola Hak Akses', Permission::GROUP_USERS, 'Mengubah pemetaan hak akses per role (super admin only).'],
+            // Pesantren group
+            ['pesantren.view', 'Lihat Pesantren', 'pesantren', 'Melihat daftar dan detail pesantren.'],
+            ['pesantren.lock', 'Kunci Pesantren', 'pesantren', 'Mengunci data pesantren agar tidak bisa diedit.'],
+            ['pesantren.manage', 'Kelola Pesantren', 'pesantren', 'Tambah, edit, dan kelola data pesantren.'],
 
-            // banding group
-            ['banding.review', 'Tinjau Banding', Permission::GROUP_BANDING, 'Memproses dan memutuskan banding hasil akreditasi.'],
-            ['banding.submit', 'Ajukan Banding', Permission::GROUP_BANDING, 'Mengajukan banding atas hasil akreditasi.'],
+            // Banding group
+            ['banding.view', 'Lihat Banding', 'banding', 'Melihat daftar dan detail banding.'],
+            ['banding.review', 'Review Banding', 'banding', 'Memproses dan meninjau banding.'],
+            ['banding.decide', 'Putuskan Banding', 'banding', 'Memutuskan hasil banding akreditasi.'],
 
-            // profile group
-            ['profile.edit', 'Edit Profil Sendiri', Permission::GROUP_PROFILE, 'Mengubah profil dan kredensial sendiri.'],
+            // Master group
+            ['master.edpm', 'Kelola Master EDPM', 'master', 'Mengelola master data EDPM (komponen dan butir).'],
+            ['master.dokumen', 'Kelola Master Dokumen', 'master', 'Mengelola master data dokumen.'],
+            ['master.kategori', 'Kelola Master Kategori', 'master', 'Mengelola master kategori dokumen.'],
+            ['master.role', 'Kelola Master Role', 'master', 'Mengelola role dan hak akses sistem.'],
 
-            // dashboard group
-            ['dashboard.view', 'Akses Dashboard', Permission::GROUP_DASHBOARD, 'Membuka halaman dashboard utama.'],
+            // Account group
+            ['account.view', 'Lihat Akun', 'account', 'Melihat daftar akun pengguna.'],
+            ['account.create', 'Buat Akun', 'account', 'Membuat akun pengguna baru.'],
+            ['account.toggle', 'Toggle Status Akun', 'account', 'Mengaktifkan atau menonaktifkan akun pengguna.'],
+            ['account.delete', 'Hapus Akun', 'account', 'Menghapus akun pengguna.'],
 
-            // system group
-            ['audit_log.view', 'Lihat Audit Log', Permission::GROUP_SYSTEM, 'Membuka log audit aktivitas sistem.'],
-            ['system_config.manage', 'Kelola Konfigurasi Sistem', Permission::GROUP_SYSTEM, 'Mengubah konfigurasi sistem dan pengaturan global.'],
+            // Trash group
+            ['trash.view', 'Lihat Trash', 'trash', 'Melihat data yang sudah dihapus (soft delete).'],
+            ['trash.restore', 'Restore Trash', 'trash', 'Mengembalikan data yang sudah dihapus.'],
+            ['trash.purge', 'Purge Trash', 'trash', 'Menghapus permanen data dari trash.'],
+
+            // Notification group
+            ['notification.view', 'Lihat Notifikasi', 'notification', 'Melihat daftar notifikasi.'],
+            ['notification.retry', 'Retry Notifikasi', 'notification', 'Mengirim ulang notifikasi yang gagal.'],
         ];
 
         foreach ($catalog as [$key, $label, $group, $description]) {
@@ -61,46 +71,6 @@ class PermissionSeeder extends Seeder
                     'description' => $description,
                 ]
             );
-        }
-
-        // Default mapping per role.
-        $admin = Role::find(Role::ID_ADMIN);
-        $asesor = Role::find(Role::ID_ASESOR);
-        $pesantren = Role::find(Role::ID_PESANTREN);
-
-        if ($admin) {
-            // Admin = everything except RBAC config (only super admin manages it).
-            $adminKeys = Permission::query()
-                ->whereNotIn('key', ['roles.manage', 'permissions.manage'])
-                ->pluck('id', 'key');
-            $admin->syncPermissions($adminKeys->values()->all());
-        }
-
-        if ($asesor) {
-            $asesorKeys = Permission::query()
-                ->whereIn('key', [
-                    'dashboard.view',
-                    'akreditasi.review',
-                    'banding.review',
-                    'profile.edit',
-                ])
-                ->pluck('id')
-                ->all();
-            $asesor->syncPermissions($asesorKeys);
-        }
-
-        if ($pesantren) {
-            $pesantrenKeys = Permission::query()
-                ->whereIn('key', [
-                    'dashboard.view',
-                    'edpm.manage',
-                    'akreditasi.assign',
-                    'banding.submit',
-                    'profile.edit',
-                ])
-                ->pluck('id')
-                ->all();
-            $pesantren->syncPermissions($pesantrenKeys);
         }
     }
 }

@@ -258,6 +258,8 @@ new #[Layout('layouts.app')] class extends Component
 
     public function toggleLock()
     {
+        Gate::authorize('pesantren.lock');
+
         if ($this->pesantren) {
             $prevLocked = $this->pesantren->is_locked;
             $this->pesantren->is_locked = ! $this->pesantren->is_locked;
@@ -289,6 +291,8 @@ new #[Layout('layouts.app')] class extends Component
 
     public function saveVisitasiReschedule()
     {
+        Gate::authorize('akreditasi.approve');
+
         $akreditasiService = app(\App\Services\AkreditasiService::class);
 
         $this->validate([
@@ -333,6 +337,8 @@ new #[Layout('layouts.app')] class extends Component
 
     public function saveAdminNv()
     {
+        Gate::authorize('akreditasi.approve');
+
         if ($this->akreditasi->status != 3) {
             session()->flash('error', 'Data tidak dapat diubah karena status bukan Validasi.');
 
@@ -614,6 +620,8 @@ new #[Layout('layouts.app')] class extends Component
 
     public function reassignAsesor(): void
     {
+        Gate::authorize('asesor.assign');
+
         $this->validate([
             'reassignAsesorId' => 'required|integer|exists:asesors,id',
         ], [

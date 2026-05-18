@@ -5,6 +5,7 @@ use App\Services\TrashService;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Gate;
 
 new #[Layout('layouts.app')] class extends Component {
     use WithPagination;
@@ -50,6 +51,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function restore(): void
     {
+        Gate::authorize('trash.restore');
+
         if ($this->previewId === null) {
             return;
         }
@@ -69,6 +72,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function forceDelete(): void
     {
+        Gate::authorize('trash.purge');
+
         if ($this->previewId === null) {
             return;
         }

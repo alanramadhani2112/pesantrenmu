@@ -37,11 +37,16 @@ class UserService
             'name' => $data['name'],
             'email' => $data['email'],
             'role_id' => $data['role_id'],
-            'status' => $data['status'] ? 1 : 0
+            'status' => $data['status'] ? 1 : 0,
         ];
 
         if (!empty($data['password'])) {
             $payload['password'] = Hash::make($data['password']);
+        }
+
+        // Persist sso_sync_role when editing
+        if (isset($data['sso_sync_role'])) {
+            $payload['sso_sync_role'] = (bool) $data['sso_sync_role'];
         }
 
         if ($id) {

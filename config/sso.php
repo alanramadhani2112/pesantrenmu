@@ -3,6 +3,17 @@
 return [
     /*
     |--------------------------------------------------------------------------
+    | SSO Enabled
+    |--------------------------------------------------------------------------
+    |
+    | Determines whether SSO login via Muhammadiyah ID is enabled.
+    | When disabled, the SSO login button will be hidden from the login page.
+    |
+     */
+    'enabled' => env('SSO_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | SSO Server
     |--------------------------------------------------------------------------
     | 
@@ -41,5 +52,39 @@ return [
     |
      */
 
-     'redirect_url' => '/dashboard'
+     'redirect_url' => '/dashboard',
+
+    /*
+    |--------------------------------------------------------------------------
+    | SSO Redirect URI (OAuth Callback)
+    |--------------------------------------------------------------------------
+    |
+    | The OAuth redirect URI used during the SSO authorization flow.
+    | If set, this overrides the default route('sso.callback') URL.
+    | Useful when the app is behind a reverse proxy or custom domain.
+    |
+     */
+    'redirect_uri' => env('SSO_REDIRECT_URI', null),
+
+    /*
+    |--------------------------------------------------------------------------
+    | SSO Scopes
+    |--------------------------------------------------------------------------
+    |
+    | The OAuth scopes to request from the SSO provider.
+    |
+     */
+    'scopes' => env('SSO_SCOPES', 'openid profile email'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | SSO Timeout
+    |--------------------------------------------------------------------------
+    |
+    | The HTTP request timeout (in seconds) for SSO server communication.
+    | If the SSO server does not respond within this time, the request
+    | will be aborted and the user redirected back with an error.
+    |
+     */
+    'timeout' => env('SSO_TIMEOUT', 10),
 ];

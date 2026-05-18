@@ -180,17 +180,6 @@ new #[Layout('layouts.app')] class extends Component {
         title="Akreditasi"
         subtitle="Kelola tugas penilaian, jadwal visitasi, catatan, dan laporan akreditasi pesantren."
     >
-        <x-ui.page-help
-            title="Panduan Tugas Akreditasi Asesor"
-            :items="[
-                'Daftar tugas menampilkan semua pesantren yang ditugaskan kepada Anda',
-                'Klik detail untuk membuka halaman visitasi dan mulai proses penilaian',
-                'Isi semua komponen penilaian sesuai hasil visitasi lapangan',
-                'Tambahkan catatan dan rekomendasi sebelum mengirimkan laporan akhir',
-            ]"
-            dismiss-key="help-asesor-akreditasi"
-        />
-
         @php
             $assessmentRecords = $this->assessments;
             $assessmentCollection = method_exists($assessmentRecords, 'getCollection')

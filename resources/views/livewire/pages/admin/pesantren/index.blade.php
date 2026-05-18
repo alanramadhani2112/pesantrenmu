@@ -104,17 +104,6 @@ new #[Layout('layouts.app')] class extends Component {
         title="Pesantren"
         subtitle="Kelola data pesantren, status akun, dan status akreditasi."
     >
-        <x-ui.page-help
-            title="Panduan Manajemen Pesantren"
-            :items="[
-                'Daftar menampilkan semua pesantren yang terdaftar beserta status akreditasinya',
-                'Gunakan filter untuk menyaring pesantren berdasarkan status akreditasi',
-                'Klik detail pesantren untuk melihat profil lengkap, IPM, SDM, dan EDPM',
-                'Aktifkan atau nonaktifkan akun pesantren sesuai kebutuhan administrasi',
-            ]"
-            dismiss-key="help-admin-pesantren"
-        />
-
         <x-datatable.layout title="Pesantren" :records="$this->pesantrens">
             <x-slot name="filters">
                 <x-ui.filter-bar>

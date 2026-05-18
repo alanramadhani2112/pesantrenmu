@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>403 - Akses Ditolak</title>
+    <title>419 - Sesi Kedaluwarsa</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand/favicon.svg') }}">
     <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.css') }}">
     <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}">
@@ -41,35 +41,35 @@
         <div class="card-body p-10 text-center">
 
             <div class="error-icon-wrap">
-                <i class="ki-duotone ki-shield-cross fs-2tx text-warning">
+                <i class="ki-duotone ki-timer fs-2tx text-warning">
                     <span class="path1"></span>
                     <span class="path2"></span>
                     <span class="path3"></span>
                 </i>
             </div>
 
-            <div class="error-code mb-3">403</div>
+            <div class="error-code mb-3">419</div>
 
-            <h1 class="fw-bold text-gray-900 fs-2 mb-3">Akses Ditolak</h1>
+            <h1 class="fw-bold text-gray-900 fs-2 mb-3">Sesi Kedaluwarsa</h1>
             <p class="text-gray-600 fw-semibold fs-6 mb-8">
-                Anda tidak memiliki izin untuk mengakses halaman ini.<br>
-                Hubungi administrator jika Anda merasa ini adalah kesalahan.
+                Sesi Anda telah berakhir karena tidak aktif.<br>
+                Silakan muat ulang halaman dan coba lagi.
             </p>
 
             <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-                <a href="{{ url('/dashboard') }}" class="btn btn-primary fw-bold px-6">
-                    <i class="ki-duotone ki-home fs-3 me-1">
+                <a href="javascript:location.reload()" class="btn btn-primary fw-bold px-6">
+                    <i class="ki-duotone ki-arrows-circle fs-3 me-1">
                         <span class="path1"></span>
                         <span class="path2"></span>
                     </i>
-                    Ke Dashboard
+                    Muat Ulang
                 </a>
-                <a href="javascript:history.back()" class="btn btn-light fw-bold px-6">
-                    <i class="ki-duotone ki-arrow-left fs-3 me-1">
+                <a href="{{ url('/login') }}" class="btn btn-light fw-bold px-6">
+                    <i class="ki-duotone ki-entrance-right fs-3 me-1">
                         <span class="path1"></span>
                         <span class="path2"></span>
                     </i>
-                    Kembali
+                    Masuk Kembali
                 </a>
             </div>
 

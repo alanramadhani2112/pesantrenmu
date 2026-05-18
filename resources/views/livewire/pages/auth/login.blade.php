@@ -119,16 +119,16 @@ new #[Layout('layouts.guest')] class extends Component
         </div>
     </form>
 
-    <!-- <div class="relative flex items-center py-5">
-        <div class="flex-grow border-t border-gray-300"></div>
-        <span class="flex-shrink mx-4 text-gray-400 text-sm">Atau</span>
-        <div class="flex-grow border-t border-gray-300"></div>
+    @if(config('sso.enabled'))
+    <div class="separator separator-content my-8">
+        <span class="text-gray-500 fw-semibold fs-7">Atau</span>
     </div>
 
-    <div class="flex items-center justify-center">
-        <a href="{{ route('sso.preflight') }}" class="w-full inline-flex justify-center items-center px-4 py-3 rounded-lg shadow-lg transform transition hover:scale-[1.02] active:scale-[0.98] overflow-hidden" 
+    <div class="d-grid">
+        <a href="{{ route('sso.preflight') }}" class="btn btn-flex btn-lg shadow-sm" 
            style="background: linear-gradient(to right, #2c506d, #427c95);">
-            <img src="https://aqsa-dev.muhammadiyah.or.id/assets/media/logos/logo-white-full.png" alt="Muhammadiyah ID" class="h-8 object-contain">
+            <img src="https://aqsa-dev.muhammadiyah.or.id/assets/media/logos/logo-white-full.png" alt="Login via Muhammadiyah ID" class="h-30px object-fit-contain">
         </a>
-    </div> -->
+    </div>
+    @endif
 </div>

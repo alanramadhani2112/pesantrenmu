@@ -5,6 +5,7 @@ use App\Models\Pesantren;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 new #[Layout('layouts.app')] class extends Component {
@@ -29,6 +30,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function toggleLock()
     {
+        Gate::authorize('pesantren.lock');
+
         if ($this->pesantren) {
             $pesantrenService = app(\App\Services\PesantrenService::class);
             if ($pesantrenService->toggleDataLock($this->pesantren->id)) {

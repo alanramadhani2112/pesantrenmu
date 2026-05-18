@@ -116,16 +116,6 @@ new #[Layout('layouts.app')] class extends Component {
         </x-ui.button>
     </x-slot:toolbar>
 
-    <x-ui.page-help
-        title="Panduan Data SDM Pesantren"
-        :items="[
-            'Isi rekap jumlah santri, ustadz, pamong, musyrif, dan tenaga kependidikan',
-            'Data SDM dikelompokkan per unit/jenjang pendidikan di pesantren',
-            'Pastikan angka yang dimasukkan sesuai dengan kondisi aktual pesantren',
-            'Data SDM akan digunakan sebagai bahan penilaian dalam proses akreditasi',
-        ]"
-        dismiss-key="help-pesantren-sdm"
-    />
 
     @php
         $grandTotal = collect($categories)->sum(fn ($category) => $this->getGrandTotal($category['key']));

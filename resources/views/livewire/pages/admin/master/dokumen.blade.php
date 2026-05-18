@@ -5,6 +5,7 @@ use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
 use App\Models\Document;
 use App\Models\DocumentCategory;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 new #[Layout('layouts.app')] class extends Component {
@@ -98,6 +99,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function save()
     {
+        Gate::authorize('master.dokumen');
+
         $rules = [
             'title' => 'required|string|max:255',
             'status' => 'required|integer|in:0,1',
@@ -123,6 +126,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function delete($id)
     {
+        Gate::authorize('master.dokumen');
+
         $documentService = app(\App\Services\DocumentService::class);
         if ($documentService->deleteDocument($id)) {
             $this->dispatch('notification-received', type: 'success', title: 'Berhasil', message: 'Dokumen berhasil dihapus.');

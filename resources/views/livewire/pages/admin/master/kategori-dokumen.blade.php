@@ -5,6 +5,7 @@ use Livewire\Attributes\Layout;
 use Livewire\WithPagination;
 use App\Models\DocumentCategory;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Gate;
 
 new #[Layout('layouts.app')] class extends Component {
     use WithPagination;
@@ -107,6 +108,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function save(): void
     {
+        Gate::authorize('master.kategori');
+
         $rules = [
             'name' => 'required|string|max:150',
             'slug' => [
@@ -148,6 +151,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function delete(int $id): void
     {
+        Gate::authorize('master.kategori');
+
         $cat = DocumentCategory::find($id);
         if (!$cat) {
             $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Kategori tidak ditemukan.');

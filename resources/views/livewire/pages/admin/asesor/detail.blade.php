@@ -263,7 +263,7 @@ new #[Layout('layouts.app')] class extends Component {
                                 @foreach($asesorDocs as $field => $label)
                                     <x-ui.document-item
                                         :label="$label"
-                                        :href="$asesor->$field ? Storage::url($asesor->$field) : null"
+                                        :href="$asesor->$field ? route('secure.asesor-docs', ['asesorId' => $asesor->id, 'field' => $field]) : null"
                                     />
                                 @endforeach
                             </div>

@@ -2,8 +2,10 @@
 
 use Livewire\Volt\Component;
 use Livewire\Attributes\Layout;
-use App\Models\Role;
 use App\Models\Permission;
+use App\Models\PermissionAuditLog;
+use App\Models\Role;
+use Illuminate\Support\Facades\Log;
 
 new #[Layout('layouts.app')] class extends Component {
     /**
@@ -47,21 +49,81 @@ new #[Layout('layouts.app')] class extends Component {
     }
 
     /**
-     * Persist the matrix in a single transaction.
+     * Persist the matrix in a single transaction and write an audit log entry
+     * for every role whose permission set changed.
      */
     public function save(): void
     {
         $roles = $this->getRoles();
 
-        \DB::transaction(function () use ($roles) {
+        // Build a lookup map: permission_id → key (for human-readable audit entries).
+        $permissionKeys = Permission::query()->pluck('key', 'id');
+
+        // Snapshot the current (before) state for each role so we can diff it.
+        $before = [];
+        foreach ($roles as $role) {
+            $before[$role->id] = $role->permissions()->pluck('permissions.id')->all();
+        }
+
+        \DB::transaction(function () use ($roles, $before, $permissionKeys): void {
+            $actor   = auth()->user();
+            $request = request();
+
             foreach ($roles as $role) {
-                $granted = collect($this->matrix[$role->id] ?? [])
+                $newGranted = collect($this->matrix[$role->id] ?? [])
                     ->filter(fn ($v) => (bool) $v)
                     ->keys()
                     ->map(fn ($id) => (int) $id)
                     ->all();
 
-                $role->syncPermissions($granted);
+                $oldGranted = array_map('intval', $before[$role->id]);
+
+                $added   = array_values(array_diff($newGranted, $oldGranted));
+                $removed = array_values(array_diff($oldGranted, $newGranted));
+
+                $role->syncPermissions($newGranted);
+
+                // Only write an audit entry when something actually changed.
+                if (empty($added) && empty($removed)) {
+                    continue;
+                }
+
+                $addedKeys   = array_values($permissionKeys->only($added)->all());
+                $removedKeys = array_values($permissionKeys->only($removed)->all());
+
+                // --- Primary audit: structured DB record ---
+                try {
+                    PermissionAuditLog::create([
+                        'user_id'             => $actor?->id,
+                        'role_id'             => $role->id,
+                        'permissions_added'   => $addedKeys ?: null,
+                        'permissions_removed' => $removedKeys ?: null,
+                        'ip_address'          => $request?->ip(),
+                        'user_agent'          => $request?->userAgent(),
+                        'created_at'          => now(),
+                    ]);
+                } catch (\Throwable $e) {
+                    // Fallback: if the DB write fails for any reason, at least
+                    // leave a trace in the application log.
+                    Log::warning('permission_audit_db_failed', [
+                        'error'              => $e->getMessage(),
+                        'actor_id'           => $actor?->id,
+                        'role_id'            => $role->id,
+                        'permissions_added'  => $addedKeys,
+                        'permissions_removed'=> $removedKeys,
+                    ]);
+                }
+
+                // --- Secondary audit: always write to the application log ---
+                Log::info('permission_matrix_changed', [
+                    'actor_id'            => $actor?->id,
+                    'actor_name'          => $actor?->name,
+                    'role_id'             => $role->id,
+                    'role_name'           => $role->name,
+                    'permissions_added'   => $addedKeys,
+                    'permissions_removed' => $removedKeys,
+                    'ip_address'          => $request?->ip(),
+                ]);
             }
         });
 

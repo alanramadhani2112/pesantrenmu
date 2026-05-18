@@ -209,6 +209,17 @@ window.adminManagement = () => ({
             if (result.isConfirmed) callWire(wire, 'deleteUser', id);
         });
     },
+    confirmUnlinkSso(wire, id, name = 'akun ini') {
+        ask({
+            title: 'Unlink SSO?',
+            text: `Akun ${name} akan di-unlink dari Muhammadiyah ID. Data profil SSO akan dihapus.`,
+            icon: 'warning',
+            confirmVariant: 'warning',
+            confirmButtonText: 'Ya, unlink',
+        }).then((result) => {
+            if (result.isConfirmed) callWire(wire, 'unlinkSso', id);
+        });
+    },
     confirmSaveAccount(wire) {
         ask({
             title: 'Simpan akun?',

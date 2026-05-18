@@ -5,6 +5,7 @@ namespace App\Livewire\Pages\Admin;
 use App\Models\FailedNotification;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -76,6 +77,8 @@ class FailedNotificationDashboard extends Component
      */
     public function retry(int $id): void
     {
+        Gate::authorize('notification.retry');
+
         $record = FailedNotification::findOrFail($id);
         $record->retry();
 
@@ -87,6 +90,8 @@ class FailedNotificationDashboard extends Component
      */
     public function dismiss(int $id): void
     {
+        Gate::authorize('notification.retry');
+
         $record = FailedNotification::findOrFail($id);
         $record->dismiss();
 

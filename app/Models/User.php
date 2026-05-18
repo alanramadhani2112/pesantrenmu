@@ -58,6 +58,8 @@ class User extends Authenticatable
         'role_id',
         'uuid',
         'status',
+        'sso_linked_at',
+        'sso_sync_role',
     ];
 
     /**
@@ -80,6 +82,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'sso_linked_at' => 'datetime',
+            'sso_sync_role' => 'boolean',
         ];
     }
 

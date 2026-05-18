@@ -19,7 +19,7 @@ Volt::route('roles', 'pages.roles.index')
     ->name('roles.index');
 
 Volt::route('accounts', 'pages.accounts.index')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'permission:account.view'])
     ->name('accounts.index');
 
 Volt::route('documents/{doc?}', 'pages.dokumen.index')
@@ -40,15 +40,19 @@ Route::middleware(['auth', 'verified', 'role:admin'])
     ->name('admin.')
     ->group(function () {
         Volt::route('master-edpm', 'pages.admin.master-edpm')
+            ->middleware('permission:master.edpm')
             ->name('master-edpm');
 
         Volt::route('master-kategori-dokumen', 'pages.admin.master.kategori-dokumen')
+            ->middleware('permission:master.kategori')
             ->name('master-kategori-dokumen');
 
         Volt::route('master-document', 'pages.admin.master.dokumen')
+            ->middleware('permission:master.dokumen')
             ->name('master-dokumen');
 
         Volt::route('master-role-permission', 'pages.admin.master.role-permission')
+            ->middleware('permission:master.role')
             ->name('master-role-permission');
 
         Volt::route('akreditasi', 'pages.admin.akreditasi')
@@ -64,21 +68,27 @@ Route::middleware(['auth', 'verified', 'role:admin'])
             ->name('asesor.detail');
 
         Volt::route('banding', 'pages.admin.banding')
+            ->middleware('permission:banding.view')
             ->name('banding');
 
         Volt::route('banding/{id}', 'pages.admin.banding-detail')
+            ->middleware('permission:banding.view')
             ->name('banding-detail');
 
         Volt::route('pesantren', 'pages.admin.pesantren.index')
+            ->middleware('permission:pesantren.view')
             ->name('pesantren.index');
 
         Volt::route('pesantren/{uuid}', 'pages.admin.pesantren.detail')
+            ->middleware('permission:pesantren.view')
             ->name('pesantren.detail');
 
         Route::get('failed-notifications', \App\Livewire\Pages\Admin\FailedNotificationDashboard::class)
+            ->middleware('permission:notification.view')
             ->name('failed-notifications');
 
         Volt::route('trash', 'pages.admin.trash')
+            ->middleware('permission:trash.view')
             ->name('trash');
     });
 
@@ -128,6 +138,38 @@ Route::middleware(['auth', 'verified', 'role:pesantren'])
         Volt::route('akreditasi/{uuid}', 'pages.pesantren.akreditasi-detail')
             ->name('akreditasi-detail');
     });
+
+/*
+|--------------------------------------------------------------------------
+| Secure private file download
+|--------------------------------------------------------------------------
+| Serves KTP / ijazah / kartu_nbm from the local (non-public) disk.
+| Only the asesor themselves or admin/super-admin may download.
+*/
+Route::get('secure/asesor-docs/{asesorId}/{field}', function (int $asesorId, string $field) {
+    $allowedFields = ['ktp_file', 'ijazah_file', 'kartu_nbm_file'];
+
+    if (! in_array($field, $allowedFields, true)) {
+        abort(404);
+    }
+
+    $asesor = \App\Models\Asesor::findOrFail($asesorId);
+
+    /** @var \App\Models\User $user */
+    $user = auth()->user();
+
+    if ($asesor->user_id !== $user->id && ! $user->canAccessAdminArea()) {
+        abort(403);
+    }
+
+    $path = $asesor->$field;
+
+    if (! $path || ! \Illuminate\Support\Facades\Storage::disk('local')->exists($path)) {
+        abort(404);
+    }
+
+    return \Illuminate\Support\Facades\Storage::disk('local')->response($path);
+})->middleware(['auth', 'verified'])->name('secure.asesor-docs');
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/sso/sso.php';
