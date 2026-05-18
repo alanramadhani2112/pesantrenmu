@@ -227,23 +227,28 @@ new #[Layout('layouts.app')] class extends Component {
         </x-ui.button>
     </x-slot:toolbar>
 
+    <x-ui.page-help
+        title="Panduan Evaluasi Data Pesantren Muhammadiyah (EDPM)"
+        :items="[
+            'EDPM mengevaluasi kinerja pesantren berdasarkan komponen-komponen yang telah ditetapkan',
+            'Isi setiap komponen dengan data yang akurat dan sertakan tautan bukti pendukung',
+            'Tambahkan catatan kinerja untuk menjelaskan kondisi dan upaya perbaikan',
+            'Data EDPM akan menjadi dasar penilaian komprehensif dalam akreditasi',
+        ]"
+        dismiss-key="help-pesantren-edpm"
+    />
+
     <div class="row g-5 mb-6">
         <div class="col-lg-4">
-            <x-ui.stat-card label="Status EDPM" value="{{ $isLocked ? 'Terkunci' : 'Aktif' }}" variant="{{ $isLocked ? 'warning' : 'success' }}">
-                <x-slot:icon><x-ui.icon name="shield-tick" class="fs-2" /></x-slot:icon>
-            </x-ui.stat-card>
+            <x-ui.stat-card label="Status EDPM" value="{{ $isLocked ? 'Terkunci' : 'Aktif' }}" variant="{{ $isLocked ? 'warning' : 'success' }}" icon="shield-tick" />
         </div>
 
         <div class="col-lg-4">
-            <x-ui.stat-card label="Komponen Aktif" value="{{ $komponenCount }} Komponen" variant="info">
-                <x-slot:icon><x-ui.icon name="menu" class="fs-2" /></x-slot:icon>
-            </x-ui.stat-card>
+            <x-ui.stat-card label="Komponen Aktif" value="{{ $komponenCount }} Komponen" variant="info" icon="menu" />
         </div>
 
         <div class="col-lg-4">
-            <x-ui.stat-card label="Langkah Saat Ini" value="{{ $currentKomponen?->nama ?? 'Belum Ada Komponen' }}" variant="primary">
-                <x-slot:icon><x-ui.icon name="layers" class="fs-2" /></x-slot:icon>
-            </x-ui.stat-card>
+            <x-ui.stat-card label="Langkah Saat Ini" value="{{ $currentKomponen?->nama ?? 'Belum Ada Komponen' }}" variant="primary" icon="layers" />
         </div>
     </div>
 

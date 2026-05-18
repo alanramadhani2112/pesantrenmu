@@ -52,7 +52,9 @@ new #[Layout('layouts.guest')] class extends Component
                     autocomplete="username"
                 />
             </div>
-            <x-input-error :messages="$errors->get('form.email')" class="invalid-feedback d-block mt-2" />
+            @error('form.email')
+                <div class="invalid-feedback d-block mt-2">{{ $message }}</div>
+            @enderror
         </div>
 
         <div class="fv-row mb-8" x-data="{ show: false }">
@@ -99,7 +101,9 @@ new #[Layout('layouts.guest')] class extends Component
                 </x-ui.button>
             </div>
 
-            <x-input-error :messages="$errors->get('form.password')" class="invalid-feedback d-block mt-2" />
+            @error('form.password')
+                <div class="invalid-feedback d-block mt-2">{{ $message }}</div>
+            @enderror
         </div>
 
         <div class="d-grid">

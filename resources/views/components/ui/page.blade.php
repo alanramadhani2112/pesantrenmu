@@ -2,7 +2,7 @@
     'title',
     'subtitle' => null,
     'compact' => false,
-    'showHeading' => false,
+    'showHeading' => true,
 ])
 
 @section('title', $title)

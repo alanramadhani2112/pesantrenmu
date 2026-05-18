@@ -118,6 +118,17 @@ new #[Layout('layouts.app')] class extends Component {
         title="Asesor"
         subtitle="Kelola asesor, penugasan aktif, dan status ketersediaan."
     >
+        <x-ui.page-help
+            title="Panduan Manajemen Asesor"
+            :items="[
+                'Daftar menampilkan semua asesor beserta status penugasan dan ketersediaannya',
+                'Gunakan filter peran untuk membedakan Ketua Asesor dan Anggota Asesor',
+                'Assign asesor ke akreditasi melalui halaman detail akreditasi pesantren',
+                'Export data asesor ke Excel untuk keperluan pelaporan dan dokumentasi',
+            ]"
+            dismiss-key="help-admin-asesor"
+        />
+
         <x-datatable.layout title="Asesor" :records="$this->asesors">
             <x-slot name="filters">
                 <x-ui.filter-bar>

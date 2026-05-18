@@ -180,6 +180,17 @@ new #[Layout('layouts.app')] class extends Component {
         title="Akreditasi"
         subtitle="Kelola tugas penilaian, jadwal visitasi, catatan, dan laporan akreditasi pesantren."
     >
+        <x-ui.page-help
+            title="Panduan Tugas Akreditasi Asesor"
+            :items="[
+                'Daftar tugas menampilkan semua pesantren yang ditugaskan kepada Anda',
+                'Klik detail untuk membuka halaman visitasi dan mulai proses penilaian',
+                'Isi semua komponen penilaian sesuai hasil visitasi lapangan',
+                'Tambahkan catatan dan rekomendasi sebelum mengirimkan laporan akhir',
+            ]"
+            dismiss-key="help-asesor-akreditasi"
+        />
+
         @php
             $assessmentRecords = $this->assessments;
             $assessmentCollection = method_exists($assessmentRecords, 'getCollection')
@@ -408,14 +419,14 @@ new #[Layout('layouts.app')] class extends Component {
             <x-ui.modal-body>
 
             @if($selectedAssessment)
-            <div class="bg-gray-50/50 rounded-2xl p-6 border border-slate-100 mb-8">
+            <div class="bg-light rounded-4 p-6 border border-gray-200 mb-8">
                 <div class="mb-4">
-                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Pesantren</p>
-                    <p class="text-sm font-black text-[#1e3a5f]">{{ $selectedAssessment->akreditasi->user?->pesantren?->nama_pesantren ?? $selectedAssessment->akreditasi->user?->name }}</p>
+                    <p class="text-muted fs-8 fw-bold text-uppercase mb-1">Pesantren</p>
+                    <p class="fs-6 fw-bolder text-gray-900">{{ $selectedAssessment->akreditasi->user?->pesantren?->nama_pesantren ?? $selectedAssessment->akreditasi->user?->name }}</p>
                 </div>
                 <div>
-                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Jadwal Penilaian</p>
-                    <p class="text-sm font-black text-[#1e3a5f]">{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_mulai)->format('d') }}â€“{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_berakhir)->format('d F Y') }}</p>
+                    <p class="text-muted fs-8 fw-bold text-uppercase mb-1">Jadwal Penilaian</p>
+                    <p class="fs-6 fw-bolder text-gray-900">{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_mulai)->format('d') }}–{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_berakhir)->format('d F Y') }}</p>
                 </div>
             </div>
             @endif
@@ -476,14 +487,14 @@ new #[Layout('layouts.app')] class extends Component {
             <x-ui.modal-body>
 
             @if($selectedAssessment)
-            <div class="bg-gray-50/50 rounded-2xl p-6 border border-slate-100 mb-8">
+            <div class="bg-light rounded-4 p-6 border border-gray-200 mb-8">
                 <div class="mb-4">
-                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Pesantren</p>
-                    <p class="text-sm font-black text-[#1e3a5f]">{{ $selectedAssessment->akreditasi->user?->pesantren?->nama_pesantren ?? $selectedAssessment->akreditasi->user?->name }}</p>
+                    <p class="text-muted fs-8 fw-bold text-uppercase mb-1">Pesantren</p>
+                    <p class="fs-6 fw-bolder text-gray-900">{{ $selectedAssessment->akreditasi->user?->pesantren?->nama_pesantren ?? $selectedAssessment->akreditasi->user?->name }}</p>
                 </div>
                 <div>
-                    <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Jadwal Assessment</p>
-                    <p class="text-sm font-black text-[#1e3a5f]">{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_mulai)->format('d') }}â€“{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_berakhir)->format('d F Y') }}</p>
+                    <p class="text-muted fs-8 fw-bold text-uppercase mb-1">Jadwal Penilaian</p>
+                    <p class="fs-6 fw-bolder text-gray-900">{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_mulai)->format('d') }}–{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_berakhir)->format('d F Y') }}</p>
                 </div>
             </div>
             @endif
@@ -524,7 +535,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     <!-- Modal Catatan (View Only) -->
     <x-ui.modal name="catatan-modal" focusable>
-        <div class="p-0 overflow-hidden rounded-3xl spm-modal-content-scroll">
+        <div class="p-0 overflow-hidden rounded-4 spm-modal-content-scroll">
             @if($selectedAkreditasiNotes)
             @php
             $latestCatatan = $selectedAkreditasiNotes->catatans->sortByDesc('created_at')->first();
@@ -532,44 +543,44 @@ new #[Layout('layouts.app')] class extends Component {
             @endphp
 
             <div class="p-8">
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-xl font-bold text-[#1e3a5f]">
+                <div class="d-flex justify-content-between align-items-center mb-8">
+                    <h2 class="fs-4 fw-bold text-gray-900">
                         {{ $isRejection ? 'Catatan Penolakan Visitasi' : 'Catatan Penerimaan Visitasi' }}
                     </h2>
                     <x-ui.icon-button icon="cross" label="Tutup" variant="light" size="sm" x-on:click="$dispatch('close')" />
                 </div>
 
-                <div class="space-y-8 pr-2 custom-scrollbar">
+                <div class="d-flex flex-column gap-8 pe-2 custom-scrollbar">
                     @forelse($selectedAkreditasiNotes->catatans->sortByDesc('created_at') as $catatan)
                     @php
                     $isNoteRejection = !empty($catatan->perbaikan);
                     @endphp
-                    <div class="bg-white border-b border-slate-50 last:border-0 pb-8 last:pb-0">
-                        <div class="flex items-center gap-4 mb-6">
+                    <div class="border-bottom border-gray-200 pb-8">
+                        <div class="d-flex align-items-center gap-4 mb-6">
                             <img src="https://ui-avatars.com/api/?name={{ urlencode($catatan->user->name) }}&color=1e3a5f&background=f1f5f9"
-                                class="w-12 h-12 rounded-2xl border-2 border-white shadow-sm object-cover" alt="Avatar">
+                                class="w-40px h-40px rounded-3 border border-white shadow-sm object-cover" alt="Avatar">
                             <div>
-                                <h3 class="text-sm font-black text-[#1e3a5f]">{{ $catatan->user->name }}</h3>
-                                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                <h3 class="fs-6 fw-bolder text-gray-900">{{ $catatan->user->name }}</h3>
+                                <p class="text-muted fs-8 fw-bold text-uppercase">
                                     {{ $catatan->user->isAsesor() ? 'Ketua Asesor' : ($catatan->user->isAdmin() ? 'Administrator Pusat' : 'Pihak Berwenang') }}
                                 </p>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 mb-6">
-                            <div>
-                                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Status:</p>
+                        <div class="row g-4 mb-6">
+                            <div class="col-6">
+                                <p class="text-muted fs-8 fw-bold text-uppercase mb-2">Status:</p>
                                 @if($isNoteRejection)
                                 <x-ui.badge variant="warning">Perlu Perbaikan Dokumen</x-ui.badge>
                                 @else
                                 <x-ui.badge variant="success">Visitasi Dijadwalkan</x-ui.badge>
                                 @endif
                             </div>
-                            <div>
-                                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">
+                            <div class="col-6">
+                                <p class="text-muted fs-8 fw-bold text-uppercase mb-2">
                                     {{ $isNoteRejection ? 'Tanggal Review:' : 'Jadwal Visitasi:' }}
                                 </p>
-                                <p class="text-[11px] font-black text-gray-700">
+                                <p class="fs-7 fw-bolder text-gray-700">
                                     @if($isNoteRejection)
                                     {{ $catatan->created_at->translatedFormat('d F Y') }}
                                     @else
@@ -585,8 +596,8 @@ new #[Layout('layouts.app')] class extends Component {
 
                         @if($isNoteRejection)
                         <div class="mb-6">
-                            <p class="text-[11px] font-black text-gray-800 mb-3">Dokumen yang memerlukan perbaikan</p>
-                            <div class="flex flex-wrap gap-2">
+                            <p class="fs-7 fw-bolder text-gray-800 mb-3">Dokumen yang memerlukan perbaikan</p>
+                            <div class="d-flex flex-wrap gap-2">
                                 @foreach(explode(', ', $catatan->perbaikan) as $p)
                                 <x-ui.badge variant="warning" class="text-uppercase">
                                     <x-ui.icon name="document" class="fs-7 me-1" />{{ $p }}
@@ -596,18 +607,16 @@ new #[Layout('layouts.app')] class extends Component {
                         </div>
                         @endif
 
-                        <div class="rounded-3xl p-6 {{ $isNoteRejection ? 'bg-light-warning' : 'bg-light-success' }}">
-                            <div class="text-xs leading-relaxed font-medium space-y-4 prose-sm max-w-none text-gray-700">
+                        <div class="rounded-4 p-6 {{ $isNoteRejection ? 'bg-light-warning' : 'bg-light-success' }}">
+                            <div class="fs-7 fw-medium text-gray-700">
                                 {!! nl2br(e($catatan->catatan)) !!}
                             </div>
                         </div>
                     </div>
                     @empty
                     <div class="text-center py-12">
-                        <svg class="w-12 h-12 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <p class="text-gray-400 font-medium font-bold text-xs text-center">Tidak ada catatan ditemukan.</p>
+                        <x-ui.icon name="document" class="fs-3x text-gray-300 mb-3 d-block mx-auto" />
+                        <p class="text-muted fw-semibold fs-7">Tidak ada catatan ditemukan.</p>
                     </div>
                     @endforelse
                 </div>

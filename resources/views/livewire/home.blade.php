@@ -331,11 +331,8 @@
                         :label="$card['label']"
                         :value="$card['value']"
                         :variant="$card['variant']"
-                    >
-                        <x-slot name="icon">
-                            <x-ui.icon :name="$card['icon']" class="fs-2x" />
-                        </x-slot>
-                    </x-ui.stat-card>
+                        :icon="$card['icon']"
+                    />
                 </div>
             @endforeach
         </div>

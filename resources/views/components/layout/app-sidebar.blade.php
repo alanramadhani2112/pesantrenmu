@@ -170,6 +170,19 @@
     </div>
     </div>
 
+    {{-- Buka Panduan button --}}
+    <div class="px-4 pb-4">
+        <button
+            type="button"
+            class="btn btn-light-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+            x-on:click="$dispatch('open-onboarding-guide')"
+            data-ui-sidebar-help="metronic"
+        >
+            <x-ui.icon name="information" class="fs-5" />
+            <span class="fw-semibold fs-7">Buka Panduan</span>
+        </button>
+    </div>
+
     {{-- SidebarBadges Livewire component for dynamic badge count updates --}}
     <livewire:layout.sidebar-badges />
 

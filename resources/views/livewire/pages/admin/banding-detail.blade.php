@@ -161,7 +161,7 @@ new #[Layout('layouts.app')] class extends Component
         @if (session()->has('message'))
             <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
                 {{ session('message') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <x-ui.button unstyled type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></x-ui.button>
             </div>
         @endif
 
@@ -349,7 +349,7 @@ new #[Layout('layouts.app')] class extends Component
                         <h5 class="modal-title">
                             {{ $banding->status === 'pending' ? 'Assign Reviewer' : 'Reassign Reviewer' }}
                         </h5>
-                        <button type="button" class="btn-close" wire:click="$set('showAssignModal', false)"></button>
+                        <x-ui.button unstyled type="button" class="btn-close" wire:click="$set('showAssignModal', false)" aria-label="Tutup"></x-ui.button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
@@ -363,11 +363,11 @@ new #[Layout('layouts.app')] class extends Component
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-light" wire:click="$set('showAssignModal', false)">Batal</button>
+                        <x-ui.button type="button" variant="light" wire:click="$set('showAssignModal', false)">Batal</x-ui.button>
                         @if($banding->status === 'pending')
-                            <button type="button" class="btn btn-primary" wire:click="assignReviewer">Assign</button>
+                            <x-ui.button type="button" variant="primary" wire:click="assignReviewer">Assign</x-ui.button>
                         @else
-                            <button type="button" class="btn btn-warning" wire:click="reassignReviewer">Reassign</button>
+                            <x-ui.button type="button" variant="warning" wire:click="reassignReviewer">Reassign</x-ui.button>
                         @endif
                     </div>
                 </div>
@@ -384,7 +384,7 @@ new #[Layout('layouts.app')] class extends Component
                         <h5 class="modal-title">
                             {{ $decisionType === 'accept' ? 'Terima Banding' : 'Tolak Banding' }}
                         </h5>
-                        <button type="button" class="btn-close" wire:click="$set('showDecisionModal', false)"></button>
+                        <x-ui.button unstyled type="button" class="btn-close" wire:click="$set('showDecisionModal', false)" aria-label="Tutup"></x-ui.button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
@@ -396,10 +396,10 @@ new #[Layout('layouts.app')] class extends Component
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-light" wire:click="$set('showDecisionModal', false)">Batal</button>
-                        <button type="button" class="btn btn-{{ $decisionType === 'accept' ? 'success' : 'danger' }}" wire:click="submitDecision">
+                        <x-ui.button type="button" variant="light" wire:click="$set('showDecisionModal', false)">Batal</x-ui.button>
+                        <x-ui.button type="button" :variant="$decisionType === 'accept' ? 'success' : 'danger'" wire:click="submitDecision">
                             {{ $decisionType === 'accept' ? 'Terima' : 'Tolak' }}
-                        </button>
+                        </x-ui.button>
                     </div>
                 </div>
             </div>

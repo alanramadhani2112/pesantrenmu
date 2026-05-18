@@ -61,6 +61,17 @@ new #[Layout('layouts.app')] class extends Component {
             <x-ui.badge variant="warning">Pending: {{ $this->pendingCount }}</x-ui.badge>
         </x-slot>
 
+        <x-ui.page-help
+            title="Panduan Manajemen Banding"
+            :items="[
+                'Banding diajukan pesantren ketika pengajuan akreditasi mereka ditolak',
+                'Tinjau alasan banding dan dokumen pendukung sebelum membuat keputusan',
+                'Setujui banding untuk membuka kembali proses akreditasi pesantren tersebut',
+                'Tolak banding dengan memberikan alasan yang jelas dan dapat dipertanggungjawabkan',
+            ]"
+            dismiss-key="help-admin-banding"
+        />
+
         <x-datatable.layout
             title="Daftar Banding"
             subtitle="Filter berdasarkan status, cari pesantren, lalu tindak lanjuti banding yang membutuhkan keputusan."

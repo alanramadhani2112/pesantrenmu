@@ -61,23 +61,28 @@
         </x-ui.button>
     </x-slot:toolbar>
 
+    <x-ui.page-help
+        title="Panduan Visitasi Akreditasi"
+        :items="[
+            'Periksa data profil, IPM, SDM, dan EDPM pesantren sebelum memulai penilaian',
+            'Isi skor dan catatan untuk setiap komponen penilaian secara teliti',
+            'Gunakan fitur catatan untuk mendokumentasikan temuan selama visitasi',
+            'Kirim laporan akhir setelah semua komponen terisi dan diverifikasi',
+        ]"
+        dismiss-key="help-asesor-akreditasi-detail"
+    />
+
     <div class="row g-5 mb-6">
         <div class="col-lg-4">
-            <x-ui.stat-card label="Status Tugas" value="{{ Akreditasi::getStatusLabel($akreditasi->status) }}" variant="{{ $statusVariant }}">
-                <x-slot:icon><x-ui.icon name="shield-tick" class="fs-2" /></x-slot:icon>
-            </x-ui.stat-card>
+            <x-ui.stat-card label="Status Tugas" value="{{ Akreditasi::getStatusLabel($akreditasi->status) }}" variant="{{ $statusVariant }}" icon="shield-tick" />
         </div>
 
         <div class="col-lg-4">
-            <x-ui.stat-card label="Jadwal Visitasi" value="{{ $akreditasi->tgl_visitasi ? \Carbon\Carbon::parse($akreditasi->tgl_visitasi)->format('d M Y') : 'Belum Dijadwalkan' }}" variant="info">
-                <x-slot:icon><x-ui.icon name="calendar" class="fs-2" /></x-slot:icon>
-            </x-ui.stat-card>
+            <x-ui.stat-card label="Jadwal Visitasi" value="{{ $akreditasi->tgl_visitasi ? \Carbon\Carbon::parse($akreditasi->tgl_visitasi)->format('d M Y') : 'Belum Dijadwalkan' }}" variant="info" icon="calendar" />
         </div>
 
         <div class="col-lg-4">
-            <x-ui.stat-card label="Tab Aktif" value="{{ \Illuminate\Support\Str::headline($activeTab) }}" variant="success">
-                <x-slot:icon><x-ui.icon name="menu" class="fs-2" /></x-slot:icon>
-            </x-ui.stat-card>
+            <x-ui.stat-card label="Tab Aktif" value="{{ \Illuminate\Support\Str::headline($activeTab) }}" variant="success" icon="menu" />
         </div>
     </div>
 
@@ -160,12 +165,8 @@
                                 </div>
                                 <div class="col-lg-5">
                                     <div class="d-flex flex-column gap-4">
-                                        <x-ui.stat-card label="Total Luas Tanah" value="{{ $pesantren->luas_tanah ?? '-' }} m2" variant="success">
-                                            <x-slot:icon><x-ui.icon name="geolocation" class="fs-2" /></x-slot:icon>
-                                        </x-ui.stat-card>
-                                        <x-ui.stat-card label="Total Luas Bangunan" value="{{ $pesantren->luas_bangunan ?? '-' }} m2" variant="info">
-                                            <x-slot:icon><x-ui.icon name="category" class="fs-2" /></x-slot:icon>
-                                        </x-ui.stat-card>
+                                        <x-ui.stat-card label="Total Luas Tanah" value="{{ $pesantren->luas_tanah ?? '-' }} m2" variant="success" icon="geolocation" />
+                                        <x-ui.stat-card label="Total Luas Bangunan" value="{{ $pesantren->luas_bangunan ?? '-' }} m2" variant="info" icon="category" />
                                     </div>
                                 </div>
                             </div>

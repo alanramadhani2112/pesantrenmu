@@ -73,7 +73,7 @@ new class extends Component {
 
         <div class="py-1 spm-notification-scroll">
                 @forelse($this->notifications as $notification)
-                    <button type="button" wire:click="markAsRead('{{ $notification->id }}')" class="spm-notification-item d-flex align-items-start w-100 text-start border-0 bg-transparent {{ $notification->read_at ? 'is-read' : 'is-unread' }}">
+                    <x-ui.button unstyled type="button" wire:click="markAsRead('{{ $notification->id }}')" class="spm-notification-item d-flex align-items-start w-100 text-start border-0 bg-transparent {{ $notification->read_at ? 'is-read' : 'is-unread' }}">
                             <div class="flex-grow-1 min-w-0">
                                 <p class="spm-notification-title mb-1">{{ $notification->data['title'] }}</p>
                                 <p class="spm-notification-message mb-1">{{ $notification->data['message'] }}</p>
@@ -82,7 +82,7 @@ new class extends Component {
                             @if(!$notification->read_at)
                                 <span class="spm-notification-dot mt-1 ms-3"></span>
                             @endif
-                    </button>
+                    </x-ui.button>
                 @empty
                     <div class="px-4 py-8 text-center text-muted fs-7">
                         Tidak ada notifikasi.

@@ -38,6 +38,27 @@ new class extends Component {
         }
     }
 
+    public function openGuide(): void
+    {
+        try {
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+
+            if (!$user) {
+                return;
+            }
+
+            $onboardingService = app(OnboardingService::class);
+            $this->steps = $onboardingService->getStepsForRole($user->role_id);
+            $this->completionStatus = $onboardingService->getStepCompletionStatus($user->id, $user->role_id);
+            $this->showModal = true;
+        } catch (\Exception $e) {
+            Log::error('OnboardingGuide: Failed to open guide', [
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
     public function navigateToStep(string $stepKey): void
     {
         try {
@@ -144,46 +165,34 @@ new class extends Component {
     }
 }; ?>
 
-<div>
+<div x-on:open-onboarding-guide.window="$wire.openGuide()">
     @if($showModal)
-    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);">
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5);" role="dialog" aria-modal="true" aria-labelledby="onboarding-modal-title">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header border-0 pb-0">
-                    <h3 class="modal-title fw-bold text-gray-800">
-                        <i class="ki-duotone ki-rocket fs-2x text-primary me-2">
-                            <span class="path1"></span>
-                            <span class="path2"></span>
-                        </i>
-                        Selamat Datang di PesantrenMu!
+                    <h3 class="modal-title fw-bold text-gray-800" id="onboarding-modal-title">
+                        <x-ui.icon name="rocket" class="fs-2x text-primary me-2" />
+                        Panduan Memulai PesantrenMu
                     </h3>
-                    <button type="button" class="btn btn-sm btn-icon btn-active-color-primary" wire:click="skipOnboarding">
-                        <i class="ki-duotone ki-cross fs-1">
-                            <span class="path1"></span>
-                            <span class="path2"></span>
-                        </i>
-                    </button>
+                    <x-ui.button type="button" variant="light" size="sm" class="btn-icon btn-active-color-primary" wire:click="skipOnboarding" aria-label="Tutup panduan">
+                        <x-ui.icon name="cross-circle" class="fs-2" />
+                    </x-ui.button>
                 </div>
 
                 <div class="modal-body pt-2">
                     @if($this->allStepsCompleted())
                         {{-- Congratulatory message when all steps completed --}}
                         <div class="text-center py-10">
-                            <i class="ki-duotone ki-check-circle fs-5x text-success mb-5">
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-                            </i>
+                            <x-ui.icon name="check-circle" class="fs-5x text-success mb-5" />
                             <h2 class="fw-bold text-gray-800 mb-3">Selamat! 🎉</h2>
                             <p class="text-gray-600 fs-5 mb-8">
                                 Anda telah menyelesaikan semua langkah panduan. Sistem siap digunakan sepenuhnya.
                             </p>
-                            <button type="button" class="btn btn-primary btn-lg" wire:click="completeOnboarding">
-                                <i class="ki-duotone ki-check fs-2 me-1">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                </i>
+                            <x-ui.button type="button" variant="primary" size="lg" wire:click="completeOnboarding">
+                                <x-ui.icon name="check-circle" class="fs-2 me-1" />
                                 Selesai
-                            </button>
+                            </x-ui.button>
                         </div>
                     @else
                         {{-- Onboarding checklist --}}
@@ -195,42 +204,44 @@ new class extends Component {
                             @foreach($steps as $index => $step)
                                 @php
                                     $isCompleted = $completionStatus[$step['key']] ?? false;
+                                    $icon = $step['icon'] ?? 'information';
+                                    $description = $step['description'] ?? '';
                                 @endphp
                                 <div
                                     wire:click="navigateToStep('{{ $step['key'] }}')"
                                     class="d-flex align-items-center p-4 rounded border border-dashed cursor-pointer
                                         {{ $isCompleted ? 'border-success bg-light-success' : 'border-gray-300 bg-hover-light' }}"
                                     style="cursor: pointer;"
+                                    role="button"
+                                    tabindex="0"
+                                    aria-label="Langkah {{ $index + 1 }}: {{ $step['label'] }}"
                                 >
-                                    {{-- Step number or checkmark --}}
-                                    <div class="me-4">
+                                    {{-- Step icon or checkmark --}}
+                                    <div class="me-4 flex-shrink-0">
                                         @if($isCompleted)
-                                            <div class="w-35px h-35px rounded-circle bg-success d-flex align-items-center justify-content-center">
-                                                <i class="ki-duotone ki-check fs-4 text-white">
-                                                    <span class="path1"></span>
-                                                    <span class="path2"></span>
-                                                </i>
+                                            <div class="w-45px h-45px rounded-circle bg-success d-flex align-items-center justify-content-center">
+                                                <x-ui.icon name="check-circle" class="fs-3 text-white" />
                                             </div>
                                         @else
-                                            <div class="w-35px h-35px rounded-circle bg-light-primary d-flex align-items-center justify-content-center">
-                                                <span class="fw-bold text-primary fs-6">{{ $index + 1 }}</span>
+                                            <div class="w-45px h-45px rounded-circle bg-light-primary d-flex align-items-center justify-content-center">
+                                                <x-ui.icon :name="$icon" class="fs-3 text-primary" />
                                             </div>
                                         @endif
                                     </div>
 
-                                    {{-- Step label --}}
-                                    <div class="flex-grow-1">
-                                        <span class="fw-semibold fs-5 {{ $isCompleted ? 'text-success text-decoration-line-through' : 'text-gray-800' }}">
+                                    {{-- Step label + description --}}
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="fw-bold fs-6 {{ $isCompleted ? 'text-success text-decoration-line-through' : 'text-gray-800' }}">
                                             {{ $step['label'] }}
-                                        </span>
+                                        </div>
+                                        @if($description)
+                                            <div class="text-muted fs-7 mt-1">{{ $description }}</div>
+                                        @endif
                                     </div>
 
                                     {{-- Arrow icon --}}
-                                    <div>
-                                        <i class="ki-duotone ki-arrow-right fs-4 {{ $isCompleted ? 'text-success' : 'text-gray-400' }}">
-                                            <span class="path1"></span>
-                                            <span class="path2"></span>
-                                        </i>
+                                    <div class="ms-3 flex-shrink-0">
+                                        <x-ui.icon name="arrow-left" class="fs-4 {{ $isCompleted ? 'text-success' : 'text-gray-400' }}" style="transform: rotate(180deg);" />
                                     </div>
                                 </div>
                             @endforeach
@@ -258,13 +269,13 @@ new class extends Component {
 
                 @if(!$this->allStepsCompleted())
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-light-danger btn-sm" wire:click="skipOnboarding">
-                        Lewati
-                    </button>
-                    @if($completedCount === $totalCount)
-                        <button type="button" class="btn btn-primary btn-sm" wire:click="completeOnboarding">
+                    <x-ui.button type="button" variant="light-danger" size="sm" wire:click="skipOnboarding">
+                        Tutup
+                    </x-ui.button>
+                    @if(isset($completedCount) && $completedCount === $totalCount)
+                        <x-ui.button type="button" variant="primary" size="sm" wire:click="completeOnboarding">
                             Selesai
-                        </button>
+                        </x-ui.button>
                     @endif
                 </div>
                 @endif

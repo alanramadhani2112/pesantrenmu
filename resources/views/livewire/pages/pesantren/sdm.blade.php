@@ -116,6 +116,17 @@ new #[Layout('layouts.app')] class extends Component {
         </x-ui.button>
     </x-slot:toolbar>
 
+    <x-ui.page-help
+        title="Panduan Data SDM Pesantren"
+        :items="[
+            'Isi rekap jumlah santri, ustadz, pamong, musyrif, dan tenaga kependidikan',
+            'Data SDM dikelompokkan per unit/jenjang pendidikan di pesantren',
+            'Pastikan angka yang dimasukkan sesuai dengan kondisi aktual pesantren',
+            'Data SDM akan digunakan sebagai bahan penilaian dalam proses akreditasi',
+        ]"
+        dismiss-key="help-pesantren-sdm"
+    />
+
     @php
         $grandTotal = collect($categories)->sum(fn ($category) => $this->getGrandTotal($category['key']));
         $unitCount = count($levels ?? []);
@@ -123,21 +134,15 @@ new #[Layout('layouts.app')] class extends Component {
 
     <div class="row g-5 mb-6">
         <div class="col-lg-4">
-            <x-ui.stat-card label="Status SDM" value="{{ $isLocked ? 'Terkunci' : 'Aktif' }}" variant="{{ $isLocked ? 'warning' : 'success' }}">
-                <x-slot:icon><x-ui.icon name="shield-tick" class="fs-2" /></x-slot:icon>
-            </x-ui.stat-card>
+            <x-ui.stat-card label="Status SDM" value="{{ $isLocked ? 'Terkunci' : 'Aktif' }}" variant="{{ $isLocked ? 'warning' : 'success' }}" icon="shield-tick" />
         </div>
 
         <div class="col-lg-4">
-            <x-ui.stat-card label="Total Unit" value="{{ $unitCount }} Unit" variant="info">
-                <x-slot:icon><x-ui.icon name="building" class="fs-2" /></x-slot:icon>
-            </x-ui.stat-card>
+            <x-ui.stat-card label="Total Unit" value="{{ $unitCount }} Unit" variant="info" icon="building" />
         </div>
 
         <div class="col-lg-4">
-            <x-ui.stat-card label="Total Rekap" value="{{ $grandTotal }} Data" variant="primary">
-                <x-slot:icon><x-ui.icon name="people" class="fs-2" /></x-slot:icon>
-            </x-ui.stat-card>
+            <x-ui.stat-card label="Total Rekap" value="{{ $grandTotal }} Data" variant="primary" icon="people" />
         </div>
     </div>
 

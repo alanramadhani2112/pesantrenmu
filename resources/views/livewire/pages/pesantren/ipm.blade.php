@@ -169,27 +169,32 @@ new #[Layout('layouts.app')] class extends Component {
         </x-ui.button>
     </x-slot:toolbar>
 
+    <x-ui.page-help
+        title="Panduan Indikator Pemenuhan Mutlak (IPM)"
+        :items="[
+            'IPM terdiri dari 4 kriteria wajib yang harus dipenuhi sebelum akreditasi',
+            'Upload dokumen pendukung untuk setiap kriteria dalam format PDF atau gambar',
+            'Pastikan dokumen yang diunggah masih berlaku dan dapat dibaca dengan jelas',
+            'Semua kriteria harus terisi sebelum pengajuan akreditasi dapat diproses',
+        ]"
+        dismiss-key="help-pesantren-ipm"
+    />
+
     @php
         $completedCriteria = collect($criteria)->filter(fn ($item) => filled($existing_files[$item['field']] ?? null))->count();
     @endphp
 
     <div class="row g-5 mb-6">
         <div class="col-lg-4">
-            <x-ui.stat-card label="Status IPM" value="{{ $isLocked ? 'Terkunci' : 'Aktif' }}" variant="{{ $isLocked ? 'warning' : 'success' }}">
-                <x-slot:icon><x-ui.icon name="shield-tick" class="fs-2" /></x-slot:icon>
-            </x-ui.stat-card>
+            <x-ui.stat-card label="Status IPM" value="{{ $isLocked ? 'Terkunci' : 'Aktif' }}" variant="{{ $isLocked ? 'warning' : 'success' }}" icon="shield-tick" />
         </div>
 
         <div class="col-lg-4">
-            <x-ui.stat-card label="Kriteria Terisi" value="{{ $completedCriteria }} / {{ count($criteria) }}" variant="info">
-                <x-slot:icon><x-ui.icon name="document" class="fs-2" /></x-slot:icon>
-            </x-ui.stat-card>
+            <x-ui.stat-card label="Kriteria Terisi" value="{{ $completedCriteria }} / {{ count($criteria) }}" variant="info" icon="document" />
         </div>
 
         <div class="col-lg-4">
-            <x-ui.stat-card label="Langkah Berikut" value="{{ $completedCriteria === count($criteria) ? 'Siap Simpan' : 'Lanjut Unggah' }}" variant="primary">
-                <x-slot:icon><x-ui.icon name="arrow-right" class="fs-2" /></x-slot:icon>
-            </x-ui.stat-card>
+            <x-ui.stat-card label="Langkah Berikut" value="{{ $completedCriteria === count($criteria) ? 'Siap Simpan' : 'Lanjut Unggah' }}" variant="primary" icon="arrow-right" />
         </div>
     </div>
 

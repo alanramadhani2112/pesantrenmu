@@ -7,10 +7,12 @@ use App\Models\Asesor;
 use App\Models\Pesantren;
 use App\Models\Assessment;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 class Home extends Component
 {
+    #[Layout('layouts.app')]
     public function render()
     {
         $user = auth()->user();

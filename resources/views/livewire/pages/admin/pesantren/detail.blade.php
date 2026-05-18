@@ -203,17 +203,9 @@ new #[Layout('layouts.app')] class extends Component {
 
                                 <div class="col-lg-5">
                                     <div class="d-flex flex-column gap-4">
-                                        <x-ui.stat-card label="Luas Tanah" value="{{ $pesantren->luas_tanah ?: '0' }} m2" variant="success">
-                                            <x-slot:icon>
-                                                <x-ui.icon name="geolocation" class="fs-2" />
-                                            </x-slot:icon>
-                                        </x-ui.stat-card>
+                                        <x-ui.stat-card label="Luas Tanah" value="{{ $pesantren->luas_tanah ?: '0' }} m2" variant="success" icon="geolocation" />
 
-                                        <x-ui.stat-card label="Luas Bangunan" value="{{ $pesantren->luas_bangunan ?: '0' }} m2" variant="info">
-                                            <x-slot:icon>
-                                                <x-ui.icon name="category" class="fs-2" />
-                                            </x-slot:icon>
-                                        </x-ui.stat-card>
+                                        <x-ui.stat-card label="Luas Bangunan" value="{{ $pesantren->luas_bangunan ?: '0' }} m2" variant="info" icon="category" />
                                     </div>
                                 </div>
                             </div>

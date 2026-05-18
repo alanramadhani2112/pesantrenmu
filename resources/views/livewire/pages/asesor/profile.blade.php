@@ -261,6 +261,17 @@ new #[Layout('layouts.app')] class extends Component {
         @endif
     </x-slot:toolbar>
 
+    <x-ui.page-help
+        title="Panduan Profil Asesor"
+        :items="[
+            'Lengkapi data identitas, pendidikan, dan pengalaman asesor dengan akurat',
+            'Upload foto profil dan dokumen sertifikasi yang masih berlaku',
+            'Data profil Anda akan digunakan sebagai referensi dalam penugasan akreditasi',
+            'Pastikan nomor WhatsApp aktif agar dapat dihubungi terkait tugas visitasi',
+        ]"
+        dismiss-key="help-asesor-profil"
+    />
+
     @if($isEditing)
     {{-- ===== EDIT MODE ===== --}}
     <form wire:submit="save" x-data="fileManagement()">

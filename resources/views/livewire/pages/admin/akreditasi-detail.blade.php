@@ -763,21 +763,15 @@ new #[Layout('layouts.app')] class extends Component
 
     <div class="row g-5 mb-6">
         <div class="col-lg-4">
-            <x-ui.stat-card label="Status Pengajuan" value="{{ Akreditasi::getStatusLabel($akreditasi->status) }}" variant="{{ $statusVariant }}">
-                <x-slot:icon><x-ui.icon name="shield-tick" class="fs-2" /></x-slot:icon>
-            </x-ui.stat-card>
+            <x-ui.stat-card label="Status Pengajuan" value="{{ Akreditasi::getStatusLabel($akreditasi->status) }}" variant="{{ $statusVariant }}" icon="shield-tick" />
         </div>
 
         <div class="col-lg-4">
-            <x-ui.stat-card label="Tim Penilai" value="{{ $akreditasi->assessments->count() }} Asesor" variant="info">
-                <x-slot:icon><x-ui.icon name="profile-user" class="fs-2" /></x-slot:icon>
-            </x-ui.stat-card>
+            <x-ui.stat-card label="Tim Penilai" value="{{ $akreditasi->assessments->count() }} Asesor" variant="info" icon="profile-user" />
         </div>
 
         <div class="col-lg-4">
-            <x-ui.stat-card label="Jadwal Visitasi" value="{{ $akreditasi->tgl_visitasi ? \Carbon\Carbon::parse($akreditasi->tgl_visitasi)->format('d M Y') : 'Belum Dijadwalkan' }}" variant="success">
-                <x-slot:icon><x-ui.icon name="calendar" class="fs-2" /></x-slot:icon>
-            </x-ui.stat-card>
+            <x-ui.stat-card label="Jadwal Visitasi" value="{{ $akreditasi->tgl_visitasi ? \Carbon\Carbon::parse($akreditasi->tgl_visitasi)->format('d M Y') : 'Belum Dijadwalkan' }}" variant="success" icon="calendar" />
         </div>
     </div>
 
@@ -969,12 +963,8 @@ new #[Layout('layouts.app')] class extends Component
 
                                 <div class="col-lg-5">
                                     <div class="d-flex flex-column gap-4">
-                                        <x-ui.stat-card label="Total Luas Tanah" value="{{ $pesantren->luas_tanah ?? '-' }} m2" variant="success">
-                                            <x-slot:icon><x-ui.icon name="geolocation" class="fs-2" /></x-slot:icon>
-                                        </x-ui.stat-card>
-                                        <x-ui.stat-card label="Total Luas Bangunan" value="{{ $pesantren->luas_bangunan ?? '-' }} m2" variant="info">
-                                            <x-slot:icon><x-ui.icon name="category" class="fs-2" /></x-slot:icon>
-                                        </x-ui.stat-card>
+                                        <x-ui.stat-card label="Total Luas Tanah" value="{{ $pesantren->luas_tanah ?? '-' }} m2" variant="success" icon="geolocation" />
+                                        <x-ui.stat-card label="Total Luas Bangunan" value="{{ $pesantren->luas_bangunan ?? '-' }} m2" variant="info" icon="category" />
                                     </div>
                                 </div>
                             </div>

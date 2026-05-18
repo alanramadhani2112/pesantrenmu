@@ -10,12 +10,15 @@
         'hat' => 'teacher',
         'paper' => 'document',
         'document' => 'document',
+        'document-stack' => 'files-tablet',
         'users' => 'people',
+        'user-circle' => 'profile-user',
+        'profile-user' => 'profile-user',
         'shield' => 'shield-tick',
         'shield-lock' => 'security-user',
         'shield-tick' => 'shield-tick',
-        'document-stack' => 'files-tablet',
-        'user-circle' => 'profile-user',
+        'trash' => 'trash',
+        'data' => 'data',
         'award' => 'medal-star',
         'messages' => 'messages',
         'check-circle' => 'check-circle',
@@ -54,15 +57,15 @@
         {{-- Progress status indicator --}}
         @if($progressStatus === 'complete')
             <span class="menu-badge">
-                <i class="ki-duotone ki-check-circle text-success fs-5"></i>
+                <x-ui.icon name="check-circle" class="text-success fs-5" />
             </span>
         @elseif($progressStatus === 'incomplete')
             <span class="menu-badge">
-                <i class="ki-duotone ki-loading text-warning fs-5"></i>
+                <x-ui.icon name="loading" class="text-warning fs-5" />
             </span>
         @elseif($progressStatus === 'not_started')
             <span class="menu-badge">
-                <i class="ki-duotone ki-record-circle text-gray-400 fs-5"></i>
+                <x-ui.icon name="minus-circle" class="text-gray-400 fs-5" />
             </span>
         @endif
 
@@ -100,15 +103,15 @@
         {{-- Progress status indicator --}}
         @if($progressStatus === 'complete')
             <span class="menu-badge">
-                <i class="ki-duotone ki-check-circle text-success fs-5"></i>
+                <x-ui.icon name="check-circle" class="text-success fs-5" />
             </span>
         @elseif($progressStatus === 'incomplete')
             <span class="menu-badge">
-                <i class="ki-duotone ki-loading text-warning fs-5"></i>
+                <x-ui.icon name="loading" class="text-warning fs-5" />
             </span>
         @elseif($progressStatus === 'not_started')
             <span class="menu-badge">
-                <i class="ki-duotone ki-record-circle text-gray-400 fs-5"></i>
+                <x-ui.icon name="minus-circle" class="text-gray-400 fs-5" />
             </span>
         @endif
 

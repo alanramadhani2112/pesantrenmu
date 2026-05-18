@@ -347,6 +347,17 @@ new #[Layout('layouts.app')] class extends Component {
         </x-ui.button>
     </x-slot:toolbar>
 
+    <x-ui.page-help
+        title="Panduan Profil Pesantren"
+        :items="[
+            'Isi semua data identitas pesantren dengan lengkap dan akurat',
+            'Upload foto pesantren jika tersedia untuk memperkuat profil',
+            'Simpan perubahan sebelum berpindah ke halaman lain',
+            'Profil akan terkunci otomatis saat proses akreditasi sedang berjalan',
+        ]"
+        dismiss-key="help-pesantren-profil"
+    />
+
         @if($pesantren->is_locked)
             <div class="alert alert-warning d-flex align-items-center p-5 mb-6">
                 <i class="ki-outline ki-shield-tick fs-2hx text-warning me-4"></i>
