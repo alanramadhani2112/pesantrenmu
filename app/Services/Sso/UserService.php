@@ -4,6 +4,7 @@ namespace App\Services\Sso;
 
 use App\Models\Profile;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -91,17 +92,19 @@ class UserService
             ]);
         }
 
+        $encryptedToken = Crypt::encryptString(self::$token);
+
         if ($user->profile_data) {
             $profile = $user->profile_data;
-            
+
             $profile->update([
                 'data' => $user_data,
-                'access_token' => self::$token
+                'access_token' => $encryptedToken,
             ]);
-        }else {
+        } else {
             $user->profile_data()->create([
                 'data' => $user_data,
-                'access_token' => self::$token
+                'access_token' => $encryptedToken,
             ]);
         }
 

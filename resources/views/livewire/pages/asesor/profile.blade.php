@@ -228,11 +228,15 @@ new #[Layout('layouts.app')] class extends Component {
 
         foreach ($privateFields as $dbField => $property) {
             if ($this->$property) {
-                if ($this->asesor->$dbField) {
-                    Storage::disk('local')->delete($this->asesor->$dbField);
+                // Store new file first; only delete old if store succeeds
+                $newPath = $this->$property->store('asesor_private_docs', 'local');
+                if ($newPath) {
+                    if ($this->asesor->$dbField) {
+                        Storage::disk('local')->delete($this->asesor->$dbField);
+                    }
+                    $data[$dbField] = $newPath;
+                    $this->existing_files[$dbField] = $newPath;
                 }
-                $data[$dbField] = $this->$property->store('asesor_private_docs', 'local');
-                $this->existing_files[$dbField] = $data[$dbField];
             }
         }
 

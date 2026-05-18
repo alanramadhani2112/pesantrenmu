@@ -58,15 +58,19 @@ class DocumentService
         ];
 
         if ($newFile) {
-            if ($id) {
-                $existing = $this->findDocument($id);
-                if ($existing && $existing->file_path && Storage::disk('public')->exists($existing->file_path)) {
-                    Storage::disk('public')->delete($existing->file_path);
+            // Store new file first; only delete old if store succeeds
+            $newPath = $newFile->store('documents', 'public');
+            if ($newPath) {
+                if ($id) {
+                    $existing = $this->findDocument($id);
+                    if ($existing && $existing->file_path && Storage::disk('public')->exists($existing->file_path)) {
+                        Storage::disk('public')->delete($existing->file_path);
+                    }
                 }
+                $payload['file_path'] = $newPath;
+                $payload['uploaded_by_user_id'] = Auth::id();
+                $payload['uploaded_by_role'] = Auth::user()?->role_id;
             }
-            $payload['file_path'] = $newFile->store('documents', 'public');
-            $payload['uploaded_by_user_id'] = Auth::id();
-            $payload['uploaded_by_role'] = Auth::user()?->role_id;
         }
 
         if ($id) {
