@@ -20,6 +20,7 @@ class AuditTrailService
         'finalized',
         'banding_submitted',
         'deleted',
+        'nv_changed',
     ];
 
     /**
