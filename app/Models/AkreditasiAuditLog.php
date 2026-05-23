@@ -46,6 +46,7 @@ class AkreditasiAuditLog extends Model
             'finalized' => 'Finalisasi',
             'banding_submitted' => 'Banding Diajukan',
             'deleted' => 'Dihapus',
+            'nv_changed' => 'NV Diubah',
             default => $actionType,
         };
     }
@@ -64,6 +65,7 @@ class AkreditasiAuditLog extends Model
             'finalized' => 'badge-light-primary',
             'banding_submitted' => 'badge-light-warning',
             'deleted' => 'badge-light-danger',
+            'nv_changed' => 'badge-light-warning',
             default => 'badge-light-secondary',
         };
     }
