@@ -6,6 +6,8 @@ use App\Livewire\Pages\Admin\FailedNotificationDashboard;
 use App\Models\FailedNotification;
 use App\Models\User;
 use App\Notifications\AkreditasiNotification;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -25,6 +27,8 @@ class FailedNotificationDashboardTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RolePermissionSeeder::class);
     }
 
     private function createAdminUser(): User
@@ -59,7 +63,7 @@ class FailedNotificationDashboardTest extends TestCase
      *
      * Validates: Requirement 5.1
      */
-    public function test_dashboard_renders_paginated_failed_notifications(): void
+public function test_dashboard_renders_paginated_failed_notifications(): void
     {
         $admin = $this->createAdminUser();
         $pesantrenUser = $this->createPesantrenUser();
@@ -79,7 +83,7 @@ class FailedNotificationDashboardTest extends TestCase
      *
      * Validates: Requirement 5.2
      */
-    public function test_retry_dispatches_notification_and_updates_status(): void
+public function test_retry_dispatches_notification_and_updates_status(): void
     {
         Notification::fake();
 
@@ -107,7 +111,7 @@ class FailedNotificationDashboardTest extends TestCase
      *
      * Validates: Requirement 5.3
      */
-    public function test_dismiss_marks_record_as_dismissed(): void
+public function test_dismiss_marks_record_as_dismissed(): void
     {
         $admin = $this->createAdminUser();
         $pesantrenUser = $this->createPesantrenUser();
@@ -128,7 +132,7 @@ class FailedNotificationDashboardTest extends TestCase
      *
      * Validates: Requirement 5.4
      */
-    public function test_non_admin_cannot_access_dashboard(): void
+public function test_non_admin_cannot_access_dashboard(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $this->actingAs($pesantrenUser);
@@ -143,7 +147,7 @@ class FailedNotificationDashboardTest extends TestCase
      *
      * Validates: Requirement 5.5
      */
-    public function test_dashboard_shows_pending_count(): void
+public function test_dashboard_shows_pending_count(): void
     {
         $admin = $this->createAdminUser();
         $pesantrenUser = $this->createPesantrenUser();
@@ -166,7 +170,7 @@ class FailedNotificationDashboardTest extends TestCase
      *
      * Validates: Requirement 5.1
      */
-    public function test_status_filter_shows_only_matching_records(): void
+public function test_status_filter_shows_only_matching_records(): void
     {
         $admin = $this->createAdminUser();
         $pesantrenUser = $this->createPesantrenUser();
@@ -190,7 +194,7 @@ class FailedNotificationDashboardTest extends TestCase
      *
      * Validates: Requirement 5.4
      */
-    public function test_route_is_protected_by_admin_middleware(): void
+public function test_route_is_protected_by_admin_middleware(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $this->actingAs($pesantrenUser);
@@ -205,7 +209,7 @@ class FailedNotificationDashboardTest extends TestCase
      *
      * Validates: Requirement 5.4
      */
-    public function test_admin_can_access_dashboard_component(): void
+public function test_admin_can_access_dashboard_component(): void
     {
         $admin = $this->createAdminUser();
         $this->actingAs($admin);
@@ -220,7 +224,7 @@ class FailedNotificationDashboardTest extends TestCase
      *
      * Validates: Requirement 5.5
      */
-    public function test_sidebar_badge_count_includes_failed_notifications(): void
+public function test_sidebar_badge_count_includes_failed_notifications(): void
     {
         $admin = $this->createAdminUser();
         $pesantrenUser = $this->createPesantrenUser();

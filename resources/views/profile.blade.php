@@ -20,10 +20,12 @@
                         </div>
                     </x-ui.section-card>
 
-                    {{-- Delete Account --}}
-                    <x-ui.section-card title="Hapus Akun" subtitle="Setelah akun dihapus, semua data akan hilang permanen.">
+                    {{-- Account Governance --}}
+                    <x-ui.section-card title="Pengelolaan Akun" subtitle="Akun pengguna terhubung dengan proses akreditasi dan audit sistem.">
                         <div class="p-6">
-                            <livewire:profile.delete-user-form />
+                            <x-ui.alert variant="info" icon="shield-tick" title="Penghapusan akun dilakukan oleh admin" class="mb-0">
+                                Untuk menjaga riwayat akreditasi, audit trail, dan keterkaitan data antar role, penghapusan akun tidak tersedia sebagai aksi mandiri di halaman profil. Hubungi admin apabila akun perlu dinonaktifkan atau dikelola.
+                            </x-ui.alert>
                         </div>
                     </x-ui.section-card>
 

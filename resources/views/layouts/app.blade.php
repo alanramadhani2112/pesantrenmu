@@ -9,6 +9,8 @@
     <title>@hasSection('title')@yield('title') — {{ config('app.name', 'PesantrenMu') }}@else{{ config('app.name', 'PesantrenMu') }}@endif</title>
     <meta name="description" content="Sistem Penjaminan Mutu PesantrenMu — Platform akreditasi pesantren Muhammadiyah.">
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand/favicon.svg') }}">
+    <link rel="preload" href="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.css') }}" as="style">
+    <link rel="preload" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}" as="style">
 
     <!-- Styles -->
     @livewireStyles
@@ -31,14 +33,64 @@
     x-data
 >
     @php
-        $pageTitle = isset($header) ? trim(strip_tags((string) $header)) : __('Dashboard');
-        $pageTitle = $pageTitle !== '' ? $pageTitle : __('Dashboard');
+        $routeName = request()->route()?->getName();
+        $docSlug = request()->route('doc');
+        $docTitle = match ($docSlug) {
+            'all' => __('Semua Dokumen'),
+            'iapm' => __('IAPM (Instrumen Akreditasi Penjaminan Mutu)'),
+            'kartu_kendali' => __('Kartu Kendali'),
+            'visitasi' => __('Laporan Visitasi'),
+            default => $docSlug ? str($docSlug)->replace(['-', '_'], ' ')->title()->toString() : __('Dokumen'),
+        };
+
+        $routeMeta = [
+            'dashboard' => ['title' => __('Dashboard')],
+            'profile' => ['title' => __('Pengaturan Profil'), 'section' => __('Akun')],
+            'roles.index' => ['title' => __('Role Sistem'), 'section' => __('Manajemen Sistem')],
+            'accounts.index' => ['title' => __('Akun Pengguna'), 'section' => __('Manajemen Sistem')],
+            'documents.index' => ['title' => $docTitle, 'section' => __('Dokumen')],
+
+            'admin.master-edpm' => ['title' => __('Komponen EDPM/IPR'), 'section' => __('Master Data')],
+            'admin.master-kategori-dokumen' => ['title' => __('Kategori Dokumen'), 'section' => __('Master Data')],
+            'admin.master-dokumen' => ['title' => __('Dokumen Wajib'), 'section' => __('Master Data')],
+            'admin.master-role-permission' => ['title' => __('Peran & Hak Akses'), 'section' => __('Manajemen Sistem')],
+            'admin.akreditasi' => ['title' => __('Akreditasi'), 'section' => __('Operasional Akreditasi')],
+            'admin.akreditasi-detail' => ['title' => __('Detail Akreditasi'), 'section' => __('Operasional Akreditasi')],
+            'admin.asesor.index' => ['title' => __('Asesor'), 'section' => __('Operasional Akreditasi')],
+            'admin.asesor.detail' => ['title' => __('Detail Asesor'), 'section' => __('Operasional Akreditasi')],
+            'admin.banding' => ['title' => __('Banding'), 'section' => __('Operasional Akreditasi')],
+            'admin.banding-detail' => ['title' => __('Detail Banding'), 'section' => __('Operasional Akreditasi')],
+            'admin.pesantren.index' => ['title' => __('Pesantren'), 'section' => __('Operasional Akreditasi')],
+            'admin.pesantren.detail' => ['title' => __('Detail Pesantren'), 'section' => __('Operasional Akreditasi')],
+            'admin.failed-notifications' => ['title' => __('Notifikasi Gagal'), 'section' => __('Administrasi')],
+            'admin.trash' => ['title' => __('Arsip Akreditasi'), 'section' => __('Administrasi')],
+
+            'asesor.profile' => ['title' => __('Profil Asesor'), 'section' => __('Profil')],
+            'asesor.akreditasi' => ['title' => __('Akreditasi'), 'section' => __('Tugas Akreditasi')],
+            'asesor.akreditasi-detail' => ['title' => __('Detail Akreditasi'), 'section' => __('Tugas Akreditasi')],
+
+            'pesantren.profile' => ['title' => __('Profil Pesantren'), 'section' => __('Persiapan Akreditasi')],
+            'pesantren.ipm' => ['title' => __('Indikator Pemenuhan Mutlak (IPM)'), 'section' => __('Persiapan Akreditasi')],
+            'pesantren.sdm' => ['title' => __('Data SDM Pesantren'), 'section' => __('Persiapan Akreditasi')],
+            'pesantren.edpm' => ['title' => __('EDPM/IPR'), 'section' => __('Persiapan Akreditasi')],
+            'pesantren.akreditasi' => ['title' => __('Pengajuan Akreditasi'), 'section' => __('Pengajuan')],
+            'pesantren.akreditasi-detail' => ['title' => __('Detail Pengajuan Akreditasi'), 'section' => __('Pengajuan')],
+        ];
+
+        $routeTitle = $routeMeta[$routeName]['title'] ?? null;
+        $routeSection = $routeMeta[$routeName]['section'] ?? null;
+        $slotHeaderTitle = isset($header) ? trim(strip_tags((string) $header)) : '';
+        $pageTitle = $routeTitle ?: ($slotHeaderTitle !== '' ? $slotHeaderTitle : __('Dashboard'));
 
         $breadcrumbItems = [
             ['label' => __('Dashboard'), 'url' => route('dashboard')],
         ];
 
         if (! request()->routeIs('dashboard')) {
+            if ($routeSection) {
+                $breadcrumbItems[] = ['label' => $routeSection];
+            }
+
             $breadcrumbItems[] = ['label' => $pageTitle];
         }
     @endphp
@@ -100,7 +152,7 @@
                         setTimeout(() => {
                             this.type = 'success';
                             this.title = 'Berhasil!';
-                            this.message = '{{ session('status') ?? session('success') }}';
+                            this.message = @js(session('status') ?? session('success'));
                             this.show = true;
                             this.timeout = setTimeout(() => { this.show = false }, 5000);
                         }, 500);
@@ -110,7 +162,7 @@
                         setTimeout(() => {
                             this.type = 'error';
                             this.title = 'Terjadi Kesalahan!';
-                            this.message = '{{ session('error') }}';
+                            this.message = @js(session('error'));
                             this.show = true;
                             this.timeout = setTimeout(() => { this.show = false }, 5000);
                         }, 500);

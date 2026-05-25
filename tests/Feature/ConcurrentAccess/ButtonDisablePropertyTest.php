@@ -5,12 +5,15 @@ namespace Tests\Feature\ConcurrentAccess;
 use App\Models\Akreditasi;
 use Faker\Factory as Faker;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Property-Based Tests for Button Disable Logic.
  *
- * @group Feature:concurrent-access-handling,Property4
  */
+#[Group('Feature:concurrent-access-handling')]
+#[Group('Property4')]
 class ButtonDisablePropertyTest extends TestCase
 {
     /**
@@ -62,9 +65,9 @@ class ButtonDisablePropertyTest extends TestCase
      *
      * **Validates: Requirements 3.5, 4.1**
      *
-     * @dataProvider terminalStatusProvider
      */
-    public function test_terminal_status_disables_action_buttons(int $status, bool $expectedDisabled): void
+#[DataProvider('terminalStatusProvider')]
+public function test_terminal_status_disables_action_buttons(int $status, bool $expectedDisabled): void
     {
         $isDisabled = in_array($status, [1, 2]);
 
@@ -80,9 +83,9 @@ class ButtonDisablePropertyTest extends TestCase
      *
      * **Validates: Requirements 3.5, 4.1**
      *
-     * @dataProvider nonTerminalStatusProvider
      */
-    public function test_non_terminal_status_does_not_disable_action_buttons(int $status, bool $expectedDisabled): void
+#[DataProvider('nonTerminalStatusProvider')]
+public function test_non_terminal_status_does_not_disable_action_buttons(int $status, bool $expectedDisabled): void
     {
         $isDisabled = in_array($status, [1, 2]);
 
@@ -101,9 +104,9 @@ class ButtonDisablePropertyTest extends TestCase
      *
      * **Validates: Requirements 3.5, 4.1**
      *
-     * @dataProvider randomStatusProvider
      */
-    public function test_random_status_combinations_correct_disable_logic(int $status, bool $expectedDisabled): void
+#[DataProvider('randomStatusProvider')]
+public function test_random_status_combinations_correct_disable_logic(int $status, bool $expectedDisabled): void
     {
         $isDisabled = in_array($status, [1, 2]);
 
@@ -119,7 +122,7 @@ class ButtonDisablePropertyTest extends TestCase
      *
      * **Validates: Requirements 4.1**
      */
-    public function test_admin_finalize_only_available_for_status_3(): void
+public function test_admin_finalize_only_available_for_status_3(): void
     {
         $allStatuses = [1, 2, 3, 4, 5, 6];
 
@@ -144,7 +147,7 @@ class ButtonDisablePropertyTest extends TestCase
      *
      * **Validates: Requirements 4.1**
      */
-    public function test_asesor_finalize_only_available_for_status_4(): void
+public function test_asesor_finalize_only_available_for_status_4(): void
     {
         $allStatuses = [1, 2, 3, 4, 5, 6];
 

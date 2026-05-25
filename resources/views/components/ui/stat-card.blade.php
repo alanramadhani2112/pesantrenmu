@@ -10,7 +10,7 @@
     $variant = in_array($variant, $allowed, true) ? $variant : 'primary';
 @endphp
 
-<x-ui.card {{ $attributes->merge(['class' => 'h-100']) }}>
+<x-ui.card {{ $attributes->merge(['class' => 'h-100 spm-stat-card']) }}>
     <div class="d-flex align-items-center justify-content-between">
         <div>
             <span class="text-muted fw-semibold fs-7">{{ $label }}</span>

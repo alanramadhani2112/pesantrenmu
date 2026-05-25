@@ -10,6 +10,16 @@ use Illuminate\Support\Str;
 
 class SsoController extends Controller
 {
+    private function serverUrl(string $path): string
+    {
+        return rtrim((string) config('sso.server_url'), '/') . '/' . ltrim($path, '/');
+    }
+
+    private function redirectUri(): string
+    {
+        return config('sso.redirect_uri') ?: route('sso.callback');
+    }
+
     /**
      * Authenticating SSO request to the parent application
      */
@@ -19,7 +29,7 @@ class SsoController extends Controller
 
         $query = http_build_query([
             'client_id' => config('sso.client_id'),
-            'redirect_uri' => config('sso.redirect_uri') ?? route('sso.callback'),
+            'redirect_uri' => $this->redirectUri(),
             'response_type' => 'code',
             'scope' => '',
             'state' => $state,
@@ -30,7 +40,7 @@ class SsoController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
-        return redirect(config('sso.server_url')."oauth/authorize?{$query}");
+        return redirect($this->serverUrl("oauth/authorize?{$query}"));
     }
 
     /**
@@ -55,12 +65,12 @@ class SsoController extends Controller
             $response = \Illuminate\Support\Facades\Http::timeout(config('sso.timeout', 10))
                 ->asForm()
                 ->post(
-                    config('sso.server_url').'oauth/token',
+                    $this->serverUrl('oauth/token'),
                     [
                         'grant_type' => 'authorization_code',
                         'client_id' => config('sso.client_id'),
                         'client_secret' => config('sso.client_secret'),
-                        'redirect_uri' => route('sso.callback'),
+                        'redirect_uri' => $this->redirectUri(),
                         'code' => $request->code,
                     ]
                 );

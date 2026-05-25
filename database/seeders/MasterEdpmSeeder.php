@@ -80,6 +80,7 @@ class MasterEdpmSeeder extends Seeder
             ],
             [
                 'nama' => 'B. INDIKATOR PEMENUHAN RELATIF',
+                'ipr' => 1,
                 'butirs' => [
                     ['no_sk' => '', 'nomor_butir' => '1', 'butir_pernyataan' => 'Kualifikasi akademik guru minimum sarjana (S1) atau diploma empat'],
                     ['no_sk' => '', 'nomor_butir' => '2', 'butir_pernyataan' => 'Ustadz pesantren memiliki ijazah atau alumni pesantren'],
@@ -109,7 +110,8 @@ class MasterEdpmSeeder extends Seeder
 
         foreach ($komponens as $komponenData) {
             $komponen = MasterEdpmKomponen::create([
-                'nama' => $komponenData['nama']
+                'nama' => $komponenData['nama'],
+                'ipr' => $komponenData['ipr'] ?? null,
             ]);
 
             foreach ($komponenData['butirs'] as $butirData) {

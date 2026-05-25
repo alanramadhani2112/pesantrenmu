@@ -35,7 +35,7 @@ class AdminBandingListTest extends TestCase
     /**
      * Task 8.7: Admin banding list renders with correct data and filters work
      */
-    public function test_admin_banding_list_renders_with_correct_data(): void
+public function test_admin_banding_list_renders_with_correct_data(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $pesantrenUser = $this->createPesantrenUser('Pesantren Al-Hikmah');
@@ -63,7 +63,7 @@ class AdminBandingListTest extends TestCase
     /**
      * Task 8.7: Status filter works correctly
      */
-    public function test_admin_banding_list_status_filter_works(): void
+public function test_admin_banding_list_status_filter_works(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $reviewer = User::factory()->create(['role_id' => 1]);
@@ -119,7 +119,7 @@ class AdminBandingListTest extends TestCase
     /**
      * Task 8.7: Search filter works correctly
      */
-    public function test_admin_banding_list_search_works(): void
+public function test_admin_banding_list_search_works(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
 
@@ -167,7 +167,7 @@ class AdminBandingListTest extends TestCase
     /**
      * Task 8.8: Overdue bandings show red highlight indicator
      */
-    public function test_overdue_bandings_show_red_highlight_indicator(): void
+public function test_overdue_bandings_show_red_highlight_indicator(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $reviewer = User::factory()->create(['role_id' => 1]);
@@ -200,7 +200,7 @@ class AdminBandingListTest extends TestCase
     /**
      * Task 8.8: Non-overdue bandings do NOT show red highlight
      */
-    public function test_non_overdue_bandings_do_not_show_red_highlight(): void
+public function test_non_overdue_bandings_do_not_show_red_highlight(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $reviewer = User::factory()->create(['role_id' => 1]);
@@ -232,7 +232,7 @@ class AdminBandingListTest extends TestCase
     /**
      * Task 8.7: Non-admin users cannot access banding list
      */
-    public function test_non_admin_cannot_access_banding_list(): void
+public function test_non_admin_cannot_access_banding_list(): void
     {
         $pesantrenUser = $this->createPesantrenUser('Pesantren Unauthorized');
 

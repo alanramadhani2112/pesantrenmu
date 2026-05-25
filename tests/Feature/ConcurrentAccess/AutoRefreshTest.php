@@ -19,12 +19,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Volt\Volt;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Example-Based Feature Tests for Auto-Refresh.
  *
- * @group Feature:concurrent-access-handling
  */
+#[Group('Feature:concurrent-access-handling')]
 class AutoRefreshTest extends TestCase
 {
     use RefreshDatabase;
@@ -43,7 +44,7 @@ class AutoRefreshTest extends TestCase
      * update the component's akreditasi state and dispatch a notification.
      * Tests the logic directly without relying on Livewire poll infrastructure.
      */
-    public function test_check_for_updates_detects_status_change_and_dispatches_notification(): void
+public function test_check_for_updates_detects_status_change_and_dispatches_notification(): void
     {
         $adminUser = User::factory()->create(['role_id' => 1]);
         $this->actingAs($adminUser);
@@ -85,7 +86,7 @@ class AutoRefreshTest extends TestCase
     /**
      * Task 8.3 (variant): checkForUpdates() does NOT dispatch notification when status unchanged.
      */
-    public function test_check_for_updates_no_notification_when_status_unchanged(): void
+public function test_check_for_updates_no_notification_when_status_unchanged(): void
     {
         $adminUser = User::factory()->create(['role_id' => 1]);
         $this->actingAs($adminUser);
@@ -109,7 +110,7 @@ class AutoRefreshTest extends TestCase
     /**
      * Task 8.4: akreditasiUpdatedAt is set on mount and updates after checkForUpdates().
      */
-    public function test_akreditasi_updated_at_updates_after_check_for_updates(): void
+public function test_akreditasi_updated_at_updates_after_check_for_updates(): void
     {
         $adminUser = User::factory()->create(['role_id' => 1]);
         $this->actingAs($adminUser);
@@ -149,7 +150,7 @@ class AutoRefreshTest extends TestCase
      *
      * After checkForUpdates() detects a terminal status, the action forms should be hidden.
      */
-    public function test_action_forms_hidden_after_terminal_status_detected(): void
+public function test_action_forms_hidden_after_terminal_status_detected(): void
     {
         $adminUser = User::factory()->create(['role_id' => 1]);
         $this->actingAs($adminUser);

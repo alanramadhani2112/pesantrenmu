@@ -14,6 +14,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Volt\Volt;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests for admin akreditasi overdue indicators and filter.
@@ -23,8 +24,8 @@ use Tests\TestCase;
  *  - Task 7.6: Overdue count is included in status counts
  *  - Task 7.7: Overdue badge is rendered for overdue items and not for non-overdue items
  *
- * @group Feature: assessment-visitasi-timeout
  */
+#[Group('Feature: assessment-visitasi-timeout')]
 class AdminAkreditasiOverdueTest extends TestCase
 {
     use RefreshDatabase;
@@ -107,7 +108,7 @@ class AdminAkreditasiOverdueTest extends TestCase
      * When statusFilter is set to 'overdue', the component should only show
      * akreditasi items that are overdue (past tanggal_berakhir).
      */
-    public function test_overdue_filter_returns_only_overdue_items(): void
+public function test_overdue_filter_returns_only_overdue_items(): void
     {
         $today = Carbon::create(2025, 10, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -143,7 +144,7 @@ class AdminAkreditasiOverdueTest extends TestCase
     /**
      * Task 7.5 (variant): Overdue filter includes both status 4 and 5 overdue items.
      */
-    public function test_overdue_filter_includes_status_4_and_5(): void
+public function test_overdue_filter_includes_status_4_and_5(): void
     {
         $today = Carbon::create(2025, 10, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -169,7 +170,7 @@ class AdminAkreditasiOverdueTest extends TestCase
     /**
      * Task 7.5 (variant): Overdue filter returns empty when no overdue items exist.
      */
-    public function test_overdue_filter_returns_empty_when_no_overdue_items(): void
+public function test_overdue_filter_returns_empty_when_no_overdue_items(): void
     {
         $today = Carbon::create(2025, 10, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -195,7 +196,7 @@ class AdminAkreditasiOverdueTest extends TestCase
     /**
      * Task 7.6: Overdue count is included in AkreditasiService::getStatusCounts().
      */
-    public function test_overdue_count_is_included_in_status_counts(): void
+public function test_overdue_count_is_included_in_status_counts(): void
     {
         $today = Carbon::create(2025, 10, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -219,7 +220,7 @@ class AdminAkreditasiOverdueTest extends TestCase
     /**
      * Task 7.6 (variant): Overdue count is zero when no overdue items exist.
      */
-    public function test_overdue_count_is_zero_when_no_overdue_items(): void
+public function test_overdue_count_is_zero_when_no_overdue_items(): void
     {
         $today = Carbon::create(2025, 10, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -239,7 +240,7 @@ class AdminAkreditasiOverdueTest extends TestCase
     /**
      * Task 7.6 (variant): Overdue count badge is displayed in the component toolbar.
      */
-    public function test_overdue_count_badge_displayed_in_toolbar_when_overdue_exists(): void
+public function test_overdue_count_badge_displayed_in_toolbar_when_overdue_exists(): void
     {
         $today = Carbon::create(2025, 10, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -260,7 +261,7 @@ class AdminAkreditasiOverdueTest extends TestCase
     /**
      * Task 7.6 (variant): Overdue filter button shows correct count.
      */
-    public function test_overdue_filter_button_shows_correct_count(): void
+public function test_overdue_filter_button_shows_correct_count(): void
     {
         $today = Carbon::create(2025, 10, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -288,7 +289,7 @@ class AdminAkreditasiOverdueTest extends TestCase
      *
      * When an akreditasi is overdue, the list should show a red "Terlambat X hari" badge.
      */
-    public function test_overdue_badge_rendered_for_overdue_items(): void
+public function test_overdue_badge_rendered_for_overdue_items(): void
     {
         $today = Carbon::create(2025, 10, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -313,7 +314,7 @@ class AdminAkreditasiOverdueTest extends TestCase
     /**
      * Task 7.7: Overdue badge is NOT rendered for non-overdue items.
      */
-    public function test_overdue_badge_not_rendered_for_non_overdue_items(): void
+public function test_overdue_badge_not_rendered_for_non_overdue_items(): void
     {
         $today = Carbon::create(2025, 10, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -342,7 +343,7 @@ class AdminAkreditasiOverdueTest extends TestCase
     /**
      * Task 7.7: Overdue badge shows correct days count.
      */
-    public function test_overdue_badge_shows_correct_days_count(): void
+public function test_overdue_badge_shows_correct_days_count(): void
     {
         $today = Carbon::create(2025, 10, 10, 0, 0, 0);
         Carbon::setTestNow($today);

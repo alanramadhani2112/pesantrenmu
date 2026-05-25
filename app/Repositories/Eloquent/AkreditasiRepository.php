@@ -12,15 +12,29 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
 {
     public function getPaginatedAkreditasis(string $statusFilter, ?string $search = null, int $perPage = 10, string $sortField = 'created_at', bool $sortAsc = false): LengthAwarePaginator
     {
-        $query = Akreditasi::with(['user.pesantren', 'assessments', 'catatans.user']);
+        // P-3 fix: eager-load assessment1 + assessment2 directly instead of bare
+        // 'assessments' — the blade reads $item->assessment1 (hasOne tipe=1) which
+        // was a separate lazy query per row when only 'assessments' was loaded.
+        $query = Akreditasi::with([
+            'user:id,name,email,uuid',
+            'user.pesantren:id,user_id,nama_pesantren,is_locked',
+            'assessment1:id,akreditasi_id,asesor_id,tipe,tanggal_mulai,tanggal_berakhir',
+            'assessment2:id,akreditasi_id,asesor_id,tipe,tanggal_mulai,tanggal_berakhir',
+            'catatans:id,akreditasi_id,user_id,tipe,perbaikan,created_at',
+            'catatans.user:id,name',
+        ]);
 
-        if ($statusFilter === 'pengajuan') {
-            $query->where('status', 6);
-        } elseif ($statusFilter === 'assessment') {
-            $query->where('status', 5);
-        } elseif ($statusFilter === 'visitasi') {
-            $query->where('status', '<=', 4);
-        }
+        match ($statusFilter) {
+            'pengajuan'  => $query->where('status', 6),
+            'verifikasi' => $query->where('status', 5),
+            'assessment' => $query->where('status', 4),
+            'visitasi'   => $query->whereIn('status', [3, 2]),
+            'validasi'   => $query->where('status', 1),
+            'selesai'    => $query->where('status', 0),
+            'ditolak'    => $query->where('status', -1),
+            'banding'    => $query->where('status', -2),
+            default      => null, // 'all' or empty — no filter
+        };
 
         if ($search) {
             $query->whereHas('user', function ($q) use ($search) {
@@ -87,15 +101,17 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
         if ($statusFilter) {
             $query->whereHas('akreditasi', function ($q) use ($statusFilter) {
                 if ($statusFilter === 'selesai') {
-                    $q->whereIn('status', [1, 2, 3]);
+                    $q->where('status', Akreditasi::STATUS_SELESAI);
                 } elseif ($statusFilter === 'siap') {
-                    $q->where('status', '>', 3)->whereNotNull('tgl_visitasi');
+                    $q->where('status', Akreditasi::STATUS_VISITASI);
+                } elseif ($statusFilter === 'penilaian') {
+                    $q->where('status', Akreditasi::STATUS_PASCA_VISITASI);
                 } elseif ($statusFilter === 'revisi') {
-                    $q->where('status', '>', 3)->whereHas('catatans', function ($cq) {
+                    $q->where('status', Akreditasi::STATUS_ASSESSMENT)->whereHas('catatans', function ($cq) {
                         $cq->whereNotNull('perbaikan')->where('perbaikan', '!=', '');
                     });
                 } elseif ($statusFilter === 'belum') {
-                    $q->where('status', '>', 3)->whereNull('tgl_visitasi')
+                    $q->where('status', Akreditasi::STATUS_ASSESSMENT)->whereNull('tgl_visitasi')
                         ->whereDoesntHave('catatans', function ($cq) {
                             $cq->whereNotNull('perbaikan')->where('perbaikan', '!=', '');
                         });
@@ -149,7 +165,7 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
 
     public function getPaginatedByUserId(int $userId, ?string $search = null, ?string $periodeFilter = null, ?string $statusFilter = null, int $perPage = 10, string $sortField = 'created_at', bool $sortAsc = false): LengthAwarePaginator
     {
-        return \App\Models\Akreditasi::with(['assessments', 'catatans', 'assessment1'])
+        return \App\Models\Akreditasi::with(['assessments', 'catatans', 'assessment1', 'children', 'bandings'])
             ->where('user_id', $userId)
             ->when($periodeFilter, fn($q) => $q->whereYear('created_at', $periodeFilter))
             ->when($statusFilter, fn($q) => $q->where('status', $statusFilter))
@@ -166,7 +182,8 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
         return Asesor::with('user')
             ->whereDoesntHave('assessments', function ($query) {
                 $query->whereHas('akreditasi', function ($q) {
-                    $q->whereNotIn('status', [1, 2]);
+                    // Exclude asesors currently assigned to active akreditasi (status 1-6)
+                    $q->whereIn('status', [6, 5, 4, 3, 2, 1]);
                 });
             })
             ->get();

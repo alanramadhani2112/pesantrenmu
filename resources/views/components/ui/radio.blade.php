@@ -3,6 +3,7 @@
     'id' => null,
     'label' => null,
     'value' => null,
+    'modifier' => null,
 ])
 
 @php
@@ -17,7 +18,7 @@
     <input
         type="radio"
         @if($id) id="{{ $id }}" @endif
-        @if($model) wire:model="{{ $model }}" @endif
+        @if($model) wire:model{{ $modifier ? '.' . $modifier : '' }}="{{ $model }}" @endif
         @if(!is_null($value)) value="{{ $value }}" @endif
         {{ $inputAttributes->merge(['class' => 'form-check-input h-22px w-22px']) }}
     >

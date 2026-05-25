@@ -5,7 +5,6 @@ use App\Services\TrashService;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\Gate;
 
 new #[Layout('layouts.app')] class extends Component {
     use WithPagination;
@@ -51,7 +50,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function restore(): void
     {
-        Gate::authorize('trash.restore');
+        abort_unless(auth()->user()?->canAccessAdminArea(), 403);
 
         if ($this->previewId === null) {
             return;
@@ -61,9 +60,9 @@ new #[Layout('layouts.app')] class extends Component {
 
         try {
             $count = $service->restore($this->previewId);
-            session()->flash('status', 'Akreditasi berhasil dipulihkan beserta '.($count - 1).' record terkait.');
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Akreditasi berhasil dipulihkan beserta '.($count - 1).' record terkait.');
         } catch (\Throwable $e) {
-            session()->flash('error', 'Gagal memulihkan akreditasi: '.$e->getMessage());
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal!', message: 'Gagal memulihkan akreditasi: '.$e->getMessage());
         }
 
         $this->reset(['previewId', 'previewData']);
@@ -72,7 +71,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function forceDelete(): void
     {
-        Gate::authorize('trash.purge');
+        abort_unless(auth()->user()?->canAccessAdminArea(), 403);
 
         if ($this->previewId === null) {
             return;
@@ -82,9 +81,9 @@ new #[Layout('layouts.app')] class extends Component {
 
         try {
             $count = $service->forceDelete($this->previewId);
-            session()->flash('status', "{$count} record berhasil dihapus permanen.");
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: "{$count} record berhasil dihapus permanen.");
         } catch (\Throwable $e) {
-            session()->flash('error', 'Gagal menghapus permanen: '.$e->getMessage());
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal!', message: 'Gagal menghapus permanen: '.$e->getMessage());
         }
 
         $this->reset(['previewId', 'previewData']);
@@ -111,10 +110,10 @@ new #[Layout('layouts.app')] class extends Component {
 }; ?>
 
 <div data-admin-trash-page="metronic">
-    <x-slot name="header">{{ __('Sampah Akreditasi') }}</x-slot>
+    <x-slot name="header">{{ __('Arsip Akreditasi') }}</x-slot>
 
     <x-ui.index-layout
-        title="Sampah Akreditasi"
+        title="Arsip Akreditasi"
         subtitle="Pulihkan akreditasi yang terhapus atau hapus permanen sebelum batas retensi {{ $this->retentionDays }} hari berakhir."
     >
         <x-slot name="toolbar">
@@ -123,20 +122,6 @@ new #[Layout('layouts.app')] class extends Component {
                 <x-ui.badge variant="warning">Total: {{ $this->trashCount }}</x-ui.badge>
             @endif
         </x-slot>
-
-        @if (session('status'))
-            <div class="alert alert-success d-flex align-items-center mb-6" role="alert">
-                <x-ui.icon name="check-circle" class="fs-4 me-3 text-success" />
-                <div>{{ session('status') }}</div>
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="alert alert-danger d-flex align-items-center mb-6" role="alert">
-                <x-ui.icon name="cross-circle" class="fs-4 me-3 text-danger" />
-                <div>{{ session('error') }}</div>
-            </div>
-        @endif
 
         <x-ui.card class="mb-6">
             <div class="d-flex align-items-start gap-3 p-4">
@@ -290,13 +275,9 @@ new #[Layout('layouts.app')] class extends Component {
 
         <x-ui.modal-body>
             @if ($previewData)
-                <div class="alert alert-danger d-flex align-items-start gap-3 mb-4" role="alert">
-                    <x-ui.icon name="information-5" class="fs-2x text-danger" />
-                    <div>
-                        <div class="fw-bold">Tindakan Tidak Dapat Dibatalkan</div>
-                        <div class="fs-7">Akreditasi ini akan dihapus permanen dari database beserta semua record terkait.</div>
-                    </div>
-                </div>
+                <x-ui.alert variant="danger" title="Tindakan Tidak Dapat Dibatalkan" class="mb-4">
+                    Akreditasi ini akan dihapus permanen dari database beserta semua record terkait.
+                </x-ui.alert>
 
                 <ul class="list-unstyled fs-7 mt-3">
                     <li><strong>Pesantren:</strong> {{ $previewData['akreditasi']->user?->pesantren?->nama_pesantren ?? $previewData['akreditasi']->user?->name ?? 'N/A' }}</li>

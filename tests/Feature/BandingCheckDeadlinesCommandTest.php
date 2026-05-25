@@ -25,7 +25,7 @@ class BandingCheckDeadlinesCommandTest extends TestCase
     /**
      * Helper: create a pesantren user with basic data.
      */
-    private function createPesantrenUser(): User
+private function createPesantrenUser(): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -38,7 +38,7 @@ class BandingCheckDeadlinesCommandTest extends TestCase
     /**
      * Test: command calls BandingService::processDeadlines() and outputs summary.
      */
-    public function test_command_calls_process_deadlines_and_outputs_summary(): void
+public function test_command_calls_process_deadlines_and_outputs_summary(): void
     {
         Notification::fake();
 
@@ -87,7 +87,7 @@ class BandingCheckDeadlinesCommandTest extends TestCase
     /**
      * Test: command exits with success code when no deadlines to process.
      */
-    public function test_command_exits_successfully_with_no_pending_deadlines(): void
+public function test_command_exits_successfully_with_no_pending_deadlines(): void
     {
         Notification::fake();
 

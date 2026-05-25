@@ -6,6 +6,7 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -18,6 +19,8 @@ use Tests\TestCase;
  *   1. Super admin is god-mode regardless of pivot state.
  *   2. Regular roles see ONLY the permissions explicitly granted to them.
  *   3. canAccessAdminArea() admits admin and super_admin and rejects everyone else.
+ *
+ * Permission keys used here match the catalog in PermissionSeeder (rbac-sso-enhance spec).
  */
 class PermissionSystemTest extends TestCase
 {
@@ -27,11 +30,9 @@ class PermissionSystemTest extends TestCase
     {
         parent::setUp();
 
-        // The seeders are intentionally idempotent so we can run them in
-        // setUp without risking duplicate keys when RefreshDatabase reuses
-        // a transaction.
         $this->seed(RoleSeeder::class);
         $this->seed(PermissionSeeder::class);
+        $this->seed(RolePermissionSeeder::class);
     }
 
     // ─── Super admin shortcut ───────────────────────────────────────────────────
@@ -40,14 +41,12 @@ class PermissionSystemTest extends TestCase
     {
         $user = $this->makeUser(Role::ID_SUPER_ADMIN);
 
-        // Super admin holds zero pivot rows by design.
-        $this->assertSame(
-            0,
-            $user->role->permissions()->count(),
-            'Super admin must not require pivot rows to be granted access.'
-        );
+        // Super admin bypasses the pivot via the isSuperAdmin() shortcut in
+        // hasPermission(). Whether or not pivot rows exist is an implementation
+        // detail of the seeder — what matters is that hasPermission() always
+        // returns true for super admin regardless of pivot state.
 
-        // Yet hasPermission() returns true for every key in the catalog.
+        // hasPermission() returns true for every key in the catalog.
         foreach (Permission::pluck('key') as $key) {
             $this->assertTrue(
                 $user->hasPermission($key),
@@ -61,53 +60,76 @@ class PermissionSystemTest extends TestCase
 
     // ─── Default role mapping (admin) ───────────────────────────────────────────
 
-    public function test_admin_holds_every_permission_except_rbac_management(): void
+    public function test_admin_holds_every_permission_except_master_role(): void
     {
         $user = $this->makeUser(Role::ID_ADMIN);
 
-        $this->assertTrue($user->hasPermission('documents.manage'));
-        $this->assertTrue($user->hasPermission('akreditasi.review'));
-        $this->assertTrue($user->hasPermission('users.manage'));
-        $this->assertTrue($user->hasPermission('master_data.view'));
+        // Admin has all permissions from the current catalog except master.role
+        $this->assertTrue($user->hasPermission('akreditasi.view'));
+        $this->assertTrue($user->hasPermission('akreditasi.approve'));
+        $this->assertTrue($user->hasPermission('akreditasi.reject'));
+        $this->assertTrue($user->hasPermission('akreditasi.delete'));
+        $this->assertTrue($user->hasPermission('akreditasi.finalize'));
+        $this->assertTrue($user->hasPermission('asesor.view'));
+        $this->assertTrue($user->hasPermission('asesor.assign'));
+        $this->assertTrue($user->hasPermission('asesor.manage'));
+        $this->assertTrue($user->hasPermission('pesantren.view'));
+        $this->assertTrue($user->hasPermission('pesantren.lock'));
+        $this->assertTrue($user->hasPermission('pesantren.manage'));
+        $this->assertTrue($user->hasPermission('banding.view'));
+        $this->assertTrue($user->hasPermission('banding.review'));
+        $this->assertTrue($user->hasPermission('banding.decide'));
+        $this->assertTrue($user->hasPermission('master.edpm'));
+        $this->assertTrue($user->hasPermission('master.dokumen'));
+        $this->assertTrue($user->hasPermission('master.kategori'));
+        $this->assertTrue($user->hasPermission('account.view'));
+        $this->assertTrue($user->hasPermission('account.create'));
+        $this->assertTrue($user->hasPermission('account.toggle'));
+        $this->assertTrue($user->hasPermission('account.delete'));
+        $this->assertTrue($user->hasPermission('trash.view'));
+        $this->assertTrue($user->hasPermission('trash.restore'));
+        $this->assertTrue($user->hasPermission('trash.purge'));
+        $this->assertTrue($user->hasPermission('notification.view'));
+        $this->assertTrue($user->hasPermission('notification.retry'));
 
         // Admin must NOT be allowed to edit the RBAC matrix itself.
-        $this->assertFalse($user->hasPermission('roles.manage'));
-        $this->assertFalse($user->hasPermission('permissions.manage'));
+        $this->assertFalse($user->hasPermission('master.role'));
     }
 
     // ─── Default role mapping (asesor) ──────────────────────────────────────────
 
-    public function test_asesor_holds_only_review_and_profile_permissions(): void
+    public function test_asesor_holds_only_akreditasi_view(): void
     {
         $user = $this->makeUser(Role::ID_ASESOR);
 
-        $this->assertTrue($user->hasPermission('dashboard.view'));
-        $this->assertTrue($user->hasPermission('akreditasi.review'));
-        $this->assertTrue($user->hasPermission('banding.review'));
-        $this->assertTrue($user->hasPermission('profile.edit'));
+        $this->assertTrue($user->hasPermission('akreditasi.view'));
 
         // Asesor must not have admin-like capabilities.
-        $this->assertFalse($user->hasPermission('users.manage'));
-        $this->assertFalse($user->hasPermission('documents.manage'));
-        $this->assertFalse($user->hasPermission('roles.manage'));
+        $this->assertFalse($user->hasPermission('akreditasi.approve'));
+        $this->assertFalse($user->hasPermission('akreditasi.reject'));
+        $this->assertFalse($user->hasPermission('akreditasi.delete'));
+        $this->assertFalse($user->hasPermission('akreditasi.finalize'));
+        $this->assertFalse($user->hasPermission('asesor.manage'));
+        $this->assertFalse($user->hasPermission('account.view'));
+        $this->assertFalse($user->hasPermission('master.role'));
+        $this->assertFalse($user->hasPermission('trash.purge'));
     }
 
     // ─── Default role mapping (pesantren) ───────────────────────────────────────
 
-    public function test_pesantren_holds_only_self_service_permissions(): void
+    public function test_pesantren_holds_only_akreditasi_view(): void
     {
         $user = $this->makeUser(Role::ID_PESANTREN);
 
-        $this->assertTrue($user->hasPermission('dashboard.view'));
-        $this->assertTrue($user->hasPermission('edpm.manage'));
-        $this->assertTrue($user->hasPermission('akreditasi.assign'));
-        $this->assertTrue($user->hasPermission('banding.submit'));
-        $this->assertTrue($user->hasPermission('profile.edit'));
+        $this->assertTrue($user->hasPermission('akreditasi.view'));
 
         // Pesantren must not have review or admin capabilities.
-        $this->assertFalse($user->hasPermission('akreditasi.review'));
-        $this->assertFalse($user->hasPermission('users.manage'));
-        $this->assertFalse($user->hasPermission('roles.manage'));
+        $this->assertFalse($user->hasPermission('akreditasi.approve'));
+        $this->assertFalse($user->hasPermission('akreditasi.reject'));
+        $this->assertFalse($user->hasPermission('pesantren.lock'));
+        $this->assertFalse($user->hasPermission('account.view'));
+        $this->assertFalse($user->hasPermission('master.role'));
+        $this->assertFalse($user->hasPermission('trash.purge'));
     }
 
     // ─── canAccessAdminArea ─────────────────────────────────────────────────────
@@ -150,28 +172,30 @@ class PermissionSystemTest extends TestCase
     {
         $asesor = $this->makeUser(Role::ID_ASESOR);
 
-        $this->assertFalse($asesor->hasPermission('documents.manage'));
+        // Asesor does not have pesantren.lock by default
+        $this->assertFalse($asesor->hasPermission('pesantren.lock'));
 
-        $perm = Permission::where('key', 'documents.manage')->firstOrFail();
+        $perm = Permission::where('key', 'pesantren.lock')->firstOrFail();
         $asesor->role->grantPermission($perm->id);
 
         // User instance must re-read pivot after grant.
         $asesor->refresh()->load('role.permissions');
 
-        $this->assertTrue($asesor->hasPermission('documents.manage'));
+        $this->assertTrue($asesor->hasPermission('pesantren.lock'));
     }
 
     public function test_revoking_a_permission_strips_it_from_users(): void
     {
         $admin = $this->makeUser(Role::ID_ADMIN);
 
-        $this->assertTrue($admin->hasPermission('documents.manage'));
+        // Admin has akreditasi.approve by default
+        $this->assertTrue($admin->hasPermission('akreditasi.approve'));
 
-        $perm = Permission::where('key', 'documents.manage')->firstOrFail();
+        $perm = Permission::where('key', 'akreditasi.approve')->firstOrFail();
         $admin->role->revokePermission($perm->id);
         $admin->refresh()->load('role.permissions');
 
-        $this->assertFalse($admin->hasPermission('documents.manage'));
+        $this->assertFalse($admin->hasPermission('akreditasi.approve'));
     }
 
     // ─── Helpers ────────────────────────────────────────────────────────────────

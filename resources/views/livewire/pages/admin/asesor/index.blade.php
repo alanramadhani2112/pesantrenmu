@@ -22,6 +22,13 @@ new #[Layout('layouts.app')] class extends Component {
     public $selectedIds = [];
     public $selectAll = false;
 
+    public function mount()
+    {
+        if (!auth()->user()?->canAccessAdminArea()) {
+            abort(403);
+        }
+    }
+
     public function updatedSearch()
     {
         $this->resetPage();
@@ -66,7 +73,7 @@ new #[Layout('layouts.app')] class extends Component {
 
         $asesorService = app(\App\Services\AsesorService::class);
         if ($asesorService->toggleStatus($userId)) {
-            session()->flash('status', 'Status asesor berhasil diperbarui.');
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Status asesor berhasil diperbarui.');
         }
     }
 
@@ -121,7 +128,11 @@ new #[Layout('layouts.app')] class extends Component {
         title="Asesor"
         subtitle="Kelola asesor, penugasan aktif, dan status ketersediaan."
     >
-        <x-datatable.layout title="Asesor" :records="$this->asesors">
+        <x-datatable.layout
+            title="Daftar Asesor"
+            subtitle="Daftar asesor beserta peran kelompok, penugasan aktif, dan status akses."
+            :records="$this->asesors"
+        >
             <x-slot name="filters">
                 <x-ui.filter-bar>
                     <x-datatable.search placeholder="Cari Asesor..." />
@@ -129,7 +140,7 @@ new #[Layout('layouts.app')] class extends Component {
                     <x-ui.filter-select
                         model="filterPeran"
                         placeholder="Semua Peran"
-                        :options="['1' => 'Ketua Asesor', '2' => 'Anggota Asesor']"
+                        :options="['1' => 'Ketua Kelompok', '2' => 'Anggota Kelompok']"
                     />
 
                     <x-ui.filter-select
@@ -147,8 +158,7 @@ new #[Layout('layouts.app')] class extends Component {
             </x-slot>
 
             <x-slot name="toolbar">
-                <x-ui.button wire:click="export" variant="primary" size="sm">
-                    <x-ui.icon name="document" class="fs-4 me-1" />
+                <x-ui.button wire:click="export" variant="primary" size="sm" icon="document">
                     Ekspor Data
                 </x-ui.button>
             </x-slot>
@@ -162,24 +172,13 @@ new #[Layout('layouts.app')] class extends Component {
                     Asesor
                 </x-datatable.th>
                 <x-ui.table-th>Pesantren Ditangani</x-ui.table-th>
-                <x-ui.table-th align="center">Peran Asesor</x-ui.table-th>
+                <x-ui.table-th align="center">Peran Kelompok</x-ui.table-th>
                 <x-ui.table-th align="center">Status Penugasan</x-ui.table-th>
                 <x-ui.table-th align="center">Status</x-ui.table-th>
                 <x-ui.table-th align="end">Aksi</x-ui.table-th>
             </x-slot>
 
             <x-slot name="tbody">
-                @if (session('status'))
-                <tr>
-                    <td colspan="7">
-                        <div class="alert alert-success d-flex align-items-center p-4 mb-0">
-                            <x-ui.icon name="check-circle" class="fs-3 me-3" />
-                            {{ session('status') }}
-                        </div>
-                    </td>
-                </tr>
-                @endif
-
                 @forelse ($this->asesors as $user)
                 <tr wire:key="asesor-{{ $user->id }}">
                     <td class="text-center">
@@ -190,15 +189,18 @@ new #[Layout('layouts.app')] class extends Component {
                     </td>
                     <td>
                         @php
-                        $latestTask = $user->asesor?->assessments->sortByDesc('created_at')->first();
-                        $pesantrenName = $latestTask?->akreditasi?->user?->pesantren?->nama_pesantren ?? '-';
+                        $asesorModel = $user->asesor;
+                        $latestTask = $asesorModel ? $asesorModel->assessments->sortByDesc('created_at')->first() : null;
+                        $pesantrenName = $latestTask?->akreditasi?->user?->pesantren?->nama_pesantren
+                            ?? $latestTask?->akreditasi?->user?->name
+                            ?? '-';
                         @endphp
                         <span class="text-muted fw-semibold">{{ $pesantrenName }}</span>
                     </td>
                     <td class="text-center">
                         @if ($latestTask)
                         <x-ui.status-badge :variant="$latestTask->tipe == 1 ? 'primary' : 'info'">
-                            {{ $latestTask->tipe == 1 ? 'Ketua' : 'Anggota' }}
+                            {{ $latestTask->tipe == 1 ? 'Ketua Kelompok' : 'Anggota Kelompok' }}
                         </x-ui.status-badge>
                         @else
                         <span class="text-muted fw-bold">-</span>

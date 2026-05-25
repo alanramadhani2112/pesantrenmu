@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Pesantren extends Model
 {
@@ -72,6 +73,39 @@ class Pesantren extends Model
         parent::boot();
         static::deleting(function ($pesantren) {
             $pesantren->units()->delete();
+
+            // Audit fix PM-3: delete uploaded files when pesantren is deleted
+            // to prevent unbounded orphan accumulation in storage.
+            $fileColumns = [
+                'status_kepemilikan_tanah',
+                'sertifikat_nsp',
+                'rk_anggaran',
+                'silabus_rpp',
+                'peraturan_kepegawaian',
+                'file_lk_iapm',
+                'laporan_tahunan',
+                'dok_profil',
+                'dok_nsp',
+                'dok_renstra',
+                'dok_rk_anggaran',
+                'dok_kurikulum',
+                'dok_silabus_rpp',
+                'dok_kepengasuhan',
+                'dok_peraturan_kepegawaian',
+                'dok_sarpras',
+                'dok_laporan_tahunan',
+                'dok_sop',
+            ];
+
+            $paths = collect($fileColumns)
+                ->map(fn ($col) => $pesantren->$col)
+                ->filter()
+                ->values()
+                ->all();
+
+            if ($paths) {
+                Storage::disk('public')->delete($paths);
+            }
         });
     }
 

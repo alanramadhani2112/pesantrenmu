@@ -14,12 +14,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Integration tests for AkreditasiService::approvePengajuan() deadline calculation.
  *
- * @group Feature: assessment-visitasi-timeout
  */
+#[Group('Feature: assessment-visitasi-timeout')]
 class ApprovePengajuanDeadlineTest extends TestCase
 {
     use RefreshDatabase;
@@ -41,7 +42,7 @@ class ApprovePengajuanDeadlineTest extends TestCase
     /**
      * Helper: create a pesantren user with a Pesantren record.
      */
-    private function createPesantrenUser(): User
+private function createPesantrenUser(): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -54,7 +55,7 @@ class ApprovePengajuanDeadlineTest extends TestCase
     /**
      * Helper: create an Asesor with an associated User.
      */
-    private function createAsesor(string $name = 'Asesor Test'): Asesor
+private function createAsesor(string $name = 'Asesor Test'): Asesor
     {
         $user = User::factory()->create(['role_id' => 2]);
         return Asesor::create([
@@ -76,7 +77,7 @@ class ApprovePengajuanDeadlineTest extends TestCase
      *
      * **Validates: Requirements 1.2**
      */
-    public function test_approval_without_explicit_end_date_uses_config_duration(): void
+public function test_approval_without_explicit_end_date_uses_config_duration(): void
     {
         $configDuration = 30;
         config(['akreditasi-timeout.assessment.default_duration_days' => $configDuration]);
@@ -118,7 +119,7 @@ class ApprovePengajuanDeadlineTest extends TestCase
      *
      * Verify the calculation works with a different configured duration.
      */
-    public function test_approval_without_explicit_end_date_uses_custom_config_duration(): void
+public function test_approval_without_explicit_end_date_uses_custom_config_duration(): void
     {
         $configDuration = 45;
         config(['akreditasi-timeout.assessment.default_duration_days' => $configDuration]);
@@ -165,7 +166,7 @@ class ApprovePengajuanDeadlineTest extends TestCase
      *
      * **Validates: Requirements 1.2**
      */
-    public function test_approval_with_explicit_end_date_preserves_provided_date(): void
+public function test_approval_with_explicit_end_date_preserves_provided_date(): void
     {
         config(['akreditasi-timeout.assessment.default_duration_days' => 30]);
 
@@ -211,7 +212,7 @@ class ApprovePengajuanDeadlineTest extends TestCase
     /**
      * Task 5.3 (variant): Explicit end date is preserved even when it equals the config-calculated date.
      */
-    public function test_approval_with_explicit_end_date_matching_config_still_uses_provided_date(): void
+public function test_approval_with_explicit_end_date_matching_config_still_uses_provided_date(): void
     {
         $configDuration = 30;
         config(['akreditasi-timeout.assessment.default_duration_days' => $configDuration]);
@@ -253,7 +254,7 @@ class ApprovePengajuanDeadlineTest extends TestCase
     /**
      * Task 5.4: Existing approval behavior — status changes to 5 after approval.
      */
-    public function test_existing_approval_changes_status_to_5(): void
+public function test_existing_approval_changes_status_to_5(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $asesor = $this->createAsesor();
@@ -276,7 +277,7 @@ class ApprovePengajuanDeadlineTest extends TestCase
     /**
      * Task 5.4: Existing approval behavior — assessment records are created.
      */
-    public function test_existing_approval_creates_assessment_records(): void
+public function test_existing_approval_creates_assessment_records(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $asesor1 = $this->createAsesor('Asesor 1');
@@ -310,7 +311,7 @@ class ApprovePengajuanDeadlineTest extends TestCase
     /**
      * Task 5.4: Existing approval behavior — throws DomainException for non-pengajuan status.
      */
-    public function test_existing_approval_throws_exception_for_non_pengajuan_status(): void
+public function test_existing_approval_throws_exception_for_non_pengajuan_status(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $asesor = $this->createAsesor();
@@ -333,7 +334,7 @@ class ApprovePengajuanDeadlineTest extends TestCase
     /**
      * Task 5.4: Existing approval behavior — notifications are sent after approval.
      */
-    public function test_existing_approval_sends_notifications(): void
+public function test_existing_approval_sends_notifications(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $asesor = $this->createAsesor();

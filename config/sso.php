@@ -29,9 +29,11 @@ return [
     |--------------------------------------------------------------------------
     | 
     | Contains the client for authenticating SSO request.
+    | M-3 fix: tidak ada default value — jika SSO_CLIENT_ID tidak di-set,
+    | config akan null dan request ke IdP akan gagal dengan error yang jelas.
     |
      */
-    'client_id' => env('SSO_CLIENT_ID', 'someId'),
+    'client_id' => env('SSO_CLIENT_ID'),
 
     /*
     |--------------------------------------------------------------------------
@@ -39,9 +41,11 @@ return [
     |--------------------------------------------------------------------------
     | 
     | Contains the secret for authenticating SSO request.
+    | M-3 fix: tidak ada default value — jika SSO_CLIENT_SECRET tidak di-set,
+    | config akan null. Jangan pernah commit secret ke source code.
     |
      */
-    'client_secret' => env('SSO_CLIENT_SECRET', 'secretKey'),
+    'client_secret' => env('SSO_CLIENT_SECRET'),
 
     /*
     |--------------------------------------------------------------------------

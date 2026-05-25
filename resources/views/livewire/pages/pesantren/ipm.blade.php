@@ -57,6 +57,31 @@ new #[Layout('layouts.app')] class extends Component {
         ];
     }
 
+    protected function ipmFileFields(): array
+    {
+        return [
+            'nsp_file_upload' => ['db' => 'nsp_file', 'section' => 'ipm.nsp'],
+            'lulus_santri_file_upload' => ['db' => 'lulus_santri_file', 'section' => 'ipm.lulus_santri'],
+            'kurikulum_file_upload' => ['db' => 'kurikulum_file', 'section' => 'ipm.kurikulum'],
+            'buku_ajar_file_upload' => ['db' => 'buku_ajar_file', 'section' => 'ipm.buku_ajar'],
+        ];
+    }
+
+    protected function ipmRules(): array
+    {
+        return collect($this->ipmFileFields())
+            ->mapWithKeys(function ($config, $property) {
+                $sectionStatus = $this->getSectionLockStatus($config['section']);
+                $mustBeComplete = !auth()->user()->pesantren?->is_locked || $sectionStatus !== 'locked';
+                $requiredRule = $mustBeComplete && blank($this->existing_files[$config['db']] ?? null)
+                    ? 'required'
+                    : 'nullable';
+
+                return [$property => "{$requiredRule}|mimes:pdf|max:2048"];
+            })
+            ->all();
+    }
+
     public function save()
     {
         $pesantrenService = app(\App\Services\PesantrenService::class);
@@ -76,42 +101,83 @@ new #[Layout('layouts.app')] class extends Component {
             return;
         }
 
-        $this->validate([
-            'nsp_file_upload' => 'nullable|mimes:pdf|max:2048',
-            'lulus_santri_file_upload' => 'nullable|mimes:pdf|max:2048',
-            'kurikulum_file_upload' => 'nullable|mimes:pdf|max:2048',
-            'buku_ajar_file_upload' => 'nullable|mimes:pdf|max:2048',
-        ]);
+        try {
+            $this->validate($this->ipmRules());
+            $this->validateIpmCompleteness();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->dispatch('show-validation-error');
+            throw $e;
+        }
 
         $data = [];
-        $fileFields = [
-            'nsp_file' => 'nsp_file_upload',
-            'lulus_santri_file' => 'lulus_santri_file_upload',
-            'kurikulum_file' => 'kurikulum_file_upload',
-            'buku_ajar_file' => 'buku_ajar_file_upload',
-        ];
+        // Track newly stored files for rollback if DB update fails (PM-2 fix).
+        $newlyStored = [];
 
-        foreach ($fileFields as $dbField => $property) {
+        foreach ($this->ipmFileFields() as $property => $config) {
+            $dbField = $config['db'];
+
             if ($this->$property) {
-                if ($this->ipm->$dbField) {
-                    Storage::disk('public')->delete($this->ipm->$dbField);
+                $newPath = $this->$property->store('ipm_docs', 'public');
+                if ($newPath) {
+                    $newlyStored[$dbField] = [
+                        'old' => $this->ipm->$dbField,
+                        'new' => $newPath,
+                    ];
+                    $data[$dbField] = $newPath;
                 }
-
-                $data[$dbField] = $this->$property->store('ipm_docs', 'public');
-                $this->existing_files[$dbField] = $data[$dbField];
             }
         }
 
-        if (!empty($data)) {
-            if ($pesantrenService->updateIpm(auth()->id(), $data)) {
-                $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Data IPM berhasil diperbarui.');
+        if (empty($data)) {
+            $this->dispatch('show-metronic-alert', type: 'info', title: 'Tidak Ada Perubahan', message: 'Pilih dokumen baru jika ingin memperbarui data IPM.');
+            return;
+        }
+
+        if ($pesantrenService->updateIpm(auth()->id(), $data)) {
+            // DB succeeded — now safe to delete old files.
+            foreach ($newlyStored as $dbField => ['old' => $oldPath, 'new' => $newPath]) {
+                if ($oldPath) {
+                    Storage::disk('public')->delete($oldPath);
+                }
+                $this->existing_files[$dbField] = $newPath;
             }
+
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Data IPM berhasil diperbarui.');
+            return;
+        }
+
+        // DB failed — rollback: delete newly stored files, keep old ones intact.
+        foreach ($newlyStored as ['new' => $newPath]) {
+            if ($newPath) {
+                Storage::disk('public')->delete($newPath);
+            }
+        }
+
+        $this->dispatch('show-metronic-alert', type: 'error', title: 'Gagal', message: 'Data IPM gagal disimpan. Data terkunci atau terjadi kesalahan.');
+    }
+
+    protected function validateIpmCompleteness(): void
+    {
+        $messages = [];
+
+        foreach ($this->ipmFileFields() as $property => $config) {
+            $sectionStatus = $this->getSectionLockStatus($config['section']);
+            $mustBeComplete = !$this->ipm->user?->pesantren?->is_locked || $sectionStatus !== 'locked';
+
+            if ($mustBeComplete && !$this->$property && blank($this->existing_files[$config['db']] ?? null)) {
+                $label = $this->validationAttributes()[$property] ?? $property;
+                $messages[$property] = "{$label} wajib diisi.";
+            }
+        }
+
+        if ($messages !== []) {
+            throw \Illuminate\Validation\ValidationException::withMessages($messages);
         }
     }
 }; ?>
 
 @php
-    $isLocked = auth()->user()->pesantren->is_locked;
+    $isLocked = auth()->user()->pesantren?->is_locked ?? false;
     $ipmSections = [
         'nsp_file_upload' => 'ipm.nsp',
         'lulus_santri_file_upload' => 'ipm.lulus_santri',
@@ -150,7 +216,7 @@ new #[Layout('layouts.app')] class extends Component {
     ];
 @endphp
 
-<x-slot name="header">{{ __('Indek Pemenuhan Mutlak (IPM)') }}</x-slot>
+<x-slot name="header">{{ __('Indikator Pemenuhan Mutlak (IPM)') }}</x-slot>
 
 <x-ui.page
     title="Indikator Pemenuhan Mutlak (IPM)"
@@ -199,25 +265,28 @@ new #[Layout('layouts.app')] class extends Component {
             }
         @endphp
         @if($anyUnlocked)
-            <div class="spm-inline-alert" style="border-left: 4px solid #f59e0b; background: #fffbeb; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-                <x-ui.icon name="shield-tick" class="fs-2 text-warning" />
-                <div>
-                    <div class="spm-inline-alert-title">Koreksi Tersedia</div>
-                    <div class="spm-inline-alert-text">Beberapa item IPM dibuka untuk perbaikan. Item yang ditandai 🔓 dapat diedit.</div>
-                </div>
-            </div>
+            <x-ui.alert variant="warning" icon="shield-tick" title="Koreksi Tersedia" class="mb-4">
+                Beberapa item IPM dibuka untuk perbaikan. Item berstatus koreksi dapat diedit.
+            </x-ui.alert>
         @else
-            <div class="spm-inline-alert">
-                <x-ui.icon name="shield-tick" class="fs-2 text-warning" />
-                <div>
-                    <div class="spm-inline-alert-title">Data Terkunci</div>
-                    <div class="spm-inline-alert-text">Data IPM tidak dapat diubah karena pesantren sedang dalam proses akreditasi.</div>
-                </div>
-            </div>
+            <x-ui.alert variant="warning" icon="shield-tick" title="Data Terkunci">
+                Data IPM tidak dapat diubah karena pesantren sedang dalam proses akreditasi.
+            </x-ui.alert>
         @endif
     @endif
 
     <form x-on:submit.prevent="confirmSave($wire)" class="d-flex flex-column gap-6">
+        @if($errors->any())
+            <x-ui.alert variant="danger" title="Data IPM belum lengkap" class="mb-0">
+                <div class="mb-3">Lengkapi dokumen yang ditandai sebelum menyimpan IPM.</div>
+                <ul class="mb-0 ps-4">
+                    @foreach($errors->all() as $message)
+                        <li>{{ $message }}</li>
+                    @endforeach
+                </ul>
+            </x-ui.alert>
+        @endif
+
         <x-ui.section-card
             title="Dokumen IPM"
             subtitle="Setiap kriteria menggunakan satu unggahan PDF dengan ukuran maksimal 2 MB."
@@ -235,7 +304,7 @@ new #[Layout('layouts.app')] class extends Component {
                         <div class="spm-input-card {{ $sectionStatus === 'unlocked_for_correction' ? 'border-warning bg-warning bg-opacity-10' : '' }}">
                             <div class="d-flex flex-column gap-4">
                                 <x-ui.form-field
-                                    :label="($sectionStatus === 'locked' ? '🔒 ' : ($sectionStatus === 'unlocked_for_correction' ? '🔓 ' : '')) . $item['label']"
+                                    :label="$item['label']"
                                     :for="$inputId"
                                     :error="$errors->get($item['property'])"
                                     :hint="$item['description']"

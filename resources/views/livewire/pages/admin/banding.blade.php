@@ -58,38 +58,24 @@ new #[Layout('layouts.app')] class extends Component {
     >
         <x-slot name="toolbar">
             <x-ui.badge variant="primary">Admin</x-ui.badge>
-            <x-ui.badge variant="warning">Pending: {{ $this->pendingCount }}</x-ui.badge>
+            <x-ui.badge variant="warning">Tertunda: {{ $this->pendingCount }}</x-ui.badge>
         </x-slot>
 
         <x-datatable.layout
             title="Daftar Banding"
-            subtitle="Filter berdasarkan status, cari pesantren, lalu tindak lanjuti banding yang membutuhkan keputusan."
+            subtitle="Pengajuan banding pesantren yang membutuhkan peninjauan dan keputusan admin."
             :records="$this->bandings"
         >
             <x-slot name="filters">
-                <div class="d-flex flex-wrap align-items-center gap-2">
-                    <x-ui.button type="button" wire:click="$set('statusFilter', 'all')" :variant="$statusFilter === 'all' ? 'primary' : 'light'" size="sm">
-                        Semua
-                    </x-ui.button>
-
-                    <x-ui.button type="button" wire:click="$set('statusFilter', 'pending')" :variant="$statusFilter === 'pending' ? 'warning' : 'light'" size="sm">
-                        Pending
-                    </x-ui.button>
-
-                    <x-ui.button type="button" wire:click="$set('statusFilter', 'under_review')" :variant="$statusFilter === 'under_review' ? 'info' : 'light'" size="sm">
-                        Under Review
-                    </x-ui.button>
-
-                    <x-ui.button type="button" wire:click="$set('statusFilter', 'accepted')" :variant="$statusFilter === 'accepted' ? 'success' : 'light'" size="sm">
-                        Accepted
-                    </x-ui.button>
-
-                    <x-ui.button type="button" wire:click="$set('statusFilter', 'rejected')" :variant="$statusFilter === 'rejected' ? 'danger' : 'light'" size="sm">
-                        Rejected
-                    </x-ui.button>
-                </div>
-
                 <x-datatable.search placeholder="Cari Pesantren..." />
+
+                <x-ui.filter-select model="statusFilter" placeholder="Semua Status">
+                    <option value="all">Semua</option>
+                    <option value="pending">Tertunda</option>
+                    <option value="under_review">Dalam Peninjauan</option>
+                    <option value="accepted">Diterima</option>
+                    <option value="rejected">Ditolak</option>
+                </x-ui.filter-select>
             </x-slot>
 
             <x-slot name="thead">
@@ -97,8 +83,9 @@ new #[Layout('layouts.app')] class extends Component {
                 <x-ui.table-th>Tanggal Pengajuan</x-ui.table-th>
                 <x-ui.table-th>Alasan</x-ui.table-th>
                 <x-ui.table-th align="center">Status</x-ui.table-th>
-                <x-ui.table-th>Reviewer</x-ui.table-th>
+                <x-ui.table-th>Peninjau</x-ui.table-th>
                 <x-ui.table-th align="center">Hari Sejak Pengajuan</x-ui.table-th>
+                <x-ui.table-th align="end">Aksi</x-ui.table-th>
             </x-slot>
 
             <x-slot name="tbody">
@@ -117,10 +104,10 @@ new #[Layout('layouts.app')] class extends Component {
                     };
 
                     $statusLabel = match ($banding->status) {
-                        'pending' => 'Pending',
-                        'under_review' => 'Under Review',
-                        'accepted' => 'Accepted',
-                        'rejected' => 'Rejected',
+                        'pending' => 'Tertunda',
+                        'under_review' => 'Dalam Peninjauan',
+                        'accepted' => 'Diterima',
+                        'rejected' => 'Ditolak',
                         default => $banding->status,
                     };
                 @endphp
@@ -151,13 +138,21 @@ new #[Layout('layouts.app')] class extends Component {
                     <td class="text-center">
                         <span class="fw-bold {{ $isOverdue ? 'text-danger' : 'text-gray-900' }}">{{ $daysSinceSubmission }} hari</span>
                         @if($isOverdue)
-                            <span class="badge badge-light-danger fs-9 ms-1">Overdue</span>
+                            <x-ui.badge variant="danger" class="ms-1">Terlambat</x-ui.badge>
                         @endif
+                    </td>
+                    <td class="text-end">
+                        <x-ui.action-menu>
+                            <x-ui.action-menu-item :href="route('admin.banding-detail', $banding->id)">
+                                <x-ui.icon name="eye" class="fs-5 text-gray-500" />
+                                Lihat Detail
+                            </x-ui.action-menu-item>
+                        </x-ui.action-menu>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6">
+                    <td colspan="7">
                         <x-ui.empty-state
                             title="Data tidak ditemukan"
                             description="Belum ada pengajuan banding atau coba ubah filter pencarian."

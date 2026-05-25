@@ -40,9 +40,9 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function mount()
     {
-        if (!auth()->user()->canAccessAdminArea()) {
-                    abort(403);
-                }
+        if (!auth()->user()?->isSuperAdmin()) {
+            abort(403);
+        }
     }
 
     public function getRolesProperty()
@@ -91,7 +91,7 @@ new #[Layout('layouts.app')] class extends Component {
         $roleService = app(\App\Services\RoleService::class);
         $roleService->saveRole(['name' => $this->name, 'parameter' => $this->parameter], $this->roleId);
 
-        session()->flash('status', $this->isEditing ? 'Role berhasil diperbarui.' : 'Role berhasil dibuat.');
+        $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: $this->isEditing ? 'Role berhasil diperbarui.' : 'Role berhasil dibuat.');
         $this->dispatch('close-modal', 'role-modal');
         $this->resetForm();
     }
@@ -102,23 +102,22 @@ new #[Layout('layouts.app')] class extends Component {
 
         $roleService = app(\App\Services\RoleService::class);
         $roleService->deleteRole($id);
-        session()->flash('status', 'Role berhasil dihapus.');
+        $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Role berhasil dihapus.');
     }
 }; ?>
 
 <div x-data="deleteConfirmation" data-module-page="roles">
     <x-ui.index-layout
-        title="Roles"
+        title="Role Sistem"
         subtitle="Kelola peran dan parameter akses pengguna sistem."
     >
-        <x-datatable.layout title="Kelola Peran (Roles)" :records="$this->roles">
+        <x-datatable.layout title="Daftar Role Sistem" :records="$this->roles">
             <x-slot name="filters">
                 <x-datatable.search placeholder="Cari Peran..." />
             </x-slot>
 
             <x-slot name="toolbar">
-                <x-ui.button wire:click="createRole" variant="primary" size="sm">
-                    <x-ui.icon name="plus" class="fs-4 me-1" />
+                <x-ui.button wire:click="createRole" variant="primary" size="sm" icon="plus">
                     Tambah Peran
                 </x-ui.button>
             </x-slot>
@@ -183,12 +182,12 @@ new #[Layout('layouts.app')] class extends Component {
             />
 
             <x-ui.modal-body>
-                <x-ui.form-field label="{{ __('Name') }}" for="name" :error="$errors->get('name')">
+                <x-ui.form-field label="{{ __('Nama Peran') }}" for="name" :error="$errors->get('name')">
                     <x-ui.input
                         model="name"
                         id="name"
                         name="name"
-                        placeholder="{{ __('e.g. Administrator') }}"
+                        placeholder="{{ __('Contoh: Administrator') }}"
                         required
                         autofocus
                     />
@@ -199,7 +198,7 @@ new #[Layout('layouts.app')] class extends Component {
                         model="parameter"
                         id="parameter"
                         name="parameter"
-                        placeholder="{{ __('e.g. administrator') }}"
+                        placeholder="{{ __('Contoh: administrator') }}"
                         required
                     />
                 </x-ui.form-field>
@@ -207,11 +206,11 @@ new #[Layout('layouts.app')] class extends Component {
 
             <x-ui.modal-footer>
                 <x-ui.button type="button" variant="light" x-on:click="$dispatch('close')">
-                    {{ __('Cancel') }}
+                    {{ __('Batal') }}
                 </x-ui.button>
 
                 <x-ui.button type="submit" variant="primary">
-                    {{ $isEditing ? __('Update') : __('Save') }}
+                    {{ $isEditing ? __('Perbarui') : __('Simpan') }}
                 </x-ui.button>
             </x-ui.modal-footer>
         </form>

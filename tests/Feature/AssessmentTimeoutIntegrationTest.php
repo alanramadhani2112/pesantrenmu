@@ -15,6 +15,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * End-to-end integration tests for the assessment/visitasi timeout feature.
@@ -24,8 +25,8 @@ use Tests\TestCase;
  *  - Task 9.3: Command handles edge cases: no assessments, all completed, mixed states
  *  - Task 9.4: Notification deduplication works across multiple command runs on same day
  *
- * @group Feature: assessment-visitasi-timeout
  */
+#[Group('Feature: assessment-visitasi-timeout')]
 class AssessmentTimeoutIntegrationTest extends TestCase
 {
     use RefreshDatabase;
@@ -81,7 +82,7 @@ class AssessmentTimeoutIntegrationTest extends TestCase
      * 3. Time advances past deadline → escalation sent to admin
      * 4. Admin reassigns asesor → new deadline set, notifications sent
      */
-    public function test_complete_flow_approval_to_reassignment(): void
+public function test_complete_flow_approval_to_reassignment(): void
     {
         Notification::fake();
 
@@ -201,7 +202,7 @@ class AssessmentTimeoutIntegrationTest extends TestCase
     /**
      * Task 9.3: Command handles edge case — no assessments at all.
      */
-    public function test_command_handles_no_assessments(): void
+public function test_command_handles_no_assessments(): void
     {
         Notification::fake();
 
@@ -213,7 +214,7 @@ class AssessmentTimeoutIntegrationTest extends TestCase
     /**
      * Task 9.3: Command handles edge case — all akreditasi are completed (status 1 or 2).
      */
-    public function test_command_handles_all_completed_akreditasi(): void
+public function test_command_handles_all_completed_akreditasi(): void
     {
         Notification::fake();
 
@@ -257,7 +258,7 @@ class AssessmentTimeoutIntegrationTest extends TestCase
      * Mix of: completed, approaching deadline, overdue, future deadline.
      * Only approaching and overdue should trigger notifications.
      */
-    public function test_command_handles_mixed_states(): void
+public function test_command_handles_mixed_states(): void
     {
         Notification::fake();
 
@@ -350,7 +351,7 @@ class AssessmentTimeoutIntegrationTest extends TestCase
      * Note: tanggal_berakhir is NOT NULL in the database, so we test with a very
      * far future date that won't trigger any notifications.
      */
-    public function test_command_handles_assessments_with_null_deadline(): void
+public function test_command_handles_assessments_with_null_deadline(): void
     {
         Notification::fake();
 
@@ -388,7 +389,7 @@ class AssessmentTimeoutIntegrationTest extends TestCase
      * Running the command multiple times on the same day should only send
      * one reminder notification per assessment.
      */
-    public function test_reminder_deduplication_across_multiple_runs_same_day(): void
+public function test_reminder_deduplication_across_multiple_runs_same_day(): void
     {
         Notification::fake();
 
@@ -427,7 +428,7 @@ class AssessmentTimeoutIntegrationTest extends TestCase
      * Running the command multiple times on the same day should only send
      * one escalation notification per assessment (when interval is 1 day).
      */
-    public function test_escalation_deduplication_across_multiple_runs_same_day(): void
+public function test_escalation_deduplication_across_multiple_runs_same_day(): void
     {
         Notification::fake();
 
@@ -465,7 +466,7 @@ class AssessmentTimeoutIntegrationTest extends TestCase
     /**
      * Task 9.4: Reminder IS sent again the next day (deduplication is per-day).
      */
-    public function test_reminder_sent_again_next_day(): void
+public function test_reminder_sent_again_next_day(): void
     {
         Notification::fake();
 
@@ -505,7 +506,7 @@ class AssessmentTimeoutIntegrationTest extends TestCase
     /**
      * Task 9.4: Escalation IS sent again after the configured interval.
      */
-    public function test_escalation_sent_again_after_interval(): void
+public function test_escalation_sent_again_after_interval(): void
     {
         Notification::fake();
 
@@ -547,7 +548,7 @@ class AssessmentTimeoutIntegrationTest extends TestCase
     /**
      * Task 9.4: Escalation NOT sent again before the configured interval.
      */
-    public function test_escalation_not_sent_before_interval(): void
+public function test_escalation_not_sent_before_interval(): void
     {
         Notification::fake();
 

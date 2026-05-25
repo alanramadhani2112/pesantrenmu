@@ -32,7 +32,7 @@ class SidebarBadgesTest extends TestCase
      *
      * Validates: Requirements 3.1, 3.2
      */
-    public function test_admin_sees_correct_pending_akreditasi_count(): void
+public function test_admin_sees_correct_pending_akreditasi_count(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
@@ -57,7 +57,7 @@ class SidebarBadgesTest extends TestCase
      *
      * Validates: Requirements 3.1, 3.2
      */
-    public function test_admin_sees_correct_pending_banding_count(): void
+public function test_admin_sees_correct_pending_banding_count(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
@@ -87,7 +87,7 @@ class SidebarBadgesTest extends TestCase
      *
      * Validates: Requirements 4.1
      */
-    public function test_asesor_sees_correct_active_task_count(): void
+public function test_asesor_sees_correct_active_task_count(): void
     {
         $asesorUser = User::factory()->create(['role_id' => 2]);
         $asesor = Asesor::create([
@@ -127,7 +127,7 @@ class SidebarBadgesTest extends TestCase
      *
      * Validates: Requirements 3.3
      */
-    public function test_admin_badges_show_zero_when_no_pending_items(): void
+public function test_admin_badges_show_zero_when_no_pending_items(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
@@ -151,7 +151,7 @@ class SidebarBadgesTest extends TestCase
      *
      * Validates: Requirements 4.2
      */
-    public function test_asesor_badge_shows_zero_when_no_active_tasks(): void
+public function test_asesor_badge_shows_zero_when_no_active_tasks(): void
     {
         $asesorUser = User::factory()->create(['role_id' => 2]);
         $asesor = Asesor::create([
@@ -179,7 +179,7 @@ class SidebarBadgesTest extends TestCase
      *
      * Validates: Requirements 4.1, 4.2
      */
-    public function test_asesor_without_profile_gets_zero_active_tasks(): void
+public function test_asesor_without_profile_gets_zero_active_tasks(): void
     {
         // Asesor user without an Asesor model record
         $asesorUser = User::factory()->create(['role_id' => 2]);

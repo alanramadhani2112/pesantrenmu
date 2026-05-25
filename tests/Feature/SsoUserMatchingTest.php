@@ -24,7 +24,7 @@ class SsoUserMatchingTest extends TestCase
     use RefreshDatabase;
 
     /** Sample SSO user payload returned by the SSO server */
-    private function makeSsoPayload(array $overrides = []): array
+private function makeSsoPayload(array $overrides = []): array
     {
         return array_merge([
             'id'    => 'sso-uid-123',
@@ -38,7 +38,7 @@ class SsoUserMatchingTest extends TestCase
      * Invoke the protected findOrCreate() method via the public getUser() entry
      * point by faking the HTTP call to the SSO server.
      */
-    private function callGetUser(array $ssoPayload): ?User
+private function callGetUser(array $ssoPayload): ?User
     {
         Http::fake([
             '*' => Http::response($ssoPayload, 200),
@@ -68,7 +68,7 @@ class SsoUserMatchingTest extends TestCase
      *   level 2 → role_id 3 (pesantren)
      *   level 3 → role_id 2 (asesor)
      */
-    public function test_creates_new_user_when_no_match_found(): void
+public function test_creates_new_user_when_no_match_found(): void
     {
         $this->assertDatabaseCount('users', 0);
 
@@ -87,7 +87,7 @@ class SsoUserMatchingTest extends TestCase
     /**
      * Task 7.1: SSO level 1 → role_id 1 (admin).
      */
-    public function test_new_user_with_level_1_gets_admin_role(): void
+public function test_new_user_with_level_1_gets_admin_role(): void
     {
         $user = $this->callGetUser($this->makeSsoPayload([
             'id'    => 'sso-uid-level1',
@@ -102,7 +102,7 @@ class SsoUserMatchingTest extends TestCase
     /**
      * Task 7.1: SSO level 2 → role_id 3 (pesantren).
      */
-    public function test_new_user_with_level_2_gets_pesantren_role(): void
+public function test_new_user_with_level_2_gets_pesantren_role(): void
     {
         $user = $this->callGetUser($this->makeSsoPayload([
             'id'    => 'sso-uid-level2',
@@ -117,7 +117,7 @@ class SsoUserMatchingTest extends TestCase
     /**
      * Task 7.1: SSO level 3 → role_id 2 (asesor).
      */
-    public function test_new_user_with_level_3_gets_asesor_role(): void
+public function test_new_user_with_level_3_gets_asesor_role(): void
     {
         $user = $this->callGetUser($this->makeSsoPayload([
             'id'    => 'sso-uid-level3',
@@ -133,7 +133,7 @@ class SsoUserMatchingTest extends TestCase
      * 6.1b  When a user with the same email already exists, that user is
      *       returned (no duplicate created).
      */
-    public function test_finds_existing_user_by_email(): void
+public function test_finds_existing_user_by_email(): void
     {
         $existing = User::factory()->create([
             'email'   => 'budi@example.com',
@@ -151,7 +151,7 @@ class SsoUserMatchingTest extends TestCase
      * 6.1c  When no user matches by email but a Profile row with the same
      *       SSO id exists, that user is returned (no duplicate created).
      */
-    public function test_finds_existing_user_by_profile_sso_id_when_email_not_found(): void
+public function test_finds_existing_user_by_profile_sso_id_when_email_not_found(): void
     {
         // User with a different email but already has a profile linked to the SSO id
         $existing = User::factory()->create([
@@ -178,7 +178,7 @@ class SsoUserMatchingTest extends TestCase
     /**
      * 6.2a  When sso_sync_role is true, the role IS updated from SSO.
      */
-    public function test_role_is_synced_when_sso_sync_role_is_true(): void
+public function test_role_is_synced_when_sso_sync_role_is_true(): void
     {
         $existing = User::factory()->create([
             'email'        => 'budi@example.com',
@@ -197,7 +197,7 @@ class SsoUserMatchingTest extends TestCase
      * 6.2b  When sso_sync_role is false, the role is NOT changed even though
      *       SSO reports a different level.
      */
-    public function test_role_is_not_overridden_when_sso_sync_role_is_false(): void
+public function test_role_is_not_overridden_when_sso_sync_role_is_false(): void
     {
         $existing = User::factory()->create([
             'email'        => 'budi@example.com',
@@ -220,7 +220,7 @@ class SsoUserMatchingTest extends TestCase
      * 6.3a  A user created manually (no sso_linked_at) gets sso_linked_at set
      *       on their first SSO login.
      */
-    public function test_manually_created_user_gets_linked_on_first_sso_login(): void
+public function test_manually_created_user_gets_linked_on_first_sso_login(): void
     {
         $existing = User::factory()->create([
             'email'        => 'budi@example.com',
@@ -243,7 +243,7 @@ class SsoUserMatchingTest extends TestCase
     /**
      * 6.3b  sso_linked_at is NOT overwritten on subsequent SSO logins.
      */
-    public function test_sso_linked_at_is_not_overwritten_on_subsequent_logins(): void
+public function test_sso_linked_at_is_not_overwritten_on_subsequent_logins(): void
     {
         $linkedAt = now()->subDays(5);
 
@@ -274,7 +274,7 @@ class SsoUserMatchingTest extends TestCase
      *      - The user's email in the system is updated to the new SSO email
      *      - No duplicate user is created
      */
-    public function test_email_updated_when_sso_email_changes(): void
+public function test_email_updated_when_sso_email_changes(): void
     {
         // User exists with old email and a linked SSO profile
         $existing = User::factory()->create([
@@ -310,7 +310,7 @@ class SsoUserMatchingTest extends TestCase
      * 6.4b  When both old-email user AND a profile-id match exist for
      *       different users, the email match takes priority (6.1 ordering).
      */
-    public function test_email_match_takes_priority_over_profile_id_match(): void
+public function test_email_match_takes_priority_over_profile_id_match(): void
     {
         // User A: matches by email
         $userA = User::factory()->create([

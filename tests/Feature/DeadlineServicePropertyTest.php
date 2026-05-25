@@ -15,6 +15,7 @@ use Faker\Factory as Faker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Property-Based Tests for DeadlineService
@@ -22,8 +23,8 @@ use Tests\TestCase;
  * Uses PHPUnit with randomized data to approximate property-based testing.
  * Each property test runs 100 iterations with randomly generated inputs.
  *
- * @group Feature: assessment-visitasi-timeout
  */
+#[Group('Feature: assessment-visitasi-timeout')]
 class DeadlineServicePropertyTest extends TestCase
 {
     use RefreshDatabase;
@@ -49,7 +50,7 @@ class DeadlineServicePropertyTest extends TestCase
      * Create an Asesor with an associated User (role_id=2).
      * Returns [$asesor, $user].
      */
-    private function createAsesorWithUser(): array
+private function createAsesorWithUser(): array
     {
         $user = User::factory()->create(['role_id' => 2]);
         $asesor = Asesor::create([
@@ -64,7 +65,7 @@ class DeadlineServicePropertyTest extends TestCase
      * Create an Akreditasi with a pesantren user (role_id=3).
      * Returns [$akreditasi, $pesantrenUser].
      */
-    private function createAkreditasiWithUser(int $status = 5): array
+private function createAkreditasiWithUser(int $status = 5): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -92,7 +93,7 @@ class DeadlineServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 1.2**
      */
-    public function test_property_1_deadline_calculation_correctness(): void
+public function test_property_1_deadline_calculation_correctness(): void
     {
         $faker = Faker::create();
 
@@ -166,7 +167,7 @@ class DeadlineServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 2.2, 2.3**
      */
-    public function test_property_2_overdue_akreditasi_identification(): void
+public function test_property_2_overdue_akreditasi_identification(): void
     {
         $faker = Faker::create();
 
@@ -247,7 +248,7 @@ class DeadlineServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 3.3**
      */
-    public function test_property_3_reminder_notification_content_completeness(): void
+public function test_property_3_reminder_notification_content_completeness(): void
     {
         $faker = Faker::create();
 
@@ -353,7 +354,7 @@ class DeadlineServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 3.5, 7.3**
      */
-    public function test_property_4_reminder_deduplication(): void
+public function test_property_4_reminder_deduplication(): void
     {
         $faker = Faker::create();
 
@@ -430,7 +431,7 @@ class DeadlineServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 4.2**
      */
-    public function test_property_5_escalation_notification_content_completeness(): void
+public function test_property_5_escalation_notification_content_completeness(): void
     {
         $faker = Faker::create();
 
@@ -535,7 +536,7 @@ class DeadlineServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 4.4, 7.4**
      */
-    public function test_property_6_escalation_interval_enforcement(): void
+public function test_property_6_escalation_interval_enforcement(): void
     {
         $faker = Faker::create();
 
@@ -625,7 +626,7 @@ class DeadlineServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 3.4**
      */
-    public function test_unit_3_7_reminder_notification_uses_database_channel(): void
+public function test_unit_3_7_reminder_notification_uses_database_channel(): void
     {
         $today = Carbon::create(2025, 10, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -688,7 +689,7 @@ class DeadlineServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 4.5**
      */
-    public function test_unit_3_8_escalation_stops_when_status_changes(): void
+public function test_unit_3_8_escalation_stops_when_status_changes(): void
     {
         $today = Carbon::create(2025, 10, 15, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -773,7 +774,7 @@ class DeadlineServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 6.2**
      */
-    public function test_property_7_available_asesors_excludes_current(): void
+public function test_property_7_available_asesors_excludes_current(): void
     {
         $faker = Faker::create();
 

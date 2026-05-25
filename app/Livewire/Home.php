@@ -6,12 +6,45 @@ use App\Models\Akreditasi;
 use App\Models\Asesor;
 use App\Models\Pesantren;
 use App\Models\Assessment;
+use App\StateMachine\AkreditasiStateMachine;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 class Home extends Component
 {
+    private function activeStatuses(): array
+    {
+        return [
+            AkreditasiStateMachine::STATUS_PENGAJUAN,
+            AkreditasiStateMachine::STATUS_VERIFIKASI_BERKAS,
+            AkreditasiStateMachine::STATUS_ASSESSMENT,
+            AkreditasiStateMachine::STATUS_VISITASI,
+            AkreditasiStateMachine::STATUS_PASCA_VISITASI,
+            AkreditasiStateMachine::STATUS_VALIDASI_ADMIN,
+        ];
+    }
+
+    private function statusStatsSelect(): string
+    {
+        $activeStatuses = implode(',', $this->activeStatuses());
+
+        return sprintf(
+            'SUM(CASE WHEN status IN (%s) THEN 1 ELSE 0 END) as total_aktif,
+                SUM(CASE WHEN status = %d THEN 1 ELSE 0 END) as verifikasi,
+                SUM(CASE WHEN status = %d THEN 1 ELSE 0 END) as assessment,
+                SUM(CASE WHEN status = %d THEN 1 ELSE 0 END) as visitasi,
+                SUM(CASE WHEN status = %d THEN 1 ELSE 0 END) as terakreditasi,
+                SUM(CASE WHEN status = %d THEN 1 ELSE 0 END) as ditolak',
+            $activeStatuses,
+            AkreditasiStateMachine::STATUS_VERIFIKASI_BERKAS,
+            AkreditasiStateMachine::STATUS_ASSESSMENT,
+            AkreditasiStateMachine::STATUS_VISITASI,
+            AkreditasiStateMachine::STATUS_SELESAI,
+            AkreditasiStateMachine::STATUS_DITOLAK,
+        );
+    }
+
     #[Layout('layouts.app')]
     public function render()
     {
@@ -28,43 +61,49 @@ class Home extends Component
             'ditolak' => 0,
         ];
 
-        // 1. Stats based on role
+        // P-7 fix: single aggregated query instead of 6 sequential COUNT(*) per render.
+        // Each role gets one round-trip instead of six.
         if ($isAdmin) {
+            $row = Akreditasi::selectRaw($this->statusStatsSelect())->first();
             $stats = [
-                'total_aktif' => Akreditasi::whereIn('status', [3, 4, 5, 6])->count(),
-                'verifikasi' => Akreditasi::where('status', 3)->count(),
-                'assessment' => Akreditasi::where('status', 5)->count(),
-                'visitasi' => Akreditasi::where('status', 4)->count(),
-                'terakreditasi' => Akreditasi::where('status', 1)->count(),
-                'ditolak' => Akreditasi::where('status', 2)->count(),
+                'total_aktif'   => (int) ($row->total_aktif ?? 0),
+                'verifikasi'    => (int) ($row->verifikasi ?? 0),
+                'assessment'    => (int) ($row->assessment ?? 0),
+                'visitasi'      => (int) ($row->visitasi ?? 0),
+                'terakreditasi' => (int) ($row->terakreditasi ?? 0),
+                'ditolak'       => (int) ($row->ditolak ?? 0),
             ];
         } elseif ($isPesantren) {
+            $row = Akreditasi::where('user_id', $user->id)->selectRaw($this->statusStatsSelect())->first();
             $stats = [
-                'total_aktif' => Akreditasi::where('user_id', $user->id)->whereIn('status', [3, 4, 5, 6])->count(),
-                'verifikasi' => Akreditasi::where('user_id', $user->id)->where('status', 3)->count(),
-                'assessment' => Akreditasi::where('user_id', $user->id)->where('status', 5)->count(),
-                'visitasi' => Akreditasi::where('user_id', $user->id)->where('status', 4)->count(),
-                'terakreditasi' => Akreditasi::where('user_id', $user->id)->where('status', 1)->count(),
-                'ditolak' => Akreditasi::where('user_id', $user->id)->where('status', 2)->count(),
+                'total_aktif'   => (int) ($row->total_aktif ?? 0),
+                'verifikasi'    => (int) ($row->verifikasi ?? 0),
+                'assessment'    => (int) ($row->assessment ?? 0),
+                'visitasi'      => (int) ($row->visitasi ?? 0),
+                'terakreditasi' => (int) ($row->terakreditasi ?? 0),
+                'ditolak'       => (int) ($row->ditolak ?? 0),
             ];
         } elseif ($isAsesor) {
             $asesor = $user->asesor;
             $asesorId = $asesor ? $asesor->id : 0;
             $stats = [
-                'total_aktif' => Assessment::where('asesor_id', $asesorId)->whereHas('akreditasi', fn($q) => $q->whereIn('status', [4, 5]))->count(),
-                'verifikasi' => Akreditasi::where('status', 3)->count(),
-                'assessment' => Assessment::where('asesor_id', $asesorId)->whereHas('akreditasi', fn($q) => $q->where('status', 5))->count(),
-                'visitasi' => Assessment::where('asesor_id', $asesorId)->whereHas('akreditasi', fn($q) => $q->where('status', 4))->count(),
-                'terakreditasi' => Assessment::where('asesor_id', $asesorId)->whereHas('akreditasi', fn($q) => $q->where('status', 1))->count(),
-                'ditolak' => Akreditasi::where('status', 2)->count(),
+                'total_aktif'   => Assessment::where('asesor_id', $asesorId)->whereHas('akreditasi', fn($q) => $q->whereIn('status', $this->activeStatuses()))->count(),
+                'verifikasi'    => Assessment::where('asesor_id', $asesorId)->whereHas('akreditasi', fn($q) => $q->where('status', AkreditasiStateMachine::STATUS_VERIFIKASI_BERKAS))->count(),
+                'assessment'    => Assessment::where('asesor_id', $asesorId)->whereHas('akreditasi', fn($q) => $q->where('status', AkreditasiStateMachine::STATUS_ASSESSMENT))->count(),
+                'visitasi'      => Assessment::where('asesor_id', $asesorId)->whereHas('akreditasi', fn($q) => $q->where('status', AkreditasiStateMachine::STATUS_VISITASI))->count(),
+                'terakreditasi' => Assessment::where('asesor_id', $asesorId)->whereHas('akreditasi', fn($q) => $q->where('status', AkreditasiStateMachine::STATUS_SELESAI))->count(),
+                'ditolak'       => Assessment::where('asesor_id', $asesorId)->whereHas('akreditasi', fn($q) => $q->where('status', AkreditasiStateMachine::STATUS_DITOLAK))->count(),
             ];
         }
 
         // 2. Chart Data
+        // L-1 fix: driver-specific SQL literal diekstrak ke konstanta agar
+        // tidak ada string interpolasi yang bisa jadi injection vector di masa depan.
+        // Semua nilai adalah literal statis dari driver name, bukan user input.
         $monthExpression = match (DB::connection()->getDriverName()) {
             'sqlite' => "CAST(strftime('%m', created_at) AS INTEGER)",
-            'pgsql' => 'EXTRACT(MONTH FROM created_at)',
-            default => 'MONTH(created_at)',
+            'pgsql'  => 'EXTRACT(MONTH FROM created_at)',
+            default  => 'MONTH(created_at)',
         };
 
         $submissionQuery = Akreditasi::selectRaw($monthExpression . ' as month, COUNT(*) as count')
@@ -92,11 +131,11 @@ class Home extends Component
         // 3. Monitoring Asesor
         $totalAsesor = Asesor::count();
         $totalTugasAktif = Assessment::whereHas('akreditasi', function ($q) {
-            $q->whereIn('status', [3, 4, 5]);
+            $q->whereIn('status', [AkreditasiStateMachine::STATUS_VERIFIKASI_BERKAS, AkreditasiStateMachine::STATUS_ASSESSMENT, AkreditasiStateMachine::STATUS_VISITASI]);
         })->count();
 
         $asesorPunyaTugasIds = Assessment::whereHas('akreditasi', function ($q) {
-            $q->whereIn('status', [3, 4, 5]);
+            $q->whereIn('status', [AkreditasiStateMachine::STATUS_VERIFIKASI_BERKAS, AkreditasiStateMachine::STATUS_ASSESSMENT, AkreditasiStateMachine::STATUS_VISITASI]);
         })->pluck('asesor_id')->unique()->toArray();
 
         $asesorTanpaTugas = $totalAsesor - count($asesorPunyaTugasIds);
@@ -139,9 +178,13 @@ class Home extends Component
         $readiness = [];
         if ($isPesantren) {
             $pesantren = $user->pesantren;
-            $ipm = $pesantren ? $user->ipm : null;
-            $sdmCount = $pesantren ? $user->sdm()->count() : 0;
             $edpmCount = $pesantren ? $user->edpms()->count() : 0;
+            $progressService = app(\App\Services\SidebarProgressService::class);
+            $sectionProgress = [
+                'profil' => $progressService->getSectionProgress($user->id, 'profil')['status'],
+                'ipm' => $progressService->getSectionProgress($user->id, 'ipm')['status'],
+                'sdm' => $progressService->getSectionProgress($user->id, 'sdm')['status'],
+            ];
 
             $docFields = ['status_kepemilikan_tanah','sertifikat_nsp','rk_anggaran','silabus_rpp','peraturan_kepegawaian','file_lk_iapm','laporan_tahunan','dok_profil','dok_nsp','dok_renstra','dok_rk_anggaran','dok_kurikulum','dok_silabus_rpp','dok_kepengasuhan','dok_peraturan_kepegawaian','dok_sarpras','dok_laporan_tahunan','dok_sop'];
             $docFilled = 0;
@@ -152,9 +195,9 @@ class Home extends Component
             }
 
             $readiness = [
-                ['key' => 'profil', 'label' => 'Profil Pesantren', 'done' => $pesantren && !empty($pesantren->nama_pesantren) && !empty($pesantren->alamat), 'route' => 'pesantren.profile'],
-                ['key' => 'ipm', 'label' => 'Data IPM', 'done' => $ipm && (!empty($ipm->nsp_file) || !empty($ipm->lulus_santri_file)), 'route' => 'pesantren.ipm'],
-                ['key' => 'sdm', 'label' => 'Data SDM', 'done' => $sdmCount > 0, 'route' => 'pesantren.sdm'],
+                ['key' => 'profil', 'label' => 'Profil Pesantren', 'done' => $sectionProgress['profil'] === 'complete', 'route' => 'pesantren.profile'],
+                ['key' => 'ipm', 'label' => 'Data IPM', 'done' => $sectionProgress['ipm'] === 'complete', 'route' => 'pesantren.ipm'],
+                ['key' => 'sdm', 'label' => 'Data SDM', 'done' => $sectionProgress['sdm'] === 'complete', 'route' => 'pesantren.sdm'],
                 ['key' => 'edpm', 'label' => 'Evaluasi Diri (EDPM)', 'done' => $edpmCount > 0, 'route' => 'pesantren.edpm'],
                 ['key' => 'dokumen', 'label' => "Dokumen ($docFilled/" . count($docFields) . ")", 'done' => $docFilled >= 7, 'route' => 'pesantren.profile'],
             ];

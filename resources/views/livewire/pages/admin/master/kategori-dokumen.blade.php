@@ -177,32 +177,36 @@ new #[Layout('layouts.app')] class extends Component {
         title="Master Kategori Dokumen"
         subtitle="Kelola kategori dokumen, hak akses per role, dan urutan tampil di sidebar."
     >
-        <x-datatable.layout title="Kategori Dokumen" :records="$this->categories">
+        <x-datatable.layout
+            title="Daftar Kategori Dokumen"
+            subtitle="Kategori menentukan visibilitas dokumen, hak upload, dan urutan tampil."
+            :records="$this->categories"
+            class="spm-table-shell--document-category"
+        >
             <x-slot name="filters">
                 <x-datatable.search placeholder="Cari kategori..." />
             </x-slot>
 
             <x-slot name="toolbar">
-                <x-ui.button wire:click="openModal" variant="primary" size="sm">
-                    <x-ui.icon name="plus" class="fs-4 me-1" />
+                <x-ui.button wire:click="openModal" variant="primary" size="sm" icon="plus">
                     Tambah Kategori
                 </x-ui.button>
             </x-slot>
 
             <x-slot name="thead">
-                <x-datatable.th field="sort_order" :sortField="$sortField" :sortAsc="$sortAsc" class="text-center" style="width: 80px;">
+                <x-datatable.th field="sort_order" :sortField="$sortField" :sortAsc="$sortAsc" class="text-center min-w-90px">
                     Urutan
                 </x-datatable.th>
-                <x-datatable.th field="name" :sortField="$sortField" :sortAsc="$sortAsc">
+                <x-datatable.th field="name" :sortField="$sortField" :sortAsc="$sortAsc" class="min-w-300px">
                     Nama Kategori
                 </x-datatable.th>
-                <x-datatable.th field="slug" :sortField="$sortField" :sortAsc="$sortAsc">
+                <x-datatable.th field="slug" :sortField="$sortField" :sortAsc="$sortAsc" class="min-w-170px">
                     Slug
                 </x-datatable.th>
-                <x-ui.table-th align="center">Visibilitas</x-ui.table-th>
-                <x-ui.table-th align="center">Upload</x-ui.table-th>
-                <x-ui.table-th align="center">Status</x-ui.table-th>
-                <x-ui.table-th align="end">Aksi</x-ui.table-th>
+                <x-ui.table-th align="center" class="min-w-150px">Visibilitas</x-ui.table-th>
+                <x-ui.table-th align="center" class="min-w-180px">Upload</x-ui.table-th>
+                <x-ui.table-th align="center" class="min-w-120px">Status</x-ui.table-th>
+                <x-ui.table-th align="end" class="min-w-120px">Aksi</x-ui.table-th>
             </x-slot>
 
             <x-slot name="tbody">
@@ -322,27 +326,33 @@ new #[Layout('layouts.app')] class extends Component {
 
                 <x-ui.form-field label="Visibilitas (siapa yang bisa LIHAT dokumen di kategori ini)" :error="$errors->get('visibility')">
                     <div class="d-flex flex-column gap-3">
-                        <label class="d-flex align-items-start gap-3 p-3 rounded border cursor-pointer" :class="$wire.visibility === 'public' ? 'border-success bg-light-success' : 'border-gray-300'">
-                            <input type="radio" wire:model.live="visibility" value="public" class="form-check-input mt-1" />
-                            <div>
-                                <div class="fw-bold text-gray-800">Publik</div>
-                                <div class="fs-8 text-muted">Bisa dilihat oleh semua role (Pesantren + Asesor + Admin). Cocok untuk panduan, IAPM, template umum.</div>
-                            </div>
-                        </label>
-                        <label class="d-flex align-items-start gap-3 p-3 rounded border cursor-pointer" :class="$wire.visibility === 'pesantren_secret' ? 'border-primary bg-light-primary' : 'border-gray-300'">
-                            <input type="radio" wire:model.live="visibility" value="pesantren_secret" class="form-check-input mt-1" />
-                            <div>
-                                <div class="fw-bold text-gray-800">Pesantren Only (Rahasia dari Asesor)</div>
-                                <div class="fs-8 text-muted">Hanya Pesantren + Admin yang bisa lihat. Cocok untuk Kartu Kendali (penilaian asesor di lapangan dari sudut pandang pesantren).</div>
-                            </div>
-                        </label>
-                        <label class="d-flex align-items-start gap-3 p-3 rounded border cursor-pointer" :class="$wire.visibility === 'asesor_secret' ? 'border-info bg-light-info' : 'border-gray-300'">
-                            <input type="radio" wire:model.live="visibility" value="asesor_secret" class="form-check-input mt-1" />
-                            <div>
-                                <div class="fw-bold text-gray-800">Asesor Only (Rahasia dari Pesantren)</div>
-                                <div class="fs-8 text-muted">Hanya Asesor + Admin yang bisa lihat. Cocok untuk Laporan Visitasi (penilaian asesor terhadap pesantren).</div>
-                            </div>
-                        </label>
+                        <x-ui.option-card
+                            model="visibility"
+                            modifier="live"
+                            value="public"
+                            title="Publik"
+                            description="Bisa dilihat oleh semua role (Pesantren + Asesor + Admin). Cocok untuk panduan, IAPM, template umum."
+                            variant="success"
+                            :active="$visibility === 'public'"
+                        />
+                        <x-ui.option-card
+                            model="visibility"
+                            modifier="live"
+                            value="pesantren_secret"
+                            title="Pesantren Only (Rahasia dari Asesor)"
+                            description="Hanya Pesantren + Admin yang bisa lihat. Cocok untuk Kartu Kendali dari sudut pandang pesantren."
+                            variant="primary"
+                            :active="$visibility === 'pesantren_secret'"
+                        />
+                        <x-ui.option-card
+                            model="visibility"
+                            modifier="live"
+                            value="asesor_secret"
+                            title="Asesor Only (Rahasia dari Pesantren)"
+                            description="Hanya Asesor + Admin yang bisa lihat. Cocok untuk Laporan Visitasi penilaian asesor."
+                            variant="info"
+                            :active="$visibility === 'asesor_secret'"
+                        />
                     </div>
                 </x-ui.form-field>
 

@@ -15,6 +15,7 @@ class AkreditasiEdpmCatatan extends Model
         'asesor_id',
         'komponen_id',
         'catatan',
+        'rekomendasi',
         'nk',
     ];
 }

@@ -8,6 +8,7 @@ use App\Services\OnboardingService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Property 4: Visit-based onboarding step completion is monotonic
@@ -95,9 +96,9 @@ class OnboardingMonotonicityPropertyTest extends TestCase
      *
      * **Validates: Requirements 6.4, 7.4**
      *
-     * @dataProvider randomVisitSequencesProvider
      */
-    public function test_property_4_visit_based_onboarding_monotonicity(
+#[DataProvider('randomVisitSequencesProvider')]
+public function test_property_4_visit_based_onboarding_monotonicity(
         int $roleId,
         array $visitSequence
     ): void {

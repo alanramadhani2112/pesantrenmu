@@ -20,6 +20,13 @@ new #[Layout('layouts.app')] class extends Component {
     public $selectedIds = [];
     public $selectAll = false;
 
+    public function mount()
+    {
+        if (!auth()->user()?->canAccessAdminArea()) {
+            abort(403);
+        }
+    }
+
     public function updatedSearch()
     {
         $this->resetPage();
@@ -104,7 +111,11 @@ new #[Layout('layouts.app')] class extends Component {
         title="Pesantren"
         subtitle="Kelola data pesantren, status akun, dan status akreditasi."
     >
-        <x-datatable.layout title="Pesantren" :records="$this->pesantrens">
+        <x-datatable.layout
+            title="Daftar Pesantren"
+            subtitle="Daftar pesantren beserta status akun dan progres akreditasi terbaru."
+            :records="$this->pesantrens"
+        >
             <x-slot name="filters">
                 <x-ui.filter-bar>
                     <x-datatable.search placeholder="Cari Pesantren..." />
@@ -129,8 +140,7 @@ new #[Layout('layouts.app')] class extends Component {
             </x-slot>
 
             <x-slot name="toolbar">
-                <x-ui.button wire:click="export" variant="primary" size="sm">
-                    <x-ui.icon name="document" class="fs-4 me-1" />
+                <x-ui.button wire:click="export" variant="primary" size="sm" icon="document">
                     Ekspor Data
                 </x-ui.button>
             </x-slot>
@@ -163,9 +173,9 @@ new #[Layout('layouts.app')] class extends Component {
                         @endphp
                         @if (!$latestAkreditasi)
                         <x-ui.status-badge variant="secondary">Belum Terakreditasi</x-ui.status-badge>
-                        @elseif ($latestAkreditasi->status == 1)
+                        @elseif ($latestAkreditasi->status == 0)
                         <x-ui.status-badge variant="success">{{ $latestAkreditasi->peringkat ?? 'Unggul' }}</x-ui.status-badge>
-                        @elseif ($latestAkreditasi->status == 2)
+                        @elseif ($latestAkreditasi->status == -1)
                         <x-ui.status-badge variant="danger">Ditolak</x-ui.status-badge>
                         @else
                         <x-ui.status-badge variant="warning">Proses</x-ui.status-badge>
@@ -179,10 +189,12 @@ new #[Layout('layouts.app')] class extends Component {
                         @endif
                     </td>
                     <td class="text-end">
-                        <x-ui.button :href="route('admin.pesantren.detail', $user->uuid)" variant="light" size="sm">
-                            <x-ui.icon name="eye" class="fs-4 me-1" />
-                            Detail
-                        </x-ui.button>
+                        <x-ui.action-menu>
+                            <x-ui.action-menu-item :href="route('admin.pesantren.detail', $user->uuid)">
+                                <x-ui.icon name="eye" class="fs-5 text-gray-500" />
+                                Lihat Detail
+                            </x-ui.action-menu-item>
+                        </x-ui.action-menu>
                     </td>
                 </tr>
                 @empty

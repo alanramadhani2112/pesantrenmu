@@ -9,8 +9,8 @@ use App\Models\User;
 use App\Services\SidebarProgressService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Property 1: Progress status calculation is consistent with data presence
@@ -35,28 +35,6 @@ class ProgressStatusPropertyTest extends TestCase
         parent::setUp();
         $this->seed(RoleSeeder::class);
         $this->service = app(SidebarProgressService::class);
-
-        // Add missing columns that the service expects but don't exist in the base migration
-        if (!Schema::hasColumn('pesantrens', 'nspp')) {
-            Schema::table('pesantrens', function ($table) {
-                $table->string('nspp')->nullable();
-            });
-        }
-        if (!Schema::hasColumn('pesantrens', 'kabupaten')) {
-            Schema::table('pesantrens', function ($table) {
-                $table->string('kabupaten')->nullable();
-            });
-        }
-        if (!Schema::hasColumn('pesantrens', 'kecamatan')) {
-            Schema::table('pesantrens', function ($table) {
-                $table->string('kecamatan')->nullable();
-            });
-        }
-        if (!Schema::hasColumn('pesantrens', 'kelurahan')) {
-            Schema::table('pesantrens', function ($table) {
-                $table->string('kelurahan')->nullable();
-            });
-        }
     }
 
     /**
@@ -64,12 +42,13 @@ class ProgressStatusPropertyTest extends TestCase
      */
     private const PROFIL_FIELDS = [
         'nama_pesantren',
-        'nspp',
+        'ns_pesantren',
         'alamat',
         'provinsi',
-        'kabupaten',
-        'kecamatan',
-        'kelurahan',
+        'kota_kabupaten',
+        'tahun_pendirian',
+        'nama_mudir',
+        'layanan_satuan_pendidikan',
     ];
 
     /**
@@ -92,8 +71,8 @@ class ProgressStatusPropertyTest extends TestCase
         mt_srand($seed);
 
         for ($i = 0; $i < 120; $i++) {
-            // Generate random bitmask for profil fields (7 fields → 0-127)
-            $profilBitmask = mt_rand(0, 127);
+            // Generate random bitmask for profil fields.
+            $profilBitmask = mt_rand(0, (1 << count(self::PROFIL_FIELDS)) - 1);
             // Generate random bitmask for IPM fields (4 fields → 0-15)
             $ipmBitmask = mt_rand(0, 15);
             // Generate random SDM presence (true/false)
@@ -114,9 +93,9 @@ class ProgressStatusPropertyTest extends TestCase
      *
      * **Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5**
      *
-     * @dataProvider randomProgressCombinationsProvider
      */
-    public function test_property_1_progress_status_consistent_with_data_presence(
+#[DataProvider('randomProgressCombinationsProvider')]
+public function test_property_1_progress_status_consistent_with_data_presence(
         int $profilBitmask,
         int $ipmBitmask,
         bool $sdmPresent
@@ -138,11 +117,13 @@ class ProgressStatusPropertyTest extends TestCase
         $profilData = ['user_id' => $user->id];
         foreach (self::PROFIL_FIELDS as $index => $field) {
             if ($profilBitmask & (1 << $index)) {
-                $profilData[$field] = 'test_value_' . $field;
+                $profilData[$field] = $field === 'layanan_satuan_pendidikan'
+                    ? ['spm']
+                    : 'test_value_' . $field;
             } else {
                 // Use empty string for unfilled fields (satisfies NOT NULL constraint
                 // while still being treated as "empty" by the service)
-                $profilData[$field] = '';
+                $profilData[$field] = $field === 'layanan_satuan_pendidikan' ? [] : '';
             }
         }
 
@@ -217,7 +198,7 @@ class ProgressStatusPropertyTest extends TestCase
     /**
      * Determine expected status based on filled count vs total.
      */
-    private function expectedStatus(int $filled, int $total): string
+private function expectedStatus(int $filled, int $total): string
     {
         if ($filled === 0) {
             return 'not_started';

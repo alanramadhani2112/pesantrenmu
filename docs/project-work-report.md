@@ -219,6 +219,70 @@ Fondasi UI sudah aman untuk dilanjutkan bertahap. Sistem sudah jauh lebih konsis
 
 **Seluruh halaman dalam project sekarang sudah menggunakan pola Metronic / x-ui.***
 
+---
+
+## Update: Business Flow LP2M & Dokumen Pasca Visitasi (23 Mei 2026)
+
+### 18. Penyusunan business spec flow LP2M
+
+- Kita merapikan ulang business flow akreditasi agar sesuai konteks LP2M
+  (Lembaga Pengembangan Pesantren Muhammadiyah), bukan Dikdasmen.
+- Spec disusun di `docs/business-spec-flow-lp2m-v1.md`.
+- Workbook proses riil LP2M digunakan sebagai konteks terminologi:
+  `NA 1`, `NA 2`, `Delta`, `NK`, `NV`, `Catatan Butir`, dan
+  `Catatan Rekomendasi Komponen`.
+- Alur bisnis dibakukan:
+  `Pengajuan -> Review Awal Admin -> Review Substansi Asesor -> Visitasi ->
+  Pasca Visitasi -> Validasi Akhir Admin -> Selesai/Ditolak Final -> Banding`.
+
+### 19. Koreksi flow banding
+
+- Banding hanya tersedia setelah `Ditolak Final`.
+- Jika banding diterima, akreditasi kembali ke `Validasi Akhir Admin`.
+- Jika banding ditolak, akreditasi kembali atau tetap `Ditolak Final`.
+- Banding diterima tidak membuat pengajuan baru dan tidak kembali ke Visitasi.
+- State machine, service, notifikasi, dan tampilan pesantren/admin diselaraskan
+  dengan rule ini.
+
+### 20. Hardening dokumen pasca visitasi
+
+- Dokumen teknis dibuat di
+  `docs/post-visitasi-documents-implementation.md`.
+- Upload dokumen workflow dipusatkan ke `AkreditasiDocumentService`.
+- Dokumen wajib pasca visitasi dibakukan:
+  - `laporan_visitasi_asesor1`
+  - `laporan_visitasi_asesor2`
+  - `laporan_visitasi_kelompok`
+  - `kartu_kendali`
+- Guard role dan status ditambahkan:
+  - pesantren hanya bisa upload kartu kendali miliknya sendiri,
+  - asesor hanya bisa upload laporan individu bila ditugaskan,
+  - hanya Asesor 1 yang bisa upload laporan kelompok,
+  - upload pasca visitasi hanya aktif pada status `2`.
+- `finalizeAssessorScoring()` diblokir bila dokumen wajib belum lengkap.
+- `issueSK()` juga diblokir bila dokumen wajib belum lengkap, untuk mencegah
+  bypass dari jalur status `Validasi Admin`.
+
+### 21. TDD dan verifikasi
+
+- Test baru dibuat:
+  `tests/Feature/AkreditasiWorkflow/PostVisitasiDocumentsTest.php`.
+- Test mencakup upload kartu kendali, laporan individu, laporan kelompok,
+  blocking finalisasi asesor, dan blocking penerbitan SK.
+- Verifikasi targeted:
+  - `9 passed, 39 assertions`
+- Sweep workflow terkait:
+  - `159 passed, 11859 assertions`
+- Blade compile:
+  - `php artisan view:cache --no-ansi` berhasil.
+
+### Status 23 Mei 2026
+
+Fondasi business flow untuk banding dan dokumen pasca visitasi sudah jauh lebih
+aman. Sistem sekarang punya guard di service layer, UI handler, legacy wrapper,
+dan test regresi. Lanjutan yang paling logis adalah hardening `NV` dan audit UI
+admin untuk checklist dokumen final.
+
 Tidak ada lagi halaman yang memakai raw Tailwind atau pola Breeze lama di area operasional maupun auth. Satu-satunya area yang secara desain berbeda adalah guest layout (auth pages) yang memang punya konteks visual terpisah dari dashboard — tapi sekarang sudah konsisten secara internal.
 
 ## Kesimpulan
@@ -268,3 +332,38 @@ Audit menyeluruh dilakukan terhadap 25 temuan yang dikelompokkan dalam 3 stream 
 ### Status
 
 Semua 4 wave selesai. Sisa: manual smoke test 3 role dan beberapa feature test opsional (ditandai `*` di tasks.md).
+
+---
+
+## Update: Role Pesantren Production Readiness (19 Mei 2026)
+
+Checkpoint ini fokus pada robustness dan UI/UX role `pesantren` untuk tiga fitur inti:
+
+- Profil Pesantren
+- IPM
+- Data SDM
+
+Hasil utama:
+
+- Profil Pesantren punya pemisahan `Submit Draft` dan `Submit` final.
+- Final submit Profil wajib mengisi data inti dan layanan satuan pendidikan.
+- IPM wajib memiliki 4 dokumen PDF sebelum final save.
+- Data SDM wajib berisi angka integer non-negatif dan tidak bisa menyimpan row kosong tanpa unit profil.
+- Alert danger dan field invalid sudah muncul untuk validasi penting.
+- Input, checkbox, upload, table, dan section memakai reusable Metronic component.
+- Emoji lock/correction dihapus dari UI.
+
+Validasi terakhir:
+
+- `php artisan test tests\Feature\Livewire\PesantrenProfileFlowTest.php tests\Feature\Livewire\PesantrenIpmFlowTest.php tests\Feature\Livewire\PesantrenSdmFlowTest.php tests\Feature\SidebarProgressServiceTest.php tests\Feature\MetronicFrontendTest.php --no-ansi`
+- `php artisan view:cache --no-ansi`
+- `npm run build`
+
+Hasil:
+
+- 49 tests lulus.
+- 706 assertions lulus.
+- Blade cache lulus.
+- Vite build lulus.
+
+Dokumen detail: `docs/pesantren-role-production-readiness.md`.

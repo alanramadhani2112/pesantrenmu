@@ -10,44 +10,27 @@
     @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css'])
     <style>
         :root { --spm-primary: #005533; }
-        .error-icon-wrap {
-            width: 96px;
-            height: 96px;
-            border-radius: 50%;
-            background: #e6f5ee;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
-        }
-        .error-code {
-            font-size: clamp(4rem, 12vw, 7rem);
-            font-weight: 900;
-            line-height: 1;
-            letter-spacing: -0.04em;
-            color: var(--spm-primary, #005533);
-        }
     </style>
 </head>
 <body data-bs-theme="light" class="d-flex flex-column min-vh-100 align-items-center justify-content-center bg-body p-6">
 
     <div class="text-center mb-8">
         <a href="{{ url('/') }}">
-            <img src="{{ asset('images/brand/logo-horizontal.svg') }}" alt="SPM" style="height: 36px;">
+            <img src="{{ asset('images/brand/logo-horizontal.svg') }}" alt="SPM" style="height: 36px;" loading="lazy">
         </a>
     </div>
 
     <div class="card shadow-sm border-0 w-100 mw-450px">
         <div class="card-body p-10 text-center">
 
-            <div class="error-icon-wrap">
-                <i class="ki-duotone ki-magnifier fs-2tx" style="color: var(--spm-primary, #005533);">
+            <div class="spm-error-icon-wrap spm-error-icon-wrap-primary">
+                <i class="ki-duotone ki-magnifier fs-2tx text-primary">
                     <span class="path1"></span>
                     <span class="path2"></span>
                 </i>
             </div>
 
-            <div class="error-code mb-3">404</div>
+            <div class="spm-error-code spm-error-code-primary mb-3">404</div>
 
             <h1 class="fw-bold text-gray-900 fs-2 mb-3">Halaman Tidak Ditemukan</h1>
             <p class="text-gray-600 fw-semibold fs-6 mb-8">

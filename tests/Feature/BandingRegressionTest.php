@@ -32,7 +32,7 @@ class BandingRegressionTest extends TestCase
     /**
      * Helper: create a pesantren user with a rejected akreditasi that has assessments.
      */
-    private function createPesantrenWithRejectedAkreditasi(): array
+private function createPesantrenWithRejectedAkreditasi(): array
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -47,7 +47,7 @@ class BandingRegressionTest extends TestCase
 
         $akreditasi = Akreditasi::create([
             'user_id' => $user->id,
-            'status' => 2, // Ditolak
+            'status' => -1,
         ]);
 
         // Create an asesor and assessment so the assessments check passes
@@ -74,10 +74,10 @@ class BandingRegressionTest extends TestCase
     }
 
     /**
-     * Task 12.2: Integration test — existing submitAppeals behavior preserved
-     * (status 2→3, admin notification).
+     * Task 12.2: Integration test — submitAppeals follows the canonical
+     * banding transition (-1→-2) and notifies admin.
      */
-    public function test_submit_appeals_preserves_backward_compatibility_status_and_notification(): void
+public function test_submit_appeals_uses_canonical_banding_status_and_notification(): void
     {
         $data = $this->createPesantrenWithRejectedAkreditasi();
         $user = $data['user'];
@@ -86,8 +86,8 @@ class BandingRegressionTest extends TestCase
 
         $alasan = 'Kami merasa penilaian tidak sesuai dengan kondisi sebenarnya di pesantren kami.';
 
-        // Verify initial status is 2 (Ditolak)
-        $this->assertEquals(2, (int) $akreditasi->status);
+        // Verify initial status is Ditolak
+        $this->assertEquals(-1, (int) $akreditasi->status);
 
         $result = $this->pesantrenService->submitAppeals(
             $akreditasi->id,
@@ -95,20 +95,18 @@ class BandingRegressionTest extends TestCase
             $alasan
         );
 
-        // Backward compatibility: submitAppeals returns true
         $this->assertTrue($result);
 
-        // Backward compatibility: akreditasi status changes from 2 to 3
+        // Akreditasi status changes from Ditolak to Banding
         $akreditasi->refresh();
-        $this->assertEquals(3, (int) $akreditasi->status);
-        $this->assertEquals($alasan, $akreditasi->catatan);
+        $this->assertEquals(-2, (int) $akreditasi->status);
 
         // Backward compatibility: admin users receive notification
         Notification::assertSentTo(
             $admins[0],
             AkreditasiNotification::class,
             function (AkreditasiNotification $notification) {
-                return $notification->type === 'banding';
+                return $notification->type === 'banding_submitted';
             }
         );
 
@@ -116,7 +114,7 @@ class BandingRegressionTest extends TestCase
             $admins[1],
             AkreditasiNotification::class,
             function (AkreditasiNotification $notification) {
-                return $notification->type === 'banding';
+                return $notification->type === 'banding_submitted';
             }
         );
 
@@ -131,7 +129,7 @@ class BandingRegressionTest extends TestCase
     /**
      * Task 12.3: Integration test — banding limit=0 disallows all appeals.
      */
-    public function test_banding_limit_zero_disallows_all_appeals(): void
+public function test_banding_limit_zero_disallows_all_appeals(): void
     {
         $data = $this->createPesantrenWithRejectedAkreditasi();
         $user = $data['user'];
@@ -151,9 +149,9 @@ class BandingRegressionTest extends TestCase
         // Should be rejected
         $this->assertFalse($result);
 
-        // Akreditasi status should remain at 2
+        // Akreditasi status should remain Ditolak
         $akreditasi->refresh();
-        $this->assertEquals(2, (int) $akreditasi->status);
+        $this->assertEquals(-1, (int) $akreditasi->status);
 
         // No banding record should be created
         $this->assertEquals(0, Banding::where('akreditasi_id', $akreditasi->id)->count());
@@ -162,7 +160,7 @@ class BandingRegressionTest extends TestCase
     /**
      * Task 12.4: Integration test — multiple bandings for same akreditasi blocked when limit=1.
      */
-    public function test_multiple_bandings_for_same_akreditasi_blocked_when_limit_is_one(): void
+public function test_multiple_bandings_for_same_akreditasi_blocked_when_limit_is_one(): void
     {
         $data = $this->createPesantrenWithRejectedAkreditasi();
         $user = $data['user'];
@@ -184,8 +182,8 @@ class BandingRegressionTest extends TestCase
         // Verify there's already 1 banding record
         $this->assertEquals(1, Banding::where('akreditasi_id', $akreditasi->id)->count());
 
-        // Akreditasi is still in status 2 (rejected, after previous banding was rejected)
-        $this->assertEquals(2, (int) $akreditasi->status);
+        // Akreditasi is still rejected after previous banding was rejected.
+        $this->assertEquals(-1, (int) $akreditasi->status);
 
         // Second appeal should be blocked (limit=1, already have 1 banding record)
         $alasan2 = 'Pengajuan banding kedua dengan bukti tambahan yang baru ditemukan.';
@@ -198,9 +196,9 @@ class BandingRegressionTest extends TestCase
 
         $this->assertFalse($result2);
 
-        // Akreditasi status should remain at 2
+        // Akreditasi status should remain Ditolak
         $akreditasi->refresh();
-        $this->assertEquals(2, (int) $akreditasi->status);
+        $this->assertEquals(-1, (int) $akreditasi->status);
 
         // Still only 1 banding record
         $this->assertEquals(1, Banding::where('akreditasi_id', $akreditasi->id)->count());

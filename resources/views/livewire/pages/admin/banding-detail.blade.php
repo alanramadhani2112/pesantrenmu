@@ -73,6 +73,7 @@ new #[Layout('layouts.app')] class extends Component
         Gate::authorize('review', $this->banding);
 
         if (empty($this->selectedReviewerId)) {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Pilih peninjau terlebih dahulu.');
             return;
         }
 
@@ -82,7 +83,10 @@ new #[Layout('layouts.app')] class extends Component
         if ($result) {
             $this->banding->refresh();
             $this->showAssignModal = false;
-            session()->flash('message', 'Reviewer berhasil ditugaskan.');
+            $this->selectedReviewerId = '';
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Peninjau berhasil ditugaskan.');
+        } else {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Gagal menugaskan peninjau.');
         }
     }
 
@@ -92,6 +96,7 @@ new #[Layout('layouts.app')] class extends Component
         Gate::authorize('review', $this->banding);
 
         if (empty($this->selectedReviewerId)) {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Pilih peninjau terlebih dahulu.');
             return;
         }
 
@@ -101,49 +106,54 @@ new #[Layout('layouts.app')] class extends Component
         if ($result) {
             $this->banding->refresh();
             $this->showAssignModal = false;
-            session()->flash('message', 'Reviewer berhasil diganti.');
+            $this->selectedReviewerId = '';
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Peninjau berhasil diganti.');
+        } else {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Gagal mengganti peninjau.');
         }
     }
 
-    public function acceptBanding()
+    public function acceptBanding(): void
     {
         Gate::authorize('banding.decide');
         Gate::authorize('review', $this->banding);
 
-        if (mb_strlen($this->keputusan) < 10) {
+        if (mb_strlen(trim($this->keputusan)) < 10) {
             $this->addError('keputusan', 'Penjelasan keputusan minimal 10 karakter.');
-
             return;
         }
 
-        $bandingService = app(BandingService::class);
-        $result = $bandingService->acceptBanding($this->banding->id, $this->keputusan);
-
-        if ($result) {
+        try {
+            $workflowService = app(\App\Services\AkreditasiWorkflowService::class);
+            $workflowService->decideBanding($this->banding->id, Auth::id(), 'diterima');
             $this->banding->refresh();
             $this->showDecisionModal = false;
-            session()->flash('message', 'Banding diterima. Pengajuan ulang telah dibuat.');
+            $this->keputusan = '';
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Banding diterima. Akreditasi kembali ke tahap Validasi Akhir Admin.');
+        } catch (\DomainException $e) {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: $e->getMessage());
         }
     }
 
-    public function rejectBanding()
+    public function rejectBanding(): void
     {
         Gate::authorize('banding.decide');
         Gate::authorize('review', $this->banding);
 
-        if (mb_strlen($this->keputusan) < 10) {
+        if (mb_strlen(trim($this->keputusan)) < 10) {
             $this->addError('keputusan', 'Penjelasan keputusan minimal 10 karakter.');
-
             return;
         }
 
-        $bandingService = app(BandingService::class);
-        $result = $bandingService->rejectBanding($this->banding->id, $this->keputusan);
-
-        if ($result) {
+        try {
+            $workflowService = app(\App\Services\AkreditasiWorkflowService::class);
+            $workflowService->decideBanding($this->banding->id, Auth::id(), 'ditolak');
             $this->banding->refresh();
             $this->showDecisionModal = false;
-            session()->flash('message', 'Banding ditolak.');
+            $this->keputusan = '';
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Banding ditolak.');
+        } catch (\DomainException $e) {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: $e->getMessage());
         }
     }
 
@@ -157,257 +167,227 @@ new #[Layout('layouts.app')] class extends Component
     }
 }; ?>
 
-<div>
+<div x-data="{ ...adminManagement() }">
     <x-slot name="header">{{ __('Detail Banding') }}</x-slot>
 
-    <div class="container-fluid py-4">
-        {{-- Flash message --}}
-        @if (session()->has('message'))
-            <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-                {{ session('message') }}
-                <x-ui.button unstyled type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></x-ui.button>
-            </div>
-        @endif
+    <x-ui.page
+        title="Detail Banding #{{ $banding->id }}"
+        subtitle="Diajukan: {{ $banding->created_at->format('d/m/Y H:i') }}"
+    >
+        <x-slot:toolbar>
+            @php
+                $statusVariant = match ($banding->status) {
+                    'pending' => 'warning',
+                    'under_review' => 'info',
+                    'accepted' => 'success',
+                    'rejected' => 'danger',
+                    default => 'light',
+                };
+                $statusLabel = match ($banding->status) {
+                    'pending' => 'Tertunda',
+                    'under_review' => 'Dalam Peninjauan',
+                    'accepted' => 'Diterima',
+                    'rejected' => 'Ditolak',
+                    default => $banding->status,
+                };
+            @endphp
+            <x-ui.status-badge :variant="$statusVariant">{{ $statusLabel }}</x-ui.status-badge>
+            <x-ui.button :href="route('admin.banding')" variant="light">
+                <x-ui.icon name="exit-right" class="fs-4 me-1" />
+                Kembali
+            </x-ui.button>
+        </x-slot:toolbar>
 
-        {{-- Header Section --}}
-        <div class="card mb-4">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h3 class="fw-bold mb-1">Banding #{{ $banding->id }}</h3>
-                        <span class="text-gray-600">Diajukan: {{ $banding->created_at->format('d/m/Y H:i') }}</span>
-                    </div>
-                    <div>
-                        @php
-                            $statusVariant = match ($banding->status) {
-                                'pending' => 'warning',
-                                'under_review' => 'info',
-                                'accepted' => 'success',
-                                'rejected' => 'danger',
-                                default => 'light',
-                            };
-                            $statusLabel = match ($banding->status) {
-                                'pending' => 'Pending',
-                                'under_review' => 'Under Review',
-                                'accepted' => 'Accepted',
-                                'rejected' => 'Rejected',
-                                default => $banding->status,
-                            };
-                        @endphp
-                        <span class="badge badge-light-{{ $statusVariant }} fs-6 px-4 py-2">{{ $statusLabel }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div class="row g-6">
+            {{-- Left column: Banding info + Actions --}}
+            <div class="col-xl-4">
+                <div class="d-flex flex-column gap-6">
 
-        {{-- Banding Reason --}}
-        <div class="card mb-4">
-            <div class="card-header">
-                <h4 class="card-title mb-0">Alasan Banding</h4>
-            </div>
-            <div class="card-body">
-                <p class="text-gray-800 fs-6">{{ $banding->alasan }}</p>
-            </div>
-        </div>
-
-        {{-- Akreditasi Info --}}
-        <div class="card mb-4">
-            <div class="card-header">
-                <h4 class="card-title mb-0">Informasi Akreditasi</h4>
-            </div>
-            <div class="card-body">
-                @if($banding->akreditasi)
-                    <div class="row">
-                        <div class="col-md-6">
-                            <table class="table table-borderless">
-                                <tr>
-                                    <td class="text-gray-600 fw-semibold w-50">Pesantren</td>
-                                    <td>{{ $banding->akreditasi->user->pesantren->nama_pesantren ?? '-' }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-gray-600 fw-semibold">Status Akreditasi</td>
-                                    <td>{{ \App\Models\Akreditasi::getStatusLabel($banding->akreditasi->status) }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-gray-600 fw-semibold">Nilai</td>
-                                    <td>{{ $banding->akreditasi->nilai ?? '-' }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-gray-600 fw-semibold">Peringkat</td>
-                                    <td>{{ $banding->akreditasi->peringkat ?? '-' }}</td>
-                                </tr>
-                            </table>
+                    {{-- Alasan Banding --}}
+                    <x-ui.section-card title="Alasan Banding">
+                        <div class="p-6">
+                            <p class="text-gray-800 fs-6 mb-0">{{ $banding->alasan }}</p>
                         </div>
-                        <div class="col-md-6">
-                            @if($banding->akreditasi->assessments->count() > 0)
-                                <h6 class="fw-bold mb-2">Assessment Scores</h6>
-                                @foreach($banding->akreditasi->assessments as $assessment)
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span class="text-gray-600">Assessment Tipe {{ $assessment->tipe }}</span>
-                                        <span class="fw-bold">{{ $assessment->nilai ?? '-' }}</span>
-                                    </div>
-                                @endforeach
-                            @else
-                                <p class="text-gray-500">Belum ada data assessment.</p>
-                            @endif
-                        </div>
-                    </div>
-                @else
-                    <p class="text-gray-500">Data akreditasi tidak ditemukan.</p>
-                @endif
-            </div>
-        </div>
+                    </x-ui.section-card>
 
-        {{-- Previous Banding Decisions (Timeline) --}}
-        @if($this->previousBandings->count() > 0)
-        <div class="card mb-4">
-            <div class="card-header">
-                <h4 class="card-title mb-0">Riwayat Banding Sebelumnya</h4>
-            </div>
-            <div class="card-body">
-                <div class="timeline">
-                    @foreach($this->previousBandings as $prevBanding)
-                        <div class="timeline-item mb-3 pb-3 border-bottom">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <span class="fw-bold">Banding #{{ $prevBanding->id }}</span>
-                                    <span class="text-gray-500 ms-2">{{ $prevBanding->created_at->format('d/m/Y') }}</span>
-                                </div>
-                                @php
-                                    $prevStatusVariant = match ($prevBanding->status) {
-                                        'pending' => 'warning',
-                                        'under_review' => 'info',
-                                        'accepted' => 'success',
-                                        'rejected' => 'danger',
-                                        default => 'light',
-                                    };
-                                @endphp
-                                <span class="badge badge-light-{{ $prevStatusVariant }}">{{ ucfirst($prevBanding->status) }}</span>
+                    {{-- Keputusan (if decided) --}}
+                    @if($banding->keputusan)
+                        <x-ui.section-card title="Keputusan">
+                            <div class="p-6">
+                                <p class="text-gray-800 fs-6 mb-2">{{ $banding->keputusan }}</p>
+                                @if($banding->decided_at)
+                                    <div class="text-muted fs-8">Diputuskan: {{ $banding->decided_at->format('d/m/Y H:i') }}</div>
+                                @endif
                             </div>
-                            @if($prevBanding->keputusan)
-                                <p class="text-gray-700 mt-2 mb-0">{{ $prevBanding->keputusan }}</p>
-                            @endif
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-        @endif
-
-        {{-- Keputusan (if decided) --}}
-        @if($banding->keputusan)
-        <div class="card mb-4">
-            <div class="card-header">
-                <h4 class="card-title mb-0">Keputusan</h4>
-            </div>
-            <div class="card-body">
-                <p class="text-gray-800 fs-6">{{ $banding->keputusan }}</p>
-                @if($banding->decided_at)
-                    <small class="text-gray-500">Diputuskan pada: {{ $banding->decided_at->format('d/m/Y H:i') }}</small>
-                @endif
-            </div>
-        </div>
-        @endif
-
-        {{-- Actions Section --}}
-        <div class="card mb-4">
-            <div class="card-header">
-                <h4 class="card-title mb-0">Tindakan</h4>
-            </div>
-            <div class="card-body">
-                {{-- Assign Reviewer (when status=pending) --}}
-                @if($banding->status === 'pending')
-                    <button wire:click="openAssignModal" class="btn btn-primary">
-                        <i class="bi bi-person-plus me-1"></i> Assign Reviewer
-                    </button>
-                @endif
-
-                {{-- Accept/Reject + Reassign (when status=under_review) --}}
-                @if($banding->status === 'under_review')
-                    @if(Auth::id() === $banding->reviewer_id)
-                        <button wire:click="openDecisionModal('accept')" class="btn btn-success me-2">
-                            <i class="bi bi-check-circle me-1"></i> Accept
-                        </button>
-                        <button wire:click="openDecisionModal('reject')" class="btn btn-danger me-2">
-                            <i class="bi bi-x-circle me-1"></i> Reject
-                        </button>
+                        </x-ui.section-card>
                     @endif
 
-                    <button wire:click="openAssignModal" class="btn btn-warning">
-                        <i class="bi bi-arrow-repeat me-1"></i> Reassign Reviewer
-                    </button>
-                @endif
+                    {{-- Actions --}}
+                    <x-ui.section-card title="Tindakan">
+                        <div class="p-6">
+                            @if($banding->status === 'pending')
+                                <x-ui.button type="button" @click="confirmAssignReviewer($wire)" variant="primary" class="w-100 justify-content-center mb-3">
+                                    <x-ui.icon name="profile-user" class="fs-4 me-2" />
+                                    Assign Reviewer
+                                </x-ui.button>
+                            @endif
 
-                @if($banding->status === 'accepted' || $banding->status === 'rejected')
-                    <p class="text-gray-500 mb-0">Banding ini sudah diputuskan.</p>
-                @endif
-            </div>
-        </div>
+                            @if($banding->status === 'under_review')
+                                @if(Auth::id() === $banding->reviewer_id)
+                                    <x-ui.button type="button" @click="confirmBandingDecision($wire, 'accept')" variant="success" class="w-100 justify-content-center mb-3">
+                                        <x-ui.icon name="check-circle" class="fs-4 me-2" />
+                                        Terima Banding
+                                    </x-ui.button>
+                                    <x-ui.button type="button" @click="confirmBandingDecision($wire, 'reject')" variant="danger" class="w-100 justify-content-center mb-3">
+                                        <x-ui.icon name="cross-circle" class="fs-4 me-2" />
+                                        Tolak Banding
+                                    </x-ui.button>
+                                @endif
+                                <x-ui.button type="button" @click="confirmReassignReviewer($wire)" variant="warning" class="w-100 justify-content-center">
+                                    <x-ui.icon name="arrows-circle" class="fs-4 me-2" />
+                                    Ganti Reviewer
+                                </x-ui.button>
+                            @endif
 
-        {{-- Assign Reviewer Modal --}}
-        @if($showAssignModal)
-        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            {{ $banding->status === 'pending' ? 'Assign Reviewer' : 'Reassign Reviewer' }}
-                        </h5>
-                        <x-ui.button unstyled type="button" class="btn-close" wire:click="$set('showAssignModal', false)" aria-label="Tutup"></x-ui.button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Pilih Reviewer</label>
-                            <select wire:model="selectedReviewerId" class="form-select">
-                                <option value="">-- Pilih Admin --</option>
-                                @foreach($this->adminUsers as $admin)
-                                    <option value="{{ $admin->id }}">{{ $admin->name }}</option>
-                                @endforeach
-                            </select>
+                            @if($banding->status === 'accepted' || $banding->status === 'rejected')
+                                <div class="text-muted fw-semibold fs-7 text-center">Banding ini sudah diputuskan.</div>
+                            @endif
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <x-ui.button type="button" variant="light" wire:click="$set('showAssignModal', false)">Batal</x-ui.button>
-                        @if($banding->status === 'pending')
-                            <x-ui.button type="button" variant="primary" wire:click="assignReviewer">Assign</x-ui.button>
-                        @else
-                            <x-ui.button type="button" variant="warning" wire:click="reassignReviewer">Reassign</x-ui.button>
-                        @endif
-                    </div>
+                    </x-ui.section-card>
+
+                    {{-- Reviewer info --}}
+                    @if($banding->reviewer)
+                        <x-ui.section-card title="Reviewer">
+                            <div class="p-6">
+                                <div class="fw-bold text-gray-900">{{ $banding->reviewer->name }}</div>
+                                <div class="text-muted fs-7">{{ $banding->reviewer->email }}</div>
+                            </div>
+                        </x-ui.section-card>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Right column: Akreditasi info + History --}}
+            <div class="col-xl-8">
+                <div class="d-flex flex-column gap-6">
+
+                    {{-- Akreditasi Info --}}
+                    @if($banding->akreditasi)
+                        <x-ui.section-card title="Informasi Akreditasi" subtitle="Data akreditasi yang menjadi dasar pengajuan banding.">
+                            <div class="p-6">
+                                <div class="row g-5">
+                                    <x-ui.detail-item label="Pesantren" value="{{ $banding->akreditasi->user->pesantren->nama_pesantren ?? '-' }}" />
+                                    <x-ui.detail-item label="Status Akreditasi" value="{{ \App\Models\Akreditasi::getStatusLabel($banding->akreditasi->status) }}" />
+                                    <x-ui.detail-item label="Nilai" value="{{ $banding->akreditasi->nilai ?? '-' }}" />
+                                    <x-ui.detail-item label="Peringkat" value="{{ $banding->akreditasi->peringkat ?? '-' }}" />
+                                </div>
+
+                                @if($banding->akreditasi->assessments->count() > 0)
+                                    <div class="separator my-5"></div>
+                                    <div class="spm-detail-label mb-3">Assessment</div>
+                                    @foreach($banding->akreditasi->assessments as $assessment)
+                                        <div class="d-flex justify-content-between py-2 border-bottom border-dashed">
+                                            <span class="text-gray-600 fw-semibold">Tipe {{ $assessment->tipe }}</span>
+                                            <span class="fw-bold">{{ $assessment->nilai ?? '-' }}</span>
+                                        </div>
+                                    @endforeach
+                                @endif
+
+                                <div class="mt-4">
+                                    <x-ui.button :href="route('admin.akreditasi-detail', $banding->akreditasi->uuid)" variant="light" size="sm">
+                                        <x-ui.icon name="eye" class="fs-5 me-1" />
+                                        Lihat Detail Akreditasi
+                                    </x-ui.button>
+                                </div>
+                            </div>
+                        </x-ui.section-card>
+                    @endif
+
+                    {{-- Previous Banding History --}}
+                    @if($this->previousBandings->count() > 0)
+                        <x-ui.section-card title="Riwayat Banding Sebelumnya" subtitle="Banding lain untuk akreditasi yang sama.">
+                            <div class="p-6">
+                                <div class="d-flex flex-column gap-4">
+                                    @foreach($this->previousBandings as $prevBanding)
+                                        @php
+                                            $prevVariant = match ($prevBanding->status) {
+                                                'pending' => 'warning',
+                                                'under_review' => 'info',
+                                                'accepted' => 'success',
+                                                'rejected' => 'danger',
+                                                default => 'light',
+                                            };
+                                        @endphp
+                                        <div class="spm-soft-panel">
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <div class="fw-bold">Banding #{{ $prevBanding->id }}</div>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <x-ui.badge :variant="$prevVariant">{{ ucfirst($prevBanding->status) }}</x-ui.badge>
+                                                    <span class="text-muted fs-8">{{ $prevBanding->created_at->format('d/m/Y') }}</span>
+                                                </div>
+                                            </div>
+                                            @if($prevBanding->keputusan)
+                                                <div class="text-gray-700 fs-7">{{ $prevBanding->keputusan }}</div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </x-ui.section-card>
+                    @endif
                 </div>
             </div>
         </div>
-        @endif
+    </x-ui.page>
 
-        {{-- Decision Modal --}}
-        @if($showDecisionModal)
-        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            {{ $decisionType === 'accept' ? 'Terima Banding' : 'Tolak Banding' }}
-                        </h5>
-                        <x-ui.button unstyled type="button" class="btn-close" wire:click="$set('showDecisionModal', false)" aria-label="Tutup"></x-ui.button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Penjelasan Keputusan</label>
-                            <textarea wire:model="keputusan" class="form-control" rows="4" placeholder="Minimal 10 karakter..."></textarea>
-                            @error('keputusan')
-                                <span class="text-danger fs-7">{{ $message }}</span>
-                            @enderror
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <x-ui.button type="button" variant="light" wire:click="$set('showDecisionModal', false)">Batal</x-ui.button>
-                        <x-ui.button type="button" :variant="$decisionType === 'accept' ? 'success' : 'danger'" wire:click="submitDecision">
-                            {{ $decisionType === 'accept' ? 'Terima' : 'Tolak' }}
-                        </x-ui.button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endif
-    </div>
+    {{-- Assign/Reassign Reviewer Modal --}}
+    @if($showAssignModal)
+    <x-ui.modal name="assign-reviewer-modal" :show="true" focusable>
+        <x-ui.modal-header
+            :title="$banding->status === 'pending' ? 'Tunjuk Peninjau' : 'Ganti Peninjau'"
+            subtitle="Pilih admin yang akan menangani banding ini."
+            icon="profile-user"
+        />
+        <x-ui.modal-body>
+            <x-ui.form-field label="Pilih Peninjau" for="selectedReviewerId">
+                <x-ui.select model="selectedReviewerId" id="selectedReviewerId" placeholder="-- Pilih Admin --">
+                    @foreach($this->adminUsers as $admin)
+                        <option value="{{ $admin->id }}">{{ $admin->name }}</option>
+                    @endforeach
+                </x-ui.select>
+            </x-ui.form-field>
+        </x-ui.modal-body>
+        <x-ui.modal-footer>
+            <x-ui.button type="button" variant="light" wire:click="$set('showAssignModal', false)">Batal</x-ui.button>
+            @if($banding->status === 'pending')
+                <x-ui.button type="button" variant="primary" wire:click="assignReviewer">Tugaskan</x-ui.button>
+            @else
+                <x-ui.button type="button" variant="warning" wire:click="reassignReviewer">Ganti</x-ui.button>
+            @endif
+        </x-ui.modal-footer>
+    </x-ui.modal>
+    @endif
+
+    {{-- Decision Modal --}}
+    @if($showDecisionModal)
+    <x-ui.modal name="decision-modal" :show="true" focusable>
+        <x-ui.modal-header
+            :title="$decisionType === 'accept' ? 'Terima Banding' : 'Tolak Banding'"
+            subtitle="Berikan penjelasan keputusan Anda."
+            :icon="$decisionType === 'accept' ? 'check-circle' : 'cross-circle'"
+            :variant="$decisionType === 'accept' ? 'success' : 'danger'"
+        />
+        <x-ui.modal-body>
+            <x-ui.form-field label="Penjelasan Keputusan" for="keputusan" :error="$errors->get('keputusan')" hint="Minimal 10 karakter.">
+                <x-ui.textarea model="keputusan" id="keputusan" rows="4" placeholder="Jelaskan alasan keputusan Anda..." />
+            </x-ui.form-field>
+        </x-ui.modal-body>
+        <x-ui.modal-footer>
+            <x-ui.button type="button" variant="light" wire:click="$set('showDecisionModal', false)">Batal</x-ui.button>
+            <x-ui.button type="button" :variant="$decisionType === 'accept' ? 'success' : 'danger'" wire:click="submitDecision">
+                {{ $decisionType === 'accept' ? 'Terima' : 'Tolak' }}
+            </x-ui.button>
+        </x-ui.modal-footer>
+    </x-ui.modal>
+    @endif
 </div>

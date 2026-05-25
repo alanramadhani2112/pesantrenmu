@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Ipm extends Model
 {
@@ -19,6 +20,24 @@ class Ipm extends Model
         'kurikulum_file',
         'buku_ajar_file',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Audit fix PM-3: delete uploaded IPM files when the record is deleted.
+        static::deleting(function ($ipm) {
+            $paths = collect(['nsp_file', 'lulus_santri_file', 'kurikulum_file', 'buku_ajar_file'])
+                ->map(fn ($col) => $ipm->$col)
+                ->filter()
+                ->values()
+                ->all();
+
+            if ($paths) {
+                Storage::disk('public')->delete($paths);
+            }
+        });
+    }
 
     public function user()
     {

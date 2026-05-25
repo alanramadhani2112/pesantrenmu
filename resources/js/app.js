@@ -275,6 +275,76 @@ window.adminManagement = () => ({
             if (result.isConfirmed) callWire(wire, 'verifikasi');
         });
     },
+    confirmToggleLock(wire, isLocked) {
+        const action = isLocked ? 'buka kunci' : 'kunci';
+        ask({
+            title: `${isLocked ? 'Buka kunci' : 'Kunci'} data pesantren?`,
+            text: isLocked
+                ? 'Data pesantren akan dapat diedit kembali oleh pesantren.'
+                : 'Data pesantren akan dikunci dan tidak dapat diedit.',
+            icon: 'warning',
+            confirmVariant: isLocked ? 'success' : 'warning',
+            confirmButtonText: `Ya, ${action}`,
+        }).then((result) => {
+            if (result.isConfirmed) callWire(wire, 'toggleLock');
+        });
+    },
+    confirmReassignAsesor(wire) {
+        ask({
+            title: 'Ganti asesor?',
+            text: 'Asesor lama akan dilepas dari tugas ini dan digantikan asesor baru.',
+            icon: 'warning',
+            confirmVariant: 'danger',
+            confirmButtonText: 'Ya, ganti asesor',
+        }).then((result) => {
+            if (result.isConfirmed) callWire(wire, 'reassignAsesor');
+        });
+    },
+    confirmRejectFinal(wire) {
+        ask({
+            title: 'Tolak akreditasi secara final?',
+            text: 'Keputusan penolakan final tidak dapat dibatalkan. Pesantren akan menerima notifikasi.',
+            icon: 'warning',
+            confirmVariant: 'danger',
+            confirmButtonText: 'Ya, tolak final',
+        }).then((result) => {
+            if (result.isConfirmed) callWire(wire, 'reject');
+        });
+    },
+    confirmAssignReviewer(wire) {
+        ask({
+            title: 'Tugaskan reviewer?',
+            text: 'Pilih reviewer di modal yang akan muncul.',
+            confirmButtonText: 'Pilih Reviewer',
+        }).then((result) => {
+            if (result.isConfirmed) callWire(wire, 'openAssignModal');
+        });
+    },
+    confirmReassignReviewer(wire) {
+        ask({
+            title: 'Ganti reviewer?',
+            text: 'Pilih reviewer baru di modal yang akan muncul.',
+            icon: 'warning',
+            confirmVariant: 'warning',
+            confirmButtonText: 'Pilih Reviewer Baru',
+        }).then((result) => {
+            if (result.isConfirmed) callWire(wire, 'openAssignModal');
+        });
+    },
+    confirmBandingDecision(wire, type) {
+        const isAccept = type === 'accept';
+        ask({
+            title: isAccept ? 'Terima banding?' : 'Tolak banding?',
+            text: isAccept
+                ? 'Banding akan diterima dan pengajuan ulang akreditasi akan dibuat.'
+                : 'Banding akan ditolak. Keputusan ini tidak dapat dibatalkan.',
+            icon: isAccept ? 'success' : 'warning',
+            confirmVariant: isAccept ? 'success' : 'danger',
+            confirmButtonText: isAccept ? 'Ya, terima' : 'Ya, tolak',
+        }).then((result) => {
+            if (result.isConfirmed) callWire(wire, 'openDecisionModal', type);
+        });
+    },
 });
 
 window.akreditasiPesantren = () => ({
@@ -306,6 +376,76 @@ window.akreditasiPesantren = () => ({
             if (result.isConfirmed) callWire(this.$wire, 'create', id);
         });
     },
+    confirmSubmitPerbaikan(wire) {
+        ask({
+            title: 'Kirim perbaikan?',
+            text: 'Asesor akan menerima notifikasi bahwa perbaikan dokumen telah dikirim.',
+            confirmButtonText: 'Ya, kirim',
+        }).then((result) => {
+            if (result.isConfirmed) callWire(wire, 'submitPerbaikan');
+        });
+    },
+    confirmResubmitDetail(wire) {
+        ask({
+            title: 'Buat pengajuan ulang?',
+            text: 'Data profil akan dikunci kembali selama proses akreditasi berjalan.',
+            confirmButtonText: 'Ya, ajukan ulang',
+        }).then((result) => {
+            if (result.isConfirmed) callWire(wire, 'resubmit');
+        });
+    },
+});
+
+window.spmActionMenu = (menuId) => ({
+    isOpen: false,
+    placementStyle: '',
+    menuId,
+    close() {
+        this.isOpen = false;
+        this.cleanupOpenState();
+    },
+    markOpenState() {
+        this.$el.classList.add('is-open');
+        this.$el.closest('td')?.classList.add('spm-action-cell-open');
+        this.$el.closest('tr')?.classList.add('spm-action-row-open');
+    },
+    cleanupOpenState() {
+        this.$el.classList.remove('is-open');
+        this.$el.closest('td')?.classList.remove('spm-action-cell-open');
+        this.$el.closest('tr')?.classList.remove('spm-action-row-open');
+    },
+    updatePosition() {
+        const trigger = this.$refs.trigger;
+        const menu = document.getElementById(this.menuId);
+
+        if (!trigger || !menu) return;
+
+        const rect = trigger.getBoundingClientRect();
+        const width = Math.min(menu.offsetWidth || 210, window.innerWidth - 32);
+        const height = Math.min(menu.scrollHeight || 240, window.innerHeight - 32);
+        const spaceBelow = window.innerHeight - rect.bottom - 16;
+        const openUp = spaceBelow < Math.min(height, 220) && rect.top > spaceBelow;
+        const top = openUp
+            ? Math.max(16, rect.top - height - 8)
+            : Math.min(rect.bottom + 8, window.innerHeight - 16);
+        const left = Math.max(16, Math.min(rect.right - width, window.innerWidth - width - 16));
+        const maxHeight = openUp
+            ? Math.max(160, rect.top - 24)
+            : Math.max(160, window.innerHeight - top - 16);
+
+        this.placementStyle = `position: fixed; top: ${top}px; left: ${left}px; max-height: ${maxHeight}px; z-index: 1200;`;
+    },
+    toggle() {
+        if (this.isOpen) {
+            this.close();
+            return;
+        }
+
+        window.dispatchEvent(new CustomEvent('spm:action-menu-open', { detail: { id: this.menuId } }));
+        this.isOpen = true;
+        this.markOpenState();
+        this.$nextTick(() => this.updatePosition());
+    },
 });
 
 window.akreditasiManagement = () => ({
@@ -329,13 +469,13 @@ window.akreditasiManagement = () => ({
     },
     confirmVerification(wire) {
         ask({
-            title: 'Selesaikan assessment?',
-            text: 'Pastikan semua nilai asesor dan NK sudah lengkap.',
+            title: 'Finalisasi penilaian pasca visitasi?',
+            text: 'Pastikan Nilai Ketua, Nilai Anggota, Nilai Kelompok, laporan visitasi, dan kartu kendali sudah lengkap.',
             icon: 'success',
             confirmVariant: 'success',
-            confirmButtonText: 'Ya, selesaikan',
+            confirmButtonText: 'Ya, finalisasi',
         }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'finalizeVerification');
+            if (result.isConfirmed) callWire(wire, 'finalizeScoring');
         });
     },
     confirmAsesor2Final(wire) {
@@ -379,6 +519,37 @@ window.asesorManagement = () => ({
             if (result.isConfirmed) callWire(wire, 'save');
         });
     },
+    confirmSaveInstrumen(wire) {
+        ask({
+            title: 'Simpan penilaian instrumen?',
+            text: 'Nilai Ketua, Nilai Anggota, atau Nilai Kelompok yang sudah terbuka akan disimpan.',
+            confirmButtonText: 'Ya, simpan',
+        }).then((result) => {
+            if (result.isConfirmed) callWire(wire, 'saveAsesorEdpm');
+        });
+    },
+    confirmTerimaPerbaikan(wire) {
+        ask({
+            title: 'Terima perbaikan?',
+            text: 'Perbaikan dokumen dari pesantren akan diterima dan proses visitasi dapat dilanjutkan.',
+            icon: 'success',
+            confirmVariant: 'success',
+            confirmButtonText: 'Ya, terima',
+        }).then((result) => {
+            if (result.isConfirmed) callWire(wire, 'acceptPerbaikan');
+        });
+    },
+    confirmKirimPenolakan(wire) {
+        ask({
+            title: 'Kirim penolakan dokumen?',
+            text: 'Pesantren akan menerima notifikasi dan diminta memperbaiki dokumen yang ditolak.',
+            icon: 'warning',
+            confirmVariant: 'danger',
+            confirmButtonText: 'Ya, kirim penolakan',
+        }).then((result) => {
+            if (result.isConfirmed) callWire(wire, 'submitRejection');
+        });
+    },
 });
 
 window.fileManagement = () => ({
@@ -388,6 +559,25 @@ window.fileManagement = () => ({
             title: 'Simpan perubahan?',
             text: 'Data dan dokumen yang dipilih akan diperbarui.',
             confirmButtonText: 'Ya, simpan',
+        }).then((result) => {
+            if (result.isConfirmed) callWire(wire, 'save');
+        });
+    },
+    confirmSaveDraft(wire) {
+        ask({
+            title: 'Submit draft profil?',
+            text: 'Data yang sudah diisi akan disimpan sebagai draft dan masih bisa dilengkapi nanti.',
+            confirmButtonText: 'Ya, simpan draft',
+        }).then((result) => {
+            if (result.isConfirmed) callWire(wire, 'saveDraft');
+        });
+    },
+    confirmSubmitProfile(wire) {
+        ask({
+            title: 'Submit profil pesantren?',
+            text: 'Pastikan data inti profil sudah lengkap dan benar.',
+            icon: 'warning',
+            confirmButtonText: 'Ya, submit',
         }).then((result) => {
             if (result.isConfirmed) callWire(wire, 'save');
         });
@@ -503,7 +693,11 @@ window.wilayahSelector = (config = {}) => ({
         if (this.selectedKabupatenNama && !this.kabupatenSearch) {
             this.kabupatenSearch = this.selectedKabupatenNama;
         }
-        if (this.currentProvinsiKode) this.loadKabupaten(this.currentProvinsiKode);
+        const resolvedProvinsiKode = this.currentProvinsiKode;
+        if (!this.selectedProvinsiKode && resolvedProvinsiKode) {
+            this.selectedProvinsiKode = resolvedProvinsiKode;
+        }
+        if (resolvedProvinsiKode) this.loadKabupaten(resolvedProvinsiKode);
     },
     selectProvinsi(item) {
         this.selectedProvinsiKode = item.kode;
@@ -532,6 +726,10 @@ window.wilayahSelector = (config = {}) => ({
                 kode: item.id,
                 nama: item.name,
             }));
+            if (!this.selectedKabupatenKode && this.selectedKabupatenNama) {
+                const matchedKabupaten = this.kabupatenList.find((item) => item.nama === this.selectedKabupatenNama);
+                if (matchedKabupaten) this.selectedKabupatenKode = matchedKabupaten.kode;
+            }
         } catch (error) {
             this.kabupatenList = [];
         }
@@ -708,6 +906,7 @@ Alpine.store('sidebar', { open: false });
 Alpine.data('deleteConfirmation', window.deleteConfirmation);
 Alpine.data('adminManagement', window.adminManagement);
 Alpine.data('akreditasiPesantren', window.akreditasiPesantren);
+Alpine.data('spmActionMenu', window.spmActionMenu);
 Alpine.data('edpmManagement', window.edpmManagement);
 Alpine.data('ipmManagement', window.ipmManagement);
 Alpine.data('sdmManagement', window.sdmManagement);

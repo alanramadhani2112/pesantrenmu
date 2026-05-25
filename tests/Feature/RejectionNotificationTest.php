@@ -32,7 +32,7 @@ class RejectionNotificationTest extends TestCase
     /**
      * Helper: create a pesantren user with akreditasi at given status and an Asesor 1 assigned.
      */
-    private function createAsesor1Setup(int $status = 5): array
+private function createAsesor1Setup(int $status = 5): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -74,7 +74,7 @@ class RejectionNotificationTest extends TestCase
      *
      * Validates: Requirements 1.7
      */
-    public function test_create_rejection_notifies_pesantren_with_item_summary(): void
+public function test_create_rejection_notifies_pesantren_with_item_summary(): void
     {
         Notification::fake();
 
@@ -92,7 +92,7 @@ class RejectionNotificationTest extends TestCase
             $pesantrenUser,
             AkreditasiNotification::class,
             function (AkreditasiNotification $notification) {
-                return $notification->type === 'rejection_created'
+                return $notification->type === 'document_rejection_created'
                     && $notification->title === 'Dokumen Ditolak'
                     && str_contains($notification->message, 'profil')
                     && str_contains($notification->message, 'ipm.kurikulum')
@@ -106,7 +106,7 @@ class RejectionNotificationTest extends TestCase
      *
      * Validates: Requirements 1.8
      */
-    public function test_create_rejection_notifies_admin_users(): void
+public function test_create_rejection_notifies_admin_users(): void
     {
         Notification::fake();
 
@@ -127,7 +127,7 @@ class RejectionNotificationTest extends TestCase
             $admin1,
             AkreditasiNotification::class,
             function (AkreditasiNotification $notification) {
-                return $notification->type === 'rejection_created_admin'
+                return $notification->type === 'document_rejection_created_admin'
                     && $notification->title === 'Asesor Menolak Dokumen';
             }
         );
@@ -136,7 +136,7 @@ class RejectionNotificationTest extends TestCase
             $admin2,
             AkreditasiNotification::class,
             function (AkreditasiNotification $notification) {
-                return $notification->type === 'rejection_created_admin';
+                return $notification->type === 'document_rejection_created_admin';
             }
         );
     }
@@ -146,7 +146,7 @@ class RejectionNotificationTest extends TestCase
      *
      * Validates: Requirements 3.4
      */
-    public function test_submit_perbaikan_notifies_asesor1(): void
+public function test_submit_perbaikan_notifies_asesor1(): void
     {
         Notification::fake();
 
@@ -185,7 +185,7 @@ class RejectionNotificationTest extends TestCase
      *
      * Validates: Requirements 3.5
      */
-    public function test_submit_perbaikan_notifies_admin_users(): void
+public function test_submit_perbaikan_notifies_admin_users(): void
     {
         Notification::fake();
 
@@ -225,7 +225,7 @@ class RejectionNotificationTest extends TestCase
      *
      * Validates: Requirements 4.4
      */
-    public function test_auto_rejection_limit_reached_notifies_pesantren(): void
+public function test_auto_rejection_limit_reached_notifies_pesantren(): void
     {
         Notification::fake();
 
@@ -270,7 +270,7 @@ class RejectionNotificationTest extends TestCase
      *
      * Validates: Requirements 4.5
      */
-    public function test_auto_rejection_limit_reached_notifies_admin(): void
+public function test_auto_rejection_limit_reached_notifies_admin(): void
     {
         Notification::fake();
 
@@ -316,7 +316,7 @@ class RejectionNotificationTest extends TestCase
      *
      * Validates: Requirements 8.5
      */
-    public function test_auto_rejection_deadline_expired_notifies_all_parties(): void
+public function test_auto_rejection_deadline_expired_notifies_all_parties(): void
     {
         Notification::fake();
 
@@ -383,7 +383,7 @@ class RejectionNotificationTest extends TestCase
      *
      * Validates: Requirements 9.6
      */
-    public function test_final_rejection_notifies_pesantren_with_categories(): void
+public function test_final_rejection_notifies_pesantren_with_categories(): void
     {
         Notification::fake();
 
@@ -418,7 +418,7 @@ class RejectionNotificationTest extends TestCase
      *
      * Validates: Requirements 8.3
      */
-    public function test_process_deadlines_sends_reminder_to_pesantren(): void
+public function test_process_deadlines_sends_reminder_to_pesantren(): void
     {
         Notification::fake();
 
@@ -461,7 +461,7 @@ class RejectionNotificationTest extends TestCase
     /**
      * Task 18.7 (additional): No notification sent when rejection validation fails.
      */
-    public function test_no_notification_sent_on_failed_rejection(): void
+public function test_no_notification_sent_on_failed_rejection(): void
     {
         Notification::fake();
 

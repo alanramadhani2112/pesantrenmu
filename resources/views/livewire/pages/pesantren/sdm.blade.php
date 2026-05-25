@@ -3,9 +3,11 @@
 use App\Models\SdmPesantren;
 use App\Models\Pesantren;
 use App\Traits\ChecksSectionLock;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 new #[Layout('layouts.app')] class extends Component {
     use ChecksSectionLock;
@@ -59,6 +61,58 @@ new #[Layout('layouts.app')] class extends Component {
         }
     }
 
+    protected function rules(): array
+    {
+        $rules = [];
+
+        foreach ($this->levels as $level) {
+            foreach ($this->fields as $field) {
+                $rules["data.{$level}.{$field}"] = 'required|integer|min:0|max:999999';
+            }
+        }
+
+        return $rules;
+    }
+
+    protected function messages(): array
+    {
+        return [
+            'required' => ':attribute wajib diisi.',
+            'integer' => ':attribute harus berupa angka bulat.',
+            'min' => ':attribute minimal :min.',
+            'max' => ':attribute maksimal :max.',
+        ];
+    }
+
+    protected function validationAttributes(): array
+    {
+        $attributes = [];
+        $fieldLabels = [
+            'santri_l' => 'Santri laki-laki',
+            'santri_p' => 'Santri perempuan',
+            'ustadz_dirosah_l' => 'Ustadz dirosah laki-laki',
+            'ustadz_dirosah_p' => 'Ustadz dirosah perempuan',
+            'ustadz_non_dirosah_l' => 'Ustadz non dirosah laki-laki',
+            'ustadz_non_dirosah_p' => 'Ustadz non dirosah perempuan',
+            'pamong_l' => 'Pamong laki-laki',
+            'pamong_p' => 'Pamong perempuan',
+            'musyrif_l' => 'Musyrif laki-laki',
+            'musyrif_p' => 'Musyrif perempuan',
+            'tendik_l' => 'Tenaga kependidikan laki-laki',
+            'tendik_p' => 'Tenaga kependidikan perempuan',
+        ];
+
+        foreach ($this->levels as $level) {
+            $unitLabel = Str::of($level)->replace('_', ' ')->title();
+
+            foreach ($this->fields as $field) {
+                $attributes["data.{$level}.{$field}"] = ($fieldLabels[$field] ?? $field) . " unit {$unitLabel}";
+            }
+        }
+
+        return $attributes;
+    }
+
     public function save()
     {
         $pesantrenService = app(\App\Services\PesantrenService::class);
@@ -67,13 +121,57 @@ new #[Layout('layouts.app')] class extends Component {
             return;
         }
 
-        foreach ($this->levels as $level) {
-            $unitId = $this->unitIds[$level] ?? null;
-            $dataToSave = array_merge($this->data[$level], ['pesantren_unit_id' => $unitId]);
-            $pesantrenService->updateSdm(auth()->id(), $level, $dataToSave);
+        if (count($this->levels) === 0) {
+            $this->dispatch('show-metronic-alert', type: 'warning', title: 'Profil Belum Lengkap', message: 'Pilih layanan satuan pendidikan di Profil Pesantren sebelum mengisi Data SDM.');
+            return;
         }
 
-        $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Data SDM berhasil disimpan.');
+        try {
+            $this->validate($this->rules(), $this->messages(), $this->validationAttributes());
+        } catch (ValidationException $e) {
+            $this->dispatch('show-validation-error');
+            throw $e;
+        }
+
+        // PM-18 fix: kumpulkan semua data terlebih dahulu, lalu simpan dalam
+        // satu DB::transaction agar partial-save tidak terjadi jika admin
+        // mengunci pesantren di tengah loop.
+        $allLevelData = [];
+        foreach ($this->levels as $level) {
+            $unitId = $this->unitIds[$level] ?? null;
+
+            if (!$unitId) {
+                $this->dispatch('show-metronic-alert', type: 'error', title: 'Unit Tidak Valid', message: 'Unit pendidikan tidak ditemukan. Perbarui Profil Pesantren sebelum menyimpan Data SDM.');
+                return;
+            }
+
+            $values = [];
+            foreach ($this->fields as $field) {
+                $values[$field] = (int) ($this->data[$level][$field] ?? 0);
+            }
+
+            $allLevelData[] = [
+                'tingkat' => $level,
+                'data' => array_merge($values, ['pesantren_unit_id' => $unitId]),
+            ];
+        }
+
+        $userId = auth()->id();
+        $success = \Illuminate\Support\Facades\DB::transaction(function () use ($pesantrenService, $userId, $allLevelData) {
+            foreach ($allLevelData as $item) {
+                $result = $pesantrenService->updateSdm($userId, $item['tingkat'], $item['data']);
+                if (! $result) {
+                    return false;
+                }
+            }
+            return true;
+        });
+
+        if ($success) {
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Data SDM berhasil disimpan.');
+        } else {
+            $this->dispatch('show-metronic-alert', type: 'error', title: 'Gagal', message: 'Data SDM gagal disimpan. Data mungkin terkunci atau terjadi kesalahan.');
+        }
     }
 
     public function getCategoryTotal($categoryKey, $fieldSuffix)
@@ -93,7 +191,7 @@ new #[Layout('layouts.app')] class extends Component {
 }; ?>
 
 @php
-    $isLocked = auth()->user()->pesantren->is_locked;
+    $isLocked = auth()->user()->pesantren?->is_locked ?? false;
     $sdmLockStatus = $this->getSectionLockStatus('sdm');
 @endphp
 
@@ -138,25 +236,28 @@ new #[Layout('layouts.app')] class extends Component {
 
     @if($isLocked)
         @if($sdmLockStatus === 'unlocked_for_correction')
-            <div class="spm-inline-alert" style="border-left: 4px solid #f59e0b; background: #fffbeb; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-                <x-ui.icon name="shield-tick" class="fs-2 text-warning" />
-                <div>
-                    <div class="spm-inline-alert-title">🔓 Koreksi Tersedia</div>
-                    <div class="spm-inline-alert-text">Data SDM dibuka untuk perbaikan sesuai catatan asesor.</div>
-                </div>
-            </div>
+            <x-ui.alert variant="warning" icon="shield-tick" title="Koreksi Tersedia" class="mb-4">
+                Data SDM dibuka untuk perbaikan sesuai catatan asesor.
+            </x-ui.alert>
         @else
-            <div class="spm-inline-alert">
-                <x-ui.icon name="shield-tick" class="fs-2 text-warning" />
-                <div>
-                    <div class="spm-inline-alert-title">🔒 Data Terkunci</div>
-                    <div class="spm-inline-alert-text">Status data sedang dalam proses akreditasi dan tidak dapat diubah untuk sementara waktu.</div>
-                </div>
-            </div>
+            <x-ui.alert variant="warning" icon="shield-tick" title="Data Terkunci">
+                Status data sedang dalam proses akreditasi dan tidak dapat diubah untuk sementara waktu.
+            </x-ui.alert>
         @endif
     @endif
 
     <form x-on:submit.prevent="confirmSave($wire)" class="d-flex flex-column gap-6">
+        @if($errors->any())
+            <x-ui.alert variant="danger" title="Data SDM belum valid" class="mb-0">
+                <div class="mb-3">Periksa kembali angka yang ditandai sebelum menyimpan rekap SDM.</div>
+                <ul class="mb-0 ps-4">
+                    @foreach($errors->all() as $message)
+                        <li>{{ $message }}</li>
+                    @endforeach
+                </ul>
+            </x-ui.alert>
+        @endif
+
         @foreach($categories as $category)
             <x-ui.section-card
                 :title="$category['label']"
@@ -201,6 +302,7 @@ new #[Layout('layouts.app')] class extends Component {
                                             placeholder="0"
                                             min="0"
                                             step="1"
+                                            inputmode="numeric"
                                             :disabled="$sdmLockStatus === 'locked'"
                                         />
                                     </td>
@@ -214,6 +316,7 @@ new #[Layout('layouts.app')] class extends Component {
                                             placeholder="0"
                                             min="0"
                                             step="1"
+                                            inputmode="numeric"
                                             :disabled="$sdmLockStatus === 'locked'"
                                         />
                                     </td>
@@ -262,10 +365,14 @@ new #[Layout('layouts.app')] class extends Component {
             </div>
 
             <div class="d-flex align-items-center gap-2">
-                @if($sdmLockStatus === 'locked')
+                @if(count($levels) === 0)
+                    <x-ui.button type="button" variant="light" disabled>
+                        Lengkapi Profil Dahulu
+                    </x-ui.button>
+                @elseif($sdmLockStatus === 'locked')
                     <x-ui.button type="button" variant="warning" disabled>
                         <x-ui.icon name="shield-tick" class="fs-4 me-1" />
-                        🔒 Data Terkunci
+                        Data Terkunci
                     </x-ui.button>
                 @else
                     <x-ui.button type="submit" variant="primary" wire:loading.attr="disabled">

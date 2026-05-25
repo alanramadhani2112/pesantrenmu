@@ -11,12 +11,15 @@ use Faker\Factory as Faker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Property-Based Tests for Timestamp Format (ISO 8601 Round-Trip).
  *
- * @group Feature:concurrent-access-handling,Property6
  */
+#[Group('Feature:concurrent-access-handling')]
+#[Group('Property6')]
 class TimestampFormatPropertyTest extends TestCase
 {
     use RefreshDatabase;
@@ -57,9 +60,9 @@ class TimestampFormatPropertyTest extends TestCase
      *
      * **Validates: Requirements 6.4**
      *
-     * @dataProvider randomDatetimeProvider
      */
-    public function test_iso8601_round_trip_preserves_datetime(string $isoString): void
+#[DataProvider('randomDatetimeProvider')]
+public function test_iso8601_round_trip_preserves_datetime(string $isoString): void
     {
         // Parse the ISO string back to Carbon
         $parsed = Carbon::parse($isoString);
@@ -82,9 +85,9 @@ class TimestampFormatPropertyTest extends TestCase
      *
      * **Validates: Requirements 6.4**
      *
-     * @dataProvider randomDatetimeProvider
      */
-    public function test_carbon_to_iso_string_is_valid_iso8601(string $isoString): void
+#[DataProvider('randomDatetimeProvider')]
+public function test_carbon_to_iso_string_is_valid_iso8601(string $isoString): void
     {
         // Verify the string matches ISO 8601 format
         // ISO 8601: YYYY-MM-DDTHH:MM:SS.sssZ or with timezone offset
@@ -102,7 +105,7 @@ class TimestampFormatPropertyTest extends TestCase
      *
      * **Validates: Requirements 6.1, 6.4**
      */
-    public function test_akreditasi_updated_at_iso_string_round_trip(): void
+public function test_akreditasi_updated_at_iso_string_round_trip(): void
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -135,7 +138,7 @@ class TimestampFormatPropertyTest extends TestCase
      *
      * **Validates: Requirements 6.4**
      */
-    public function test_timestamp_comparison_is_exact(): void
+public function test_timestamp_comparison_is_exact(): void
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([

@@ -52,7 +52,19 @@ class UserService
         if ($id) {
             $this->userRepository->update($id, $payload);
         } else {
-            $this->userRepository->create($payload);
+            $user = $this->userRepository->create($payload);
+
+            // Auto-create asesor profile when role is Asesor (role_id = 2)
+            // so the user immediately appears in asesor assignment dropdowns.
+            if ((int) $data['role_id'] === 2) {
+                \App\Models\Asesor::firstOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'nama_dengan_gelar' => $data['name'],
+                        'nama_tanpa_gelar'  => $data['name'],
+                    ]
+                );
+            }
         }
     }
 

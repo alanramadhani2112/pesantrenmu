@@ -33,9 +33,9 @@ class BandingServicePropertyTest extends TestCase
     }
 
     /**
-     * Helper: create a pesantren user with complete data for createSubmission compatibility.
+     * Helper: create a pesantren user with basic profile data.
      */
-    private function createPesantrenUser(): User
+private function createPesantrenUser(): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -53,7 +53,7 @@ class BandingServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 1.1**
      */
-    public function test_property_1_banding_creation_correctness(): void
+public function test_property_1_banding_creation_correctness(): void
     {
         $faker = Faker::create();
 
@@ -90,7 +90,7 @@ class BandingServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 2.2, 2.3**
      */
-    public function test_property_4_appeal_limit_enforcement(): void
+public function test_property_4_appeal_limit_enforcement(): void
     {
         $faker = Faker::create();
 
@@ -134,7 +134,7 @@ class BandingServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 1.3, 4.3**
      */
-    public function test_property_2_reviewer_assignment_state_transition(): void
+public function test_property_2_reviewer_assignment_state_transition(): void
     {
         $faker = Faker::create();
 
@@ -143,7 +143,7 @@ class BandingServicePropertyTest extends TestCase
             $reviewer = User::factory()->create(['role_id' => 1]);
             $akreditasi = Akreditasi::create([
                 'user_id' => $user->id,
-                'status' => 3,
+                'status' => -2,
             ]);
 
             $banding = Banding::create([
@@ -171,7 +171,7 @@ class BandingServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 1.4, 5.1, 5.3**
      */
-    public function test_property_3_decision_state_transition(): void
+public function test_property_3_decision_state_transition(): void
     {
         $faker = Faker::create();
 
@@ -180,7 +180,7 @@ class BandingServicePropertyTest extends TestCase
             $reviewer = User::factory()->create(['role_id' => 1]);
             $akreditasi = Akreditasi::create([
                 'user_id' => $user->id,
-                'status' => 3,
+                'status' => -2,
             ]);
 
             $banding = Banding::create([
@@ -203,8 +203,7 @@ class BandingServicePropertyTest extends TestCase
 
             if ($decision === 'accept') {
                 $result = $this->bandingService->acceptBanding($banding->id, $keputusan);
-                // acceptBanding may return null if createSubmission fails (data completeness check)
-                // but the banding itself should still be updated
+                $this->assertNotNull($result, "Iteration {$i}: acceptBanding should return the akreditasi");
                 $banding->refresh();
                 $this->assertEquals('accepted', $banding->status, "Iteration {$i}: Status should be accepted");
             } else {
@@ -226,7 +225,7 @@ class BandingServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 5.5**
      */
-    public function test_property_7_explanation_minimum_length_validation(): void
+public function test_property_7_explanation_minimum_length_validation(): void
     {
         $faker = Faker::create();
 
@@ -235,7 +234,7 @@ class BandingServicePropertyTest extends TestCase
             $reviewer = User::factory()->create(['role_id' => 1]);
             $akreditasi = Akreditasi::create([
                 'user_id' => $user->id,
-                'status' => 3,
+                'status' => -2,
             ]);
 
             $banding = Banding::create([
@@ -270,10 +269,10 @@ class BandingServicePropertyTest extends TestCase
     }
 
     /**
-     * Helper: create a pesantren user with COMPLETE data for createSubmission compatibility.
+     * Helper: create a pesantren user with complete supporting data.
      * This includes Pesantren, IPM, SDM, and EDPM data.
      */
-    private function createCompletePesantrenUser(): User
+private function createCompletePesantrenUser(): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -314,13 +313,13 @@ class BandingServicePropertyTest extends TestCase
     }
 
     /**
-     * Property 5: Accept outcome — new akreditasi creation
-     * For any accepted banding, the system SHALL create a new Akreditasi record
-     * with status 6 (Pengajuan) and parent field set to the original akreditasi_id.
+     * Property 5: Accept outcome — return to final admin validation
+     * For any accepted banding, the system SHALL keep the existing Akreditasi record
+     * and move it back to status 1 (Validasi Akhir Admin).
      *
      * **Validates: Requirements 5.2**
      */
-    public function test_property_5_accept_outcome_new_akreditasi_creation(): void
+public function test_property_5_accept_outcome_returns_to_validasi_admin(): void
     {
         $faker = Faker::create();
 
@@ -329,7 +328,7 @@ class BandingServicePropertyTest extends TestCase
             $reviewer = User::factory()->create(['role_id' => 1]);
             $akreditasi = Akreditasi::create([
                 'user_id' => $user->id,
-                'status' => 3,
+                'status' => -2,
             ]);
 
             $banding = Banding::create([
@@ -347,24 +346,21 @@ class BandingServicePropertyTest extends TestCase
                 $keputusan = str_pad($keputusan, 10, 'x');
             }
 
-            $newAkreditasi = $this->bandingService->acceptBanding($banding->id, $keputusan);
+            $acceptedAkreditasi = $this->bandingService->acceptBanding($banding->id, $keputusan);
 
-            $this->assertNotNull($newAkreditasi, "Iteration {$i}: acceptBanding should return new Akreditasi");
-            $this->assertEquals(6, (int) $newAkreditasi->status, "Iteration {$i}: New akreditasi should have status 6");
-            $this->assertEquals($akreditasi->id, $newAkreditasi->parent, "Iteration {$i}: New akreditasi parent should be original akreditasi_id");
-            $this->assertEquals($user->id, $newAkreditasi->user_id, "Iteration {$i}: New akreditasi should belong to same user");
+            $this->assertNotNull($acceptedAkreditasi, "Iteration {$i}: acceptBanding should return the akreditasi");
+            $this->assertEquals($akreditasi->id, $acceptedAkreditasi->id, "Iteration {$i}: acceptBanding should return the original akreditasi");
+            $this->assertEquals(1, (int) $acceptedAkreditasi->status, "Iteration {$i}: Akreditasi should have status 1");
+            $this->assertEquals($user->id, $acceptedAkreditasi->user_id, "Iteration {$i}: Akreditasi should belong to same user");
 
             // Verify it exists in the database
             $this->assertDatabaseHas('akreditasis', [
-                'id' => $newAkreditasi->id,
-                'status' => 6,
-                'parent' => $akreditasi->id,
+                'id' => $akreditasi->id,
+                'status' => 1,
+                'parent' => null,
             ]);
 
-            // Clean up: delete the new akreditasi so next iteration's createSubmission doesn't fail
-            // (createSubmission checks for existing active akreditasi)
-            Akreditasi::where('id', $newAkreditasi->id)->forceDelete();
-            // Also clean up the banding and original akreditasi
+            // Clean up the banding and akreditasi.
             Banding::where('id', $banding->id)->delete();
             Akreditasi::where('id', $akreditasi->id)->forceDelete();
             // Clean up user data for next iteration
@@ -377,12 +373,12 @@ class BandingServicePropertyTest extends TestCase
 
     /**
      * Property 6: Reject outcome — akreditasi status revert
-     * For any rejected banding, the associated akreditasi SHALL have its status set to 2 (Ditolak)
+     * For any rejected banding, the associated akreditasi SHALL have its status set to -1 (Ditolak)
      * and an AkreditasiCatatan record SHALL be created containing the rejection explanation.
      *
      * **Validates: Requirements 5.4**
      */
-    public function test_property_6_reject_outcome_akreditasi_status_revert(): void
+public function test_property_6_reject_outcome_akreditasi_status_revert(): void
     {
         $faker = Faker::create();
 
@@ -391,7 +387,7 @@ class BandingServicePropertyTest extends TestCase
             $reviewer = User::factory()->create(['role_id' => 1]);
             $akreditasi = Akreditasi::create([
                 'user_id' => $user->id,
-                'status' => 3, // Validasi (banding submitted)
+                'status' => -2,
             ]);
 
             $banding = Banding::create([
@@ -413,9 +409,9 @@ class BandingServicePropertyTest extends TestCase
 
             $this->assertTrue($result, "Iteration {$i}: rejectBanding should return true");
 
-            // Verify akreditasi status reverted to 2
+            // Verify akreditasi status reverted to Ditolak
             $akreditasi->refresh();
-            $this->assertEquals(2, (int) $akreditasi->status, "Iteration {$i}: Akreditasi status should be reverted to 2");
+            $this->assertEquals(-1, (int) $akreditasi->status, "Iteration {$i}: Akreditasi status should be reverted to -1");
 
             // Verify AkreditasiCatatan created with rejection explanation
             $catatan = AkreditasiCatatan::where('akreditasi_id', $akreditasi->id)
@@ -435,7 +431,7 @@ class BandingServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 5.6**
      */
-    public function test_property_8_status_guard_on_decisions(): void
+public function test_property_8_status_guard_on_decisions(): void
     {
         $faker = Faker::create();
 
@@ -499,7 +495,7 @@ class BandingServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 4.4, 7.1**
      */
-    public function test_property_9_deadline_calculation(): void
+public function test_property_9_deadline_calculation(): void
     {
         $faker = Faker::create();
 
@@ -520,7 +516,7 @@ class BandingServicePropertyTest extends TestCase
             $reviewer = User::factory()->create(['role_id' => 1]);
             $akreditasi = Akreditasi::create([
                 'user_id' => $user->id,
-                'status' => 3,
+                'status' => -2,
             ]);
 
             $banding = Banding::create([
@@ -561,7 +557,7 @@ class BandingServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 7.4, 7.5**
      */
-    public function test_property_10_overdue_detection(): void
+public function test_property_10_overdue_detection(): void
     {
         $faker = Faker::create();
 
@@ -570,7 +566,7 @@ class BandingServicePropertyTest extends TestCase
             $reviewer = User::factory()->create(['role_id' => 1]);
             $akreditasi = Akreditasi::create([
                 'user_id' => $user->id,
-                'status' => 3,
+                'status' => -2,
             ]);
 
             // Generate a random deadline relative to "now"
@@ -624,7 +620,7 @@ class BandingServicePropertyTest extends TestCase
     /**
      * Additional check for Property 10: non-under_review status should never be overdue
      */
-    public function test_property_10_non_under_review_never_overdue(): void
+public function test_property_10_non_under_review_never_overdue(): void
     {
         $faker = Faker::create();
 
@@ -634,7 +630,7 @@ class BandingServicePropertyTest extends TestCase
             $user = $this->createPesantrenUser();
             $akreditasi = Akreditasi::create([
                 'user_id' => $user->id,
-                'status' => 3,
+                'status' => -2,
             ]);
 
             $status = $faker->randomElement($nonReviewStatuses);
@@ -667,7 +663,7 @@ class BandingServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 3.5**
      */
-    public function test_property_11_banding_list_sorting(): void
+public function test_property_11_banding_list_sorting(): void
     {
         $faker = Faker::create();
 
@@ -678,7 +674,7 @@ class BandingServicePropertyTest extends TestCase
             $users[] = $user;
             $akreditasi = Akreditasi::create([
                 'user_id' => $user->id,
-                'status' => 3,
+                'status' => -2,
             ]);
 
             // Create banding with a random created_at date

@@ -3,6 +3,7 @@
 use App\Models\Akreditasi;
 use App\Models\Banding;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Livewire\Volt\Component;
 
@@ -45,11 +46,19 @@ new class extends Component {
 
     private function loadAdminBadges(): void
     {
-        // Count Akreditasi with status=6 (Pengajuan/pending_review)
-        $this->pendingAkreditasiCount = Akreditasi::where('status', 6)->count();
+        // P-8 fix: cache badge counts for 30s to avoid sustained polling load.
+        // With 50 active admins polling every 30s = 100 queries/min → 2 queries/min.
+        $this->pendingAkreditasiCount = Cache::remember(
+            'badge:admin:pending_akreditasi',
+            30,
+            fn () => Akreditasi::where('status', 6)->count()
+        );
 
-        // Count Banding with status='pending'
-        $this->pendingBandingCount = Banding::where('status', 'pending')->count();
+        $this->pendingBandingCount = Cache::remember(
+            'badge:admin:pending_banding',
+            30,
+            fn () => Banding::where('status', 'pending')->count()
+        );
     }
 
     private function loadAsesorBadges(\App\Models\User $user): void
@@ -61,13 +70,16 @@ new class extends Component {
             return;
         }
 
-        // Count Akreditasi assigned to this asesor with active statuses
-        // Status 4 = Visitasi (in_progress), Status 5 = Assessment (assigned)
-        $this->activeTaskCount = Akreditasi::whereIn('status', [4, 5])
-            ->whereHas('assessments', function ($query) use ($asesor) {
-                $query->where('asesor_id', $asesor->id);
-            })
-            ->count();
+        // P-8 fix: cache per-asesor badge count for 30s.
+        $this->activeTaskCount = Cache::remember(
+            'badge:asesor:' . $asesor->id . ':active_tasks',
+            30,
+            fn () => Akreditasi::whereIn('status', [4, 5])
+                ->whereHas('assessments', function ($query) use ($asesor) {
+                    $query->where('asesor_id', $asesor->id);
+                })
+                ->count()
+        );
     }
 }; ?>
 

@@ -15,6 +15,7 @@ new #[Layout('layouts.app')] class extends Component {
     public $links = [];
     public $catatans = [];
     public $activeStep = 0;
+    public $activeGroup = 'edpm';
 
     public function mount()
     {
@@ -43,14 +44,38 @@ new #[Layout('layouts.app')] class extends Component {
         }
     }
 
+    protected function visibleKomponens()
+    {
+        return collect($this->komponens ?? [])
+            ->filter(fn ($komponen) => $this->activeGroup === 'ipr' ? (bool) $komponen->ipr : ! (bool) $komponen->ipr)
+            ->values();
+    }
+
+    public function setGroup($group)
+    {
+        if (! in_array($group, ['edpm', 'ipr'], true)) {
+            return;
+        }
+
+        $this->activeGroup = $group;
+        $this->activeStep = 0;
+        $this->resetErrorBag();
+    }
+
     public function nextStep()
     {
-        if (isset($this->komponens[$this->activeStep])) {
-            $currentKomponen = $this->komponens[$this->activeStep];
+        $visibleKomponens = $this->visibleKomponens();
+
+        if (isset($visibleKomponens[$this->activeStep])) {
+            $currentKomponen = $visibleKomponens[$this->activeStep];
             $rules = [];
             $messages = [];
 
             foreach ($currentKomponen->butirs as $butir) {
+                // Skip validation for locked butirs
+                if (!$this->isButirEditable($butir->id)) {
+                    continue;
+                }
                 $rules['evaluasis.' . $butir->id] = 'required|numeric|min:1|max:4';
                 $rules['links.' . $butir->id] = 'required|url';
                 $messages['evaluasis.' . $butir->id . '.required'] = 'Harap pilih nilai evaluasi untuk butir ' . $butir->nomor_butir;
@@ -64,14 +89,12 @@ new #[Layout('layouts.app')] class extends Component {
             try {
                 $this->validate($rules, $messages);
             } catch (\Illuminate\Validation\ValidationException $e) {
-                $errorMessages = collect($e->errors())->flatten()->toArray();
-                session()->flash('validation_errors', $errorMessages);
                 $this->dispatch('show-validation-error');
-                return;
+                throw $e;
             }
         }
 
-        if ($this->activeStep < count($this->komponens) - 1) {
+        if ($this->activeStep < $visibleKomponens->count() - 1) {
             $this->activeStep++;
         }
     }
@@ -85,7 +108,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function setStep($step)
     {
-        if ($step >= 0 && $step < count($this->komponens)) {
+        if ($step >= 0 && $step < $this->visibleKomponens()->count()) {
             $this->activeStep = $step;
         }
     }
@@ -105,6 +128,10 @@ new #[Layout('layouts.app')] class extends Component {
 
         foreach ($this->komponens as $komponen) {
             foreach ($komponen->butirs as $butir) {
+                // Only validate editable butirs
+                if (!$this->isButirEditable($butir->id)) {
+                    continue;
+                }
                 $rules['evaluasis.' . $butir->id] = 'required|numeric|min:1|max:4';
                 $rules['links.' . $butir->id] = 'required|url';
 
@@ -121,15 +148,14 @@ new #[Layout('layouts.app')] class extends Component {
         try {
             $this->validate($rules, $messages);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            $errorMessages = collect($e->errors())->flatten()->toArray();
-            session()->flash('validation_errors', $errorMessages);
             $this->dispatch('show-validation-error');
-            return;
+            throw $e;
         }
 
         if ($pesantrenService->saveEdpmEvaluation(auth()->id(), $this->evaluasis, $this->links, $this->catatans)) {
-            session()->flash('status', 'Evaluasi EDPM berhasil disimpan.');
-            $this->dispatch('notification-received', title: 'Berhasil', message: 'Evaluasi EDPM berhasil disimpan.');
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil', message: 'Evaluasi EDPM berhasil disimpan.');
+        } else {
+            $this->dispatch('show-metronic-alert', type: 'error', title: 'Gagal', message: 'Evaluasi EDPM gagal disimpan.');
         }
     }
 
@@ -141,24 +167,38 @@ new #[Layout('layouts.app')] class extends Component {
             return;
         }
 
-        $this->validate([
-            'evaluasis.*' => 'nullable|numeric|min:1|max:4',
-            'links.*' => 'nullable|url',
-            'catatans.*' => 'nullable|string',
-        ]);
+        try {
+            $this->validate([
+                'evaluasis.*' => 'nullable|numeric|min:1|max:4',
+                'links.*' => 'nullable|url',
+                'catatans.*' => 'nullable|string',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->dispatch('show-validation-error');
+            throw $e;
+        }
 
         if ($pesantrenService->saveEdpmDraft(auth()->id(), $this->evaluasis, $this->links, $this->catatans)) {
-            $this->dispatch('notification-received', title: 'Draft Disimpan', message: 'Draft evaluasi EDPM berhasil disimpan.');
+            $this->dispatch('notification-received', type: 'success', title: 'Draft Disimpan', message: 'Draft evaluasi EDPM berhasil disimpan.');
+        } else {
+            $this->dispatch('show-metronic-alert', type: 'error', title: 'Gagal', message: 'Draft EDPM gagal disimpan.');
         }
     }
 
     public function isStepComplete($index)
     {
-        if (!isset($this->komponens[$index])) {
+        $visibleKomponens = $this->visibleKomponens();
+
+        if (!isset($visibleKomponens[$index])) {
             return false;
         }
 
-        foreach ($this->komponens[$index]->butirs as $butir) {
+        foreach ($visibleKomponens[$index]->butirs as $butir) {
+            // Locked butirs that can't be edited are skipped from completeness check
+            if (!$this->isButirEditable($butir->id)) {
+                continue;
+            }
+
             if (!isset($this->evaluasis[$butir->id]) || $this->evaluasis[$butir->id] === '') {
                 return false;
             }
@@ -203,15 +243,22 @@ new #[Layout('layouts.app')] class extends Component {
 }; ?>
 
 @php
-    $isLocked = auth()->user()->pesantren->is_locked;
-    $currentKomponen = $komponens[$activeStep] ?? null;
-    $komponenCount = is_countable($komponens ?? null) ? count($komponens) : 0;
+    $isLocked = auth()->user()->pesantren?->is_locked ?? false;
+    $allKomponens = collect($komponens ?? []);
+    $edpmCount = $allKomponens->filter(fn ($komponen) => ! (bool) $komponen->ipr)->count();
+    $iprCount = $allKomponens->filter(fn ($komponen) => (bool) $komponen->ipr)->count();
+    $visibleKomponens = $allKomponens
+        ->filter(fn ($komponen) => $activeGroup === 'ipr' ? (bool) $komponen->ipr : ! (bool) $komponen->ipr)
+        ->values();
+    $currentKomponen = $visibleKomponens[$activeStep] ?? null;
+    $komponenCount = $visibleKomponens->count();
+    $groupLabel = $activeGroup === 'ipr' ? 'IPR' : 'EDPM';
 @endphp
 
-<x-slot name="header">{{ __('Evaluasi Data Pesantren Muhammadiyah (EDPM)') }}</x-slot>
+<x-slot name="header">{{ __('Evaluasi Data Pesantren Muhammadiyah (EDPM/IPR)') }}</x-slot>
 
 <x-ui.page
-    title="Evaluasi Data Pesantren Muhammadiyah (EDPM)"
+    title="Evaluasi Data Pesantren Muhammadiyah (EDPM/IPR)"
     subtitle="Susun evaluasi per komponen, tautan bukti, dan catatan kinerja."
     data-module-page="pesantren-edpm"
     x-data="edpmManagement"
@@ -233,7 +280,7 @@ new #[Layout('layouts.app')] class extends Component {
         </div>
 
         <div class="col-lg-4">
-            <x-ui.stat-card label="Komponen Aktif" value="{{ $komponenCount }} Komponen" variant="info" icon="menu" />
+            <x-ui.stat-card label="Komponen {{ $groupLabel }}" value="{{ $komponenCount }} Komponen" variant="info" icon="menu" />
         </div>
 
         <div class="col-lg-4">
@@ -244,29 +291,46 @@ new #[Layout('layouts.app')] class extends Component {
     @if($isLocked)
         @php $hasAnyEdpmEditable = $this->hasAnyEdpmButirEditable(); @endphp
         @if($hasAnyEdpmEditable)
-            <div class="spm-inline-alert" style="border-left: 4px solid #f59e0b; background: #fffbeb; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-                <x-ui.icon name="shield-tick" class="fs-2 text-warning" />
-                <div>
-                    <div class="spm-inline-alert-title">🔓 Koreksi Tersedia</div>
-                    <div class="spm-inline-alert-text">Beberapa butir EDPM dibuka untuk perbaikan. Butir yang ditandai 🔓 dapat diedit.</div>
-                </div>
-            </div>
+            <x-ui.alert variant="warning" icon="shield-tick" title="Koreksi Tersedia" class="mb-4">
+                Beberapa butir EDPM dibuka untuk perbaikan. Butir yang ditandai dapat diedit.
+            </x-ui.alert>
         @else
-            <div class="spm-inline-alert">
-                <x-ui.icon name="shield-tick" class="fs-2 text-warning" />
-                <div>
-                    <div class="spm-inline-alert-title">🔒 Data Terkunci</div>
-                    <div class="spm-inline-alert-text">Data EDPM tidak dapat diubah karena pesantren sedang dalam proses akreditasi.</div>
-                </div>
-            </div>
+            <x-ui.alert variant="warning" icon="shield-tick" title="Data Terkunci">
+                Data EDPM tidak dapat diubah karena pesantren sedang dalam proses akreditasi.
+            </x-ui.alert>
         @endif
     @endif
 
+    @if($allKomponens->isNotEmpty())
+        <x-ui.tabs class="mb-6">
+            <x-ui.tab :active="$activeGroup === 'edpm'" wire:click="setGroup('edpm')">
+                Komponen EDPM
+                <span class="badge badge-light-primary ms-2">{{ $edpmCount }}</span>
+            </x-ui.tab>
+
+            <x-ui.tab :active="$activeGroup === 'ipr'" wire:click="setGroup('ipr')">
+                Komponen IPR
+                <span class="badge badge-light-success ms-2">{{ $iprCount }}</span>
+            </x-ui.tab>
+        </x-ui.tabs>
+    @endif
+
     @if($komponenCount > 0)
-        <x-ui.section-card title="Tahapan EDPM" subtitle="Pilih komponen untuk mengisi nilai evaluasi dan tautan bukti.">
+        @if($errors->any())
+            <x-ui.alert variant="danger" title="Data {{ $groupLabel }} belum valid" class="mb-6">
+                <div class="mb-3">Periksa kembali nilai dan tautan bukti yang ditandai sebelum menyimpan.</div>
+                <ul class="mb-0 ps-4">
+                    @foreach($errors->all() as $message)
+                        <li>{{ $message }}</li>
+                    @endforeach
+                </ul>
+            </x-ui.alert>
+        @endif
+
+        <x-ui.section-card title="Tahapan {{ $groupLabel }}" subtitle="Pilih komponen untuk mengisi nilai evaluasi dan tautan bukti.">
             <div class="p-6">
                 <div class="spm-edpm-stepper">
-                    @foreach($komponens as $index => $komponen)
+                    @foreach($visibleKomponens as $index => $komponen)
                         @php
                             $isActive = $activeStep === $index;
                             $isComplete = $this->isStepComplete($index);
@@ -295,7 +359,7 @@ new #[Layout('layouts.app')] class extends Component {
         @if($currentKomponen)
             <x-ui.section-card
                 :title="$currentKomponen->nama"
-                subtitle="Isi evaluasi, tautan bukti, dan catatan untuk komponen yang sedang aktif."
+                subtitle="Isi evaluasi, tautan bukti, dan catatan untuk komponen {{ $groupLabel }} yang sedang aktif."
             >
                 <x-slot:toolbar>
                     <x-ui.status-badge :variant="$this->isStepComplete($activeStep) ? 'success' : 'warning'">
@@ -307,8 +371,9 @@ new #[Layout('layouts.app')] class extends Component {
                     <x-ui.simple-table tableClass="spm-edpm-table">
                         <thead>
                             <tr>
-                                <th class="ps-4">Butir</th>
-                                <th>Pernyataan</th>
+                                <th class="ps-4" style="min-width: 220px;">Komponen</th>
+                                <th style="min-width: 120px;">Butir</th>
+                                <th>Butir Pernyataan</th>
                                 <th style="min-width: 220px;">Evaluasi</th>
                                 <th style="min-width: 320px;" class="pe-4">Tautan Bukti</th>
                             </tr>
@@ -318,10 +383,19 @@ new #[Layout('layouts.app')] class extends Component {
                                 @php $butirEditable = $this->isButirEditable($butir->id); @endphp
                                 <tr class="{{ ($isLocked && $butirEditable) ? 'bg-warning bg-opacity-10' : '' }}">
                                     <td class="ps-4 align-top">
+                                        <div class="fw-bold text-gray-900">{{ $currentKomponen->nama }}</div>
+                                        <div class="text-muted fs-8">{{ $groupLabel }}</div>
+                                    </td>
+                                    <td class="align-top">
                                         <div class="fw-bold text-gray-900">
-                                            {{ $isLocked ? ($butirEditable ? '🔓 ' : '🔒 ') : '' }}{{ $butir->nomor_butir }}
+                                            <x-ui.badge variant="primary">{{ $butir->nomor_butir }}</x-ui.badge>
                                         </div>
-                                        <div class="text-muted fs-8">SK {{ $butir->no_sk }}</div>
+                                        <div class="text-muted fs-8 mt-2">SK {{ $butir->no_sk ?: '-' }}</div>
+                                        @if($isLocked)
+                                            <x-ui.status-badge :variant="$butirEditable ? 'warning' : 'secondary'" class="mt-2">
+                                                {{ $butirEditable ? 'Dibuka' : 'Terkunci' }}
+                                            </x-ui.status-badge>
+                                        @endif
                                     </td>
                                     <td class="align-top">
                                         <div class="spm-edpm-statement">{{ $butir->butir_pernyataan }}</div>
@@ -370,7 +444,7 @@ new #[Layout('layouts.app')] class extends Component {
                 <x-ui.section-card title="Catatan Kinerja Satuan Pendidikan" subtitle="Lengkapi catatan evaluasi untuk setiap komponen.">
                     <div class="p-6">
                         <div class="spm-input-grid">
-                            @foreach($komponens as $komponen)
+                            @foreach($visibleKomponens as $komponen)
                                 @php $komponenHasUnlocked = false;
                                     foreach ($komponen->butirs as $b) {
                                         if ($this->isButirEditable($b->id)) { $komponenHasUnlocked = true; break; }
@@ -398,7 +472,7 @@ new #[Layout('layouts.app')] class extends Component {
 
             <div class="spm-action-panel d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-4">
                 <div>
-                    <h3 class="spm-card-title mb-1">Aksi EDPM</h3>
+                    <h3 class="spm-card-title mb-1">Aksi {{ $groupLabel }}</h3>
                     <div class="text-muted fw-semibold fs-7">
                         Gunakan draf untuk menyimpan sementara, lalu finalkan setelah semua komponen lengkap.
                     </div>
@@ -455,7 +529,7 @@ new #[Layout('layouts.app')] class extends Component {
         @endif
     @else
         <x-ui.card>
-            <x-ui.empty-state title="Data Komponen Belum Tersedia" description="Pesantren ini belum memiliki komponen EDPM yang dapat diisi." />
+            <x-ui.empty-state title="Data Komponen Belum Tersedia" description="Pesantren ini belum memiliki komponen {{ $groupLabel }} yang dapat diisi." />
         </x-ui.card>
     @endif
 </x-ui.page>

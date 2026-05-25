@@ -3,13 +3,15 @@
 namespace Tests\Feature;
 
 use App\Models\Ipm;
+use App\Models\Edpm;
+use App\Models\MasterEdpmButir;
+use App\Models\MasterEdpmKomponen;
 use App\Models\Pesantren;
 use App\Models\SdmPesantren;
 use App\Models\User;
 use App\Services\SidebarProgressService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 /**
@@ -30,28 +32,6 @@ class SidebarProgressServiceTest extends TestCase
         parent::setUp();
         $this->seed(RoleSeeder::class);
         $this->service = app(SidebarProgressService::class);
-
-        // Add missing columns that the service expects but don't exist in the base migration
-        if (!Schema::hasColumn('pesantrens', 'nspp')) {
-            Schema::table('pesantrens', function ($table) {
-                $table->string('nspp')->nullable();
-            });
-        }
-        if (!Schema::hasColumn('pesantrens', 'kabupaten')) {
-            Schema::table('pesantrens', function ($table) {
-                $table->string('kabupaten')->nullable();
-            });
-        }
-        if (!Schema::hasColumn('pesantrens', 'kecamatan')) {
-            Schema::table('pesantrens', function ($table) {
-                $table->string('kecamatan')->nullable();
-            });
-        }
-        if (!Schema::hasColumn('pesantrens', 'kelurahan')) {
-            Schema::table('pesantrens', function ($table) {
-                $table->string('kelurahan')->nullable();
-            });
-        }
     }
 
     // ─── Edge Case: User with no Pesantren record → all 'not_started' ───────────
@@ -65,6 +45,7 @@ class SidebarProgressServiceTest extends TestCase
         $this->assertSame('not_started', $progress['profil']);
         $this->assertSame('not_started', $progress['ipm']);
         $this->assertSame('not_started', $progress['sdm']);
+        $this->assertSame('not_started', $progress['edpm']);
     }
 
     public function test_user_with_no_data_profil_section_returns_correct_counts(): void
@@ -75,7 +56,7 @@ class SidebarProgressServiceTest extends TestCase
 
         $this->assertSame('not_started', $result['status']);
         $this->assertSame(0, $result['filled']);
-        $this->assertSame(7, $result['total']);
+        $this->assertSame(8, $result['total']);
     }
 
     public function test_user_with_no_data_ipm_section_returns_correct_counts(): void
@@ -110,12 +91,13 @@ class SidebarProgressServiceTest extends TestCase
         Pesantren::create([
             'user_id' => $user->id,
             'nama_pesantren' => 'Pesantren Al-Hikmah',
-            'nspp' => '123456789',
+            'ns_pesantren' => '123456789',
             'alamat' => 'Jl. Raya No. 1',
             'provinsi' => 'Jawa Timur',
-            'kabupaten' => 'Surabaya',
-            'kecamatan' => 'Gubeng',
-            'kelurahan' => 'Airlangga',
+            'kota_kabupaten' => 'Surabaya',
+            'tahun_pendirian' => '1998',
+            'nama_mudir' => 'Ahmad Mudir',
+            'layanan_satuan_pendidikan' => ['spm'],
         ]);
 
         // Create complete IPM record
@@ -138,6 +120,7 @@ class SidebarProgressServiceTest extends TestCase
         $this->assertSame('complete', $progress['profil']);
         $this->assertSame('complete', $progress['ipm']);
         $this->assertSame('complete', $progress['sdm']);
+        $this->assertSame('not_started', $progress['edpm']);
     }
 
     public function test_user_with_complete_profil_returns_correct_counts(): void
@@ -147,19 +130,20 @@ class SidebarProgressServiceTest extends TestCase
         Pesantren::create([
             'user_id' => $user->id,
             'nama_pesantren' => 'Pesantren Al-Hikmah',
-            'nspp' => '123456789',
+            'ns_pesantren' => '123456789',
             'alamat' => 'Jl. Raya No. 1',
             'provinsi' => 'Jawa Timur',
-            'kabupaten' => 'Surabaya',
-            'kecamatan' => 'Gubeng',
-            'kelurahan' => 'Airlangga',
+            'kota_kabupaten' => 'Surabaya',
+            'tahun_pendirian' => '1998',
+            'nama_mudir' => 'Ahmad Mudir',
+            'layanan_satuan_pendidikan' => ['spm'],
         ]);
 
         $result = $this->service->getSectionProgress($user->id, 'profil');
 
         $this->assertSame('complete', $result['status']);
-        $this->assertSame(7, $result['filled']);
-        $this->assertSame(7, $result['total']);
+        $this->assertSame(8, $result['filled']);
+        $this->assertSame(8, $result['total']);
     }
 
     public function test_user_with_complete_ipm_returns_correct_counts(): void
@@ -197,6 +181,33 @@ class SidebarProgressServiceTest extends TestCase
         $this->assertSame(1, $result['total']);
     }
 
+    public function test_user_with_complete_edpm_returns_correct_counts(): void
+    {
+        $user = User::factory()->create(['role_id' => 3]);
+        $komponen = MasterEdpmKomponen::create(['nama' => 'MUTU LULUSAN']);
+        $butir1 = MasterEdpmButir::create([
+            'komponen_id' => $komponen->id,
+            'no_sk' => '1',
+            'nomor_butir' => '1',
+            'butir_pernyataan' => 'Butir 1',
+        ]);
+        $butir2 = MasterEdpmButir::create([
+            'komponen_id' => $komponen->id,
+            'no_sk' => '2',
+            'nomor_butir' => '2',
+            'butir_pernyataan' => 'Butir 2',
+        ]);
+
+        Edpm::create(['user_id' => $user->id, 'butir_id' => $butir1->id, 'isian' => 'A']);
+        Edpm::create(['user_id' => $user->id, 'butir_id' => $butir2->id, 'isian' => 'B']);
+
+        $result = $this->service->getSectionProgress($user->id, 'edpm');
+
+        $this->assertSame('complete', $result['status']);
+        $this->assertSame(2, $result['filled']);
+        $this->assertSame(2, $result['total']);
+    }
+
     // ─── Specific Example: User with Profil filled but no IPM → mixed statuses ─
 
     public function test_user_with_profil_filled_but_no_ipm_returns_mixed_statuses(): void
@@ -207,12 +218,13 @@ class SidebarProgressServiceTest extends TestCase
         Pesantren::create([
             'user_id' => $user->id,
             'nama_pesantren' => 'Pesantren Al-Hikmah',
-            'nspp' => '123456789',
+            'ns_pesantren' => '123456789',
             'alamat' => 'Jl. Raya No. 1',
             'provinsi' => 'Jawa Timur',
-            'kabupaten' => 'Surabaya',
-            'kecamatan' => 'Gubeng',
-            'kelurahan' => 'Airlangga',
+            'kota_kabupaten' => 'Surabaya',
+            'tahun_pendirian' => '1998',
+            'nama_mudir' => 'Ahmad Mudir',
+            'layanan_satuan_pendidikan' => ['spm'],
         ]);
 
         // No IPM record, no SDM record
@@ -222,6 +234,7 @@ class SidebarProgressServiceTest extends TestCase
         $this->assertSame('complete', $progress['profil']);
         $this->assertSame('not_started', $progress['ipm']);
         $this->assertSame('not_started', $progress['sdm']);
+        $this->assertSame('not_started', $progress['edpm']);
     }
 
     public function test_user_with_partial_profil_and_partial_ipm(): void
@@ -232,12 +245,13 @@ class SidebarProgressServiceTest extends TestCase
         Pesantren::create([
             'user_id' => $user->id,
             'nama_pesantren' => 'Pesantren Al-Hikmah',
-            'nspp' => '123456789',
+            'ns_pesantren' => '123456789',
             'alamat' => '',
             'provinsi' => '',
-            'kabupaten' => '',
-            'kecamatan' => '',
-            'kelurahan' => '',
+            'kota_kabupaten' => '',
+            'tahun_pendirian' => '',
+            'nama_mudir' => '',
+            'layanan_satuan_pendidikan' => [],
         ]);
 
         // Create partial IPM record (only some files uploaded)
@@ -257,8 +271,8 @@ class SidebarProgressServiceTest extends TestCase
 
         // Verify specific counts
         $profilResult = $this->service->getSectionProgress($user->id, 'profil');
-        $this->assertSame(2, $profilResult['filled']); // nama_pesantren + nspp
-        $this->assertSame(7, $profilResult['total']);
+        $this->assertSame(2, $profilResult['filled']); // nama_pesantren + ns_pesantren
+        $this->assertSame(8, $profilResult['total']);
 
         $ipmResult = $this->service->getSectionProgress($user->id, 'ipm');
         $this->assertSame(1, $ipmResult['filled']); // nsp_file only
@@ -286,19 +300,20 @@ class SidebarProgressServiceTest extends TestCase
         Pesantren::create([
             'user_id' => $user->id,
             'nama_pesantren' => '',
-            'nspp' => '',
+            'ns_pesantren' => '',
             'alamat' => '',
             'provinsi' => '',
-            'kabupaten' => '',
-            'kecamatan' => '',
-            'kelurahan' => '',
+            'kota_kabupaten' => '',
+            'tahun_pendirian' => '',
+            'nama_mudir' => '',
+            'layanan_satuan_pendidikan' => [],
         ]);
 
         $result = $this->service->getSectionProgress($user->id, 'profil');
 
         $this->assertSame('not_started', $result['status']);
         $this->assertSame(0, $result['filled']);
-        $this->assertSame(7, $result['total']);
+        $this->assertSame(8, $result['total']);
     }
 
     public function test_multiple_sdm_records_still_returns_complete(): void

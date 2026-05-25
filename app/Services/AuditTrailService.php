@@ -21,6 +21,8 @@ class AuditTrailService
         'banding_submitted',
         'deleted',
         'nv_changed',
+        'document_uploaded',
+        'document_replaced',
     ];
 
     /**

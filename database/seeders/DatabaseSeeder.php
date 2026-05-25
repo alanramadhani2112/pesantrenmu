@@ -32,9 +32,29 @@ class DatabaseSeeder extends Seeder
 
         $this->call(DocumentCategorySeeder::class);
 
-        $this->seedAdmin();
-        $this->seedPesantren();
-        $this->seedAsesor();
+        // H-4 fix: demo accounts hanya di-seed di environment local/testing.
+        // Jangan jalankan di staging/production — akun demo dengan password
+        // 'password' adalah pintu masuk trivial bagi penyerang.
+        if (app()->environment('local', 'testing')) {
+            $this->seedAdmin();
+            $this->seedPesantren();
+            $this->seedAsesor();
+            $this->seedSuperAdmin();
+        }
+    }
+
+    private function seedSuperAdmin(): User
+    {
+        return User::updateOrCreate(
+            ['email' => 'superadmin@spm.test'],
+            [
+                'name' => 'Super Admin SPM',
+                'password' => Hash::make('password'),
+                'role_id' => 4,
+                'status' => 1,
+                'email_verified_at' => now(),
+            ]
+        );
     }
 
     private function seedAdmin(): User
@@ -166,7 +186,7 @@ class DatabaseSeeder extends Seeder
                 'nik' => '3400000000000001',
                 'tempat_lahir' => 'Yogyakarta',
                 'tanggal_lahir' => '1985-01-01',
-                'unit_kerja' => 'Majelis Dikdasmen PWM',
+                'unit_kerja' => 'LP2M PWM',
                 'jabatan_utama' => 'Asesor',
                 'jenis_kelamin' => 'L',
                 'alamat_kantor' => 'Jl. Kantor PWM No. 1',

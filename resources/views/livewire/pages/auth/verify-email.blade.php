@@ -46,10 +46,7 @@ new #[Layout('layouts.guest')] class extends Component
     </div>
 
     @if (session('status') == 'verification-link-sent')
-    <div class="alert alert-success d-flex align-items-center gap-3 mb-6">
-        <i class="ki-duotone ki-check-circle fs-2x text-success"><span class="path1"></span><span class="path2"></span></i>
-        <span class="fw-semibold">Link verifikasi baru telah dikirim ke email Anda.</span>
-    </div>
+        <x-ui.alert variant="success" class="mb-6">Link verifikasi baru telah dikirim ke email Anda.</x-ui.alert>
     @endif
 
     <div class="d-flex flex-column gap-4">

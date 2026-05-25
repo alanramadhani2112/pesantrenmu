@@ -37,6 +37,7 @@ class TenantPolicyTest extends TestCase
         parent::setUp();
         $this->seed(RoleSeeder::class);
         $this->seed(PermissionSeeder::class);
+        $this->seed(\Database\Seeders\RolePermissionSeeder::class);
     }
 
     // ─── Pesantren policy ──────────────────────────────────────────────────────
@@ -326,7 +327,7 @@ class TenantPolicyTest extends TestCase
     /**
      * @return array{0: User, 1: Pesantren}
      */
-    private function makePesantrenUser(): array
+private function makePesantrenUser(): array
     {
         $user = $this->makeUser(Role::ID_PESANTREN);
         $pesantren = Pesantren::create([
@@ -340,7 +341,7 @@ class TenantPolicyTest extends TestCase
     /**
      * @return array{0: User, 1: Asesor}
      */
-    private function makeAsesorUser(): array
+private function makeAsesorUser(): array
     {
         $user = $this->makeUser(Role::ID_ASESOR);
         $asesor = Asesor::create([

@@ -37,7 +37,7 @@ class PesantrenAkreditasiDetailResubmissionTest extends TestCase
     /**
      * Task 6.6: Rejected akreditasi shows resubmission count and limit
      */
-    public function test_rejected_akreditasi_shows_resubmission_count_and_limit(): void
+public function test_rejected_akreditasi_shows_resubmission_count_and_limit(): void
     {
         $user = $this->createCompletePesantrenUser();
         $this->actingAs($user);
@@ -67,7 +67,7 @@ class PesantrenAkreditasiDetailResubmissionTest extends TestCase
     /**
      * Task 6.7: Button disabled when limit reached, shows correct message
      */
-    public function test_button_disabled_when_limit_reached_shows_correct_message(): void
+public function test_button_disabled_when_limit_reached_shows_correct_message(): void
     {
         $user = $this->createCompletePesantrenUser();
         $this->actingAs($user);
@@ -102,7 +102,7 @@ class PesantrenAkreditasiDetailResubmissionTest extends TestCase
     /**
      * Task 6.8: Button disabled when cooling period active, shows remaining days
      */
-    public function test_button_disabled_when_cooling_period_active_shows_remaining_days(): void
+public function test_button_disabled_when_cooling_period_active_shows_remaining_days(): void
     {
         $user = $this->createCompletePesantrenUser();
         $this->actingAs($user);
@@ -139,7 +139,7 @@ class PesantrenAkreditasiDetailResubmissionTest extends TestCase
     /**
      * Task 6.9: Button enabled when eligible, clicking creates resubmission
      */
-    public function test_button_enabled_when_eligible_clicking_creates_resubmission(): void
+public function test_button_enabled_when_eligible_clicking_creates_resubmission(): void
     {
         $user = $this->createCompletePesantrenUser();
         $this->actingAs($user);

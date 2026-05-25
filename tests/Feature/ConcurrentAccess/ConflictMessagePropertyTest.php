@@ -4,13 +4,15 @@ namespace Tests\Feature\ConcurrentAccess;
 
 use App\Exceptions\ConflictException;
 use App\Models\Akreditasi;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
 /**
  * Property-Based Tests for Conflict Message Status Labels.
- *
- * @group Feature:concurrent-access-handling,Property3
  */
+#[Group('Feature:concurrent-access-handling')]
+#[Group('Property3')]
 class ConflictMessagePropertyTest extends TestCase
 {
     /**
@@ -19,12 +21,12 @@ class ConflictMessagePropertyTest extends TestCase
     public static function statusLabelProvider(): array
     {
         return [
-            'status_1_berhasil'    => [1, 'Berhasil'],
-            'status_2_ditolak'     => [2, 'Di Tolak'],
-            'status_3_validasi'    => [3, 'Validasi'],
-            'status_4_visitasi'    => [4, 'Visitasi'],
-            'status_5_assessment'  => [5, 'Assessment'],
-            'status_6_pengajuan'   => [6, 'Pengajuan'],
+            'status_1_validasi_admin' => [1, 'Validasi Admin'],
+            'status_2_pasca_visitasi' => [2, 'Penilaian Pasca Visitasi'],
+            'status_3_visitasi'       => [3, 'Visitasi'],
+            'status_4_assessment'     => [4, 'Review Asesor'],
+            'status_5_verifikasi'     => [5, 'Verifikasi Berkas'],
+            'status_6_pengajuan'      => [6, 'Pengajuan'],
         ];
     }
 
@@ -36,9 +38,8 @@ class ConflictMessagePropertyTest extends TestCase
      * corresponding to that status value.
      *
      * **Validates: Requirements 2.2**
-     *
-     * @dataProvider statusLabelProvider
      */
+    #[DataProvider('statusLabelProvider')]
     public function test_conflict_exception_returns_correct_status_label(int $status, string $expectedLabel): void
     {
         $exception = new ConflictException(1, $status);
@@ -56,9 +57,8 @@ class ConflictMessagePropertyTest extends TestCase
      * The ConflictException::getStatusLabel() must be consistent with the model's static method.
      *
      * **Validates: Requirements 2.2**
-     *
-     * @dataProvider statusLabelProvider
      */
+    #[DataProvider('statusLabelProvider')]
     public function test_conflict_exception_label_matches_model_label(int $status, string $expectedLabel): void
     {
         $exception = new ConflictException(42, $status);
@@ -84,9 +84,8 @@ class ConflictMessagePropertyTest extends TestCase
      * Verifies that the status label can be embedded in a conflict message string.
      *
      * **Validates: Requirements 2.2, 2.3**
-     *
-     * @dataProvider statusLabelProvider
      */
+    #[DataProvider('statusLabelProvider')]
     public function test_conflict_message_contains_status_label(int $status, string $expectedLabel): void
     {
         $exception = new ConflictException(10, $status);

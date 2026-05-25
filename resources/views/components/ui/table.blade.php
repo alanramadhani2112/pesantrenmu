@@ -6,9 +6,9 @@
 ])
 
 <div data-ui-table="metronic" {{ $attributes->merge(['class' => 'card spm-table-shell']) }}>
-    @if($title || $subtitle || isset($filters))
-        <div class="card-header border-0 pt-6 pb-4">
-            <div class="card-title d-flex flex-column">
+    @if($title || $subtitle || isset($filters) || isset($toolbar))
+        <div class="card-header border-0 spm-table-header">
+            <div class="spm-table-heading">
                 @if($title)
                     <h3 class="spm-card-title mb-1">{{ $title }}</h3>
                 @endif
@@ -18,9 +18,15 @@
                 @endif
             </div>
 
+            @isset($toolbar)
+                <div class="spm-table-actions">
+                    {{ $toolbar }}
+                </div>
+            @endisset
+
             @isset($filters)
-                <div class="card-toolbar">
-                    <div class="d-flex flex-wrap align-items-center justify-content-lg-end gap-3">
+                <div class="spm-table-controls">
+                    <div class="spm-table-filter-row">
                         {{ $filters }}
                     </div>
                 </div>
@@ -29,19 +35,9 @@
     @endif
 
     <div class="card-body pt-0">
-        @if($showPerPage || isset($toolbar))
-            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4 mb-5">
-                <div>
-                    @if($showPerPage)
-                        <x-ui.table-per-page />
-                    @endif
-                </div>
-
-                @isset($toolbar)
-                    <div class="d-flex flex-wrap align-items-center justify-content-md-end gap-2">
-                        {{ $toolbar }}
-                    </div>
-                @endisset
+        @if($showPerPage)
+            <div class="spm-table-utility-row">
+                <x-ui.table-per-page />
             </div>
         @endif
 
@@ -59,8 +55,8 @@
         </div>
 
         @if($records && method_exists($records, 'links'))
-            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4 pt-6">
-                <div class="text-muted fw-semibold fs-7">
+            <div class="spm-table-footer">
+                <div class="spm-table-result-meta">
                     Menampilkan {{ $records->firstItem() ?? 0 }} sampai {{ $records->lastItem() ?? 0 }} dari {{ $records->total() ?? 0 }} data
                 </div>
 

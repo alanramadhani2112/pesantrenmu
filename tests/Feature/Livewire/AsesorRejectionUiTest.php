@@ -13,6 +13,9 @@ use App\Models\MasterEdpmKomponen;
 use App\Models\Pesantren;
 use App\Models\SdmPesantren;
 use App\Models\User;
+use App\StateMachine\AkreditasiStateMachine;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -27,6 +30,8 @@ class AsesorRejectionUiTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RolePermissionSeeder::class);
         Notification::fake();
     }
 
@@ -195,6 +200,36 @@ class AsesorRejectionUiTest extends TestCase
             ->assertSee('Diterima');
     }
 
+    public function test_asesor_detail_rejection_modal_and_score_tables_use_safe_metronic_markup(): void
+    {
+        [$asesorUser, $akreditasi] = $this->createAsesor1WithAkreditasi();
+        $this->actingAs($asesorUser);
+
+        $component = Livewire::test(\App\Livewire\Pages\Asesor\AkreditasiDetail::class, ['uuid' => $akreditasi->uuid])
+            ->assertSee('Tolak Dokumen')
+            ->assertSee('asesor-reject-documents-modal', false)
+            ->assertSee('data-ui-modal="metronic"', false)
+            ->assertDontSee('Form Penolakan Dokumen');
+
+        $component
+            ->call('setTab', 'edpm_pesantren')
+            ->assertSee('spm-score-table--readonly', false)
+            ->assertSee('Catatan Komponen');
+
+        $component
+            ->call('setTab', 'instrumen')
+            ->assertSee('Delta')
+            ->assertDontSee('x-transition="x-transition"', false);
+    }
+
+    public function test_asesor_detail_delta_display_uses_absolute_difference(): void
+    {
+        $view = file_get_contents(resource_path('views/livewire/pages/asesor/akreditasi-detail.blade.php'));
+
+        $this->assertStringContainsString('abs((int) $na1Value - (int) $na2Value)', $view);
+        $this->assertStringNotContainsString('? ((int) $na1Value - (int) $na2Value)', $view);
+    }
+
     private function createAsesor1WithAkreditasi(): array
     {
         // Create pesantren user with complete data
@@ -227,10 +262,10 @@ class AsesorRejectionUiTest extends TestCase
             'isian' => '4',
         ]);
 
-        // Create akreditasi at status 5
+        // Create akreditasi at assessment status
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status' => 5,
+            'status' => AkreditasiStateMachine::STATUS_ASSESSMENT,
         ]);
 
         // Create asesor user

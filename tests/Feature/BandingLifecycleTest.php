@@ -31,9 +31,9 @@ class BandingLifecycleTest extends TestCase
     }
 
     /**
-     * Helper: create a pesantren user with COMPLETE data for createSubmission compatibility.
+     * Helper: create a pesantren user with complete supporting data.
      */
-    private function createCompletePesantrenUser(): User
+private function createCompletePesantrenUser(): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -74,9 +74,9 @@ class BandingLifecycleTest extends TestCase
 
     /**
      * Integration test: full accept lifecycle
-     * submit banding → assign reviewer → accept → new akreditasi exists with status=6 and parent
+     * submit banding → assign reviewer → accept → akreditasi returns to Validasi Akhir Admin.
      */
-    public function test_full_accept_lifecycle(): void
+public function test_full_accept_lifecycle(): void
     {
         // Setup: create a complete pesantren user with a rejected akreditasi
         $user = $this->createCompletePesantrenUser();
@@ -84,7 +84,7 @@ class BandingLifecycleTest extends TestCase
 
         $akreditasi = Akreditasi::create([
             'user_id' => $user->id,
-            'status' => 2, // Ditolak
+            'status' => -2,
         ]);
 
         // Step 1: Submit banding
@@ -110,7 +110,7 @@ class BandingLifecycleTest extends TestCase
 
         // Step 3: Accept banding
         $keputusan = 'Setelah ditinjau ulang, kami menerima banding ini dan memberikan kesempatan evaluasi ulang.';
-        $newAkreditasi = $this->bandingService->acceptBanding($banding->id, $keputusan);
+        $acceptedAkreditasi = $this->bandingService->acceptBanding($banding->id, $keputusan);
 
         // Verify banding is accepted
         $banding->refresh();
@@ -118,26 +118,26 @@ class BandingLifecycleTest extends TestCase
         $this->assertEquals($keputusan, $banding->keputusan);
         $this->assertNotNull($banding->decided_at);
 
-        // Verify new akreditasi exists with correct status and parent
-        $this->assertNotNull($newAkreditasi);
-        $this->assertEquals(6, (int) $newAkreditasi->status);
-        $this->assertEquals($akreditasi->id, $newAkreditasi->parent);
-        $this->assertEquals($user->id, $newAkreditasi->user_id);
+        // Verify the existing akreditasi returns to final admin validation.
+        $this->assertNotNull($acceptedAkreditasi);
+        $this->assertEquals($akreditasi->id, $acceptedAkreditasi->id);
+        $this->assertEquals(1, (int) $acceptedAkreditasi->status);
+        $this->assertEquals($user->id, $acceptedAkreditasi->user_id);
 
         // Verify in database
         $this->assertDatabaseHas('akreditasis', [
-            'id' => $newAkreditasi->id,
-            'status' => 6,
-            'parent' => $akreditasi->id,
+            'id' => $akreditasi->id,
+            'status' => 1,
+            'parent' => null,
             'user_id' => $user->id,
         ]);
     }
 
     /**
      * Integration test: full reject lifecycle
-     * submit banding → assign reviewer → reject → akreditasi back to status 2 and catatan created
+     * submit banding → assign reviewer → reject → akreditasi back to Ditolak and catatan created
      */
-    public function test_full_reject_lifecycle(): void
+public function test_full_reject_lifecycle(): void
     {
         // Setup: create a pesantren user with a rejected akreditasi
         $user = User::factory()->create(['role_id' => 3]);
@@ -150,10 +150,10 @@ class BandingLifecycleTest extends TestCase
 
         $akreditasi = Akreditasi::create([
             'user_id' => $user->id,
-            'status' => 2, // Ditolak
+            'status' => -2,
         ]);
 
-        // Step 1: Submit banding (simulates what happens after submitAppeals changes status to 3)
+        // Step 1: Submit banding record for an akreditasi already in Banding status.
         $banding = $this->bandingService->createBanding(
             $akreditasi->id,
             $user->id,
@@ -162,9 +162,6 @@ class BandingLifecycleTest extends TestCase
 
         $this->assertNotNull($banding);
         $this->assertEquals('pending', $banding->status);
-
-        // Update akreditasi status to 3 (as submitAppeals would do)
-        $akreditasi->update(['status' => 3]);
 
         // Step 2: Assign reviewer
         $result = $this->bandingService->assignReviewer($banding->id, $admin->id);
@@ -186,9 +183,9 @@ class BandingLifecycleTest extends TestCase
         $this->assertEquals($keputusan, $banding->keputusan);
         $this->assertNotNull($banding->decided_at);
 
-        // Verify akreditasi status reverted to 2
+        // Verify akreditasi status reverted to Ditolak
         $akreditasi->refresh();
-        $this->assertEquals(2, (int) $akreditasi->status);
+        $this->assertEquals(-1, (int) $akreditasi->status);
 
         // Verify AkreditasiCatatan created with rejection explanation
         $catatan = AkreditasiCatatan::where('akreditasi_id', $akreditasi->id)

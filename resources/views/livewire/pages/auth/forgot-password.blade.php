@@ -44,10 +44,7 @@ new #[Layout('layouts.guest')] class extends Component
     </div>
 
     @if (session('status'))
-    <div class="alert alert-success d-flex align-items-center gap-3 mb-6">
-        <i class="ki-duotone ki-check-circle fs-2x text-success"><span class="path1"></span><span class="path2"></span></i>
-        <span class="fw-semibold">{{ session('status') }}</span>
-    </div>
+        <x-ui.alert variant="success" class="mb-6">{{ session('status') }}</x-ui.alert>
     @endif
 
     <form wire:submit="sendPasswordResetLink" class="form w-100">

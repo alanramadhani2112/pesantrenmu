@@ -213,9 +213,10 @@
                             </div>
 
                             <div class="px-6 pb-4">
-                                <div class="progress h-8px">
-                                    <div class="progress-bar {{ $progressPercent === 100 ? 'bg-success' : 'bg-primary' }}" style="width: {{ $progressPercent }}%"></div>
-                                </div>
+                                <x-ui.progress
+                                    :value="$progressPercent"
+                                    :variant="$progressPercent === 100 ? 'success' : 'primary'"
+                                />
                             </div>
 
                             <div class="separator"></div>
@@ -416,63 +417,61 @@
                     subtitle="{{ $isAdmin ? 'Pengajuan akreditasi terbaru dari seluruh pesantren.' : ($isPesantren ? 'Riwayat pengajuan akreditasi pesantren Anda.' : 'Tugas penilaian terbaru yang ditugaskan kepada Anda.') }}"
                 >
                     @if($recentActivities->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-row-dashed align-middle gs-0 gy-4 mb-0">
-                                <thead>
-                                    <tr class="text-uppercase fs-8 fw-bold text-muted">
-                                        <th class="min-w-200px">Pesantren</th>
-                                        <th class="min-w-100px">Status</th>
-                                        <th class="min-w-100px d-none d-md-table-cell">Peringkat</th>
-                                        <th class="min-w-150px d-none d-sm-table-cell">Terakhir Diperbarui</th>
-                                        <th class="text-end"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($recentActivities as $activity)
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center gap-3">
-                                                    <div class="symbol symbol-40px flex-shrink-0">
-                                                        <div class="symbol-label bg-light-primary text-primary fw-bolder">
-                                                            {{ strtoupper(substr($activity['pesantren_name'], 0, 1)) }}
-                                                        </div>
-                                                    </div>
-                                                    <div class="d-flex flex-column min-w-0">
-                                                        <span class="text-gray-900 fw-bold fs-7 fs-md-6 text-truncate">{{ $activity['pesantren_name'] }}</span>
-                                                        <span class="text-muted fw-semibold fs-8 d-sm-none">
-                                                            {{ $activity['updated_at']->translatedFormat('d M Y') }}
-                                                        </span>
+                        <x-ui.simple-table>
+                            <thead>
+                                <tr class="text-uppercase fs-8 fw-bold text-muted">
+                                    <th class="min-w-200px ps-4">Pesantren</th>
+                                    <th class="min-w-100px">Status</th>
+                                    <th class="min-w-100px d-none d-md-table-cell">Peringkat</th>
+                                    <th class="min-w-150px d-none d-sm-table-cell">Terakhir Diperbarui</th>
+                                    <th class="text-end pe-4"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($recentActivities as $activity)
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="symbol symbol-40px flex-shrink-0">
+                                                    <div class="symbol-label bg-light-primary text-primary fw-bolder">
+                                                        {{ strtoupper(substr($activity['pesantren_name'], 0, 1)) }}
                                                     </div>
                                                 </div>
-                                            </td>
-                                            <td>
-                                                <x-ui.status-badge :variant="$statusVariantMap[$activity['status']] ?? 'secondary'">
-                                                    {{ $activity['status_label'] }}
-                                                </x-ui.status-badge>
-                                            </td>
-                                            <td class="d-none d-md-table-cell">
-                                                @if($activity['peringkat'])
-                                                    <span class="fw-bold text-gray-700">{{ $activity['peringkat'] }}</span>
-                                                @else
-                                                    <span class="text-muted">-</span>
-                                                @endif
-                                            </td>
-                                            <td class="d-none d-sm-table-cell">
-                                                <span class="text-muted fw-semibold fs-7">
-                                                    {{ $activity['updated_at']->translatedFormat('d M Y, H:i') }}
-                                                </span>
-                                            </td>
-                                            <td class="text-end">
-                                                <x-ui.button :href="$recentRouteFor($activity['uuid'])" variant="light" size="sm" class="btn-icon btn-sm-auto">
-                                                    <x-ui.icon name="eye" class="fs-5" />
-                                                    <span class="d-none d-sm-inline ms-1">Detail</span>
-                                                </x-ui.button>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                                <div class="d-flex flex-column min-w-0">
+                                                    <span class="text-gray-900 fw-bold fs-7 fs-md-6 text-truncate">{{ $activity['pesantren_name'] }}</span>
+                                                    <span class="text-muted fw-semibold fs-8 d-sm-none">
+                                                        {{ $activity['updated_at']->translatedFormat('d M Y') }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <x-ui.status-badge :variant="$statusVariantMap[$activity['status']] ?? 'secondary'">
+                                                {{ $activity['status_label'] }}
+                                            </x-ui.status-badge>
+                                        </td>
+                                        <td class="d-none d-md-table-cell">
+                                            @if($activity['peringkat'])
+                                                <span class="fw-bold text-gray-700">{{ $activity['peringkat'] }}</span>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
+                                        <td class="d-none d-sm-table-cell">
+                                            <span class="text-muted fw-semibold fs-7">
+                                                {{ $activity['updated_at']->translatedFormat('d M Y, H:i') }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <x-ui.button :href="$recentRouteFor($activity['uuid'])" variant="light" size="sm" class="btn-icon btn-sm-auto">
+                                                <x-ui.icon name="eye" class="fs-5" />
+                                                <span class="d-none d-sm-inline ms-1">Detail</span>
+                                            </x-ui.button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </x-ui.simple-table>
                     @else
                         <x-ui.empty-state
                             title="Belum ada aktivitas"

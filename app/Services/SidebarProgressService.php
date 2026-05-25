@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Ipm;
+use App\Models\Edpm;
+use App\Models\MasterEdpmButir;
 use App\Models\Pesantren;
 use App\Models\SdmPesantren;
 
@@ -13,12 +15,13 @@ class SidebarProgressService
      */
     private const PROFIL_REQUIRED_FIELDS = [
         'nama_pesantren',
-        'nspp',
+        'ns_pesantren',
         'alamat',
         'provinsi',
-        'kabupaten',
-        'kecamatan',
-        'kelurahan',
+        'kota_kabupaten',
+        'tahun_pendirian',
+        'nama_mudir',
+        'layanan_satuan_pendidikan',
     ];
 
     /**
@@ -44,6 +47,7 @@ class SidebarProgressService
             'profil' => $this->getSectionProgress($userId, 'profil')['status'],
             'ipm' => $this->getSectionProgress($userId, 'ipm')['status'],
             'sdm' => $this->getSectionProgress($userId, 'sdm')['status'],
+            'edpm' => $this->getSectionProgress($userId, 'edpm')['status'],
         ];
     }
 
@@ -51,7 +55,7 @@ class SidebarProgressService
      * Calculate completion status for a specific section.
      *
      * @param int $userId
-     * @param string $section One of: 'profil', 'ipm', 'sdm'
+     * @param string $section One of: 'profil', 'ipm', 'sdm', 'edpm'
      * @return array{status: string, filled: int, total: int}
      */
     public function getSectionProgress(int $userId, string $section): array
@@ -60,6 +64,7 @@ class SidebarProgressService
             'profil' => $this->calculateProfilProgress($userId),
             'ipm' => $this->calculateIpmProgress($userId),
             'sdm' => $this->calculateSdmProgress($userId),
+            'edpm' => $this->calculateEdpmProgress($userId),
             default => ['status' => 'not_started', 'filled' => 0, 'total' => 0],
         };
     }
@@ -78,7 +83,9 @@ class SidebarProgressService
 
         $filled = 0;
         foreach (self::PROFIL_REQUIRED_FIELDS as $field) {
-            if (!empty($pesantren->{$field})) {
+            $value = $pesantren->{$field};
+
+            if (is_array($value) ? $value !== [] : !empty($value)) {
                 $filled++;
             }
         }
@@ -127,6 +134,31 @@ class SidebarProgressService
 
         return [
             'status' => $filled > 0 ? 'complete' : 'not_started',
+            'filled' => $filled,
+            'total' => $total,
+        ];
+    }
+
+    /**
+     * Calculate progress for EDPM/IPR section.
+     */
+    private function calculateEdpmProgress(int $userId): array
+    {
+        $total = MasterEdpmButir::count();
+
+        if ($total === 0) {
+            return ['status' => 'not_started', 'filled' => 0, 'total' => 0];
+        }
+
+        $filled = Edpm::query()
+            ->where('user_id', $userId)
+            ->distinct('butir_id')
+            ->count('butir_id');
+
+        $filled = min($filled, $total);
+
+        return [
+            'status' => $this->determineStatus($filled, $total),
             'filled' => $filled,
             'total' => $total,
         ];

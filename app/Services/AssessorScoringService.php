@@ -6,6 +6,8 @@ use App\Exceptions\ImmutableValueException;
 use App\Models\Akreditasi;
 use App\Models\AkreditasiEdpm;
 use App\Models\Asesor;
+use App\Models\Assessment;
+use App\Models\MasterEdpmButir;
 use App\StateMachine\AkreditasiStateMachine;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -83,7 +85,7 @@ class AssessorScoringService
 
             if ($record && $record->is_final) {
                 throw new ImmutableValueException(
-                    "Nilai NA untuk butir #{$butirId} sudah Final dan tidak dapat diubah."
+                    "Nilai asesor untuk butir #{$butirId} sudah final dan tidak dapat diubah."
                 );
             }
 
@@ -114,9 +116,10 @@ class AssessorScoringService
     // =========================================================================
 
     /**
-     * Save NK (Nilai Kelompok) for a butir by Asesor_1.
+     * Save NK (Nilai Kelompok) for a butir by Ketua Kelompok.
      *
-     * NK gate: both NA1 and NA2 for this butir must be Final before NK can be saved.
+     * NK gate: all Nilai Ketua and all Nilai Anggota must be Final before
+     * any Nilai Kelompok can be saved.
      *
      * @param int  $akreditasiId
      * @param int  $asesor1Id     The user_id of Asesor_1
@@ -143,67 +146,51 @@ class AssessorScoringService
         $akreditasi = Akreditasi::findOrFail($akreditasiId);
         if ((int) $akreditasi->status !== AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
             throw new \DomainException(
-                "Penilaian NK hanya dapat dilakukan saat status Pasca Visitasi (status saat ini: {$akreditasi->status})."
+                "Nilai Kelompok hanya dapat diisi saat status Pasca Visitasi (status saat ini: {$akreditasi->status})."
             );
         }
 
-        // Req 7.8, 7.9: NK gate — both NA1 and NA2 must be Final
-        $na1Record = AkreditasiEdpm::where('akreditasi_id', $akreditasiId)
-            ->where('asesor_id', $this->resolveAsesorId($asesor1Id))
-            ->where('butir_id', $butirId)
-            ->first();
+        $resolvedAsesor1Id = $this->resolveAsesorId($asesor1Id);
+        $resolvedAsesor2Id = $this->resolveAsesorId($asesor2Id);
 
-        $na2Record = AkreditasiEdpm::where('akreditasi_id', $akreditasiId)
-            ->where('asesor_id', $this->resolveAsesorId($asesor2Id))
-            ->where('butir_id', $butirId)
-            ->first();
+        $this->assertAssignedScoringPair($akreditasiId, $resolvedAsesor1Id, $resolvedAsesor2Id);
 
-        $na1Final = $na1Record && $na1Record->is_final && $na1Record->isian !== null;
-        $na2Final = $na2Record && $na2Record->is_final && $na2Record->isian !== null;
+        // Req 7.8, 7.9: NK gate — all Nilai Ketua and Nilai Anggota must be Final.
+        $ketuaFinal = $this->hasAllFinalNaValues($akreditasiId, $resolvedAsesor1Id);
+        $anggotaFinal = $this->hasAllFinalNaValues($akreditasiId, $resolvedAsesor2Id);
 
-        if (!$na1Final && !$na2Final) {
+        if (!$ketuaFinal && !$anggotaFinal) {
             throw new \DomainException(
-                "NK untuk butir #{$butirId} tidak dapat diisi: NA1 dan NA2 belum Final."
+                'Nilai Kelompok belum dapat diisi karena Nilai Ketua dan Nilai Anggota belum disubmit final seluruhnya.'
             );
         }
-        if (!$na1Final) {
+        if (!$ketuaFinal) {
             throw new \DomainException(
-                "NK untuk butir #{$butirId} tidak dapat diisi: NA1 belum Final."
+                'Nilai Kelompok belum dapat diisi karena Nilai Ketua belum disubmit final seluruhnya.'
             );
         }
-        if (!$na2Final) {
+        if (!$anggotaFinal) {
             throw new \DomainException(
-                "NK untuk butir #{$butirId} tidak dapat diisi: NA2 belum Final."
+                'Nilai Kelompok belum dapat diisi karena Nilai Anggota belum disubmit final seluruhnya.'
             );
         }
 
-        return DB::transaction(function () use ($akreditasiId, $asesor1Id, $butirId, $nkValue, $isFinal, $akreditasi) {
-            // NK is stored on the Asesor_1 record
-            $resolvedAsesor1Id = $this->resolveAsesorId($asesor1Id);
-
+        return DB::transaction(function () use ($akreditasiId, $resolvedAsesor1Id, $butirId, $nkValue, $isFinal, $akreditasi) {
+            // Nilai Kelompok is stored on the Ketua Kelompok record.
             $record = AkreditasiEdpm::where('akreditasi_id', $akreditasiId)
                 ->where('asesor_id', $resolvedAsesor1Id)
                 ->where('butir_id', $butirId)
                 ->first();
 
             if ($record && $record->nk !== null) {
-                // Check NK-specific immutability: we track NK finality via a separate flag
-                // For simplicity, NK immutability is tracked by checking if nk_is_final
-                // Since the schema uses is_final for the whole record, we use a convention:
-                // NK is considered final when the record's is_final=true AND nk is set.
-                // However, per design, is_final covers the whole record (isian + nk).
-                // We allow NK to be set independently — check if NK was already finalized.
-                // The spec says is_final covers the record; NK finality is implicit.
-                // We'll use a dedicated check: if the record is_final AND nk is already set,
-                // reject modification.
                 if ($record->is_final && $record->nk !== null) {
                     throw new ImmutableValueException(
-                        "NK untuk butir #{$butirId} sudah Final dan tidak dapat diubah."
+                        "Nilai Kelompok untuk butir #{$butirId} sudah final dan tidak dapat diubah."
                     );
                 }
-                $record->update(['nk' => $nkValue, 'is_final' => $isFinal]);
+                $record->update(['nk' => $nkValue, 'is_final' => $record->is_final || $isFinal]);
             } elseif ($record) {
-                $record->update(['nk' => $nkValue, 'is_final' => $isFinal]);
+                $record->update(['nk' => $nkValue, 'is_final' => $record->is_final || $isFinal]);
             } else {
                 $record = AkreditasiEdpm::create([
                     'akreditasi_id' => $akreditasiId,
@@ -406,13 +393,7 @@ class AssessorScoringService
     public function allNA1Final(int $akreditasiId, int $asesor1Id): bool
     {
         $resolvedId = $this->resolveAsesorId($asesor1Id);
-        $count = AkreditasiEdpm::where('akreditasi_id', $akreditasiId)
-            ->where('asesor_id', $resolvedId)
-            ->whereNotNull('isian')
-            ->where('is_final', true)
-            ->count();
-
-        return $count >= self::TOTAL_BUTIR;
+        return $this->hasAllFinalNaValues($akreditasiId, $resolvedId);
     }
 
     /**
@@ -431,7 +412,7 @@ class AssessorScoringService
             ->where('is_final', true)
             ->count();
 
-        return $count >= self::TOTAL_BUTIR;
+        return $count >= $this->totalButirs();
     }
 
     /**
@@ -444,13 +425,7 @@ class AssessorScoringService
     public function allNA2Final(int $akreditasiId, int $asesor2Id): bool
     {
         $resolvedId = $this->resolveAsesorId($asesor2Id);
-        $count = AkreditasiEdpm::where('akreditasi_id', $akreditasiId)
-            ->where('asesor_id', $resolvedId)
-            ->whereNotNull('isian')
-            ->where('is_final', true)
-            ->count();
-
-        return $count >= self::TOTAL_BUTIR;
+        return $this->hasAllFinalNaValues($akreditasiId, $resolvedId);
     }
 
     /**
@@ -466,7 +441,7 @@ class AssessorScoringService
             ->where('is_final', true)
             ->count();
 
-        return $count >= self::TOTAL_BUTIR;
+        return $count >= $this->totalButirs();
     }
 
     // =========================================================================
@@ -498,6 +473,43 @@ class AssessorScoringService
     {
         $asesor = Asesor::where('user_id', $userId)->first();
         return $asesor ? $asesor->id : $userId;
+    }
+
+    private function hasAllFinalNaValues(int $akreditasiId, int $asesorModelId): bool
+    {
+        $count = AkreditasiEdpm::where('akreditasi_id', $akreditasiId)
+            ->where('asesor_id', $asesorModelId)
+            ->whereNotNull('isian')
+            ->where('is_final', true)
+            ->count();
+
+        return $count >= $this->totalButirs();
+    }
+
+    private function totalButirs(): int
+    {
+        return MasterEdpmButir::count() ?: self::TOTAL_BUTIR;
+    }
+
+    private function assertAssignedScoringPair(int $akreditasiId, int $asesor1ModelId, int $asesor2ModelId): void
+    {
+        $ketuaAssigned = Assessment::where('akreditasi_id', $akreditasiId)
+            ->where('tipe', 1)
+            ->where('asesor_id', $asesor1ModelId)
+            ->exists();
+
+        if (!$ketuaAssigned) {
+            throw new \DomainException('Hanya Ketua Kelompok yang ditugaskan yang dapat mengisi Nilai Kelompok.');
+        }
+
+        $anggotaAssigned = Assessment::where('akreditasi_id', $akreditasiId)
+            ->where('tipe', 2)
+            ->where('asesor_id', $asesor2ModelId)
+            ->exists();
+
+        if (!$anggotaAssigned) {
+            throw new \DomainException('Anggota Kelompok yang ditugaskan tidak sesuai untuk pengisian Nilai Kelompok.');
+        }
     }
 
     /**

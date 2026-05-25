@@ -14,6 +14,8 @@ use App\Models\MasterEdpmKomponen;
 use App\Models\Pesantren;
 use App\Models\SdmPesantren;
 use App\Models\User;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -28,13 +30,15 @@ class AdminRejectionUiTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RolePermissionSeeder::class);
         Notification::fake();
     }
 
     /**
      * Task 16.4: Reject button hidden at status 6
      */
-    public function test_reject_button_hidden_at_status_6(): void
+public function test_reject_button_hidden_at_status_6(): void
     {
         $adminUser = User::factory()->create(['role_id' => 1]);
         $this->actingAs($adminUser);
@@ -56,7 +60,7 @@ class AdminRejectionUiTest extends TestCase
     /**
      * Task 16.5: Structured final rejection form validates and submits
      */
-    public function test_structured_final_rejection_form_validates_empty_categories(): void
+public function test_structured_final_rejection_form_validates_empty_categories(): void
     {
         [$adminUser, $akreditasi] = $this->createAdminWithStatus3Akreditasi();
         $this->actingAs($adminUser);
@@ -104,9 +108,9 @@ class AdminRejectionUiTest extends TestCase
             'status' => 'final',
         ]);
 
-        // Verify akreditasi status changed to 2
+        // Verify akreditasi status changed to Ditolak
         $akreditasi->refresh();
-        $this->assertEquals(2, $akreditasi->status);
+        $this->assertEquals(-1, $akreditasi->status);
 
         // Verify redirect
         $component->assertRedirect(route('admin.akreditasi'));
@@ -153,7 +157,7 @@ class AdminRejectionUiTest extends TestCase
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status' => 2,
+            'status' => -1,
             'catatan' => 'Ditolak',
         ]);
 
@@ -219,9 +223,9 @@ class AdminRejectionUiTest extends TestCase
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status' => 3,
+            'status' => 1,
             'kartu_kendali' => 'akreditasi/kartu_kendali/test.pdf',
-            'laporan_visitasi_file' => 'akreditasi/laporan/test.pdf',
+            'laporan_visitasi_asesor1' => 'akreditasi/laporan/test.pdf',
         ]);
 
         // Create asesor with complete EDPM data for checkScores to pass

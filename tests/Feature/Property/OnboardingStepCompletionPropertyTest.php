@@ -13,8 +13,8 @@ use App\Models\User;
 use App\Services\OnboardingService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Property 3: Pesantren onboarding step completion reflects data state
@@ -22,7 +22,7 @@ use Tests\TestCase;
  * For any Pesantren user with arbitrary data completeness states, the onboarding step
  * completion status SHALL mark a step as completed if and only if the corresponding
  * data section meets its completion criteria:
- * - Profil: all 7 required fields filled
+ * - Profil: all required fields filled
  * - IPM: all 4 required file fields filled
  * - SDM: at least one SdmPesantren record exists
  * - EDPM: user has AkreditasiEdpm records
@@ -41,28 +41,6 @@ class OnboardingStepCompletionPropertyTest extends TestCase
         parent::setUp();
         $this->seed(RoleSeeder::class);
         $this->service = app(OnboardingService::class);
-
-        // Add missing columns that the service expects but don't exist in the base migration
-        if (!Schema::hasColumn('pesantrens', 'nspp')) {
-            Schema::table('pesantrens', function ($table) {
-                $table->string('nspp')->nullable();
-            });
-        }
-        if (!Schema::hasColumn('pesantrens', 'kabupaten')) {
-            Schema::table('pesantrens', function ($table) {
-                $table->string('kabupaten')->nullable();
-            });
-        }
-        if (!Schema::hasColumn('pesantrens', 'kecamatan')) {
-            Schema::table('pesantrens', function ($table) {
-                $table->string('kecamatan')->nullable();
-            });
-        }
-        if (!Schema::hasColumn('pesantrens', 'kelurahan')) {
-            Schema::table('pesantrens', function ($table) {
-                $table->string('kelurahan')->nullable();
-            });
-        }
     }
 
     /**
@@ -70,12 +48,13 @@ class OnboardingStepCompletionPropertyTest extends TestCase
      */
     private const PROFIL_FIELDS = [
         'nama_pesantren',
-        'nspp',
+        'ns_pesantren',
         'alamat',
         'provinsi',
-        'kabupaten',
-        'kecamatan',
-        'kelurahan',
+        'kota_kabupaten',
+        'tahun_pendirian',
+        'nama_mudir',
+        'layanan_satuan_pendidikan',
     ];
 
     /**
@@ -98,8 +77,8 @@ class OnboardingStepCompletionPropertyTest extends TestCase
         mt_srand($seed);
 
         for ($i = 0; $i < 120; $i++) {
-            // Generate random bitmask for profil fields (7 fields → 0-127)
-            $profilBitmask = mt_rand(0, 127);
+            // Generate random bitmask for profil fields.
+            $profilBitmask = mt_rand(0, (1 << count(self::PROFIL_FIELDS)) - 1);
             // Generate random bitmask for IPM fields (4 fields → 0-15)
             $ipmBitmask = mt_rand(0, 15);
             // Generate random SDM presence (true/false)
@@ -126,9 +105,9 @@ class OnboardingStepCompletionPropertyTest extends TestCase
      *
      * **Validates: Requirements 5.4, 5.5**
      *
-     * @dataProvider randomOnboardingStatesProvider
      */
-    public function test_property_3_onboarding_step_completion_reflects_data_state(
+#[DataProvider('randomOnboardingStatesProvider')]
+public function test_property_3_onboarding_step_completion_reflects_data_state(
         int $profilBitmask,
         int $ipmBitmask,
         bool $sdmPresent,
@@ -142,10 +121,12 @@ class OnboardingStepCompletionPropertyTest extends TestCase
         $profilFilledCount = 0;
         foreach (self::PROFIL_FIELDS as $index => $field) {
             if ($profilBitmask & (1 << $index)) {
-                $profilData[$field] = 'test_value_' . $field;
+                $profilData[$field] = $field === 'layanan_satuan_pendidikan'
+                    ? ['spm']
+                    : 'test_value_' . $field;
                 $profilFilledCount++;
             } else {
-                $profilData[$field] = '';
+                $profilData[$field] = $field === 'layanan_satuan_pendidikan' ? [] : '';
             }
         }
         Pesantren::create($profilData);

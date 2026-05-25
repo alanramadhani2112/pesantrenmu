@@ -28,7 +28,7 @@ class AdminAkreditasiTest extends TestCase
     /**
      * Helper: create a pesantren user with an akreditasi at the given status.
      */
-    private function createAkreditasiWithStatus(int $status): Akreditasi
+private function createAkreditasiWithStatus(int $status): Akreditasi
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -47,7 +47,7 @@ class AdminAkreditasiTest extends TestCase
      *
      * Requirements: 2.20
      */
-    public function test_admin_cannot_finalize_akreditasi_not_in_status_validasi(): void
+public function test_admin_cannot_finalize_akreditasi_not_in_status_validasi(): void
     {
         $adminUser = User::factory()->create(['role_id' => 1]);
         $this->actingAs($adminUser);
@@ -78,7 +78,7 @@ class AdminAkreditasiTest extends TestCase
      *
      * Requirements: 2.21
      */
-    public function test_admin_cannot_reject_pengajuan_not_in_status_pengajuan(): void
+public function test_admin_cannot_reject_pengajuan_not_in_status_pengajuan(): void
     {
         $adminUser = User::factory()->create(['role_id' => 1]);
         $this->actingAs($adminUser);

@@ -28,22 +28,35 @@ class AkreditasiService
         $this->auditTrailService = $auditTrailService;
     }
 
+    /**
+     * Get paginated akreditasi list with optional status filter and search.
+     */
     public function getPaginatedAkreditasis(string $statusFilter, ?string $search = null, int $perPage = 10, string $sortField = 'created_at', bool $sortAsc = false): LengthAwarePaginator
     {
         return $this->akreditasiRepository->getPaginatedAkreditasis($statusFilter, $search, $perPage, $sortField, $sortAsc);
     }
 
+    /**
+     * Get count of akreditasi per status for dashboard widgets.
+     *
+     * @return array{pengajuan: int, verifikasi: int, assessment: int, visitasi: int, validasi: int, overdue: int}
+     */
     public function getStatusCounts(): array
     {
         $deadlineService = app(DeadlineService::class);
         return [
-            'pengajuan' => $this->akreditasiRepository->getCountByStatus(6),
-            'assessment' => $this->akreditasiRepository->getCountByStatus(5),
-            'visitasi' => $this->akreditasiRepository->getCountByStatus([3, 4]), // Status 3 (Validasi) + 4 (Visitasi); 1=Berhasil & 2=Ditolak excluded.
-            'overdue' => $deadlineService->getOverdueCount(),
+            'pengajuan'  => $this->akreditasiRepository->getCountByStatus(6),   // Pengajuan
+            'verifikasi' => $this->akreditasiRepository->getCountByStatus(5),   // Verifikasi Berkas
+            'assessment' => $this->akreditasiRepository->getCountByStatus(4),   // Review Asesor
+            'visitasi'   => $this->akreditasiRepository->getCountByStatus([3, 2]), // Visitasi + Penilaian Pasca Visitasi
+            'validasi'   => $this->akreditasiRepository->getCountByStatus(1),   // Validasi Admin
+            'overdue'    => $deadlineService->getOverdueCount(),
         ];
     }
 
+    /**
+     * Find akreditasi by UUID with optional eager-loaded relations.
+     */
     public function findAkreditasi(string $uuid, array $relations = []): ?Akreditasi
     {
         return $this->akreditasiRepository->findByUuid($uuid, $relations);
@@ -54,12 +67,17 @@ class AkreditasiService
         return $this->akreditasiRepository->find($id, $relations);
     }
 
+    /**
+     * Soft-delete an akreditasi. Returns false if status=0 (Selesai) and force=false.
+     *
+     * @param bool $force Skip the status=0 guard and delete regardless.
+     */
     public function deleteAkreditasi(int $id, bool $force = false): bool
     {
         if (!$force) {
             $akreditasi = $this->akreditasiRepository->find($id);
-            if ($akreditasi && $akreditasi->status === 1) {
-                return false; // Tolak hapus akreditasi yang sudah Berhasil kecuali force=true
+            if ($akreditasi && $akreditasi->status === 0) {
+                return false; // Tolak hapus akreditasi yang sudah Selesai kecuali force=true
             }
         }
         return $this->akreditasiRepository->delete($id);

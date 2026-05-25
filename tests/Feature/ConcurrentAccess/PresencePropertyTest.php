@@ -59,7 +59,7 @@ class PresencePropertyTest extends TestCase
      * client (Alpine x-data init in presence-indicator.blade.php) can
      * filter `currentUserId` out of the displayed presence list.
      */
-    public function test_payload_returns_current_user_identity_for_client_side_exclusion(): void
+public function test_payload_returns_current_user_identity_for_client_side_exclusion(): void
     {
         [$user, $akreditasi] = $this->makeOwnerAndAkreditasi();
 
@@ -76,7 +76,7 @@ class PresencePropertyTest extends TestCase
     /**
      * @return array{0: User, 1: Akreditasi}
      */
-    private function makeOwnerAndAkreditasi(): array
+private function makeOwnerAndAkreditasi(): array
     {
         [$user] = $this->makePesantrenUser();
 
@@ -91,7 +91,7 @@ class PresencePropertyTest extends TestCase
     /**
      * @return array{0: User, 1: Pesantren}
      */
-    private function makePesantrenUser(): array
+private function makePesantrenUser(): array
     {
         $user = User::factory()->create([
             'role_id' => Role::ID_PESANTREN,

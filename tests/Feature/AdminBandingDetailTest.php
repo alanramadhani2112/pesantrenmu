@@ -13,8 +13,11 @@ use App\Models\Edpm;
 use App\Models\Pesantren;
 use App\Models\SdmPesantren;
 use App\Models\User;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Volt\Volt;
 use Tests\TestCase;
 
@@ -26,6 +29,12 @@ class AdminBandingDetailTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RolePermissionSeeder::class);
+
+        foreach (['banding.review', 'banding.decide'] as $permission) {
+            Gate::define($permission, fn (User $user) => $user->hasPermission($permission));
+        }
     }
 
     private function createPesantrenUser(string $pesantrenName = 'Pesantren Test'): User
@@ -75,7 +84,7 @@ class AdminBandingDetailTest extends TestCase
     /**
      * Task 9.7: Assign reviewer updates banding and shows under_review status
      */
-    public function test_assign_reviewer_updates_banding_status(): void
+public function test_assign_reviewer_updates_banding_status(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $reviewer = User::factory()->create(['role_id' => 1, 'name' => 'Reviewer Admin']);
@@ -83,7 +92,7 @@ class AdminBandingDetailTest extends TestCase
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status' => 3,
+            'status' => -2,
         ]);
 
         $banding = Banding::create([
@@ -93,13 +102,21 @@ class AdminBandingDetailTest extends TestCase
             'alasan' => 'Saya tidak setuju dengan hasil penilaian yang diberikan.',
         ]);
 
-        $this->actingAs($admin);
+        Volt::actingAs($admin);
 
         $component = Volt::test('pages.admin.banding-detail', ['id' => $banding->id])
+            ->assertOk()
             ->assertSee('Pending')
-            ->assertSee('Assign Reviewer')
+            ->assertSee('Assign Reviewer');
+
+        $component
+            ->call('openAssignModal')
+            ->assertSet('showAssignModal', true)
             ->set('selectedReviewerId', $reviewer->id)
-            ->call('assignReviewer');
+            ->assertSet('selectedReviewerId', $reviewer->id)
+            ->call('assignReviewer')
+            ->assertOk()
+            ->assertHasNoErrors();
 
         // Verify banding status changed
         $banding->refresh();
@@ -111,9 +128,9 @@ class AdminBandingDetailTest extends TestCase
     }
 
     /**
-     * Task 9.8: Accept decision creates new akreditasi and shows accepted status
+     * Task 9.8: Accept decision returns akreditasi to final admin validation.
      */
-    public function test_accept_decision_creates_new_akreditasi(): void
+public function test_accept_decision_returns_to_validasi_admin(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $pesantrenUser = $this->createPesantrenUser('Pesantren Accept');
@@ -121,7 +138,7 @@ class AdminBandingDetailTest extends TestCase
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status' => 3,
+            'status' => -2,
         ]);
 
         // Create an assessment so the akreditasi looks valid
@@ -149,14 +166,14 @@ class AdminBandingDetailTest extends TestCase
             'review_deadline' => now()->addDays(14),
         ]);
 
-        $this->actingAs($admin);
+        Volt::actingAs($admin);
 
         $component = Volt::test('pages.admin.banding-detail', ['id' => $banding->id])
-            ->assertSee('Accept')
-            ->assertSee('Reject')
+            ->assertSee('Terima Banding')
+            ->assertSee('Tolak Banding')
+            ->call('openDecisionModal', 'accept')
             ->set('keputusan', 'Banding diterima karena ada bukti yang valid dan perlu dievaluasi ulang.')
             ->set('decisionType', 'accept')
-            ->set('showDecisionModal', true)
             ->call('submitDecision');
 
         // Verify banding status changed to accepted
@@ -164,10 +181,10 @@ class AdminBandingDetailTest extends TestCase
         $this->assertEquals('accepted', $banding->status);
         $this->assertNotNull($banding->decided_at);
 
-        // Verify new akreditasi was created
-        $newAkreditasi = Akreditasi::where('parent', $akreditasi->id)->first();
-        $this->assertNotNull($newAkreditasi);
-        $this->assertEquals(6, $newAkreditasi->status);
+        // Verify akreditasi returns to Validasi Akhir Admin.
+        $akreditasi->refresh();
+        $this->assertEquals(1, $akreditasi->status);
+        $this->assertNull(Akreditasi::where('parent', $akreditasi->id)->first());
 
         // Verify the component shows accepted status
         $component->assertSee('Accepted');
@@ -176,14 +193,14 @@ class AdminBandingDetailTest extends TestCase
     /**
      * Task 9.9: Reject decision reverts akreditasi and shows rejected status
      */
-    public function test_reject_decision_reverts_akreditasi(): void
+public function test_reject_decision_reverts_akreditasi(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $pesantrenUser = $this->createPesantrenUser('Pesantren Reject');
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status' => 3,
+            'status' => -2,
         ]);
 
         $banding = Banding::create([
@@ -195,14 +212,14 @@ class AdminBandingDetailTest extends TestCase
             'review_deadline' => now()->addDays(14),
         ]);
 
-        $this->actingAs($admin);
+        Volt::actingAs($admin);
 
         $component = Volt::test('pages.admin.banding-detail', ['id' => $banding->id])
-            ->assertSee('Accept')
-            ->assertSee('Reject')
+            ->assertSee('Terima Banding')
+            ->assertSee('Tolak Banding')
+            ->call('openDecisionModal', 'reject')
             ->set('keputusan', 'Banding ditolak karena tidak ada bukti yang cukup untuk mendukung klaim.')
             ->set('decisionType', 'reject')
-            ->set('showDecisionModal', true)
             ->call('submitDecision');
 
         // Verify banding status changed to rejected
@@ -210,9 +227,9 @@ class AdminBandingDetailTest extends TestCase
         $this->assertEquals('rejected', $banding->status);
         $this->assertNotNull($banding->decided_at);
 
-        // Verify akreditasi reverted to status 2
+        // Verify akreditasi remains rejected.
         $akreditasi->refresh();
-        $this->assertEquals(2, $akreditasi->status);
+        $this->assertEquals(-1, $akreditasi->status);
 
         // Verify the component shows rejected status
         $component->assertSee('Rejected');
@@ -221,7 +238,7 @@ class AdminBandingDetailTest extends TestCase
     /**
      * Task 9.10: Decision actions hidden when status is not under_review
      */
-    public function test_decision_actions_hidden_when_not_under_review(): void
+public function test_decision_actions_hidden_when_not_under_review(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $pesantrenUser = $this->createPesantrenUser('Pesantren Hidden');
@@ -239,7 +256,7 @@ class AdminBandingDetailTest extends TestCase
             'alasan' => 'Alasan banding pending.',
         ]);
 
-        $this->actingAs($admin);
+        Volt::actingAs($admin);
 
         Volt::test('pages.admin.banding-detail', ['id' => $pendingBanding->id])
             ->assertSee('Assign Reviewer')
@@ -280,7 +297,7 @@ class AdminBandingDetailTest extends TestCase
     /**
      * Additional: Non-admin cannot access banding detail
      */
-    public function test_non_admin_cannot_access_banding_detail(): void
+public function test_non_admin_cannot_access_banding_detail(): void
     {
         $pesantrenUser = $this->createPesantrenUser('Pesantren Unauthorized');
 
@@ -296,7 +313,7 @@ class AdminBandingDetailTest extends TestCase
             'alasan' => 'Alasan banding.',
         ]);
 
-        $this->actingAs($pesantrenUser);
+        Volt::actingAs($pesantrenUser);
 
         $response = $this->get('/admin/banding/' . $banding->id);
         $response->assertStatus(403);

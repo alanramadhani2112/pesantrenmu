@@ -2,8 +2,18 @@
 
 namespace App\Providers;
 
+use App\Events\AkreditasiTransitioned;
+use App\Events\BandingDecided;
+use App\Events\BandingSubmitted;
+use App\Events\PerbaikanDeadlineApproaching;
+use App\Events\PerbaikanSubmitted;
+use App\Events\ScoringCompleted;
+use App\Events\SKIssued;
+use App\Events\VisitasiScheduled;
+use App\Listeners\AkreditasiNotificationListener;
 use App\Models\Akreditasi;
 use App\Observers\AkreditasiObserver;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
 
@@ -65,8 +75,26 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // URL::forceScheme('https');
+        // PR-16 fix: paksa HTTPS di production untuk mencegah mixed-content
+        // dan broken signed URLs saat di-deploy di belakang reverse proxy.
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
 
         Akreditasi::observe(AkreditasiObserver::class);
+
+        // =====================================================================
+        // Task 12.2: Register akreditasi workflow event → notification listener
+        // =====================================================================
+        $listener = AkreditasiNotificationListener::class;
+
+        Event::listen(AkreditasiTransitioned::class, [$listener, 'handleAkreditasiTransitioned']);
+        Event::listen(PerbaikanSubmitted::class,     [$listener, 'handlePerbaikanSubmitted']);
+        Event::listen(VisitasiScheduled::class,      [$listener, 'handleVisitasiScheduled']);
+        Event::listen(ScoringCompleted::class,       [$listener, 'handleScoringCompleted']);
+        Event::listen(SKIssued::class,               [$listener, 'handleSKIssued']);
+        Event::listen(BandingSubmitted::class,       [$listener, 'handleBandingSubmitted']);
+        Event::listen(BandingDecided::class,         [$listener, 'handleBandingDecided']);
+        Event::listen(PerbaikanDeadlineApproaching::class, [$listener, 'handlePerbaikanDeadlineApproaching']);
     }
 }

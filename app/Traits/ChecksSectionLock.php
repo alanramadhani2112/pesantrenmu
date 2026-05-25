@@ -23,6 +23,11 @@ trait ChecksSectionLock
      */
     protected function isSectionEditable(string $section): bool
     {
+        // L-2 fix: guard terhadap unauthenticated context (queue job, public route, dll)
+        if (! auth()->check()) {
+            return false;
+        }
+
         $pesantren = auth()->user()->pesantren;
 
         // If pesantren is not locked, everything is editable
@@ -53,6 +58,11 @@ trait ChecksSectionLock
      */
     protected function getSectionLockStatus(string $section): string
     {
+        // L-2 fix: guard terhadap unauthenticated context
+        if (! auth()->check()) {
+            return 'locked';
+        }
+
         $pesantren = auth()->user()->pesantren;
 
         if (!$pesantren || !$pesantren->is_locked) {
@@ -79,6 +89,11 @@ trait ChecksSectionLock
      */
     protected function getActiveAkreditasi(): ?Akreditasi
     {
+        // L-2 fix: guard terhadap unauthenticated context
+        if (! auth()->check()) {
+            return null;
+        }
+
         return Akreditasi::where('user_id', auth()->id())
             ->where('status', 5)
             ->latest()

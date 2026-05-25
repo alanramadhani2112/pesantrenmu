@@ -11,6 +11,8 @@ use App\Models\MasterEdpmKomponen;
 use App\Models\Pesantren;
 use App\Models\SdmPesantren;
 use App\Models\User;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -25,23 +27,25 @@ class PesantrenBandingVisibilityTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RolePermissionSeeder::class);
         Notification::fake();
     }
 
     /**
      * Task 10.7: Pesantren sees banding status on akreditasi detail
      */
-    public function test_pesantren_sees_banding_status_on_akreditasi_detail(): void
+public function test_pesantren_sees_banding_status_on_akreditasi_detail(): void
     {
         $user = $this->createCompletePesantrenUser();
-        $this->actingAs($user);
+        Volt::actingAs($user);
 
         config(['akreditasi.banding_limit' => 1]);
 
-        // Create a rejected akreditasi that has been appealed (status 3 = Validasi)
+        // Create an akreditasi that has been appealed.
         $akreditasi = Akreditasi::create([
             'user_id' => $user->id,
-            'status' => 3,
+            'status' => -2,
             'catatan' => 'Data tidak lengkap',
             'parent' => null,
         ]);
@@ -55,7 +59,7 @@ class PesantrenBandingVisibilityTest extends TestCase
         ]);
 
         $component = Volt::test('pages.pesantren.akreditasi-detail', ['uuid' => $akreditasi->uuid])
-            ->set('activeTab', 'hasil');
+            ->call('setTab', 'hasil');
 
         // Verify banding status section is visible
         $component->assertSee('Status Banding')
@@ -71,17 +75,17 @@ class PesantrenBandingVisibilityTest extends TestCase
     /**
      * Task 10.7: Pesantren sees banding under_review status
      */
-    public function test_pesantren_sees_banding_under_review_status(): void
+public function test_pesantren_sees_banding_under_review_status(): void
     {
         $user = $this->createCompletePesantrenUser();
         $reviewer = User::factory()->create(['role_id' => 1]);
-        $this->actingAs($user);
+        Volt::actingAs($user);
 
         config(['akreditasi.banding_limit' => 1]);
 
         $akreditasi = Akreditasi::create([
             'user_id' => $user->id,
-            'status' => 3,
+            'status' => -2,
             'catatan' => 'Data tidak lengkap',
             'parent' => null,
         ]);
@@ -96,7 +100,7 @@ class PesantrenBandingVisibilityTest extends TestCase
         ]);
 
         $component = Volt::test('pages.pesantren.akreditasi-detail', ['uuid' => $akreditasi->uuid])
-            ->set('activeTab', 'hasil');
+            ->call('setTab', 'hasil');
 
         $component->assertSee('Status Banding')
             ->assertSee('Sedang Direview')
@@ -106,17 +110,17 @@ class PesantrenBandingVisibilityTest extends TestCase
     /**
      * Task 10.7: Pesantren sees banding decision when accepted
      */
-    public function test_pesantren_sees_banding_accepted_decision(): void
+public function test_pesantren_sees_banding_accepted_decision(): void
     {
         $user = $this->createCompletePesantrenUser();
         $reviewer = User::factory()->create(['role_id' => 1]);
-        $this->actingAs($user);
+        Volt::actingAs($user);
 
         config(['akreditasi.banding_limit' => 1]);
 
         $akreditasi = Akreditasi::create([
             'user_id' => $user->id,
-            'status' => 2,
+            'status' => 1,
             'catatan' => 'Data tidak lengkap',
             'parent' => null,
         ]);
@@ -132,36 +136,30 @@ class PesantrenBandingVisibilityTest extends TestCase
             'decided_at' => now(),
         ]);
 
-        // Create the new akreditasi that resulted from the accepted banding
-        $newAkreditasi = Akreditasi::create([
-            'user_id' => $user->id,
-            'status' => 6,
-            'parent' => $akreditasi->id,
-        ]);
-
         $component = Volt::test('pages.pesantren.akreditasi-detail', ['uuid' => $akreditasi->uuid])
-            ->set('activeTab', 'hasil');
+            ->call('setTab', 'hasil');
 
         $component->assertSee('Status Banding')
             ->assertSee('Diterima')
             ->assertSee('Setelah ditinjau ulang, banding diterima karena ada bukti tambahan yang valid.')
-            ->assertSee('Lihat Pengajuan Baru');
+            ->assertSee('Menunggu Validasi Akhir Admin')
+            ->assertDontSee('Lihat Pengajuan Baru');
     }
 
     /**
      * Task 10.7: Pesantren sees banding decision when rejected
      */
-    public function test_pesantren_sees_banding_rejected_decision(): void
+public function test_pesantren_sees_banding_rejected_decision(): void
     {
         $user = $this->createCompletePesantrenUser();
         $reviewer = User::factory()->create(['role_id' => 1]);
-        $this->actingAs($user);
+        Volt::actingAs($user);
 
         config(['akreditasi.banding_limit' => 1]);
 
         $akreditasi = Akreditasi::create([
             'user_id' => $user->id,
-            'status' => 2,
+            'status' => -1,
             'catatan' => 'Data tidak lengkap',
             'parent' => null,
         ]);
@@ -177,7 +175,7 @@ class PesantrenBandingVisibilityTest extends TestCase
         ]);
 
         $component = Volt::test('pages.pesantren.akreditasi-detail', ['uuid' => $akreditasi->uuid])
-            ->set('activeTab', 'hasil');
+            ->call('setTab', 'hasil');
 
         $component->assertSee('Status Banding')
             ->assertSee('Ditolak')
@@ -187,16 +185,16 @@ class PesantrenBandingVisibilityTest extends TestCase
     /**
      * Task 10.7: Pesantren sees remaining appeal count
      */
-    public function test_pesantren_sees_remaining_appeal_count(): void
+public function test_pesantren_sees_remaining_appeal_count(): void
     {
         $user = $this->createCompletePesantrenUser();
-        $this->actingAs($user);
+        Volt::actingAs($user);
 
         config(['akreditasi.banding_limit' => 2]);
 
         $akreditasi = Akreditasi::create([
             'user_id' => $user->id,
-            'status' => 2,
+            'status' => -1,
             'catatan' => 'Data tidak lengkap',
             'parent' => null,
         ]);
@@ -212,7 +210,7 @@ class PesantrenBandingVisibilityTest extends TestCase
         ]);
 
         $component = Volt::test('pages.pesantren.akreditasi-detail', ['uuid' => $akreditasi->uuid])
-            ->set('activeTab', 'hasil');
+            ->call('setTab', 'hasil');
 
         // Should show remaining count: 1/2
         $component->assertSee('Sisa kesempatan banding:')
@@ -226,16 +224,16 @@ class PesantrenBandingVisibilityTest extends TestCase
     /**
      * Task 10.8: Banding button disabled when limit reached
      */
-    public function test_banding_button_disabled_when_limit_reached(): void
+public function test_banding_button_disabled_when_limit_reached(): void
     {
         $user = $this->createCompletePesantrenUser();
-        $this->actingAs($user);
+        Volt::actingAs($user);
 
         config(['akreditasi.banding_limit' => 1]);
 
         $akreditasi = Akreditasi::create([
             'user_id' => $user->id,
-            'status' => 2,
+            'status' => -1,
             'catatan' => 'Data tidak lengkap',
             'parent' => null,
         ]);
@@ -251,7 +249,7 @@ class PesantrenBandingVisibilityTest extends TestCase
         ]);
 
         $component = Volt::test('pages.pesantren.akreditasi-detail', ['uuid' => $akreditasi->uuid])
-            ->set('activeTab', 'hasil');
+            ->call('setTab', 'hasil');
 
         // Should show limit reached message
         $component->assertSee('Batas pengajuan banding telah tercapai')
@@ -265,23 +263,23 @@ class PesantrenBandingVisibilityTest extends TestCase
     /**
      * Task 10.8: Banding button enabled when limit not reached
      */
-    public function test_banding_button_enabled_when_limit_not_reached(): void
+public function test_banding_button_enabled_when_limit_not_reached(): void
     {
         $user = $this->createCompletePesantrenUser();
-        $this->actingAs($user);
+        Volt::actingAs($user);
 
         config(['akreditasi.banding_limit' => 2]);
 
         $akreditasi = Akreditasi::create([
             'user_id' => $user->id,
-            'status' => 2,
+            'status' => -1,
             'catatan' => 'Data tidak lengkap',
             'parent' => null,
         ]);
 
         // No banding yet, limit is 2
         $component = Volt::test('pages.pesantren.akreditasi-detail', ['uuid' => $akreditasi->uuid])
-            ->set('activeTab', 'hasil');
+            ->call('setTab', 'hasil');
 
         // Should show remaining count and button should be enabled
         $component->assertSee('Sisa kesempatan banding:')

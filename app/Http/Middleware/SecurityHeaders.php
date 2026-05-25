@@ -60,8 +60,12 @@ class SecurityHeaders
             'Permissions-Policy',
             'camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=()'
         );
-        // Isolasi window/tab dari cross-origin popup (mitigasi Spectre + XS-Leaks)
-        $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
+        // Isolasi window/tab dari cross-origin popup (mitigasi Spectre + XS-Leaks).
+        // Browser mengabaikan COOP pada origin HTTP yang tidak trustworthy seperti
+        // http://spm_fix.test, jadi header ini dibatasi agar console lokal tetap bersih.
+        if ($this->shouldSendCrossOriginOpenerPolicy($request)) {
+            $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
+        }
         // Cegah resource di-embed oleh origin lain tanpa izin eksplisit
         $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');
 
@@ -81,5 +85,11 @@ class SecurityHeaders
         return ! str_starts_with($contentType, 'text/html')
             && ! str_starts_with($contentType, 'application/json')
             && $contentType !== '';
+    }
+
+    private function shouldSendCrossOriginOpenerPolicy(Request $request): bool
+    {
+        return $request->isSecure()
+            || in_array($request->getHost(), ['localhost', '127.0.0.1', '::1'], true);
     }
 }

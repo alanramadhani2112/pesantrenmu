@@ -13,7 +13,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function mount($uuid)
     {
-        if (!Auth::user()?->isAdmin()) {
+        if (!Auth::user()?->canAccessAdminArea()) {
             abort(403);
         }
 
@@ -77,7 +77,7 @@ new #[Layout('layouts.app')] class extends Component {
 
 <x-slot name="header">{{ __('Detail Asesor') }}</x-slot>
 
-<x-ui.page title="Detail Asesor" subtitle="Profil lengkap, rekam jejak, dan dokumen pendukung asesor.">
+<x-ui.page title="Detail Asesor" subtitle="Profil lengkap, rekam jejak, dan dokumen pendukung asesor." class="spm-detail-page">
     <x-slot:toolbar>
         <x-ui.button :href="route('admin.asesor.index')" variant="light">
             <x-ui.icon name="exit-right" class="fs-4 me-1" />
@@ -93,7 +93,7 @@ new #[Layout('layouts.app')] class extends Component {
                         <div class="d-flex align-items-start gap-4">
                             <div class="spm-asesor-avatar-wrap">
                                 @if($asesor->foto)
-                                    <img src="{{ Storage::url($asesor->foto) }}" class="spm-asesor-avatar-image" alt="{{ $profileName }}">
+                                    <img src="{{ Storage::url($asesor->foto) }}" class="spm-asesor-avatar-image" alt="{{ $profileName }}" loading="lazy">
                                 @else
                                     <div class="spm-profile-avatar spm-asesor-avatar-fallback d-flex align-items-center justify-content-center">
                                         {{ substr($profileName, 0, 1) }}

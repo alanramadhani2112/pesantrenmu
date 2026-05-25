@@ -10,10 +10,22 @@ class Profile extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id', 'created_at', 'updated_at'];
+    /**
+     * Explicit fillable — audit fix C-2.
+     * `access_token` sengaja dimasukkan agar UserService bisa menyimpannya,
+     * tapi kolom ini di-encrypt at rest (lihat $casts di bawah).
+     */
+    protected $fillable = [
+        'user_id',
+        'data',
+        'access_token',
+    ];
 
     protected $casts = [
-        'data' => 'array'
+        'data' => 'array',
+        // L-3 fix: enkripsi access_token di DB sehingga DB compromise tidak
+        // langsung mengekspos token IdP yang masih aktif.
+        'access_token' => 'encrypted',
     ];
 
     public function user(): BelongsTo

@@ -199,7 +199,25 @@ new #[Layout('layouts.app')] class extends Component {
     {
         return [
             'nama_pesantren' => 'Nama Pesantren',
+            'ns_pesantren' => 'Nomor Statistik Pesantren (NSP)',
+            'alamat' => 'Alamat Pesantren',
+            'provinsi' => 'Provinsi',
+            'provinsi_kode' => 'Kode Provinsi',
+            'kota_kabupaten' => 'Kota / Kabupaten',
+            'kabupaten_kode' => 'Kode Kabupaten',
+            'tahun_pendirian' => 'Tahun Pendirian',
+            'nama_mudir' => 'Nama Mudir / Pimpinan',
+            'jenjang_pendidikan_mudir' => 'Jenjang Pendidikan Mudir',
+            'telp_pesantren' => 'Telepon Pesantren',
+            'hp_wa' => 'No. HP / WhatsApp',
             'email_pesantren' => 'Email Pesantren',
+            'persyarikatan' => 'Persyarikatan',
+            'visi' => 'Visi',
+            'misi' => 'Misi',
+            'luas_tanah' => 'Luas Tanah',
+            'luas_bangunan' => 'Luas Bangunan',
+            'layanan_satuan_pendidikan' => 'Layanan Satuan Pendidikan',
+            'layanan_satuan_pendidikan.*' => 'Layanan Satuan Pendidikan',
             'units_data.*.jumlah_rombel' => 'Jumlah Rombel',
             'status_kepemilikan_tanah_file' => 'File Status Kepemilikan Tanah',
             'sertifikat_nsp_file' => 'File Sertifikat NSP',
@@ -222,20 +240,34 @@ new #[Layout('layouts.app')] class extends Component {
         ];
     }
 
-    public function save()
+    protected function profileDraftRules(): array
     {
-        $this->validate([
-            'nama_pesantren' => 'required|string|max:255',
-            'email_pesantren' => 'nullable|email',
+        $validProvinsiKodes = implode(',', array_keys($this->provinsiMap()));
+        return [
+            'nama_pesantren' => 'nullable|string|max:255',
+            'ns_pesantren' => 'nullable|string|max:20',
+            'alamat' => 'nullable|string|max:1000',
+            'kota_kabupaten' => 'nullable|string|max:255',
+            'provinsi' => 'nullable|string|max:255',
+            // PM-25 fix: validate kode against known list
+            'provinsi_kode' => "nullable|string|in:{$validProvinsiKodes}",
+            'kabupaten_kode' => 'nullable|string|max:10',
+            'tahun_pendirian' => 'nullable|integer|min:1900|max:' . date('Y'),
+            'nama_mudir' => 'nullable|string|max:255',
+            'jenjang_pendidikan_mudir' => 'nullable|string|max:255',
+            'telp_pesantren' => 'nullable|string|max:20',
+            'hp_wa' => 'nullable|string|max:20',
+            'email_pesantren' => 'nullable|email|max:255',
+            'persyarikatan' => 'nullable|string|max:255',
+            'visi' => 'nullable|string|max:5000',
+            'misi' => 'nullable|string|max:5000',
             'layanan_satuan_pendidikan' => 'array',
-
-            // Dynamic units validation
+            // PM-10 fix: validate layanan values against known list
+            'layanan_satuan_pendidikan.*' => 'string|in:sd,mi,smp,mts,sma,ma,smk,satuan_pesantren_muadalah_(SPM)',
             'units_data' => 'array',
-            'units_data.*.jumlah_rombel' => 'required_with:units_data|integer|min:0',
-            'luas_tanah' => 'nullable|string',
-            'luas_bangunan' => 'nullable|string',
-
-            // File validations
+            'units_data.*.jumlah_rombel' => 'nullable|integer|min:0|max:9999',
+            'luas_tanah' => 'nullable|string|max:50',
+            'luas_bangunan' => 'nullable|string|max:50',
             'status_kepemilikan_tanah_file' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
             'sertifikat_nsp_file' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
             'rk_anggaran_file' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
@@ -254,14 +286,135 @@ new #[Layout('layouts.app')] class extends Component {
             'dok_sarpras_file' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
             'dok_laporan_tahunan_file' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
             'dok_sop_file' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
-        ]);
+        ];
+    }
 
-        $data = [
-            'nama_pesantren' => $this->nama_pesantren,
+    protected function profileFinalRules(): array
+    {
+        $rules = $this->profileDraftRules();
+
+        foreach (array_keys(\App\Services\PesantrenService::PROFILE_REQUIRED_FIELDS) as $field) {
+            $rules[$field] = 'required|string|max:255';
+        }
+
+        $rules['alamat'] = 'required|string|max:1000';
+        $rules['layanan_satuan_pendidikan'] = 'required|array|min:1';
+        $rules['layanan_satuan_pendidikan.*'] = 'required|string|in:sd,mi,smp,mts,sma,ma,smk,satuan_pesantren_muadalah_(SPM)';
+        // PM-25 fix: provinsi_kode wajib saat final submit
+        $validProvinsiKodes = implode(',', array_keys($this->provinsiMap()));
+        $rules['provinsi_kode'] = "required|string|in:{$validProvinsiKodes}";
+        $rules['tahun_pendirian'] = 'required|integer|min:1900|max:' . date('Y');
+
+        return $rules;
+    }
+
+    public function saveDraft()
+    {
+        if (!$this->isSectionEditable('profil')) {
+            $this->dispatch('show-metronic-alert', type: 'error', title: 'Akses Ditolak', message: 'Data terkunci karena sedang dalam proses akreditasi.');
+            return;
+        }
+
+        $this->validate($this->profileDraftRules());
+
+        $this->persistProfile('Draft Disimpan', 'Draft profil pesantren berhasil disimpan.', false);
+    }
+
+    public function save()
+    {
+        if (!$this->isSectionEditable('profil')) {
+            $this->dispatch('show-metronic-alert', type: 'error', title: 'Akses Ditolak', message: 'Data terkunci karena sedang dalam proses akreditasi.');
+            return;
+        }
+
+        try {
+            $this->validate($this->profileFinalRules());
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            session()->flash('validation_errors', collect($e->errors())->flatten()->toArray());
+            $this->dispatch('show-validation-error');
+            throw $e;
+        }
+
+        $this->persistProfile('Berhasil!', 'Profil pesantren berhasil disubmit.', true);
+    }
+
+    protected function persistProfile(string $title, string $message, bool $exitEditMode): void
+    {
+        $data = $this->buildProfileData();
+
+        // Store uploaded files FIRST, track new paths so we can rollback on DB failure.
+        // Pattern: store new → attempt DB update → on success delete old, on failure delete new.
+        $newlyStoredPaths = $this->storeUploadedFiles($data);
+
+        $pesantrenService = app(\App\Services\PesantrenService::class);
+        if ($pesantrenService->updateProfile(auth()->id(), $data, $this->buildUnitsData())) {
+            // DB succeeded — now safe to delete the old files.
+            foreach ($newlyStoredPaths as $dbField => ['old' => $oldPath]) {
+                if ($oldPath) {
+                    Storage::disk('public')->delete($oldPath);
+                }
+                $this->existing_files[$dbField] = $data[$dbField];
+            }
+
+            $this->dispatch('notification-received', type: 'success', title: $title, message: $message);
+
+            if ($exitEditMode) {
+                $this->isEditing = false;
+                $this->mount();
+            }
+
+            return;
+        }
+
+        // DB failed (e.g. section locked) — rollback: delete the newly stored files.
+        foreach ($newlyStoredPaths as ['new' => $newPath]) {
+            if ($newPath) {
+                Storage::disk('public')->delete($newPath);
+            }
+        }
+
+        $this->dispatch('show-metronic-alert', type: 'error', title: 'Gagal', message: 'Profil pesantren gagal disimpan. Data terkunci atau terjadi kesalahan.');
+    }
+
+    /**
+     * Master list kode provinsi Indonesia.
+     * PM-25 fix: server-side validation agar kode dan nama tidak bisa drift.
+     */
+    protected function provinsiMap(): array
+    {
+        return [
+            '11' => 'Aceh', '12' => 'Sumatera Utara', '13' => 'Sumatera Barat',
+            '14' => 'Riau', '15' => 'Jambi', '16' => 'Sumatera Selatan',
+            '17' => 'Bengkulu', '18' => 'Lampung', '19' => 'Kepulauan Bangka Belitung',
+            '21' => 'Kepulauan Riau', '31' => 'DKI Jakarta', '32' => 'Jawa Barat',
+            '33' => 'Jawa Tengah', '34' => 'DI Yogyakarta', '35' => 'Jawa Timur',
+            '36' => 'Banten', '51' => 'Bali', '52' => 'Nusa Tenggara Barat',
+            '53' => 'Nusa Tenggara Timur', '61' => 'Kalimantan Barat',
+            '62' => 'Kalimantan Tengah', '63' => 'Kalimantan Selatan',
+            '64' => 'Kalimantan Timur', '65' => 'Kalimantan Utara',
+            '71' => 'Sulawesi Utara', '72' => 'Sulawesi Tengah',
+            '73' => 'Sulawesi Selatan', '74' => 'Sulawesi Tenggara',
+            '75' => 'Gorontalo', '76' => 'Sulawesi Barat',
+            '81' => 'Maluku', '82' => 'Maluku Utara',
+            '91' => 'Papua Barat', '92' => 'Papua Barat Daya',
+            '93' => 'Papua Selatan', '94' => 'Papua',
+            '95' => 'Papua Tengah', '96' => 'Papua Pegunungan',
+        ];
+    }
+
+    protected function buildProfileData(): array
+    {
+        // PM-25 fix: derive nama provinsi dari kode yang dikirim client.
+        // Ini mencegah drift antara kode dan nama (e.g. kode Aceh tapi nama Jawa Barat).
+        $provinsiMap = $this->provinsiMap();
+        $derivedProvinsiNama = $provinsiMap[$this->provinsi_kode] ?? $this->provinsi;
+
+        return [
+            'nama_pesantren' => $this->nama_pesantren ?? '',
             'ns_pesantren' => $this->ns_pesantren,
             'alamat' => $this->alamat,
             'kota_kabupaten' => $this->kota_kabupaten,
-            'provinsi' => $this->provinsi,
+            'provinsi' => $derivedProvinsiNama,
             'provinsi_kode' => $this->provinsi_kode,
             'kabupaten_kode' => $this->kabupaten_kode,
             'tahun_pendirian' => $this->tahun_pendirian,
@@ -275,10 +428,22 @@ new #[Layout('layouts.app')] class extends Component {
             'misi' => $this->misi,
             'luas_tanah' => $this->luas_tanah,
             'luas_bangunan' => $this->luas_bangunan,
-            'layanan_satuan_pendidikan' => $this->layanan_satuan_pendidikan,
+            'layanan_satuan_pendidikan' => $this->layanan_satuan_pendidikan ?? [],
         ];
+    }
 
-        // Handle file uploads
+    /**
+     * Store newly uploaded files to disk and inject their paths into $data.
+     *
+     * Returns a map of dbField => ['old' => oldPath, 'new' => newPath] so the
+     * caller can delete old files after a successful DB update, or rollback
+     * (delete new files) if the DB update fails.
+     *
+     * This fixes PM-1 (orphan file race): old files are NOT deleted here.
+     * Deletion of old files only happens after the DB write succeeds.
+     */
+    protected function storeUploadedFiles(array &$data): array
+    {
         $fileFields = [
             'status_kepemilikan_tanah' => 'status_kepemilikan_tanah_file',
             'sertifikat_nsp' => 'sertifikat_nsp_file',
@@ -300,40 +465,67 @@ new #[Layout('layouts.app')] class extends Component {
             'dok_sop' => 'dok_sop_file',
         ];
 
+        $stored = [];
+
         foreach ($fileFields as $dbField => $property) {
             if ($this->$property) {
-                // Store new file first; only delete old if store succeeds
                 $newPath = $this->$property->store('pesantren_docs', 'public');
                 if ($newPath) {
-                    if ($this->pesantren->$dbField) {
-                        Storage::disk('public')->delete($this->pesantren->$dbField);
-                    }
+                    $stored[$dbField] = [
+                        'old' => $this->pesantren->$dbField, // keep old path for deferred deletion
+                        'new' => $newPath,
+                    ];
                     $data[$dbField] = $newPath;
-                    $this->existing_files[$dbField] = $newPath;
                 }
             }
         }
 
+        return $stored;
+    }
+
+    protected function buildUnitsData(): array
+    {
         $unitsData = [];
-        foreach ($this->layanan_satuan_pendidikan as $unitName) {
+
+        foreach (($this->layanan_satuan_pendidikan ?? []) as $unitName) {
             $unitsData[] = [
                 'unit' => $unitName,
                 'jumlah_rombel' => $this->units_data[$unitName]['jumlah_rombel'] ?? 0,
             ];
         }
 
-        $pesantrenService = app(\App\Services\PesantrenService::class);
-        if ($pesantrenService->updateProfile(auth()->id(), $data, $unitsData)) {
-            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Profil pesantren berhasil diperbarui.');
-            $this->isEditing = false;
-            $this->mount();
+        return $unitsData;
+    }
+
+    /**
+     * PM-13: Return list of unit names that have been unchecked from layanan
+     * but still have existing SDM data rows. Used to warn the user before save.
+     *
+     * @return list<string>
+     */
+    public function getSdmWarningUnitsProperty(): array
+    {
+        $savedUnits = $this->pesantren?->units?->pluck('unit')->toArray() ?? [];
+        $currentUnits = $this->layanan_satuan_pendidikan ?? [];
+        $removedUnits = array_diff($savedUnits, $currentUnits);
+
+        if (empty($removedUnits)) {
+            return [];
         }
+
+        $userId = auth()->id();
+        $sdmTingkats = \App\Models\SdmPesantren::where('user_id', $userId)
+            ->whereIn('tingkat', $removedUnits)
+            ->pluck('tingkat')
+            ->toArray();
+
+        return $sdmTingkats;
     }
 }; ?>
 
 <x-slot name="header">{{ __('Profil Pesantren') }}</x-slot>
 
-<x-ui.page title="Profil Pesantren" subtitle="Kelola informasi data pesantren Anda" x-data="fileManagement()">
+<x-ui.page title="Profil Pesantren" subtitle="Kelola informasi data pesantren Anda" class="spm-detail-page" x-data="fileManagement()">
     <x-slot:toolbar>
         <x-ui.button
             type="button"
@@ -352,17 +544,23 @@ new #[Layout('layouts.app')] class extends Component {
 
 
         @if($pesantren->is_locked)
-            <div class="alert alert-warning d-flex align-items-center p-5 mb-6">
-                <i class="ki-outline ki-shield-tick fs-2hx text-warning me-4"></i>
-                <div class="d-flex flex-column">
-                    <h4 class="mb-1 text-warning">Profil Terkunci</h4>
-                    <span class="text-gray-700">Profil ini terkunci karena sedang dalam proses akreditasi atau telah disetujui. Beberapa data tidak dapat diubah.</span>
-                </div>
-            </div>
+            <x-ui.alert variant="warning" icon="shield-tick" title="Profil Terkunci" class="mb-6">
+                Profil ini terkunci karena sedang dalam proses akreditasi atau telah disetujui. Beberapa data tidak dapat diubah.
+            </x-ui.alert>
         @endif
 
         @if($isEditing)
-            <form @submit.prevent="confirmSave($wire)" class="d-flex flex-column gap-6">
+            <form @submit.prevent="confirmSubmitProfile($wire)" class="d-flex flex-column gap-6">
+                @if($errors->any())
+                    <x-ui.alert variant="danger" title="Data profil belum lengkap" class="mb-0">
+                        <div class="mb-3">Lengkapi field yang ditandai sebelum melakukan submit final.</div>
+                        <ul class="mb-0 ps-4">
+                            @foreach($errors->all() as $message)
+                                <li>{{ $message }}</li>
+                            @endforeach
+                        </ul>
+                    </x-ui.alert>
+                @endif
 
                 {{-- A. PROFIL PESANTREN --}}
                 <x-ui.section-card title="A. Profil Pesantren" subtitle="Identitas dan informasi dasar pesantren">
@@ -370,138 +568,121 @@ new #[Layout('layouts.app')] class extends Component {
                     <div class="row g-5">
                         <div class="col-md-6">
                             <x-ui.form-field label="Nama Pesantren" required :error="$errors->get('nama_pesantren')">
-                                <x-ui.input wire:model="nama_pesantren" placeholder="Masukkan nama pesantren" />
+                                <x-ui.input model="nama_pesantren" placeholder="Masukkan nama pesantren" />
                             </x-ui.form-field>
                         </div>
                         <div class="col-md-6">
-                            <x-ui.form-field label="Nomor Statistik Pesantren (NSP)" :error="$errors->get('ns_pesantren')">
-                                <x-ui.input wire:model="ns_pesantren" placeholder="Masukkan NSP" />
+                            <x-ui.form-field label="Nomor Statistik Pesantren (NSP)" required :error="$errors->get('ns_pesantren')">
+                                <x-ui.input model="ns_pesantren" placeholder="Masukkan NSP" />
                             </x-ui.form-field>
                         </div>
 
                         <div class="col-12">
-                            <x-ui.form-field label="Alamat Pesantren" :error="$errors->get('alamat')">
-                                <x-ui.textarea wire:model="alamat" rows="3" placeholder="Alamat lengkap pesantren" />
+                            <x-ui.form-field label="Alamat Pesantren" required :error="$errors->get('alamat')">
+                                <x-ui.textarea model="alamat" rows="3" placeholder="Alamat lengkap pesantren" />
                             </x-ui.form-field>
                         </div>
 
                         {{-- Wilayah Selector --}}
-                        <div class="col-12" x-data="wilayahSelector()" x-init="init()">
+                        <div class="col-12" x-data="wilayahSelector({
+                            selectedProvinsiKode: $wire.entangle('provinsi_kode'),
+                            selectedProvinsiNama: $wire.entangle('provinsi'),
+                            selectedKabupatenKode: $wire.entangle('kabupaten_kode'),
+                            selectedKabupatenNama: $wire.entangle('kota_kabupaten')
+                        })">
                             <div class="row g-5">
                                 <div class="col-md-6">
-                                    <div class="fv-row spm-form-field position-relative">
-                                        <label class="form-label fw-semibold text-gray-700 fs-7">Provinsi</label>
-                                        <input
-                                            type="text"
-                                            class="form-control form-control-solid"
-                                            placeholder="Cari provinsi..."
-                                            x-model="provinsiSearch"
-                                            @focus="showProvinsiDropdown = true"
-                                            @click.away="showProvinsiDropdown = false"
-                                        />
-                                        <input type="hidden" x-model="selectedProvinsiKode" @entangle('provinsi_kode')>
-                                        <input type="hidden" x-model="selectedProvinsiNama" @entangle('provinsi')>
-                                        <div
-                                            x-show="showProvinsiDropdown && filteredProvinsi.length > 0"
-                                            class="position-absolute w-100 mt-1 bg-white border border-gray-300 rounded shadow-sm overflow-auto"
-                                            style="z-index: 1050; max-height: 240px;"
-                                        >
-                                            <template x-for="provinsi in filteredProvinsi" :key="provinsi.kode">
-                                                <div
-                                                    @click="selectProvinsi(provinsi)"
-                                                    class="px-4 py-2 cursor-pointer text-gray-800 fs-7"
-                                                    style="cursor: pointer;"
-                                                    onmouseover="this.style.backgroundColor='#f5f8fa'"
-                                                    onmouseout="this.style.backgroundColor='transparent'"
-                                                    x-text="provinsi.nama"
-                                                ></div>
-                                            </template>
-                                        </div>
-                                    </div>
+                                    <x-ui.combobox
+                                        label="Provinsi"
+                                        placeholder="Cari provinsi..."
+                                        show="showProvinsiDropdown && filteredProvinsi.length > 0"
+                                        :error="$errors->get('provinsi')"
+                                        x-model="provinsiSearch"
+                                        x-on:focus="showProvinsiDropdown = true"
+                                        x-on:click.away="showProvinsiDropdown = false"
+                                    >
+                                        <template x-for="provinsi in filteredProvinsi" :key="provinsi.kode">
+                                            <button
+                                                type="button"
+                                                x-on:click="selectProvinsi(provinsi)"
+                                                class="spm-combobox-option"
+                                                x-text="provinsi.nama"
+                                            ></button>
+                                        </template>
+                                    </x-ui.combobox>
                                 </div>
 
                                 <div class="col-md-6">
-                                    <div class="fv-row spm-form-field position-relative">
-                                        <label class="form-label fw-semibold text-gray-700 fs-7">Kota / Kabupaten</label>
-                                        <input
-                                            type="text"
-                                            class="form-control form-control-solid"
-                                            placeholder="Cari kota/kabupaten..."
-                                            x-model="kabupatenSearch"
-                                            @focus="showKabupatenDropdown = true"
-                                            @click.away="showKabupatenDropdown = false"
-                                            :disabled="!selectedProvinsiKode"
-                                        />
-                                        <input type="hidden" x-model="selectedKabupatenKode" @entangle('kabupaten_kode')>
-                                        <input type="hidden" x-model="selectedKabupatenNama" @entangle('kota_kabupaten')>
-                                        <div
-                                            x-show="showKabupatenDropdown && filteredKabupaten.length > 0"
-                                            class="position-absolute w-100 mt-1 bg-white border border-gray-300 rounded shadow-sm overflow-auto"
-                                            style="z-index: 1050; max-height: 240px;"
-                                        >
-                                            <template x-for="kabupaten in filteredKabupaten" :key="kabupaten.kode">
-                                                <div
-                                                    @click="selectKabupaten(kabupaten)"
-                                                    class="px-4 py-2 cursor-pointer text-gray-800 fs-7"
-                                                    style="cursor: pointer;"
-                                                    onmouseover="this.style.backgroundColor='#f5f8fa'"
-                                                    onmouseout="this.style.backgroundColor='transparent'"
-                                                    x-text="kabupaten.nama"
-                                                ></div>
-                                            </template>
-                                        </div>
-                                    </div>
+                                    <x-ui.combobox
+                                        label="Kota / Kabupaten"
+                                        placeholder="Cari kota/kabupaten..."
+                                        show="showKabupatenDropdown && filteredKabupaten.length > 0"
+                                        :error="$errors->get('kota_kabupaten')"
+                                        x-model="kabupatenSearch"
+                                        x-on:focus="showKabupatenDropdown = true"
+                                        x-on:click.away="showKabupatenDropdown = false"
+                                        x-bind:disabled="!currentProvinsiKode"
+                                    >
+                                        <template x-for="kabupaten in filteredKabupaten" :key="kabupaten.kode">
+                                            <button
+                                                type="button"
+                                                x-on:click="selectKabupaten(kabupaten)"
+                                                class="spm-combobox-option"
+                                                x-text="kabupaten.nama"
+                                            ></button>
+                                        </template>
+                                    </x-ui.combobox>
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-md-6">
-                            <x-ui.form-field label="Tahun Pendirian" :error="$errors->get('tahun_pendirian')">
-                                <x-ui.input wire:model="tahun_pendirian" type="number" placeholder="Contoh: 1995" />
+                            <x-ui.form-field label="Tahun Pendirian" required :error="$errors->get('tahun_pendirian')">
+                                <x-ui.input model="tahun_pendirian" type="number" placeholder="Contoh: 1995" />
                             </x-ui.form-field>
                         </div>
                         <div class="col-md-6">
                             <x-ui.form-field label="Persyarikatan" :error="$errors->get('persyarikatan')">
-                                <x-ui.input wire:model="persyarikatan" placeholder="Contoh: Muhammadiyah" />
+                                <x-ui.input model="persyarikatan" placeholder="Contoh: Muhammadiyah" />
                             </x-ui.form-field>
                         </div>
 
                         <div class="col-md-6">
-                            <x-ui.form-field label="Nama Mudir / Pimpinan" :error="$errors->get('nama_mudir')">
-                                <x-ui.input wire:model="nama_mudir" placeholder="Nama lengkap mudir" />
+                            <x-ui.form-field label="Nama Mudir / Pimpinan" required :error="$errors->get('nama_mudir')">
+                                <x-ui.input model="nama_mudir" placeholder="Nama lengkap mudir" />
                             </x-ui.form-field>
                         </div>
                         <div class="col-md-6">
                             <x-ui.form-field label="Jenjang Pendidikan Mudir" :error="$errors->get('jenjang_pendidikan_mudir')">
-                                <x-ui.input wire:model="jenjang_pendidikan_mudir" placeholder="Contoh: S1, S2, S3" />
+                                <x-ui.input model="jenjang_pendidikan_mudir" placeholder="Contoh: S1, S2, S3" />
                             </x-ui.form-field>
                         </div>
 
                         <div class="col-md-6">
                             <x-ui.form-field label="Telepon Pesantren" :error="$errors->get('telp_pesantren')">
-                                <x-ui.input wire:model="telp_pesantren" placeholder="Nomor telepon kantor" />
+                                <x-ui.input model="telp_pesantren" placeholder="Nomor telepon kantor" />
                             </x-ui.form-field>
                         </div>
                         <div class="col-md-6">
                             <x-ui.form-field label="No. HP / WhatsApp" :error="$errors->get('hp_wa')">
-                                <x-ui.input wire:model="hp_wa" placeholder="Contoh: 08123456789" />
+                                <x-ui.input model="hp_wa" placeholder="Contoh: 08123456789" />
                             </x-ui.form-field>
                         </div>
 
                         <div class="col-12">
                             <x-ui.form-field label="Email Pesantren" :error="$errors->get('email_pesantren')">
-                                <x-ui.input wire:model="email_pesantren" type="email" placeholder="email@pesantren.sch.id" />
+                                <x-ui.input model="email_pesantren" type="email" placeholder="email@pesantren.sch.id" />
                             </x-ui.form-field>
                         </div>
 
                         <div class="col-12">
                             <x-ui.form-field label="Visi" :error="$errors->get('visi')">
-                                <x-ui.textarea wire:model="visi" rows="3" placeholder="Visi pesantren" />
+                                <x-ui.textarea model="visi" rows="3" placeholder="Visi pesantren" />
                             </x-ui.form-field>
                         </div>
                         <div class="col-12">
                             <x-ui.form-field label="Misi" :error="$errors->get('misi')">
-                                <x-ui.textarea wire:model="misi" rows="4" placeholder="Misi pesantren" />
+                                <x-ui.textarea model="misi" rows="4" placeholder="Misi pesantren" />
                             </x-ui.form-field>
                         </div>
                     </div>
@@ -512,26 +693,36 @@ new #[Layout('layouts.app')] class extends Component {
                 <x-ui.section-card title="B. Data Pesantren" subtitle="Layanan satuan pendidikan dan jumlah rombongan belajar">
                     <div class="p-6">
                     <label class="form-label fw-semibold text-gray-700 fs-7 mb-3">Layanan Satuan Pendidikan</label>
+                    @error('layanan_satuan_pendidikan')
+                        <div class="invalid-feedback d-block fw-semibold mb-3">{{ $message }}</div>
+                    @enderror
                     <div class="row g-3 mb-6">
                         @foreach (['sd', 'mi', 'smp', 'mts', 'sma', 'ma', 'smk', 'satuan_pesantren_muadalah_(SPM)'] as $item)
                             <div class="col-md-3 col-sm-6">
-                                <label class="btn btn-outline btn-outline-dashed btn-active-light-primary d-flex align-items-center w-100 p-4 mb-0 cursor-pointer"
-                                       :class="@js(in_array($item, $layanan_satuan_pendidikan ?? [])) ? 'active border-primary bg-light-primary' : ''">
-                                    <input
-                                        type="checkbox"
-                                        class="form-check-input me-3"
-                                        wire:model.live="layanan_satuan_pendidikan"
-                                        value="{{ $item }}"
-                                    />
-                                    <span class="fw-semibold text-gray-800 text-uppercase fs-7">
-                                        {{ str_replace('_', ' ', $item) }}
-                                    </span>
-                                </label>
+                                <x-ui.checkbox
+                                    model="layanan_satuan_pendidikan"
+                                    modifier="live"
+                                    :value="$item"
+                                    :label="strtoupper(str_replace('_', ' ', $item))"
+                                    @class([
+                                        'spm-check-option border border-gray-300 rounded w-100 p-4 mb-0 text-uppercase',
+                                        'active border-primary bg-light-primary' => in_array($item, $layanan_satuan_pendidikan ?? [], true),
+                                    ])
+                                />
                             </div>
                         @endforeach
                     </div>
 
                     @if(count($layanan_satuan_pendidikan ?? []) > 0)
+                        {{-- PM-13: warn if unchecked units still have SDM data --}}
+                        @php $sdmWarningUnits = $this->getSdmWarningUnitsProperty(); @endphp
+                        @if(count($sdmWarningUnits) > 0)
+                            <x-ui.alert variant="danger" title="Data SDM Akan Terhapus" class="mb-5">
+                                Unit berikut dihapus dari layanan tetapi masih memiliki data SDM:
+                                <strong>{{ implode(', ', array_map(fn($u) => strtoupper(str_replace('_', ' ', $u)), $sdmWarningUnits)) }}</strong>.
+                                Menyimpan profil akan menghapus data SDM unit tersebut secara permanen.
+                            </x-ui.alert>
+                        @endif
                         <div class="separator separator-dashed my-5"></div>
                         <label class="form-label fw-semibold text-gray-700 fs-7 mb-3">Jumlah Rombongan Belajar (Rombel)</label>
                         <div class="row g-5">
@@ -580,12 +771,12 @@ new #[Layout('layouts.app')] class extends Component {
                     <div class="row g-5">
                         <div class="col-md-6">
                             <x-ui.form-field label="Luas Tanah (m²)" :error="$errors->get('luas_tanah')">
-                                <x-ui.input wire:model="luas_tanah" placeholder="Contoh: 5000" />
+                                <x-ui.input model="luas_tanah" placeholder="Contoh: 5000" />
                             </x-ui.form-field>
                         </div>
                         <div class="col-md-6">
                             <x-ui.form-field label="Luas Bangunan (m²)" :error="$errors->get('luas_bangunan')">
-                                <x-ui.input wire:model="luas_bangunan" placeholder="Contoh: 2500" />
+                                <x-ui.input model="luas_bangunan" placeholder="Contoh: 2500" />
                             </x-ui.form-field>
                         </div>
                     </div>
@@ -608,17 +799,16 @@ new #[Layout('layouts.app')] class extends Component {
                                         <i class="ki-outline ki-cloud-download fs-7 me-1"></i>Unduh Template IAPM
                                     </a>
                                 @endif
-                                <label
-                                    for="{{ $prop }}"
-                                    class="d-flex flex-column align-items-center justify-content-center border border-2 border-gray-300 border-dashed rounded p-5 cursor-pointer position-relative"
-                                    style="min-height: 160px; background-color: #f9f9f9; transition: all 0.2s;"
-                                    onmouseover="this.style.borderColor='#009ef7'; this.style.backgroundColor='#f1faff';"
-                                    onmouseout="this.style.borderColor='#e1e3ea'; this.style.backgroundColor='#f9f9f9';"
+                                <x-ui.file-upload
+                                    id="{{ $prop }}"
+                                    accept="application/pdf,image/png,image/jpeg"
+                                    change-action="if(validate($event)) { $wire.upload('{{ $prop }}', $event.target.files[0]) }"
+                                    label-class="spm-document-dropzone"
                                 >
                                     <div wire:loading.remove wire:target="{{ $prop }}" class="text-center w-100">
                                         @if ($$prop)
                                             @if (str_contains($$prop->getMimeType(), 'image'))
-                                                <img src="{{ $$prop->temporaryUrl() }}" class="rounded mb-2" style="max-height: 80px; max-width: 100%; object-fit: contain;" />
+                                                <img src="{{ $$prop->temporaryUrl() }}" class="spm-document-dropzone-preview" alt="Pratinjau dokumen" loading="lazy" />
                                             @else
                                                 <i class="ki-outline ki-file-up fs-3hx text-success mb-2"></i>
                                             @endif
@@ -630,22 +820,15 @@ new #[Layout('layouts.app')] class extends Component {
                                             <div class="text-muted fs-8 mt-1">Klik untuk Ganti</div>
                                         @else
                                             <i class="ki-outline ki-cloud-add fs-3hx text-gray-500 mb-2"></i>
-                                            <div class="fw-bold text-gray-700 fs-7">Upload File</div>
-                                            <div class="text-muted fs-8 mt-1">PDF/IMG (Max 2MB)</div>
+                                            <div class="fw-bold text-gray-700 fs-7">Unggah File</div>
+                                            <div class="text-muted fs-8 mt-1">PDF/Gambar (Maks. 2MB)</div>
                                         @endif
                                     </div>
                                     <div wire:loading wire:target="{{ $prop }}" class="text-center">
                                         <span class="spinner-border spinner-border-sm text-primary"></span>
                                         <div class="text-muted fs-8 mt-2">Mengunggah...</div>
                                     </div>
-                                    <input
-                                        type="file"
-                                        id="{{ $prop }}"
-                                        x-on:change="if(validate($event)) { $wire.upload('{{ $prop }}', $event.target.files[0]) }"
-                                        accept="application/pdf,image/png,image/jpeg"
-                                        class="d-none"
-                                    />
-                                </label>
+                                </x-ui.file-upload>
 
                                 @if (!empty($existing_files[$dbField]))
                                     <a href="{{ Storage::url($existing_files[$dbField]) }}" target="_blank" class="d-inline-flex align-items-center text-primary fw-semibold fs-8 mt-2">
@@ -668,17 +851,16 @@ new #[Layout('layouts.app')] class extends Component {
                             @php $dbField = str_replace('_file', '', $prop); @endphp
                             <div class="col-md-6 col-lg-4">
                                 <label class="form-label fw-semibold text-gray-700 fs-7 mb-2">{{ $label }}</label>
-                                <label
-                                    for="{{ $prop }}"
-                                    class="d-flex flex-column align-items-center justify-content-center border border-2 border-gray-300 border-dashed rounded p-5 cursor-pointer position-relative"
-                                    style="min-height: 160px; background-color: #f9f9f9; transition: all 0.2s;"
-                                    onmouseover="this.style.borderColor='#009ef7'; this.style.backgroundColor='#f1faff';"
-                                    onmouseout="this.style.borderColor='#e1e3ea'; this.style.backgroundColor='#f9f9f9';"
+                                <x-ui.file-upload
+                                    id="{{ $prop }}"
+                                    accept="application/pdf,image/png,image/jpeg"
+                                    change-action="if(validate($event)) { $wire.upload('{{ $prop }}', $event.target.files[0]) }"
+                                    label-class="spm-document-dropzone"
                                 >
                                     <div wire:loading.remove wire:target="{{ $prop }}" class="text-center w-100">
                                         @if ($$prop)
                                             @if (str_contains($$prop->getMimeType(), 'image'))
-                                                <img src="{{ $$prop->temporaryUrl() }}" class="rounded mb-2" style="max-height: 80px; max-width: 100%; object-fit: contain;" />
+                                                <img src="{{ $$prop->temporaryUrl() }}" class="spm-document-dropzone-preview" alt="Pratinjau dokumen" loading="lazy" />
                                             @else
                                                 <i class="ki-outline ki-file-up fs-3hx text-success mb-2"></i>
                                             @endif
@@ -690,22 +872,15 @@ new #[Layout('layouts.app')] class extends Component {
                                             <div class="text-muted fs-8 mt-1">Klik untuk Ganti</div>
                                         @else
                                             <i class="ki-outline ki-cloud-add fs-3hx text-gray-500 mb-2"></i>
-                                            <div class="fw-bold text-gray-700 fs-7">Upload File</div>
-                                            <div class="text-muted fs-8 mt-1">PDF/IMG (Max 2MB)</div>
+                                            <div class="fw-bold text-gray-700 fs-7">Unggah File</div>
+                                            <div class="text-muted fs-8 mt-1">PDF/Gambar (Maks. 2MB)</div>
                                         @endif
                                     </div>
                                     <div wire:loading wire:target="{{ $prop }}" class="text-center">
                                         <span class="spinner-border spinner-border-sm text-primary"></span>
                                         <div class="text-muted fs-8 mt-2">Mengunggah...</div>
                                     </div>
-                                    <input
-                                        type="file"
-                                        id="{{ $prop }}"
-                                        x-on:change="if(validate($event)) { $wire.upload('{{ $prop }}', $event.target.files[0]) }"
-                                        accept="application/pdf,image/png,image/jpeg"
-                                        class="d-none"
-                                    />
-                                </label>
+                                </x-ui.file-upload>
 
                                 @if (!empty($existing_files[$dbField]))
                                     <a href="{{ Storage::url($existing_files[$dbField]) }}" target="_blank" class="d-inline-flex align-items-center text-primary fw-semibold fs-8 mt-2">
@@ -721,25 +896,48 @@ new #[Layout('layouts.app')] class extends Component {
                 </x-ui.section-card>
 
                 {{-- ACTION BUTTONS --}}
-                <div class="d-flex justify-content-end gap-3">
-                    <x-ui.button type="button" variant="light" wire:click="toggleEdit">
-                        Batal
-                    </x-ui.button>
-                    <x-ui.button
-                        type="button"
-                        variant="primary"
-                        @click="confirmSave($wire)"
-                        wire:loading.attr="disabled"
-                    >
-                        <span wire:loading.remove wire:target="save">
-                            <i class="ki-outline ki-check fs-5 me-1"></i>
-                            Simpan Perubahan
-                        </span>
-                        <span wire:loading wire:target="save">
-                            <span class="spinner-border spinner-border-sm me-2"></span>
-                            Memproses...
-                        </span>
-                    </x-ui.button>
+                <div class="spm-action-panel d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-4">
+                    <div>
+                        <h3 class="spm-card-title mb-1">Aksi Profil Pesantren</h3>
+                        <div class="text-muted fw-semibold fs-7">
+                            Simpan draft untuk melanjutkan nanti, atau submit setelah data inti profil lengkap.
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center gap-2">
+                        <x-ui.button type="button" variant="light" wire:click="toggleEdit" wire:loading.attr="disabled">
+                            Batal
+                        </x-ui.button>
+                        <x-ui.button
+                            type="button"
+                            variant="warning"
+                            @click="confirmSaveDraft($wire)"
+                            wire:loading.attr="disabled"
+                        >
+                            <span wire:loading.remove wire:target="saveDraft">
+                                Submit Draft
+                            </span>
+                            <span wire:loading wire:target="saveDraft">
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                Memproses...
+                            </span>
+                        </x-ui.button>
+                        <x-ui.button
+                            type="button"
+                            variant="success"
+                            @click="confirmSubmitProfile($wire)"
+                            wire:loading.attr="disabled"
+                        >
+                            <span wire:loading.remove wire:target="save">
+                                <i class="ki-outline ki-check fs-5 me-1"></i>
+                                Submit
+                            </span>
+                            <span wire:loading wire:target="save">
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                Memproses...
+                            </span>
+                        </x-ui.button>
+                    </div>
                 </div>
             </form>
         @else
@@ -802,7 +1000,7 @@ new #[Layout('layouts.app')] class extends Component {
                                 <div class="text-gray-500 fw-semibold fs-8 text-uppercase mb-1">Akreditasi</div>
                                 <div>
                                     @php $akreditasi = auth()->user()->akreditasis()->latest()->first(); @endphp
-                                    @if($akreditasi && $akreditasi->status == 1)
+                                    @if($akreditasi && $akreditasi->status == 0)
                                         <span class="badge badge-light-primary fs-7 fw-bold">{{ $akreditasi->peringkat ?? 'Terakreditasi' }}</span>
                                     @elseif($akreditasi)
                                         <span class="badge badge-light-warning fs-7 fw-bold">Proses</span>
@@ -813,11 +1011,11 @@ new #[Layout('layouts.app')] class extends Component {
                             </div>
                             <div class="col-12">
                                 <div class="text-gray-500 fw-semibold fs-8 text-uppercase mb-1">Visi</div>
-                                <div class="fs-6 text-gray-800" style="white-space: pre-line;">{{ $visi ?: '-' }}</div>
+                                <div class="fs-6 text-gray-800 spm-pre-line">{{ $visi ?: '-' }}</div>
                             </div>
                             <div class="col-12">
                                 <div class="text-gray-500 fw-semibold fs-8 text-uppercase mb-1">Misi</div>
-                                <div class="fs-6 text-gray-800" style="white-space: pre-line;">{{ $misi ?: '-' }}</div>
+                                <div class="fs-6 text-gray-800 spm-pre-line">{{ $misi ?: '-' }}</div>
                             </div>
                         </div>
                     </div>

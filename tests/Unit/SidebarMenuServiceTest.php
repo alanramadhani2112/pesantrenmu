@@ -71,11 +71,11 @@ class SidebarMenuServiceTest extends TestCase
     {
         $menu = $this->service->getMenuForRole(1);
 
-        $this->assertCount(5, $menu);
+        $this->assertCount(4, $menu);
 
         $sectionLabels = array_column($menu, 'label');
         $this->assertSame(
-            ['Monitoring', 'Penilaian & Banding', 'Master Data', 'Administrasi Sistem', 'Coming Soon'],
+            ['Monitoring', 'Operasional Akreditasi', 'Master Data', 'Administrasi'],
             $sectionLabels
         );
     }
@@ -133,10 +133,10 @@ class SidebarMenuServiceTest extends TestCase
         $menu = $this->service->getMenuForRole(1);
         $items = $menu[3]['items'];
 
-        $this->assertCount(4, $items);
+        $this->assertCount(3, $items);
 
         $keys = array_column($items, 'key');
-        $this->assertSame(['failed_notifications', 'trash', 'akun_pengguna', 'peran_hak_akses'], $keys);
+        $this->assertSame(['akun_pengguna', 'failed_notifications', 'trash'], $keys);
     }
 
     // ─── Asesor Menu (Role ID = 2) ──────────────────────────────────────────────
@@ -145,11 +145,11 @@ class SidebarMenuServiceTest extends TestCase
     {
         $menu = $this->service->getMenuForRole(2);
 
-        $this->assertCount(4, $menu);
+        $this->assertCount(3, $menu);
 
         $sectionLabels = array_column($menu, 'label');
         $this->assertSame(
-            ['Profil', 'Tugas Akreditasi', 'Dokumen', 'Coming Soon'],
+            ['Profil', 'Tugas Akreditasi', 'Dokumen'],
             $sectionLabels
         );
     }
@@ -168,8 +168,13 @@ class SidebarMenuServiceTest extends TestCase
         $menu = $this->service->getMenuForRole(2);
         $items = $menu[1]['items'];
 
-        $this->assertCount(1, $items);
-        $this->assertSame('daftar_tugas', $items[0]['key']);
+        $this->assertCount(5, $items);
+
+        $keys = array_column($items, 'key');
+        $this->assertSame(
+            ['daftar_tugas', 'review_berkas', 'jadwal_visitasi', 'input_nilai', 'laporan_visitasi_workflow'],
+            $keys
+        );
     }
 
     public function test_asesor_menu_dokumen_includes_public_and_asesor_secret_only(): void
@@ -177,17 +182,18 @@ class SidebarMenuServiceTest extends TestCase
         $menu = $this->service->getMenuForRole(2);
         $items = $menu[2]['items'];
 
-        // 2 categories (iapm public + visitasi asesor_secret) + Semua Dokumen entry
-        $this->assertCount(3, $items);
+        // IAPM public + Semua Dokumen. Laporan Visitasi is represented in the workflow section.
+        $this->assertCount(2, $items);
 
         $keys = array_column($items, 'key');
         $this->assertSame(
-            ['dokumen_asesor_iapm', 'dokumen_asesor_visitasi', 'semua_dokumen_asesor'],
+            ['dokumen_asesor_iapm', 'semua_dokumen_asesor'],
             $keys
         );
 
         // Asesor must NOT see pesantren_secret category
         $this->assertNotContains('dokumen_asesor_kartu_kendali', $keys);
+        $this->assertNotContains('dokumen_asesor_visitasi', $keys);
     }
 
     public function test_asesor_dokumen_items_use_documents_route_with_slug_param(): void
@@ -207,11 +213,11 @@ class SidebarMenuServiceTest extends TestCase
     {
         $menu = $this->service->getMenuForRole(3);
 
-        $this->assertCount(4, $menu);
+        $this->assertCount(5, $menu);
 
         $sectionLabels = array_column($menu, 'label');
         $this->assertSame(
-            ['Persiapan Data', 'Proses Akreditasi', 'Dokumen', 'Coming Soon'],
+            ['Persiapan Akreditasi', 'Pengajuan', 'Visitasi', 'Hasil Akreditasi', 'Dokumen'],
             $sectionLabels
         );
     }
@@ -221,10 +227,10 @@ class SidebarMenuServiceTest extends TestCase
         $menu = $this->service->getMenuForRole(3);
         $items = $menu[0]['items'];
 
-        $this->assertCount(3, $items);
+        $this->assertCount(4, $items);
 
         $keys = array_column($items, 'key');
-        $this->assertSame(['profil_pesantren', 'ipm', 'data_sdm'], $keys);
+        $this->assertSame(['profil_pesantren', 'ipm', 'data_sdm', 'edpm_ipr'], $keys);
     }
 
     public function test_pesantren_menu_proses_akreditasi_section_items(): void
@@ -235,25 +241,37 @@ class SidebarMenuServiceTest extends TestCase
         $this->assertCount(2, $items);
 
         $keys = array_column($items, 'key');
-        $this->assertSame(['edpm', 'pengajuan'], $keys);
+        $this->assertSame(['pengajuan', 'status_perbaikan'], $keys);
+    }
+
+    public function test_pesantren_menu_visitasi_and_hasil_items_follow_business_flow(): void
+    {
+        $menu = $this->service->getMenuForRole(3);
+
+        $visitasiKeys = array_column($menu[2]['items'], 'key');
+        $hasilKeys = array_column($menu[3]['items'], 'key');
+
+        $this->assertSame(['kartu_kendali_visitasi'], $visitasiKeys);
+        $this->assertSame(['hasil_akhir', 'sertifikat_akreditasi', 'banding_pesantren'], $hasilKeys);
     }
 
     public function test_pesantren_menu_dokumen_includes_public_and_pesantren_secret_only(): void
     {
         $menu = $this->service->getMenuForRole(3);
-        $items = $menu[2]['items'];
+        $items = $menu[4]['items'];
 
-        // 2 categories (iapm public + kartu_kendali pesantren_secret) + Semua Dokumen
-        $this->assertCount(3, $items);
+        // IAPM public + Semua Dokumen. Kartu Kendali is represented in the Visitasi section.
+        $this->assertCount(2, $items);
 
         $keys = array_column($items, 'key');
         $this->assertSame(
-            ['dokumen_pesantren_iapm', 'dokumen_pesantren_kartu_kendali', 'semua_dokumen_pesantren'],
+            ['dokumen_pesantren_iapm', 'semua_dokumen_pesantren'],
             $keys
         );
 
         // Pesantren must NOT see asesor_secret category
         $this->assertNotContains('dokumen_pesantren_visitasi', $keys);
+        $this->assertNotContains('dokumen_pesantren_kartu_kendali', $keys);
     }
 
     public function test_inactive_categories_are_excluded_from_dokumen_menu(): void
@@ -263,7 +281,7 @@ class SidebarMenuServiceTest extends TestCase
         // Force a fresh service so the in-memory cache is bypassed
         $service = new SidebarMenuService();
         $menu = $service->getMenuForRole(3);
-        $items = $menu[2]['items'];
+        $items = $menu[4]['items'];
 
         $keys = array_column($items, 'key');
         $this->assertSame(
@@ -301,27 +319,32 @@ class SidebarMenuServiceTest extends TestCase
     {
         $menu = $this->service->getMenuForRole(4);
 
-        $this->assertCount(5, $menu);
+        $this->assertCount(4, $menu);
 
         $sectionLabels = array_column($menu, 'label');
         $this->assertSame(
-            ['Monitoring', 'Penilaian & Banding', 'Master Data', 'Administrasi Sistem', 'Coming Soon'],
+            ['Monitoring', 'Operasional Akreditasi', 'Master Data', 'Manajemen Sistem'],
             $sectionLabels
         );
     }
 
-    public function test_super_admin_menu_master_data_includes_role_permission(): void
+    public function test_super_admin_menu_system_section_includes_role_and_permission_management(): void
     {
         $menu = $this->service->getMenuForRole(4);
-        $masterData = collect($menu)->firstWhere('label', 'Master Data');
+        $system = collect($menu)->firstWhere('label', 'Manajemen Sistem');
 
-        $this->assertNotNull($masterData);
-        $keys = array_column($masterData['items'], 'key');
-        $this->assertContains('master_role_permission', $keys);
+        $this->assertNotNull($system);
+        $keys = array_column($system['items'], 'key');
+        $this->assertContains('role_sistem', $keys);
+        $this->assertContains('hak_akses', $keys);
 
-        $rolePermItem = collect($masterData['items'])->firstWhere('key', 'master_role_permission');
+        $roleItem = collect($system['items'])->firstWhere('key', 'role_sistem');
+        $rolePermItem = collect($system['items'])->firstWhere('key', 'hak_akses');
+
+        $this->assertSame('roles.index', $roleItem['route']);
+        $this->assertSame('Role Sistem', $roleItem['label']);
         $this->assertSame('admin.master-role-permission', $rolePermItem['route']);
-        $this->assertSame('Peran & Hak Akses', $rolePermItem['label']);
+        $this->assertSame('Hak Akses', $rolePermItem['label']);
     }
 
     public function test_admin_menu_does_not_include_role_permission_management(): void
@@ -329,65 +352,24 @@ class SidebarMenuServiceTest extends TestCase
         // Regular admin (id=1) must NOT see master_role_permission item.
         $menu = $this->service->getMenuForRole(1);
         $masterData = collect($menu)->firstWhere('label', 'Master Data');
+        $adminSection = collect($menu)->firstWhere('label', 'Administrasi');
 
         $keys = array_column($masterData['items'], 'key');
-        $this->assertNotContains('master_role_permission', $keys);
+        $adminKeys = array_column($adminSection['items'], 'key');
+
+        $this->assertNotContains('hak_akses', $keys);
+        $this->assertNotContains('role_sistem', $adminKeys);
+        $this->assertNotContains('hak_akses', $adminKeys);
     }
 
-    // ─── Coming Soon Items ──────────────────────────────────────────────────────
+    // ─── Coming Soon Items (removed — feature not implemented) ──────────────────
 
-    public function test_pesantren_coming_soon_items_present(): void
+    public function test_no_coming_soon_section_in_any_role_menu(): void
     {
-        $menu = $this->service->getMenuForRole(3);
-        $soon = collect($menu)->firstWhere('label', 'Coming Soon');
-
-        $this->assertNotNull($soon);
-        $keys = array_column($soon['items'], 'key');
-
-        $this->assertContains('soon_sertifikat_digital', $keys);
-        $this->assertContains('soon_forum_mutu', $keys);
-        $this->assertContains('soon_self_assessment', $keys);
-        $this->assertContains('soon_benchmark', $keys);
-        $this->assertContains('soon_help_center', $keys);
-    }
-
-    public function test_asesor_coming_soon_items_present(): void
-    {
-        $menu = $this->service->getMenuForRole(2);
-        $soon = collect($menu)->firstWhere('label', 'Coming Soon');
-
-        $this->assertNotNull($soon);
-        $keys = array_column($soon['items'], 'key');
-
-        $this->assertContains('soon_visitasi_cerdas', $keys);
-        $this->assertContains('soon_mobile_companion', $keys);
-        $this->assertContains('soon_sertifikat_cpd', $keys);
-        $this->assertContains('soon_help_center', $keys);
-    }
-
-    public function test_admin_coming_soon_items_present(): void
-    {
-        $menu = $this->service->getMenuForRole(1);
-        $soon = collect($menu)->firstWhere('label', 'Coming Soon');
-
-        $this->assertNotNull($soon);
-        $keys = array_column($soon['items'], 'key');
-
-        $this->assertContains('soon_analytics_nasional', $keys);
-        $this->assertContains('soon_broadcast', $keys);
-        $this->assertContains('soon_export_compliance', $keys);
-        $this->assertContains('soon_help_center', $keys);
-    }
-
-    public function test_coming_soon_items_are_flagged_disabled_with_badge(): void
-    {
-        $menu = $this->service->getMenuForRole(3);
-        $soon = collect($menu)->firstWhere('label', 'Coming Soon');
-
-        foreach ($soon['items'] as $item) {
-            $this->assertTrue($item['coming_soon'] ?? false, "Item {$item['key']} missing coming_soon flag");
-            $this->assertSame('Soon', $item['badge_text'] ?? null);
-            $this->assertNull($item['route'], "Item {$item['key']} should have null route");
+        foreach ([1, 2, 3, 4] as $roleId) {
+            $menu = $this->service->getMenuForRole($roleId);
+            $soon = collect($menu)->firstWhere('label', 'Coming Soon');
+            $this->assertNull($soon, "Role $roleId should not have a Coming Soon section");
         }
     }
 
@@ -468,18 +450,29 @@ class SidebarMenuServiceTest extends TestCase
     {
         $menu = $this->service->getMenuForRole(3);
 
-        foreach ($menu[0]['items'] as $item) {
-            $this->assertTrue(
-                $item['show_progress'],
-                "Item '{$item['key']}' should show progress"
-            );
-        }
+        $progressMap = collect($menu[0]['items'])->pluck('show_progress', 'key')->all();
+
+        $this->assertTrue($progressMap['profil_pesantren']);
+        $this->assertTrue($progressMap['ipm']);
+        $this->assertTrue($progressMap['data_sdm']);
+        $this->assertTrue($progressMap['edpm_ipr']);
+    }
+
+    public function test_kartu_kendali_menu_targets_pascha_visitasi_context(): void
+    {
+        $menu = $this->service->getMenuForRole(3);
+
+        $item = $menu[2]['items'][0];
+
+        $this->assertSame('kartu_kendali_visitasi', $item['key']);
+        $this->assertSame(['statusFilter' => '2', 'focus' => 'kartu_kendali'], $item['route_query']);
+        $this->assertSame(['statusFilter' => '2', 'focus' => 'kartu_kendali'], $item['active_query']);
     }
 
     public function test_dokumen_items_share_documents_route(): void
     {
         $menu = $this->service->getMenuForRole(3);
-        $items = $menu[2]['items'];
+        $items = $menu[4]['items'];
 
         foreach ($items as $item) {
             $this->assertSame('documents.index', $item['route']);

@@ -17,12 +17,16 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Property-Based Tests for Optimistic Locking.
  *
- * @group Feature:concurrent-access-handling,Property1,Property2
  */
+#[Group('Feature:concurrent-access-handling')]
+#[Group('Property1')]
+#[Group('Property2')]
 class OptimisticLockPropertyTest extends TestCase
 {
     use RefreshDatabase;
@@ -92,9 +96,9 @@ class OptimisticLockPropertyTest extends TestCase
      *
      * **Validates: Requirements 1.2, 1.4**
      *
-     * @dataProvider staleTimestampProvider
      */
-    public function test_stale_timestamp_throws_conflict_exception_and_db_unchanged(string $staleTimestamp): void
+#[DataProvider('staleTimestampProvider')]
+public function test_stale_timestamp_throws_conflict_exception_and_db_unchanged(string $staleTimestamp): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $asesor = $this->createAsesor();
@@ -128,9 +132,9 @@ class OptimisticLockPropertyTest extends TestCase
      *
      * **Validates: Requirements 1.2, 1.4**
      *
-     * @dataProvider staleTimestampProvider
      */
-    public function test_stale_timestamp_on_approve_pengajuan_throws_conflict_exception(string $staleTimestamp): void
+#[DataProvider('staleTimestampProvider')]
+public function test_stale_timestamp_on_approve_pengajuan_throws_conflict_exception(string $staleTimestamp): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $asesor = $this->createAsesor();
@@ -177,9 +181,9 @@ class OptimisticLockPropertyTest extends TestCase
      *
      * **Validates: Requirements 1.3**
      *
-     * @dataProvider freshTimestampProvider
      */
-    public function test_fresh_timestamp_allows_finalize_to_proceed(int $iteration): void
+#[DataProvider('freshTimestampProvider')]
+public function test_fresh_timestamp_allows_finalize_to_proceed(int $iteration): void
     {
         $pesantrenUser = $this->createPesantrenUser();
 
@@ -209,9 +213,9 @@ class OptimisticLockPropertyTest extends TestCase
      *
      * **Validates: Requirements 1.3**
      *
-     * @dataProvider freshTimestampProvider
      */
-    public function test_fresh_timestamp_allows_approve_pengajuan_to_proceed(int $iteration): void
+#[DataProvider('freshTimestampProvider')]
+public function test_fresh_timestamp_allows_approve_pengajuan_to_proceed(int $iteration): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $asesor = $this->createAsesor("Asesor Fresh {$iteration}");

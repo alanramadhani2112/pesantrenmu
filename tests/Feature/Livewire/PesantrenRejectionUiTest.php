@@ -33,7 +33,7 @@ class PesantrenRejectionUiTest extends TestCase
     /**
      * Task 14.8: Pesantren sees rejection history and status
      */
-    public function test_pesantren_sees_rejection_count_and_status(): void
+public function test_pesantren_sees_rejection_count_and_status(): void
     {
         $user = $this->createCompletePesantrenUser();
         $this->actingAs($user);

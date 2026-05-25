@@ -120,7 +120,7 @@ class NonBlockingNotificationsTest extends TestCase
      *
      * Validates: Requirements 1.1, 6.1
      */
-    public function test_approve_pengajuan_dispatches_notifications_after_transaction(): void
+public function test_approve_pengajuan_dispatches_notifications_after_transaction(): void
     {
         Notification::fake();
 
@@ -152,7 +152,7 @@ class NonBlockingNotificationsTest extends TestCase
      *
      * Validates: Requirement 6.4
      */
-    public function test_approve_pengajuan_preserves_notification_content(): void
+public function test_approve_pengajuan_preserves_notification_content(): void
     {
         Notification::fake();
 
@@ -198,7 +198,7 @@ class NonBlockingNotificationsTest extends TestCase
      *
      * Validates: Requirements 1.1, 6.1
      */
-    public function test_finalize_akreditasi_dispatches_notifications_after_transaction(): void
+public function test_finalize_akreditasi_dispatches_notifications_after_transaction(): void
     {
         Notification::fake();
 
@@ -230,7 +230,7 @@ class NonBlockingNotificationsTest extends TestCase
      *
      * Validates: Requirement 6.4
      */
-    public function test_finalize_akreditasi_preserves_notification_content(): void
+public function test_finalize_akreditasi_preserves_notification_content(): void
     {
         Notification::fake();
 
@@ -268,7 +268,7 @@ class NonBlockingNotificationsTest extends TestCase
      *
      * Validates: Requirements 1.1, 6.2
      */
-    public function test_finalize_verification_dispatches_notifications_after_transaction(): void
+public function test_finalize_verification_dispatches_notifications_after_transaction(): void
     {
         Notification::fake();
 
@@ -327,7 +327,7 @@ class NonBlockingNotificationsTest extends TestCase
      *
      * Validates: Requirements 1.1, 6.3
      */
-    public function test_submit_appeals_dispatches_notifications_after_transaction(): void
+public function test_submit_appeals_dispatches_notifications_after_transaction(): void
     {
         Notification::fake();
 
@@ -337,7 +337,7 @@ class NonBlockingNotificationsTest extends TestCase
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status' => 2,
+            'status' => -1,
         ]);
 
         $asesorUser = $this->createAsesorUser();
@@ -357,8 +357,8 @@ class NonBlockingNotificationsTest extends TestCase
 
         $this->assertTrue($result);
 
-        // Transaction committed: status changed to 3
-        $this->assertSame(3, $akreditasi->fresh()->status);
+        // Transaction committed: status changed to Banding
+        $this->assertSame(-2, $akreditasi->fresh()->status);
 
         // Admin notification dispatched
         Notification::assertSentTo($admin, AkreditasiNotification::class);
@@ -369,7 +369,7 @@ class NonBlockingNotificationsTest extends TestCase
      *
      * Validates: Requirements 1.1, 6.3
      */
-    public function test_upload_kartu_kendali_dispatches_notifications_after_transaction(): void
+public function test_upload_kartu_kendali_dispatches_notifications_after_transaction(): void
     {
         Notification::fake();
 
@@ -378,7 +378,7 @@ class NonBlockingNotificationsTest extends TestCase
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status' => 3,
+            'status' => 2,
         ]);
 
         $result = $this->pesantrenService->uploadKartuKendali(
@@ -401,7 +401,7 @@ class NonBlockingNotificationsTest extends TestCase
      *
      * Validates: Requirement 6.4
      */
-    public function test_upload_kartu_kendali_preserves_notification_content(): void
+public function test_upload_kartu_kendali_preserves_notification_content(): void
     {
         Notification::fake();
 
@@ -410,7 +410,7 @@ class NonBlockingNotificationsTest extends TestCase
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status' => 3,
+            'status' => 2,
         ]);
 
         $this->pesantrenService->uploadKartuKendali(
@@ -439,7 +439,7 @@ class NonBlockingNotificationsTest extends TestCase
      *
      * Validates: Requirement 1.4
      */
-    public function test_transaction_rollback_dispatches_zero_notifications(): void
+public function test_transaction_rollback_dispatches_zero_notifications(): void
     {
         Notification::fake();
 
@@ -479,7 +479,7 @@ class NonBlockingNotificationsTest extends TestCase
      *
      * Validates: Requirement 1.2
      */
-    public function test_notification_failure_does_not_rollback_committed_transaction(): void
+public function test_notification_failure_does_not_rollback_committed_transaction(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
 
@@ -515,7 +515,7 @@ class NonBlockingNotificationsTest extends TestCase
      * notification class implements ShouldQueue (which is the mechanism that
      * ensures async processing in production with the database queue driver).
      */
-    public function test_notification_implements_should_queue_for_async_processing(): void
+public function test_notification_implements_should_queue_for_async_processing(): void
     {
         $notification = new AkreditasiNotification('test', 'Title', 'Message');
 
@@ -533,7 +533,7 @@ class NonBlockingNotificationsTest extends TestCase
     /**
      * Task 8.4 (regression): approvePengajuan still changes status to 5 after refactoring.
      */
-    public function test_approve_pengajuan_still_changes_status_to_assessment(): void
+public function test_approve_pengajuan_still_changes_status_to_assessment(): void
     {
         Notification::fake();
 
@@ -558,7 +558,7 @@ class NonBlockingNotificationsTest extends TestCase
     /**
      * Task 8.4 (regression): finalizeAkreditasi still changes status to 1 after refactoring.
      */
-    public function test_finalize_akreditasi_still_changes_status_to_approved(): void
+public function test_finalize_akreditasi_still_changes_status_to_approved(): void
     {
         Notification::fake();
 
@@ -581,9 +581,9 @@ class NonBlockingNotificationsTest extends TestCase
     }
 
     /**
-     * Task 8.4 (regression): submitAppeals still changes status to 3 after refactoring.
+     * Task 8.4 (regression): submitAppeals still changes status to Banding after refactoring.
      */
-    public function test_submit_appeals_still_changes_status_to_banding(): void
+public function test_submit_appeals_still_changes_status_to_banding(): void
     {
         Notification::fake();
 
@@ -593,7 +593,7 @@ class NonBlockingNotificationsTest extends TestCase
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status' => 2,
+            'status' => -1,
         ]);
 
         $asesorUser = $this->createAsesorUser();
@@ -612,6 +612,6 @@ class NonBlockingNotificationsTest extends TestCase
         );
 
         $this->assertTrue($result);
-        $this->assertSame(3, $akreditasi->fresh()->status);
+        $this->assertSame(-2, $akreditasi->fresh()->status);
     }
 }

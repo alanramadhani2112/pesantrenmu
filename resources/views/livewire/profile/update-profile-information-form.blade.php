@@ -78,19 +78,18 @@ new class extends Component
                 </x-ui.form-field>
 
                 @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! auth()->user()->hasVerifiedEmail())
-                <div class="alert alert-warning d-flex align-items-center gap-3 mt-3">
-                    <x-ui.icon name="information" class="fs-4 text-warning" />
-                    <div class="fs-7">
+                <x-ui.alert variant="warning" icon="information" class="mt-3 mb-0">
+                    <div>
                         {{ __('Email Anda belum terverifikasi.') }}
                         <x-ui.button type="button" wire:click.prevent="sendVerification" variant="link" size="sm" class="p-0 ms-1">
                             {{ __('Kirim ulang email verifikasi.') }}
                         </x-ui.button>
                     </div>
-                </div>
+                </x-ui.alert>
                 @if (session('status') === 'verification-link-sent')
-                <div class="alert alert-success fs-8 mt-2">
+                <x-ui.alert variant="success" class="mt-2 mb-0 py-3 px-4">
                     {{ __('Link verifikasi baru telah dikirim ke email Anda.') }}
-                </div>
+                </x-ui.alert>
                 @endif
                 @endif
             </div>

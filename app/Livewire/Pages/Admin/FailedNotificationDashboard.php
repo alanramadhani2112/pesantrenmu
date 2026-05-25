@@ -5,7 +5,6 @@ namespace App\Livewire\Pages\Admin;
 use App\Models\FailedNotification;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -77,12 +76,14 @@ class FailedNotificationDashboard extends Component
      */
     public function retry(int $id): void
     {
-        Gate::authorize('notification.retry');
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        abort_unless($user && $user->canAccessAdminArea(), 403);
 
         $record = FailedNotification::findOrFail($id);
         $record->retry();
 
-        session()->flash('status', 'Notifikasi berhasil dikirim ulang.');
+        $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Notifikasi berhasil dikirim ulang.');
     }
 
     /**
@@ -90,12 +91,14 @@ class FailedNotificationDashboard extends Component
      */
     public function dismiss(int $id): void
     {
-        Gate::authorize('notification.retry');
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        abort_unless($user && $user->canAccessAdminArea(), 403);
 
         $record = FailedNotification::findOrFail($id);
         $record->dismiss();
 
-        session()->flash('status', 'Notifikasi berhasil diabaikan.');
+        $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Notifikasi berhasil diabaikan.');
     }
 
     public function render()

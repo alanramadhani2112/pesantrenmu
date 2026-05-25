@@ -198,13 +198,17 @@ new #[Layout('layouts.app')] class extends Component {
 }; ?>
 
 <div x-data="adminManagement" data-module-page="accounts">
-    <x-slot name="header">{{ __('Account Management') }}</x-slot>
+    <x-slot name="header">{{ __('Akun Pengguna') }}</x-slot>
 
     <x-ui.index-layout
-        title="Accounts"
+        title="Akun Pengguna"
         subtitle="Kelola akun admin, asesor, dan pesantren dari satu daftar."
     >
-        <x-datatable.layout title="Manajemen Akun" :records="$this->users">
+        <x-datatable.layout
+            title="Daftar Akun"
+            subtitle="Ringkasan akun pengguna menurut peran dan status akses."
+            :records="$this->users"
+        >
             <x-slot name="filters">
                 <x-ui.tabs>
                     <x-ui.tab :active="$activeTab == 1" wire:click="setTab(1)">
@@ -227,8 +231,7 @@ new #[Layout('layouts.app')] class extends Component {
             </x-slot>
 
             <x-slot name="toolbar">
-                <x-ui.button wire:click="createUser" variant="primary" size="sm">
-                    <x-ui.icon name="plus" class="fs-4 me-1" />
+                <x-ui.button wire:click="createUser" variant="primary" size="sm" icon="plus">
                     Tambah Akun
                 </x-ui.button>
             </x-slot>
@@ -331,13 +334,13 @@ new #[Layout('layouts.app')] class extends Component {
     <x-ui.modal name="account-modal" :show="$errors->isNotEmpty()" focusable>
         <form x-on:submit.prevent="confirmSaveAccount($wire)">
             <x-ui.modal-header
-                :title="$isEditing ? __('Edit Account') : __('Create Account')"
-                :subtitle="$isEditing ? __('Update account details.') : __('Add a new user account to the system.')"
+                :title="$isEditing ? __('Edit Akun') : __('Tambah Akun')"
+                :subtitle="$isEditing ? __('Perbarui detail akun pengguna.') : __('Tambahkan akun pengguna baru ke sistem.')"
                 icon="profile-user"
             />
 
             <x-ui.modal-body>
-                <x-ui.form-field label="{{ __('Name') }}" for="name" :error="$errors->get('name')">
+                <x-ui.form-field label="{{ __('Nama') }}" for="name" :error="$errors->get('name')">
                     <x-ui.input model="name" id="name" required autofocus />
                 </x-ui.form-field>
 
@@ -346,7 +349,7 @@ new #[Layout('layouts.app')] class extends Component {
                 </x-ui.form-field>
 
                 <x-ui.form-field label="{{ __('Role') }}" for="role_id" :error="$errors->get('role_id')">
-                    <x-ui.select model="role_id" id="role_id" placeholder="Select Role" required>
+                    <x-ui.select model="role_id" id="role_id" placeholder="Pilih Role" required>
                         @foreach ($roles as $role)
                             <option value="{{ $role->id }}">{{ $role->name }}</option>
                         @endforeach
@@ -357,7 +360,7 @@ new #[Layout('layouts.app')] class extends Component {
                     label="{{ __('Password') }}"
                     for="password"
                     :error="$errors->get('password')"
-                    :hint="$isEditing ? __('Leave blank to keep current password.') : __('Leave blank to auto-generate. User can also log in via SSO without a password.')"
+                    :hint="$isEditing ? __('Kosongkan bila password tidak diubah.') : __('Kosongkan untuk membuat password otomatis. Pengguna juga dapat masuk melalui SSO tanpa password manual.')"
                 >
                     <x-ui.input model="password" id="password" type="password" />
                 </x-ui.form-field>
@@ -378,11 +381,11 @@ new #[Layout('layouts.app')] class extends Component {
 
             <x-ui.modal-footer>
                 <x-ui.button type="button" variant="light" x-on:click="$dispatch('close')">
-                    {{ __('Cancel') }}
+                    {{ __('Batal') }}
                 </x-ui.button>
 
                 <x-ui.button type="submit" variant="primary">
-                    {{ $isEditing ? __('Update') : __('Save') }}
+                    {{ $isEditing ? __('Perbarui') : __('Simpan') }}
                 </x-ui.button>
             </x-ui.modal-footer>
         </form>

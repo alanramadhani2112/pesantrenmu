@@ -1,4 +1,4 @@
-<div>
+<div x-data="deleteConfirmation()">
     <x-slot name="header">{{ __('Notifikasi Gagal') }}</x-slot>
 
     <x-ui.index-layout
@@ -11,13 +11,6 @@
                 <x-ui.badge variant="danger">Pending: {{ $pendingCount }}</x-ui.badge>
             @endif
         </x-slot>
-
-        @if(session('status'))
-            <div class="alert alert-success d-flex align-items-center mb-6" role="alert">
-                <x-ui.icon name="check-circle" class="fs-4 me-3 text-success" />
-                <div>{{ session('status') }}</div>
-            </div>
-        @endif
 
         <x-datatable.layout
             title="Daftar Notifikasi Gagal"
@@ -118,9 +111,9 @@
                         </td>
 
                         <td>
-                            <span class="badge badge-light-primary fw-semibold fs-8">
+                            <x-ui.badge variant="primary">
                                 {{ $item->notification_type }}
-                            </span>
+                            </x-ui.badge>
                         </td>
 
                         <td>
@@ -137,7 +130,7 @@
                             @if($item->status === 'pending')
                                 <x-ui.action-menu>
                                     <x-ui.action-menu-item
-                                        wire:click="retry({{ $item->id }})"
+                                        x-on:click="confirmAction('retry', 'Kirim ulang notifikasi?', 'Notifikasi akan dikirim ulang ke penerima.', 'Ya, kirim ulang').then(r => r.isConfirmed && $wire.retry({{ $item->id }}))"
                                         variant="primary"
                                     >
                                         <x-ui.icon name="arrows-circle" class="fs-4" />
@@ -145,7 +138,7 @@
                                     </x-ui.action-menu-item>
 
                                     <x-ui.action-menu-item
-                                        wire:click="dismiss({{ $item->id }})"
+                                        x-on:click="confirmAction('dismiss', 'Abaikan notifikasi?', 'Notifikasi ini akan ditandai sebagai diabaikan.', 'Ya, abaikan').then(r => r.isConfirmed && $wire.dismiss({{ $item->id }}))"
                                         variant="secondary"
                                     >
                                         <x-ui.icon name="cross-circle" class="fs-4" />

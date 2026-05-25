@@ -42,25 +42,67 @@ class SidebarMenuService
     }
 
     /**
-     * Super admin sees the full admin menu plus an exclusive
-     * "Peran & Hak Akses" CRUD entry.
+     * Super admin sees the admin operational menu plus exclusive system
+     * management entries for role catalog and permission matrix.
      */
     private function getSuperAdminMenu(): array
     {
         $menu = $this->getAdminMenu();
 
-        // Inject master_role_permission into the Master Data group.
         foreach ($menu as $idx => $group) {
-            if (($group['label'] ?? null) === 'Master Data') {
-                $menu[$idx]['items'][] = [
-                    'key' => 'master_role_permission',
-                    'label' => 'Peran & Hak Akses',
-                    'route' => 'admin.master-role-permission',
-                    'icon' => 'shield-tick',
-                    'active_pattern' => 'admin.master-role-permission',
-                    'tooltip' => 'Kelola matriks peran dan permission tiap role secara dinamis',
-                    'show_progress' => false,
-                    'show_badge' => false,
+            if (($group['label'] ?? null) === 'Administrasi') {
+                $menu[$idx]['label'] = 'Manajemen Sistem';
+                $menu[$idx]['items'] = [
+                    [
+                        'key' => 'akun_pengguna',
+                        'label' => 'Akun Pengguna',
+                        'route' => 'accounts.index',
+                        'icon' => 'profile-user',
+                        'active_pattern' => 'accounts.*',
+                        'tooltip' => 'Kelola akun admin, asesor, dan pesantren beserta status aktivasinya',
+                        'show_progress' => true,
+                        'show_badge' => false,
+                    ],
+                    [
+                        'key' => 'role_sistem',
+                        'label' => 'Role Sistem',
+                        'route' => 'roles.index',
+                        'icon' => 'shield-lock',
+                        'active_pattern' => 'roles.*',
+                        'tooltip' => 'Kelola katalog role sistem yang menjadi dasar hak akses pengguna',
+                        'show_progress' => false,
+                        'show_badge' => false,
+                    ],
+                    [
+                        'key' => 'hak_akses',
+                        'label' => 'Hak Akses',
+                        'route' => 'admin.master-role-permission',
+                        'icon' => 'shield-tick',
+                        'active_pattern' => 'admin.master-role-permission',
+                        'tooltip' => 'Kelola matriks permission tiap role secara dinamis',
+                        'show_progress' => false,
+                        'show_badge' => false,
+                    ],
+                    [
+                        'key' => 'failed_notifications',
+                        'label' => 'Notifikasi Gagal',
+                        'route' => 'admin.failed-notifications',
+                        'icon' => 'notification-bing',
+                        'active_pattern' => 'admin.failed-notifications',
+                        'tooltip' => 'Pantau dan kelola notifikasi yang gagal terkirim',
+                        'show_progress' => false,
+                        'show_badge' => true,
+                    ],
+                    [
+                        'key' => 'trash',
+                        'label' => 'Arsip Akreditasi',
+                        'route' => 'admin.trash',
+                        'icon' => 'trash',
+                        'active_pattern' => 'admin.trash',
+                        'tooltip' => 'Kelola data akreditasi terhapus dengan masa retensi sebelum dihapus permanen',
+                        'show_progress' => false,
+                        'show_badge' => true,
+                    ],
                 ];
                 break;
             }
@@ -90,7 +132,7 @@ class SidebarMenuService
     {
         return [
             [
-                'label' => 'Persiapan Data',
+                'label' => 'Persiapan Akreditasi',
                 'items' => [
                     [
                         'key' => 'profil_pesantren',
@@ -122,28 +164,99 @@ class SidebarMenuService
                         'show_progress' => true,
                         'show_badge' => false,
                     ],
-                ],
-            ],
-            [
-                'label' => 'Proses Akreditasi',
-                'items' => [
                     [
-                        'key' => 'edpm',
-                        'label' => 'EDPM',
+                        'key' => 'edpm_ipr',
+                        'label' => 'EDPM/IPR',
                         'route' => 'pesantren.edpm',
                         'icon' => 'paper',
                         'active_pattern' => 'pesantren.edpm',
-                        'tooltip' => 'Isi Evaluasi Diri Penjaminan Mutu pesantren',
-                        'show_progress' => false,
+                        'tooltip' => 'Isi Evaluasi Diri Penjaminan Mutu dan Indikator Pemenuhan Relatif',
+                        'show_progress' => true,
                         'show_badge' => false,
                     ],
+                ],
+            ],
+            [
+                'label' => 'Pengajuan',
+                'items' => [
                     [
                         'key' => 'pengajuan',
-                        'label' => 'Pengajuan',
+                        'label' => 'Pengajuan Akreditasi',
                         'route' => 'pesantren.akreditasi',
                         'icon' => 'shield-lock',
                         'active_pattern' => 'pesantren.akreditasi*',
                         'tooltip' => 'Ajukan dan pantau status akreditasi pesantren',
+                        'active_query_absent' => ['focus', 'statusFilter', 'tahapanFilter'],
+                        'show_progress' => false,
+                        'show_badge' => false,
+                    ],
+                    [
+                        'key' => 'status_perbaikan',
+                        'label' => 'Status Perbaikan',
+                        'route' => 'pesantren.akreditasi',
+                        'route_query' => ['statusFilter' => '-1', 'focus' => 'perbaikan'],
+                        'icon' => 'messages',
+                        'active_pattern' => 'pesantren.akreditasi*',
+                        'active_query' => ['statusFilter' => '-1', 'focus' => 'perbaikan'],
+                        'tooltip' => 'Pantau catatan penolakan dan tindak lanjut perbaikan berkas',
+                        'show_progress' => false,
+                        'show_badge' => false,
+                    ],
+                ],
+            ],
+            [
+                'label' => 'Visitasi',
+                'items' => [
+                    [
+                        'key' => 'kartu_kendali_visitasi',
+                        'label' => 'Kartu Kendali',
+                        'route' => 'pesantren.akreditasi',
+                        'route_query' => ['statusFilter' => '2', 'focus' => 'kartu_kendali'],
+                        'icon' => 'clipboard-check',
+                        'active_pattern' => 'pesantren.akreditasi*',
+                        'active_query' => ['statusFilter' => '2', 'focus' => 'kartu_kendali'],
+                        'tooltip' => 'Unggah dan pantau kartu kendali setelah visitasi selesai',
+                        'show_progress' => false,
+                        'show_badge' => false,
+                    ],
+                ],
+            ],
+            [
+                'label' => 'Hasil Akreditasi',
+                'items' => [
+                    [
+                        'key' => 'hasil_akhir',
+                        'label' => 'Hasil Akhir',
+                        'route' => 'pesantren.akreditasi',
+                        'route_query' => ['statusFilter' => '0', 'focus' => 'hasil'],
+                        'icon' => 'chart-line-up',
+                        'active_pattern' => 'pesantren.akreditasi*',
+                        'active_query' => ['statusFilter' => '0', 'focus' => 'hasil'],
+                        'tooltip' => 'Lihat nilai akhir, peringkat, dan rekomendasi hasil akreditasi',
+                        'show_progress' => false,
+                        'show_badge' => false,
+                    ],
+                    [
+                        'key' => 'sertifikat_akreditasi',
+                        'label' => 'Sertifikat',
+                        'route' => 'pesantren.akreditasi',
+                        'route_query' => ['statusFilter' => '0', 'focus' => 'sertifikat'],
+                        'icon' => 'file-down',
+                        'active_pattern' => 'pesantren.akreditasi*',
+                        'active_query' => ['statusFilter' => '0', 'focus' => 'sertifikat'],
+                        'tooltip' => 'Unduh sertifikat akreditasi jika sudah diterbitkan',
+                        'show_progress' => false,
+                        'show_badge' => false,
+                    ],
+                    [
+                        'key' => 'banding_pesantren',
+                        'label' => 'Banding',
+                        'route' => 'pesantren.akreditasi',
+                        'route_query' => ['statusFilter' => '-2', 'focus' => 'banding'],
+                        'icon' => 'shield-lock',
+                        'active_pattern' => 'pesantren.akreditasi*',
+                        'active_query' => ['statusFilter' => '-2', 'focus' => 'banding'],
+                        'tooltip' => 'Ajukan dan pantau banding hasil akreditasi',
                         'show_progress' => false,
                         'show_badge' => false,
                     ],
@@ -151,7 +264,7 @@ class SidebarMenuService
             ],
             [
                 'label' => 'Dokumen',
-                'items' => $this->buildDokumenItems('pesantren'),
+                'items' => $this->buildDokumenItems('pesantren', ['kartu_kendali']),
             ],
         ];
     }
@@ -188,7 +301,7 @@ class SidebarMenuService
                 ],
             ],
             [
-                'label' => 'Penilaian & Banding',
+                'label' => 'Operasional Akreditasi',
                 'items' => [
                     [
                         'key' => 'daftar_pesantren',
@@ -227,7 +340,7 @@ class SidebarMenuService
                 'items' => [
                     [
                         'key' => 'master_edpm',
-                        'label' => 'Komponen EDPM',
+                        'label' => 'Komponen EDPM/IPR',
                         'route' => 'admin.master-edpm',
                         'icon' => 'data',
                         'active_pattern' => 'admin.master-edpm',
@@ -258,8 +371,18 @@ class SidebarMenuService
                 ],
             ],
             [
-                'label' => 'Administrasi Sistem',
+                'label' => 'Administrasi',
                 'items' => [
+                    [
+                        'key' => 'akun_pengguna',
+                        'label' => 'Akun Pengguna',
+                        'route' => 'accounts.index',
+                        'icon' => 'profile-user',
+                        'active_pattern' => 'accounts.*',
+                        'tooltip' => 'Kelola akun admin, asesor, dan pesantren beserta status aktivasinya',
+                        'show_progress' => false,
+                        'show_badge' => false,
+                    ],
                     [
                         'key' => 'failed_notifications',
                         'label' => 'Notifikasi Gagal',
@@ -272,33 +395,13 @@ class SidebarMenuService
                     ],
                     [
                         'key' => 'trash',
-                        'label' => 'Sampah Akreditasi',
+                        'label' => 'Arsip Akreditasi',
                         'route' => 'admin.trash',
                         'icon' => 'trash',
                         'active_pattern' => 'admin.trash',
                         'tooltip' => 'Kelola data akreditasi terhapus dengan masa retensi sebelum dihapus permanen',
                         'show_progress' => false,
                         'show_badge' => true,
-                    ],
-                    [
-                        'key' => 'akun_pengguna',
-                        'label' => 'Akun Pengguna',
-                        'route' => 'accounts.index',
-                        'icon' => 'profile-user',
-                        'active_pattern' => 'accounts.*',
-                        'tooltip' => 'Kelola akun admin, asesor, dan pesantren beserta status aktivasinya',
-                        'show_progress' => false,
-                        'show_badge' => false,
-                    ],
-                    [
-                        'key' => 'peran_hak_akses',
-                        'label' => 'Peran & Hak Akses',
-                        'route' => 'roles.index',
-                        'icon' => 'shield-lock',
-                        'active_pattern' => 'roles.*',
-                        'tooltip' => 'Kelola peran (role) yang tersedia di sistem',
-                        'show_progress' => false,
-                        'show_badge' => false,
                     ],
                 ],
             ],
@@ -336,14 +439,63 @@ class SidebarMenuService
                         'icon' => 'shield-lock',
                         'active_pattern' => 'asesor.akreditasi*',
                         'tooltip' => 'Lihat dan kelola tugas penilaian akreditasi Anda',
+                        'active_query_absent' => ['focus', 'statusFilter'],
                         'show_progress' => false,
                         'show_badge' => true,
+                    ],
+                    [
+                        'key' => 'review_berkas',
+                        'label' => 'Review Berkas',
+                        'route' => 'asesor.akreditasi',
+                        'route_query' => ['focus' => 'review'],
+                        'icon' => 'eye',
+                        'active_pattern' => 'asesor.akreditasi*',
+                        'active_query' => ['focus' => 'review'],
+                        'tooltip' => 'Review profil, IPM, SDM, EDPM/IPR, dan catatan berkas pesantren',
+                        'show_progress' => false,
+                        'show_badge' => false,
+                    ],
+                    [
+                        'key' => 'jadwal_visitasi',
+                        'label' => 'Penjadwalan Visitasi',
+                        'route' => 'asesor.akreditasi',
+                        'route_query' => ['statusFilter' => 'belum', 'focus' => 'jadwal'],
+                        'icon' => 'calendar-tick',
+                        'active_pattern' => 'asesor.akreditasi*',
+                        'active_query' => ['statusFilter' => 'belum', 'focus' => 'jadwal'],
+                        'tooltip' => 'Atur jadwal visitasi dan catatan awal untuk pesantren yang ditugaskan',
+                        'show_progress' => false,
+                        'show_badge' => false,
+                    ],
+                    [
+                        'key' => 'input_nilai',
+                        'label' => 'Input Nilai',
+                        'route' => 'asesor.akreditasi',
+                        'route_query' => ['statusFilter' => 'penilaian', 'focus' => 'nilai'],
+                        'icon' => 'pencil',
+                        'active_pattern' => 'asesor.akreditasi*',
+                        'active_query' => ['statusFilter' => 'penilaian', 'focus' => 'nilai'],
+                        'tooltip' => 'Lanjutkan pengisian instrumen dan nilai hasil visitasi',
+                        'show_progress' => false,
+                        'show_badge' => false,
+                    ],
+                    [
+                        'key' => 'laporan_visitasi_workflow',
+                        'label' => 'Laporan Visitasi',
+                        'route' => 'asesor.akreditasi',
+                        'route_query' => ['statusFilter' => 'penilaian', 'focus' => 'laporan_visitasi'],
+                        'icon' => 'document-up',
+                        'active_pattern' => 'asesor.akreditasi*',
+                        'active_query' => ['statusFilter' => 'penilaian', 'focus' => 'laporan_visitasi'],
+                        'tooltip' => 'Unggah laporan visitasi individu dan kelompok setelah penilaian selesai',
+                        'show_progress' => false,
+                        'show_badge' => false,
                     ],
                 ],
             ],
             [
                 'label' => 'Dokumen',
-                'items' => $this->buildDokumenItems('asesor'),
+                'items' => $this->buildDokumenItems('asesor', ['visitasi']),
             ],
         ];
     }
@@ -356,11 +508,13 @@ class SidebarMenuService
      * appended so users can browse the unfiltered list.
      *
      * @param  string  $roleScope  'pesantren' | 'asesor'
+     * @param  array<int, string>  $excludeSlugs
      * @return array<int, array<string, mixed>>
      */
-    private function buildDokumenItems(string $roleScope): array
+    private function buildDokumenItems(string $roleScope, array $excludeSlugs = []): array
     {
-        $categories = $this->getDocumentCategoriesForRole($roleScope);
+        $categories = $this->getDocumentCategoriesForRole($roleScope)
+            ->reject(fn (DocumentCategory $cat) => in_array($cat->slug, $excludeSlugs, true));
 
         $items = $categories->map(function (DocumentCategory $cat) use ($roleScope) {
             $key = 'dokumen_' . $roleScope . '_' . $cat->slug;
@@ -433,8 +587,13 @@ class SidebarMenuService
             'profil_pesantren' => 'Kelola data profil dan informasi dasar pesantren Anda',
             'ipm' => 'Kelola dokumen Instrumen Penilaian Mutu pesantren',
             'data_sdm' => 'Kelola data sumber daya manusia pesantren',
-            'edpm' => 'Isi Evaluasi Diri Penjaminan Mutu pesantren',
+            'edpm_ipr' => 'Isi Evaluasi Diri Penjaminan Mutu dan Indikator Pemenuhan Relatif',
             'pengajuan' => 'Ajukan dan pantau status akreditasi pesantren',
+            'status_perbaikan' => 'Pantau catatan penolakan dan tindak lanjut perbaikan berkas',
+            'kartu_kendali_visitasi' => 'Unggah dan pantau kartu kendali setelah visitasi selesai',
+            'hasil_akhir' => 'Lihat nilai akhir, peringkat, dan rekomendasi hasil akreditasi',
+            'sertifikat_akreditasi' => 'Unduh sertifikat akreditasi jika sudah diterbitkan',
+            'banding_pesantren' => 'Ajukan dan pantau banding hasil akreditasi',
 
             // Admin tooltips
             'dashboard' => 'Lihat ringkasan dan statistik sistem akreditasi',
@@ -446,13 +605,18 @@ class SidebarMenuService
             'master_kategori_dokumen' => 'Atur kategori dan visibilitas dokumen per role',
             'master_dokumen' => 'Kelola katalog dokumen wajib yang diunggah pesantren dan asesor',
             'akun_pengguna' => 'Kelola akun admin, asesor, dan pesantren beserta status aktivasinya',
-            'peran_hak_akses' => 'Kelola peran (role) yang tersedia di sistem',
+            'role_sistem' => 'Kelola katalog role sistem yang menjadi dasar hak akses pengguna',
+            'hak_akses' => 'Kelola matriks permission tiap role secara dinamis',
             'failed_notifications' => 'Pantau dan kelola notifikasi yang gagal terkirim',
             'trash' => 'Kelola data akreditasi terhapus dengan masa retensi sebelum dihapus permanen',
 
             // Asesor tooltips
             'profil_asesor' => 'Kelola data profil dan informasi asesor Anda',
             'daftar_tugas' => 'Lihat dan kelola tugas penilaian akreditasi Anda',
+            'review_berkas' => 'Review profil, IPM, SDM, EDPM/IPR, dan catatan berkas pesantren',
+            'jadwal_visitasi' => 'Atur jadwal visitasi dan catatan awal untuk pesantren yang ditugaskan',
+            'input_nilai' => 'Lanjutkan pengisian instrumen dan nilai hasil visitasi',
+            'laporan_visitasi_workflow' => 'Unggah laporan visitasi individu dan kelompok setelah penilaian selesai',
         ];
     }
 }

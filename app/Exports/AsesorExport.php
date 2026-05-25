@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\Akreditasi;
 use App\Models\User;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -43,12 +44,12 @@ class AsesorExport implements FromCollection, WithHeadings, WithMapping
             ->when($this->filterPenugasan, function ($query) {
                 if ($this->filterPenugasan === 'bertugas') {
                     $query->whereHas('asesor.assessments.akreditasi', function ($q) {
-                        $q->whereNotIn('status', [1, 2]);
+                        $q->whereIn('status', Akreditasi::activeStatuses());
                     });
                 } elseif ($this->filterPenugasan === 'bebas') {
                     $query->whereDoesntHave('asesor.assessments', function ($q) {
                         $q->whereHas('akreditasi', function ($sq) {
-                            $sq->whereNotIn('status', [1, 2]);
+                            $sq->whereIn('status', Akreditasi::activeStatuses());
                         });
                     });
                 }
@@ -86,9 +87,9 @@ class AsesorExport implements FromCollection, WithHeadings, WithMapping
         if ($latestTask) {
             $statusAkreditasi = $latestTask->akreditasi?->status;
             $penugasan = 'Sedang Bertugas';
-            if ($statusAkreditasi == 4) {
+            if ((int) $statusAkreditasi === Akreditasi::STATUS_VISITASI) {
                 $penugasan = 'Visitasi';
-            } elseif (in_array($statusAkreditasi, [1, 2])) {
+            } elseif ((int) $statusAkreditasi === Akreditasi::STATUS_SELESAI) {
                 $penugasan = 'Selesai';
             }
         }

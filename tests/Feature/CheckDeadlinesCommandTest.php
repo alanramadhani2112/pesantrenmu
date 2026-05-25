@@ -14,12 +14,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schedule;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests for CheckDeadlinesCommand (akreditasi:check-deadlines)
  *
- * @group Feature: assessment-visitasi-timeout
  */
+#[Group('Feature: assessment-visitasi-timeout')]
 class CheckDeadlinesCommandTest extends TestCase
 {
     use RefreshDatabase;
@@ -33,7 +34,7 @@ class CheckDeadlinesCommandTest extends TestCase
     /**
      * Helper: create a pesantren user with a Pesantren record.
      */
-    private function createPesantrenUser(string $pesantrenName = 'Pesantren Test'): User
+private function createPesantrenUser(string $pesantrenName = 'Pesantren Test'): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -46,7 +47,7 @@ class CheckDeadlinesCommandTest extends TestCase
     /**
      * Helper: create an Asesor with an associated User.
      */
-    private function createAsesorWithUser(string $name = 'Asesor Test'): array
+private function createAsesorWithUser(string $name = 'Asesor Test'): array
     {
         $user = User::factory()->create(['role_id' => 2]);
         $asesor = Asesor::create([
@@ -64,7 +65,7 @@ class CheckDeadlinesCommandTest extends TestCase
     /**
      * Task 4.4: Verify the command is registered and scheduled daily.
      */
-    public function test_command_is_registered(): void
+public function test_command_is_registered(): void
     {
         // Verify the command exists and can be called
         $this->artisan('akreditasi:check-deadlines')
@@ -74,7 +75,7 @@ class CheckDeadlinesCommandTest extends TestCase
     /**
      * Task 4.4: Verify the command is scheduled daily in routes/console.php.
      */
-    public function test_command_is_scheduled_daily(): void
+public function test_command_is_scheduled_daily(): void
     {
         // Read the console routes file and verify the schedule entry exists
         $consoleRoutesPath = base_path('routes/console.php');
@@ -102,7 +103,7 @@ class CheckDeadlinesCommandTest extends TestCase
      * - One assessment with future deadline (not approaching) → no notification
      * - One akreditasi with status 1 (completed) → no notification
      */
-    public function test_full_command_run_with_mixed_data_dispatches_correct_notifications(): void
+public function test_full_command_run_with_mixed_data_dispatches_correct_notifications(): void
     {
         Notification::fake();
 
@@ -206,7 +207,7 @@ class CheckDeadlinesCommandTest extends TestCase
     /**
      * Task 4.5: Command handles edge case — no assessments, exits successfully.
      */
-    public function test_command_exits_successfully_with_no_assessments(): void
+public function test_command_exits_successfully_with_no_assessments(): void
     {
         Notification::fake();
 

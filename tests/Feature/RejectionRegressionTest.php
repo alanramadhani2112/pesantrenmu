@@ -32,7 +32,7 @@ class RejectionRegressionTest extends TestCase
     /**
      * Helper: create a pesantren user with akreditasi at status 5 and an Asesor 1 assigned.
      */
-    private function createAsesor1Setup(): array
+private function createAsesor1Setup(): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -78,7 +78,7 @@ class RejectionRegressionTest extends TestCase
      *
      * Validates: Requirements 1.1, 2.1, 3.1, 7.1
      */
-    public function test_full_rejection_perbaikan_accept_lifecycle_end_to_end(): void
+public function test_full_rejection_perbaikan_accept_lifecycle_end_to_end(): void
     {
         Notification::fake();
 
@@ -132,9 +132,9 @@ class RejectionRegressionTest extends TestCase
         $this->assertFalse($this->rejectionService->isSectionUnlocked($akreditasiId, 'sdm'));
         $this->assertEmpty($this->rejectionService->getUnlockedSections($akreditasiId));
 
-        // Verify rejection status is 'submitted'
+        // Verify rejection status is resolved after pesantren submits perbaikan.
         $rejection = AkreditasiRejection::where('akreditasi_id', $akreditasiId)->first();
-        $this->assertEquals('submitted', $rejection->status);
+        $this->assertEquals('resolved', $rejection->status);
         $this->assertNotNull($rejection->perbaikan_submitted_at);
 
         // Verify akreditasi status still at 5
@@ -163,7 +163,7 @@ class RejectionRegressionTest extends TestCase
             $setup['pesantrenUser'],
             AkreditasiNotification::class,
             function ($notification) {
-                return $notification->type === 'rejection_created';
+                return $notification->type === 'document_rejection_created';
             }
         );
     }
@@ -178,7 +178,7 @@ class RejectionRegressionTest extends TestCase
      *
      * Validates: Requirements 4.3, 4.6, 4.8
      */
-    public function test_rejection_limit_reached_triggers_auto_rejection_with_banding_available(): void
+public function test_rejection_limit_reached_triggers_auto_rejection_with_banding_available(): void
     {
         Notification::fake();
 
@@ -222,13 +222,13 @@ class RejectionRegressionTest extends TestCase
         $this->assertEquals('limit_reached', $result2['rejection']->status);
         $this->assertEquals(2, $result2['rejection']->rejection_number);
 
-        // Step 3: Verify akreditasi status = 2 (Ditolak)
+        // Step 3: Verify akreditasi status = Ditolak
         $akreditasi->refresh();
-        $this->assertEquals(2, (int) $akreditasi->status);
+        $this->assertEquals(-1, (int) $akreditasi->status);
 
         $this->assertDatabaseHas('akreditasis', [
             'id' => $akreditasiId,
-            'status' => 2,
+            'status' => -1,
         ]);
 
         // Step 4: Verify pesantren is unlocked
@@ -236,9 +236,7 @@ class RejectionRegressionTest extends TestCase
         $this->assertFalse((bool) $pesantren->is_locked, 'Pesantren should be unlocked after auto-rejection');
 
         // Step 5: Verify banding/resubmission mechanisms are still available
-        // Status 2 (Ditolak) allows banding - the system doesn't block banding at status 2
-        // This is verified by checking the akreditasi is at status 2 which is the prerequisite for banding
-        $this->assertEquals(2, (int) $akreditasi->status, 'Status 2 allows banding/resubmission');
+        $this->assertEquals(-1, (int) $akreditasi->status, 'Status -1 allows banding/resubmission');
 
         // Verify the rejection record has no perbaikan_deadline (no further correction cycle)
         $this->assertNull($result2['rejection']->perbaikan_deadline, 'No deadline should be set for limit_reached rejection');
@@ -262,7 +260,7 @@ class RejectionRegressionTest extends TestCase
      *
      * Validates: Requirements 8.4, 8.5
      */
-    public function test_perbaikan_deadline_expiry_triggers_auto_rejection(): void
+public function test_perbaikan_deadline_expiry_triggers_auto_rejection(): void
     {
         Notification::fake();
 
@@ -307,13 +305,14 @@ class RejectionRegressionTest extends TestCase
             'status' => 'expired',
         ]);
 
-        // Step 4: Verify akreditasi status = 2 (Ditolak)
-        $akreditasi = Akreditasi::find($akreditasiId);
-        $this->assertEquals(2, (int) $akreditasi->status);
+        // Step 4: Verify akreditasi status = Ditolak
+        $akreditasi = Akreditasi::withTrashed()->find($akreditasiId);
+        $this->assertNotNull($akreditasi);
+        $this->assertEquals(-1, (int) $akreditasi->status);
 
         $this->assertDatabaseHas('akreditasis', [
             'id' => $akreditasiId,
-            'status' => 2,
+            'status' => -1,
         ]);
 
         // Step 5: Verify pesantren is unlocked
@@ -341,7 +340,7 @@ class RejectionRegressionTest extends TestCase
      *
      * Validates: Requirements 9.1, 9.2, 9.3
      */
-    public function test_admin_final_rejection_stores_categories_and_changes_status(): void
+public function test_admin_final_rejection_stores_categories_and_changes_status(): void
     {
         Notification::fake();
 
@@ -405,13 +404,13 @@ class RejectionRegressionTest extends TestCase
             'status' => 'final',
         ]);
 
-        // Step 4: Verify akreditasi status = 2 (Ditolak)
+        // Step 4: Verify akreditasi status = Ditolak
         $akreditasi->refresh();
-        $this->assertEquals(2, (int) $akreditasi->status);
+        $this->assertEquals(-1, (int) $akreditasi->status);
 
         $this->assertDatabaseHas('akreditasis', [
             'id' => $akreditasi->id,
-            'status' => 2,
+            'status' => -1,
         ]);
 
         // Step 5: Verify pesantren is unlocked

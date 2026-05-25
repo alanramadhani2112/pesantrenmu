@@ -20,6 +20,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Property-Based Tests for Asesor 2 Enforcement
@@ -27,8 +29,8 @@ use Tests\TestCase;
  * Uses PHPUnit with randomized data providers to approximate property-based testing.
  * Each property test runs 100 iterations with randomly generated inputs.
  *
- * @group Feature: asesor-2-enforcement
  */
+#[Group('Feature: asesor-2-enforcement')]
 class Asesor2EnforcementPropertyTest extends TestCase
 {
     use RefreshDatabase;
@@ -164,10 +166,10 @@ class Asesor2EnforcementPropertyTest extends TestCase
      *
      * **Validates: Requirements 1.1, 1.2, 1.3**
      *
-     * @dataProvider randomFilledTotalProvider
-     * @group Property 1: completion percentage calculation
      */
-    public function test_property_1_completion_percentage_calculation(int $filled, int $total): void
+#[Group('Property 1: completion percentage calculation')]
+#[DataProvider('randomFilledTotalProvider')]
+public function test_property_1_completion_percentage_calculation(int $filled, int $total): void
     {
         // Create master butir records to match the total
         $komponen = MasterEdpmKomponen::firstOrCreate(['nama' => 'Test Komponen']);
@@ -241,10 +243,10 @@ class Asesor2EnforcementPropertyTest extends TestCase
      *
      * **Validates: Requirements 2.1, 2.2, 7.1, 7.4**
      *
-     * @dataProvider randomIncompleteAsesor2Provider
-     * @group Property 2: finalization blocked by incomplete asesor 2
      */
-    public function test_property_2_finalization_blocked_by_incomplete_asesor2(int $filled, int $total): void
+#[Group('Property 2: finalization blocked by incomplete asesor 2')]
+#[DataProvider('randomIncompleteAsesor2Provider')]
+public function test_property_2_finalization_blocked_by_incomplete_asesor2(int $filled, int $total): void
     {
         // Create master butir records
         $komponen = MasterEdpmKomponen::firstOrCreate(['nama' => 'Test Komponen']);
@@ -349,10 +351,10 @@ class Asesor2EnforcementPropertyTest extends TestCase
      *
      * **Validates: Requirements 2.1 (implicit), 7.2, 7.4**
      *
-     * @dataProvider randomIncompleteAsesor1Provider
-     * @group Property 3: finalization blocked by incomplete asesor 1
      */
-    public function test_property_3_finalization_blocked_by_incomplete_asesor1(
+#[Group('Property 3: finalization blocked by incomplete asesor 1')]
+#[DataProvider('randomIncompleteAsesor1Provider')]
+public function test_property_3_finalization_blocked_by_incomplete_asesor1(
         int $naFilled,
         int $nkFilled,
         int $total,
@@ -443,10 +445,10 @@ class Asesor2EnforcementPropertyTest extends TestCase
      *
      * **Validates: Requirements 3.4**
      *
-     * @dataProvider randomPercentageProvider
-     * @group Property 4: color mapping
      */
-    public function test_property_4_color_mapping(int $percentage): void
+#[Group('Property 4: color mapping')]
+#[DataProvider('randomPercentageProvider')]
+public function test_property_4_color_mapping(int $percentage): void
     {
         $color = $this->progressTracker->getColorClass((float) $percentage);
 
@@ -473,10 +475,10 @@ class Asesor2EnforcementPropertyTest extends TestCase
      *
      * **Validates: Requirements 5.4**
      *
-     * @dataProvider randomReminderContentProvider
-     * @group Property 5: reminder content
      */
-    public function test_property_5_reminder_content(string $pesantrenName, int $percentage, string $deadline): void
+#[Group('Property 5: reminder content')]
+#[DataProvider('randomReminderContentProvider')]
+public function test_property_5_reminder_content(string $pesantrenName, int $percentage, string $deadline): void
     {
         // Create master butir records (need at least 1)
         $komponen = MasterEdpmKomponen::firstOrCreate(['nama' => 'Test Komponen']);
@@ -572,9 +574,9 @@ class Asesor2EnforcementPropertyTest extends TestCase
      *
      * **Validates: Requirements 5.5**
      *
-     * @group Property 6: rate limiting
      */
-    public function test_property_6_rate_limiting(): void
+#[Group('Property 6: rate limiting')]
+public function test_property_6_rate_limiting(): void
     {
         $faker = Faker::create();
 

@@ -33,7 +33,7 @@ class AuditTrailPropertyTest extends TestCase
     /**
      * Helper: create an admin user.
      */
-    private function createAdminUser(): User
+private function createAdminUser(): User
     {
         return User::factory()->create(['role_id' => 1]);
     }
@@ -41,7 +41,7 @@ class AuditTrailPropertyTest extends TestCase
     /**
      * Helper: create a pesantren user with pesantren record.
      */
-    private function createPesantrenUser(): User
+private function createPesantrenUser(): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -54,7 +54,7 @@ class AuditTrailPropertyTest extends TestCase
     /**
      * Helper: create an akreditasi for a given user.
      */
-    private function createAkreditasi(int $userId, int $status = 6): Akreditasi
+private function createAkreditasi(int $userId, int $status = 6): Akreditasi
     {
         return Akreditasi::create([
             'user_id' => $userId,

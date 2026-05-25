@@ -19,6 +19,7 @@ use Faker\Factory as Faker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests for DeadlineService::reassignAsesor()
@@ -30,8 +31,8 @@ use Tests\TestCase;
  *  - Task 6.5: Notifications sent to both old and new asesor
  *  - Task 6.6: DomainException thrown when akreditasi is not overdue
  *
- * @group Feature: assessment-visitasi-timeout
  */
+#[Group('Feature: assessment-visitasi-timeout')]
 class ReassignAsesorTest extends TestCase
 {
     use RefreshDatabase;
@@ -57,7 +58,7 @@ class ReassignAsesorTest extends TestCase
      * Create an Asesor with an associated User (role_id=2).
      * Returns [$asesor, $user].
      */
-    private function createAsesorWithUser(string $name = null): array
+private function createAsesorWithUser(string $name = null): array
     {
         $user = User::factory()->create(['role_id' => 2]);
         $displayName = $name ?? ('Asesor ' . $user->id);
@@ -73,7 +74,7 @@ class ReassignAsesorTest extends TestCase
      * Create an Akreditasi with a pesantren user (role_id=3).
      * Returns [$akreditasi, $pesantrenUser].
      */
-    private function createAkreditasiWithUser(int $status = 5): array
+private function createAkreditasiWithUser(int $status = 5): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -90,7 +91,7 @@ class ReassignAsesorTest extends TestCase
     /**
      * Create an overdue Assessment for the given akreditasi and asesor.
      */
-    private function createOverdueAssessment(Akreditasi $akreditasi, Asesor $asesor, Carbon $today): Assessment
+private function createOverdueAssessment(Akreditasi $akreditasi, Asesor $asesor, Carbon $today): Assessment
     {
         return Assessment::create([
             'akreditasi_id' => $akreditasi->id,
@@ -107,7 +108,7 @@ class ReassignAsesorTest extends TestCase
      * Create a MasterEdpmKomponen and MasterEdpmButir for EDPM test data.
      * Returns [$komponen, $butir].
      */
-    private function createEdpmMasterData(): array
+private function createEdpmMasterData(): array
     {
         $komponen = MasterEdpmKomponen::create(['nama' => 'Komponen Test']);
         $butir = MasterEdpmButir::create([
@@ -134,7 +135,7 @@ class ReassignAsesorTest extends TestCase
      *
      * **Validates: Requirements 6.3**
      */
-    public function test_property_8_reassignment_updates_asesor_and_resets_deadline(): void
+public function test_property_8_reassignment_updates_asesor_and_resets_deadline(): void
     {
         $faker = Faker::create();
 
@@ -222,7 +223,7 @@ class ReassignAsesorTest extends TestCase
      *
      * **Validates: Requirements 6.6**
      */
-    public function test_property_9_edpm_data_preserved_after_reassignment(): void
+public function test_property_9_edpm_data_preserved_after_reassignment(): void
     {
         $faker = Faker::create();
 
@@ -362,7 +363,7 @@ class ReassignAsesorTest extends TestCase
      *
      * **Validates: Requirements 6.4, 6.5**
      */
-    public function test_integration_reassignment_sends_notifications_to_both_asesors(): void
+public function test_integration_reassignment_sends_notifications_to_both_asesors(): void
     {
         Notification::fake();
 
@@ -405,7 +406,7 @@ class ReassignAsesorTest extends TestCase
      *
      * **Validates: Requirements 6.4**
      */
-    public function test_integration_new_asesor_notification_contains_pesantren_and_deadline(): void
+public function test_integration_new_asesor_notification_contains_pesantren_and_deadline(): void
     {
         Notification::fake();
 
@@ -462,7 +463,7 @@ class ReassignAsesorTest extends TestCase
      *
      * **Validates: Requirements 6.7**
      */
-    public function test_unit_reassignment_on_non_overdue_throws_domain_exception(): void
+public function test_unit_reassignment_on_non_overdue_throws_domain_exception(): void
     {
         $today = Carbon::create(2025, 9, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -496,7 +497,7 @@ class ReassignAsesorTest extends TestCase
      *
      * **Validates: Requirements 6.7**
      */
-    public function test_unit_reassignment_on_deadline_today_throws_domain_exception(): void
+public function test_unit_reassignment_on_deadline_today_throws_domain_exception(): void
     {
         $today = Carbon::create(2025, 9, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -528,7 +529,7 @@ class ReassignAsesorTest extends TestCase
      *
      * **Validates: Requirements 6.1**
      */
-    public function test_unit_reassignment_on_overdue_does_not_throw(): void
+public function test_unit_reassignment_on_overdue_does_not_throw(): void
     {
         Notification::fake();
 
@@ -560,7 +561,7 @@ class ReassignAsesorTest extends TestCase
      *
      * **Validates: Requirements 6.7**
      */
-    public function test_unit_reassignment_on_far_future_deadline_throws_domain_exception(): void
+public function test_unit_reassignment_on_far_future_deadline_throws_domain_exception(): void
     {
         $today = Carbon::create(2025, 9, 1, 0, 0, 0);
         Carbon::setTestNow($today);

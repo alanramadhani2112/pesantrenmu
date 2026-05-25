@@ -76,6 +76,7 @@ class PesantrenAkreditasiWorkflowTest extends TestCase
         $rejected = Akreditasi::create([
             'user_id' => $user->id,
             'status' => 2,
+            'updated_at' => now()->subDays(31),
         ]);
 
         $firstResubmission = $this->service()->createSubmission($user->id, $rejected->id);
@@ -99,6 +100,13 @@ class PesantrenAkreditasiWorkflowTest extends TestCase
         Pesantren::create([
             'user_id' => $user->id,
             'nama_pesantren' => 'Pesantren TDD',
+            'ns_pesantren' => '510012345678',
+            'alamat' => 'Jl. Pendidikan No. 12',
+            'provinsi' => 'Jawa Tengah',
+            'kota_kabupaten' => 'Kota Surakarta',
+            'tahun_pendirian' => '1998',
+            'nama_mudir' => 'Ahmad Mudir',
+            'layanan_satuan_pendidikan' => ['spm'],
             'is_locked' => false,
         ]);
 
@@ -113,6 +121,14 @@ class PesantrenAkreditasiWorkflowTest extends TestCase
         SdmPesantren::create([
             'user_id' => $user->id,
             'tingkat' => 'spm',
+            'santri_l' => 120,
+            'santri_p' => 95,
+            'ustadz_dirosah_l' => 8,
+            'ustadz_dirosah_p' => 4,
+            'ustadz_tsanawiyah_l' => 3,
+            'ustadz_tsanawiyah_p' => 2,
+            'ustadz_aliyah_l' => 2,
+            'ustadz_aliyah_p' => 1,
         ]);
 
         $komponen = MasterEdpmKomponen::create(['nama' => 'Standar Isi']);

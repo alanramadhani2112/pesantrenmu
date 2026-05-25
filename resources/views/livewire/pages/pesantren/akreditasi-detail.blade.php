@@ -74,6 +74,9 @@ new #[Layout('layouts.app')] class extends Component
     // Rejection status data
     public $rejectionStatus = [];
 
+    // Banding
+    public $bandingAlasan = '';
+
     use WithFileUploads;
 
     public function mount($uuid)
@@ -121,8 +124,8 @@ new #[Layout('layouts.app')] class extends Component
             }
         }
 
-        // Load resubmission status when akreditasi is rejected (status 2)
-        if ((int) $this->akreditasi->status === 2) {
+        // Load resubmission status when akreditasi is rejected (status -1)
+        if ((int) $this->akreditasi->status === \App\StateMachine\AkreditasiStateMachine::STATUS_DITOLAK) {
             $resubmissionService = app(ResubmissionService::class);
             $this->resubmissionStatus = $resubmissionService->getResubmissionStatus($this->akreditasi->id);
         }
@@ -199,9 +202,7 @@ new #[Layout('layouts.app')] class extends Component
     {
         Gate::authorize('update', $this->akreditasi);
 
-        $pesantrenService = app(\App\Services\PesantrenService::class);
-
-        if ($this->akreditasi->status != 3) {
+        if ((int)$this->akreditasi->status !== \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
             return;
         }
 
@@ -213,78 +214,56 @@ new #[Layout('layouts.app')] class extends Component
             'kartu_kendali_file.max' => 'Ukuran file maksimal 5MB.',
         ]);
 
-        $path = $this->kartu_kendali_file->store('akreditasi/kartu_kendali', 'public');
-
-        $success = $pesantrenService->uploadKartuKendali($this->akreditasi->id, Auth::id(), $path);
-
-        if (! $success) {
-            $this->dispatch(
-                'notification-received',
-                type: 'error',
-                title: 'Gagal',
-                message: 'Anda tidak memiliki akses ke pengajuan ini.'
-            );
-
-            return;
+        try {
+            $docService = app(\App\Services\AkreditasiDocumentService::class);
+            $docService->uploadKartuKendaliForPesantren($this->akreditasi->id, Auth::id(), $this->kartu_kendali_file);
+            $this->reset(['kartu_kendali_file']);
+            $this->akreditasi->refresh();
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Kartu Kendali berhasil diunggah.');
+        } catch (\Throwable $e) {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Upload gagal: ' . $e->getMessage());
         }
-
-        $this->reset(['kartu_kendali_file']);
-
-        $this->dispatch(
-            'notification-received',
-            type: 'success',
-            title: 'Berhasil!',
-            message: 'Kartu Kendali berhasil diunggah.'
-        );
     }
 
     public function resubmit()
     {
         Gate::authorize('update', $this->akreditasi);
 
-        $pesantrenService = app(PesantrenService::class);
-        $resubmissionService = app(ResubmissionService::class);
-
-        $result = $pesantrenService->createSubmission(Auth::id(), $this->akreditasi->id);
-
-        if ($result === null) {
-            // Get the eligibility info to determine the error message
-            $eligibility = $resubmissionService->checkResubmissionEligibility($this->akreditasi->id);
-
-            if (! $eligibility['allowed'] && $eligibility['error_code']) {
-                $message = $resubmissionService->getErrorMessage($eligibility['error_code'], $eligibility['error_data']);
-            } else {
-                $message = 'Pengajuan ulang gagal. Silakan periksa kelengkapan data Anda.';
-            }
-
-            $this->dispatch(
-                'notification-received',
-                type: 'error',
-                title: 'Gagal',
-                message: $message
-            );
-
-            return;
+        try {
+            $workflowService = app(\App\Services\AkreditasiWorkflowService::class);
+            $newAkreditasi = $workflowService->createResubmission($this->akreditasi->id, Auth::id());
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Pengajuan ulang berhasil dibuat.');
+            $this->redirect(route('pesantren.akreditasi-detail', $newAkreditasi->uuid), navigate: true);
+        } catch (\DomainException $e) {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: $e->getMessage());
         }
+    }
 
-        $this->dispatch(
-            'notification-received',
-            type: 'success',
-            title: 'Berhasil!',
-            message: 'Pengajuan ulang berhasil dibuat.'
-        );
-
-        $this->redirect(route('pesantren.akreditasi-detail', $result->uuid), navigate: true);
+    public function submitBanding(): void
+    {
+        Gate::authorize('update', $this->akreditasi);
+        $this->validate(['bandingAlasan' => 'required|string|min:10|max:1000']);
+        try {
+            $workflowService = app(\App\Services\AkreditasiWorkflowService::class);
+            $workflowService->submitBanding($this->akreditasi->id, Auth::id(), $this->bandingAlasan);
+            $this->akreditasi->refresh();
+            $this->bandingAlasan = '';
+            $this->dispatch('close-modal', 'banding-modal');
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Banding berhasil diajukan.');
+        } catch (\DomainException $e) {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: $e->getMessage());
+        }
     }
 }; ?>
 
 @php
     $statusVariant = match ((int) $akreditasi->status) {
-        1 => 'success',
-        2 => 'danger',
-        3 => 'warning',
-        4 => 'info',
-        default => 'primary',
+        0 => 'success',
+        -1, -2 => 'danger',
+        1 => 'warning',
+        2 => 'info',
+        3, 4, 5, 6 => 'primary',
+        default => 'secondary',
     };
 
     $ipmItems = [
@@ -319,11 +298,12 @@ new #[Layout('layouts.app')] class extends Component
     ];
 @endphp
 
-<x-slot name="header">{{ __('Akreditasi Detail') }}</x-slot>
+<x-slot name="header">{{ __('Detail Pengajuan Akreditasi') }}</x-slot>
 
 <x-ui.page
     title="Detail Pengajuan Akreditasi"
     subtitle="{{ $pesantren?->nama_pesantren ?? 'Pesantren' }}"
+    class="spm-detail-page"
     x-data="akreditasiPesantren()"
 >
     <x-slot:toolbar>
@@ -351,18 +331,21 @@ new #[Layout('layouts.app')] class extends Component
         </div>
     </div>
 
+    <x-akreditasi.workflow-stepper
+        :status="$akreditasi->status"
+        title="Tahapan Akreditasi LP2M"
+        subtitle="Lihat posisi pengajuan pesantren dari pengiriman berkas sampai hasil akhir akreditasi."
+        class="mb-6"
+    />
+
     {{-- Rejection Status Section --}}
     @if(!empty($rejectionStatus) && ($rejectionStatus['count'] > 0 || $rejectionStatus['active'] || $rejectionStatus['history']->count() > 0))
         <div class="mb-6">
             {{-- Active rejection: Submit Perbaikan or Menunggu Review --}}
             @if($rejectionStatus['active'] && $rejectionStatus['active']->status === 'pending')
-                <div class="spm-inline-alert mb-4" style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 16px;">
-                    <x-ui.icon name="information-2" class="fs-2 text-warning" />
-                    <div class="flex-grow-1">
-                        <div class="spm-inline-alert-title">Perbaikan Diperlukan</div>
-                        <div class="spm-inline-alert-text">
-                            Asesor telah menolak beberapa bagian dokumen Anda. Silakan perbaiki bagian yang ditandai, lalu kirim perbaikan.
-                        </div>
+                <x-ui.alert variant="warning" icon="information-2" title="Perbaikan Diperlukan" class="mb-4">
+                    <div>
+                        Asesor telah menolak beberapa bagian dokumen Anda. Silakan perbaiki bagian yang ditandai, lalu kirim perbaikan.
                         <div class="d-flex align-items-center gap-3 mt-3">
                             <x-ui.badge variant="warning">
                                 Penolakan {{ $rejectionStatus['count'] }} dari {{ $rejectionStatus['limit'] }}
@@ -374,32 +357,28 @@ new #[Layout('layouts.app')] class extends Component
                             @endif
                         </div>
                         <div class="mt-3">
-                            <x-ui.button wire:click="submitPerbaikan" wire:loading.attr="disabled" variant="primary" size="sm">
+                            <x-ui.button @click="confirmSubmitPerbaikan($wire)" wire:loading.attr="disabled" variant="primary" size="sm">
                                 <span wire:loading.remove wire:target="submitPerbaikan">Submit Perbaikan</span>
                                 <span wire:loading wire:target="submitPerbaikan">Memproses...</span>
                             </x-ui.button>
                         </div>
                     </div>
-                </div>
+                </x-ui.alert>
             @elseif($rejectionStatus['history']->where('type', 'asesor')->where('status', 'submitted')->count() > 0)
-                <div class="spm-inline-alert mb-4" style="background: #d1ecf1; border: 1px solid #17a2b8; border-radius: 8px; padding: 16px;">
-                    <x-ui.icon name="timer" class="fs-2 text-info" />
-                    <div class="flex-grow-1">
-                        <div class="spm-inline-alert-title">Menunggu Review</div>
-                        <div class="spm-inline-alert-text">
-                            Perbaikan Anda telah dikirim dan sedang menunggu review dari asesor.
-                        </div>
+                <x-ui.alert variant="info" icon="timer" title="Menunggu Review" class="mb-4">
+                    <div>
+                        Perbaikan Anda telah dikirim dan sedang menunggu review dari asesor.
                         <div class="d-flex align-items-center gap-3 mt-3">
                             <x-ui.badge variant="info">
                                 Penolakan {{ $rejectionStatus['count'] }} dari {{ $rejectionStatus['limit'] }}
                             </x-ui.badge>
                         </div>
                     </div>
-                </div>
+                </x-ui.alert>
             @endif
 
             {{-- Admin Final Rejection Detail --}}
-            @if((int) $akreditasi->status === 2)
+            @if((int) $akreditasi->status === -1)
                 @php
                     $adminFinalRejection = $rejectionStatus['history']->where('type', 'admin_final')->first();
                 @endphp
@@ -427,25 +406,13 @@ new #[Layout('layouts.app')] class extends Component
                         $expiredRejection = $rejectionStatus['history']->where('status', 'expired')->first();
                     @endphp
                     @if($limitRejection)
-                        <div class="spm-inline-alert mb-4" style="background: #f8d7da; border: 1px solid #dc3545; border-radius: 8px; padding: 16px;">
-                            <x-ui.icon name="cross-circle" class="fs-2 text-danger" />
-                            <div>
-                                <div class="spm-inline-alert-title">Ditolak Otomatis — Batas Penolakan Tercapai</div>
-                                <div class="spm-inline-alert-text">
-                                    Pengajuan ditolak secara otomatis karena batas maksimum penolakan ({{ $rejectionStatus['limit'] }}x) telah tercapai.
-                                </div>
-                            </div>
-                        </div>
+                        <x-ui.alert variant="danger" icon="cross-circle" title="Ditolak Otomatis - Batas Penolakan Tercapai" class="mb-4">
+                            Pengajuan ditolak secara otomatis karena batas maksimum penolakan ({{ $rejectionStatus['limit'] }}x) telah tercapai.
+                        </x-ui.alert>
                     @elseif($expiredRejection)
-                        <div class="spm-inline-alert mb-4" style="background: #f8d7da; border: 1px solid #dc3545; border-radius: 8px; padding: 16px;">
-                            <x-ui.icon name="cross-circle" class="fs-2 text-danger" />
-                            <div>
-                                <div class="spm-inline-alert-title">Ditolak Otomatis — Batas Waktu Perbaikan Terlewat</div>
-                                <div class="spm-inline-alert-text">
-                                    Pengajuan ditolak secara otomatis karena batas waktu perbaikan telah terlewat.
-                                </div>
-                            </div>
-                        </div>
+                        <x-ui.alert variant="danger" icon="cross-circle" title="Ditolak Otomatis - Batas Waktu Perbaikan Terlewat" class="mb-4">
+                            Pengajuan ditolak secara otomatis karena batas waktu perbaikan telah terlewat.
+                        </x-ui.alert>
                     @endif
                 @endif
             @endif
@@ -523,10 +490,10 @@ new #[Layout('layouts.app')] class extends Component
                 <x-ui.tab wire:click="setTab('ipm')" :active="$activeTab === 'ipm'">IPM</x-ui.tab>
                 <x-ui.tab wire:click="setTab('sdm')" :active="$activeTab === 'sdm'">SDM</x-ui.tab>
                 <x-ui.tab wire:click="setTab('edpm')" :active="$activeTab === 'edpm'">EDPM</x-ui.tab>
-                @if($akreditasi->status == 1 || $akreditasi->status == 2 || ($akreditasi->status == 3 && $bandingStatus))
+                @if((int) $akreditasi->status === 0 || (int) $akreditasi->status === -1 || $bandingStatus)
                     <x-ui.tab wire:click="setTab('hasil')" :active="$activeTab === 'hasil'">Hasil Penilaian</x-ui.tab>
                 @endif
-                @if($akreditasi->status == 3)
+                @if((int) $akreditasi->status === 2)
                     <x-ui.tab wire:click="setTab('kartu')" :active="$activeTab === 'kartu'">Kartu Kendali</x-ui.tab>
                 @endif
             </x-ui.tabs>
@@ -738,7 +705,7 @@ new #[Layout('layouts.app')] class extends Component
 
             @if ($activeTab === 'hasil')
                 <div class="d-flex flex-column gap-6">
-                    @if($akreditasi->status == 1)
+                    @if((int) $akreditasi->status === 0)
                         <x-ui.section-card title="Hasil Akreditasi Akhir" subtitle="Nilai, peringkat, SK, dan masa berlaku.">
                             <div class="p-6">
                                 <div class="row g-5">
@@ -759,14 +726,10 @@ new #[Layout('layouts.app')] class extends Component
                                 </div>
                             </div>
                         </x-ui.section-card>
-                    @elseif($akreditasi->status == 2)
-                        <div class="spm-inline-alert">
-                            <x-ui.icon name="cross-circle" class="fs-2 text-danger" />
-                            <div>
-                                <div class="spm-inline-alert-title">Pengajuan Ditolak</div>
-                                <div class="spm-inline-alert-text">Catatan: {{ $akreditasi->catatan }}</div>
-                            </div>
-                        </div>
+                    @elseif((int) $akreditasi->status === -1)
+                        <x-ui.alert variant="danger" icon="cross-circle" title="Pengajuan Ditolak">
+                            Catatan: {{ $akreditasi->catatan }}
+                        </x-ui.alert>
 
                         {{-- Resubmission Status Section --}}
                         @if(!empty($resubmissionStatus))
@@ -795,7 +758,7 @@ new #[Layout('layouts.app')] class extends Component
                                         {{-- Resubmit button --}}
                                         <div>
                                             @if($resubmissionStatus['can_resubmit'])
-                                                <x-ui.button wire:click="resubmit" wire:loading.attr="disabled">
+                                                <x-ui.button @click="confirmResubmitDetail($wire)" wire:loading.attr="disabled">
                                                     <span wire:loading.remove wire:target="resubmit">Pengajuan Ulang</span>
                                                     <span wire:loading wire:target="resubmit">Memproses...</span>
                                                 </x-ui.button>
@@ -859,18 +822,11 @@ new #[Layout('layouts.app')] class extends Component
                                         </div>
                                     @endif
 
-                                    {{-- Link to new akreditasi (when accepted) --}}
+                                    {{-- Accepted banding returns to final admin validation. --}}
                                     @if($bandingStatus->status === 'accepted')
-                                        @php
-                                            $newAkreditasi = \App\Models\Akreditasi::where('parent', $bandingStatus->akreditasi_id)->latest()->first();
-                                        @endphp
-                                        @if($newAkreditasi)
-                                            <div>
-                                                <x-ui.button :href="route('pesantren.akreditasi-detail', $newAkreditasi->uuid)" variant="success" size="sm">
-                                                    Lihat Pengajuan Baru
-                                                </x-ui.button>
-                                            </div>
-                                        @endif
+                                        <x-ui.alert variant="info" icon="timer" title="Menunggu Validasi Akhir Admin">
+                                            Banding diterima dan proses akreditasi kembali ke tahap Validasi Akhir Admin.
+                                        </x-ui.alert>
                                     @endif
 
                                     {{-- Remaining appeal count --}}
@@ -882,10 +838,10 @@ new #[Layout('layouts.app')] class extends Component
                                     </div>
 
                                     {{-- Ajukan Banding button --}}
-                                    @if((int) $akreditasi->status === 2)
+                                    @if((int) $akreditasi->status === -1)
                                         <div>
                                             @if($bandingEligibility['allowed'])
-                                                <x-ui.button :href="route('pesantren.akreditasi', ['uuid' => $akreditasi->uuid])" variant="primary" size="sm">
+                                                <x-ui.button type="button" variant="primary" size="sm" x-on:click="$dispatch('open-modal', 'banding-modal')">
                                                     Ajukan Banding
                                                 </x-ui.button>
                                             @else
@@ -915,10 +871,10 @@ new #[Layout('layouts.app')] class extends Component
                                     </div>
 
                                     {{-- Ajukan Banding button --}}
-                                    @if((int) $akreditasi->status === 2)
+                                    @if((int) $akreditasi->status === -1)
                                         <div>
                                             @if($bandingEligibility['allowed'])
-                                                <x-ui.button :href="route('pesantren.akreditasi', ['uuid' => $akreditasi->uuid])" variant="primary" size="sm">
+                                                <x-ui.button type="button" variant="primary" size="sm" x-on:click="$dispatch('open-modal', 'banding-modal')">
                                                     Ajukan Banding
                                                 </x-ui.button>
                                             @else
@@ -979,9 +935,9 @@ new #[Layout('layouts.app')] class extends Component
                             <div class="col-lg-4">
                                 <div class="spm-soft-panel h-100">
                                     <div class="spm-detail-label">Langkah 3</div>
-                                    @if($akreditasi->status == 3 && $akreditasi->kartu_kendali && !$errors->has('kartu_kendali_file'))
+                                    @if($akreditasi->status == 2 && $akreditasi->kartu_kendali && !$errors->has('kartu_kendali_file'))
                                         <x-ui.document-item label="Kartu Kendali" :href="Storage::url($akreditasi->kartu_kendali)" />
-                                    @elseif($akreditasi->status == 3)
+                                    @elseif($akreditasi->status == 2)
                                         <x-ui.form-field label="Unggah Kartu Kendali" for="kartu_kendali_file" :error="$errors->get('kartu_kendali_file')">
                                             <x-ui.file-upload
                                                 model="kartu_kendali_file"
@@ -1010,4 +966,21 @@ new #[Layout('layouts.app')] class extends Component
             @endif
         </div>
     </x-ui.card>
+
+    {{-- Banding Modal --}}
+    <x-ui.modal name="banding-modal" focusable>
+        <x-ui.modal-header title="Ajukan Banding" subtitle="Berikan alasan keberatan Anda terhadap hasil akreditasi." icon="information-2" variant="warning" />
+        <x-ui.modal-body>
+            <x-ui.form-field label="Alasan Banding" for="bandingAlasan" :error="$errors->first('bandingAlasan')" hint="Minimal 10 karakter, maksimal 1000 karakter.">
+                <x-ui.textarea model="bandingAlasan" id="bandingAlasan" rows="5" placeholder="Jelaskan alasan keberatan Anda..." />
+            </x-ui.form-field>
+        </x-ui.modal-body>
+        <x-ui.modal-footer>
+            <x-ui.button type="button" variant="light" x-on:click="$dispatch('close-modal', 'banding-modal')">Batal</x-ui.button>
+            <x-ui.button type="button" variant="warning" wire:click="submitBanding" wire:loading.attr="disabled">
+                <span wire:loading.remove wire:target="submitBanding">Ajukan Banding</span>
+                <span wire:loading wire:target="submitBanding">Memproses...</span>
+            </x-ui.button>
+        </x-ui.modal-footer>
+    </x-ui.modal>
 </x-ui.page>

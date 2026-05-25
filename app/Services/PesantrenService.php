@@ -13,6 +13,17 @@ use Illuminate\Support\Facades\Log;
 
 class PesantrenService
 {
+    public const PROFILE_REQUIRED_FIELDS = [
+        'nama_pesantren' => 'Nama Pesantren',
+        'ns_pesantren' => 'Nomor Statistik Pesantren (NSP)',
+        'alamat' => 'Alamat Pesantren',
+        'provinsi' => 'Provinsi',
+        'kota_kabupaten' => 'Kota / Kabupaten',
+        'tahun_pendirian' => 'Tahun Pendirian',
+        'nama_mudir' => 'Nama Mudir / Pimpinan',
+        'layanan_satuan_pendidikan' => 'Layanan Satuan Pendidikan',
+    ];
+
     protected $pesantrenRepository;
 
     protected $akreditasiRepository;
@@ -53,13 +64,19 @@ class PesantrenService
 
     public function toggleDataLock(int $pesantrenId): bool
     {
-        $pesantren = $this->pesantrenRepository->findPesantren($pesantrenId);
-        if ($pesantren) {
+        // PM-8 fix: gunakan lockForUpdate + atomic NOT is_locked untuk mencegah
+        // lost-update saat dua admin klik toggle bersamaan.
+        return DB::transaction(function () use ($pesantrenId) {
+            $pesantren = Pesantren::lockForUpdate()->find($pesantrenId);
+            if (! $pesantren) {
+                return false;
+            }
+
             $isLocked = ! $pesantren->is_locked;
-            $this->pesantrenRepository->updatePesantren($pesantrenId, ['is_locked' => $isLocked]);
+            $pesantren->update(['is_locked' => $isLocked]);
 
             if (! $isLocked) {
-                // Notify user
+                // Notify user hanya saat dibuka kunci
                 $user = User::find($pesantren->user_id);
                 if ($user) {
                     $user->notify(new \App\Notifications\AkreditasiNotification(
@@ -72,9 +89,7 @@ class PesantrenService
             }
 
             return true;
-        }
-
-        return false;
+        });
     }
 
     public function getAkreditasis(int $userId, ?string $search = null, ?string $periodeFilter = null, ?string $statusFilter = null, int $perPage = 10, string $sortField = 'created_at', bool $sortAsc = false): LengthAwarePaginator
@@ -90,8 +105,17 @@ class PesantrenService
         $pesantren = \App\Models\Pesantren::where('user_id', $userId)->first();
         if (! $pesantren) {
             $missingData[] = 'Profil Pesantren belum diisi';
-        } elseif (empty($pesantren->nama_pesantren)) {
-            $missingData[] = 'Nama Pesantren di Profil belum diisi';
+        } else {
+            $missingProfileFields = $this->getMissingProfileFields($pesantren);
+            if ($missingProfileFields !== []) {
+                $missingData[] = 'Profil Pesantren belum lengkap: '.implode(', ', $missingProfileFields);
+            }
+
+            // PM-12 fix: wajib ada minimal 1 layanan satuan pendidikan
+            $layanan = $pesantren->layanan_satuan_pendidikan;
+            if (empty($layanan) || (is_array($layanan) && count($layanan) === 0)) {
+                $missingData[] = 'Layanan Satuan Pendidikan belum dipilih';
+            }
         }
 
         // 2. Check IPM
@@ -113,19 +137,62 @@ class PesantrenService
             }
         }
 
-        // 3. Check SDM
-        if (\App\Models\SdmPesantren::where('user_id', $userId)->count() === 0) {
+        // 3. Check SDM — PM-12 fix: minimal 1 row SDM dengan setidaknya 1 nilai non-zero
+        $sdmRows = \App\Models\SdmPesantren::where('user_id', $userId)->get();
+        if ($sdmRows->isEmpty()) {
             $missingData[] = 'Data SDM belum diisi';
+        } else {
+            $numericFields = [
+                'santri_l', 'santri_p',
+                'ustadz_dirosah_l', 'ustadz_dirosah_p',
+                'ustadz_non_dirosah_l', 'ustadz_non_dirosah_p',
+                'pamong_l', 'pamong_p',
+                'musyrif_l', 'musyrif_p',
+                'tendik_l', 'tendik_p',
+            ];
+            $hasNonZero = $sdmRows->contains(function ($row) use ($numericFields) {
+                foreach ($numericFields as $field) {
+                    if ((int) ($row->$field ?? 0) > 0) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+            if (! $hasNonZero) {
+                $missingData[] = 'Data SDM masih kosong (semua nilai nol). Isi minimal satu data SDM.';
+            }
         }
 
         // 4. Check EDPM
-        $totalButirs = \App\Models\MasterEdpmButir::count();
+        // P-9 fix: cache master butir count — it changes only when admin edits master data.
+        $totalButirs = \Illuminate\Support\Facades\Cache::rememberForever(
+            'master_edpm_butir_count',
+            fn () => \App\Models\MasterEdpmButir::count()
+        );
         $evaluatedButirs = \App\Models\Edpm::where('user_id', $userId)->count();
         if ($evaluatedButirs < $totalButirs) {
             $missingData[] = "Evaluasi Diri (EDPM) belum lengkap ($evaluatedButirs/$totalButirs butir terisi)";
         }
 
         return $missingData;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getMissingProfileFields(Pesantren $pesantren): array
+    {
+        $missing = [];
+
+        foreach (self::PROFILE_REQUIRED_FIELDS as $field => $label) {
+            $value = $pesantren->{$field};
+
+            if (is_array($value) ? $value === [] : blank($value)) {
+                $missing[] = $label;
+            }
+        }
+
+        return $missing;
     }
 
     public function createSubmission(int $userId, ?int $parentId = null): ?\App\Models\Akreditasi
@@ -226,30 +293,46 @@ class PesantrenService
         });
     }
 
-    public function cancelSubmission(int $id, int $userId): void
+    public function cancelSubmission(int $id, int $userId): bool
     {
-        $akreditasi = \App\Models\Akreditasi::where('user_id', $userId)->where('status', 6)->findOrFail($id);
-        $akreditasi->delete();
+        // PM-7 fix: gunakan find + ownership check (bukan findOrFail yang throw 404
+        // pada double-click), dan bungkus dalam DB::transaction agar delete +
+        // unlock pesantren jadi atomic.
+        $akreditasi = \App\Models\Akreditasi::where('user_id', $userId)
+            ->where('status', 6)
+            ->find($id);
 
-        // Unlock Data if no more active
-        $hasActive = \App\Models\Akreditasi::where('user_id', $userId)->whereIn('status', [3, 4, 5, 6])->exists();
-        if (! $hasActive) {
-            $user = User::find($userId);
-            if ($user && $user->pesantren) {
-                $user->pesantren->update(['is_locked' => false]);
-            }
+        if (! $akreditasi) {
+            return false;
         }
+
+        return DB::transaction(function () use ($akreditasi, $userId) {
+            $akreditasi->delete();
+
+            // Unlock pesantren data only when no other active akreditasi remains.
+            $hasActive = \App\Models\Akreditasi::where('user_id', $userId)
+                ->whereIn('status', [3, 4, 5, 6])
+                ->exists();
+
+            if (! $hasActive) {
+                $user = User::find($userId);
+                $user?->pesantren?->update(['is_locked' => false]);
+            }
+
+            return true;
+        });
     }
 
     public function submitAppeals(int $id, int $userId, string $alasan): bool
     {
         // Defense-in-depth length validation
+        // L-6 fix: use $trimmed for both min and max bounds (was using $alasan for max).
         $trimmed = trim($alasan);
-        if (mb_strlen($trimmed) < 10 || mb_strlen($alasan) > 1000) {
+        if (mb_strlen($trimmed) < 10 || mb_strlen($trimmed) > 1000) {
             return false;
         }
 
-        $akreditasi = \App\Models\Akreditasi::where('user_id', $userId)->find($id);
+        $akreditasi = \App\Models\Akreditasi::withTrashed()->where('user_id', $userId)->find($id);
         if (! $akreditasi) {
             Log::warning('submitAppeals ownership mismatch or not found', [
                 'user_id' => $userId,
@@ -259,59 +342,35 @@ class PesantrenService
             return false;
         }
 
-        if ((int) $akreditasi->status !== 2) {
-            return false;
-        }
-
-        if (! $akreditasi->assessments()->exists()) {
-            return false;
-        }
-
-        // Check banding eligibility before proceeding
         $bandingService = app(BandingService::class);
-        $eligibility = $bandingService->checkBandingEligibility($id);
+        $outcome = $bandingService->submitBanding($id, $userId, $trimmed);
 
-        if (! $eligibility['allowed']) {
+        if (! $outcome['success']) {
             return false;
         }
 
-        $result = DB::transaction(function () use ($akreditasi, $userId, $alasan) {
-            $akreditasi->update(['status' => 3, 'catatan' => $alasan]);
+        // Audit trail: log banding submission for callers still using this wrapper.
+        $this->auditTrailService->log(
+            akreditasiId: $akreditasi->id,
+            actionType: 'banding_submitted',
+            metadata: [
+                'alasan' => $trimmed,
+            ]
+        );
 
-            // Create banding record
-            $bandingService = app(BandingService::class);
-            $bandingService->createBanding($akreditasi->id, $userId, $alasan);
-
-            // Audit trail: log banding submission
-            $this->auditTrailService->log(
-                akreditasiId: $akreditasi->id,
-                actionType: 'banding_submitted',
-                metadata: [
-                    'alasan' => $alasan,
-                ]
-            );
-
-            return true;
-        });
-
-        // Dispatch notifications AFTER transaction commits (non-blocking)
-        if ($result) {
-            $admins = User::whereHas('role', fn ($q) => $q->where('id', 1))->get();
-            $user = User::find($userId);
-            \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\AkreditasiNotification(
-                'banding',
-                'Pengajuan Banding Baru',
-                'Pesantren '.($user->pesantren->nama_pesantren ?? $user->name).' telah mengajukan banding akreditasi.',
-                route('admin.akreditasi')
-            ));
-        }
-
-        return (bool) $result;
+        return true;
     }
 
     public function getProfile(int $userId): Pesantren
     {
-        return $this->pesantrenRepository->findByUserId($userId) ?? Pesantren::create(['user_id' => $userId, 'nama_pesantren' => auth()->user()->name]);
+        // Audit fix PM-4: use firstOrCreate so the unique index on user_id
+        // turns a concurrent double-insert race into a safe retry instead of
+        // producing two Pesantren rows for the same user.
+        return $this->pesantrenRepository->findByUserId($userId)
+            ?? Pesantren::firstOrCreate(
+                ['user_id' => $userId],
+                ['nama_pesantren' => auth()->user()?->name ?? '']
+            );
     }
 
     /**
@@ -656,18 +715,29 @@ class PesantrenService
             return false;
         }
 
-        if ($akreditasi->status != 3) {
+        if ((int) $akreditasi->status !== \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
             return false;
         }
 
         $result = DB::transaction(function () use ($akreditasi, $filePath) {
+            // PM-27 fix: simpan path lama sebelum update, hapus setelah commit sukses.
+            $oldPath = $akreditasi->kartu_kendali;
             $akreditasi->update(['kartu_kendali' => $filePath]);
 
-            return true;
+            return ['success' => true, 'old_path' => $oldPath];
         });
 
+        if (! $result['success']) {
+            return false;
+        }
+
+        // Hapus file lama setelah transaction commit (non-blocking, best-effort)
+        if ($result['old_path'] && $result['old_path'] !== $filePath) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($result['old_path']);
+        }
+
         // Dispatch notifications AFTER transaction commits (non-blocking)
-        if ($result) {
+        if ($result['success']) {
             $admins = \App\Models\User::whereHas('role', fn ($q) => $q->where('id', 1))->get();
             \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\AkreditasiNotification(
                 'kartu_kendali_diunggah',
@@ -677,6 +747,6 @@ class PesantrenService
             ));
         }
 
-        return (bool) $result;
+        return (bool) $result['success'];
     }
 }

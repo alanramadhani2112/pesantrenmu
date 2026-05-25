@@ -15,7 +15,7 @@ Route::view('profile', 'profile')
     ->name('profile');
 
 Volt::route('roles', 'pages.roles.index')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'permission:master.role'])
     ->name('roles.index');
 
 Volt::route('accounts', 'pages.accounts.index')

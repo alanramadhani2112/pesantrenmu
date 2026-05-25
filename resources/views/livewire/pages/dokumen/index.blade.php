@@ -13,6 +13,12 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function mount($doc = 'all')
     {
+        // Defense-in-depth: only authenticated users with a known role may view documents.
+        $user = auth()->user();
+        if (! $user || (! $user->canAccessAdminArea() && ! $user->isAsesor() && ! $user->isPesantren())) {
+            abort(403);
+        }
+
         $this->doc = $doc;
     }
 
@@ -60,8 +66,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     /**
      * Resolve the human-friendly page title for the active doc filter.
-     * Falls back to the DocumentCategory name if a slug is selected, so
-     * newly-created categories show a meaningful heading without code edits.
+     * Uses the already-loaded documents collection to avoid an extra query.
+     * Falls back to the DocumentCategory name only when no documents are loaded.
      */
     public function getPageTitleProperty(): string
     {
@@ -69,7 +75,15 @@ new #[Layout('layouts.app')] class extends Component {
             return 'Daftar Dokumen';
         }
 
-        $category = DocumentCategory::query()
+        // Derive title from the first document's category (already eager-loaded)
+        // to avoid a separate query per render.
+        $firstDoc = $this->documents->first();
+        if ($firstDoc && $firstDoc->category) {
+            return $firstDoc->category->name;
+        }
+
+        // Fallback: query only when no documents exist for this slug
+        $category = \App\Models\DocumentCategory::query()
             ->where('slug', $this->doc)
             ->value('name');
 

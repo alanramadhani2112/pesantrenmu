@@ -28,14 +28,26 @@
         'medal-star' => 'medal-star',
         'chart-pie-simple' => 'chart-pie-simple',
         'notification' => 'notification',
+        'notification-bing' => 'notification',
+        'clipboard-check' => 'check-circle',
+        'document-up' => 'arrow-up',
+        'abstract-26' => 'category',
         'file-down' => 'file-down',
         'information' => 'information',
+        'eye' => 'eye',
+        'pencil' => 'pencil',
     ];
 
     $iconName = $iconMap[$icon] ?? 'menu';
     $isChild = $icon === 'none';
     $classes = 'spm-sidebar-link' . ($active ? ' active' : '') . ($isChild ? ' spm-sidebar-link-child' : '') . ($disabled ? ' spm-sidebar-link-disabled' : '') . ' menu-link';
     $disabledAttrs = $disabled ? 'aria-disabled="true" tabindex="-1" style="opacity:.6;cursor:not-allowed;pointer-events:none;"' : '';
+    $progressMeta = match ($progressStatus) {
+        'complete' => ['label' => 'Lengkap', 'class' => 'spm-sidebar-progress-badge--complete', 'aria' => 'Kesiapan data lengkap'],
+        'incomplete' => ['label' => 'Draft', 'class' => 'spm-sidebar-progress-badge--incomplete', 'aria' => 'Kesiapan data masih draft'],
+        'not_started' => ['label' => 'Belum', 'class' => 'spm-sidebar-progress-badge--empty', 'aria' => 'Data belum diisi'],
+        default => null,
+    };
 @endphp
 
 @if($tooltip)
@@ -55,17 +67,16 @@
         <span class="spm-sidebar-title menu-title truncate">{{ $slot }}</span>
 
         {{-- Progress status indicator --}}
-        @if($progressStatus === 'complete')
+        @if($progressMeta)
             <span class="menu-badge">
-                <x-ui.icon name="check-circle" class="text-success fs-5" />
-            </span>
-        @elseif($progressStatus === 'incomplete')
-            <span class="menu-badge">
-                <x-ui.icon name="loading" class="text-warning fs-5" />
-            </span>
-        @elseif($progressStatus === 'not_started')
-            <span class="menu-badge">
-                <x-ui.icon name="minus-circle" class="text-gray-400 fs-5" />
+                <span
+                    class="spm-sidebar-progress-badge {{ $progressMeta['class'] }}"
+                    aria-label="{{ $progressMeta['aria'] }}"
+                    title="{{ $progressMeta['aria'] }}"
+                >
+                    <span class="spm-sidebar-progress-dot" aria-hidden="true"></span>
+                    <span class="visually-hidden">{{ $progressMeta['aria'] }}</span>
+                </span>
             </span>
         @endif
 
@@ -101,17 +112,16 @@
         <span class="spm-sidebar-title menu-title truncate">{{ $slot }}</span>
 
         {{-- Progress status indicator --}}
-        @if($progressStatus === 'complete')
+        @if($progressMeta)
             <span class="menu-badge">
-                <x-ui.icon name="check-circle" class="text-success fs-5" />
-            </span>
-        @elseif($progressStatus === 'incomplete')
-            <span class="menu-badge">
-                <x-ui.icon name="loading" class="text-warning fs-5" />
-            </span>
-        @elseif($progressStatus === 'not_started')
-            <span class="menu-badge">
-                <x-ui.icon name="minus-circle" class="text-gray-400 fs-5" />
+                <span
+                    class="spm-sidebar-progress-badge {{ $progressMeta['class'] }}"
+                    aria-label="{{ $progressMeta['aria'] }}"
+                    title="{{ $progressMeta['aria'] }}"
+                >
+                    <span class="spm-sidebar-progress-dot" aria-hidden="true"></span>
+                    <span class="visually-hidden">{{ $progressMeta['aria'] }}</span>
+                </span>
             </span>
         @endif
 

@@ -30,7 +30,7 @@ class AsesorVisitasiTest extends TestCase
     /**
      * Helper: create a pesantren user with an akreditasi at status 3 (Validasi).
      */
-    private function createAkreditasi(int $status = 3): array
+private function createAkreditasi(int $status = 3): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -52,7 +52,7 @@ class AsesorVisitasiTest extends TestCase
     /**
      * Helper: create an asesor user and assign them to an akreditasi with a given tipe.
      */
-    private function createAndAssignAsesor(int $akreditasiId, int $tipe): array
+private function createAndAssignAsesor(int $akreditasiId, int $tipe): array
     {
         $asesorUser = User::factory()->create(['role_id' => 2]);
         $asesor = Asesor::create([
@@ -76,7 +76,7 @@ class AsesorVisitasiTest extends TestCase
      *
      * Only asesor 1 (tipe=1) is authorised to process visitasi.
      */
-    public function test_asesor_2_cannot_call_process_visitasi(): void
+public function test_asesor_2_cannot_call_process_visitasi(): void
     {
         [, $akreditasi] = $this->createAkreditasi();
 
@@ -102,7 +102,7 @@ class AsesorVisitasiTest extends TestCase
     /**
      * Task 4.3: An asesor not assigned to the akreditasi cannot call processVisitasi — returns false.
      */
-    public function test_asesor_not_assigned_cannot_call_process_visitasi(): void
+public function test_asesor_not_assigned_cannot_call_process_visitasi(): void
     {
         [, $akreditasi] = $this->createAkreditasi();
 

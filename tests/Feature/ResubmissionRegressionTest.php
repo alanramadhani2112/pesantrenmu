@@ -37,7 +37,7 @@ class ResubmissionRegressionTest extends TestCase
     /**
      * Task 8.3: Soft-deleted resubmissions are counted toward the limit (cannot circumvent by deleting)
      */
-    public function test_soft_deleted_resubmissions_are_counted_toward_limit(): void
+public function test_soft_deleted_resubmissions_are_counted_toward_limit(): void
     {
         $user = $this->createCompletePesantrenUser();
 
@@ -82,7 +82,7 @@ class ResubmissionRegressionTest extends TestCase
     /**
      * Task 8.4: limit=0 disallows all resubmissions
      */
-    public function test_limit_zero_disallows_all_resubmissions(): void
+public function test_limit_zero_disallows_all_resubmissions(): void
     {
         $user = $this->createCompletePesantrenUser();
 
@@ -106,7 +106,7 @@ class ResubmissionRegressionTest extends TestCase
     /**
      * Task 8.5: cooling_period_days=0 allows immediate resubmission
      */
-    public function test_cooling_period_zero_allows_immediate_resubmission(): void
+public function test_cooling_period_zero_allows_immediate_resubmission(): void
     {
         $user = $this->createCompletePesantrenUser();
 
@@ -145,6 +145,13 @@ class ResubmissionRegressionTest extends TestCase
         Pesantren::create([
             'user_id' => $user->id,
             'nama_pesantren' => 'Pesantren TDD',
+            'ns_pesantren' => '510012345678',
+            'alamat' => 'Jl. Pendidikan No. 12',
+            'provinsi' => 'Jawa Tengah',
+            'kota_kabupaten' => 'Kota Surakarta',
+            'tahun_pendirian' => '1998',
+            'nama_mudir' => 'Ahmad Mudir',
+            'layanan_satuan_pendidikan' => ['spm'],
             'is_locked' => false,
         ]);
 

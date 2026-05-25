@@ -16,17 +16,19 @@ use App\Models\SdmPesantren;
 use App\Models\User;
 use App\Services\AkreditasiService;
 use Carbon\Carbon;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Volt\Volt;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
 /**
  * Example-Based Feature Tests for Conflict Feedback.
- *
- * @group Feature:concurrent-access-handling
  */
+#[Group('Feature:concurrent-access-handling')]
 class ConflictFeedbackTest extends TestCase
 {
     use RefreshDatabase;
@@ -35,6 +37,8 @@ class ConflictFeedbackTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RolePermissionSeeder::class);
         Notification::fake();
     }
 
@@ -44,7 +48,7 @@ class ConflictFeedbackTest extends TestCase
      * When finalizeAkreditasi() is called with a stale timestamp, the service should
      * throw a ConflictException.
      */
-    public function test_approve_with_stale_timestamp_dispatches_conflict_notification(): void
+public function test_approve_with_stale_timestamp_dispatches_conflict_notification(): void
     {
         [$adminUser, $akreditasi] = $this->createAdminWithStatus3Akreditasi();
         $this->actingAs($adminUser);
@@ -71,14 +75,14 @@ class ConflictFeedbackTest extends TestCase
      * When reject() is called with a stale timestamp, the component should
      * dispatch a conflict notification (not throw an unhandled exception).
      */
-    public function test_reject_with_stale_timestamp_dispatches_conflict_notification(): void
+public function test_reject_with_stale_timestamp_dispatches_conflict_notification(): void
     {
         [$adminUser, $akreditasi] = $this->createAdminWithStatus3Akreditasi();
         $this->actingAs($adminUser);
 
         $staleTimestamp = Carbon::now()->subHours(2)->toISOString();
 
-        $component = Volt::test('pages.admin.akreditasi-detail', ['uuid' => $akreditasi->uuid]);
+        $component = Volt::test('pages.admin.akreditasi-detail', ['uuid' => $akreditasi->uuid])->assertOk();
 
         // Set a stale timestamp
         $component->set('akreditasiUpdatedAt', $staleTimestamp);
@@ -101,14 +105,14 @@ class ConflictFeedbackTest extends TestCase
     /**
      * Task 8.2 (variant): No 500 error on stale reject — graceful handling.
      */
-    public function test_reject_with_stale_timestamp_does_not_throw_500(): void
+public function test_reject_with_stale_timestamp_does_not_throw_500(): void
     {
         [$adminUser, $akreditasi] = $this->createAdminWithStatus3Akreditasi();
         $this->actingAs($adminUser);
 
         $staleTimestamp = Carbon::now()->subHours(5)->toISOString();
 
-        $component = Volt::test('pages.admin.akreditasi-detail', ['uuid' => $akreditasi->uuid]);
+        $component = Volt::test('pages.admin.akreditasi-detail', ['uuid' => $akreditasi->uuid])->assertOk();
         $component->set('akreditasiUpdatedAt', $staleTimestamp);
         $component->set('rejectionCategories', [
             ['category' => 'lainnya', 'explanation' => 'Test rejection reason for no-500 test.'],
@@ -124,12 +128,12 @@ class ConflictFeedbackTest extends TestCase
     /**
      * Task 8.4: akreditasiUpdatedAt is set on mount.
      */
-    public function test_akreditasi_updated_at_is_set_on_mount(): void
+public function test_akreditasi_updated_at_is_set_on_mount(): void
     {
         [$adminUser, $akreditasi] = $this->createAdminWithStatus3Akreditasi();
         $this->actingAs($adminUser);
 
-        $component = Volt::test('pages.admin.akreditasi-detail', ['uuid' => $akreditasi->uuid]);
+        $component = Volt::test('pages.admin.akreditasi-detail', ['uuid' => $akreditasi->uuid])->assertOk();
 
         $expectedTimestamp = $akreditasi->updated_at->toISOString();
 
@@ -141,7 +145,7 @@ class ConflictFeedbackTest extends TestCase
      *
      * When akreditasi status is 1 or 2, the approve/reject forms should not be shown.
      */
-    public function test_action_forms_hidden_when_status_is_terminal(): void
+public function test_action_forms_hidden_when_status_is_terminal(): void
     {
         $adminUser = User::factory()->create(['role_id' => 1]);
         $this->actingAs($adminUser);
@@ -214,7 +218,7 @@ class ConflictFeedbackTest extends TestCase
             'user_id' => $pesantrenUser->id,
             'status' => 3,
             'kartu_kendali' => 'akreditasi/kartu_kendali/test.pdf',
-            'laporan_visitasi_file' => 'akreditasi/laporan/test.pdf',
+            'laporan_visitasi_asesor1' => 'akreditasi/laporan/test.pdf',
         ]);
 
         $asesorUser = User::factory()->create(['role_id' => 2]);

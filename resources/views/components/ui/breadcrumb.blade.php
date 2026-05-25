@@ -3,7 +3,7 @@
 ])
 
 @if(count($items) >= 1)
-<ol class="breadcrumb breadcrumb-dot text-muted fs-7 fw-semibold mb-0" data-ui-breadcrumb="metronic">
+<ol class="breadcrumb breadcrumb-dot text-muted fs-7 fw-semibold mb-0 spm-breadcrumb" data-ui-breadcrumb="metronic">
     @foreach($items as $index => $item)
         @php $isLast = $index === count($items) - 1; @endphp
         <li class="breadcrumb-item {{ $isLast ? 'text-gray-700' : '' }}">

@@ -9,6 +9,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Property-based tests for FailedNotification persistence and retry behavior.
@@ -91,9 +92,9 @@ class FailedNotificationPropertyTest extends TestCase
      *
      * **Validates: Requirements 3.3, 4.1**
      *
-     * @dataProvider randomNotificationPayloadsProvider
      */
-    public function test_property_1_failed_handler_persists_all_fields_correctly(
+#[DataProvider('randomNotificationPayloadsProvider')]
+public function test_property_1_failed_handler_persists_all_fields_correctly(
         string $type,
         string $title,
         string $message,
@@ -183,9 +184,9 @@ class FailedNotificationPropertyTest extends TestCase
      *
      * **Validates: Requirements 4.4**
      *
-     * @dataProvider randomFailedNotificationRecordsProvider
      */
-    public function test_property_2_retry_sets_status_resolved_and_queues_notification(
+#[DataProvider('randomFailedNotificationRecordsProvider')]
+public function test_property_2_retry_sets_status_resolved_and_queues_notification(
         string $type,
         string $title,
         string $message,
@@ -235,7 +236,7 @@ class FailedNotificationPropertyTest extends TestCase
      * Additional: retry() is a no-op when the user no longer exists.
      * Tests the code path where User::find returns null.
      */
-    public function test_retry_is_noop_when_user_not_found(): void
+public function test_retry_is_noop_when_user_not_found(): void
     {
         Notification::fake();
 
@@ -274,7 +275,7 @@ class FailedNotificationPropertyTest extends TestCase
     /**
      * Additional: dismiss() sets status to 'dismissed'.
      */
-    public function test_dismiss_sets_status_to_dismissed(): void
+public function test_dismiss_sets_status_to_dismissed(): void
     {
         $user = User::factory()->create(['role_id' => 3]);
 

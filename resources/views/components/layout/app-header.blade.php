@@ -26,7 +26,7 @@
             </div>
 
             <a href="{{ route('dashboard') }}" class="d-flex align-items-center d-lg-none me-4">
-                <img src="{{ asset('images/brand/favicon.svg') }}" class="h-30px" alt="PesantrenMu" />
+                <img src="{{ asset('images/brand/favicon.svg') }}" class="h-30px" alt="PesantrenMu" loading="eager" />
             </a>
 
             <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3 min-w-0">

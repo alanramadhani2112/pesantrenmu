@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Models\Akreditasi;
 use App\Models\Edpm;
@@ -89,8 +89,14 @@ new #[Layout('layouts.app')] class extends Component
     public $isOverdue = false;
     public $availableAsesorsForReassignment = [];
 
+    // New workflow properties
+    public $asesor1Id = '';
+    public $asesor2Id = '';
+    public $berkasRejectionSections = [];
+    public $berkasRejectionCatatan = '';
+
     // Concurrent access handling
-    public string $akreditasiUpdatedAt = '';
+    public $akreditasiUpdatedAt = '';
 
     public $levels = [];
 
@@ -176,7 +182,7 @@ new #[Layout('layouts.app')] class extends Component
                 $this->pesantrenLinks[$butir->id] = $pLinks[$butir->id] ?? null;
                 $this->asesor1Evaluasis[$butir->id] = $a1Evaluasis[$butir->id] ?? '';
                 $this->asesor1Nks[$butir->id] = $a1Nks[$butir->id] ?? '';
-                $this->adminNvs[$butir->id] = $a1Nvs[$butir->id] ?? ($this->akreditasi->status == 3 ? ($a1Nks[$butir->id] ?? '') : '');
+                $this->adminNvs[$butir->id] = $a1Nvs[$butir->id] ?? ($this->akreditasi->status == 1 ? ($a1Nks[$butir->id] ?? '') : '');
                 $this->asesor1ButirCatatans[$butir->id] = $a1ButirCatatans[$butir->id] ?? '';
                 $this->asesor2Evaluasis[$butir->id] = $a2Evaluasis[$butir->id] ?? '';
                 $this->asesor2ButirCatatans[$butir->id] = $a2ButirCatatans[$butir->id] ?? '';
@@ -202,8 +208,8 @@ new #[Layout('layouts.app')] class extends Component
         $rejectionService = app(\App\Services\RejectionService::class);
         $this->rejectionStatus = $rejectionService->getRejectionStatus($this->akreditasi->id);
 
-        // Load progress data for status 5 (Assessment phase)
-        if ($this->akreditasi->status == 5) {
+        // Load scoring progress only after visitasi is confirmed selesai.
+        if ($this->akreditasi->status == \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
             $progressTracker = app(\App\Services\ProgressTracker::class);
             $progress = $progressTracker->getAkreditasiProgress($this->akreditasi->id);
             $this->asesor1NaProgress = $progress['asesor1_na'];
@@ -289,23 +295,34 @@ new #[Layout('layouts.app')] class extends Component
         $this->dispatch('open-modal', 'visitasi-edit-modal');
     }
 
-    public function saveVisitasiReschedule()
+    public function saveVisitasiReschedule(): void
     {
         Gate::authorize('akreditasi.approve');
-
-        $akreditasiService = app(\App\Services\AkreditasiService::class);
 
         $this->validate([
             'tgl_visitasi' => 'required|date',
             'tgl_visitasi_akhir' => 'required|date|after_or_equal:tgl_visitasi',
         ]);
 
-        if ($akreditasiService->rescheduleVisitasi($this->akreditasi->id, $this->tgl_visitasi, $this->tgl_visitasi_akhir)) {
+        try {
+            $asesor1UserId = $this->akreditasi->assessment1?->asesor?->user_id;
+            if (!$asesor1UserId) {
+                $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Ketua Kelompok tidak ditemukan.');
+                return;
+            }
+
+            $workflowService = app(\App\Services\AkreditasiWorkflowService::class);
+            $workflowService->rescheduleVisitasi($this->akreditasi->id, $asesor1UserId, [
+                'tanggal_mulai' => $this->tgl_visitasi,
+                'tanggal_akhir' => $this->tgl_visitasi_akhir,
+                'catatan_visitasi' => $this->akreditasi->catatan_visitasi ?? '',
+            ]);
+
             $this->dispatch('close-modal', 'visitasi-edit-modal');
             $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Jadwal Visitasi berhasil diperbarui.');
             $this->akreditasi->refresh();
-        } else {
-            $this->dispatch('notification-received', type: 'error', title: 'Gagal!', message: 'Jadwal Visitasi gagal diperbarui.');
+        } catch (\DomainException $e) {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: $e->getMessage());
         }
     }
 
@@ -335,41 +352,27 @@ new #[Layout('layouts.app')] class extends Component
         return $attributes;
     }
 
-    public function saveAdminNv()
+    public function saveAdminNv(): void
     {
         Gate::authorize('akreditasi.approve');
 
-        if ($this->akreditasi->status != 3) {
-            session()->flash('error', 'Data tidak dapat diubah karena status bukan Validasi.');
-
+        if ((int) $this->akreditasi->status !== 1) {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Data tidak dapat diubah karena status bukan Validasi Admin.');
             return;
         }
 
-        // Check if Kartu Kendali and Laporan Visitasi are uploaded
-        if (empty($this->akreditasi->kartu_kendali) || empty($this->akreditasi->laporan_visitasi_file)) {
-            $this->dispatch(
-                'notification-received',
-                type: 'error',
-                title: 'Data Belum Lengkap',
-                message: 'Nilai NV belum dapat disimpan karena Kartu Kendali atau Laporan Visitasi belum diunggah.'
-            );
-
+        if (empty($this->akreditasi->laporan_visitasi_asesor1)) {
+            $this->dispatch('notification-received', type: 'error', title: 'Data Belum Lengkap', message: 'Nilai NV belum dapat disimpan karena Laporan Visitasi Ketua Kelompok belum diunggah.');
             return;
         }
 
         try {
-            $this->validate([
-                'adminNvs.*' => 'required|integer|between:1,4',
-            ]);
+            $this->validate(['adminNvs.*' => 'required|integer|between:1,4']);
         } catch (\Illuminate\Validation\ValidationException $e) {
             $missingItems = [];
-            $errors = $e->validator->errors()->messages();
-
-            foreach ($errors as $key => $messages) {
+            foreach ($e->validator->errors()->messages() as $key => $messages) {
                 if (preg_match('/adminNvs\.(\d+)/', $key, $matches)) {
                     $butirId = $matches[1];
-
-                    // Find butir info from our komponens collection
                     foreach ($this->komponens as $komponen) {
                         $butir = $komponen->butirs->firstWhere('id', $butirId);
                         if ($butir) {
@@ -379,137 +382,68 @@ new #[Layout('layouts.app')] class extends Component
                     }
                 }
             }
-
             $htmlList = '<ul class="text-left list-disc pl-5 mt-2 space-y-1 text-[11px]">'.implode('', array_unique($missingItems)).'</ul>';
-
-            $this->dispatch(
-                'validation-failed',
-                title: 'Nilai NV Belum Lengkap',
-                html: 'Mohon lengkapi nilai verifikasi berikut sebelum menyimpan:<br>'.$htmlList
-            );
+            $this->dispatch('validation-failed', title: 'Nilai NV Belum Lengkap', html: 'Mohon lengkapi nilai verifikasi berikut sebelum menyimpan:<br>'.$htmlList);
             throw $e;
         }
 
-        $asesor1Id = $this->akreditasi->assessment1->asesor_id ?? null;
-        if (! $asesor1Id) {
-            session()->flash('error', 'Asesor 1 tidak ditemukan.');
+        $scoringService = app(\App\Services\AssessorScoringService::class);
+        $adminId = Auth::id();
+        $errors = [];
+        foreach ($this->adminNvs as $butirId => $nvValue) {
+            if (!empty($nvValue)) {
+                try {
+                    $scoringService->saveNV($this->akreditasi->id, $adminId, (int) $butirId, (int) $nvValue, false);
+                } catch (\Throwable $e) {
+                    $errors[] = "Butir #{$butirId}: " . $e->getMessage();
+                }
+            }
+        }
 
+        if (!empty($errors)) {
+            $this->dispatch('notification-received', type: 'warning', title: 'Sebagian Gagal', message: implode('; ', array_slice($errors, 0, 3)));
             return;
         }
 
-        $akreditasiService = app(\App\Services\AkreditasiService::class);
-        if ($asesor1Id) {
-            $akreditasiService->updateAdminNv($this->akreditasi->id, $asesor1Id, $this->adminNvs);
-        }
-
-        $this->dispatch(
-            'notification-received',
-            type: 'success',
-            title: 'Berhasil!',
-            message: 'Nilai Verifikasi berhasil disimpan.'
-        );
-    }
-
-    private function determineResults()
-    {
-        $bobotKomponen = [
-            'MUTU LULUSAN' => 35,
-            'PROSES PEMBELAJARAN' => 29,
-            'MUTU USTAZ' => 18,
-            'MANAJEMEN PESANTREN' => 18,
-            'INDIKATOR PEMENUHAN RELATIF' => 97,
-        ];
-
-        $iprNullComponents = $this->komponens->filter(function ($k) {
-            return is_null($k->ipr);
-        });
-        $iprNotNullComponents = $this->komponens->filter(function ($k) {
-            return ! is_null($k->ipr);
-        });
-
-        $totalSkorIprNull = 0;
-        foreach ($iprNullComponents as $k) {
-            $b = $bobotKomponen[$k->nama] ?? 0;
-            $c_total = count($k->butirs) * 4;
-            $c_ci = 0;
-            foreach ($k->butirs as $butir) {
-                $c_ci += (int) ($this->adminNvs[$butir->id] ?? 0);
-            }
-            if ($c_total > 0) {
-                $totalSkorIprNull += round(($c_ci / $c_total) * $b);
-            }
-        }
-
-        $totalSkorIprNotNull = 0;
-        foreach ($iprNotNullComponents as $k) {
-            $c_total = count($k->butirs) * 4;
-            $c_ci = 0;
-            foreach ($k->butirs as $butir) {
-                $c_ci += (int) ($this->adminNvs[$butir->id] ?? 0);
-            }
-            if ($c_total > 0) {
-                $totalSkorIprNotNull += round(($c_ci / $c_total) * 100);
-            }
-        }
-
-        $nilai = round((0.7 * $totalSkorIprNull) + (0.3 * $totalSkorIprNotNull));
-
-        $peringkat = 'NA';
-        if ($nilai >= 86) {
-            $peringkat = 'Unggul';
-        } elseif ($nilai >= 70) {
-            $peringkat = 'Baik';
-        } elseif ($nilai >= 0) {
-            $peringkat = 'Cukup';
-        }
-
-        return ['nilai' => $nilai, 'peringkat' => $peringkat];
+        $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Nilai Verifikasi berhasil disimpan.');
     }
 
     public function approve()
     {
         Gate::authorize('finalize', $this->akreditasi);
 
-        if (in_array($this->akreditasi->status, [1, 2])) {
-            $this->dispatch('notification-received', type: 'warning', title: 'Tidak Dapat Diproses', message: 'Akreditasi telah diproses oleh admin lain.');
-            return;
-        }
-
-        if (! $this->checkScores()) {
+        if ((int) $this->akreditasi->status !== 1) {
+            $this->dispatch('notification-received', type: 'warning', title: 'Tidak Dapat Diproses', message: 'Akreditasi tidak berada pada status Validasi Admin.');
             return;
         }
 
         $this->validate([
-            'nomor_sk' => 'required|string|max:255',
+            'nomor_sk' => 'required|string|max:100',
             'sertifikat_file' => 'required|file|mimes:pdf|max:10240',
             'masa_berlaku' => 'required|date',
             'masa_berlaku_akhir' => 'required|date|after:masa_berlaku',
         ]);
 
-        $results = $this->determineResults();
-        $akreditasiService = app(\App\Services\AkreditasiService::class);
-
         try {
-            $akreditasiService->finalizeAkreditasi($this->akreditasi->id, [
+            $sertifikatPath = $this->sertifikat_file->store('akreditasi/sertifikat', 'public');
+
+            $workflowService = app(\App\Services\AkreditasiWorkflowService::class);
+            $workflowService->issueSK($this->akreditasi->id, Auth::id(), [
                 'nomor_sk' => $this->nomor_sk,
-                'sertifikat_file' => $this->sertifikat_file,
                 'masa_berlaku' => $this->masa_berlaku,
                 'masa_berlaku_akhir' => $this->masa_berlaku_akhir,
-                'nilai' => $results['nilai'],
-                'peringkat' => $results['peringkat'],
-            ], true, $this->akreditasiUpdatedAt);
+                'sertifikat_path' => $sertifikatPath,
+                'catatan_rekomendasi_admin' => $this->catatan_admin ?? '',
+            ]);
 
-            session()->flash('status', 'Akreditasi berhasil disetujui.');
-
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'SK Akreditasi berhasil diterbitkan.');
             return redirect()->route('admin.akreditasi');
-        } catch (\App\Exceptions\ConflictException $e) {
+        } catch (\DomainException $e) {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: $e->getMessage());
+        } catch (\App\Exceptions\StaleStateException $e) {
             $this->akreditasi->refresh();
             $this->akreditasiUpdatedAt = $this->akreditasi->updated_at->toISOString();
-            $this->dispatch('notification-received',
-                type: 'error',
-                title: 'Konflik Terdeteksi',
-                message: "Akreditasi telah dimodifikasi oleh pengguna lain. Status saat ini: {$e->getStatusLabel()}. Silakan muat ulang halaman untuk melihat data terbaru."
-            );
+            $this->dispatch('notification-received', type: 'error', title: 'Konflik Terdeteksi', message: 'Akreditasi telah dimodifikasi oleh pengguna lain. Silakan muat ulang halaman.');
         }
     }
 
@@ -517,50 +451,44 @@ new #[Layout('layouts.app')] class extends Component
     {
         Gate::authorize('finalize', $this->akreditasi);
 
-        if (in_array($this->akreditasi->status, [1, 2])) {
-            $this->dispatch('notification-received', type: 'warning', title: 'Tidak Dapat Diproses', message: 'Akreditasi telah diproses oleh admin lain.');
-            return;
-        }
-
-        if (! $this->checkScores()) {
+        if ((int) $this->akreditasi->status !== 1) {
+            $this->dispatch('notification-received', type: 'warning', title: 'Tidak Dapat Diproses', message: 'Akreditasi tidak berada pada status Validasi Admin.');
             return;
         }
 
         $this->validate([
             'rejectionCategories' => 'required|array|min:1',
-            'rejectionCategories.*.category' => 'required|string|in:nilai_tidak_memenuhi,laporan_tidak_lengkap,kartu_kendali_tidak_sesuai,inkonsistensi_data,lainnya',
+            'rejectionCategories.*.category' => 'required|string',
             'rejectionCategories.*.explanation' => 'required|string|min:10|max:2000',
         ], [
             'rejectionCategories.required' => 'Pilih minimal satu kategori penolakan.',
             'rejectionCategories.min' => 'Pilih minimal satu kategori penolakan.',
-            'rejectionCategories.*.category.required' => 'Kategori wajib dipilih.',
-            'rejectionCategories.*.category.in' => 'Kategori tidak valid.',
             'rejectionCategories.*.explanation.required' => 'Penjelasan wajib diisi untuk setiap kategori.',
             'rejectionCategories.*.explanation.min' => 'Penjelasan minimal 10 karakter.',
         ]);
 
-        $akreditasiService = app(\App\Services\AkreditasiService::class);
-
         try {
-            $result = $akreditasiService->finalizeAkreditasi($this->akreditasi->id, [
-                'rejection_categories' => $this->rejectionCategories,
-            ], false, $this->akreditasiUpdatedAt);
+            $reason = collect($this->rejectionCategories)
+                ->map(fn($c) => ($c['category'] ?? '') . ': ' . ($c['explanation'] ?? ''))
+                ->implode('; ');
 
-            if ($result) {
-                session()->flash('status', 'Akreditasi telah ditolak.');
+            $workflowService = app(\App\Services\AkreditasiWorkflowService::class);
+            $workflowService->rejectAtValidasi(
+                $this->akreditasi->id,
+                Auth::id(),
+                $reason,
+                $this->akreditasiUpdatedAt,
+                $this->rejectionCategories
+            );
 
-                return redirect()->route('admin.akreditasi');
-            } else {
-                $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Penolakan gagal diproses.');
-            }
-        } catch (\App\Exceptions\ConflictException $e) {
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Akreditasi telah ditolak.');
+            return redirect()->route('admin.akreditasi');
+        } catch (\DomainException $e) {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: $e->getMessage());
+        } catch (\App\Exceptions\StaleStateException $e) {
             $this->akreditasi->refresh();
             $this->akreditasiUpdatedAt = $this->akreditasi->updated_at->toISOString();
-            $this->dispatch('notification-received',
-                type: 'error',
-                title: 'Konflik Terdeteksi',
-                message: "Akreditasi telah dimodifikasi oleh pengguna lain. Status saat ini: {$e->getStatusLabel()}. Silakan muat ulang halaman untuk melihat data terbaru."
-            );
+            $this->dispatch('notification-received', type: 'error', title: 'Konflik Terdeteksi', message: 'Akreditasi telah dimodifikasi oleh pengguna lain. Silakan muat ulang halaman.');
         }
     }
 
@@ -587,28 +515,108 @@ new #[Layout('layouts.app')] class extends Component
 
     private function checkScores()
     {
-        $isMissing = false;
-        foreach ($this->komponens as $komponen) {
-            foreach ($komponen->butirs as $butir) {
-                if (empty($this->asesor1Nks[$butir->id]) || empty($this->adminNvs[$butir->id])) {
-                    $isMissing = true;
-                    break 2;
+        // Let the service handle validation
+        return true;
+    }
+
+    public function openForReview(): void
+    {
+        Gate::authorize('akreditasi.approve');
+        try {
+            $workflowService = app(\App\Services\AkreditasiWorkflowService::class);
+            $workflowService->openForReview($this->akreditasi->id, Auth::id());
+            $this->akreditasi->refresh();
+            $this->akreditasiUpdatedAt = $this->akreditasi->updated_at->toISOString();
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Pengajuan dibuka untuk verifikasi berkas.');
+        } catch (\DomainException $e) {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: $e->getMessage());
+        }
+    }
+
+    public function approveBerkas(): void
+    {
+        Gate::authorize('akreditasi.approve');
+        $this->validate([
+            'asesor1Id' => 'required|integer|exists:users,id',
+            'asesor2Id' => 'required|integer|exists:users,id|different:asesor1Id',
+        ], [
+            'asesor1Id.required' => 'Ketua Kelompok wajib dipilih.',
+            'asesor2Id.required' => 'Anggota Kelompok wajib dipilih.',
+            'asesor2Id.different' => 'Ketua Kelompok dan Anggota Kelompok harus berbeda.',
+        ]);
+        try {
+            $workflowService = app(\App\Services\AkreditasiWorkflowService::class);
+            $workflowService->approveBerkas($this->akreditasi->id, Auth::id(), (int) $this->asesor1Id, (int) $this->asesor2Id);
+            $this->akreditasi->refresh();
+            $this->akreditasiUpdatedAt = $this->akreditasi->updated_at->toISOString();
+            $this->dispatch('close-modal', 'approve-berkas-modal');
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Berkas disetujui. Asesor telah ditugaskan.');
+        } catch (\DomainException $e) {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: $e->getMessage());
+        }
+    }
+
+    public function rejectBerkas()
+    {
+        Gate::authorize('akreditasi.approve');
+        $this->validate([
+            'berkasRejectionSections' => 'required|array|min:1',
+            'berkasRejectionCatatan' => 'required|string|min:10|max:2000',
+        ], [
+            'berkasRejectionSections.required' => 'Pilih minimal satu bagian yang ditolak.',
+            'berkasRejectionSections.min' => 'Pilih minimal satu bagian yang ditolak.',
+            'berkasRejectionCatatan.required' => 'Catatan penolakan wajib diisi.',
+            'berkasRejectionCatatan.min' => 'Catatan minimal 10 karakter.',
+        ]);
+        try {
+            $workflowService = app(\App\Services\AkreditasiWorkflowService::class);
+            $workflowService->rejectBerkas($this->akreditasi->id, Auth::id(), [
+                'sections' => $this->berkasRejectionSections,
+                'catatan' => $this->berkasRejectionCatatan,
+            ]);
+            $this->dispatch('close-modal', 'reject-berkas-modal');
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Berkas ditolak.');
+            return redirect()->route('admin.akreditasi');
+        } catch (\DomainException $e) {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: $e->getMessage());
+        }
+    }
+
+    public function finalizeAllNv(): void
+    {
+        Gate::authorize('akreditasi.approve');
+
+        if ((int) $this->akreditasi->status !== 1) {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Finalisasi NV hanya dapat dilakukan saat status Validasi Admin.');
+            return;
+        }
+
+        try {
+            $scoringService = app(\App\Services\AssessorScoringService::class);
+            $adminId = Auth::id();
+            $finalizedCount = 0;
+            foreach ($this->adminNvs as $butirId => $nvValue) {
+                if (!empty($nvValue)) {
+                    try {
+                        $scoringService->saveNV($this->akreditasi->id, $adminId, (int) $butirId, (int) $nvValue, true);
+                        $finalizedCount++;
+                    } catch (\App\Exceptions\ImmutableValueException $e) {
+                        // Already final, skip
+                        $finalizedCount++;
+                    } catch (\Throwable $e) {
+                        // Log but continue
+                    }
                 }
             }
+
+            // Set is_nv_final flag on akreditasi
+            $this->akreditasi->update(['is_nv_final' => true]);
+            $this->akreditasi->refresh();
+
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: "Semua NV ({$finalizedCount} butir) berhasil difinalisasi dan dikunci.");
+        } catch (\Throwable $e) {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: $e->getMessage());
         }
-
-        if ($isMissing) {
-            $this->dispatch(
-                'notification-received',
-                type: 'error',
-                title: 'Data Belum Lengkap',
-                message: 'Tidak dapat memproses akreditasi. Pastikan nilai NK (Asesor) dan NV (Admin) telah diisi untuk semua butir.'
-            );
-
-            return false;
-        }
-
-        return true;
     }
 
     public function openReassignModal(): void
@@ -635,7 +643,7 @@ new #[Layout('layouts.app')] class extends Component
             ?? $this->akreditasi->assessments->first();
 
         if (! $primaryAssessment) {
-            session()->flash('error', 'Assessment tidak ditemukan.');
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Assessment tidak ditemukan.');
             $this->dispatch('close-modal', 'reassign-asesor-modal');
             return;
         }
@@ -658,9 +666,9 @@ new #[Layout('layouts.app')] class extends Component
                 : [];
 
             $this->dispatch('close-modal', 'reassign-asesor-modal');
-            session()->flash('status', 'Asesor berhasil diganti. Deadline baru telah ditetapkan.');
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Asesor berhasil diganti. Deadline baru telah ditetapkan.');
         } catch (\DomainException $e) {
-            session()->flash('error', 'Gagal mengganti asesor: ' . $e->getMessage());
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Gagal mengganti asesor: ' . $e->getMessage());
             $this->dispatch('close-modal', 'reassign-asesor-modal');
         }
     }
@@ -668,12 +676,19 @@ new #[Layout('layouts.app')] class extends Component
 
 @php
     $statusVariant = match ((int) $akreditasi->status) {
-        1 => 'success',
-        2 => 'danger',
-        3 => 'warning',
-        4 => 'info',
-        default => 'primary',
+        0 => 'success',
+        -1, -2 => 'danger',
+        1 => 'warning',
+        2 => 'info',
+        3, 4, 5, 6 => 'primary',
+        default => 'secondary',
     };
+
+    $canShowAdminScoring = in_array((int) $akreditasi->status, [
+        \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI,
+        \App\StateMachine\AkreditasiStateMachine::STATUS_VALIDASI_ADMIN,
+        \App\StateMachine\AkreditasiStateMachine::STATUS_SELESAI,
+    ], true);
 
     $dokumenUtama = [
         'status_kepemilikan_tanah' => 'Status Kepemilikan Tanah',
@@ -712,8 +727,9 @@ new #[Layout('layouts.app')] class extends Component
 <x-ui.page
     title="Detail Akreditasi"
     subtitle="{{ $pesantren?->nama_pesantren ?? $akreditasi->user->name }}"
+    class="spm-detail-page"
     x-data="{ ...akreditasiManagement(), ...adminManagement() }"
-    wire:poll.10s="checkForUpdates"
+    wire:poll.30s="checkForUpdates"
 >
     <x-akreditasi.presence-indicator :akreditasi-id="$akreditasi->id" />
     <x-slot:toolbar>
@@ -734,7 +750,7 @@ new #[Layout('layouts.app')] class extends Component
             </x-ui.badge>
         @endif
 
-        @if(in_array($akreditasi->status, [4, 5]))
+        @if(in_array($akreditasi->status, [\App\StateMachine\AkreditasiStateMachine::STATUS_ASSESSMENT, \App\StateMachine\AkreditasiStateMachine::STATUS_VISITASI]))
             <x-ui.button
                 type="button"
                 wire:click="openReassignModal"
@@ -748,26 +764,31 @@ new #[Layout('layouts.app')] class extends Component
             </x-ui.button>
         @endif
 
+        @if((int)$akreditasi->status === \App\StateMachine\AkreditasiStateMachine::STATUS_PENGAJUAN)
+            <x-ui.button type="button" wire:click="openForReview" variant="primary" size="sm">
+                <x-ui.icon name="eye" class="fs-4 me-1" />
+                Buka untuk Review
+            </x-ui.button>
+        @endif
+
+        @if((int)$akreditasi->status === \App\StateMachine\AkreditasiStateMachine::STATUS_VERIFIKASI_BERKAS)
+            <x-ui.button type="button" @click="$dispatch('open-modal', 'approve-berkas-modal')" variant="success" size="sm">
+                <x-ui.icon name="check-circle" class="fs-4 me-1" />
+                Setujui Berkas
+            </x-ui.button>
+            <x-ui.button type="button" @click="$dispatch('open-modal', 'reject-berkas-modal')" variant="danger" size="sm">
+                <x-ui.icon name="cross-circle" class="fs-4 me-1" />
+                Tolak Berkas
+            </x-ui.button>
+        @endif
+
         <x-ui.button :href="route('admin.akreditasi')" variant="light">
             <x-ui.icon name="exit-right" class="fs-4 me-1" />
             Kembali
         </x-ui.button>
     </x-slot:toolbar>
 
-    {{-- Flash messages --}}
-    @if (session('status'))
-        <div class="alert alert-success d-flex align-items-center mb-6" role="alert">
-            <x-ui.icon name="check-circle" class="fs-4 me-3 text-success" />
-            <div>{{ session('status') }}</div>
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="alert alert-danger d-flex align-items-center mb-6" role="alert">
-            <x-ui.icon name="warning-2" class="fs-4 me-3 text-danger" />
-            <div>{{ session('error') }}</div>
-        </div>
-    @endif
+    {{-- Flash messages handled by notification-received event --}}
 
     <div class="row g-5 mb-6">
         <div class="col-lg-4">
@@ -782,6 +803,13 @@ new #[Layout('layouts.app')] class extends Component
             <x-ui.stat-card label="Jadwal Visitasi" value="{{ $akreditasi->tgl_visitasi ? \Carbon\Carbon::parse($akreditasi->tgl_visitasi)->format('d M Y') : 'Belum Dijadwalkan' }}" variant="success" icon="calendar" />
         </div>
     </div>
+
+    <x-akreditasi.workflow-stepper
+        :status="$akreditasi->status"
+        title="Tahapan Akreditasi LP2M"
+        subtitle="Pantau posisi pengajuan dari review awal, review asesor, visitasi, penilaian pasca visitasi, validasi admin, sampai hasil akhir."
+        class="mb-6"
+    />
 
     {{-- Rejection History and Admin Final Rejection Detail --}}
     @if(!empty($rejectionStatus) && ($rejectionStatus['count'] > 0 || $rejectionStatus['history']->count() > 0))
@@ -895,7 +923,7 @@ new #[Layout('layouts.app')] class extends Component
                 <x-ui.tab wire:click="setTab('ipm')" :active="$activeTab === 'ipm'">IPM</x-ui.tab>
                 <x-ui.tab wire:click="setTab('sdm')" :active="$activeTab === 'sdm'">SDM</x-ui.tab>
                 <x-ui.tab wire:click="setTab('edpm_pesantren')" :active="$activeTab === 'edpm_pesantren'">EDPM</x-ui.tab>
-                <x-ui.tab wire:click="setTab('instrumen')" :active="$activeTab === 'instrumen'">NA</x-ui.tab>
+                <x-ui.tab wire:click="setTab('instrumen')" :active="$activeTab === 'instrumen'">Nilai</x-ui.tab>
                 <x-ui.tab wire:click="setTab('laporan_visitasi')" :active="$activeTab === 'laporan_visitasi'">Laporan Visitasi</x-ui.tab>
                 @if(count($chainTimeline) > 0)
                     <x-ui.tab wire:click="setTab('riwayat')" :active="$activeTab === 'riwayat'">Riwayat Pengajuan</x-ui.tab>
@@ -912,7 +940,7 @@ new #[Layout('layouts.app')] class extends Component
                             @if($pesantren)
                                 <x-ui.button
                                     type="button"
-                                    wire:click="toggleLock"
+                                    @click="confirmToggleLock($wire, {{ $pesantren?->is_locked ? 'true' : 'false' }})"
                                     wire:loading.attr="disabled"
                                     :variant="$pesantren?->is_locked ? 'warning' : 'light'"
                                     size="sm"
@@ -1031,7 +1059,7 @@ new #[Layout('layouts.app')] class extends Component
                                                 </div>
                                             </div>
 
-                                            @if(in_array($akreditasi->status, [1, 2]))
+                                            @if(in_array($akreditasi->status, [0, -1]))
                                                 <x-ui.status-badge variant="secondary">Reschedule Terkunci</x-ui.status-badge>
                                             @else
                                                 <x-ui.button type="button" wire:click="openVisitasiEditModal" variant="light" size="sm">
@@ -1097,7 +1125,7 @@ new #[Layout('layouts.app')] class extends Component
                                                 {{ Akreditasi::getStatusLabel($entry->status) }}
                                             </x-ui.badge>
                                         </td>
-                                        <td>{{ (int) $entry->status === 2 ? ($entry->catatan ?? '-') : '-' }}</td>
+                                        <td>{{ (int) $entry->status === -1 ? ($entry->catatan ?? '-') : '-' }}</td>
                                         <td>{{ $timeElapsed ?? '-' }}</td>
                                         <td class="text-end pe-4">
                                             <a href="{{ route('admin.akreditasi-detail', $entry->uuid) }}" class="btn btn-sm btn-light-primary">
@@ -1216,24 +1244,30 @@ new #[Layout('layouts.app')] class extends Component
 
             @if ($activeTab === 'instrumen')
                 <div class="d-flex flex-column gap-6">
-                    @if ($akreditasi->status == 3 && (empty($akreditasi->kartu_kendali) || empty($akreditasi->laporan_visitasi_file)))
-                        <div class="spm-inline-alert">
-                            <span class="symbol symbol-35px">
-                                <span class="symbol-label bg-light-warning text-warning">
-                                    <x-ui.icon name="timer" class="fs-3" />
-                                </span>
-                            </span>
-                            <div>
-                                <div class="spm-inline-alert-title">Kelengkapan Dokumen Wajib</div>
-                                <div class="spm-inline-alert-text">
-                                    Nilai NV hanya dapat disimpan apabila Kartu Kendali dan Laporan Visitasi telah diunggah.
+                    @if(! $canShowAdminScoring)
+                        <x-ui.alert variant="info" icon="information-2" title="Penilaian Belum Dibuka">
+                            Alur yang benar: visitasi dilakukan lebih dulu, Ketua Kelompok mengonfirmasi visitasi selesai, lalu Nilai Ketua dan Nilai Anggota diisi pada tahap Penilaian Pasca Visitasi. Nilai Verifikasi Admin baru terbuka setelah Nilai Kelompok final.
+                        </x-ui.alert>
+
+                        <x-ui.section-card title="Posisi Proses Saat Ini" subtitle="Admin dapat memantau berkas, tim asesor, dan jadwal visitasi pada tahap ini.">
+                            <div class="p-6">
+                                <div class="row g-5">
+                                    <x-ui.detail-item label="Status Saat Ini" value="{{ Akreditasi::getStatusLabel($akreditasi->status) }}" />
+                                    <x-ui.detail-item label="Jadwal Visitasi" value="{{ $akreditasi->tgl_visitasi ? \Carbon\Carbon::parse($akreditasi->tgl_visitasi)->format('d M Y') : 'Belum dijadwalkan' }}" />
+                                    <x-ui.detail-item label="Tahap Nilai Berikutnya" value="Penilaian Pasca Visitasi" />
+                                    <x-ui.detail-item label="Nilai Verifikasi" value="Terbuka setelah Nilai Kelompok final" />
                                 </div>
                             </div>
-                        </div>
+                        </x-ui.section-card>
+                    @else
+                    @if ($akreditasi->status == 1 && (empty($akreditasi->kartu_kendali) || empty($akreditasi->laporan_visitasi_asesor1)))
+                        <x-ui.alert variant="warning" icon="timer" title="Kelengkapan Dokumen Wajib">
+                            Nilai NV hanya dapat disimpan apabila Kartu Kendali dan Laporan Visitasi telah diunggah.
+                        </x-ui.alert>
                     @endif
 
-                    {{-- Task 4.2: Progress indicators for status 5 (Assessment phase) --}}
-                    @if ($akreditasi->status == 5 && ($asesor1NaProgress || $asesor2NaProgress))
+                    {{-- Progress indicators are available after visitasi is confirmed selesai. --}}
+                    @if ((int) $akreditasi->status === \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI && ($asesor1NaProgress || $asesor2NaProgress))
                         <x-ui.section-card title="Progress Penilaian Asesor" subtitle="Kelengkapan pengisian butir oleh masing-masing asesor.">
                             <div class="p-6">
                                 <div class="row g-5">
@@ -1244,7 +1278,7 @@ new #[Layout('layouts.app')] class extends Component
                                                 :filled="$asesor1NaProgress['filled']"
                                                 :total="$asesor1NaProgress['total']"
                                                 :percentage="$asesor1NaProgress['percentage']"
-                                                label="NA1 (Asesor 1)"
+                                                label="Nilai Ketua"
                                                 :color="$c1Na"
                                             />
                                         </div>
@@ -1256,7 +1290,7 @@ new #[Layout('layouts.app')] class extends Component
                                                 :filled="$asesor1NkProgress['filled']"
                                                 :total="$asesor1NkProgress['total']"
                                                 :percentage="$asesor1NkProgress['percentage']"
-                                                label="NK (Asesor 1)"
+                                                label="Nilai Kelompok"
                                                 :color="$c1Nk"
                                             />
                                         </div>
@@ -1268,7 +1302,7 @@ new #[Layout('layouts.app')] class extends Component
                                                 :filled="$asesor2NaProgress['filled']"
                                                 :total="$asesor2NaProgress['total']"
                                                 :percentage="$asesor2NaProgress['percentage']"
-                                                label="NA2 (Asesor 2)"
+                                                label="Nilai Anggota"
                                                 :color="$c2Na"
                                             />
                                         </div>
@@ -1278,9 +1312,9 @@ new #[Layout('layouts.app')] class extends Component
                                 {{-- Blocking badges --}}
                                 @php
                                     $blockers = [];
-                                    if ($asesor1NaProgress && $asesor1NaProgress['percentage'] < 100) $blockers[] = 'Menunggu Asesor 1 (NA1)';
-                                    if ($asesor1NkProgress && $asesor1NkProgress['percentage'] < 100) $blockers[] = 'Menunggu Asesor 1 (NK)';
-                                    if ($asesor2NaProgress && $asesor2NaProgress['percentage'] < 100) $blockers[] = 'Menunggu Asesor 2 (NA2)';
+                                    if ($asesor1NaProgress && $asesor1NaProgress['percentage'] < 100) $blockers[] = 'Menunggu Nilai Ketua';
+                                    if ($asesor1NkProgress && $asesor1NkProgress['percentage'] < 100) $blockers[] = 'Menunggu Nilai Kelompok';
+                                    if ($asesor2NaProgress && $asesor2NaProgress['percentage'] < 100) $blockers[] = 'Menunggu Nilai Anggota';
                                 @endphp
                                 @if (!empty($blockers))
                                     <div class="d-flex flex-wrap gap-2 mt-4">
@@ -1296,7 +1330,7 @@ new #[Layout('layouts.app')] class extends Component
                         </x-ui.section-card>
                     @endif
 
-                    <x-ui.section-card title="Nilai Akhir" subtitle="Perbandingan NA asesor, NK, NV admin, catatan butir, dan rekomendasi.">
+                    <x-ui.section-card title="Nilai Akhir" subtitle="Perbandingan Nilai Ketua, Nilai Anggota, Nilai Kelompok, Nilai Verifikasi Admin, catatan butir, dan rekomendasi.">
                         <div class="p-6">
                             <x-ui.simple-table tableClass="spm-score-table">
                                 <thead>
@@ -1305,10 +1339,10 @@ new #[Layout('layouts.app')] class extends Component
                                         <th class="text-center w-80px">No SK</th>
                                         <th class="text-center w-90px">No Butir</th>
                                         <th>Pernyataan</th>
-                                        <th class="text-center w-80px">NA 1</th>
-                                        <th class="text-center w-80px">NA 2</th>
-                                        <th class="text-center w-80px">NK</th>
-                                        <th class="text-center w-110px">NV</th>
+                                        <th class="text-center w-90px">Nilai Ketua</th>
+                                        <th class="text-center w-90px">Nilai Anggota</th>
+                                        <th class="text-center w-100px">Nilai Kelompok</th>
+                                        <th class="text-center w-110px">Nilai Verifikasi</th>
                                         <th class="w-220px">Catatan Butir</th>
                                         <th class="pe-4 w-260px">Rekomendasi</th>
                                     </tr>
@@ -1330,7 +1364,7 @@ new #[Layout('layouts.app')] class extends Component
                                                 <td class="text-center fw-bold">{{ $asesor2Evaluasis[$butir->id] ?? '' }}</td>
                                                 <td class="text-center fw-bold text-warning">{{ $asesor1Nks[$butir->id] ?? '' }}</td>
                                                 <td class="text-center">
-                                                    @if ($akreditasi->status == 3)
+                                                    @if ($akreditasi->status == 1)
                                                         <x-ui.select
                                                             model="adminNvs.{{ $butir->id }}"
                                                             modifier="live"
@@ -1360,20 +1394,36 @@ new #[Layout('layouts.app')] class extends Component
                         </div>
                     </x-ui.section-card>
 
-                    @if ($akreditasi->status == 3)
+                    @if ($akreditasi->status == 1)
                         <div class="spm-action-panel d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
                             <div>
                                 <h3 class="spm-card-title mb-1">Nilai Verifikasi (NV)</h3>
                                 <div class="text-muted fw-semibold fs-7">Simpan nilai verifikasi setelah semua butir lengkap.</div>
                             </div>
-                            <x-ui.button type="button" @click="confirmSaveNV($wire)" wire:loading.attr="disabled" variant="primary">
-                                <span wire:loading.remove wire:target="saveAdminNv">Simpan NV</span>
-                                <span wire:loading wire:target="saveAdminNv">Menyimpan...</span>
-                            </x-ui.button>
+                            <div class="d-flex gap-3">
+                                <x-ui.button type="button" @click="confirmSaveNV($wire)" wire:loading.attr="disabled" variant="primary">
+                                    <span wire:loading.remove wire:target="saveAdminNv">Simpan NV (Draft)</span>
+                                    <span wire:loading wire:target="saveAdminNv">Menyimpan...</span>
+                                </x-ui.button>
+                                @if(!$akreditasi->is_nv_final)
+                                    <x-ui.button type="button" wire:click="finalizeAllNv" wire:loading.attr="disabled" variant="success">
+                                        <span wire:loading.remove wire:target="finalizeAllNv">
+                                            <x-ui.icon name="lock" class="fs-5 me-1" />
+                                            Finalisasi Semua NV
+                                        </span>
+                                        <span wire:loading wire:target="finalizeAllNv">Memproses...</span>
+                                    </x-ui.button>
+                                @else
+                                    <x-ui.badge variant="success" class="align-self-center">
+                                        <x-ui.icon name="lock" class="fs-7 me-1" />
+                                        NV Sudah Final
+                                    </x-ui.badge>
+                                @endif
+                            </div>
                         </div>
                     @endif
 
-                    @if ($akreditasi->status == 3 || $akreditasi->status == 1)
+                    @if ($akreditasi->status == 1 || $akreditasi->status == 0)
                         <x-ui.section-card title="Ringkasan Data Penilaian" subtitle="Perhitungan skor komponen dan hasil akhir.">
                             <div class="p-6">
                                 @php
@@ -1497,16 +1547,15 @@ new #[Layout('layouts.app')] class extends Component
                         </x-ui.section-card>
                     @endif
 
-                    @if ($akreditasi->status == 3)
+                    @if ($akreditasi->status == 1)
                         <div class="row g-6">
                             <div class="col-lg-6">
                                 <x-ui.section-card title="Setujui Akreditasi" subtitle="Lengkapi SK dan sertifikat final.">
-                                    @if(in_array($akreditasi->status, [1, 2]))
+                                    @if(in_array($akreditasi->status, [0, -1]))
                                         <div class="p-6">
-                                            <div class="alert alert-warning d-flex align-items-center gap-3">
-                                                <x-ui.icon name="warning-2" class="fs-4" />
-                                                <span>Akreditasi telah diproses oleh admin lain. Muat ulang halaman untuk melihat status terbaru.</span>
-                                            </div>
+                                            <x-ui.alert variant="warning" class="mb-0">
+                                                Akreditasi telah diproses oleh admin lain. Muat ulang halaman untuk melihat status terbaru.
+                                            </x-ui.alert>
                                         </div>
                                     @else
                                     <form @submit.prevent="confirmApprove($wire)" class="p-6">
@@ -1552,15 +1601,14 @@ new #[Layout('layouts.app')] class extends Component
 
                             <div class="col-lg-6">
                                 <x-ui.section-card title="Tolak Akreditasi" subtitle="Pilih kategori dan berikan penjelasan per kategori.">
-                                    @if(in_array($akreditasi->status, [1, 2]))
+                                    @if(in_array($akreditasi->status, [0, -1]))
                                         <div class="p-6">
-                                            <div class="alert alert-warning d-flex align-items-center gap-3">
-                                                <x-ui.icon name="warning-2" class="fs-4" />
-                                                <span>Akreditasi telah diproses oleh admin lain. Muat ulang halaman untuk melihat status terbaru.</span>
-                                            </div>
+                                            <x-ui.alert variant="warning" class="mb-0">
+                                                Akreditasi telah diproses oleh admin lain. Muat ulang halaman untuk melihat status terbaru.
+                                            </x-ui.alert>
                                         </div>
                                     @else
-                                    <form wire:submit="reject" class="p-6">
+                                    <form x-on:submit.prevent="confirmRejectFinal($wire)" class="p-6">
                                         <div class="mb-4">
                                             <div class="spm-detail-label mb-2">Kategori Penolakan <span class="text-danger">*</span></div>
 
@@ -1568,22 +1616,21 @@ new #[Layout('layouts.app')] class extends Component
                                                 <div class="spm-soft-panel mb-3">
                                                     <div class="d-flex align-items-start justify-content-between gap-2">
                                                         <div class="flex-grow-1">
-                                                            <select wire:model="rejectionCategories.{{ $index }}.category" class="form-select form-select-sm mb-2">
+                                                            <x-ui.select model="rejectionCategories.{{ $index }}.category" size="sm" class="mb-2">
                                                                 <option value="">-- Pilih Kategori --</option>
                                                                 @foreach(config('akreditasi.final_rejection_categories', []) as $key => $label)
                                                                     <option value="{{ $key }}">{{ $label }}</option>
                                                                 @endforeach
-                                                            </select>
+                                                            </x-ui.select>
                                                             @error("rejectionCategories.{$index}.category")
                                                                 <div class="text-danger fs-8">{{ $message }}</div>
                                                             @enderror
 
-                                                            <textarea
-                                                                wire:model="rejectionCategories.{{ $index }}.explanation"
-                                                                class="form-control form-control-sm"
+                                                            <x-ui.textarea
+                                                                model="rejectionCategories.{{ $index }}.explanation"
                                                                 rows="3"
                                                                 placeholder="Penjelasan detail (min 10 karakter)..."
-                                                            ></textarea>
+                                                            />
                                                             @error("rejectionCategories.{$index}.explanation")
                                                                 <div class="text-danger fs-8">{{ $message }}</div>
                                                             @enderror
@@ -1637,11 +1684,65 @@ new #[Layout('layouts.app')] class extends Component
                             <x-ui.icon name="arrow-down" class="fs-2" />
                         </x-ui.button>
                     </div>
+                    @endif
                 </div>
             @endif
 
             @if($activeTab === 'laporan_visitasi')
                 <div class="d-flex flex-column gap-6">
+                    {{-- Post-Visitasi Document Checklist — visible after visitasi (Req 10.6) --}}
+                    @if(in_array((int) $akreditasi->status, [
+                        \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI,
+                        \App\StateMachine\AkreditasiStateMachine::STATUS_VALIDASI_ADMIN,
+                        \App\StateMachine\AkreditasiStateMachine::STATUS_SELESAI,
+                    ]))
+                        @php
+                            $requiredDocs = [
+                                ['key' => 'laporan_visitasi_asesor1',  'label' => 'Laporan Visitasi Ketua Kelompok',  'uploader' => 'Ketua Kelompok'],
+                                ['key' => 'laporan_visitasi_asesor2',  'label' => 'Laporan Visitasi Anggota Kelompok', 'uploader' => 'Anggota Kelompok'],
+                                ['key' => 'laporan_visitasi_kelompok', 'label' => 'Laporan Visitasi Kelompok',          'uploader' => 'Ketua Kelompok'],
+                                ['key' => 'kartu_kendali',             'label' => 'Kartu Kendali',                       'uploader' => 'Pesantren'],
+                            ];
+                            $available = 0;
+                            foreach ($requiredDocs as $doc) {
+                                if (!empty($akreditasi->{$doc['key']})) {
+                                    $available++;
+                                }
+                            }
+                            $isComplete = $available === count($requiredDocs);
+                        @endphp
+                        <x-ui.section-card title="Kelengkapan Dokumen Pasca Visitasi">
+                            <x-slot:toolbar>
+                                <x-ui.status-badge :variant="$isComplete ? 'success' : 'warning'">
+                                    <x-ui.icon :name="$isComplete ? 'check-circle' : 'information'" class="fs-4 me-2" />
+                                    {{ $available }}/{{ count($requiredDocs) }} Lengkap
+                                </x-ui.status-badge>
+                            </x-slot:toolbar>
+                            <div class="p-6">
+                                <div class="d-flex flex-column gap-3">
+                                    @foreach($requiredDocs as $doc)
+                                        @php $has = !empty($akreditasi->{$doc['key']}) @endphp
+                                        <div class="d-flex align-items-center gap-3">
+                                            <span class="symbol symbol-30px">
+                                                <span class="symbol-label {{ $has ? 'bg-light-success text-success' : 'bg-light-danger text-danger' }}">
+                                                    <span class="svg-icon svg-icon-2">
+                                                        @if($has)
+                                                            <i class="bi bi-check-lg fw-bold"></i>
+                                                        @else
+                                                            <i class="bi bi-x-lg fw-bold"></i>
+                                                        @endif
+                                                    </span>
+                                                </span>
+                                            </span>
+                                            <span class="fw-semibold text-gray-800">{{ $doc['label'] }}</span>
+                                            <span class="text-muted fs-8 ms-auto">{{ $doc['uploader'] }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </x-ui.section-card>
+                    @endif
+
                     @if($akreditasi->status >= 3)
                         <x-ui.section-card title="Kartu Kendali" subtitle="Dokumen kontrol validasi dari pesantren.">
                             <div class="p-6">
@@ -1659,19 +1760,27 @@ new #[Layout('layouts.app')] class extends Component
                     <x-ui.section-card title="Laporan Hasil Visitasi" subtitle="Dokumen laporan dari ketua dan anggota asesor.">
                         <div class="p-6">
                             <div class="row g-5">
-                                <div class="col-lg-6">
+                                <div class="col-lg-4">
                                     <div class="spm-document-list">
                                         <x-ui.document-item
-                                            label="Laporan Ketua"
-                                            :href="$akreditasi->laporan_visitasi_file ? Storage::url($akreditasi->laporan_visitasi_file) : null"
+                                            label="Laporan Ketua Kelompok"
+                                            :href="$akreditasi->laporan_visitasi_asesor1 ? Storage::url($akreditasi->laporan_visitasi_asesor1) : null"
                                         />
                                     </div>
                                 </div>
-                                <div class="col-lg-6">
+                                <div class="col-lg-4">
                                     <div class="spm-document-list">
                                         <x-ui.document-item
-                                            label="Laporan Anggota"
-                                            :href="$akreditasi->laporan_visitasi_file_2 ? Storage::url($akreditasi->laporan_visitasi_file_2) : null"
+                                            label="Laporan Anggota Kelompok"
+                                            :href="$akreditasi->laporan_visitasi_asesor2 ? Storage::url($akreditasi->laporan_visitasi_asesor2) : null"
+                                        />
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="spm-document-list">
+                                        <x-ui.document-item
+                                            label="Laporan Kelompok"
+                                            :href="$akreditasi->laporan_visitasi_kelompok ? Storage::url($akreditasi->laporan_visitasi_kelompok) : null"
                                         />
                                     </div>
                                 </div>
@@ -1725,7 +1834,7 @@ new #[Layout('layouts.app')] class extends Component
 
     {{-- Reassign Asesor Modal --}}
     <x-ui.modal name="reassign-asesor-modal" focusable>
-        <form wire:submit.prevent="reassignAsesor">
+        <form x-on:submit.prevent="confirmReassignAsesor($wire)">
             <x-ui.modal-header
                 title="Ganti Asesor"
                 subtitle="Pilih asesor pengganti untuk akreditasi yang telah melewati deadline."
@@ -1767,5 +1876,57 @@ new #[Layout('layouts.app')] class extends Component
                 </x-ui.button>
             </x-ui.modal-footer>
         </form>
+    </x-ui.modal>
+
+    {{-- Approve Berkas Modal --}}
+    <x-ui.modal name="approve-berkas-modal" focusable>
+        <x-ui.modal-header title="Setujui Berkas" subtitle="Tugaskan Ketua Kelompok dan Anggota Kelompok untuk melanjutkan ke tahap assessment." icon="check-circle" variant="success" />
+        <x-ui.modal-body>
+            <x-ui.form-field label="Ketua Kelompok" for="asesor1Id" :error="$errors->first('asesor1Id')">
+                <x-ui.select model="asesor1Id" id="asesor1Id" placeholder="-- Pilih Ketua Kelompok --">
+                    @foreach(\App\Models\Asesor::with('user')->get() as $asesor)
+                        <option value="{{ $asesor->user_id }}">{{ $asesor->nama_tanpa_gelar ?? $asesor->user->name }}</option>
+                    @endforeach
+                </x-ui.select>
+            </x-ui.form-field>
+            <x-ui.form-field label="Anggota Kelompok" for="asesor2Id" :error="$errors->first('asesor2Id')">
+                <x-ui.select model="asesor2Id" id="asesor2Id" placeholder="-- Pilih Anggota Kelompok --">
+                    @foreach(\App\Models\Asesor::with('user')->get() as $asesor)
+                        <option value="{{ $asesor->user_id }}">{{ $asesor->nama_tanpa_gelar ?? $asesor->user->name }}</option>
+                    @endforeach
+                </x-ui.select>
+            </x-ui.form-field>
+        </x-ui.modal-body>
+        <x-ui.modal-footer>
+            <x-ui.button type="button" variant="light" x-on:click="$dispatch('close-modal', 'approve-berkas-modal')">Batal</x-ui.button>
+            <x-ui.button type="button" variant="success" wire:click="approveBerkas" wire:loading.attr="disabled">
+                <span wire:loading.remove wire:target="approveBerkas">Setujui & Tugaskan Tim Asesor</span>
+                <span wire:loading wire:target="approveBerkas">Memproses...</span>
+            </x-ui.button>
+        </x-ui.modal-footer>
+    </x-ui.modal>
+
+    {{-- Reject Berkas Modal --}}
+    <x-ui.modal name="reject-berkas-modal" focusable>
+        <x-ui.modal-header title="Tolak Berkas" subtitle="Pilih bagian yang bermasalah dan berikan catatan penolakan." icon="cross-circle" variant="danger" />
+        <x-ui.modal-body>
+            <x-ui.form-field label="Bagian yang Ditolak" :error="$errors->first('berkasRejectionSections')">
+                <div class="d-flex flex-column gap-3">
+                    @foreach(['profil' => 'Profil', 'ipm.nsp' => 'IPM - NSP', 'ipm.kurikulum' => 'IPM - Kurikulum', 'ipm.buku_ajar' => 'IPM - Buku Ajar', 'ipm.lulus_santri' => 'IPM - Lulus Santri', 'sdm' => 'SDM', 'edpm' => 'EDPM'] as $value => $label)
+                        <x-ui.checkbox model="berkasRejectionSections" :value="$value" :label="$label" />
+                    @endforeach
+                </div>
+            </x-ui.form-field>
+            <x-ui.form-field label="Catatan Penolakan" for="berkasRejectionCatatan" :error="$errors->first('berkasRejectionCatatan')" hint="Minimal 10 karakter, maksimal 2000 karakter.">
+                <x-ui.textarea model="berkasRejectionCatatan" id="berkasRejectionCatatan" rows="4" placeholder="Jelaskan alasan penolakan berkas..." />
+            </x-ui.form-field>
+        </x-ui.modal-body>
+        <x-ui.modal-footer>
+            <x-ui.button type="button" variant="light" x-on:click="$dispatch('close-modal', 'reject-berkas-modal')">Batal</x-ui.button>
+            <x-ui.button type="button" variant="danger" wire:click="rejectBerkas" wire:loading.attr="disabled">
+                <span wire:loading.remove wire:target="rejectBerkas">Tolak Berkas</span>
+                <span wire:loading wire:target="rejectBerkas">Memproses...</span>
+            </x-ui.button>
+        </x-ui.modal-footer>
     </x-ui.modal>
 </x-ui.page>

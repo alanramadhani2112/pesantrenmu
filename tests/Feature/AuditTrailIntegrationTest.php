@@ -11,7 +11,9 @@ use App\Models\User;
 use App\Services\AkreditasiService;
 use App\Services\AuditTrailService;
 use App\Services\PesantrenService;
+use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
+use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -27,13 +29,15 @@ class AuditTrailIntegrationTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RolePermissionSeeder::class);
         $this->auditTrailService = app(AuditTrailService::class);
     }
 
     /**
      * Helper: create an admin user.
      */
-    private function createAdminUser(): User
+private function createAdminUser(): User
     {
         return User::factory()->create(['role_id' => 1]);
     }
@@ -41,7 +45,7 @@ class AuditTrailIntegrationTest extends TestCase
     /**
      * Helper: create a pesantren user with pesantren record.
      */
-    private function createPesantrenUser(): User
+private function createPesantrenUser(): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -55,7 +59,7 @@ class AuditTrailIntegrationTest extends TestCase
     /**
      * Helper: create an asesor user with asesor record.
      */
-    private function createAsesor(string $name = 'Asesor Test'): Asesor
+private function createAsesor(string $name = 'Asesor Test'): Asesor
     {
         $user = User::factory()->create(['role_id' => 2]);
 
@@ -69,7 +73,7 @@ class AuditTrailIntegrationTest extends TestCase
     /**
      * Helper: create an akreditasi for a given user.
      */
-    private function createAkreditasi(int $userId, int $status = 6): Akreditasi
+private function createAkreditasi(int $userId, int $status = 6): Akreditasi
     {
         return Akreditasi::create([
             'user_id' => $userId,
@@ -83,7 +87,7 @@ class AuditTrailIntegrationTest extends TestCase
      * Creates akreditasi, creates audit logs for it, then deletes the akreditasi.
      * Asserts audit logs still exist in the database (FK has no cascade).
      */
-    public function test_audit_logs_persist_after_akreditasi_soft_delete(): void
+public function test_audit_logs_persist_after_akreditasi_soft_delete(): void
     {
         $admin = $this->createAdminUser();
         Auth::login($admin);
@@ -135,7 +139,7 @@ class AuditTrailIntegrationTest extends TestCase
      * Create → assign asesor → status change → finalize → verify complete audit trail
      * with correct sequence.
      */
-    public function test_full_workflow_integration_create_assign_finalize(): void
+public function test_full_workflow_integration_create_assign_finalize(): void
     {
         $admin = $this->createAdminUser();
         Auth::login($admin);
@@ -213,7 +217,7 @@ class AuditTrailIntegrationTest extends TestCase
      *
      * Reject akreditasi → submit banding → verify both "rejected" and "banding_submitted" logs exist.
      */
-    public function test_banding_flow_reject_then_submit_banding(): void
+public function test_banding_flow_reject_then_submit_banding(): void
     {
         $admin = $this->createAdminUser();
         Auth::login($admin);
@@ -249,8 +253,8 @@ class AuditTrailIntegrationTest extends TestCase
 
         // Step 2: Submit banding as pesantren user
         $akreditasi->refresh();
-        // After rejection, status should be 2 (Ditolak)
-        $this->assertEquals(2, $akreditasi->status);
+        // After rejection, status should be Ditolak
+        $this->assertEquals(-1, $akreditasi->status);
 
         Auth::login($pesantrenUser);
         $pesantrenService = app(PesantrenService::class);
@@ -282,7 +286,7 @@ class AuditTrailIntegrationTest extends TestCase
      *
      * Assign asesor → reassign → verify "asesor_assigned" and "asesor_reassigned" logs.
      */
-    public function test_reassignment_logs_asesor_assigned_and_reassigned(): void
+public function test_reassignment_logs_asesor_assigned_and_reassigned(): void
     {
         $admin = $this->createAdminUser();
         Auth::login($admin);
@@ -350,7 +354,7 @@ class AuditTrailIntegrationTest extends TestCase
      * Create admin user, create akreditasi with audit logs, GET the admin akreditasi
      * detail page, assert 200 response and "Audit Trail" tab is visible.
      */
-    public function test_admin_can_access_audit_timeline_page(): void
+public function test_admin_can_access_audit_timeline_page(): void
     {
         $admin = $this->createAdminUser();
         $pesantrenUser = $this->createPesantrenUser();

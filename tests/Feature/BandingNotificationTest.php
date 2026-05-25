@@ -34,7 +34,7 @@ class BandingNotificationTest extends TestCase
     /**
      * Helper: create a pesantren user with basic data.
      */
-    private function createPesantrenUser(): User
+private function createPesantrenUser(): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -47,7 +47,7 @@ class BandingNotificationTest extends TestCase
     /**
      * Helper: create a pesantren user with COMPLETE data for createSubmission compatibility.
      */
-    private function createCompletePesantrenUser(): User
+private function createCompletePesantrenUser(): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -93,7 +93,7 @@ class BandingNotificationTest extends TestCase
      * - The reviewer receives a notification with type 'banding_review'
      * - The pesantren user receives a notification with type 'banding_under_review'
      */
-    public function test_assign_reviewer_sends_notification_to_reviewer(): void
+public function test_assign_reviewer_sends_notification_to_reviewer(): void
     {
         Notification::fake();
 
@@ -102,7 +102,7 @@ class BandingNotificationTest extends TestCase
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status' => 2,
+            'status' => -2,
         ]);
 
         $banding = Banding::create([
@@ -129,7 +129,7 @@ class BandingNotificationTest extends TestCase
     /**
      * Task 11.4: assignReviewer sends notification to pesantren user.
      */
-    public function test_assign_reviewer_sends_notification_to_pesantren_user(): void
+public function test_assign_reviewer_sends_notification_to_pesantren_user(): void
     {
         Notification::fake();
 
@@ -165,7 +165,7 @@ class BandingNotificationTest extends TestCase
     /**
      * Task 11.4: assignReviewer sends notifications to BOTH reviewer and pesantren user.
      */
-    public function test_assign_reviewer_sends_notifications_to_both_reviewer_and_pesantren_user(): void
+public function test_assign_reviewer_sends_notifications_to_both_reviewer_and_pesantren_user(): void
     {
         Notification::fake();
 
@@ -213,9 +213,9 @@ class BandingNotificationTest extends TestCase
      *
      * Verifies that when a banding is accepted:
      * - The pesantren user receives a notification with type 'banding_accepted'
-     * - The notification message indicates the appeal was accepted and re-evaluation will occur
+     * - The notification message indicates the appeal returns to final admin validation
      */
-    public function test_accept_banding_sends_notification_to_pesantren_user(): void
+public function test_accept_banding_sends_notification_to_pesantren_user(): void
     {
         Notification::fake();
 
@@ -224,7 +224,7 @@ class BandingNotificationTest extends TestCase
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status' => 2,
+            'status' => -2,
         ]);
 
         $banding = Banding::create([
@@ -247,7 +247,7 @@ class BandingNotificationTest extends TestCase
                 return $notification->type === 'banding_accepted'
                     && $notification->title === 'Banding Diterima'
                     && str_contains($notification->message, 'diterima')
-                    && str_contains($notification->message, 'Evaluasi ulang');
+                    && str_contains($notification->message, 'Validasi Akhir Admin');
             }
         );
     }
@@ -259,7 +259,7 @@ class BandingNotificationTest extends TestCase
      * - The pesantren user receives a notification with type 'banding_rejected'
      * - The notification message includes the rejection explanation
      */
-    public function test_reject_banding_sends_notification_to_pesantren_user_with_explanation(): void
+public function test_reject_banding_sends_notification_to_pesantren_user_with_explanation(): void
     {
         Notification::fake();
 
@@ -268,7 +268,7 @@ class BandingNotificationTest extends TestCase
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status' => 2,
+            'status' => -2,
         ]);
 
         $banding = Banding::create([
@@ -299,7 +299,7 @@ class BandingNotificationTest extends TestCase
     /**
      * Task 11.6 (additional): rejectBanding notification message contains the full rejection explanation.
      */
-    public function test_reject_banding_notification_contains_rejection_explanation(): void
+public function test_reject_banding_notification_contains_rejection_explanation(): void
     {
         Notification::fake();
 
@@ -308,7 +308,7 @@ class BandingNotificationTest extends TestCase
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status' => 2,
+            'status' => -2,
         ]);
 
         $banding = Banding::create([

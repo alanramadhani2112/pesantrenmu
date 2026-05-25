@@ -14,7 +14,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function mount($uuid)
     {
-        if (!Auth::user()?->isAdmin()) {
+        if (!Auth::user()?->canAccessAdminArea()) {
             abort(403);
         }
 
@@ -36,7 +36,7 @@ new #[Layout('layouts.app')] class extends Component {
             $pesantrenService = app(\App\Services\PesantrenService::class);
             if ($pesantrenService->toggleDataLock($this->pesantren->id)) {
                 $status = $this->pesantren->refresh()->is_locked ? 'terkunci' : 'terbuka';
-                $this->dispatch('notification-received', title: 'Berhasil', message: "Akses data pesantren berhasil diubah menjadi $status.");
+                $this->dispatch('notification-received', type: 'success', title: 'Berhasil', message: "Akses data pesantren berhasil diubah menjadi $status.");
             }
         }
     }
@@ -48,8 +48,8 @@ new #[Layout('layouts.app')] class extends Component {
     $akreditasiLabel = '-';
     $akreditasiVariant = 'secondary';
 
-    if ($latestAkreditasi && (int) $latestAkreditasi->status === 1) {
-        $akreditasiLabel = $latestAkreditasi->peringkat ?? 'Berhasil';
+    if ($latestAkreditasi && (int) $latestAkreditasi->status === 0) {
+        $akreditasiLabel = $latestAkreditasi->peringkat ?? 'Selesai';
         $akreditasiVariant = 'primary';
     } elseif ($latestAkreditasi) {
         $akreditasiLabel = 'Proses';
@@ -80,7 +80,7 @@ new #[Layout('layouts.app')] class extends Component {
 
 <x-slot name="header">{{ __('Detail Pesantren') }}</x-slot>
 
-<x-ui.page title="Detail Pesantren" subtitle="Ringkasan profil, layanan pendidikan, dan kelengkapan dokumen pesantren.">
+<x-ui.page title="Detail Pesantren" subtitle="Ringkasan profil, layanan pendidikan, dan kelengkapan dokumen pesantren." class="spm-detail-page" x-data="adminManagement()">
     <x-slot:toolbar>
         <x-ui.button :href="route('admin.pesantren.index')" variant="light">
             <x-ui.icon name="exit-right" class="fs-4 me-1" />
@@ -126,7 +126,7 @@ new #[Layout('layouts.app')] class extends Component {
                             <div class="border-top border-gray-200 pt-5">
                                 <x-ui.button
                                     type="button"
-                                    wire:click="toggleLock"
+                                    @click="confirmToggleLock($wire, {{ $pesantren->is_locked ? 'true' : 'false' }})"
                                     wire:loading.attr="disabled"
                                     :variant="$pesantren->is_locked ? 'warning' : 'primary'"
                                     class="w-100 justify-content-center"

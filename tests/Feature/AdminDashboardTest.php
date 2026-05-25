@@ -26,7 +26,7 @@ class AdminDashboardTest extends TestCase
     /**
      * Helper: create a pesantren user with an akreditasi at the given status.
      */
-    private function createAkreditasiWithStatus(int $status): Akreditasi
+private function createAkreditasiWithStatus(int $status): Akreditasi
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -41,39 +41,39 @@ class AdminDashboardTest extends TestCase
     }
 
     /**
-     * Task 6.2: getStatusCounts()['visitasi'] only counts status 3 and 4,
-     * not status 1 (Berhasil) or 2 (Ditolak).
+     * Task 6.2: getStatusCounts()['visitasi'] only counts status 3 and 2,
+     * not status 1 (Validasi Admin) or 0 (Selesai).
+     *
+     * Service counts 'visitasi' as status [3 (Visitasi), 2 (Pasca Visitasi)].
      *
      * Requirements: 2.25
      */
-    public function test_get_status_counts_visitasi_excludes_status_1_and_2(): void
+    public function test_get_status_counts_visitasi_only_counts_status_3_and_2(): void
     {
-        // Create akreditasis at each status
-        $this->createAkreditasiWithStatus(1); // Berhasil — must NOT be counted
-        $this->createAkreditasiWithStatus(2); // Ditolak — must NOT be counted
-        $this->createAkreditasiWithStatus(3); // Validasi — must be counted
-        $this->createAkreditasiWithStatus(4); // Visitasi — must be counted
+        $this->createAkreditasiWithStatus(1); // Validasi Admin — must NOT be counted
+        $this->createAkreditasiWithStatus(0); // Selesai — must NOT be counted
+        $this->createAkreditasiWithStatus(3); // Visitasi — must be counted
+        $this->createAkreditasiWithStatus(2); // Pasca Visitasi — must be counted
 
         $counts = $this->akreditasiService->getStatusCounts();
 
-        // visitasi should be exactly 2 (status 3 + status 4)
         $this->assertEquals(2, $counts['visitasi'],
-            'visitasi count should only include status 3 and 4, not 1 or 2'
+            'visitasi count should only include status 3 and 2, not 1 or 0'
         );
     }
 
     /**
-     * Complementary: verify status 1 and 2 are truly excluded even when they exist.
+     * Complementary: verify non-visitasi statuses are truly excluded.
      */
-    public function test_get_status_counts_visitasi_is_zero_when_only_status_1_and_2_exist(): void
+    public function test_get_status_counts_visitasi_is_zero_when_only_non_visitasi_statuses_exist(): void
     {
-        $this->createAkreditasiWithStatus(1);
-        $this->createAkreditasiWithStatus(2);
+        $this->createAkreditasiWithStatus(1); // Validasi Admin
+        $this->createAkreditasiWithStatus(0); // Selesai
 
         $counts = $this->akreditasiService->getStatusCounts();
 
         $this->assertEquals(0, $counts['visitasi'],
-            'visitasi count should be 0 when only status 1 and 2 exist'
+            'visitasi count should be 0 when only status 1 and 0 exist'
         );
     }
 }

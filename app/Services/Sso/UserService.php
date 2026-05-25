@@ -4,13 +4,17 @@ namespace App\Services\Sso;
 
 use App\Models\Profile;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class UserService
 {
     protected static string $token = '';
+
+    protected static function serverUrl(string $path): string
+    {
+        return rtrim((string) config('sso.server_url'), '/') . '/' . ltrim($path, '/');
+    }
     
     protected static function getCredentials(string $token): mixed
     {
@@ -20,7 +24,7 @@ class UserService
             ->withHeaders([
                 'Accept' => 'application/json',
                 'Authorization' => 'Bearer ' . self::$token,
-            ])->get(config('sso.server_url') . 'api/user');
+            ])->get(self::serverUrl('api/user'));
 
 
         if ($req->successful()) {
@@ -92,19 +96,19 @@ class UserService
             ]);
         }
 
-        $encryptedToken = Crypt::encryptString(self::$token);
-
+        // L-3 fix: cast 'encrypted' di Profile model sekarang handle enkripsi otomatis.
+        // Tidak perlu manual Crypt::encryptString — simpan token raw, cast yang encrypt.
         if ($user->profile_data) {
             $profile = $user->profile_data;
 
             $profile->update([
                 'data' => $user_data,
-                'access_token' => $encryptedToken,
+                'access_token' => self::$token,
             ]);
         } else {
             $user->profile_data()->create([
                 'data' => $user_data,
-                'access_token' => $encryptedToken,
+                'access_token' => self::$token,
             ]);
         }
 

@@ -29,6 +29,7 @@
         'profil_pesantren' => 'profil',
         'ipm' => 'ipm',
         'data_sdm' => 'sdm',
+        'edpm_ipr' => 'edpm',
     ];
 
     // Compute badge counts for items with show_badge=true
@@ -74,7 +75,7 @@
     <div class="app-sidebar-logo flex-shrink-0 d-flex align-items-center justify-content-between px-8" id="kt_app_sidebar_logo">
         <a href="{{ route('dashboard') }}" class="d-flex align-items-center gap-3 min-w-0">
             <span class="spm-sidebar-logo-mark d-flex align-items-center justify-content-center p-0 border-0 bg-transparent">
-                <img src="{{ asset('images/brand/favicon.svg') }}" class="w-30px h-30px" alt="PesantrenMu" />
+                <img src="{{ asset('images/brand/favicon.svg') }}" class="w-30px h-30px" alt="PesantrenMu" loading="eager" />
             </span>
             <span class="spm-sidebar-brand-title">PesantrenMu</span>
         </a>
@@ -109,15 +110,39 @@
                                 $isActive = false;
                             } else {
                                 $routeParams = $item['route_params'] ?? [];
+                                $routeQuery = $item['route_query'] ?? [];
                                 $href = route($item['route'], $routeParams);
+                                if (! empty($routeQuery)) {
+                                    $href .= '?' . http_build_query($routeQuery);
+                                }
 
                                 $activePattern = $item['active_pattern'];
                                 if (str_contains($activePattern, 'documents.index.')) {
-                                    $isActive = request()->fullUrlIs($href);
+                                    $routeMatches = request()->fullUrlIs($href);
                                 } elseif (str_ends_with($activePattern, '*')) {
-                                    $isActive = request()->routeIs($activePattern);
+                                    $routeMatches = request()->routeIs($activePattern);
                                 } else {
-                                    $isActive = request()->routeIs($activePattern);
+                                    $routeMatches = request()->routeIs($activePattern);
+                                }
+
+                                if (isset($item['active_query'])) {
+                                    $isActive = $routeMatches;
+                                    foreach ($item['active_query'] as $queryKey => $queryValue) {
+                                        if ((string) request()->query($queryKey, '') !== (string) $queryValue) {
+                                            $isActive = false;
+                                            break;
+                                        }
+                                    }
+                                } elseif (isset($item['active_query_absent'])) {
+                                    $isActive = $routeMatches;
+                                    foreach ($item['active_query_absent'] as $queryKey) {
+                                        if (request()->query->has($queryKey)) {
+                                            $isActive = false;
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    $isActive = $routeMatches;
                                 }
                             }
 
@@ -172,7 +197,4 @@
 
     {{-- SidebarBadges Livewire component for dynamic badge count updates --}}
     <livewire:layout.sidebar-badges />
-
-    {{-- OnboardingGuide Livewire component for onboarding modal --}}
-    <livewire:layout.onboarding-guide />
 </div>

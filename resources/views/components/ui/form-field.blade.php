@@ -3,6 +3,7 @@
     'for' => null,
     'error' => [],
     'hint' => null,
+    'required' => false,
 ])
 
 @php
@@ -13,6 +14,9 @@
     @if($label)
         <label @if($for) for="{{ $for }}" @endif class="form-label fw-semibold text-gray-700 fs-7">
             {{ $label }}
+            @if($required)
+                <span class="text-danger ms-1">*</span>
+            @endif
         </label>
     @endif
 

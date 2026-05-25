@@ -11,6 +11,7 @@ use Faker\Factory as Faker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class ResubmissionServiceTest extends TestCase
 {
@@ -33,9 +34,9 @@ class ResubmissionServiceTest extends TestCase
      *
      * **Validates: Requirements 1.3, 3.1, 3.2, 3.3**
      *
-     * @dataProvider chainCountDataProvider
      */
-    public function test_property_chain_count_accuracy(int $depth, array $softDeleteIndices): void
+#[DataProvider('chainCountDataProvider')]
+public function test_property_chain_count_accuracy(int $depth, array $softDeleteIndices): void
     {
         $user = User::factory()->create(['role_id' => 3]);
 
@@ -108,9 +109,9 @@ class ResubmissionServiceTest extends TestCase
      *
      * **Validates: Requirements 1.4, 1.5**
      *
-     * @dataProvider limitEnforcementDataProvider
      */
-    public function test_property_limit_enforcement(int $chainDepth, int $limit): void
+#[DataProvider('limitEnforcementDataProvider')]
+public function test_property_limit_enforcement(int $chainDepth, int $limit): void
     {
         $user = User::factory()->create(['role_id' => 3]);
 
@@ -177,9 +178,9 @@ class ResubmissionServiceTest extends TestCase
      *
      * **Validates: Requirements 2.4, 2.6**
      *
-     * @dataProvider coolingPeriodDataProvider
      */
-    public function test_property_cooling_period_enforcement(int $daysAgoRejected, int $coolingDays): void
+#[DataProvider('coolingPeriodDataProvider')]
+public function test_property_cooling_period_enforcement(int $daysAgoRejected, int $coolingDays): void
     {
         $user = User::factory()->create(['role_id' => 3]);
 
@@ -248,9 +249,9 @@ class ResubmissionServiceTest extends TestCase
      *
      * **Validates: Requirements 2.5**
      *
-     * @dataProvider remainingDaysDataProvider
      */
-    public function test_property_remaining_days_calculation(int $daysAgoRejected, int $coolingDays): void
+#[DataProvider('remainingDaysDataProvider')]
+public function test_property_remaining_days_calculation(int $daysAgoRejected, int $coolingDays): void
     {
         $user = User::factory()->create(['role_id' => 3]);
 
@@ -319,9 +320,9 @@ class ResubmissionServiceTest extends TestCase
      *
      * **Validates: Requirements 6.1**
      *
-     * @dataProvider limitErrorMessageDataProvider
      */
-    public function test_property_limit_error_message_formatting(int $count, int $limit): void
+#[DataProvider('limitErrorMessageDataProvider')]
+public function test_property_limit_error_message_formatting(int $count, int $limit): void
     {
         $errorData = [
             'count' => $count,
@@ -368,9 +369,9 @@ class ResubmissionServiceTest extends TestCase
      *
      * **Validates: Requirements 6.2**
      *
-     * @dataProvider coolingErrorMessageDataProvider
      */
-    public function test_property_cooling_error_message_formatting(int $daysAgoRejected, int $coolingDays): void
+#[DataProvider('coolingErrorMessageDataProvider')]
+public function test_property_cooling_error_message_formatting(int $daysAgoRejected, int $coolingDays): void
     {
         // Calculate expected values
         $now = Carbon::now()->startOfDay();
@@ -427,7 +428,7 @@ class ResubmissionServiceTest extends TestCase
      * Unit test: Circular reference detection
      * Create chain with circular parent, verify traversal halts and logs error.
      */
-    public function test_circular_reference_detection_halts_and_logs_error(): void
+public function test_circular_reference_detection_halts_and_logs_error(): void
     {
         $user = User::factory()->create(['role_id' => 3]);
 
@@ -461,7 +462,7 @@ class ResubmissionServiceTest extends TestCase
     /**
      * Unit test: getChainTimeline returns ordered collection from root to leaf.
      */
-    public function test_get_chain_timeline_returns_ordered_collection(): void
+public function test_get_chain_timeline_returns_ordered_collection(): void
     {
         $user = User::factory()->create(['role_id' => 3]);
 
@@ -494,7 +495,7 @@ class ResubmissionServiceTest extends TestCase
     /**
      * Unit test: getChainTimeline includes soft-deleted entries.
      */
-    public function test_get_chain_timeline_includes_soft_deleted(): void
+public function test_get_chain_timeline_includes_soft_deleted(): void
     {
         $user = User::factory()->create(['role_id' => 3]);
 
@@ -527,7 +528,7 @@ class ResubmissionServiceTest extends TestCase
     /**
      * Unit test: checkResubmissionEligibility returns allowed when both conditions met.
      */
-    public function test_eligibility_allowed_when_under_limit_and_cooling_elapsed(): void
+public function test_eligibility_allowed_when_under_limit_and_cooling_elapsed(): void
     {
         $user = User::factory()->create(['role_id' => 3]);
 
@@ -558,7 +559,7 @@ class ResubmissionServiceTest extends TestCase
     /**
      * Unit test: getResubmissionStatus with limit=0 returns can_resubmit=false.
      */
-    public function test_status_with_zero_limit_disallows_resubmission(): void
+public function test_status_with_zero_limit_disallows_resubmission(): void
     {
         $user = User::factory()->create(['role_id' => 3]);
 

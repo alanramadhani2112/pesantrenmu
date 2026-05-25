@@ -9,9 +9,6 @@ Route::middleware('guest')->group(function () {
         ->middleware('throttle:10,1')
         ->name('register');
 
-    Volt::route('/', 'pages.auth.login')
-        ->middleware('throttle:10,1');
-
     Volt::route('login', 'pages.auth.login')
         ->middleware('throttle:10,1')
         ->name('login');

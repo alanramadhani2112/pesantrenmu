@@ -31,7 +31,7 @@ class RejectionServiceTest extends TestCase
     /**
      * Helper: create a pesantren user with akreditasi at status 5 and an Asesor 1 assigned.
      */
-    private function createAsesor1Setup(): array
+private function createAsesor1Setup(): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -73,7 +73,7 @@ class RejectionServiceTest extends TestCase
      *
      * Validates: Requirements 8.3
      */
-    public function test_process_deadlines_sends_reminders_for_approaching_deadlines(): void
+public function test_process_deadlines_sends_reminders_for_approaching_deadlines(): void
     {
         config(['akreditasi.perbaikan_reminder_days_before' => 3]);
         config(['akreditasi.rejection_limit' => 10]);
@@ -116,7 +116,7 @@ class RejectionServiceTest extends TestCase
      *
      * Validates: Requirements 8.3
      */
-    public function test_process_deadlines_does_not_send_reminders_outside_threshold(): void
+public function test_process_deadlines_does_not_send_reminders_outside_threshold(): void
     {
         config(['akreditasi.perbaikan_reminder_days_before' => 3]);
         config(['akreditasi.rejection_limit' => 10]);
@@ -152,7 +152,7 @@ class RejectionServiceTest extends TestCase
      *
      * Validates: Requirements 8.4, 8.5
      */
-    public function test_process_deadlines_auto_rejects_expired_rejections_and_unlocks_pesantren(): void
+public function test_process_deadlines_auto_rejects_expired_rejections_and_unlocks_pesantren(): void
     {
         config(['akreditasi.perbaikan_reminder_days_before' => 3]);
         config(['akreditasi.rejection_limit' => 10]);
@@ -187,9 +187,9 @@ class RejectionServiceTest extends TestCase
         $this->assertEquals(0, $result['reminders_sent'], 'Should not send reminders');
         $this->assertEquals(1, $result['auto_rejected'], 'Should auto-reject 1 expired rejection');
 
-        // Verify: akreditasi status changed to 2
-        $akreditasi = Akreditasi::find($akreditasiId);
-        $this->assertEquals(2, (int) $akreditasi->status, 'Akreditasi status should be changed to 2 (Ditolak)');
+        // Verify: akreditasi status changed to Ditolak
+        $akreditasi = Akreditasi::withTrashed()->find($akreditasiId);
+        $this->assertEquals(-1, (int) $akreditasi->status, 'Akreditasi status should be changed to -1 (Ditolak)');
 
         // Verify: pesantren is_locked is false
         $pesantren->refresh();
@@ -207,7 +207,7 @@ class RejectionServiceTest extends TestCase
      *
      * Validates: Requirements 8.4, 8.5
      */
-    public function test_process_deadlines_handles_multiple_expired_rejections(): void
+public function test_process_deadlines_handles_multiple_expired_rejections(): void
     {
         config(['akreditasi.perbaikan_reminder_days_before' => 3]);
         config(['akreditasi.rejection_limit' => 10]);
@@ -247,8 +247,8 @@ class RejectionServiceTest extends TestCase
         $this->assertEquals(2, $result['auto_rejected'], 'Should auto-reject 2 expired rejections');
 
         // Verify both akreditasi statuses changed
-        $this->assertEquals(2, (int) Akreditasi::find($setup1['akreditasi']->id)->status);
-        $this->assertEquals(2, (int) Akreditasi::find($setup2['akreditasi']->id)->status);
+        $this->assertEquals(-1, (int) Akreditasi::withTrashed()->find($setup1['akreditasi']->id)->status);
+        $this->assertEquals(-1, (int) Akreditasi::withTrashed()->find($setup2['akreditasi']->id)->status);
 
         // Verify both pesantrens unlocked
         $pesantren1 = Pesantren::where('user_id', $setup1['pesantrenUser']->id)->first();
@@ -264,7 +264,7 @@ class RejectionServiceTest extends TestCase
      *
      * Validates: Requirements 8.4
      */
-    public function test_process_deadlines_skips_submitted_perbaikan(): void
+public function test_process_deadlines_skips_submitted_perbaikan(): void
     {
         config(['akreditasi.perbaikan_reminder_days_before' => 3]);
         config(['akreditasi.rejection_limit' => 10]);
@@ -308,7 +308,7 @@ class RejectionServiceTest extends TestCase
      *
      * Validates: Requirements 1.1, 1.5
      */
-    public function test_process_visitasi_tolak_creates_structured_rejection_record(): void
+public function test_process_visitasi_tolak_creates_structured_rejection_record(): void
     {
         $setup = $this->createAsesor1Setup();
         $akreditasiId = $setup['akreditasi']->id;
@@ -349,7 +349,7 @@ class RejectionServiceTest extends TestCase
      *
      * Validates: Requirements 1.6
      */
-    public function test_process_visitasi_tolak_fails_for_unauthorized_user(): void
+public function test_process_visitasi_tolak_fails_for_unauthorized_user(): void
     {
         $setup = $this->createAsesor1Setup();
         $akreditasiId = $setup['akreditasi']->id;
@@ -379,7 +379,7 @@ class RejectionServiceTest extends TestCase
      *
      * Validates: Requirements 7.1, 7.2
      */
-    public function test_process_visitasi_accept_perbaikan_clears_rejection(): void
+public function test_process_visitasi_accept_perbaikan_clears_rejection(): void
     {
         $setup = $this->createAsesor1Setup();
         $akreditasiId = $setup['akreditasi']->id;
@@ -419,7 +419,7 @@ class RejectionServiceTest extends TestCase
      *
      * Validates: Requirements 7.1
      */
-    public function test_process_visitasi_accept_perbaikan_fails_without_submitted_rejection(): void
+public function test_process_visitasi_accept_perbaikan_fails_without_submitted_rejection(): void
     {
         $setup = $this->createAsesor1Setup();
         $akreditasiId = $setup['akreditasi']->id;
@@ -438,7 +438,7 @@ class RejectionServiceTest extends TestCase
      *
      * Validates: Requirements 1.1, 3.1, 3.2, 7.1, 7.2
      */
-    public function test_full_rejection_perbaikan_accept_lifecycle(): void
+public function test_full_rejection_perbaikan_accept_lifecycle(): void
     {
         $setup = $this->createAsesor1Setup();
         $akreditasiId = $setup['akreditasi']->id;
@@ -477,9 +477,9 @@ class RejectionServiceTest extends TestCase
         $this->assertEmpty($this->rejectionService->getUnlockedSections($akreditasiId));
         $this->assertFalse($this->rejectionService->isSectionUnlocked($akreditasiId, 'profil'));
 
-        // Verify rejection status is 'submitted'
+        // Verify rejection status is resolved after pesantren submits perbaikan.
         $rejection->refresh();
-        $this->assertEquals('submitted', $rejection->status);
+        $this->assertEquals('resolved', $rejection->status);
         $this->assertNotNull($rejection->perbaikan_submitted_at);
 
         // Step 3: Asesor 1 accepts perbaikan via processVisitasi

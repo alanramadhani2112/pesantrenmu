@@ -251,6 +251,19 @@ class AsesorService
 
     public function saveAsesorEdpm(int $akreditasiId, int $asesorId, int $asesorTipe, int $pesantrenId, array $data): bool
     {
+        $akreditasi = $this->akreditasiRepository->find($akreditasiId);
+        if (!$akreditasi) {
+            throw new \DomainException("Akreditasi #{$akreditasiId} tidak ditemukan.");
+        }
+
+        if ((int) $akreditasi->status !== \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
+            throw new \DomainException('Nilai asesor hanya dapat diisi setelah visitasi dikonfirmasi selesai.');
+        }
+
+        if ($asesorTipe == 1 && $this->containsNilaiKelompok($data['asesorNks'] ?? [])) {
+            $this->assertNilaiKelompokInputIsOpen($akreditasiId);
+        }
+
         foreach ($data['asesorEvaluasis'] as $butirId => $isian) {
             if (empty($isian)) continue;
 
@@ -284,6 +297,41 @@ class AsesorService
         return true;
     }
 
+    private function containsNilaiKelompok(array $nilaiKelompok): bool
+    {
+        foreach ($nilaiKelompok as $value) {
+            if ($value !== null && $value !== '') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function assertNilaiKelompokInputIsOpen(int $akreditasiId): void
+    {
+        $ketua = Assessment::where('akreditasi_id', $akreditasiId)
+            ->where('tipe', 1)
+            ->with('asesor')
+            ->first();
+
+        $anggota = Assessment::where('akreditasi_id', $akreditasiId)
+            ->where('tipe', 2)
+            ->with('asesor')
+            ->first();
+
+        if (! $ketua?->asesor?->user_id || ! $anggota?->asesor?->user_id) {
+            throw new \DomainException('Nilai Kelompok belum dapat diisi karena pasangan Ketua dan Anggota Kelompok belum lengkap.');
+        }
+
+        $scoringService = app(AssessorScoringService::class);
+
+        if (! $scoringService->allNA1Final($akreditasiId, $ketua->asesor->user_id)
+            || ! $scoringService->allNA2Final($akreditasiId, $anggota->asesor->user_id)) {
+            throw new \DomainException('Nilai Kelompok baru dapat diisi setelah Nilai Ketua dan Nilai Anggota disubmit final seluruhnya.');
+        }
+    }
+
     protected function notifyEdpmInput(int $akreditasiId, int $asesorTipe): void
     {
         $akreditasi = $this->akreditasiRepository->find($akreditasiId);
@@ -292,20 +340,20 @@ class AsesorService
         $pesantrenName = $akreditasi->user?->pesantren?->nama_pesantren ?? $akreditasi->user?->name;
 
         if ($asesorTipe == 1) {
-            $message = 'Asesor 1 (' . $user->name . ') telah mengisi draf nilai NA untuk ' . $pesantrenName;
-            Notification::send($admins, new AkreditasiNotification('na1_diisi', 'Nilai NA 1 diisi', $message, route('admin.akreditasi-detail', $akreditasi->uuid)));
+            $message = 'Ketua Kelompok (' . $user->name . ') telah mengisi draf Nilai Ketua untuk ' . $pesantrenName;
+            Notification::send($admins, new AkreditasiNotification('na1_diisi', 'Nilai Ketua diisi', $message, route('admin.akreditasi-detail', $akreditasi->uuid)));
 
             $assessor2 = $akreditasi->assessment2;
             if ($assessor2 && $assessor2->asesor && $assessor2->asesor->user) {
-                $assessor2->asesor->user->notify(new AkreditasiNotification('na1_diisi', 'Nilai NA 1 diisi', $message, route('asesor.akreditasi-detail', $akreditasi->uuid)));
+                $assessor2->asesor->user->notify(new AkreditasiNotification('na1_diisi', 'Nilai Ketua diisi', $message, route('asesor.akreditasi-detail', $akreditasi->uuid)));
             }
         } elseif ($asesorTipe == 2) {
-            $message = 'Asesor 2 (' . $user->name . ') telah mengisi nilai NA untuk ' . $pesantrenName;
-            Notification::send($admins, new AkreditasiNotification('na2_diisi', 'Nilai NA 2 diisi', $message, route('admin.akreditasi-detail', $akreditasi->uuid)));
+            $message = 'Anggota Kelompok (' . $user->name . ') telah mengisi Nilai Anggota untuk ' . $pesantrenName;
+            Notification::send($admins, new AkreditasiNotification('na2_diisi', 'Nilai Anggota diisi', $message, route('admin.akreditasi-detail', $akreditasi->uuid)));
 
             $assessor1 = $akreditasi->assessment1;
             if ($assessor1 && $assessor1->asesor && $assessor1->asesor->user) {
-                $assessor1->asesor->user->notify(new AkreditasiNotification('na2_diisi', 'Nilai NA 2 diisi', $message, route('asesor.akreditasi-detail', $akreditasi->uuid)));
+                $assessor1->asesor->user->notify(new AkreditasiNotification('na2_diisi', 'Nilai Anggota diisi', $message, route('asesor.akreditasi-detail', $akreditasi->uuid)));
             }
         }
     }
@@ -317,7 +365,7 @@ class AsesorService
      */
     public function finalizeVerification(int $akreditasiId, int $userId, string $clientUpdatedAt = ''): array
     {
-        // Precondition 1: Hanya asesor 1 (ketua) yang ditugaskan boleh finalisasi
+        // Precondition 1: hanya Ketua Kelompok yang ditugaskan boleh finalisasi
         $asesor1Assessment = Assessment::where('akreditasi_id', $akreditasiId)
             ->where('tipe', 1)
             ->whereHas('asesor', fn($q) => $q->where('user_id', $userId))
@@ -336,8 +384,16 @@ class AsesorService
             return ['success' => false, 'error' => 'not_found', 'details' => null];
         }
 
+        if ((int) $akreditasi->status !== \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
+            return [
+                'success' => false,
+                'error'   => 'invalid_status',
+                'details' => ['status' => (int) $akreditasi->status],
+            ];
+        }
+
         // Precondition 2: Kelengkapan butir di server (defense-in-depth)
-        // Asesor 1: NA (isian) harus terisi untuk semua butir
+        // Ketua Kelompok: Nilai Ketua harus terisi untuk semua butir
         $asesor1NaCompletion = $this->progressTracker->getCompletion($akreditasiId, $asesor1Assessment->asesor_id, 'isian');
         if ($asesor1NaCompletion['percentage'] < 100.0) {
             Log::warning('finalizeVerification incomplete asesor1 NA data', [
@@ -352,7 +408,7 @@ class AsesorService
             ];
         }
 
-        // Asesor 1: NK harus terisi untuk semua butir
+        // Ketua Kelompok: Nilai Kelompok harus terisi untuk semua butir
         $asesor1NkCompletion = $this->progressTracker->getCompletion($akreditasiId, $asesor1Assessment->asesor_id, 'nk');
         if ($asesor1NkCompletion['percentage'] < 100.0) {
             Log::warning('finalizeVerification incomplete asesor1 NK data', [
@@ -367,7 +423,7 @@ class AsesorService
             ];
         }
 
-        // Asesor 2 (bila ditugaskan): NA (isian) harus terisi untuk semua butir
+        // Anggota Kelompok (bila ditugaskan): Nilai Anggota harus terisi untuk semua butir
         $asesor2Assessment = Assessment::where('akreditasi_id', $akreditasiId)
             ->where('tipe', 2)
             ->first();
@@ -392,9 +448,19 @@ class AsesorService
             if ($clientUpdatedAt !== '') {
                 $this->assertNotStale($akreditasiId, $clientUpdatedAt);
             }
-            $akreditasi->update(['status' => 3]); // Validasi Central
+            $user = User::findOrFail($userId);
 
-            $user = User::find($userId);
+            $akreditasi->update([
+                'is_nilai_asesor_final'  => true,
+                'is_nilai_asesor2_final' => true,
+            ]);
+            $akreditasi->refresh();
+
+            app(\App\StateMachine\AkreditasiStateMachine::class)->transition(
+                $akreditasi,
+                \App\StateMachine\AkreditasiStateMachine::STATUS_VALIDASI_ADMIN,
+                $user
+            );
 
             // Audit trail: log finalization
             $this->auditTrailService->log(
@@ -498,7 +564,15 @@ class AsesorService
         $akreditasi = \App\Models\Akreditasi::find($akreditasiId);
         if (!$akreditasi) return false;
 
-        $field = $asesorTipe == 1 ? 'laporan_visitasi_file' : 'laporan_visitasi_file_2';
+        if ((int) $akreditasi->status !== \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
+            return false;
+        }
+
+        if (!in_array((int) $asesorTipe, [1, 2], true)) {
+            return false;
+        }
+
+        $field = $asesorTipe == 1 ? 'laporan_visitasi_asesor1' : 'laporan_visitasi_asesor2';
         return $akreditasi->update([$field => $filePath]);
     }
 }

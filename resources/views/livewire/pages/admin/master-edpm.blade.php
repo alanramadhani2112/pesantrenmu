@@ -94,7 +94,7 @@ new #[Layout('layouts.app')] class extends Component {
             'ipr' => $this->komponen_ipr ? 1 : NULL
         ], $this->komponen_id);
 
-        session()->flash('status', 'Komponen berhasil disimpan.');
+        $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Komponen berhasil disimpan.');
         $this->loadData();
         $this->dispatch('close-modal', 'edpm-komponen-modal');
     }
@@ -106,7 +106,7 @@ new #[Layout('layouts.app')] class extends Component {
         $masterEdpmService = app(\App\Services\MasterEdpmService::class);
         $masterEdpmService->deleteKomponen($id);
         $this->loadData();
-        session()->flash('status', 'Komponen berhasil dihapus.');
+        $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Komponen berhasil dihapus.');
     }
 
     public function openButirModal($komponenId, $butirId = null)
@@ -148,7 +148,7 @@ new #[Layout('layouts.app')] class extends Component {
             'butir_pernyataan' => $this->butir_pernyataan,
         ], $this->butir_id);
 
-        session()->flash('status', 'Butir pernyataan berhasil disimpan.');
+        $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Butir pernyataan berhasil disimpan.');
         $this->loadData();
         $this->dispatch('close-modal', 'edpm-butir-modal');
     }
@@ -160,7 +160,7 @@ new #[Layout('layouts.app')] class extends Component {
         $masterEdpmService = app(\App\Services\MasterEdpmService::class);
         $masterEdpmService->deleteButir($id);
         $this->loadData();
-        session()->flash('status', 'Butir pernyataan berhasil dihapus.');
+        $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Butir pernyataan berhasil dihapus.');
     }
 }; ?>
 
@@ -170,13 +170,10 @@ new #[Layout('layouts.app')] class extends Component {
         subtitle="Kelola komponen dan butir pernyataan EDPM/IPR."
     >
         <x-slot name="toolbar">
-            <x-ui.button wire:click="openKomponenModal()" variant="primary" size="sm">
-                <x-ui.icon name="plus" class="fs-4 me-1" />
+            <x-ui.button wire:click="openKomponenModal()" variant="primary" size="sm" icon="plus">
                 Tambah Komponen
             </x-ui.button>
         </x-slot>
-
-        <x-auth-session-status class="mb-4" :status="session('status')" />
 
         <x-ui.tabs class="mb-6">
             <x-ui.tab :active="$activeTab === 'edpm'" wire:click="setTab('edpm')">
@@ -268,8 +265,7 @@ new #[Layout('layouts.app')] class extends Component {
             @forelse ($filteredKomponens as $komponen)
                 <x-ui.section-card :title="$komponen->nama" class="spm-edpm-component-card">
                     <x-slot name="toolbar">
-                        <x-ui.button wire:click="openButirModal({{ $komponen->id }})" variant="light" size="sm">
-                            <x-ui.icon name="plus" class="fs-4 me-1" />
+                        <x-ui.button wire:click="openButirModal({{ $komponen->id }})" variant="light" size="sm" icon="plus">
                             Tambah Butir
                         </x-ui.button>
 

@@ -38,7 +38,7 @@
                 <div class="mw-500px spm-auth-aside-card">
                     <x-ui.badge variant="primary" class="mb-6">PesantrenMu</x-ui.badge>
                     <h1 class="fs-2hx fw-bold text-gray-900 mb-4">Sistem Penjaminan Mutu PesantrenMu</h1>
-                    <p class="fs-5 fw-semibold text-gray-600 mb-8">Majelis Dikdasmen PP Muhammadiyah</p>
+                    <p class="fs-5 fw-semibold text-gray-600 mb-8">Dikembangkan oleh LabMu untuk LP2M</p>
 
                     <div class="row g-4">
                         <div class="col-6">

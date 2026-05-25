@@ -19,6 +19,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Volt\Volt;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Livewire component tests for admin akreditasi detail reassignment UI.
@@ -27,8 +28,8 @@ use Tests\TestCase;
  *  - Task 8.5: Reassign button disabled when not overdue, enabled when overdue
  *  - Task 8.6: Reassignment action updates the view and shows success message
  *
- * @group Feature: assessment-visitasi-timeout
  */
+#[Group('Feature: assessment-visitasi-timeout')]
 class AdminReassignAsesorUiTest extends TestCase
 {
     use RefreshDatabase;
@@ -134,7 +135,7 @@ class AdminReassignAsesorUiTest extends TestCase
      * When the akreditasi is in assessment/visitasi phase but not overdue,
      * the "Ganti Asesor" button should be present but disabled.
      */
-    public function test_reassign_button_disabled_when_not_overdue(): void
+public function test_reassign_button_disabled_when_not_overdue(): void
     {
         $today = Carbon::create(2025, 11, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -165,7 +166,7 @@ class AdminReassignAsesorUiTest extends TestCase
      * When the akreditasi is overdue, the "Ganti Asesor" button should be
      * enabled (not disabled) and styled as danger.
      */
-    public function test_reassign_button_enabled_when_overdue(): void
+public function test_reassign_button_enabled_when_overdue(): void
     {
         $today = Carbon::create(2025, 11, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -192,7 +193,7 @@ class AdminReassignAsesorUiTest extends TestCase
     /**
      * Task 8.5: Reassign button is NOT shown for completed akreditasi (status 1).
      */
-    public function test_reassign_button_not_shown_for_completed_akreditasi(): void
+public function test_reassign_button_not_shown_for_completed_akreditasi(): void
     {
         $today = Carbon::create(2025, 11, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -225,7 +226,7 @@ class AdminReassignAsesorUiTest extends TestCase
     /**
      * Task 8.5: Overdue badge is shown in toolbar when akreditasi is overdue.
      */
-    public function test_overdue_badge_shown_in_toolbar_when_overdue(): void
+public function test_overdue_badge_shown_in_toolbar_when_overdue(): void
     {
         $today = Carbon::create(2025, 11, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -257,7 +258,7 @@ class AdminReassignAsesorUiTest extends TestCase
      * - A success flash message should be shown
      * - Notifications should be sent to old and new asesor
      */
-    public function test_reassignment_action_updates_view_and_shows_success_message(): void
+public function test_reassignment_action_updates_view_and_shows_success_message(): void
     {
         $today = Carbon::create(2025, 11, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -307,7 +308,7 @@ class AdminReassignAsesorUiTest extends TestCase
     /**
      * Task 8.6: Reassignment action fails with error when no asesor selected.
      */
-    public function test_reassignment_action_fails_with_validation_error_when_no_asesor_selected(): void
+public function test_reassignment_action_fails_with_validation_error_when_no_asesor_selected(): void
     {
         $today = Carbon::create(2025, 11, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -337,7 +338,7 @@ class AdminReassignAsesorUiTest extends TestCase
      * If somehow the reassign action is called on a non-overdue akreditasi,
      * it should show an error message.
      */
-    public function test_reassignment_action_shows_error_when_not_overdue(): void
+public function test_reassignment_action_shows_error_when_not_overdue(): void
     {
         $today = Carbon::create(2025, 11, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -370,7 +371,7 @@ class AdminReassignAsesorUiTest extends TestCase
     /**
      * Task 8.6: After successful reassignment, the new deadline is reset.
      */
-    public function test_reassignment_resets_deadline_to_configured_duration(): void
+public function test_reassignment_resets_deadline_to_configured_duration(): void
     {
         $today = Carbon::create(2025, 11, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -409,7 +410,7 @@ class AdminReassignAsesorUiTest extends TestCase
     /**
      * Task 8.6: Available asesors list excludes the currently assigned asesor.
      */
-    public function test_available_asesors_excludes_current_asesor(): void
+public function test_available_asesors_excludes_current_asesor(): void
     {
         $today = Carbon::create(2025, 11, 1, 0, 0, 0);
         Carbon::setTestNow($today);

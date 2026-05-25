@@ -29,7 +29,7 @@ class PesantrenUploadTest extends TestCase
      * Task 3.4: A pesantren user cannot upload kartu kendali for an akreditasi
      * owned by another user — uploadKartuKendali returns false.
      */
-    public function test_pesantren_cannot_upload_kartu_kendali_for_other_user_akreditasi(): void
+public function test_pesantren_cannot_upload_kartu_kendali_for_other_user_akreditasi(): void
     {
         // Arrange — owner of the akreditasi
         $owner = User::factory()->create(['role_id' => 3]);
@@ -43,7 +43,7 @@ class PesantrenUploadTest extends TestCase
 
         $akreditasi = Akreditasi::create([
             'user_id' => $owner->id,
-            'status' => 3, // Validasi — the only status that allows upload
+            'status' => 2, // Pasca Visitasi — the only status that allows upload
         ]);
 
         // Attacker — a different pesantren user

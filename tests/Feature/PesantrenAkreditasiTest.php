@@ -28,7 +28,7 @@ class PesantrenAkreditasiTest extends TestCase
     /**
      * Helper: create a pesantren user with a Pesantren record.
      */
-    private function createPesantrenUser(): User
+private function createPesantrenUser(): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -45,7 +45,7 @@ class PesantrenAkreditasiTest extends TestCase
      *
      * Requirements: 2.12
      */
-    public function test_pesantren_cannot_delete_akreditasi_with_status_other_than_pengajuan(): void
+public function test_pesantren_cannot_delete_akreditasi_with_status_other_than_pengajuan(): void
     {
         $user = $this->createPesantrenUser();
 
@@ -69,7 +69,7 @@ class PesantrenAkreditasiTest extends TestCase
      *
      * Requirements: 2.13
      */
-    public function test_pesantren_with_null_pesantren_record_can_delete_safely(): void
+public function test_pesantren_with_null_pesantren_record_can_delete_safely(): void
     {
         // Create a user WITHOUT a Pesantren record
         $user = User::factory()->create(['role_id' => 3]);
@@ -94,7 +94,7 @@ class PesantrenAkreditasiTest extends TestCase
      *
      * Requirements: 2.12
      */
-    public function test_pesantren_cannot_delete_akreditasi_owned_by_another_user(): void
+public function test_pesantren_cannot_delete_akreditasi_owned_by_another_user(): void
     {
         $owner = $this->createPesantrenUser();
         $attacker = $this->createPesantrenUser();

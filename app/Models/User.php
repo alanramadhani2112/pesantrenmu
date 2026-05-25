@@ -24,25 +24,30 @@ class User extends Authenticatable
         });
 
         static::deleting(function ($user) {
-            // Delete related models that might have their own deleting events
-            if ($user->pesantren) {
-                $user->pesantren->delete();
-            }
+            // P-6 fix: wrap entire cascade in a single transaction so a mid-loop
+            // failure doesn't leave partial state (e.g. pesantren deleted but
+            // akreditasi children still exist).
+            \Illuminate\Support\Facades\DB::transaction(function () use ($user) {
+                // Delete related models that might have their own deleting events
+                if ($user->pesantren) {
+                    $user->pesantren->delete();
+                }
 
-            if ($user->asesor) {
-                $user->asesor->delete();
-            }
+                if ($user->asesor) {
+                    $user->asesor->delete();
+                }
 
-            foreach ($user->akreditasis as $akreditasi) {
-                $akreditasi->delete();
-            }
+                foreach ($user->akreditasis as $akreditasi) {
+                    $akreditasi->delete();
+                }
 
-            // Delete other related models
-            $user->ipm()->delete();
-            $user->sdm()->delete();
-            $user->edpms()->delete();
-            $user->edpmCatatans()->delete();
-            $user->profile_data()->delete();
+                // Delete other related models
+                $user->ipm()->delete();
+                $user->sdm()->delete();
+                $user->edpms()->delete();
+                $user->edpmCatatans()->delete();
+                $user->profile_data()->delete();
+            });
         });
     }
 

@@ -45,7 +45,7 @@ class RolePermissionMatrixTest extends TestCase
 
         $component->set('matrix', $matrix)
             ->call('save')
-            ->assertDispatched('toast');
+            ->assertDispatched('notification-received');
 
         // Verify pivot table state
         $grantedIds = $adminRole->fresh()->permissions()->pluck('permissions.id')->all();
@@ -142,7 +142,95 @@ class RolePermissionMatrixTest extends TestCase
         $component = Volt::test('pages.admin.master.role-permission');
 
         $component->call('save')
-            ->assertDispatched('toast', type: 'success', title: 'Hak akses tersimpan');
+            ->assertDispatched('notification-received', type: 'success', title: 'Hak akses tersimpan');
+    }
+
+    public function test_matrix_supports_search_and_group_filter(): void
+    {
+        $superAdmin = User::factory()->create(['role_id' => Role::ID_SUPER_ADMIN]);
+        $this->actingAs($superAdmin);
+
+        Volt::test('pages.admin.master.role-permission')
+            ->set('groupFilter', 'master')
+            ->set('search', 'EDPM')
+            ->assertSee('Kelola Master EDPM')
+            ->assertDontSee('Lihat Akreditasi')
+            ->assertDontSee('Kelola Master Dokumen');
+    }
+
+    public function test_bulk_role_action_sets_only_visible_permissions(): void
+    {
+        $superAdmin = User::factory()->create(['role_id' => Role::ID_SUPER_ADMIN]);
+        $this->actingAs($superAdmin);
+
+        $adminRole = Role::find(Role::ID_ADMIN);
+        $adminRole->permissions()->detach();
+
+        $edpmPermission = Permission::where('key', 'master.edpm')->firstOrFail();
+        $dokumenPermission = Permission::where('key', 'master.dokumen')->firstOrFail();
+
+        $component = Volt::test('pages.admin.master.role-permission')
+            ->set('groupFilter', 'master')
+            ->set('search', 'EDPM')
+            ->call('grantVisibleForRole', $adminRole->id);
+
+        $matrix = $component->get('matrix');
+
+        $this->assertTrue($matrix[$adminRole->id][$edpmPermission->id]);
+        $this->assertFalse($matrix[$adminRole->id][$dokumenPermission->id]);
+    }
+
+    public function test_bulk_visible_action_can_apply_to_all_editable_roles(): void
+    {
+        $superAdmin = User::factory()->create(['role_id' => Role::ID_SUPER_ADMIN]);
+        $this->actingAs($superAdmin);
+
+        $edpmPermission = Permission::where('key', 'master.edpm')->firstOrFail();
+
+        $component = Volt::test('pages.admin.master.role-permission')
+            ->set('groupFilter', 'master')
+            ->set('search', 'EDPM')
+            ->call('grantVisibleForAllRoles');
+
+        $matrix = $component->get('matrix');
+
+        foreach ([Role::ID_ADMIN, Role::ID_ASESOR, Role::ID_PESANTREN] as $roleId) {
+            $this->assertTrue($matrix[$roleId][$edpmPermission->id]);
+        }
+    }
+
+    public function test_audit_history_is_rendered_on_matrix_page(): void
+    {
+        $superAdmin = User::factory()->create(['role_id' => Role::ID_SUPER_ADMIN]);
+        $this->actingAs($superAdmin);
+
+        PermissionAuditLog::create([
+            'user_id' => $superAdmin->id,
+            'role_id' => Role::ID_ADMIN,
+            'permissions_added' => ['master.edpm'],
+            'permissions_removed' => null,
+            'ip_address' => '127.0.0.1',
+            'user_agent' => 'PHPUnit',
+            'created_at' => now(),
+        ]);
+
+        Volt::test('pages.admin.master.role-permission')
+            ->assertSee('Riwayat Perubahan')
+            ->assertSee('master.edpm')
+            ->assertSee('Admin');
+    }
+
+    public function test_role_permission_page_uses_clean_metronic_matrix_layout(): void
+    {
+        $superAdmin = User::factory()->create(['role_id' => Role::ID_SUPER_ADMIN]);
+        $this->actingAs($superAdmin);
+
+        Volt::test('pages.admin.master.role-permission')
+            ->assertSee('spm-permission-control-panel', false)
+            ->assertSee('spm-permission-quick-actions', false)
+            ->assertSee('spm-permission-role-actions', false)
+            ->assertSee('spm-permission-matrix', false)
+            ->assertSee('data-ui-simple-table="metronic"', false);
     }
 
     // -------------------------------------------------------------------------

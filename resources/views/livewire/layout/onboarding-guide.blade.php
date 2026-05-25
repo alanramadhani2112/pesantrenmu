@@ -268,12 +268,10 @@ new class extends Component {
                                 <span class="text-gray-600 fs-7">Progres</span>
                                 <span class="text-gray-800 fw-semibold fs-7">{{ $completedCount }}/{{ $totalCount }} langkah selesai</span>
                             </div>
-                            <div class="progress h-8px">
-                                <div class="progress-bar bg-success" role="progressbar"
-                                     style="width: {{ $totalCount > 0 ? ($completedCount / $totalCount) * 100 : 0 }}%"
-                                     aria-valuenow="{{ $completedCount }}" aria-valuemin="0" aria-valuemax="{{ $totalCount }}">
-                                </div>
-                            </div>
+                            <x-ui.progress
+                                :value="$totalCount > 0 ? ($completedCount / $totalCount) * 100 : 0"
+                                variant="success"
+                            />
                         </div>
                     @endif
                 </div>

@@ -7,6 +7,7 @@ use App\Models\SdmPesantren;
 use App\Models\Edpm;
 use App\Models\MasterEdpmButir;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 use Livewire\Volt\Component;
 use Illuminate\Support\Str;
 use Livewire\WithFileUploads;
@@ -22,8 +23,12 @@ new #[Layout('layouts.app')] class extends Component {
     public $sortAsc = false;
     public $selectedAkreditasiNotes;
     public $periodeFilter = '';
+    #[Url]
     public $statusFilter = '';
+    #[Url]
     public $tahapanFilter = '';
+    #[Url]
+    public $focus = '';
 
     public function openCatatanModal($id)
     {
@@ -75,23 +80,14 @@ new #[Layout('layouts.app')] class extends Component {
         );
     }
 
-    public function create($parentId = null)
+    public function create($parentId = null): void
     {
-        $pesantrenService = app(\App\Services\PesantrenService::class);
-        $userId = Auth::id();
-
-        $missingData = $pesantrenService->checkDataCompleteness($userId);
-
-        if (!empty($missingData)) {
-            $errorMessage = "<ul class='text-left list-disc pl-5 mt-2'><li>" . implode("</li><li>", $missingData) . "</li></ul>";
-            $this->dispatch('show-validation-alert', title: 'Data Belum Lengkap!', html: "Mohon lengkapi data berikut sebelum mengajukan akreditasi:<br>" . $errorMessage);
-            return;
-        }
-
-        if ($pesantrenService->createSubmission($userId, $parentId)) {
-            session()->flash('status', 'Pengajuan akreditasi berhasil dibuat.');
-        } else {
-            $this->dispatch('notification-received', type: 'error', title: 'Gagal!', message: 'Pengajuan ini sudah pernah diajukan ulang sebelumnya.');
+        try {
+            $workflowService = app(\App\Services\AkreditasiWorkflowService::class);
+            $workflowService->submitPengajuan(Auth::id());
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Pengajuan akreditasi berhasil dibuat. Data profil telah dikunci.');
+        } catch (\DomainException $e) {
+            $this->dispatch('show-validation-alert', title: 'Gagal Membuat Pengajuan', html: e($e->getMessage()));
         }
     }
 
@@ -101,130 +97,232 @@ new #[Layout('layouts.app')] class extends Component {
         $success = $pesantrenService->deleteSubmission($id, Auth::id());
 
         if (!$success) {
-            session()->flash('error', 'Tidak dapat menghapus pengajuan ini. Pastikan status masih Pengajuan dan Anda adalah pemiliknya.');
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal!', message: 'Tidak dapat menghapus pengajuan ini. Pastikan status masih Pengajuan dan Anda adalah pemiliknya.');
             return;
         }
 
-        session()->flash('status', 'Pengajuan akreditasi berhasil dihapus. Data profil telah dibuka kunci.');
+        $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Pengajuan akreditasi berhasil dihapus. Data profil telah dibuka kunci.');
     }
 
     public function cancelSubmission($id)
     {
         $pesantrenService = app(\App\Services\PesantrenService::class);
-        $pesantrenService->cancelSubmission($id, Auth::id());
+        $result = $pesantrenService->cancelSubmission($id, Auth::id());
 
-        $this->dispatch('notification-received', type: 'success', title: 'Dibatalkan!', message: 'Pengajuan akreditasi telah berhasil dibatalkan.');
+        if ($result) {
+            $this->dispatch('notification-received', type: 'success', title: 'Dibatalkan!', message: 'Pengajuan akreditasi telah berhasil dibatalkan.');
+        } else {
+            $this->dispatch('show-metronic-alert', type: 'error', title: 'Gagal', message: 'Pengajuan tidak dapat dibatalkan. Mungkin sudah dibatalkan sebelumnya.');
+        }
     }
 
-    public function banding($id, $alasan)
+    public function banding($id, $alasan): void
     {
-        \Illuminate\Support\Facades\Validator::make(
-            ['alasan' => $alasan],
-            ['alasan' => 'required|string|min:10|max:1000'],
-            [
-                'alasan.required' => 'Alasan banding wajib diisi.',
-                'alasan.min' => 'Alasan banding minimal 10 karakter.',
-                'alasan.max' => 'Alasan banding maksimal 1000 karakter.',
-            ]
-        )->validate();
+        try {
+            \Illuminate\Support\Facades\Validator::make(
+                ['alasan' => $alasan],
+                ['alasan' => 'required|string|min:10|max:1000'],
+                [
+                    'alasan.required' => 'Alasan banding wajib diisi.',
+                    'alasan.min' => 'Alasan banding minimal 10 karakter.',
+                    'alasan.max' => 'Alasan banding maksimal 1000 karakter.',
+                ]
+            )->validate();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->dispatch('notification-received', type: 'error', title: 'Validasi Gagal!', message: collect($e->errors())->flatten()->first());
+            return;
+        }
 
-        $pesantrenService = app(\App\Services\PesantrenService::class);
-        if ($pesantrenService->submitAppeals($id, Auth::id(), $alasan)) {
-            session()->flash('status', 'Pengajuan banding berhasil dikirim. Status berubah menjadi Validasi.');
-        } else {
-            session()->flash('error', 'Gagal mengajukan banding. Pastikan status pengajuan adalah Ditolak dan sudah melalui tahap Assessment.');
+        try {
+            $workflowService = app(\App\Services\AkreditasiWorkflowService::class);
+            $akreditasi = \App\Models\Akreditasi::withTrashed()->find($id);
+            if (!$akreditasi) {
+                $this->dispatch('notification-received', type: 'error', title: 'Gagal!', message: 'Akreditasi tidak ditemukan.');
+                return;
+            }
+            $workflowService->submitBanding($akreditasi->id, Auth::id(), $alasan);
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Pengajuan banding berhasil dikirim.');
+        } catch (\DomainException $e) {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal!', message: $e->getMessage());
         }
     }
 }; ?>
 
 <div x-data="akreditasiPesantren" data-module-page="pesantren-akreditasi">
-    <x-slot name="header">{{ __('Akreditasi') }}</x-slot>
+    @php
+        $akreditasiRecords = $this->akreditasis;
+        $akreditasiCollection = method_exists($akreditasiRecords, 'getCollection')
+            ? $akreditasiRecords->getCollection()
+            : collect($akreditasiRecords);
+        $totalPengajuan = method_exists($akreditasiRecords, 'total')
+            ? $akreditasiRecords->total()
+            : $akreditasiCollection->count();
+        $activeFocus = in_array($focus, ['perbaikan', 'kartu_kendali', 'hasil', 'sertifikat', 'banding'], true)
+            ? $focus
+            : 'pengajuan';
+        $pengajuanProses = $akreditasiCollection->whereNotIn('status', [0, -1, -2])->count();
+        $pengajuanDitolak = $akreditasiCollection->where('status', -1)->count();
+        $nilaiRataRata = $akreditasiCollection->whereNotNull('nilai')->avg('nilai');
+
+        $context = match ($activeFocus) {
+            'perbaikan' => [
+                'title' => 'Status Perbaikan',
+                'subtitle' => 'Pantau catatan penolakan, bagian yang harus diperbaiki, dan pengajuan ulang.',
+                'hero' => 'Status Perbaikan',
+                'heroSubtitle' => 'Menu ini khusus untuk membaca berkas yang ditolak dan tindakan koreksi berikutnya.',
+                'tableTitle' => 'Daftar Perbaikan',
+                'tableSubtitle' => 'Fokus pada catatan penolakan, bagian perbaikan, dan status pengajuan ulang.',
+                'variant' => 'warning',
+                'metrics' => [
+                    ['label' => 'Total Ditolak', 'value' => $totalPengajuan, 'variant' => 'warning', 'description' => 'Pengajuan yang masuk ke status ditolak.'],
+                    ['label' => 'Belum Diajukan Ulang', 'value' => $akreditasiCollection->filter(fn ($item) => $item->children->isEmpty())->count(), 'variant' => 'danger', 'description' => 'Masih menunggu tindak lanjut pesantren.'],
+                    ['label' => 'Sudah Diajukan Ulang', 'value' => $akreditasiCollection->filter(fn ($item) => $item->children->isNotEmpty())->count(), 'variant' => 'success', 'description' => 'Sudah memiliki pengajuan lanjutan.'],
+                ],
+                'steps' => ['Baca catatan penolakan', 'Perbaiki bagian yang diminta', 'Ajukan ulang bila masih tersedia'],
+            ],
+            'kartu_kendali' => [
+                'title' => 'Kartu Kendali Visitasi',
+                'subtitle' => 'Unggah dan pantau kartu kendali setelah proses visitasi selesai.',
+                'hero' => 'Kartu Kendali Visitasi',
+                'heroSubtitle' => 'Menu ini hanya relevan untuk pengajuan pasca visitasi yang menunggu kartu kendali.',
+                'tableTitle' => 'Daftar Kartu Kendali',
+                'tableSubtitle' => 'Fokus pada status kartu kendali, jadwal visitasi, dan aksi unggah dokumen.',
+                'variant' => 'info',
+                'metrics' => [
+                    ['label' => 'Pasca Visitasi', 'value' => $totalPengajuan, 'variant' => 'info', 'description' => 'Pengajuan pada tahap pasca visitasi.'],
+                    ['label' => 'Menunggu Kartu', 'value' => $akreditasiCollection->whereNull('kartu_kendali')->count(), 'variant' => 'warning', 'description' => 'Belum ada kartu kendali yang tersimpan.'],
+                    ['label' => 'Kartu Tersimpan', 'value' => $akreditasiCollection->whereNotNull('kartu_kendali')->count(), 'variant' => 'success', 'description' => 'Kartu kendali sudah diunggah.'],
+                ],
+                'steps' => ['Unduh template bila tersedia', 'Unggah kartu kendali final', 'Tunggu review admin'],
+            ],
+            'hasil' => [
+                'title' => 'Hasil Akhir Akreditasi',
+                'subtitle' => 'Lihat nilai akhir, peringkat, dan rekomendasi pasca penilaian.',
+                'hero' => 'Hasil Akhir Akreditasi',
+                'heroSubtitle' => 'Menu ini bukan daftar umum; fokusnya membaca keputusan nilai dan rekomendasi asesor/admin.',
+                'tableTitle' => 'Daftar Hasil Akhir',
+                'tableSubtitle' => 'Fokus pada nilai akhir, peringkat, dan rekomendasi hasil akreditasi.',
+                'variant' => 'success',
+                'metrics' => [
+                    ['label' => 'Hasil Terbit', 'value' => $totalPengajuan, 'variant' => 'success', 'description' => 'Pengajuan yang sudah selesai.'],
+                    ['label' => 'Nilai Rata-rata', 'value' => $nilaiRataRata ? number_format($nilaiRataRata, 1) : '-', 'variant' => 'primary', 'description' => 'Rata-rata nilai akhir yang tampil.'],
+                    ['label' => 'Unggul/Mumtaz', 'value' => $akreditasiCollection->filter(fn ($item) => in_array($item->peringkat, ['Unggul', 'Mumtaz'], true))->count(), 'variant' => 'info', 'description' => 'Pengajuan dengan peringkat tertinggi.'],
+                ],
+                'steps' => ['Baca nilai akhir', 'Cermati rekomendasi', 'Gunakan sertifikat dari menu Sertifikat'],
+            ],
+            'sertifikat' => [
+                'title' => 'Sertifikat Akreditasi',
+                'subtitle' => 'Unduh sertifikat dan lihat nomor SK serta masa berlaku akreditasi.',
+                'hero' => 'Sertifikat Akreditasi',
+                'heroSubtitle' => 'Menu ini khusus untuk dokumen legal hasil akreditasi, bukan proses perbaikan atau banding.',
+                'tableTitle' => 'Daftar Sertifikat',
+                'tableSubtitle' => 'Fokus pada nomor SK, masa berlaku, dan dokumen sertifikat.',
+                'variant' => 'primary',
+                'metrics' => [
+                    ['label' => 'Sertifikat Tersedia', 'value' => $akreditasiCollection->whereNotNull('sertifikat_path')->count(), 'variant' => 'success', 'description' => 'Sertifikat sudah dapat diunduh.'],
+                    ['label' => 'SK Terbit', 'value' => $akreditasiCollection->whereNotNull('nomor_sk')->count(), 'variant' => 'primary', 'description' => 'Pengajuan yang sudah memiliki nomor SK.'],
+                    ['label' => 'Masa Berlaku Aktif', 'value' => $akreditasiCollection->filter(fn ($item) => !$item->masa_berlaku_akhir || !\Carbon\Carbon::parse($item->masa_berlaku_akhir)->isPast())->count(), 'variant' => 'info', 'description' => 'Sertifikat yang belum melewati masa berlaku.'],
+                ],
+                'steps' => ['Cek nomor SK', 'Pastikan masa berlaku', 'Unduh sertifikat'],
+            ],
+            'banding' => [
+                'title' => 'Banding Akreditasi',
+                'subtitle' => 'Ajukan dan pantau status banding terhadap hasil atau penolakan akreditasi.',
+                'hero' => 'Banding Akreditasi',
+                'heroSubtitle' => 'Menu ini memisahkan proses keberatan dari daftar pengajuan biasa agar status banding mudah dibaca.',
+                'tableTitle' => 'Daftar Banding',
+                'tableSubtitle' => 'Fokus pada alasan banding, status review, dan keputusan admin.',
+                'variant' => 'warning',
+                'metrics' => [
+                    ['label' => 'Banding Aktif', 'value' => $totalPengajuan, 'variant' => 'warning', 'description' => 'Pengajuan yang berada pada status banding.'],
+                    ['label' => 'Menunggu Review', 'value' => $akreditasiCollection->filter(fn ($item) => optional($item->bandings->sortByDesc('created_at')->first())->status === 'pending')->count(), 'variant' => 'info', 'description' => 'Banding yang belum diputuskan.'],
+                    ['label' => 'Sudah Diputuskan', 'value' => $akreditasiCollection->filter(fn ($item) => in_array(optional($item->bandings->sortByDesc('created_at')->first())->status, ['accepted', 'rejected'], true))->count(), 'variant' => 'success', 'description' => 'Banding yang sudah memiliki keputusan.'],
+                ],
+                'steps' => ['Baca status banding', 'Pantau review admin', 'Lihat keputusan dan tindak lanjut'],
+            ],
+            default => [
+                'title' => 'Pengajuan Akreditasi',
+                'subtitle' => 'Pantau pengajuan, status proses, catatan, dan tindak lanjut akreditasi pesantren.',
+                'hero' => 'Ruang Kendali Pengajuan',
+                'heroSubtitle' => 'Ikuti progres akreditasi pesantren dari kesiapan data sampai tindak lanjut catatan.',
+                'tableTitle' => 'Daftar Pengajuan',
+                'tableSubtitle' => 'Daftar umum seluruh pengajuan akreditasi pesantren Anda.',
+                'variant' => 'primary',
+                'metrics' => [
+                    ['label' => 'Total Pengajuan', 'value' => $totalPengajuan, 'variant' => 'primary', 'description' => 'Riwayat pengajuan akreditasi yang tampil pada daftar.'],
+                    ['label' => 'Sedang Diproses', 'value' => $pengajuanProses, 'variant' => 'info', 'description' => 'Pengajuan yang masih diproses atau belum ditolak.'],
+                    ['label' => 'Perlu Tindak Lanjut', 'value' => $pengajuanDitolak, 'variant' => 'warning', 'description' => 'Cek catatan lalu ajukan ulang bila masih dibuka.'],
+                ],
+                'steps' => ['Lengkapi data', 'Pantau status', 'Tindak lanjuti catatan'],
+            ],
+        };
+
+        $emptyTitle = match ($activeFocus) {
+            'perbaikan' => 'Belum ada pengajuan yang perlu perbaikan',
+            'kartu_kendali' => 'Belum ada kartu kendali yang perlu diunggah',
+            'hasil' => 'Belum ada hasil akhir akreditasi',
+            'sertifikat' => 'Belum ada sertifikat akreditasi',
+            'banding' => 'Belum ada pengajuan banding',
+            default => 'Belum ada data pengajuan akreditasi',
+        };
+
+        $tableColspan = match ($activeFocus) {
+            'perbaikan', 'kartu_kendali', 'hasil', 'sertifikat', 'banding' => 5,
+            default => 7,
+        };
+    @endphp
+
+    <x-slot name="header">{{ $context['title'] }}</x-slot>
 
     <x-ui.page
-        title="Akreditasi"
-        subtitle="Pantau pengajuan, status proses, catatan, dan tindak lanjut akreditasi pesantren."
+        :title="$context['title']"
+        :subtitle="$context['subtitle']"
+        data-akreditasi-context="{{ $activeFocus }}"
     >
-        @php
-            $akreditasiRecords = $this->akreditasis;
-            $akreditasiCollection = method_exists($akreditasiRecords, 'getCollection')
-                ? $akreditasiRecords->getCollection()
-                : collect($akreditasiRecords);
-            $totalPengajuan = method_exists($akreditasiRecords, 'total')
-                ? $akreditasiRecords->total()
-                : $akreditasiCollection->count();
-            $pengajuanProses = $akreditasiCollection->whereNotIn('status', [1, 2])->count();
-            $pengajuanDitolak = $akreditasiCollection->where('status', 2)->count();
-        @endphp
-
         <div class="row g-6 mb-6">
             <div class="col-12 col-xl-8">
                 <x-ui.card
-                    title="Ruang Kendali Pengajuan"
-                    subtitle="Ikuti progres akreditasi pesantren dari kesiapan data sampai tindak lanjut catatan."
-                    class="h-100"
+                    :title="$context['hero']"
+                    :subtitle="$context['heroSubtitle']"
+                    class="h-100 spm-akreditasi-context-card"
                 >
                     <div class="row g-4">
-                        <div class="col-12 col-md-4">
-                            <div class="border border-dashed border-gray-300 rounded-3 p-5 h-100">
-                                <x-ui.badge variant="primary" class="mb-4">Total Pengajuan</x-ui.badge>
-                                <div class="fs-2 fw-bold text-gray-900 mb-1">{{ $totalPengajuan }}</div>
-                                <div class="text-muted fw-semibold fs-7">Riwayat pengajuan akreditasi yang tampil pada daftar.</div>
+                        @foreach ($context['metrics'] as $metric)
+                            <div class="col-12 col-md-4" wire:key="metric-{{ $activeFocus }}-{{ $loop->index }}">
+                                <x-ui.metric-box
+                                    :label="$metric['label']"
+                                    :value="$metric['value']"
+                                    :variant="$metric['variant']"
+                                    :description="$metric['description']"
+                                />
                             </div>
-                        </div>
-
-                        <div class="col-12 col-md-4">
-                            <div class="border border-dashed border-gray-300 rounded-3 p-5 h-100">
-                                <x-ui.badge variant="info" class="mb-4">Sedang Diproses</x-ui.badge>
-                                <div class="fs-2 fw-bold text-gray-900 mb-1">{{ $pengajuanProses }}</div>
-                                <div class="text-muted fw-semibold fs-7">Pengajuan yang masih diproses atau belum ditolak.</div>
-                            </div>
-                        </div>
-
-                        <div class="col-12 col-md-4">
-                            <div class="border border-dashed border-gray-300 rounded-3 p-5 h-100">
-                                <x-ui.badge variant="warning" class="mb-4">Perlu Tindak Lanjut</x-ui.badge>
-                                <div class="fs-2 fw-bold text-gray-900 mb-1">{{ $pengajuanDitolak }}</div>
-                                <div class="text-muted fw-semibold fs-7">Cek catatan lalu ajukan ulang bila masih dibuka.</div>
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
                 </x-ui.card>
             </div>
 
             <div class="col-12 col-xl-4">
                 <x-ui.card
-                    title="Langkah Pesantren"
-                    subtitle="Aksi utama tetap mengikuti tombol dan menu yang sudah tersedia di proses akreditasi pesantren."
-                    class="h-100"
+                    title="Alur Menu Ini"
+                    subtitle="Setiap menu punya fokus kerja berbeda, bukan hanya filter daftar."
+                    class="h-100 spm-akreditasi-context-card"
                 >
                     <div class="d-flex flex-column gap-4">
-                        <div class="d-flex align-items-start gap-3">
-                            <span class="badge badge-circle badge-light-primary">1</span>
-                            <div>
-                                <div class="fw-bold text-gray-900">Lengkapi data</div>
-                                <div class="text-muted fs-7">Pastikan profil, IPM, SDM, dan EDPM siap sebelum membuat pengajuan akreditasi.</div>
+                        @foreach ($context['steps'] as $step)
+                            <div class="d-flex align-items-start gap-3" wire:key="step-{{ $activeFocus }}-{{ $loop->index }}">
+                                <x-ui.badge :variant="$context['variant']" class="rounded-circle min-w-25px h-25px justify-content-center p-0">{{ $loop->iteration }}</x-ui.badge>
+                                <div>
+                                    <div class="fw-bold text-gray-900">{{ $step }}</div>
+                                    <div class="text-muted fs-7">Status dan dokumen terkait muncul sesuai tahap akreditasi.</div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="d-flex align-items-start gap-3">
-                            <span class="badge badge-circle badge-light-primary">2</span>
-                            <div>
-                                <div class="fw-bold text-gray-900">Pantau status</div>
-                                <div class="text-muted fs-7">Gunakan filter periode, status, dan tahapan untuk membaca progres pengajuan.</div>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-start gap-3">
-                            <span class="badge badge-circle badge-light-primary">3</span>
-                            <div>
-                                <div class="fw-bold text-gray-900">Tindak lanjuti catatan</div>
-                                <div class="text-muted fs-7">Buka catatan, unggah dokumen, atau ajukan ulang dari menu aksi.</div>
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
                 </x-ui.card>
             </div>
         </div>
 
-        <x-datatable.layout title="Pengajuan Akreditasi" :records="$this->akreditasis">
+        <x-datatable.layout :title="$context['tableTitle']" :subtitle="$context['tableSubtitle']" :records="$this->akreditasis">
             <x-slot name="filters">
                 <div class="d-flex flex-wrap align-items-center gap-3">
                     <x-ui.filter-select model="periodeFilter" placeholder="Periode">
@@ -233,95 +331,215 @@ new #[Layout('layouts.app')] class extends Component {
                             @endfor
                     </x-ui.filter-select>
 
-                    <x-ui.filter-select
-                        model="statusFilter"
-                        placeholder="Status"
-                        :options="['1' => 'Selesai', '2' => 'Ditolak']"
-                    />
+                    @if ($activeFocus === 'pengajuan')
+                        <x-ui.filter-select
+                            model="statusFilter"
+                            placeholder="Status"
+                            :options="['0' => 'Selesai', '-1' => 'Ditolak', '-2' => 'Banding']"
+                        />
 
-                    <x-ui.filter-select
-                        model="tahapanFilter"
-                        placeholder="Tahapan"
-                        :options="['visitasi' => 'Visitasi']"
-                    />
+                        <x-ui.filter-select
+                            model="tahapanFilter"
+                            placeholder="Tahapan"
+                            :options="['visitasi' => 'Visitasi']"
+                        />
 
-                    <x-ui.button x-on:click="confirmCreate" variant="primary" size="sm">
-                        <x-ui.icon name="plus" class="fs-4 me-1" />
-                        Buat Pengajuan
-                    </x-ui.button>
+                        <x-ui.button x-on:click="confirmCreate" variant="primary" size="sm" icon="plus">
+                            Buat Pengajuan
+                        </x-ui.button>
+                    @else
+                        <x-ui.button :href="route('pesantren.akreditasi')" variant="light" size="sm" icon="arrow-left">
+                            Lihat Semua Pengajuan
+                        </x-ui.button>
+                    @endif
                 </div>
             </x-slot>
 
             <x-slot name="thead">
-                <x-ui.table-th>Periode</x-ui.table-th>
-                <x-ui.table-th align="center">Status</x-ui.table-th>
-                <x-ui.table-th align="center">Tahap Akreditasi</x-ui.table-th>
-                <x-ui.table-th align="center">Nilai</x-ui.table-th>
-                <x-ui.table-th align="center">Peringkat</x-ui.table-th>
-                <x-ui.table-th align="center">Catatan</x-ui.table-th>
-                <x-ui.table-th align="end">Aksi</x-ui.table-th>
+                @if ($activeFocus === 'perbaikan')
+                    <x-ui.table-th>Periode</x-ui.table-th>
+                    <x-ui.table-th align="center">Status Perbaikan</x-ui.table-th>
+                    <x-ui.table-th>Bagian Perbaikan</x-ui.table-th>
+                    <x-ui.table-th align="center">Catatan</x-ui.table-th>
+                    <x-ui.table-th align="end">Aksi</x-ui.table-th>
+                @elseif ($activeFocus === 'kartu_kendali')
+                    <x-ui.table-th>Periode</x-ui.table-th>
+                    <x-ui.table-th align="center">Tahap</x-ui.table-th>
+                    <x-ui.table-th align="center">Status Kartu</x-ui.table-th>
+                    <x-ui.table-th align="center">Jadwal Visitasi</x-ui.table-th>
+                    <x-ui.table-th align="end">Aksi</x-ui.table-th>
+                @elseif ($activeFocus === 'hasil')
+                    <x-ui.table-th>Periode</x-ui.table-th>
+                    <x-ui.table-th align="center">Nilai Akhir</x-ui.table-th>
+                    <x-ui.table-th align="center">Peringkat</x-ui.table-th>
+                    <x-ui.table-th>Rekomendasi</x-ui.table-th>
+                    <x-ui.table-th align="end">Aksi</x-ui.table-th>
+                @elseif ($activeFocus === 'sertifikat')
+                    <x-ui.table-th>Periode</x-ui.table-th>
+                    <x-ui.table-th>Nomor SK</x-ui.table-th>
+                    <x-ui.table-th align="center">Masa Berlaku</x-ui.table-th>
+                    <x-ui.table-th align="center">Sertifikat</x-ui.table-th>
+                    <x-ui.table-th align="end">Aksi</x-ui.table-th>
+                @elseif ($activeFocus === 'banding')
+                    <x-ui.table-th>Periode</x-ui.table-th>
+                    <x-ui.table-th align="center">Status Banding</x-ui.table-th>
+                    <x-ui.table-th>Alasan Banding</x-ui.table-th>
+                    <x-ui.table-th>Keputusan</x-ui.table-th>
+                    <x-ui.table-th align="end">Aksi</x-ui.table-th>
+                @else
+                    <x-ui.table-th>Periode</x-ui.table-th>
+                    <x-ui.table-th align="center">Status</x-ui.table-th>
+                    <x-ui.table-th align="center">Tahap Akreditasi</x-ui.table-th>
+                    <x-ui.table-th align="center">Nilai</x-ui.table-th>
+                    <x-ui.table-th align="center">Peringkat</x-ui.table-th>
+                    <x-ui.table-th align="center">Catatan</x-ui.table-th>
+                    <x-ui.table-th align="end">Aksi</x-ui.table-th>
+                @endif
             </x-slot>
 
             <x-slot name="tbody">
                 @forelse ($this->akreditasis as $index => $item)
+                @php
+                    $latestCatatan = $item->catatans->sortByDesc('created_at')->first();
+                    $latestBanding = $item->bandings->sortByDesc('created_at')->first();
+                    $perbaikanList = $latestCatatan && $latestCatatan->perbaikan
+                        ? collect(explode(', ', $latestCatatan->perbaikan))->filter()->values()
+                        : collect();
+                    $recommendation = $item->catatan_rekomendasi_admin
+                        ?: ($item->catatan_visitasi ?: ($latestCatatan?->catatan ?: '-'));
+                @endphp
                 <tr wire:key="akred-{{ $item->id }}">
                     <td>
                         <span class="text-gray-900 fw-bold fs-6">{{ $item->created_at->format('Y') }}</span>
                     </td>
-                    <td class="text-center">
-                        @if($item->status == 1)
-                        @if($item->masa_berlaku_akhir && \Carbon\Carbon::parse($item->masa_berlaku_akhir)->isPast())
-                        <x-ui.status-badge variant="danger">
-                            Masa Berlaku Habis
-                        </x-ui.status-badge>
-                        @else
-                        <x-ui.status-badge variant="success">
-                            Selesai
-                        </x-ui.status-badge>
-                        @endif
-                        @elseif($item->status == 2)
-                        <x-ui.status-badge variant="danger">
-                            Ditolak
-                        </x-ui.status-badge>
-                        @else
-                        <x-ui.status-badge variant="primary">
-                            Proses Akreditasi
-                        </x-ui.status-badge>
-                        @endif
-                    </td>
-                    <td class="text-center">
-                        @if($item->status == 1 || $item->status == 2)
-                        <x-ui.status-badge variant="success">Selesai</x-ui.status-badge>
-                        @elseif($item->status == 5 && $item->catatans->whereNotNull('perbaikan')->filter(fn($c) => !empty($c->perbaikan))->isNotEmpty())
-                        <x-ui.status-badge variant="warning">Perlu Perbaikan Dokumen</x-ui.status-badge>
-                        @elseif($item->tgl_visitasi)
-                        <x-ui.status-badge variant="info">Visitasi Dijadwalkan</x-ui.status-badge>
-                        @else
-                        <x-ui.status-badge variant="secondary">-</x-ui.status-badge>
-                        @endif
-                    </td>
-                    <td class="text-center">
-                        @if($item->nilai)
-                        <span class="fw-bold text-success fs-5">{{ $item->nilai }}</span>
-                        @else
-                        <span class="text-muted fw-bold">-</span>
-                        @endif
-                    </td>
-                    <td class="text-center">
-                        @if($item->peringkat)
-                        <x-ui.status-badge variant="success">
-                            {{ $item->peringkat == 'Unggul' ? 'Unggul / Mumtaz' : $item->peringkat }}
-                        </x-ui.status-badge>
-                        @else
-                        <span class="text-muted fw-bold">-</span>
-                        @endif
-                    </td>
-                    <td class="text-center">
-                        <x-ui.button wire:click="openCatatanModal({{ $item->id }})" variant="light" size="sm">
-                            <x-ui.icon name="document" class="fs-5 me-1" />
-                            {{ $item->catatans->count() > 0 ? $item->catatans->count() . ' Catatan' : 'Catatan' }}
-                        </x-ui.button>
-                    </td>
+
+                    @if ($activeFocus === 'perbaikan')
+                        <td class="text-center">
+                            <x-ui.status-badge :variant="$item->children->isNotEmpty() ? 'success' : 'warning'">
+                                {{ $item->children->isNotEmpty() ? 'Sudah Diajukan Ulang' : 'Menunggu Perbaikan' }}
+                            </x-ui.status-badge>
+                        </td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-2">
+                                @forelse ($perbaikanList as $perbaikan)
+                                    <x-ui.badge variant="warning">{{ $perbaikan }}</x-ui.badge>
+                                @empty
+                                    <span class="text-muted fw-semibold fs-7">Bagian perbaikan belum dirinci.</span>
+                                @endforelse
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <x-ui.button wire:click="openCatatanModal({{ $item->id }})" variant="light" size="sm">
+                                {{ $item->catatans->count() > 0 ? $item->catatans->count() . ' Catatan' : 'Catatan' }}
+                            </x-ui.button>
+                        </td>
+                    @elseif ($activeFocus === 'kartu_kendali')
+                        <td class="text-center">
+                            <x-ui.status-badge variant="info">{{ \App\Models\Akreditasi::getStatusLabel($item->status) }}</x-ui.status-badge>
+                        </td>
+                        <td class="text-center">
+                            <x-ui.status-badge :variant="$item->kartu_kendali ? 'success' : 'warning'">
+                                {{ $item->kartu_kendali ? 'Kartu Tersimpan' : 'Belum Diunggah' }}
+                            </x-ui.status-badge>
+                        </td>
+                        <td class="text-center">
+                            <span class="fw-semibold text-gray-800">
+                                {{ $item->tgl_visitasi ? \Carbon\Carbon::parse($item->tgl_visitasi)->format('d M Y') : '-' }}
+                            </span>
+                        </td>
+                    @elseif ($activeFocus === 'hasil')
+                        <td class="text-center">
+                            <span class="fw-bold text-success fs-5">{{ $item->nilai ?: '-' }}</span>
+                        </td>
+                        <td class="text-center">
+                            @if($item->peringkat)
+                                <x-ui.status-badge variant="success">
+                                    {{ $item->peringkat == 'Unggul' ? 'Unggul / Mumtaz' : $item->peringkat }}
+                                </x-ui.status-badge>
+                            @else
+                                <span class="text-muted fw-bold">-</span>
+                            @endif
+                        </td>
+                        <td>
+                            <div class="text-gray-700 fw-semibold fs-7 text-truncate mw-350px">{{ $recommendation }}</div>
+                        </td>
+                    @elseif ($activeFocus === 'sertifikat')
+                        <td>
+                            <span class="fw-bold text-gray-900">{{ $item->nomor_sk ?: '-' }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="fw-semibold text-gray-800">
+                                {{ $item->masa_berlaku_akhir ? \Carbon\Carbon::parse($item->masa_berlaku_akhir)->format('d M Y') : '-' }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            @if ($item->sertifikat_path)
+                                <x-ui.button href="{{ Storage::url($item->sertifikat_path) }}" target="_blank" variant="light-success" size="sm" icon="file-down">
+                                    Unduh Sertifikat
+                                </x-ui.button>
+                            @else
+                                <x-ui.status-badge variant="secondary">Belum Terbit</x-ui.status-badge>
+                            @endif
+                        </td>
+                    @elseif ($activeFocus === 'banding')
+                        <td class="text-center">
+                            <x-ui.status-badge variant="warning">
+                                {{ $latestBanding ? str_replace('_', ' ', ucfirst($latestBanding->status)) : 'Banding' }}
+                            </x-ui.status-badge>
+                        </td>
+                        <td>
+                            <div class="text-gray-700 fw-semibold fs-7 text-truncate mw-350px">{{ $latestBanding?->alasan ?: '-' }}</div>
+                        </td>
+                        <td>
+                            <div class="text-gray-700 fw-semibold fs-7 text-truncate mw-350px">{{ $latestBanding?->keputusan ?: 'Menunggu keputusan admin' }}</div>
+                        </td>
+                    @else
+                        <td class="text-center">
+                            @if($item->status == 0)
+                                @if($item->masa_berlaku_akhir && \Carbon\Carbon::parse($item->masa_berlaku_akhir)->isPast())
+                                    <x-ui.status-badge variant="danger">Masa Berlaku Habis</x-ui.status-badge>
+                                @else
+                                    <x-ui.status-badge variant="success">Selesai</x-ui.status-badge>
+                                @endif
+                            @elseif($item->status == -1)
+                                <x-ui.status-badge variant="danger">Ditolak</x-ui.status-badge>
+                            @elseif($item->status == -2)
+                                <x-ui.status-badge variant="warning">Banding</x-ui.status-badge>
+                            @else
+                                <x-ui.status-badge variant="primary">Proses Akreditasi</x-ui.status-badge>
+                            @endif
+                        </td>
+                        <td class="text-center">
+                            @if($item->status == 0 || $item->status == -1)
+                                <x-ui.status-badge variant="success">Selesai</x-ui.status-badge>
+                            @elseif($item->status == 4 && $item->catatans->whereNotNull('perbaikan')->filter(fn($c) => !empty($c->perbaikan))->isNotEmpty())
+                                <x-ui.status-badge variant="warning">Perlu Perbaikan Dokumen</x-ui.status-badge>
+                            @elseif($item->tgl_visitasi)
+                                <x-ui.status-badge variant="info">Visitasi Dijadwalkan</x-ui.status-badge>
+                            @else
+                                <x-ui.status-badge variant="secondary">-</x-ui.status-badge>
+                            @endif
+                        </td>
+                        <td class="text-center">
+                            <span class="fw-bold {{ $item->nilai ? 'text-success fs-5' : 'text-muted' }}">{{ $item->nilai ?: '-' }}</span>
+                        </td>
+                        <td class="text-center">
+                            @if($item->peringkat)
+                                <x-ui.status-badge variant="success">
+                                    {{ $item->peringkat == 'Unggul' ? 'Unggul / Mumtaz' : $item->peringkat }}
+                                </x-ui.status-badge>
+                            @else
+                                <span class="text-muted fw-bold">-</span>
+                            @endif
+                        </td>
+                        <td class="text-center">
+                            <x-ui.button wire:click="openCatatanModal({{ $item->id }})" variant="light" size="sm">
+                                <x-ui.icon name="document" class="fs-5 me-1" />
+                                {{ $item->catatans->count() > 0 ? $item->catatans->count() . ' Catatan' : 'Catatan' }}
+                            </x-ui.button>
+                        </td>
+                    @endif
+
                     <td class="text-end">
                         <x-ui.action-menu>
                             <x-ui.action-menu-item :href="route('pesantren.akreditasi-detail', $item->uuid)">
@@ -329,7 +547,7 @@ new #[Layout('layouts.app')] class extends Component {
                                 Lihat Detail
                             </x-ui.action-menu-item>
 
-                            @if ($item->status == 3 && !$item->kartu_kendali)
+                            @if ($item->status == 2 && !$item->kartu_kendali)
                                 <x-ui.action-menu-item
                                     :href="route('pesantren.akreditasi-detail', ['uuid' => $item->uuid, 'activeTab' => 'kartu'])"
                                     variant="success"
@@ -339,7 +557,7 @@ new #[Layout('layouts.app')] class extends Component {
                                 </x-ui.action-menu-item>
                             @endif
 
-                            @if ($item->status == 1 && $item->sertifikat_path)
+                            @if ($item->status == 0 && $item->sertifikat_path)
                                 <x-ui.action-menu-item href="{{ Storage::url($item->sertifikat_path) }}" target="_blank" variant="success">
                                     <x-ui.icon name="document" class="fs-5" />
                                     Download Sertifikat
@@ -356,9 +574,9 @@ new #[Layout('layouts.app')] class extends Component {
                                 </x-ui.action-menu-item>
                             @endif
 
-                            @if ($item->status == 2)
+                            @if ($item->status == -1)
                                 @php
-                                    $isAlreadyResubmitted = \App\Models\Akreditasi::where('parent', $item->id)->exists();
+                                    $isAlreadyResubmitted = $item->children->isNotEmpty();
                                 @endphp
 
                                 @if (!$isAlreadyResubmitted)
@@ -380,8 +598,8 @@ new #[Layout('layouts.app')] class extends Component {
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7">
-                        <x-ui.empty-state title="Belum ada data pengajuan akreditasi" class="py-15" />
+                    <td colspan="{{ $tableColspan }}">
+                        <x-ui.empty-state :title="$emptyTitle" class="py-15" />
                     </td>
                 </tr>
                 @endforelse
@@ -391,21 +609,20 @@ new #[Layout('layouts.app')] class extends Component {
 
     <!-- Modal Catatan (View Only) -->
     <x-ui.modal name="catatan-modal" focusable>
-        <div class="p-0 overflow-hidden rounded-4 spm-modal-content-scroll">
-            @if($selectedAkreditasiNotes)
+        @if($selectedAkreditasiNotes)
             @php
             $latestCatatan = $selectedAkreditasiNotes->catatans->sortByDesc('created_at')->first();
             $isRejection = $latestCatatan && !empty($latestCatatan->perbaikan);
             @endphp
 
-            <div class="p-8">
-                <div class="d-flex justify-content-between align-items-center mb-8">
-                    <h2 class="fs-4 fw-bold text-gray-900">
-                        {{ $isRejection ? 'Catatan Penolakan Visitasi' : 'Catatan Penerimaan Visitasi' }}
-                    </h2>
-                    <x-ui.icon-button icon="cross" label="Tutup" variant="light" size="sm" x-on:click="$dispatch('close')" />
-                </div>
+            <x-ui.modal-header
+                :title="$isRejection ? 'Catatan Penolakan Visitasi' : 'Catatan Penerimaan Visitasi'"
+                subtitle="Riwayat catatan dan tindak lanjut pengajuan ini."
+                :icon="$isRejection ? 'warning-2' : 'document'"
+                :variant="$isRejection ? 'warning' : 'success'"
+            />
 
+            <x-ui.modal-body class="spm-modal-content-scroll">
                 <div class="d-flex flex-column gap-8 pe-2 custom-scrollbar">
                     @forelse($selectedAkreditasiNotes->catatans->sortByDesc('created_at') as $catatan)
                     @php
@@ -414,6 +631,7 @@ new #[Layout('layouts.app')] class extends Component {
                     <div class="border-bottom border-gray-200 pb-8">
                         <div class="d-flex align-items-center gap-4 mb-6">
                             <img src="https://ui-avatars.com/api/?name={{ urlencode($catatan->user->name) }}&color=1e3a5f&background=f1f5f9"
+                                loading="lazy"
                                 class="w-40px h-40px rounded-3 border border-white shadow-sm object-cover" alt="Asesor">
                             <div>
                                 <h3 class="fs-6 fw-bolder text-gray-900">{{ $catatan->user->name }}</h3>
@@ -476,8 +694,11 @@ new #[Layout('layouts.app')] class extends Component {
                     </div>
                     @endforelse
                 </div>
-            </div>
-            @endif
-        </div>
+            </x-ui.modal-body>
+
+            <x-ui.modal-footer>
+                <x-ui.button type="button" variant="light" x-on:click="$dispatch('close')">Tutup</x-ui.button>
+            </x-ui.modal-footer>
+        @endif
     </x-ui.modal>
 </div>

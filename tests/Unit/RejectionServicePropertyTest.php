@@ -33,7 +33,7 @@ class RejectionServicePropertyTest extends TestCase
     /**
      * Helper: create a pesantren user with akreditasi at status 5 and an Asesor 1 assigned.
      */
-    private function createAsesor1Setup(): array
+private function createAsesor1Setup(): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -73,7 +73,7 @@ class RejectionServicePropertyTest extends TestCase
     /**
      * Helper: get a list of valid rejection item identifiers.
      */
-    private function getValidItems(): array
+private function getValidItems(): array
     {
         return ['profil', 'ipm.nsp', 'ipm.kurikulum', 'ipm.buku_ajar', 'ipm.lulus_santri', 'sdm'];
     }
@@ -86,7 +86,7 @@ class RejectionServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 1.3, 1.4**
      */
-    public function test_property_1_rejection_input_validation(): void
+public function test_property_1_rejection_input_validation(): void
     {
         $faker = Faker::create();
 
@@ -159,7 +159,7 @@ class RejectionServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 1.5**
      */
-    public function test_property_2_rejection_record_persistence(): void
+public function test_property_2_rejection_record_persistence(): void
     {
         $faker = Faker::create();
 
@@ -208,7 +208,7 @@ class RejectionServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 1.6**
      */
-    public function test_property_3_authorization_only_asesor1_can_reject(): void
+public function test_property_3_authorization_only_asesor1_can_reject(): void
     {
         $faker = Faker::create();
 
@@ -259,7 +259,7 @@ class RejectionServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 2.1, 2.2**
      */
-    public function test_property_4_partial_unlock_correctness(): void
+public function test_property_4_partial_unlock_correctness(): void
     {
         $faker = Faker::create();
 
@@ -327,7 +327,7 @@ class RejectionServicePropertyTest extends TestCase
     /**
      * Helper: create an Asesor 2 for a given akreditasi.
      */
-    private function createAsesor2ForAkreditasi(Akreditasi $akreditasi): User
+private function createAsesor2ForAkreditasi(Akreditasi $akreditasi): User
     {
         $asesorUser2 = User::factory()->create(['role_id' => 2]);
         $asesor2 = Asesor::create([
@@ -356,7 +356,7 @@ class RejectionServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 3.2, 3.7**
      */
-    public function test_property_5_perbaikan_relocks_all_sections(): void
+public function test_property_5_perbaikan_relocks_all_sections(): void
     {
         $faker = Faker::create();
 
@@ -427,7 +427,7 @@ class RejectionServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 3.6**
      */
-    public function test_property_6_status_invariant_during_cycle(): void
+public function test_property_6_status_invariant_during_cycle(): void
     {
         $faker = Faker::create();
 
@@ -488,7 +488,7 @@ class RejectionServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 4.2**
      */
-    public function test_property_7_rejection_counter_increments(): void
+public function test_property_7_rejection_counter_increments(): void
     {
         $faker = Faker::create();
 
@@ -556,7 +556,7 @@ class RejectionServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 4.3**
      */
-    public function test_property_8_auto_rejection_at_limit(): void
+public function test_property_8_auto_rejection_at_limit(): void
     {
         $faker = Faker::create();
 
@@ -596,9 +596,9 @@ class RejectionServicePropertyTest extends TestCase
             $result = $this->rejectionService->createRejection($akreditasiId, $asesorUserId, $items, $explanation);
             $this->assertTrue($result['success'], "Iteration {$i}: Limit rejection should succeed");
 
-            // Verify: akreditasi status changed to 2
+            // Verify: akreditasi status changed to Ditolak
             $akreditasi = $this->akreditasiRepository()->find($akreditasiId);
-            $this->assertEquals(2, (int) $akreditasi->status, "Iteration {$i}: Akreditasi status should be 2 (Ditolak) after limit reached");
+            $this->assertEquals(-1, (int) $akreditasi->status, "Iteration {$i}: Akreditasi status should be -1 (Ditolak) after limit reached");
 
             // Verify: rejection record has status 'limit_reached'
             $this->assertEquals('limit_reached', $result['rejection']->status, "Iteration {$i}: Rejection status should be 'limit_reached'");
@@ -619,7 +619,7 @@ class RejectionServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 4.6, 8.4**
      */
-    public function test_property_9_auto_rejection_unlocks_pesantren_data(): void
+public function test_property_9_auto_rejection_unlocks_pesantren_data(): void
     {
         $faker = Faker::create();
 
@@ -682,7 +682,7 @@ class RejectionServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 8.2**
      */
-    public function test_property_12_deadline_calculation_correctness(): void
+public function test_property_12_deadline_calculation_correctness(): void
     {
         $faker = Faker::create();
 
@@ -734,7 +734,7 @@ class RejectionServicePropertyTest extends TestCase
     /**
      * Helper: get the AkreditasiRepository instance.
      */
-    private function akreditasiRepository(): \App\Repositories\Contracts\AkreditasiRepositoryInterface
+private function akreditasiRepository(): \App\Repositories\Contracts\AkreditasiRepositoryInterface
     {
         return app(\App\Repositories\Contracts\AkreditasiRepositoryInterface::class);
     }
@@ -747,7 +747,7 @@ class RejectionServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 5.1, 5.3, 5.5**
      */
-    public function test_property_10_rejection_blocked_at_status_6(): void
+public function test_property_10_rejection_blocked_at_status_6(): void
     {
         $faker = Faker::create();
 
@@ -799,7 +799,7 @@ class RejectionServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 9.1, 9.2**
      */
-    public function test_property_13_final_rejection_input_validation(): void
+public function test_property_13_final_rejection_input_validation(): void
     {
         $faker = Faker::create();
         $validCategoryKeys = array_keys(config('akreditasi.final_rejection_categories'));
@@ -886,7 +886,7 @@ class RejectionServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 9.3**
      */
-    public function test_property_14_final_rejection_persistence(): void
+public function test_property_14_final_rejection_persistence(): void
     {
         $faker = Faker::create();
         $validCategoryKeys = array_keys(config('akreditasi.final_rejection_categories'));
@@ -931,9 +931,9 @@ class RejectionServicePropertyTest extends TestCase
             $this->assertEquals($adminUser->id, $stored->user_id, "Iteration {$i}: user_id should match admin");
             $this->assertEquals($categories, $stored->categories, "Iteration {$i}: categories should match exactly");
 
-            // Verify: akreditasi status SHALL be 2
+            // Verify: akreditasi status SHALL be Ditolak
             $akreditasi->refresh();
-            $this->assertEquals(2, (int) $akreditasi->status, "Iteration {$i}: Akreditasi status should be 2 (Ditolak)");
+            $this->assertEquals(-1, (int) $akreditasi->status, "Iteration {$i}: Akreditasi status should be -1 (Ditolak)");
 
             // Clean up for next iteration
             AkreditasiRejection::where('akreditasi_id', $akreditasi->id)->delete();
@@ -949,7 +949,7 @@ class RejectionServicePropertyTest extends TestCase
      *
      * **Validates: Requirements 6.1**
      */
-    public function test_property_11_rejection_history_chronological_ordering(): void
+public function test_property_11_rejection_history_chronological_ordering(): void
     {
         $faker = Faker::create();
 

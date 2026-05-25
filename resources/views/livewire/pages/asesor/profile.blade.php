@@ -168,17 +168,22 @@ new #[Layout('layouts.app')] class extends Component {
     public function save()
     {
         $asesorService = app(\App\Services\AsesorService::class);
-        
-        $this->validate([
-            'nama_dengan_gelar' => 'required|string|max:255',
-            'nama_tanpa_gelar' => 'required|string|max:255',
-            'email_pribadi' => 'nullable|email',
-            'foto_upload' => 'nullable|image|max:1024',
-            'ktp_file_upload' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
-            'ijazah_file_upload' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
-            'kartu_nbm_file_upload' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
-            'password' => 'nullable|min:8',
-        ]);
+
+        try {
+            $this->validate([
+                'nama_dengan_gelar' => 'required|string|max:255',
+                'nama_tanpa_gelar' => 'required|string|max:255',
+                'email_pribadi' => 'nullable|email',
+                'foto_upload' => 'nullable|image|max:1024',
+                'ktp_file_upload' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
+                'ijazah_file_upload' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
+                'kartu_nbm_file_upload' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
+                'password' => 'nullable|min:8',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->dispatch('show-validation-error');
+            throw $e;
+        }
 
         $data = [
             'nama_dengan_gelar' => $this->nama_dengan_gelar,
@@ -211,12 +216,13 @@ new #[Layout('layouts.app')] class extends Component {
         ];
 
         // foto stays on public disk (non-sensitive)
+        // Store new foto first; only delete old if store succeeds (PM-1 pattern)
         if ($this->foto_upload) {
-            if ($this->asesor->foto) {
-                Storage::disk('public')->delete($this->asesor->foto);
+            $newFotoPath = $this->foto_upload->store('asesor_docs', 'public');
+            if ($newFotoPath) {
+                $oldFotoPath = $this->asesor->foto;
+                $data['foto'] = $newFotoPath;
             }
-            $data['foto'] = $this->foto_upload->store('asesor_docs', 'public');
-            $this->existing_files['foto'] = $data['foto'];
         }
 
         // KTP / ijazah / kartu_nbm are PII — stored on local (private) disk
@@ -226,40 +232,65 @@ new #[Layout('layouts.app')] class extends Component {
             'kartu_nbm_file' => 'kartu_nbm_file_upload',
         ];
 
+        $newPrivatePaths = [];
         foreach ($privateFields as $dbField => $property) {
             if ($this->$property) {
-                // Store new file first; only delete old if store succeeds
                 $newPath = $this->$property->store('asesor_private_docs', 'local');
                 if ($newPath) {
-                    if ($this->asesor->$dbField) {
-                        Storage::disk('local')->delete($this->asesor->$dbField);
-                    }
+                    $newPrivatePaths[$dbField] = [
+                        'old' => $this->asesor->$dbField,
+                        'new' => $newPath,
+                    ];
                     $data[$dbField] = $newPath;
-                    $this->existing_files[$dbField] = $newPath;
                 }
             }
         }
 
-        $asesorService->updateProfile(auth()->id(), $data);
+        $success = $asesorService->updateProfile(auth()->id(), $data);
 
-        // Update password if provided
-        if ($this->password) {
-            auth()->user()->update([
-                'password' => \Illuminate\Support\Facades\Hash::make($this->password)
-            ]);
-            $this->password = null;
+        if ($success) {
+            // DB succeeded — now safe to delete old files
+            if (isset($newFotoPath) && isset($oldFotoPath) && $oldFotoPath) {
+                Storage::disk('public')->delete($oldFotoPath);
+            }
+            foreach ($newPrivatePaths as ['old' => $oldPath]) {
+                if ($oldPath) {
+                    Storage::disk('local')->delete($oldPath);
+                }
+            }
+
+            // Update password if provided
+            if ($this->password) {
+                auth()->user()->update([
+                    'password' => \Illuminate\Support\Facades\Hash::make($this->password)
+                ]);
+                $this->password = null;
+            }
+
+            $this->isEditing = false;
+            $this->mount();
+
+            $this->dispatch(
+                'notification-received',
+                type: 'success',
+                title: 'Berhasil!',
+                message: 'Profil asesor berhasil diperbarui.'
+            );
+        } else {
+            // DB failed — rollback: delete newly stored files
+            if (isset($newFotoPath)) {
+                Storage::disk('public')->delete($newFotoPath);
+            }
+            foreach ($newPrivatePaths as ['new' => $newPath]) {
+                Storage::disk('local')->delete($newPath);
+            }
+
+            $this->dispatch('show-metronic-alert', type: 'error', title: 'Gagal', message: 'Profil asesor gagal disimpan.');
         }
-
-        $this->dispatch(
-            'notification-received',
-            type: 'success',
-            title: 'Berhasil!',
-            message: 'Profil asesor berhasil diperbarui.'
-        );
     }
 }; ?>
 
-<x-ui.page title="Profil Asesor" subtitle="Kelola informasi data diri, pengalaman, dan dokumen Anda.">
+<x-ui.page title="Profil Asesor" subtitle="Kelola informasi data diri, pengalaman, dan dokumen Anda." class="spm-detail-page">
     <x-slot:toolbar>
         @if($isEditing)
             <x-ui.button type="button" wire:click="toggleEdit" variant="light">
@@ -276,7 +307,18 @@ new #[Layout('layouts.app')] class extends Component {
 
     @if($isEditing)
     {{-- ===== EDIT MODE ===== --}}
-    <form wire:submit="save" x-data="fileManagement()">
+    <form x-on:submit.prevent="confirmSaveProfile($wire)" x-data="{ ...fileManagement(), ...asesorManagement() }">
+        @if($errors->any())
+            <x-ui.alert variant="danger" title="Data profil belum valid" class="mb-6">
+                <div class="mb-3">Periksa kembali isian yang ditandai sebelum menyimpan.</div>
+                <ul class="mb-0 ps-4">
+                    @foreach($errors->all() as $message)
+                        <li>{{ $message }}</li>
+                    @endforeach
+                </ul>
+            </x-ui.alert>
+        @endif
+
         <div class="d-flex flex-column gap-6">
 
             {{-- A. Identitas --}}
@@ -289,9 +331,9 @@ new #[Layout('layouts.app')] class extends Component {
                                 <div class="rounded-circle overflow-hidden border border-3 border-light shadow"
                                      style="width:120px;height:120px;background:#f5f5f5;">
                                     @if($foto_upload)
-                                        <img src="{{ $foto_upload->temporaryUrl() }}" class="w-100 h-100 object-fit-cover">
+                                        <img src="{{ $foto_upload->temporaryUrl() }}" class="w-100 h-100 object-fit-cover" alt="Pratinjau foto asesor" loading="lazy">
                                     @elseif($existing_files['foto'])
-                                        <img src="{{ Storage::url($existing_files['foto']) }}" class="w-100 h-100 object-fit-cover">
+                                        <img src="{{ Storage::url($existing_files['foto']) }}" class="w-100 h-100 object-fit-cover" alt="Foto asesor" loading="lazy">
                                     @else
                                         <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted fs-1 fw-bold">
                                             {{ substr($nama_dengan_gelar ?? 'A', 0, 1) }}
@@ -453,7 +495,7 @@ new #[Layout('layouts.app')] class extends Component {
                                                 placeholder="Cari Kota/Kabupaten..."
                                                 @focus="showKabupatenConfig = true"
                                                 @click.outside="showKabupatenConfig = false"
-                                                x-bindx-bindx-bind:disabled="!currentProvinsiKode" />
+                                                x-bind:disabled="!currentProvinsiKode" />
                                             <div x-show="showKabupatenConfig && filteredKabupaten.length > 0"
                                                  class="position-absolute w-100 mt-1 bg-white border rounded shadow-sm"
                                                  style="z-index:50;max-height:200px;overflow-y:auto;">
@@ -542,7 +584,7 @@ new #[Layout('layouts.app')] class extends Component {
                                     </x-ui.form-field>
                                 </div>
                                 <div class="col-md-2 d-flex align-items-end pb-1">
-                                    <x-ui.icon-button type="button" wire:click="removeRow('riwayat_pendidikan', {{ $index }})" variant="light-danger" icon="trash" />
+                                    <x-ui.icon-button type="button" wire:click="removeRow('riwayat_pendidikan', {{ $index }})" variant="light-danger" icon="trash" label="Hapus" />
                                 </div>
                             </div>
                             @endforeach
@@ -576,7 +618,7 @@ new #[Layout('layouts.app')] class extends Component {
                                     </x-ui.form-field>
                                 </div>
                                 <div class="col-md-2 d-flex align-items-end pb-1">
-                                    <x-ui.icon-button type="button" wire:click="removeRow('pengalaman_bekerja', {{ $index }})" variant="light-danger" icon="trash" />
+                                    <x-ui.icon-button type="button" wire:click="removeRow('pengalaman_bekerja', {{ $index }})" variant="light-danger" icon="trash" label="Hapus" />
                                 </div>
                             </div>
                             @endforeach
@@ -612,7 +654,7 @@ new #[Layout('layouts.app')] class extends Component {
                                             </x-ui.form-field>
                                         </div>
                                         <div class="col-12 d-flex justify-content-end">
-                                            <x-ui.icon-button type="button" wire:click="removeRow('pengalaman_pelatihan', {{ $index }})" variant="light-danger" icon="trash" />
+                                            <x-ui.icon-button type="button" wire:click="removeRow('pengalaman_pelatihan', {{ $index }})" variant="light-danger" icon="trash" label="Hapus" />
                                         </div>
                                     </div>
                                 </div>
@@ -645,7 +687,7 @@ new #[Layout('layouts.app')] class extends Component {
                                             </x-ui.form-field>
                                         </div>
                                         <div class="col-12 d-flex justify-content-end">
-                                            <x-ui.icon-button type="button" wire:click="removeRow('pengalaman_berorganisasi', {{ $index }})" variant="light-danger" icon="trash" />
+                                            <x-ui.icon-button type="button" wire:click="removeRow('pengalaman_berorganisasi', {{ $index }})" variant="light-danger" icon="trash" label="Hapus" />
                                         </div>
                                     </div>
                                 </div>
@@ -676,7 +718,7 @@ new #[Layout('layouts.app')] class extends Component {
                                     </x-ui.form-field>
                                 </div>
                                 <div class="col-md-2 d-flex align-items-end pb-1">
-                                    <x-ui.icon-button type="button" wire:click="removeRow('karya_publikasi', {{ $index }})" variant="light-danger" icon="trash" />
+                                    <x-ui.icon-button type="button" wire:click="removeRow('karya_publikasi', {{ $index }})" variant="light-danger" icon="trash" label="Hapus" />
                                 </div>
                             </div>
                             @endforeach
@@ -762,6 +804,8 @@ new #[Layout('layouts.app')] class extends Component {
                         <div class="mb-5">
                             @if($existing_files['foto'])
                                 <img src="{{ Storage::url($existing_files['foto']) }}"
+                                     alt="Foto asesor"
+                                     loading="lazy"
                                      class="rounded-circle object-fit-cover border border-3 border-light shadow-sm"
                                      style="width:100px;height:100px;">
                             @else

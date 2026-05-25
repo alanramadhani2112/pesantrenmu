@@ -38,7 +38,7 @@ class PesantrenResubmissionIntegrationTest extends TestCase
     /**
      * Task 4.3: createSubmission returns null when resubmission limit is reached
      */
-    public function test_create_submission_returns_null_when_resubmission_limit_reached(): void
+public function test_create_submission_returns_null_when_resubmission_limit_reached(): void
     {
         $user = $this->createCompletePesantrenUser();
 
@@ -90,7 +90,7 @@ class PesantrenResubmissionIntegrationTest extends TestCase
     /**
      * Task 4.4: createSubmission returns null when cooling period has not elapsed
      */
-    public function test_create_submission_returns_null_when_cooling_period_not_elapsed(): void
+public function test_create_submission_returns_null_when_cooling_period_not_elapsed(): void
     {
         $user = $this->createCompletePesantrenUser();
 
@@ -136,7 +136,7 @@ class PesantrenResubmissionIntegrationTest extends TestCase
     /**
      * Task 4.5: createSubmission succeeds when both limit and cooling period allow it
      */
-    public function test_create_submission_succeeds_when_limit_and_cooling_allow(): void
+public function test_create_submission_succeeds_when_limit_and_cooling_allow(): void
     {
         $user = $this->createCompletePesantrenUser();
 
@@ -175,7 +175,7 @@ class PesantrenResubmissionIntegrationTest extends TestCase
     /**
      * Task 4.6: createSubmission succeeds for first submission (no parentId) — regression test
      */
-    public function test_create_submission_succeeds_for_first_submission_without_parent_id(): void
+public function test_create_submission_succeeds_for_first_submission_without_parent_id(): void
     {
         $user = $this->createCompletePesantrenUser();
 
@@ -204,6 +204,13 @@ class PesantrenResubmissionIntegrationTest extends TestCase
         Pesantren::create([
             'user_id' => $user->id,
             'nama_pesantren' => 'Pesantren TDD',
+            'ns_pesantren' => '510012345678',
+            'alamat' => 'Jl. Pendidikan No. 12',
+            'provinsi' => 'Jawa Tengah',
+            'kota_kabupaten' => 'Kota Surakarta',
+            'tahun_pendirian' => '1998',
+            'nama_mudir' => 'Ahmad Mudir',
+            'layanan_satuan_pendidikan' => ['spm'],
             'is_locked' => false,
         ]);
 

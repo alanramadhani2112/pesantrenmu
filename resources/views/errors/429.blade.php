@@ -33,7 +33,7 @@
 
     <div class="text-center mb-8">
         <a href="{{ url('/') }}">
-            <img src="{{ asset('images/brand/logo-horizontal.svg') }}" alt="SPM" style="height: 36px;">
+            <img src="{{ asset('images/brand/logo-horizontal.svg') }}" alt="SPM" style="height: 36px;" loading="lazy">
         </a>
     </div>
 

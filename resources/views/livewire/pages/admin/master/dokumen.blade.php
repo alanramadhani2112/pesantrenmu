@@ -148,8 +148,7 @@ new #[Layout('layouts.app')] class extends Component {
             </x-slot>
 
             <x-slot name="toolbar">
-                <x-ui.button wire:click="openModal" variant="primary" size="sm">
-                    <x-ui.icon name="plus" class="fs-4 me-1" />
+                <x-ui.button wire:click="openModal" variant="primary" size="sm" icon="plus">
                     Tambah Dokumen
                 </x-ui.button>
             </x-slot>
@@ -295,9 +294,13 @@ new #[Layout('layouts.app')] class extends Component {
                         x-on:livewire-upload-error="isUploading = false"
                         x-on:livewire-upload-progress="progress = $event.detail.progress"
                     >
-                        <div x-show="isUploading" class="progress h-5px mt-3">
-                            <div class="progress-bar bg-primary" :style="'width: ' + progress + '%'"></div>
-                        </div>
+                        <x-ui.progress
+                            x-show="isUploading"
+                            dynamic-value="progress"
+                            variant="primary"
+                            height="5px"
+                            class="mt-3"
+                        />
                     </x-ui.file-upload>
                 </x-ui.form-field>
 

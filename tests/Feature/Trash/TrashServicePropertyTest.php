@@ -36,7 +36,7 @@ class TrashServicePropertyTest extends TestCase
      *
      * @return array{akreditasi: Akreditasi, user: User}
      */
-    private function makeAkreditasiWithChildren(string $pesantrenName = 'Pesantren Demo', int $status = 5, bool $softDelete = true): array
+private function makeAkreditasiWithChildren(string $pesantrenName = 'Pesantren Demo', int $status = 5, bool $softDelete = true): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -94,7 +94,7 @@ class TrashServicePropertyTest extends TestCase
     }
 
     /** Property 1: cascade restore — restore parent juga restore semua child. */
-    public function test_property_cascade_restore_undoes_all_children(): void
+public function test_property_cascade_restore_undoes_all_children(): void
     {
         $arr = $this->makeAkreditasiWithChildren();
         $akreditasi = $arr['akreditasi'];
@@ -115,7 +115,7 @@ class TrashServicePropertyTest extends TestCase
     }
 
     /** Property 2: forceDelete benar-benar menghapus parent + semua child dari DB. */
-    public function test_property_force_delete_purges_records_from_database(): void
+public function test_property_force_delete_purges_records_from_database(): void
     {
         $arr = $this->makeAkreditasiWithChildren();
         $akreditasi = $arr['akreditasi'];
@@ -131,7 +131,7 @@ class TrashServicePropertyTest extends TestCase
     }
 
     /** Property 3: idempotent — restore lalu restore lagi tidak menambah/merusak data. */
-    public function test_property_restore_is_idempotent(): void
+public function test_property_restore_is_idempotent(): void
     {
         $arr = $this->makeAkreditasiWithChildren();
         $akreditasi = $arr['akreditasi'];
@@ -145,7 +145,7 @@ class TrashServicePropertyTest extends TestCase
     }
 
     /** Property 4: getTrashCount akurat sebelum & sesudah operasi. */
-    public function test_property_trash_count_accurate(): void
+public function test_property_trash_count_accurate(): void
     {
         $service = app(TrashService::class);
         $this->assertSame(0, $service->getTrashCount());
@@ -163,7 +163,7 @@ class TrashServicePropertyTest extends TestCase
     }
 
     /** Property 5: getRestorePreview returns child counts matching DB state. */
-    public function test_property_restore_preview_counts_match_database(): void
+public function test_property_restore_preview_counts_match_database(): void
     {
         $arr = $this->makeAkreditasiWithChildren();
         $akreditasi = $arr['akreditasi'];
@@ -180,7 +180,7 @@ class TrashServicePropertyTest extends TestCase
     }
 
     /** Property 6: search filter mempersempit hasil ke pesantren yang cocok. */
-    public function test_property_search_filter_narrows_results(): void
+public function test_property_search_filter_narrows_results(): void
     {
         $this->makeAkreditasiWithChildren('Al-Hidayah Bandung');
         $this->makeAkreditasiWithChildren('An-Nur Surabaya');

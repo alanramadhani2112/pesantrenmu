@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Models\Akreditasi;
 use App\Models\User;
 use App\Repositories\Contracts\AsesorRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -25,18 +26,29 @@ class AsesorRepository implements AsesorRepositoryInterface
             ->when($filters['penugasan'] ?? null, function ($query, $penugasan) {
                 if ($penugasan === 'bertugas') {
                     $query->whereHas('asesor.assessments.akreditasi', function ($q) {
-                        $q->whereNotIn('status', [1, 2]);
+                        $q->whereIn('status', Akreditasi::activeStatuses());
                     });
                 } elseif ($penugasan === 'bebas') {
                     $query->whereDoesntHave('asesor.assessments', function ($q) {
                         $q->whereHas('akreditasi', function ($sq) {
-                            $sq->whereNotIn('status', [1, 2]);
+                            $sq->whereIn('status', Akreditasi::activeStatuses());
                         });
                     });
                 }
             });
 
-        return $query->with(['asesor.assessments.akreditasi.user.pesantren'])
+        return $query->with([
+                'asesor:id,user_id,nama_dengan_gelar',
+                'asesor.assessments' => function ($query) {
+                    $query
+                        ->latest()
+                        ->with([
+                            'akreditasi:id,user_id,status,uuid',
+                            'akreditasi.user:id,name',
+                            'akreditasi.user.pesantren:id,user_id,nama_pesantren',
+                        ]);
+                },
+            ])
             ->orderBy($sortField, $sortAsc ? 'asc' : 'desc')
             ->paginate($perPage);
     }

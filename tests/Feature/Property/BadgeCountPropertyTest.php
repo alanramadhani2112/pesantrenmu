@@ -11,6 +11,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * Property 2: Badge count equals filtered record count
@@ -90,9 +91,9 @@ class BadgeCountPropertyTest extends TestCase
      *
      * **Validates: Requirements 3.1, 3.2, 3.3**
      *
-     * @dataProvider randomBadgeCountCombinationsProvider
      */
-    public function test_property_2_admin_badge_count_equals_filtered_record_count(
+#[DataProvider('randomBadgeCountCombinationsProvider')]
+public function test_property_2_admin_badge_count_equals_filtered_record_count(
         array $akreditasiStatuses,
         array $bandingStatuses,
         array $asesorAkreditasiStatuses,
@@ -163,9 +164,9 @@ class BadgeCountPropertyTest extends TestCase
      *
      * **Validates: Requirements 4.1, 4.2**
      *
-     * @dataProvider randomBadgeCountCombinationsProvider
      */
-    public function test_property_2_asesor_badge_count_equals_filtered_record_count(
+#[DataProvider('randomBadgeCountCombinationsProvider')]
+public function test_property_2_asesor_badge_count_equals_filtered_record_count(
         array $akreditasiStatuses,
         array $bandingStatuses,
         array $asesorAkreditasiStatuses,

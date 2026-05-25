@@ -11,6 +11,8 @@ use App\Models\Pesantren;
 use App\Models\SdmPesantren;
 use App\Models\User;
 use Carbon\Carbon;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Volt\Volt;
@@ -24,12 +26,14 @@ class AdminAkreditasiResubmissionTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RolePermissionSeeder::class);
     }
 
     /**
      * Task 7.6: Admin detail shows chain timeline with correct entries
      */
-    public function test_admin_detail_shows_chain_timeline_with_correct_entries(): void
+public function test_admin_detail_shows_chain_timeline_with_correct_entries(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $pesantrenUser = $this->createCompletePesantrenUser();
@@ -85,7 +89,7 @@ class AdminAkreditasiResubmissionTest extends TestCase
     /**
      * Task 7.6 (additional): Admin detail shows resubmission count badge
      */
-    public function test_admin_detail_shows_resubmission_count_badge(): void
+public function test_admin_detail_shows_resubmission_count_badge(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $pesantrenUser = $this->createCompletePesantrenUser();
@@ -118,7 +122,7 @@ class AdminAkreditasiResubmissionTest extends TestCase
     /**
      * Task 7.6 (additional): Admin detail does NOT show chain timeline for standalone akreditasi
      */
-    public function test_admin_detail_does_not_show_timeline_for_standalone_akreditasi(): void
+public function test_admin_detail_does_not_show_timeline_for_standalone_akreditasi(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $pesantrenUser = $this->createCompletePesantrenUser();
@@ -146,7 +150,7 @@ class AdminAkreditasiResubmissionTest extends TestCase
     /**
      * Task 7.7: Admin list shows resubmission badge for chain members
      */
-    public function test_admin_list_shows_resubmission_badge_for_chain_members(): void
+public function test_admin_list_shows_resubmission_badge_for_chain_members(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $pesantrenUser = $this->createCompletePesantrenUser();
@@ -177,7 +181,7 @@ class AdminAkreditasiResubmissionTest extends TestCase
     /**
      * Task 7.7 (additional): Admin list does NOT show resubmission badge for root akreditasi
      */
-    public function test_admin_list_does_not_show_resubmission_badge_for_root_akreditasi(): void
+public function test_admin_list_does_not_show_resubmission_badge_for_root_akreditasi(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $pesantrenUser = $this->createCompletePesantrenUser();

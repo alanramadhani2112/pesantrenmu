@@ -31,11 +31,10 @@ new #[Layout('layouts.guest')] class extends Component
         <div class="text-gray-500 fw-semibold fs-6">Gunakan akun yang sudah terdaftar.</div>
     </div>
 
-    <x-auth-session-status class="alert alert-success mb-6" :status="session('status')" />
+    <x-auth-session-status :status="session('status')" />
 
     <form wire:submit="login" class="form w-100">
-        <div class="fv-row mb-8">
-            <label for="email" class="form-label fw-bold text-gray-900">Email</label>
+        <x-ui.form-field label="Email" :error="$errors->first('form.email')">
             <div class="position-relative">
                 <i class="ki-duotone ki-sms fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4">
                     <span class="path1"></span>
@@ -52,15 +51,10 @@ new #[Layout('layouts.guest')] class extends Component
                     autocomplete="username"
                 />
             </div>
-            @error('form.email')
-                <div class="invalid-feedback d-block mt-2">{{ $message }}</div>
-            @enderror
-        </div>
+        </x-ui.form-field>
 
-        <div class="fv-row mb-8" x-data="{ show: false }">
-            <label for="password" class="form-label fw-bold text-gray-900">Password</label>
-
-            <div class="position-relative">
+        <x-ui.form-field label="Password" :error="$errors->first('form.password')" class="mb-8">
+            <div class="position-relative" x-data="{ show: false }">
                 <i class="ki-duotone ki-lock-2 fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4">
                     <span class="path1"></span>
                     <span class="path2"></span>
@@ -78,7 +72,6 @@ new #[Layout('layouts.guest')] class extends Component
                     required
                     autocomplete="current-password"
                 />
-
                 <x-ui.button
                     type="button"
                     variant="light"
@@ -100,11 +93,7 @@ new #[Layout('layouts.guest')] class extends Component
                     </i>
                 </x-ui.button>
             </div>
-
-            @error('form.password')
-                <div class="invalid-feedback d-block mt-2">{{ $message }}</div>
-            @enderror
-        </div>
+        </x-ui.form-field>
 
         <div class="d-grid">
             <x-ui.button type="submit" variant="primary" size="lg">
@@ -125,9 +114,13 @@ new #[Layout('layouts.guest')] class extends Component
     </div>
 
     <div class="d-grid">
-        <a href="{{ route('sso.preflight') }}" class="btn btn-flex btn-lg shadow-sm" 
-           style="background: linear-gradient(to right, #2c506d, #427c95);">
-            <img src="https://aqsa-dev.muhammadiyah.or.id/assets/media/logos/logo-white-full.png" alt="Login via Muhammadiyah ID" class="h-30px object-fit-contain">
+        {{-- SSO button menggunakan Metronic btn-flex tanpa inline style --}}
+        <a href="{{ route('sso.preflight') }}"
+           class="btn btn-flex btn-lg btn-sso-muhammadiyah fw-bold">
+             <img src="{{ asset('images/brand/logo-horizontal.svg') }}"
+                  alt="Login via Muhammadiyah ID"
+                  loading="lazy"
+                  class="h-30px object-fit-contain">
         </a>
     </div>
     @endif

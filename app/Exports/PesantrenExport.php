@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\Akreditasi;
 use App\Models\User;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -45,15 +46,15 @@ class PesantrenExport implements FromCollection, WithHeadings, WithMapping
                     $query->whereDoesntHave('akreditasis');
                 } elseif ($this->filterAkreditasi === 'proses') {
                     $query->whereHas('akreditasis', function ($q) {
-                        $q->whereNotIn('status', [1, 2]);
+                        $q->whereIn('status', Akreditasi::activeStatuses());
                     });
                 } elseif ($this->filterAkreditasi === 'terakreditasi') {
                     $query->whereHas('akreditasis', function ($q) {
-                        $q->where('status', 1);
+                        $q->where('status', Akreditasi::STATUS_SELESAI);
                     });
                 } elseif ($this->filterAkreditasi === 'ditolak') {
                     $query->whereHas('akreditasis', function ($q) {
-                        $q->where('status', 2);
+                        $q->where('status', Akreditasi::STATUS_DITOLAK);
                     });
                 }
             })
@@ -83,10 +84,10 @@ class PesantrenExport implements FromCollection, WithHeadings, WithMapping
         $akreditasiStatus = 'Belum Terakreditasi';
         $peringkat = '-';
         if ($latestAkreditasi) {
-            if ($latestAkreditasi->status == 1) {
+            if ((int) $latestAkreditasi->status === Akreditasi::STATUS_SELESAI) {
                 $akreditasiStatus = 'Terakreditasi';
                 $peringkat = $latestAkreditasi->peringkat ?? 'Unggul';
-            } elseif ($latestAkreditasi->status == 2) {
+            } elseif ((int) $latestAkreditasi->status === Akreditasi::STATUS_DITOLAK) {
                 $akreditasiStatus = 'Ditolak';
             } else {
                 $akreditasiStatus = 'Proses';

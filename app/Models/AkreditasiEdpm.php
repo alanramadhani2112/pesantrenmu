@@ -18,5 +18,12 @@ class AkreditasiEdpm extends Model
         'nk',
         'nv',
         'catatan',
+        'is_final',
+        'delta',
+    ];
+
+    protected $casts = [
+        'is_final' => 'boolean',
+        'delta' => 'integer',
     ];
 }
