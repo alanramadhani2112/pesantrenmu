@@ -22,7 +22,7 @@
         }
         .error-code {
             font-size: clamp(4rem, 12vw, 7rem);
-            font-weight: 900;
+            font-weight: 600;
             line-height: 1;
             letter-spacing: -0.04em;
             color: #f59e0b;
@@ -41,7 +41,7 @@
         <div class="card-body p-10 text-center">
 
             <div class="error-icon-wrap">
-                <i class="ki-duotone ki-timer fs-2tx text-warning">
+                <i class="ki-solid ki-timer fs-2tx text-warning">
                     <span class="path1"></span>
                     <span class="path2"></span>
                     <span class="path3"></span>
@@ -58,14 +58,14 @@
 
             <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
                 <a href="javascript:location.reload()" class="btn btn-primary fw-bold px-6">
-                    <i class="ki-duotone ki-arrows-circle fs-3 me-1">
+                    <i class="ki-solid ki-arrows-circle fs-3 me-1">
                         <span class="path1"></span>
                         <span class="path2"></span>
                     </i>
                     Muat Ulang
                 </a>
                 <a href="{{ url('/login') }}" class="btn btn-light fw-bold px-6">
-                    <i class="ki-duotone ki-entrance-right fs-3 me-1">
+                    <i class="ki-solid ki-entrance-right fs-3 me-1">
                         <span class="path1"></span>
                         <span class="path2"></span>
                     </i>

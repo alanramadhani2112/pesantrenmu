@@ -26,7 +26,7 @@
         </div>
     @endisset
 
-    <h3 class="fw-bold text-gray-900 mb-2">{{ $title }}</h3>
+    <h3 class="fw-semibold text-gray-900 mb-2">{{ $title }}</h3>
 
     @if($description)
         <p class="text-muted fw-semibold fs-6 mb-0 mw-450px">{{ $description }}</p>

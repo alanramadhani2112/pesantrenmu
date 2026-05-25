@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use App\Models\Akreditasi;
 use App\Models\Asesor;
@@ -487,7 +487,7 @@ new #[Layout('layouts.app')] class extends Component {
                                 loading="lazy"
                                 class="w-40px h-40px rounded-3 border border-white shadow-sm object-cover" alt="Avatar">
                             <div>
-                                <h3 class="fs-6 fw-bolder text-gray-900">{{ $catatan->user->name }}</h3>
+                                <h3 class="fs-6 fw-semibold text-gray-900">{{ $catatan->user->name }}</h3>
                                 <p class="text-muted fs-8 fw-bold text-uppercase">
                                     {{ $catatan->user->isAsesor() ? 'Ketua Kelompok' : ($catatan->user->isAdmin() ? 'Administrator Pusat' : 'Pihak Berwenang') }}
                                 </p>
@@ -505,7 +505,7 @@ new #[Layout('layouts.app')] class extends Component {
                             </div>
                             <div class="col-6">
                                 <p class="text-muted fs-8 fw-bold text-uppercase mb-2">Tanggal:</p>
-                                <p class="fs-7 fw-bolder text-gray-700">
+                                <p class="fs-7 fw-semibold text-gray-700">
                                     {{ $catatan->created_at->translatedFormat('d F Y H:i') }}
                                 </p>
                             </div>
@@ -513,7 +513,7 @@ new #[Layout('layouts.app')] class extends Component {
 
                         @if($isNoteRejection)
                         <div class="mb-6">
-                            <p class="fs-7 fw-bolder text-gray-800 mb-3">Dokumen yang memerlukan perbaikan</p>
+                            <p class="fs-7 fw-semibold text-gray-800 mb-3">Dokumen yang memerlukan perbaikan</p>
                             <div class="d-flex flex-wrap gap-2">
                                 @foreach(explode(', ', $catatan->perbaikan) as $p)
                                 <x-ui.badge variant="warning" class="text-uppercase">

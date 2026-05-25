@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Hash;
@@ -72,7 +72,7 @@ new #[Layout('layouts.guest')] class extends Component
 <div>
     <div class="text-center mb-10">
         <x-ui.badge variant="primary" class="mb-4">Reset Password</x-ui.badge>
-        <h1 class="text-gray-900 fw-bolder mb-3">Password Baru</h1>
+        <h1 class="text-gray-900 fw-semibold mb-3">Password Baru</h1>
         <div class="text-gray-500 fw-semibold fs-6">Masukkan password baru untuk akun Anda.</div>
     </div>
 

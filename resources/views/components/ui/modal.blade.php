@@ -56,7 +56,7 @@
     role="dialog"
     aria-modal="true"
     class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-4 py-6 sm:px-6 lg:px-8 spm-modal-overlay"
-    style="display: {{ $show ? 'block' : 'none' }};"
+    style="display: {{ $show ? 'flex' : 'none' }};"
 >
     <div
         x-show="show"

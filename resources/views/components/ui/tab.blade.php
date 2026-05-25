@@ -5,7 +5,7 @@
 ])
 
 @php
-    $classes = trim('nav-link text-active-primary py-4 px-0 me-8 ' . ($active ? 'active' : ''));
+    $classes = trim('nav-link text-active-primary spm-tab-link ' . ($active ? 'active' : ''));
     $ariaPressed = $active ? 'true' : 'false';
 @endphp
 

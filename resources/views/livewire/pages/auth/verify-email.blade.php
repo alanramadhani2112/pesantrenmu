@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use App\Livewire\Actions\Logout;
 use Illuminate\Support\Facades\Auth;
@@ -38,7 +38,7 @@ new #[Layout('layouts.guest')] class extends Component
 <div>
     <div class="text-center mb-10">
         <x-ui.badge variant="info" class="mb-4">Verifikasi</x-ui.badge>
-        <h1 class="text-gray-900 fw-bolder mb-3">Verifikasi Email</h1>
+        <h1 class="text-gray-900 fw-semibold mb-3">Verifikasi Email</h1>
         <div class="text-gray-500 fw-semibold fs-6">
             Terima kasih telah mendaftar! Silakan verifikasi email Anda dengan mengklik link yang kami kirimkan.
             Jika tidak menerima email, kami akan mengirim ulang.

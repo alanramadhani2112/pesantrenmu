@@ -27,7 +27,7 @@ new #[Layout('layouts.guest')] class extends Component
 <div>
     <div class="text-center mb-10">
         <x-ui.badge variant="primary" class="mb-4">Akses Sistem</x-ui.badge>
-        <h1 class="text-gray-900 fw-bolder mb-3">Masuk ke SPM</h1>
+        <h1 class="text-gray-900 fw-semibold mb-3">Masuk ke SPM</h1>
         <div class="text-gray-500 fw-semibold fs-6">Gunakan akun yang sudah terdaftar.</div>
     </div>
 

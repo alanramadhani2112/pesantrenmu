@@ -198,7 +198,7 @@ h6 {
 .spm-header-title {
     color: #111827;
     font-size: 18px !important;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.25;
     letter-spacing: 0;
 }
@@ -273,7 +273,7 @@ h6 {
 .spm-notification-title {
     color: #1f2937;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.35;
 }
 
@@ -317,14 +317,14 @@ h6 {
 
 .spm-page-title {
     font-size: 24px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.28;
     letter-spacing: 0;
 }
 
 .spm-page-title-compact {
     font-size: 22px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.3;
 }
 
@@ -455,7 +455,7 @@ h6 {
     margin: 0;
     color: #101828;
     font-size: 17px;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.35;
 }
 
@@ -632,7 +632,7 @@ h6 {
     border: 0 !important;
     border-radius: 6px;
     font-size: 12px !important;
-    font-weight: 800 !important;
+    font-weight: 600 !important;
     line-height: 1;
     text-transform: uppercase;
 }
@@ -736,7 +736,7 @@ h6 {
     min-height: 38px;
     border-radius: 6px;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.25;
     white-space: nowrap;
 }
@@ -747,7 +747,7 @@ h6 {
 
 .spm-alert-title {
     font-size: 14px;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.35;
 }
 
@@ -774,7 +774,7 @@ h6 {
     border-color: #e4e7ec;
     color: #667085;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 [data-ui-pagination="metronic"] .page-item.active .page-link {
@@ -796,7 +796,7 @@ h6 {
 .spm-progress-label,
 .spm-progress-meta {
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.35;
 }
 
@@ -855,7 +855,7 @@ h6 {
 .spm-card-title {
     color: #111827;
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.35;
     letter-spacing: 0;
 }
@@ -933,7 +933,7 @@ h6 {
     border: 4px solid var(--spm-primary-light);
     border-radius: 8px;
     font-size: 30px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1;
 }
 
@@ -1004,7 +1004,7 @@ h6 {
     margin: 0;
     color: #111827;
     font-size: 18px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.25;
 }
 
@@ -1109,7 +1109,7 @@ h6 {
 .spm-inline-alert-title {
     color: #92400e;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.35;
     letter-spacing: 0;
     text-transform: uppercase;
@@ -1208,7 +1208,7 @@ h6 {
 .spm-toast-title {
     color: #111827;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.35;
     letter-spacing: 0;
 }
@@ -1249,7 +1249,7 @@ h6 {
 
 .spm-simple-table tfoot td {
     color: #1f2937;
-    font-weight: 700;
+    font-weight: 600;
     background-color: #f8fafc;
     border-color: #e8edf4 !important;
 }
@@ -1401,7 +1401,7 @@ h6 {
     margin-bottom: 8px;
     color: #667085;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.25;
 }
 
@@ -1429,7 +1429,7 @@ h6 {
     display: block;
     color: #7c8aa0;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.25;
 }
 
@@ -1437,14 +1437,14 @@ h6 {
     display: block;
     color: #111827;
     font-size: 24px;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.1;
 }
 
 .spm-permission-block-title {
     color: #111827;
     font-size: 14px;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.35;
 }
 
@@ -1471,14 +1471,14 @@ h6 {
 .spm-permission-action-title {
     color: #1f2937;
     font-size: 13px;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.3;
 }
 
 .spm-permission-action-meta {
     color: #7c8aa0;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.25;
     white-space: nowrap;
 }
@@ -1514,14 +1514,14 @@ h6 {
 .spm-permission-role-name {
     color: #1f2937;
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.25;
 }
 
 .spm-permission-role-count {
     color: #98a2b3;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.2;
     text-transform: none;
 }
@@ -1531,7 +1531,7 @@ h6 {
     padding-bottom: 10px !important;
     color: #475467 !important;
     font-size: 11px !important;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.25;
     text-transform: uppercase;
     background-color: #f8fafc !important;
@@ -1550,7 +1550,7 @@ h6 {
 .spm-permission-label {
     color: #1f2937;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.35;
 }
 
@@ -1562,7 +1562,7 @@ h6 {
     color: #52637a;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.35;
     background-color: #f3f6fa;
     border: 1px solid #e4eaf2;
@@ -1899,7 +1899,7 @@ h6 {
 .spm-sidebar-brand-title {
     color: var(--spm-primary);
     font-size: 17px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.2;
     letter-spacing: 0;
 }
@@ -2011,7 +2011,7 @@ h6 {
     border: 1px solid transparent;
     border-radius: 6px;
     font-size: 10.5px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1;
     letter-spacing: 0;
     white-space: nowrap;
@@ -2415,7 +2415,7 @@ a:not(.btn),
     margin: 0;
     color: #111827;
     font-size: 18px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.35;
     letter-spacing: 0;
 }
@@ -2870,7 +2870,7 @@ a:not(.btn),
 .spm-app-sidebar .spm-sidebar-link.menu-link.active {
     background-color: rgba(var(--spm-primary-rgb), 0.08) !important;
     color: var(--spm-primary) !important;
-    font-weight: 700;
+    font-weight: 600;
     position: relative;
 }
 
@@ -2901,7 +2901,7 @@ a:not(.btn),
 .spm-app-sidebar .spm-sidebar-section .menu-heading {
     color: #98a2b3 !important;
     font-size: 10px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     letter-spacing: 0.06em !important;
     text-transform: uppercase;
 }
@@ -2924,7 +2924,7 @@ a:not(.btn),
 .spm-app-sidebar .menu-item.show > .spm-sidebar-group-toggle {
     background-color: transparent !important;
     color: var(--spm-primary) !important;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 /* Sub menu indention: lebih halus */
@@ -3046,7 +3046,7 @@ a:not(.btn),
     border-radius: 8px;
     color: #667085;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1;
     text-decoration: none;
     transition: background-color 140ms ease, color 140ms ease;
@@ -3129,7 +3129,7 @@ a:not(.btn),
     color: var(--spm-primary);
     background-color: var(--spm-primary-subtle);
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1;
     text-transform: uppercase;
 }
@@ -3139,7 +3139,7 @@ a:not(.btn),
     margin: 0 0 18px;
     color: #101828;
     font-size: 46px;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.12;
 }
 
@@ -3206,7 +3206,7 @@ a:not(.btn),
     margin-bottom: 4px;
     color: #667085;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.25;
 }
 
@@ -3214,7 +3214,7 @@ a:not(.btn),
     display: block;
     color: #101828;
     font-size: 17px;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.25;
 }
 
@@ -3238,7 +3238,7 @@ a:not(.btn),
     display: block;
     color: #667085;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.3;
 }
 
@@ -3247,7 +3247,7 @@ a:not(.btn),
     margin-top: 6px;
     color: #101828;
     font-size: 24px;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1;
 }
 
@@ -3270,7 +3270,7 @@ a:not(.btn),
     border: 1px solid #eaecf0;
     border-radius: 8px;
     font-size: 11px;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.25;
     text-align: center;
 }
@@ -3309,7 +3309,7 @@ a:not(.btn),
     flex: 0 0 auto;
     color: #101828;
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1;
 }
 
@@ -3334,7 +3334,7 @@ a:not(.btn),
     margin-bottom: 8px;
     color: var(--spm-primary);
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.25;
     text-transform: uppercase;
 }
@@ -3343,7 +3343,7 @@ a:not(.btn),
     margin: 0;
     color: #101828;
     font-size: 30px;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.2;
 }
 
@@ -3396,7 +3396,7 @@ a:not(.btn),
     border: 1px solid rgba(var(--spm-primary-rgb), 0.16);
     border-radius: 8px;
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1;
 }
 
@@ -3406,7 +3406,7 @@ a:not(.btn),
     margin: 0;
     color: #101828;
     font-size: 16px;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.35;
 }
 
@@ -3451,7 +3451,7 @@ a:not(.btn),
     background-color: var(--spm-primary);
     border-radius: 8px;
     font-size: 14px;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1;
 }
 
@@ -3479,7 +3479,7 @@ a:not(.btn),
     margin: 0;
     color: #ffffff;
     font-size: 28px;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.25;
 }
 
@@ -3888,7 +3888,7 @@ a:not(.btn),
     margin: 0;
     padding: 0;
     font-size: 17px !important;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.3;
 }
 
@@ -3978,7 +3978,7 @@ a:not(.btn),
 
 .spm-error-code {
     font-size: clamp(4rem, 12vw, 7rem);
-    font-weight: 900;
+    font-weight: 600;
     line-height: 1;
     letter-spacing: -0.04em;
 }
@@ -4029,7 +4029,7 @@ a:not(.btn),
 .spm-audit-stepper .stepper-title {
     color: #101828 !important;
     font-size: 14px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     line-height: 1.35;
     margin-bottom: 3px !important;
 }
@@ -4176,7 +4176,7 @@ a:not(.btn),
 .spm-header-title {
     color: var(--spm-text-strong) !important;
     font-size: 18px !important;
-    font-weight: 750 !important;
+    font-weight: 600 !important;
     line-height: 1.25 !important;
 }
 
@@ -4202,7 +4202,7 @@ a:not(.btn),
 .spm-page-title {
     color: var(--spm-text-strong) !important;
     font-size: 26px !important;
-    font-weight: 750 !important;
+    font-weight: 600 !important;
     line-height: 1.22 !important;
 }
 
@@ -4251,7 +4251,7 @@ a:not(.btn),
 .spm-table-heading .spm-card-title {
     color: var(--spm-text-strong) !important;
     font-size: 18px !important;
-    font-weight: 750 !important;
+    font-weight: 600 !important;
     line-height: 1.3 !important;
 }
 
@@ -4262,13 +4262,13 @@ a:not(.btn),
 .spm-stat-card .text-muted {
     color: var(--spm-text-muted) !important;
     font-size: 13px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
 }
 
 .spm-stat-card .fs-2 {
     color: var(--spm-text-strong) !important;
     font-size: 22px !important;
-    font-weight: 750 !important;
+    font-weight: 600 !important;
     line-height: 1.25 !important;
 }
 
@@ -4333,7 +4333,7 @@ a:not(.btn),
 .spm-workflow-stepper .stepper-number {
     color: inherit;
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1;
 }
 
@@ -4345,7 +4345,7 @@ a:not(.btn),
     margin: 0 0 4px !important;
     color: var(--spm-text-strong) !important;
     font-size: 13.5px !important;
-    font-weight: 800 !important;
+    font-weight: 600 !important;
     line-height: 1.3 !important;
 }
 
@@ -4444,7 +4444,7 @@ a:not(.btn),
     padding: 0 !important;
     color: var(--spm-text-soft) !important;
     font-size: 12px !important;
-    font-weight: 800 !important;
+    font-weight: 600 !important;
     letter-spacing: 0 !important;
     text-transform: uppercase;
     border: 0 !important;
@@ -4473,7 +4473,7 @@ a:not(.btn),
 .spm-detail-label {
     color: #7c8aa0 !important;
     font-size: 11px !important;
-    font-weight: 800 !important;
+    font-weight: 600 !important;
     line-height: 1.25 !important;
     letter-spacing: 0 !important;
     text-transform: uppercase;
@@ -4483,7 +4483,7 @@ a:not(.btn),
 .spm-detail-value {
     color: var(--spm-text-strong) !important;
     font-size: 14px !important;
-    font-weight: 650 !important;
+    font-weight: 600 !important;
     line-height: 1.55 !important;
 }
 
@@ -4511,7 +4511,7 @@ a:not(.btn),
     background-color: var(--spm-primary);
     color: #ffffff;
     font-size: 28px;
-    font-weight: 800;
+    font-weight: 600;
     box-shadow: 0 0 0 4px var(--spm-primary-light);
 }
 
@@ -4535,7 +4535,7 @@ a:not(.btn),
 .spm-sidebar-brand-title {
     color: var(--spm-primary) !important;
     font-size: 18px !important;
-    font-weight: 750 !important;
+    font-weight: 600 !important;
 }
 
 .spm-app-sidebar .menu {
@@ -4553,7 +4553,7 @@ a:not(.btn),
 .spm-app-sidebar .spm-sidebar-section .menu-heading {
     color: #98a2b3 !important;
     font-size: 11px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     text-transform: uppercase;
 }
 
@@ -4563,7 +4563,7 @@ a:not(.btn),
     color: #52637a !important;
     border-radius: 8px !important;
     font-size: 14px !important;
-    font-weight: 650 !important;
+    font-weight: 600 !important;
     transition: background-color 120ms ease, color 120ms ease;
 }
 
@@ -4577,7 +4577,7 @@ a:not(.btn),
 .spm-app-sidebar .menu-item.here > .spm-sidebar-group-toggle {
     color: var(--spm-primary) !important;
     background-color: var(--spm-primary-light) !important;
-    font-weight: 750 !important;
+    font-weight: 600 !important;
 }
 
 .spm-sidebar-link.active:not(.spm-sidebar-link-child)::before {
@@ -4665,7 +4665,7 @@ a:not(.btn),
     min-height: 42px;
     border-radius: 8px !important;
     font-size: 14px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
 }
 
 .btn-sm:not(.btn-icon) {
@@ -4680,7 +4680,7 @@ a:not(.btn),
     padding: 0.35rem 0.6rem !important;
     border-radius: 6px !important;
     font-size: 12px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
 }
 
 .spm-table-header {
@@ -4714,7 +4714,7 @@ a:not(.btn),
     padding: 14px 18px !important;
     color: #667085 !important;
     font-size: 12px !important;
-    font-weight: 750 !important;
+    font-weight: 600 !important;
     text-transform: none;
     background-color: #f9fafb !important;
 }
@@ -4805,5 +4805,825 @@ code {
 
     .spm-table-actions {
         justify-content: flex-start !important;
+    }
+}
+
+/* ============================================================
+   SPM Button Standardization
+   ============================================================
+   Ensures all buttons share the same visual DNA regardless
+   of variant (primary, light, danger, etc.) or size (sm, md, lg).
+   Targets both <x-ui.button> (.spm-btn) and bare Metronic .btn.
+   ============================================================ */
+
+[data-ui-button="metronic"],
+.spm-btn,
+.btn.spm-btn {
+    min-height: 42px;
+    padding: 0.55rem 1.3rem;
+    font-family: var(--bs-font-sans-serif) !important;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.35;
+    border-radius: 8px !important;
+    border: 1px solid transparent;
+    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+[data-ui-button="metronic"].btn-sm,
+.spm-btn.btn-sm {
+    min-height: 34px;
+    padding: 0.35rem 0.9rem;
+    font-size: 12px;
+}
+
+[data-ui-button="metronic"].btn-lg,
+.spm-btn.btn-lg {
+    min-height: 48px;
+    padding: 0.65rem 1.7rem;
+    font-size: 14px;
+}
+
+/* Light variant buttons — tighter visual weight */
+[data-ui-button="metronic"].btn-light-primary,
+[data-ui-button="metronic"].btn-light-success,
+[data-ui-button="metronic"].btn-light-warning,
+[data-ui-button="metronic"].btn-light-danger,
+[data-ui-button="metronic"].btn-light-info,
+.spm-btn.btn-light-primary,
+.spm-btn.btn-light-success,
+.spm-btn.btn-light-warning,
+.spm-btn.btn-light-danger,
+.spm-btn.btn-light-info {
+    font-weight: 600;
+}
+
+/* Icon-only buttons — compact */
+[data-ui-button="metronic"].btn-icon,
+.spm-btn.btn-icon {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0;
+    aspect-ratio: 1;
+}
+
+[data-ui-button="metronic"].btn-icon.btn-sm,
+.spm-btn.btn-icon.btn-sm {
+    min-width: 30px;
+    min-height: 30px;
+}
+
+/* Action menu trigger buttons */
+[data-ui-action-menu="metronic"] > .btn {
+    min-height: 38px;
+    padding: 0.45rem 1.1rem;
+    font-family: var(--bs-font-sans-serif) !important;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0;
+    border-radius: 8px !important;
+    transition: background-color 140ms ease, border-color 140ms ease;
+}
+
+/* ============================================================
+   Font-Family Reinforcement
+   ============================================================
+   Metronic ships its own font stack. These rules ensure Inter
+   always wins everywhere it matters — even inside Metronic
+   widgets, dropdowns, modals, and notification elements.
+   ============================================================ */
+
+/* Global reset — apply to every element inside the app shell.
+   Does NOT touch icon elements (i tags, ki-* icon fonts). */
+.spm-app-shell,
+.spm-app-shell *:not(i):not([class*="ki-"]):not([class*="svg-icon"]):not(.svg-icon):not(.bullet):not(.bullet-dot),
+.app-default,
+.app-default *:not(i):not([class*="ki-"]):not([class*="svg-icon"]):not(.svg-icon):not(.bullet):not(.bullet-dot),
+[data-ui-table="metronic"],
+[data-ui-table="metronic"] *:not(i):not([class*="ki-"]):not([class*="svg-icon"]):not(.svg-icon):not(.bullet):not(.bullet-dot),
+[data-ui-button="metronic"] {
+    font-family: var(--bs-font-sans-serif) !important;
+}
+
+/* Allow monospace for code/pre blocks */
+pre,
+code,
+kbd,
+samp,
+[data-ui-table="metronic"] pre,
+[data-ui-table="metronic"] code {
+    font-family: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", "Consolas", "Courier New", monospace !important;
+}
+
+/* Metronic menu dropdown font */
+#kt_app_header_menu_wrapper,
+#kt_app_header_menu_wrapper *,
+[data-ui-action-menu-dropdown="metronic"],
+[data-ui-action-menu-dropdown="metronic"] * {
+    font-family: var(--bs-font-sans-serif) !important;
+}
+
+/* KeenIcons render their glyphs through nested .path* spans.
+   Keep those descendants on the icon font so the global Inter reset
+   never turns icon glyphs into missing-character boxes. */
+.ki-duotone,
+.ki-duotone *,
+.ki-duotone::before,
+.ki-duotone *::before {
+    font-family: "keenicons-duotone" !important;
+}
+
+.ki-outline,
+.ki-outline *,
+.ki-outline::before,
+.ki-outline *::before {
+    font-family: "keenicons-outline" !important;
+}
+
+.ki-solid,
+.ki-solid *,
+.ki-solid::before,
+.ki-solid *::before {
+    font-family: "keenicons-solid" !important;
+}
+
+/* ============================================================
+   Text Readability — Lighten heavy dashboard text
+   ============================================================
+   Reduces visual weight on stat cards, headings, and labels
+   so the UI feels airier and easier to scan.
+   ============================================================ */
+
+/* Dashboard stat cards — dial back aggressive font weights */
+.spm-dashboard-stat .fs-2,
+.spm-dashboard-stat .fs-1 {
+    font-weight: 600 !important;
+    letter-spacing: -0.01em;
+}
+
+.spm-dashboard-stat .text-muted {
+    font-weight: 600 !important;
+    letter-spacing: 0.04em;
+}
+
+/* Table headings — slightly lighter */
+.spm-table-heading .spm-card-title {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+/* Card titles — reduce from 800 to 700 */
+.spm-card-title {
+    font-weight: 600;
+}
+
+/* Section heading in detail pages */
+.spm-section-card .card-header h5,
+.spm-section-card .card-header .spm-card-title {
+    font-weight: 600;
+}
+
+/* Status badges — slightly less aggressive */
+[data-ui-badge="metronic"].badge {
+    font-weight: 600 !important;
+    letter-spacing: 0.01em;
+}
+
+/* Detail values — improve line-height for readability */
+.spm-detail-value {
+    line-height: 1.6;
+}
+
+/* ============================================================
+   Spacing & Whitespace
+   ============================================================
+   Adds breathing room to commonly dense areas.
+   ============================================================ */
+
+/* Dashboard hero card — more padding */
+.spm-dashboard-hero {
+    padding: 2rem 2rem !important;
+}
+
+@media (min-width: 768px) {
+    .spm-dashboard-hero {
+        padding: 2.5rem 2.5rem !important;
+    }
+}
+
+/* Quick action cards — better spacing */
+.spm-quick-action .card-body {
+    padding: 1.2rem 1rem !important;
+}
+
+/* Stat cards — give them more internal space */
+.spm-dashboard-stat .card-body {
+    padding: 1.5rem 1.5rem !important;
+}
+
+/* Main content area — more breathing room at top */
+.spm-main-content {
+    padding-top: 32px !important;
+}
+
+@media (min-width: 768px) {
+    .spm-main-content {
+        padding-top: 36px !important;
+    }
+}
+
+@media (min-width: 1200px) {
+    .spm-main-content {
+        padding-top: 40px !important;
+    }
+}
+
+/* ============================================================
+   Form & Input Consistency
+   ============================================================ */
+
+.spm-main-content .form-control,
+.spm-main-content .form-select {
+    min-height: 42px;
+    font-family: var(--bs-font-sans-serif) !important;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+}
+
+.spm-main-content .form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #344054;
+    margin-bottom: 6px;
+}
+
+/* ============================================================
+   Link consistency
+   ============================================================ */
+
+a:not(.btn):not(.nav-link):not(.menu-link):not(.page-link) {
+    color: var(--spm-primary);
+    text-decoration: none;
+    transition: color 140ms ease;
+}
+
+a:not(.btn):not(.nav-link):not(.menu-link):not(.page-link):hover {
+    color: var(--spm-primary-hover);
+}
+
+/* ============================================================
+   Final Typography Guard
+   ============================================================
+   All visible UI text uses Inter and maxes out at semibold.
+   Icon fonts are restored after the text reset so KeenIcons keep
+   their glyph font instead of inheriting Inter.
+   ============================================================ */
+
+body,
+body *:not(i):not(pre):not(code):not(kbd):not(samp):not(.font-monospace):not([class*="ki-"]):not([class*="svg-icon"]):not(.svg-icon):not(.bullet):not(.bullet-dot) {
+    font-family: var(--bs-font-sans-serif) !important;
+}
+
+body .fw-bold,
+body .fw-bolder,
+body .font-bold,
+body .font-extrabold,
+body .font-black,
+body b,
+body strong,
+body h1,
+body h2,
+body h3,
+body h4,
+body h5,
+body h6,
+body .card-title,
+body .modal-title,
+body .page-heading,
+body .spm-card-title,
+body .spm-header-title,
+body .spm-page-title,
+body .spm-table-heading .spm-card-title,
+body .symbol-label,
+body [data-ui-badge="metronic"].badge,
+body .badge,
+body .btn,
+body .form-label,
+body th,
+body .menu-title,
+body .nav-link,
+body .apexcharts-title-text,
+body .apexcharts-legend-text {
+    font-weight: 600 !important;
+}
+
+/* Keep code and technical snippets readable without forcing Inter. */
+body pre,
+body code,
+body kbd,
+body samp,
+body .font-monospace {
+    font-family: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", "Consolas", "Courier New", monospace !important;
+}
+
+/* Final icon-font escape hatch after every typography rule. */
+.ki-duotone,
+.ki-duotone *,
+.ki-duotone::before,
+.ki-duotone *::before {
+    font-family: "keenicons-duotone" !important;
+    font-weight: normal !important;
+}
+
+.ki-outline,
+.ki-outline *,
+.ki-outline::before,
+.ki-outline *::before {
+    font-family: "keenicons-outline" !important;
+    font-weight: normal !important;
+}
+
+.ki-solid,
+.ki-solid *,
+.ki-solid::before,
+.ki-solid *::before {
+    font-family: "keenicons-solid" !important;
+    font-weight: normal !important;
+}
+
+/* ============================================================
+   Production UI Polish V2
+   ============================================================ */
+
+.spm-page {
+    --spm-control-height: 42px;
+    --spm-control-height-sm: 36px;
+    --spm-radius: 8px;
+    --spm-soft-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.spm-index-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.spm-index-tabs-shell {
+    min-width: 0;
+    padding: 4px 0;
+}
+
+.spm-table-shell--standard,
+[data-ui-table-adapter="datatable"] {
+    overflow: visible;
+    border-color: var(--spm-border, #e4e9f2) !important;
+    border-radius: var(--spm-radius) !important;
+    box-shadow: var(--spm-soft-shadow);
+}
+
+.spm-table-shell--standard > .spm-table-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start !important;
+    gap: 16px 20px;
+    min-height: 0 !important;
+    padding: 22px 28px 18px !important;
+}
+
+.spm-table-heading {
+    min-width: 0;
+}
+
+.spm-table-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    min-width: 0;
+}
+
+.spm-table-controls {
+    grid-column: 1 / -1;
+    min-width: 0;
+    padding-top: 16px !important;
+    border-top: 1px solid var(--spm-border-soft, #edf1f7);
+}
+
+.spm-table-filter-row,
+.spm-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.spm-table-filter-row > [data-ui-tabs="metronic"] {
+    flex: 1 1 100%;
+    max-width: 100%;
+}
+
+[data-ui-table-search="metronic"] {
+    flex: 1 1 280px;
+    min-width: min(100%, 240px);
+    max-width: 360px;
+}
+
+[data-ui-table-search="metronic"] .spm-table-search-input {
+    width: 100% !important;
+    min-height: var(--spm-control-height);
+    padding-right: 14px !important;
+}
+
+[data-ui-filter-select="metronic"],
+.spm-filter-select {
+    flex: 0 1 210px;
+    width: auto !important;
+    min-width: min(100%, 178px) !important;
+    max-width: 260px;
+    min-height: var(--spm-control-height);
+}
+
+.spm-table-utility-row {
+    justify-content: flex-end;
+    min-height: 38px;
+    margin-bottom: 14px !important;
+}
+
+.spm-table-scroll {
+    overflow-x: auto;
+    overflow-y: visible;
+    border-radius: var(--spm-radius);
+}
+
+.spm-datatable {
+    min-width: 860px;
+}
+
+[data-ui-table="metronic"] .spm-datatable thead th {
+    height: 46px;
+    vertical-align: middle;
+}
+
+[data-ui-table="metronic"] .spm-datatable tbody td {
+    height: 58px;
+    vertical-align: middle !important;
+}
+
+[data-ui-table="metronic"] .spm-datatable tbody td:last-child,
+[data-ui-simple-table="metronic"] tbody td:last-child {
+    white-space: nowrap;
+}
+
+[data-ui-table="metronic"] .btn-flush,
+[data-ui-simple-table="metronic"] .btn-flush {
+    min-height: 24px !important;
+    color: #475467 !important;
+}
+
+[data-ui-table="metronic"] .symbol-label,
+[data-ui-simple-table="metronic"] .symbol-label {
+    border-radius: var(--spm-radius) !important;
+}
+
+.spm-simple-table-wrap {
+    border-color: var(--spm-border, #e4e9f2) !important;
+    border-radius: var(--spm-radius) !important;
+}
+
+.spm-simple-table thead th {
+    color: #667085 !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    background: #f9fafb !important;
+    border-bottom: 1px solid var(--spm-border-soft, #edf1f7) !important;
+}
+
+.spm-simple-table tbody td {
+    color: var(--spm-text-body, #344054) !important;
+    font-size: 14px;
+}
+
+[data-ui-tabs="metronic"].spm-tabs {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.spm-tabs-nav {
+    display: inline-flex !important;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 4px;
+    min-width: max-content;
+    min-height: 42px;
+    padding: 4px !important;
+    background: #f8fafc;
+    border: 1px solid var(--spm-border, #e4e9f2) !important;
+    border-radius: var(--spm-radius);
+}
+
+.spm-tab-link {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    color: #667085 !important;
+    border: 0 !important;
+    border-radius: 6px !important;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.spm-tab-link.active {
+    color: var(--spm-primary) !important;
+    background: #ffffff !important;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+}
+
+.spm-tab-link .badge {
+    min-height: 20px !important;
+    padding: 0.25rem 0.45rem !important;
+}
+
+.spm-btn,
+[data-ui-button="metronic"] {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+    touch-action: manipulation;
+}
+
+.spm-btn > [class*="ki-"],
+[data-ui-button="metronic"] > [class*="ki-"] {
+    flex: 0 0 auto;
+}
+
+[data-ui-icon-button="metronic"] {
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    min-height: 36px;
+    border-radius: 8px !important;
+}
+
+.spm-btn.btn-icon,
+[data-ui-button="metronic"].btn-icon,
+.spm-btn.btn-icon.btn-sm,
+[data-ui-button="metronic"].btn-icon.btn-sm {
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+}
+
+.spm-badge,
+[data-ui-badge="metronic"],
+[data-ui-status-badge="metronic"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    max-width: 100%;
+    line-height: 1.15;
+    white-space: nowrap;
+}
+
+[data-ui-action-menu="metronic"] {
+    position: relative;
+}
+
+[data-ui-action-menu="metronic"] > [data-ui-button="metronic"] {
+    min-width: 92px;
+}
+
+[data-ui-action-menu-dropdown="metronic"].spm-action-menu-dropdown {
+    padding: 6px !important;
+    border-color: var(--spm-border, #e4e9f2) !important;
+    border-radius: var(--spm-radius) !important;
+}
+
+[data-ui-action-menu-dropdown="metronic"] .menu-item + .menu-item {
+    margin-top: 2px;
+}
+
+[data-ui-action-menu-dropdown="metronic"] .menu-link {
+    min-height: 38px;
+    padding: 0 10px !important;
+    border-radius: 6px !important;
+}
+
+[data-ui-action-menu-dropdown="metronic"] .menu-link:hover {
+    background: var(--spm-primary-light, #e6f5ee) !important;
+}
+
+.spm-section-card > .card-header {
+    align-items: center;
+    gap: 16px;
+}
+
+.spm-section-card .card-title {
+    min-width: 0;
+}
+
+.spm-section-card .card-toolbar {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.spm-section-card-accent {
+    flex: 0 0 3px;
+}
+
+.spm-soft-panel,
+.spm-detail-block,
+.spm-permission-action-card,
+.spm-metric-box {
+    border-color: var(--spm-border, #e4e9f2) !important;
+    border-radius: var(--spm-radius) !important;
+    background: #f8fafc !important;
+}
+
+.spm-detail-page .bg-light.rounded,
+.spm-detail-page .bg-light.rounded-4,
+[data-admin-akreditasi-page="metronic"] .rounded-4,
+[data-module-page="master-edpm"] .rounded-4,
+[data-module-page="accounts"] .rounded-4 {
+    border-radius: var(--spm-radius) !important;
+}
+
+.spm-main-content .form-control,
+.spm-main-content .form-select,
+.spm-modal-panel .form-control,
+.spm-modal-panel .form-select,
+.spm-modal-panel textarea {
+    min-height: 44px;
+    color: var(--spm-text-strong, #0f172a);
+    border-color: #dfe7f0;
+    border-radius: var(--spm-radius) !important;
+}
+
+.spm-main-content textarea.form-control,
+.spm-modal-panel textarea.form-control {
+    min-height: 96px;
+}
+
+.spm-main-content .form-control:focus,
+.spm-main-content .form-select:focus,
+.spm-modal-panel .form-control:focus,
+.spm-modal-panel .form-select:focus {
+    border-color: rgba(var(--spm-primary-rgb), 0.42);
+    box-shadow: 0 0 0 3px rgba(var(--spm-primary-rgb), 0.1);
+}
+
+.spm-main-content .is-invalid,
+.spm-modal-panel .is-invalid {
+    border-color: var(--spm-danger, #ef4444) !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08);
+}
+
+.spm-modal-overlay {
+    z-index: 1055 !important;
+    align-items: flex-start !important;
+    padding-top: min(6vh, 48px) !important;
+    padding-bottom: 32px !important;
+}
+
+.spm-modal-panel {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100dvh - 64px);
+    overflow: hidden !important;
+    border: 1px solid var(--spm-border, #e4e9f2);
+    border-radius: 10px !important;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22) !important;
+}
+
+.spm-modal-header,
+.spm-modal-footer {
+    flex: 0 0 auto;
+    padding-right: 28px !important;
+    padding-left: 28px !important;
+}
+
+.spm-modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 24px 28px !important;
+    overflow-y: auto;
+}
+
+.spm-modal-footer {
+    min-height: 70px;
+    border-top: 1px solid var(--spm-border-soft, #edf1f7) !important;
+}
+
+.spm-permission-matrix-wrap {
+    max-height: min(72vh, 760px);
+    overflow: auto !important;
+}
+
+.spm-permission-matrix thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.spm-permission-name-col {
+    min-width: 320px;
+}
+
+.spm-permission-role-col {
+    min-width: 150px;
+}
+
+[data-ui-empty-state="metronic"] {
+    min-height: 170px;
+    color: var(--spm-text-muted, #667085);
+}
+
+[data-ui-empty-state="metronic"] h3 {
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+@media (max-width: 1199.98px) {
+    .spm-table-shell--standard > .spm-table-header {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .spm-table-actions {
+        justify-content: flex-start;
+    }
+
+    [data-ui-table-search="metronic"],
+    [data-ui-filter-select="metronic"],
+    .spm-filter-select {
+        flex: 1 1 220px;
+        max-width: none;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .spm-table-shell--standard > .spm-table-header,
+    .spm-section-card > .card-header,
+    .spm-main-content .card-header {
+        padding-right: 18px !important;
+        padding-left: 18px !important;
+    }
+
+    .spm-table-body-wrap,
+    .spm-main-content .card-body {
+        padding-right: 18px !important;
+        padding-left: 18px !important;
+    }
+
+    .spm-table-filter-row,
+    .spm-filter-bar,
+    .spm-table-actions,
+    .spm-index-toolbar {
+        align-items: stretch;
+    }
+
+    [data-ui-table-search="metronic"],
+    [data-ui-filter-select="metronic"],
+    .spm-filter-select,
+    .spm-table-actions > *,
+    .spm-index-toolbar > * {
+        width: 100% !important;
+        max-width: none;
+    }
+
+    .spm-btn,
+    [data-ui-button="metronic"] {
+        width: 100%;
+    }
+
+    [data-ui-icon-button="metronic"] {
+        width: 38px !important;
+        min-width: 38px !important;
+    }
+
+    .spm-modal-overlay {
+        padding: 16px !important;
+    }
+
+    .spm-modal-panel {
+        max-height: calc(100dvh - 32px);
+    }
+
+    .spm-modal-header,
+    .spm-modal-body,
+    .spm-modal-footer {
+        padding-right: 18px !important;
+        padding-left: 18px !important;
     }
 }

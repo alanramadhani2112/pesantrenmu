@@ -11,12 +11,15 @@
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand/favicon.svg') }}">
     <link rel="preload" href="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.css') }}" as="style">
     <link rel="preload" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}" as="style">
+    <link rel="preconnect" href="{{ url('/') }}" crossorigin>
 
     <!-- Styles -->
     @livewireStyles
-    <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.css') }}">
-    <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}">
-    @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css', 'resources/js/app.js'])
+    {{-- Defer non-critical Metronic CSS to prevent render blocking (~2.25 MB) --}}
+    <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.css') }}" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}" media="print" onload="this.media='all'">
+    {{-- Critical app CSS loaded normally --}}
+    @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css'])
     @livewireScriptConfig
 </head>
 
@@ -225,6 +228,9 @@
             </div>
         </div>
     </div>
+
+    {{-- Deferred app JS — loaded after content for faster first paint --}}
+    @vite(['resources/js/app.js'])
 </body>
 
 </html>

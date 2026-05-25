@@ -24,7 +24,7 @@
         <div class="card-body p-10 text-center">
 
             <div class="spm-error-icon-wrap spm-error-icon-wrap-primary">
-                <i class="ki-duotone ki-magnifier fs-2tx text-primary">
+                <i class="ki-solid ki-magnifier fs-2tx text-primary">
                     <span class="path1"></span>
                     <span class="path2"></span>
                 </i>
@@ -40,14 +40,14 @@
 
             <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
                 <a href="{{ url('/dashboard') }}" class="btn btn-primary fw-bold px-6">
-                    <i class="ki-duotone ki-home fs-3 me-1">
+                    <i class="ki-solid ki-home fs-3 me-1">
                         <span class="path1"></span>
                         <span class="path2"></span>
                     </i>
                     Ke Dashboard
                 </a>
                 <a href="javascript:history.back()" class="btn btn-light fw-bold px-6">
-                    <i class="ki-duotone ki-arrow-left fs-3 me-1">
+                    <i class="ki-solid ki-arrow-left fs-3 me-1">
                         <span class="path1"></span>
                         <span class="path2"></span>
                     </i>

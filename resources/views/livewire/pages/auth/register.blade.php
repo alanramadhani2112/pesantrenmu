@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -39,7 +39,7 @@ new #[Layout('layouts.guest')] class extends Component
 <div>
     <div class="text-center mb-10">
         <x-ui.badge variant="primary" class="mb-4">Daftar Akun</x-ui.badge>
-        <h1 class="text-gray-900 fw-bolder mb-3">Buat Akun Baru</h1>
+        <h1 class="text-gray-900 fw-semibold mb-3">Buat Akun Baru</h1>
         <div class="text-gray-500 fw-semibold fs-6">Isi data berikut untuk mendaftar.</div>
     </div>
 

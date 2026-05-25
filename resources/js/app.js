@@ -50,7 +50,7 @@ const buildMetronicSwalOptions = (options = {}) => {
         buttonsStyling: false,
         customClass: {
             popup: 'spm-swal-popup',
-            title: 'fw-bold text-gray-900',
+            title: 'fw-semibold text-gray-900',
             htmlContainer: 'fw-semibold text-gray-600',
             confirmButton: swalButtonClasses[confirmVariant] ?? swalButtonClasses.primary,
             cancelButton: swalButtonClasses[cancelVariant] ?? swalButtonClasses.light,

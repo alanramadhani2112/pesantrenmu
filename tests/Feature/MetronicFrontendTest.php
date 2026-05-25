@@ -160,8 +160,14 @@ class MetronicFrontendTest extends TestCase
     public function test_metronic_overrides_apply_enterprise_typography_and_hide_navigation_progress(): void
     {
         $css = file_get_contents(resource_path('css/metronic-overrides.css'));
+        $appCss = file_get_contents(resource_path('css/app.css'));
 
         $this->assertStringContainsString('--bs-font-sans-serif: "Inter"', $css);
+        $this->assertStringContainsString('@fontsource/inter/latin-400.css', $appCss);
+        $this->assertStringContainsString('@fontsource/inter/latin-500.css', $appCss);
+        $this->assertStringContainsString('@fontsource/inter/latin-600.css', $appCss);
+        $this->assertStringNotContainsString('@fontsource/inter/latin-700.css', $appCss);
+        $this->assertStringNotContainsString('@fontsource/inter/latin-800.css', $appCss);
         $this->assertStringContainsString('font-size: 15px;', $css);
         $this->assertStringContainsString('.spm-page-title', $css);
         $this->assertStringContainsString('[data-ui-table="metronic"] .table tbody td', $css);
@@ -179,6 +185,14 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('.spm-workflow-stepper', $css);
         $this->assertStringContainsString('#nprogress', $css);
         $this->assertStringContainsString('display: none !important;', $css);
+        $this->assertStringContainsString('Final Typography Guard', $css);
+        $this->assertStringContainsString('Production UI Polish V2', $css);
+        $this->assertStringContainsString('body .fw-bold', $css);
+        $this->assertStringContainsString('font-weight: 600 !important;', $css);
+        $this->assertStringContainsString('"keenicons-duotone"', $css);
+        $this->assertStringContainsString('"keenicons-outline"', $css);
+        $this->assertStringContainsString('"keenicons-solid"', $css);
+        $this->assertDoesNotMatchRegularExpression('/font-weight:\s*(?:650|700|750|800|900)\b/', $css);
     }
 
     public function test_akreditasi_workflow_stepper_renders_metronic_detail_contract(): void
@@ -236,16 +250,19 @@ class MetronicFrontendTest extends TestCase
             BLADE, ['records' => $records]);
 
         $this->assertStringContainsString('data-ui-table="metronic"', $html);
+        $this->assertStringContainsString('spm-table-shell--standard', $html);
         $this->assertStringContainsString('spm-table-header', $html);
         $this->assertStringContainsString('spm-table-heading', $html);
         $this->assertStringContainsString('spm-table-controls', $html);
         $this->assertStringContainsString('spm-table-filter-row', $html);
         $this->assertStringContainsString('spm-table-actions', $html);
+        $this->assertStringContainsString('spm-table-body-wrap', $html);
+        $this->assertStringContainsString('spm-table-scroll', $html);
         $this->assertStringContainsString('spm-table-utility-row', $html);
         $this->assertStringContainsString('spm-table-footer', $html);
         $this->assertStringContainsString('table table-row-dashed', $html);
         $this->assertStringContainsString('spm-datatable', $html);
-        $this->assertStringContainsString('form-control form-control-solid', $html);
+        $this->assertStringContainsString('spm-table-search-input', $html);
         $this->assertStringContainsString('Ekspor Data', $html);
         $this->assertStringContainsString('wire:model.live.debounce.300ms="search"', $html);
         $this->assertStringContainsString("wire:click=\"sortBy('created_at')\"", $html);

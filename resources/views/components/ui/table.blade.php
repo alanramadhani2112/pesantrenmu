@@ -5,7 +5,7 @@
     'showPerPage' => true,
 ])
 
-<div data-ui-table="metronic" {{ $attributes->merge(['class' => 'card spm-table-shell']) }}>
+<div data-ui-table="metronic" {{ $attributes->merge(['class' => 'card spm-table-shell spm-table-shell--standard']) }}>
     @if($title || $subtitle || isset($filters) || isset($toolbar))
         <div class="card-header border-0 spm-table-header">
             <div class="spm-table-heading">
@@ -34,14 +34,14 @@
         </div>
     @endif
 
-    <div class="card-body pt-0">
+    <div class="card-body pt-0 spm-table-body-wrap">
         @if($showPerPage)
             <div class="spm-table-utility-row">
                 <x-ui.table-per-page />
             </div>
         @endif
 
-        <div class="table-responsive">
+        <div class="table-responsive spm-table-scroll">
             <table class="table table-row-dashed align-middle gs-0 gy-4 mb-0 spm-datatable spm-table spm-table--list">
                 <thead>
                     <tr class="text-start text-gray-500 fw-semibold gs-0 spm-table-head">

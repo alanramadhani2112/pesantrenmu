@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Repositories\Contracts\MasterEdpmRepositoryInterface;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use App\Models\MasterEdpmKomponen;
 use App\Models\MasterEdpmButir;
 
@@ -18,7 +19,17 @@ class MasterEdpmService
 
     public function getKomponensData(): Collection
     {
-        return $this->masterEdpmRepository->getAllKomponensWithButirs();
+        return Cache::remember('master_edpm_komponens_butirs', now()->addHours(24), function () {
+            return $this->masterEdpmRepository->getAllKomponensWithButirs();
+        });
+    }
+
+    /**
+     * Bust the master data cache after any mutation.
+     */
+    public function flushCache(): void
+    {
+        Cache::forget('master_edpm_komponens_butirs');
     }
 
     public function saveKomponen(array $data, ?int $id = null): void
@@ -28,11 +39,14 @@ class MasterEdpmService
         } else {
             $this->masterEdpmRepository->createKomponen($data);
         }
+        $this->flushCache();
     }
 
     public function deleteKomponen(int $id): bool
     {
-        return $this->masterEdpmRepository->deleteKomponen($id);
+        $result = $this->masterEdpmRepository->deleteKomponen($id);
+        $this->flushCache();
+        return $result;
     }
 
     public function saveButir(array $data, ?int $id = null): void
@@ -42,11 +56,14 @@ class MasterEdpmService
         } else {
             $this->masterEdpmRepository->createButir($data);
         }
+        $this->flushCache();
     }
 
     public function deleteButir(int $id): bool
     {
-        return $this->masterEdpmRepository->deleteButir($id);
+        $result = $this->masterEdpmRepository->deleteButir($id);
+        $this->flushCache();
+        return $result;
     }
 
     public function findKomponen(int $id): ?MasterEdpmKomponen

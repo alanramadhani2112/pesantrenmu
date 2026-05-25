@@ -111,7 +111,7 @@
             <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
                 <div class="d-flex flex-column flex-grow-1">
                     <div class="text-white opacity-75 fw-semibold fs-8 fs-md-7 text-uppercase mb-1">{{ $today }}</div>
-                    <h2 class="text-white fw-bolder fs-2 fs-md-1 mb-2">{{ $greeting }}, {{ $firstName }}.</h2>
+                    <h2 class="text-white fw-semibold fs-3 fs-md-2 mb-2">{{ $greeting }}, {{ $firstName }}.</h2>
                     <div class="text-white opacity-75 fw-semibold fs-7 fs-md-6">{{ $contextualMessage }}</div>
                 </div>
 
@@ -139,7 +139,7 @@
                                         <x-ui.icon :name="$action['icon']" class="fs-3 fs-md-2" />
                                     </div>
                                 </div>
-                                <span class="fw-bold fs-8 fs-md-7 text-gray-900">{{ $action['label'] }}</span>
+                                <span class="fw-semibold fs-8 fs-md-7 text-gray-800">{{ $action['label'] }}</span>
                             </div>
                         </a>
                     </div>
@@ -155,8 +155,8 @@
                             <div class="col-sm-6 col-md-4">
                                 <div class="rounded border border-dashed border-warning bg-light-warning p-5 h-100">
                                     <x-ui.badge variant="warning" class="mb-4">Verifikasi</x-ui.badge>
-                                    <div class="fs-2x fw-bolder text-gray-900 mb-1">{{ $stats['verifikasi'] }}</div>
-                                    <div class="text-muted fw-semibold fs-7 mb-5">Pengajuan menunggu validasi awal.</div>
+                                    <div class="fs-2x fw-semibold text-gray-900 mb-1">{{ $stats['verifikasi'] }}</div>
+                                    <div class="text-muted fw-medium fs-8 mb-5">Pengajuan menunggu validasi awal.</div>
                                     <x-ui.button :href="route('admin.akreditasi')" variant="light-warning" size="sm">Buka Pengajuan</x-ui.button>
                                 </div>
                             </div>
@@ -164,8 +164,8 @@
                             <div class="col-sm-6 col-md-4">
                                 <div class="rounded border border-dashed border-info bg-light-info p-5 h-100">
                                     <x-ui.badge variant="info" class="mb-4">Penilaian</x-ui.badge>
-                                    <div class="fs-2x fw-bolder text-gray-900 mb-1">{{ $stats['assessment'] }}</div>
-                                    <div class="text-muted fw-semibold fs-7 mb-5">Pengajuan sedang dinilai asesor.</div>
+                                    <div class="fs-2x fw-semibold text-gray-900 mb-1">{{ $stats['assessment'] }}</div>
+                                    <div class="text-muted fw-medium fs-8 mb-5">Pengajuan sedang dinilai asesor.</div>
                                     <x-ui.button :href="route('admin.akreditasi')" variant="light-info" size="sm">Pantau Proses</x-ui.button>
                                 </div>
                             </div>
@@ -173,8 +173,8 @@
                             <div class="col-sm-6 col-md-4">
                                 <div class="rounded border border-dashed border-primary bg-light-primary p-5 h-100">
                                     <x-ui.badge variant="primary" class="mb-4">Visitasi</x-ui.badge>
-                                    <div class="fs-2x fw-bolder text-gray-900 mb-1">{{ $stats['visitasi'] }}</div>
-                                    <div class="text-muted fw-semibold fs-7 mb-5">Visitasi berjalan atau menunggu hasil.</div>
+                                    <div class="fs-2x fw-semibold text-gray-900 mb-1">{{ $stats['visitasi'] }}</div>
+                                    <div class="text-muted fw-medium fs-8 mb-5">Visitasi berjalan atau menunggu hasil.</div>
                                     <x-ui.button :href="route('admin.akreditasi')" variant="light" size="sm">Lihat Jadwal</x-ui.button>
                                 </div>
                             </div>
@@ -209,7 +209,7 @@
                                 <div>
                                     <span class="fw-bold text-gray-900 fs-6">{{ $doneCount }}/{{ $totalSteps }} langkah selesai</span>
                                 </div>
-                                <span class="fw-bolder fs-6 {{ $progressPercent === 100 ? 'text-success' : 'text-primary' }}">{{ $progressPercent }}%</span>
+                                <span class="fw-semibold fs-6 {{ $progressPercent === 100 ? 'text-success' : 'text-primary' }}">{{ $progressPercent }}%</span>
                             </div>
 
                             <div class="px-6 pb-4">
@@ -284,7 +284,7 @@
                             <div class="col-sm-6 col-md-4">
                                 <div class="rounded border border-dashed border-primary bg-light-primary p-5 h-100">
                                     <x-ui.badge variant="primary" class="mb-4">Total Tugas</x-ui.badge>
-                                    <div class="fs-2x fw-bolder text-gray-900 mb-1">{{ $stats['total_aktif'] }}</div>
+                                    <div class="fs-2x fw-semibold text-gray-900 mb-1">{{ $stats['total_aktif'] }}</div>
                                     <div class="text-muted fw-semibold fs-7 mb-5">Penilaian atau visitasi yang masih aktif.</div>
                                     <x-ui.button :href="route('asesor.akreditasi')" variant="light" size="sm">Buka Tugas</x-ui.button>
                                 </div>
@@ -293,7 +293,7 @@
                             <div class="col-sm-6 col-md-4">
                                 <div class="rounded border border-dashed border-info bg-light-info p-5 h-100">
                                     <x-ui.badge variant="info" class="mb-4">Penilaian</x-ui.badge>
-                                    <div class="fs-2x fw-bolder text-gray-900 mb-1">{{ $stats['assessment'] }}</div>
+                                    <div class="fs-2x fw-semibold text-gray-900 mb-1">{{ $stats['assessment'] }}</div>
                                     <div class="text-muted fw-semibold fs-7 mb-5">Tugas penilaian instrumen yang perlu diproses.</div>
                                     <x-ui.button :href="route('asesor.akreditasi')" variant="light-info" size="sm">Isi Instrumen</x-ui.button>
                                 </div>
@@ -302,7 +302,7 @@
                             <div class="col-sm-6 col-md-4">
                                 <div class="rounded border border-dashed border-warning bg-light-warning p-5 h-100">
                                     <x-ui.badge variant="warning" class="mb-4">Visitasi</x-ui.badge>
-                                    <div class="fs-2x fw-bolder text-gray-900 mb-1">{{ $stats['visitasi'] }}</div>
+                                    <div class="fs-2x fw-semibold text-gray-900 mb-1">{{ $stats['visitasi'] }}</div>
                                     <div class="text-muted fw-semibold fs-7 mb-5">Tugas visitasi yang perlu dijadwalkan atau diselesaikan.</div>
                                     <x-ui.button :href="route('asesor.akreditasi')" variant="light-warning" size="sm">Atur Visitasi</x-ui.button>
                                 </div>
@@ -377,7 +377,7 @@
                             <div class="position-relative h-250px w-250px d-flex align-items-center justify-content-center">
                                 <canvas id="statusChart"></canvas>
                                 <div class="position-absolute top-50 start-50 translate-middle text-center pe-none">
-                                    <span class="fs-2hx fw-bolder text-gray-900">{{ $stats['terakreditasi'] + $stats['ditolak'] }}</span>
+                                    <span class="fs-2hx fw-semibold text-gray-900">{{ $stats['terakreditasi'] + $stats['ditolak'] }}</span>
                                     <span class="d-block text-muted fw-bold fs-8 text-uppercase">Selesai</span>
                                 </div>
                             </div>
@@ -433,7 +433,7 @@
                                         <td class="ps-4">
                                             <div class="d-flex align-items-center gap-3">
                                                 <div class="symbol symbol-40px flex-shrink-0">
-                                                    <div class="symbol-label bg-light-primary text-primary fw-bolder">
+                                                    <div class="symbol-label bg-light-primary text-primary fw-semibold">
                                                         {{ strtoupper(substr($activity['pesantren_name'], 0, 1)) }}
                                                     </div>
                                                 </div>

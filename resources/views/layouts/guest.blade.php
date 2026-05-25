@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
@@ -44,13 +44,13 @@
                         <div class="col-6">
                             <div class="spm-auth-metric">
                                 <div class="fs-7 fw-bold text-gray-500 text-uppercase mb-1">Role</div>
-                                <div class="fs-5 fw-bolder text-gray-900">3 Aktor</div>
+                                <div class="fs-5 fw-semibold text-gray-900">3 Aktor</div>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="spm-auth-metric">
                                 <div class="fs-7 fw-bold text-gray-500 text-uppercase mb-1">Workflow</div>
-                                <div class="fs-5 fw-bolder text-gray-900">Akreditasi</div>
+                                <div class="fs-5 fw-semibold text-gray-900">Akreditasi</div>
                             </div>
                         </div>
                     </div>

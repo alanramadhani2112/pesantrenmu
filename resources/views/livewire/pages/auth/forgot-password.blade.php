@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use Illuminate\Support\Facades\Password;
 use Livewire\Attributes\Layout;
@@ -39,7 +39,7 @@ new #[Layout('layouts.guest')] class extends Component
 <div>
     <div class="text-center mb-10">
         <x-ui.badge variant="warning" class="mb-4">Lupa Password</x-ui.badge>
-        <h1 class="text-gray-900 fw-bolder mb-3">Reset Password</h1>
+        <h1 class="text-gray-900 fw-semibold mb-3">Reset Password</h1>
         <div class="text-gray-500 fw-semibold fs-6">Masukkan email Anda untuk menerima link reset password.</div>
     </div>
 

@@ -10,6 +10,6 @@
         type="text"
         wire:model.live.debounce.300ms="{{ $model }}"
         placeholder="{{ $placeholder }}"
-        {{ $attributes->merge(['class' => 'form-control form-control-solid ps-12 w-275px']) }}
+        {{ $attributes->merge(['class' => 'form-control form-control-solid ps-12 spm-table-search-input']) }}
     >
 </div>

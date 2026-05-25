@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use App\Models\Akreditasi;
 use App\Models\Asesor;
@@ -434,11 +434,11 @@ new #[Layout('layouts.app')] class extends Component {
             <div class="bg-light rounded-4 p-6 border border-gray-200 mb-8">
                 <div class="mb-4">
                     <p class="text-muted fs-8 fw-bold text-uppercase mb-1">Pesantren</p>
-                    <p class="fs-6 fw-bolder text-gray-900">{{ $selectedAssessment->akreditasi->user?->pesantren?->nama_pesantren ?? $selectedAssessment->akreditasi->user?->name }}</p>
+                    <p class="fs-6 fw-semibold text-gray-900">{{ $selectedAssessment->akreditasi->user?->pesantren?->nama_pesantren ?? $selectedAssessment->akreditasi->user?->name }}</p>
                 </div>
                 <div>
                     <p class="text-muted fs-8 fw-bold text-uppercase mb-1">Jadwal Penilaian</p>
-                    <p class="fs-6 fw-bolder text-gray-900">{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_mulai)->format('d') }}–{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_berakhir)->format('d F Y') }}</p>
+                    <p class="fs-6 fw-semibold text-gray-900">{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_mulai)->format('d') }}–{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_berakhir)->format('d F Y') }}</p>
                 </div>
             </div>
             @endif
@@ -502,11 +502,11 @@ new #[Layout('layouts.app')] class extends Component {
             <div class="bg-light rounded-4 p-6 border border-gray-200 mb-8">
                 <div class="mb-4">
                     <p class="text-muted fs-8 fw-bold text-uppercase mb-1">Pesantren</p>
-                    <p class="fs-6 fw-bolder text-gray-900">{{ $selectedAssessment->akreditasi->user?->pesantren?->nama_pesantren ?? $selectedAssessment->akreditasi->user?->name }}</p>
+                    <p class="fs-6 fw-semibold text-gray-900">{{ $selectedAssessment->akreditasi->user?->pesantren?->nama_pesantren ?? $selectedAssessment->akreditasi->user?->name }}</p>
                 </div>
                 <div>
                     <p class="text-muted fs-8 fw-bold text-uppercase mb-1">Jadwal Penilaian</p>
-                    <p class="fs-6 fw-bolder text-gray-900">{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_mulai)->format('d') }}–{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_berakhir)->format('d F Y') }}</p>
+                    <p class="fs-6 fw-semibold text-gray-900">{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_mulai)->format('d') }}–{{ \Carbon\Carbon::parse($selectedAssessment->tanggal_berakhir)->format('d F Y') }}</p>
                 </div>
             </div>
             @endif
@@ -572,7 +572,7 @@ new #[Layout('layouts.app')] class extends Component {
                                 loading="lazy"
                                 class="w-40px h-40px rounded-3 border border-white shadow-sm object-cover" alt="Avatar">
                             <div>
-                                <h3 class="fs-6 fw-bolder text-gray-900">{{ $catatan->user->name }}</h3>
+                                <h3 class="fs-6 fw-semibold text-gray-900">{{ $catatan->user->name }}</h3>
                                 <p class="text-muted fs-8 fw-bold text-uppercase">
                                     {{ $catatan->user->isAsesor() ? 'Ketua Kelompok' : ($catatan->user->isAdmin() ? 'Administrator Pusat' : 'Pihak Berwenang') }}
                                 </p>
@@ -592,7 +592,7 @@ new #[Layout('layouts.app')] class extends Component {
                                 <p class="text-muted fs-8 fw-bold text-uppercase mb-2">
                                     {{ $isNoteRejection ? 'Tanggal Review:' : 'Jadwal Visitasi:' }}
                                 </p>
-                                <p class="fs-7 fw-bolder text-gray-700">
+                                <p class="fs-7 fw-semibold text-gray-700">
                                     @if($isNoteRejection)
                                     {{ $catatan->created_at->translatedFormat('d F Y') }}
                                     @else
@@ -608,7 +608,7 @@ new #[Layout('layouts.app')] class extends Component {
 
                         @if($isNoteRejection)
                         <div class="mb-6">
-                            <p class="fs-7 fw-bolder text-gray-800 mb-3">Dokumen yang memerlukan perbaikan</p>
+                            <p class="fs-7 fw-semibold text-gray-800 mb-3">Dokumen yang memerlukan perbaikan</p>
                             <div class="d-flex flex-wrap gap-2">
                                 @foreach(explode(', ', $catatan->perbaikan) as $p)
                                 <x-ui.badge variant="warning" class="text-uppercase">

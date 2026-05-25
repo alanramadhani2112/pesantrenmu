@@ -12,7 +12,7 @@
         'lg' => 'form-select-lg',
     ];
 
-    $classes = trim('form-select form-select-solid w-auto min-w-175px ' . ($sizes[$size] ?? ''));
+    $classes = trim('form-select form-select-solid spm-filter-select ' . ($sizes[$size] ?? ''));
 @endphp
 
 <select

@@ -22,7 +22,7 @@
         }
         .error-code {
             font-size: clamp(4rem, 12vw, 7rem);
-            font-weight: 900;
+            font-weight: 600;
             line-height: 1;
             letter-spacing: -0.04em;
             color: #dc3545;
@@ -41,7 +41,7 @@
         <div class="card-body p-10 text-center">
 
             <div class="error-icon-wrap">
-                <i class="ki-duotone ki-abstract-26 fs-2tx text-danger">
+                <i class="ki-solid ki-abstract-26 fs-2tx text-danger">
                     <span class="path1"></span>
                     <span class="path2"></span>
                 </i>
@@ -57,14 +57,14 @@
 
             <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
                 <a href="javascript:history.back()" class="btn btn-primary fw-bold px-6">
-                    <i class="ki-duotone ki-arrow-left fs-3 me-1">
+                    <i class="ki-solid ki-arrow-left fs-3 me-1">
                         <span class="path1"></span>
                         <span class="path2"></span>
                     </i>
                     Kembali
                 </a>
                 <a href="{{ url('/dashboard') }}" class="btn btn-light fw-bold px-6">
-                    <i class="ki-duotone ki-home fs-3 me-1">
+                    <i class="ki-solid ki-home fs-3 me-1">
                         <span class="path1"></span>
                         <span class="path2"></span>
                     </i>

@@ -15,5 +15,5 @@
         <span class="fw-bold text-gray-700">{{ $label }}</span>
     </div>
 
-    <span class="fw-bolder text-gray-900">{{ $value }}</span>
+    <span class="fw-semibold text-gray-900">{{ $value }}</span>
 </div>
