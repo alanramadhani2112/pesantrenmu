@@ -25,9 +25,9 @@ Aplikasi akreditasi pesantren Muhammadiyah berbasis web. Mengelola alur pengajua
 |--------|-------|
 | 6 | Pengajuan |
 | 5 | Verifikasi Berkas |
-| 4 | Assessment |
+| 4 | Review Asesor |
 | 3 | Visitasi |
-| 2 | Pasca Visitasi |
+| 2 | Penilaian Pasca Visitasi |
 | 1 | Validasi Admin |
 | 0 | Selesai |
 | -1 | Ditolak |

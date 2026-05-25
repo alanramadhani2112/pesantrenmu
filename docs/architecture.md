@@ -82,9 +82,9 @@ di bawah hanya gambaran arsitektur status.
 Pesantren mengisi data (Profil + IPM + SDM + EDPM)
   -> Pengajuan (status=6)
   -> Review Awal Admin (status=5)
-  -> Review Substansi Asesor (status=4)
+  -> Review Asesor (status=4)
   -> Visitasi (status=3)
-  -> Pasca Visitasi (status=2)
+  -> Penilaian Pasca Visitasi (status=2)
   -> Validasi Akhir Admin (status=1)
   -> Selesai / Terakreditasi (status=0)
   -> Ditolak Final (status=-1)
@@ -96,7 +96,7 @@ Catatan transisi banding: `Banding (-2)` hanya boleh kembali ke
 ditolak. Banding diterima tidak membuat pengajuan baru dan tidak kembali ke
 Visitasi.
 
-### Dokumen Pasca Visitasi
+### Dokumen Penilaian Pasca Visitasi
 
 Detail implementasi dokumen pasca visitasi dicatat di
 [`docs/post-visitasi-documents-implementation.md`](post-visitasi-documents-implementation.md).
@@ -110,7 +110,7 @@ Dokumen wajib sebelum finalisasi asesor dan penerbitan SK:
 
 Guard utama ada di `AkreditasiDocumentService` dan
 `AkreditasiWorkflowService`. Upload hanya diizinkan pada status
-`Pasca Visitasi (2)`, sedangkan penerbitan SK di status `Validasi Admin (1)`
+`Penilaian Pasca Visitasi (2)`, sedangkan penerbitan SK di status `Validasi Admin (1)`
 tetap memeriksa ulang kelengkapan dokumen untuk mencegah jalur bypass.
 
 ## Database Cascade Rules

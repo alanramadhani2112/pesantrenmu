@@ -313,7 +313,7 @@ class AkreditasiWorkflowService
      * Schedule visitasi by Asesor_1 (status 4 → 3).
      *
      * Validates:
-     *  - Akreditasi is at status 4 (Assessment)
+     *  - Akreditasi is at status 4 (Review Asesor)
      *  - Actor is assigned Asesor_1 (tipe=1) for this akreditasi
      *  - tanggal_mulai ≥ today + 7 days (Req 5.2)
      *  - tanggal_akhir ≥ tanggal_mulai (Req 5.2)
@@ -341,10 +341,10 @@ class AkreditasiWorkflowService
             throw new \DomainException("Akreditasi #{$akreditasiId} tidak ditemukan.");
         }
 
-        // Req 5.1: Must be at status 4 (Assessment)
+        // Req 5.1: Must be at status 4 (Review Asesor)
         if ((int) $akreditasi->status !== AkreditasiStateMachine::STATUS_ASSESSMENT) {
             throw new \DomainException(
-                "Penjadwalan visitasi hanya dapat dilakukan saat status Assessment (status saat ini: {$akreditasi->status})."
+                "Penjadwalan visitasi hanya dapat dilakukan saat tahap Review Asesor (status saat ini: {$akreditasi->status})."
             );
         }
 
@@ -613,7 +613,7 @@ class AkreditasiWorkflowService
 
         if ((int) $akreditasi->status !== AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
             throw new \DomainException(
-                "Finalisasi penilaian hanya dapat dilakukan saat status Pasca Visitasi (status saat ini: {$akreditasi->status})."
+                "Finalisasi penilaian hanya dapat dilakukan saat tahap Penilaian Pasca Visitasi (status saat ini: {$akreditasi->status})."
             );
         }
 
@@ -1220,7 +1220,7 @@ class AkreditasiWorkflowService
                 $pesantrenUser->notify(new AkreditasiNotification(
                     'berkas_approved',
                     'Berkas Akreditasi Disetujui',
-                    'Berkas akreditasi Anda telah diverifikasi dan masuk tahap Assessment.',
+                    'Berkas akreditasi Anda telah diverifikasi dan masuk tahap Review Asesor.',
                     route('pesantren.akreditasi')
                 ));
             }
@@ -1231,7 +1231,7 @@ class AkreditasiWorkflowService
                 $pesantrenName = $pesantrenUser?->pesantren?->nama_pesantren ?? $pesantrenUser?->name ?? 'Pesantren';
                 $asesor1User->notify(new AkreditasiNotification(
                     'tugas_baru',
-                    'Penugasan Assessment Baru',
+                    'Penugasan Review Asesor Baru',
                     "Anda ditugaskan sebagai Ketua Kelompok untuk pesantren {$pesantrenName}.",
                     route('asesor.akreditasi')
                 ));
@@ -1243,7 +1243,7 @@ class AkreditasiWorkflowService
                 $pesantrenName = $pesantrenUser?->pesantren?->nama_pesantren ?? $pesantrenUser?->name ?? 'Pesantren';
                 $asesor2User->notify(new AkreditasiNotification(
                     'tugas_baru',
-                    'Penugasan Assessment Baru',
+                    'Penugasan Review Asesor Baru',
                     "Anda ditugaskan sebagai Anggota Kelompok untuk pesantren {$pesantrenName}.",
                     route('asesor.akreditasi')
                 ));

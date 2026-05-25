@@ -306,7 +306,7 @@ new #[Layout('layouts.app')] class extends Component {
                     :options="[
                         'belum' => 'Review Berkas',
                         'siap' => 'Visitasi Terjadwal',
-                        'penilaian' => 'Pasca Visitasi / Input Nilai',
+                        'penilaian' => 'Penilaian Pasca Visitasi',
                         'revisi' => 'Perlu Revisi',
                         'selesai' => 'Selesai',
                     ]"
@@ -315,7 +315,7 @@ new #[Layout('layouts.app')] class extends Component {
 
             <x-slot name="thead">
                 <x-ui.table-th>Pesantren</x-ui.table-th>
-                <x-ui.table-th align="center">Jadwal Assessment</x-ui.table-th>
+                <x-ui.table-th align="center">Jadwal Review</x-ui.table-th>
                 <x-ui.table-th align="center">Status</x-ui.table-th>
                 <x-ui.table-th align="center">Jadwal Visitasi</x-ui.table-th>
                 <x-ui.table-th>Catatan</x-ui.table-th>
@@ -349,7 +349,7 @@ new #[Layout('layouts.app')] class extends Component {
                         </x-ui.status-badge>
                         @elseif($item->akreditasi->status == 2)
                         <x-ui.status-badge variant="info">
-                            Pasca Visitasi
+                            Penilaian Pasca Visitasi
                         </x-ui.status-badge>
                         @elseif($item->akreditasi->status == 3)
                         <x-ui.status-badge variant="info">

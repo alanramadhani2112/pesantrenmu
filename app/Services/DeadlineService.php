@@ -133,7 +133,7 @@ class DeadlineService
                     ?? $akreditasi->user->name
                     ?? 'Pesantren';
 
-                $phase = $akreditasi->status === 4 ? 'Visitasi' : 'Assessment';
+                $phase = $this->phaseLabelForStatus((int) $akreditasi->status);
                 $deadline = $assessment->tanggal_berakhir->format('d/m/Y');
                 $isToday = $assessment->tanggal_berakhir->startOfDay()->eq(Carbon::today());
 
@@ -194,7 +194,7 @@ class DeadlineService
                     ?? $assessment->asesor->user->name
                     ?? 'Asesor';
 
-                $phase = $akreditasi->status === 4 ? 'Visitasi' : 'Assessment';
+                $phase = $this->phaseLabelForStatus((int) $akreditasi->status);
                 $deadline = $assessment->tanggal_berakhir->format('d/m/Y');
                 $daysOverdue = $this->getDaysOverdue($assessment);
 
@@ -230,7 +230,7 @@ class DeadlineService
         }
 
         $akreditasi = $assessment->akreditasi;
-        $phase = $akreditasi->status === 4 ? 'visitasi' : 'assessment';
+        $phase = (int) $akreditasi->status === Akreditasi::STATUS_VISITASI ? 'visitasi' : 'assessment';
         $duration = $phase === 'visitasi'
             ? $this->visitasiDurationDays
             : $this->assessmentDurationDays;
@@ -253,7 +253,7 @@ class DeadlineService
             ?? $akreditasi->user->name
             ?? 'Pesantren';
 
-        $phaseLabel = $akreditasi->status === 4 ? 'Visitasi' : 'Assessment';
+        $phaseLabel = $this->phaseLabelForStatus((int) $akreditasi->status);
         $deadlineFormatted = $newDeadline->format('d/m/Y');
 
         // Notify new asesor
@@ -275,5 +275,16 @@ class DeadlineService
                 "Tugas {$phaseLabel} Anda untuk pesantren {$pesantrenName} telah dialihkan ke asesor lain."
             ));
         }
+    }
+
+    private function phaseLabelForStatus(int $status): string
+    {
+        return match ($status) {
+            Akreditasi::STATUS_VERIFIKASI_BERKAS => 'Review Awal',
+            Akreditasi::STATUS_ASSESSMENT => 'Review Asesor',
+            Akreditasi::STATUS_VISITASI => 'Visitasi',
+            Akreditasi::STATUS_PASCA_VISITASI => 'Penilaian Pasca Visitasi',
+            default => Akreditasi::getStatusLabel($status),
+        };
     }
 }

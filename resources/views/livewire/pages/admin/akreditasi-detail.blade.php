@@ -643,7 +643,7 @@ new #[Layout('layouts.app')] class extends Component
             ?? $this->akreditasi->assessments->first();
 
         if (! $primaryAssessment) {
-            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Assessment tidak ditemukan.');
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Penugasan asesor tidak ditemukan.');
             $this->dispatch('close-modal', 'reassign-asesor-modal');
             return;
         }
@@ -1711,7 +1711,7 @@ new #[Layout('layouts.app')] class extends Component
                             }
                             $isComplete = $available === count($requiredDocs);
                         @endphp
-                        <x-ui.section-card title="Kelengkapan Dokumen Pasca Visitasi">
+                        <x-ui.section-card title="Kelengkapan Dokumen Penilaian Pasca Visitasi">
                             <x-slot:toolbar>
                                 <x-ui.status-badge :variant="$isComplete ? 'success' : 'warning'">
                                     <x-ui.icon :name="$isComplete ? 'check-circle' : 'information'" class="fs-4 me-2" />

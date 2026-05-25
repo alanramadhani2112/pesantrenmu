@@ -69,7 +69,7 @@ final class PostVisitasiDocumentsTest extends TestCase
         $visitasiSetup = $this->createAssignedAkreditasi(AkreditasiStateMachine::STATUS_VISITASI);
 
         $this->expectException(\DomainException::class);
-        $this->expectExceptionMessage('Kartu Kendali hanya dapat diunggah pada tahap Pasca Visitasi.');
+        $this->expectExceptionMessage('Kartu Kendali hanya dapat diunggah pada tahap Penilaian Pasca Visitasi.');
 
         $this->documentService->uploadKartuKendaliForPesantren(
             $visitasiSetup['akreditasi']->id,
@@ -155,7 +155,7 @@ final class PostVisitasiDocumentsTest extends TestCase
         );
     }
 
-    public function test_legacy_pesantren_service_upload_kartu_kendali_uses_pascha_visitasi_status(): void
+    public function test_legacy_pesantren_service_upload_kartu_kendali_uses_penilaian_pasca_visitasi_status(): void
     {
         $setup = $this->createAssignedAkreditasi(AkreditasiStateMachine::STATUS_PASCA_VISITASI);
 
@@ -306,7 +306,7 @@ final class PostVisitasiDocumentsTest extends TestCase
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
             'user_id' => $pesantrenUser->id,
-            'nama_pesantren' => 'Pesantren Dokumen Pasca Visitasi',
+            'nama_pesantren' => 'Pesantren Dokumen Penilaian Pasca Visitasi',
         ]);
 
         $asesor1User = User::factory()->create(['role_id' => 2]);

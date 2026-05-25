@@ -100,7 +100,7 @@ public function test_audit_logs_persist_after_akreditasi_soft_delete(): void
             akreditasiId: $akreditasi->id,
             actionType: 'status_changed',
             oldValue: 'Pengajuan',
-            newValue: 'Assessment',
+            newValue: 'Verifikasi Berkas',
             metadata: ['old_status_code' => 6, 'new_status_code' => 5]
         );
 
@@ -366,7 +366,7 @@ public function test_admin_can_access_audit_timeline_page(): void
             akreditasiId: $akreditasi->id,
             actionType: 'status_changed',
             oldValue: 'Pengajuan',
-            newValue: 'Assessment',
+            newValue: 'Verifikasi Berkas',
             metadata: ['old_status_code' => 6, 'new_status_code' => 5]
         );
 

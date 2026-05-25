@@ -197,8 +197,8 @@ class AkreditasiDocumentService
         if ($admins->isNotEmpty()) {
             Notification::send($admins, new AkreditasiNotification(
                 'dokumen_pasca_visitasi_lengkap',
-                'Dokumen Pasca Visitasi Lengkap',
-                "Semua dokumen pasca visitasi telah lengkap dan siap untuk divalidasi.",
+                'Dokumen Penilaian Pasca Visitasi Lengkap',
+                "Semua dokumen penilaian pasca visitasi telah lengkap dan siap untuk divalidasi.",
                 route('admin.akreditasi-detail', $akreditasi->uuid)
             ));
         }
@@ -215,7 +215,7 @@ class AkreditasiDocumentService
             throw new \DomainException('Pesantren hanya dapat mengunggah Kartu Kendali untuk pengajuan miliknya.');
         }
 
-        $this->assertPascaVisitasi($akreditasi, 'Kartu Kendali hanya dapat diunggah pada tahap Pasca Visitasi.');
+        $this->assertPascaVisitasi($akreditasi, 'Kartu Kendali hanya dapat diunggah pada tahap Penilaian Pasca Visitasi.');
 
         return $this->validatedUpload($akreditasi, self::DOC_KARTU_KENDALI, $file, $pesantrenUserId);
     }
@@ -232,7 +232,7 @@ class AkreditasiDocumentService
             throw new \DomainException('Hanya asesor yang ditugaskan yang dapat mengunggah laporan individu.');
         }
 
-        $this->assertPascaVisitasi($akreditasi, 'Laporan individu hanya dapat diunggah pada tahap Pasca Visitasi.');
+        $this->assertPascaVisitasi($akreditasi, 'Laporan individu hanya dapat diunggah pada tahap Penilaian Pasca Visitasi.');
 
         $documentType = (int) $assessment->tipe === 1
             ? self::DOC_LAPORAN_VISITASI_ASESOR1
@@ -253,7 +253,7 @@ class AkreditasiDocumentService
             throw new \DomainException('Hanya Ketua Kelompok yang ditugaskan yang dapat mengunggah laporan kelompok.');
         }
 
-        $this->assertPascaVisitasi($akreditasi, 'Laporan kelompok hanya dapat diunggah pada tahap Pasca Visitasi.');
+        $this->assertPascaVisitasi($akreditasi, 'Laporan kelompok hanya dapat diunggah pada tahap Penilaian Pasca Visitasi.');
 
         return $this->validatedUpload($akreditasi, self::DOC_LAPORAN_VISITASI_KELOMPOK, $file, $asesorUserId);
     }

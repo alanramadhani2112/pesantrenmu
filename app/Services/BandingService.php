@@ -290,7 +290,7 @@ class BandingService
      * original tables (akreditasi_edpms).
      *
      * Returns true when:
-     *   - akreditasi status is 2 (Pasca Visitasi)
+     *   - akreditasi status is 2 (Penilaian Pasca Visitasi)
      *   - AND a banding record with status 'accepted' exists for this akreditasi
      *
      * Validates Requirement 14.7, 14.8

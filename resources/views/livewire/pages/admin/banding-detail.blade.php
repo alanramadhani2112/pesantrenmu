@@ -284,7 +284,7 @@ new #[Layout('layouts.app')] class extends Component
 
                                 @if($banding->akreditasi->assessments->count() > 0)
                                     <div class="separator my-5"></div>
-                                    <div class="spm-detail-label mb-3">Assessment</div>
+                                    <div class="spm-detail-label mb-3">Penugasan Asesor</div>
                                     @foreach($banding->akreditasi->assessments as $assessment)
                                         <div class="d-flex justify-content-between py-2 border-bottom border-dashed">
                                             <span class="text-gray-600 fw-semibold">Tipe {{ $assessment->tipe }}</span>

@@ -48,7 +48,7 @@ class FailedNotificationDashboardTest extends TestCase
             'notifiable_id'     => $user->id,
             'payload'           => [
                 'type'    => 'assessment',
-                'title'   => 'Update Status: Assessment',
+                'title'   => 'Update Status: Verifikasi Berkas',
                 'message' => 'Pengajuan akreditasi Anda telah diverifikasi.',
                 'url'     => 'https://example.com/akreditasi',
             ],

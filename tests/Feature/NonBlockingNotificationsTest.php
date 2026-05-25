@@ -171,14 +171,14 @@ public function test_approve_pengajuan_preserves_notification_content(): void
             'tanggal_berakhir' => now()->addDays(30)->toDateString(),
         ]);
 
-        // Pesantren receives 'assessment' type notification
+        // Pesantren receives workflow update notification.
         Notification::assertSentTo(
             $pesantrenUser,
             AkreditasiNotification::class,
             function (AkreditasiNotification $n) {
                 return $n->type === 'assessment'
-                    && $n->title === 'Update Status: Assessment'
-                    && str_contains($n->message, 'Assessment');
+                    && $n->title === 'Update Status: Verifikasi Berkas'
+                    && str_contains($n->message, 'verifikasi berkas');
             }
         );
 
@@ -188,7 +188,7 @@ public function test_approve_pengajuan_preserves_notification_content(): void
             AkreditasiNotification::class,
             function (AkreditasiNotification $n) {
                 return $n->type === 'tugas_baru'
-                    && $n->title === 'Tugas Assessment Baru';
+                    && $n->title === 'Tugas Review Asesor Baru';
             }
         );
     }
@@ -273,7 +273,7 @@ public function test_finalize_verification_dispatches_notifications_after_transa
         Notification::fake();
 
         $pesantrenUser = $this->createPesantrenUser();
-        $akreditasi = $this->createAkreditasiWithStatus(5, $pesantrenUser);
+        $akreditasi = $this->createAkreditasiWithStatus(2, $pesantrenUser);
 
         $asesorUser1 = $this->createAsesorUser();
         $asesor1 = $asesorUser1->asesor;
@@ -311,8 +311,8 @@ public function test_finalize_verification_dispatches_notifications_after_transa
 
         $this->assertTrue($result['success']);
 
-        // Transaction committed: status changed to 3
-        $this->assertSame(3, $akreditasi->fresh()->status);
+        // Transaction committed: status changed to Validasi Admin
+        $this->assertSame(1, $akreditasi->fresh()->status);
 
         // Notifications dispatched
         Notification::assertSentTo($pesantrenUser, AkreditasiNotification::class);
@@ -531,9 +531,9 @@ public function test_notification_implements_should_queue_for_async_processing()
     }
 
     /**
-     * Task 8.4 (regression): approvePengajuan still changes status to 5 after refactoring.
+     * Task 8.4 (regression): approvePengajuan still changes status to Review Awal after refactoring.
      */
-public function test_approve_pengajuan_still_changes_status_to_assessment(): void
+public function test_approve_pengajuan_still_changes_status_to_review_awal(): void
     {
         Notification::fake();
 

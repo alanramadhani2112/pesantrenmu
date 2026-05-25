@@ -41,9 +41,9 @@ Workbook tersebut memuat istilah hasil asesmen seperti `NA 1`, `NA 2`,
 | --- | --- | --- |
 | `6` | Pengajuan | Pesantren sudah submit data akreditasi. |
 | `5` | Review Awal Admin | Admin memeriksa kelengkapan administratif awal. |
-| `4` | Review Substansi Asesor | Asesor menelaah berkas dan bukti pesantren. |
+| `4` | Review Asesor | Asesor menelaah berkas dan bukti pesantren. |
 | `3` | Visitasi | Visitasi lapangan sudah dijadwalkan dan sedang berjalan. |
-| `2` | Pasca Visitasi | Visitasi selesai, asesor dan pesantren melengkapi paket pasca visitasi. |
+| `2` | Penilaian Pasca Visitasi | Visitasi selesai, asesor dan pesantren melengkapi nilai serta dokumen pasca visitasi. |
 | `1` | Validasi Akhir Admin | Admin mereview hasil asesor dan mengisi nilai verifikasi. |
 | `0` | Selesai / Terakreditasi | Hasil akhir disahkan dan sertifikat tersedia. |
 | `-1` | Ditolak Final | Keputusan akhir tidak disahkan. |
@@ -106,7 +106,7 @@ Outcome:
 
 Revisi administratif tidak membuka banding.
 
-### 4. Review Substansi Asesor
+### 4. Review Asesor
 
 Asesor menelaah seluruh isi pengajuan pesantren, termasuk profil, IPM, EDPM,
 SDM, bukti, dan lampiran.
@@ -125,7 +125,7 @@ Ketua Kelompok menjadwalkan visitasi. Visitasi dilakukan di luar sistem.
 Setelah visitasi selesai, Ketua Kelompok mengonfirmasi penyelesaian visitasi
 di sistem.
 
-### 6. Pasca Visitasi
+### 6. Penilaian Pasca Visitasi
 
 Setelah visitasi selesai, paket pasca visitasi harus dilengkapi.
 
@@ -155,7 +155,7 @@ final submit hasil asesor.
 Status implementasi per 23 Mei 2026:
 
 - Upload kartu kendali hanya bisa dilakukan oleh pesantren pemilik pengajuan
-  pada status `Pasca Visitasi`.
+  pada status `Penilaian Pasca Visitasi`.
 - Upload laporan individu hanya bisa dilakukan oleh asesor yang ditugaskan.
 - Upload laporan kelompok hanya bisa dilakukan oleh Ketua Kelompok.
 - Final submit hasil asesor diblokir bila salah satu dokumen pasca visitasi
@@ -304,13 +304,13 @@ Keterangan:
   banding.
 - Admin dapat assign dua asesor berbeda dan melanjutkan ke status `4`.
 
-### Review Substansi Asesor
+### Review Asesor
 
 - Asesor dapat menandai bagian yang perlu diperbaiki dan memberi catatan.
 - Pesantren hanya memperbaiki bagian yang dibuka.
 - Perbaikan substansi tidak dianggap `Ditolak Final`.
 
-### Visitasi dan Pasca Visitasi
+### Visitasi dan Penilaian Pasca Visitasi
 
 - Hanya Ketua Kelompok yang dapat menjadwalkan visitasi.
 - Hanya Ketua Kelompok yang dapat mengonfirmasi visitasi selesai.

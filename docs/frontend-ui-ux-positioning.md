@@ -98,7 +98,7 @@ Prioritas desain:
 Status akreditasi harus menjadi elemen visual utama di tabel dan detail page. Label status perlu konsisten:
 
 - Pengajuan
-- Assessment
+- Review Asesor
 - Visitasi
 - Validasi
 - Berhasil

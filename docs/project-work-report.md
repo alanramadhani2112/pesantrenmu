@@ -221,7 +221,7 @@ Fondasi UI sudah aman untuk dilanjutkan bertahap. Sistem sudah jauh lebih konsis
 
 ---
 
-## Update: Business Flow LP2M & Dokumen Pasca Visitasi (23 Mei 2026)
+## Update: Business Flow LP2M & Dokumen Penilaian Pasca Visitasi (23 Mei 2026)
 
 ### 18. Penyusunan business spec flow LP2M
 
@@ -232,8 +232,8 @@ Fondasi UI sudah aman untuk dilanjutkan bertahap. Sistem sudah jauh lebih konsis
   `NA 1`, `NA 2`, `Delta`, `NK`, `NV`, `Catatan Butir`, dan
   `Catatan Rekomendasi Komponen`.
 - Alur bisnis dibakukan:
-  `Pengajuan -> Review Awal Admin -> Review Substansi Asesor -> Visitasi ->
-  Pasca Visitasi -> Validasi Akhir Admin -> Selesai/Ditolak Final -> Banding`.
+  `Pengajuan -> Review Awal Admin -> Review Asesor -> Visitasi ->
+  Penilaian Pasca Visitasi -> Validasi Akhir Admin -> Selesai/Ditolak Final -> Banding`.
 
 ### 19. Koreksi flow banding
 

@@ -264,9 +264,9 @@ public function test_property_3_reminder_notification_content_completeness(): vo
             // Random pesantren name
             $pesantrenName = $faker->company . ' Pesantren ' . $i;
 
-            // Random phase: status 4 (Visitasi) or 5 (Assessment)
+            // Random phase: status 4 (Review Asesor) or 5 (Review Awal)
             $status = $faker->randomElement([4, 5]);
-            $expectedPhase = $status === 4 ? 'Visitasi' : 'Assessment';
+            $expectedPhase = $status === 4 ? 'Review Asesor' : 'Review Awal';
 
             // Deadline within reminder threshold (1–3 days from now)
             $daysUntilDeadline = $faker->numberBetween(1, 3);
@@ -448,7 +448,7 @@ public function test_property_5_escalation_notification_content_completeness(): 
 
             // Random phase
             $status = $faker->randomElement([4, 5]);
-            $expectedPhase = $status === 4 ? 'Visitasi' : 'Assessment';
+            $expectedPhase = $status === 4 ? 'Review Asesor' : 'Review Awal';
 
             // Random days overdue (1–30)
             $daysOverdue = $faker->numberBetween(1, 30);
@@ -735,7 +735,7 @@ public function test_unit_3_8_escalation_stops_when_status_changes(): void
             \App\Notifications\AkreditasiNotification::class
         );
 
-        // Now change status to 5 (Assessment) and verify escalation IS sent
+        // Now change status to 5 (Review Awal) and verify escalation IS sent
         $akreditasi->update(['status' => 5]);
         \Illuminate\Support\Facades\Notification::fake(); // reset
 

@@ -189,7 +189,7 @@ new #[Layout('layouts.app')] class extends Component {
                 'tableSubtitle' => 'Fokus pada status kartu kendali, jadwal visitasi, dan aksi unggah dokumen.',
                 'variant' => 'info',
                 'metrics' => [
-                    ['label' => 'Pasca Visitasi', 'value' => $totalPengajuan, 'variant' => 'info', 'description' => 'Pengajuan pada tahap pasca visitasi.'],
+                    ['label' => 'Penilaian Pasca Visitasi', 'value' => $totalPengajuan, 'variant' => 'info', 'description' => 'Pengajuan pada tahap penilaian pasca visitasi.'],
                     ['label' => 'Menunggu Kartu', 'value' => $akreditasiCollection->whereNull('kartu_kendali')->count(), 'variant' => 'warning', 'description' => 'Belum ada kartu kendali yang tersimpan.'],
                     ['label' => 'Kartu Tersimpan', 'value' => $akreditasiCollection->whereNotNull('kartu_kendali')->count(), 'variant' => 'success', 'description' => 'Kartu kendali sudah diunggah.'],
                 ],

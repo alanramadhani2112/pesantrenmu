@@ -46,7 +46,7 @@ info-light: #eff6ff
 
 ```text
 Pengajuan: primary or info
-Assessment: warning
+Review Asesor: warning
 Visitasi: info
 Validasi: primary
 Berhasil: success

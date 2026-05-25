@@ -1,11 +1,11 @@
-# Implementasi Dokumen Pasca Visitasi
+# Implementasi Dokumen Penilaian Pasca Visitasi
 
 Tanggal update: 23 Mei 2026
 
 ## Tujuan
 
-Dokumen ini mencatat proses hardening yang sudah dilakukan untuk fase Pasca
-Visitasi pada workflow akreditasi LP2M. Fokusnya adalah memastikan dokumen
+Dokumen ini mencatat proses hardening yang sudah dilakukan untuk fase Penilaian
+Pasca Visitasi pada workflow akreditasi LP2M. Fokusnya adalah memastikan dokumen
 wajib setelah visitasi tidak bisa dilewati sebelum asesor memfinalisasi
 penilaian dan sebelum admin menerbitkan SK.
 
@@ -48,7 +48,7 @@ Dokumen wajib didefinisikan sebagai:
 Rule yang sekarang enforced:
 
 - Pesantren hanya dapat mengunggah kartu kendali milik pengajuannya sendiri.
-- Kartu kendali hanya dapat diunggah pada status `2` atau `Pasca Visitasi`.
+- Kartu kendali hanya dapat diunggah pada status `2` atau `Penilaian Pasca Visitasi`.
 - Asesor hanya dapat mengunggah laporan individu jika ditugaskan pada akreditasi
   tersebut.
 - Ketua Kelompok mengisi field `laporan_visitasi_asesor1`.
@@ -133,7 +133,7 @@ Coverage utama:
 - Pesantren tidak dapat upload kartu kendali untuk akreditasi milik user lain.
 - Asesor hanya dapat upload laporan individu sesuai penugasannya.
 - Hanya Ketua Kelompok yang dapat upload laporan kelompok.
-- Jalur legacy upload kartu kendali memakai status Pasca Visitasi.
+- Jalur legacy upload kartu kendali memakai status Penilaian Pasca Visitasi.
 - Finalisasi penilaian asesor tertahan bila salah satu dokumen wajib hilang.
 - Finalisasi penilaian asesor berhasil bila skor dan dokumen lengkap.
 - Penerbitan SK tertahan bila dokumen wajib hilang walaupun NV sudah lengkap.

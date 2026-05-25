@@ -701,7 +701,7 @@
                             <div class="mt-6">
                                 <x-ui.section-card title="Konfirmasi Visitasi">
                                     <div class="p-6">
-                                        <p class="text-gray-700 mb-4">Konfirmasi bahwa visitasi telah selesai dilaksanakan. Akreditasi akan masuk ke tahap Pasca Visitasi.</p>
+                                        <p class="text-gray-700 mb-4">Konfirmasi bahwa visitasi telah selesai dilaksanakan. Akreditasi akan masuk ke tahap Penilaian Pasca Visitasi.</p>
                                         <x-ui.button type="button" wire:click="confirmVisitasiSelesai" wire:loading.attr="disabled" variant="success">
                                             <span wire:loading.remove wire:target="confirmVisitasiSelesai">Konfirmasi Visitasi Selesai</span>
                                             <span wire:loading wire:target="confirmVisitasiSelesai">Memproses...</span>
@@ -712,7 +712,7 @@
                         @endif
                     @endif
 
-                    {{-- Finalisasi Penilaian (Ketua Kelompok, status Pasca Visitasi) --}}
+                    {{-- Finalisasi Penilaian (Ketua Kelompok, status Penilaian Pasca Visitasi) --}}
                     @if((int)$akreditasi->status === \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI && $asesorTipe == 1)
                         <div class="mt-6">
                             <x-ui.section-card title="Finalisasi Penilaian">
@@ -776,7 +776,7 @@
                                 @endif
                             @else
                                 @if(!$laporanIndividuPath)
-                                    <div class="text-muted fs-7">Laporan dapat diunggah saat status Pasca Visitasi.</div>
+                                    <div class="text-muted fs-7">Laporan dapat diunggah saat status Penilaian Pasca Visitasi.</div>
                                 @endif
                             @endif
                         </div>
@@ -819,7 +819,7 @@
                                     @endif
                                 @else
                                     @if(!$akreditasi->laporan_visitasi_kelompok)
-                                        <div class="text-muted fs-7">Laporan dapat diunggah saat status Pasca Visitasi.</div>
+                                        <div class="text-muted fs-7">Laporan dapat diunggah saat status Penilaian Pasca Visitasi.</div>
                                     @endif
                                 @endif
                             </div>

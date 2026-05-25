@@ -151,7 +151,7 @@ class AsesorService
 
                 $notificationData = ['action' => 'terima', 'rangeStr' => $rangeStr];
             } else {
-                $this->akreditasiRepository->update($akreditasiId, ['status' => 5]); // Kembali ke Assessment (penjadwalan)
+                $this->akreditasiRepository->update($akreditasiId, ['status' => 5]); // Kembali ke Review Awal.
 
                 $this->akreditasiRepository->addCatatan([
                     'akreditasi_id' => $akreditasiId,
@@ -483,8 +483,8 @@ class AsesorService
             // Notify Admin
             Notification::send($admins, new AkreditasiNotification(
                 'assessment_selesai',
-                'Pemberitahuan: Assessment Selesai',
-                "Assessment untuk $pesantrenName telah diselesaikan oleh $user->name. Menunggu unggahan Laporan Visitasi.",
+                'Pemberitahuan: Penilaian Asesor Selesai',
+                "Penilaian asesor untuk $pesantrenName telah diselesaikan oleh $user->name. Menunggu unggahan Laporan Visitasi.",
                 route('admin.akreditasi-detail', $akreditasi->uuid)
             ));
 
@@ -496,7 +496,7 @@ class AsesorService
             Notification::send($asesors->unique('id'), new AkreditasiNotification(
                 'input_laporan',
                 'Instruksi: Unggah Laporan Visitasi',
-                "Assessment untuk $pesantrenName telah diverifikasi. Silakan ketua/anggota segera unggah Laporan Visitasi di tab yang tersedia.",
+                "Penilaian asesor untuk $pesantrenName telah diverifikasi. Silakan Ketua Kelompok atau Anggota Kelompok segera unggah Laporan Visitasi di tab yang tersedia.",
                 route('asesor.akreditasi-detail', $akreditasi->uuid)
             ));
 
@@ -504,7 +504,7 @@ class AsesorService
             $akreditasi->user->notify(new AkreditasiNotification(
                 'validasi',
                 'Update Status: Validasi',
-                'Assessment telah selesai. Silakan unduh Kartu Kendali di menu dokumen, kemudian unggah kembali di menu akreditasi untuk melanjutkan proses validasi.',
+                'Penilaian asesor telah selesai. Silakan unduh Kartu Kendali di menu dokumen, kemudian unggah kembali di menu akreditasi untuk melanjutkan proses validasi.',
                 route('pesantren.akreditasi')
             ));
         }

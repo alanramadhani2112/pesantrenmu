@@ -71,7 +71,7 @@ class AssessorScoringService
         $akreditasi = Akreditasi::findOrFail($akreditasiId);
         if ((int) $akreditasi->status !== AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
             throw new \DomainException(
-                "Penilaian NA hanya dapat dilakukan saat status Pasca Visitasi (status saat ini: {$akreditasi->status})."
+                "Penilaian NA hanya dapat dilakukan saat tahap Penilaian Pasca Visitasi (status saat ini: {$akreditasi->status})."
             );
         }
 
@@ -146,7 +146,7 @@ class AssessorScoringService
         $akreditasi = Akreditasi::findOrFail($akreditasiId);
         if ((int) $akreditasi->status !== AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
             throw new \DomainException(
-                "Nilai Kelompok hanya dapat diisi saat status Pasca Visitasi (status saat ini: {$akreditasi->status})."
+                "Nilai Kelompok hanya dapat diisi saat tahap Penilaian Pasca Visitasi (status saat ini: {$akreditasi->status})."
             );
         }
 

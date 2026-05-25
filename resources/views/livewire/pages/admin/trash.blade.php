@@ -245,7 +245,7 @@ new #[Layout('layouts.app')] class extends Component {
                 <p class="text-gray-700 fs-6">Anda akan memulihkan akreditasi berikut beserta semua record terkait:</p>
                 <ul class="list-unstyled fs-7 mt-3">
                     <li><strong>Pesantren:</strong> {{ $previewData['akreditasi']->user?->pesantren?->nama_pesantren ?? $previewData['akreditasi']->user?->name ?? 'N/A' }}</li>
-                    <li><strong>Assessment:</strong> {{ $previewData['children']['assessment'] }} record</li>
+                    <li><strong>Penugasan Asesor:</strong> {{ $previewData['children']['assessment'] }} record</li>
                     <li><strong>EDPM:</strong> {{ $previewData['children']['akreditasi_edpm'] }} record</li>
                     <li><strong>Catatan EDPM:</strong> {{ $previewData['children']['akreditasi_edpm_catatan'] }} record</li>
                     <li class="text-success fw-bold mt-2">Total: {{ $previewData['children']['total'] + 1 }} record</li>
@@ -281,7 +281,7 @@ new #[Layout('layouts.app')] class extends Component {
 
                 <ul class="list-unstyled fs-7 mt-3">
                     <li><strong>Pesantren:</strong> {{ $previewData['akreditasi']->user?->pesantren?->nama_pesantren ?? $previewData['akreditasi']->user?->name ?? 'N/A' }}</li>
-                    <li><strong>Assessment:</strong> {{ $previewData['children']['assessment'] }} record</li>
+                    <li><strong>Penugasan Asesor:</strong> {{ $previewData['children']['assessment'] }} record</li>
                     <li><strong>EDPM:</strong> {{ $previewData['children']['akreditasi_edpm'] }} record</li>
                     <li><strong>Catatan EDPM:</strong> {{ $previewData['children']['akreditasi_edpm_catatan'] }} record</li>
                     <li class="text-danger fw-bold mt-2">Total dihapus permanen: {{ $previewData['children']['total'] + 1 }} record</li>

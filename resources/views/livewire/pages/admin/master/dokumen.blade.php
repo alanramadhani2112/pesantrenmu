@@ -245,7 +245,7 @@ new #[Layout('layouts.app')] class extends Component {
 
             <x-ui.modal-body>
                 <x-ui.form-field label="Nama Dokumen" for="title" :error="$errors->get('title')">
-                    <x-ui.input model="title" id="title" placeholder="Contoh: Panduan Assessment" required />
+                    <x-ui.input model="title" id="title" placeholder="Contoh: Panduan Review Asesor" required />
                 </x-ui.form-field>
 
                 <x-ui.form-field label="Kategori" for="category_id" :error="$errors->get('category_id')">

@@ -135,7 +135,7 @@ class AkreditasiService
             // Audit logging for asesor assignment/reassignment
             $this->logAsesorAssignments($id, $data, $existingAssessments);
 
-            $akreditasi->update(['status' => 5]); // Assessment stage
+            $akreditasi->update(['status' => 5]); // Verifikasi berkas stage before asesor review.
         });
 
         // Dispatch notifications AFTER transaction commits (non-blocking)
@@ -228,17 +228,17 @@ class AkreditasiService
 
     protected function notifyApprove(Akreditasi $akreditasi, array $data)
     {
-        $akreditasi->user->notify(new \App\Notifications\AkreditasiNotification('assessment', 'Update Status: Assessment', 'Pengajuan akreditasi Anda telah diverifikasi dan masuk tahap Assessment.', route('pesantren.akreditasi')));
+        $akreditasi->user->notify(new \App\Notifications\AkreditasiNotification('assessment', 'Update Status: Verifikasi Berkas', 'Pengajuan akreditasi Anda telah diverifikasi dan masuk tahap verifikasi berkas.', route('pesantren.akreditasi')));
 
         $asesor1 = Asesor::with('user')->find($data['asesor_id1']);
         if ($asesor1 && $asesor1->user) {
-            $asesor1->user->notify(new \App\Notifications\AkreditasiNotification('tugas_baru', 'Tugas Assessment Baru', 'Anda telah ditugaskan sebagai asesor 1 untuk pesantren ' . ($akreditasi->user->pesantren->nama_pesantren ?? $akreditasi->user->name), route('asesor.akreditasi')));
+            $asesor1->user->notify(new \App\Notifications\AkreditasiNotification('tugas_baru', 'Tugas Review Asesor Baru', 'Anda telah ditugaskan sebagai Ketua Kelompok untuk pesantren ' . ($akreditasi->user->pesantren->nama_pesantren ?? $akreditasi->user->name), route('asesor.akreditasi')));
         }
 
         if (!empty($data['asesor_id2'])) {
             $asesor2 = Asesor::with('user')->find($data['asesor_id2']);
             if ($asesor2 && $asesor2->user) {
-                $asesor2->user->notify(new \App\Notifications\AkreditasiNotification('tugas_baru', 'Tugas Assessment Baru', 'Anda telah ditugaskan sebagai asesor 2 untuk pesantren ' . ($akreditasi->user->pesantren->nama_pesantren ?? $akreditasi->user->name), route('asesor.akreditasi')));
+                $asesor2->user->notify(new \App\Notifications\AkreditasiNotification('tugas_baru', 'Tugas Review Asesor Baru', 'Anda telah ditugaskan sebagai Anggota Kelompok untuk pesantren ' . ($akreditasi->user->pesantren->nama_pesantren ?? $akreditasi->user->name), route('asesor.akreditasi')));
             }
         }
     }
