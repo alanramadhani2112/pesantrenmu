@@ -250,10 +250,10 @@ class FullHappyPathTest extends TestCase
      */
     public function test_full_happy_path_end_to_end(): void
     {
-        // Create asesors FIRST so their user_ids match asesors.id
-        // (service uses user_id to query asesor_id in akreditasi_edpms)
         $asesor1User = $this->createAsesor();
         $asesor2User = $this->createAsesor();
+        $asesor1 = Asesor::where('user_id', $asesor1User->id)->firstOrFail();
+        $asesor2 = Asesor::where('user_id', $asesor2User->id)->firstOrFail();
         $pesantrenUser = $this->createCompletePesantrenUser();
         $admin = $this->createAdmin();
 
@@ -343,7 +343,7 @@ class FullHappyPathTest extends TestCase
 
         // Verify 62 NA1 records exist and are Final
         $na1Count = AkreditasiEdpm::where('akreditasi_id', $akreditasi->id)
-            ->where('asesor_id', $asesor1User->id)
+            ->where('asesor_id', $asesor1->id)
             ->where('is_final', true)
             ->whereNotNull('isian')
             ->count();
@@ -351,7 +351,7 @@ class FullHappyPathTest extends TestCase
 
         // Verify 62 NA2 records exist and are Final
         $na2Count = AkreditasiEdpm::where('akreditasi_id', $akreditasi->id)
-            ->where('asesor_id', $asesor2User->id)
+            ->where('asesor_id', $asesor2->id)
             ->where('is_final', true)
             ->whereNotNull('isian')
             ->count();
