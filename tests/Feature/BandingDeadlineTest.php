@@ -36,13 +36,14 @@ class BandingDeadlineTest extends TestCase
     /**
      * Helper: create a pesantren user with basic data.
      */
-private function createPesantrenUser(): User
+    private function createPesantrenUser(): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
             'user_id' => $user->id,
-            'nama_pesantren' => 'Pesantren Deadline Test ' . $user->id,
+            'nama_pesantren' => 'Pesantren Deadline Test '.$user->id,
         ]);
+
         return $user;
     }
 
@@ -54,7 +55,7 @@ private function createPesantrenUser(): User
      * reminder threshold is 3 days. processDeadlines() should send a
      * reminder notification to the assigned reviewer.
      */
-public function test_process_deadlines_sends_reminder_to_reviewer_within_threshold(): void
+    public function test_process_deadlines_sends_reminder_to_reviewer_within_threshold(): void
     {
         Notification::fake();
 
@@ -101,7 +102,7 @@ public function test_process_deadlines_sends_reminder_to_reviewer_within_thresho
      * Integration test 5.4 (additional): processDeadlines does NOT send reminder
      * when deadline is outside the reminder threshold.
      */
-public function test_process_deadlines_no_reminder_when_outside_threshold(): void
+    public function test_process_deadlines_no_reminder_when_outside_threshold(): void
     {
         Notification::fake();
 
@@ -143,7 +144,7 @@ public function test_process_deadlines_no_reminder_when_outside_threshold(): voi
      * Scenario: A banding has review_deadline in the past. processDeadlines()
      * should send an escalation notification to all admin users.
      */
-public function test_process_deadlines_sends_escalation_to_admins_when_overdue(): void
+    public function test_process_deadlines_sends_escalation_to_admins_when_overdue(): void
     {
         Notification::fake();
 
@@ -182,7 +183,7 @@ public function test_process_deadlines_sends_escalation_to_admins_when_overdue()
             AkreditasiNotification::class,
             function (AkreditasiNotification $notification) use ($banding) {
                 return $notification->type === 'banding_escalation'
-                    && str_contains($notification->message, 'Banding #' . $banding->id);
+                    && str_contains($notification->message, 'Banding #'.$banding->id);
             }
         );
 
@@ -207,7 +208,7 @@ public function test_process_deadlines_sends_escalation_to_admins_when_overdue()
      * Integration test 5.5 (additional): processDeadlines handles multiple
      * overdue bandings and sends escalation for each.
      */
-public function test_process_deadlines_handles_multiple_overdue_bandings(): void
+    public function test_process_deadlines_handles_multiple_overdue_bandings(): void
     {
         Notification::fake();
 
@@ -256,7 +257,7 @@ public function test_process_deadlines_handles_multiple_overdue_bandings(): void
      * Integration test: processDeadlines does not send escalation for
      * bandings that are not in under_review status even if deadline passed.
      */
-public function test_process_deadlines_ignores_non_under_review_bandings(): void
+    public function test_process_deadlines_ignores_non_under_review_bandings(): void
     {
         Notification::fake();
 

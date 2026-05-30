@@ -31,7 +31,7 @@ class BandingSubmitAppealsTest extends TestCase
     /**
      * Helper: create a pesantren user with a rejected akreditasi that has assessments.
      */
-private function createPesantrenWithRejectedAkreditasi(): array
+    private function createPesantrenWithRejectedAkreditasi(): array
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -70,7 +70,7 @@ private function createPesantrenWithRejectedAkreditasi(): array
     /**
      * Task 6.3: submitAppeals returns false when banding limit is reached.
      */
-public function test_submit_appeals_returns_false_when_banding_limit_reached(): void
+    public function test_submit_appeals_returns_false_when_banding_limit_reached(): void
     {
         $data = $this->createPesantrenWithRejectedAkreditasi();
         $user = $data['user'];
@@ -107,7 +107,7 @@ public function test_submit_appeals_returns_false_when_banding_limit_reached(): 
     /**
      * Task 6.4: submitAppeals creates Banding record and moves to Banding status.
      */
-public function test_submit_appeals_creates_banding_record_alongside_status_change(): void
+    public function test_submit_appeals_creates_banding_record_alongside_status_change(): void
     {
         $data = $this->createPesantrenWithRejectedAkreditasi();
         $user = $data['user'];
@@ -143,7 +143,7 @@ public function test_submit_appeals_creates_banding_record_alongside_status_chan
      *
      * Requirements: 2.15
      */
-public function test_pesantren_banding_requires_alasan_min_10_chars(): void
+    public function test_pesantren_banding_requires_alasan_min_10_chars(): void
     {
         $data = $this->createPesantrenWithRejectedAkreditasi();
         $user = $data['user'];
@@ -172,7 +172,7 @@ public function test_pesantren_banding_requires_alasan_min_10_chars(): void
     /**
      * Task 6.5: submitAppeals changes akreditasi status from Ditolak to Banding.
      */
-public function test_submit_appeals_changes_akreditasi_status_from_ditolak_to_banding(): void
+    public function test_submit_appeals_changes_akreditasi_status_from_ditolak_to_banding(): void
     {
         $data = $this->createPesantrenWithRejectedAkreditasi();
         $user = $data['user'];

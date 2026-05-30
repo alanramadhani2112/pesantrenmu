@@ -34,8 +34,8 @@ class ProgressTracker
         $percentage = round(($filled / $total) * 100, 2);
 
         return [
-            'filled'     => $filled,
-            'total'      => $total,
+            'filled' => $filled,
+            'total' => $total,
             'percentage' => $percentage,
         ];
     }
@@ -132,7 +132,7 @@ class ProgressTracker
         }
 
         return [
-            'blocked'  => count($blockers) > 0,
+            'blocked' => count($blockers) > 0,
             'blockers' => $blockers,
         ];
     }

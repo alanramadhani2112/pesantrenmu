@@ -59,7 +59,7 @@ class SendPerbaikanReminders extends Command
                 'auto_rejected' => $autoRejected,
             ]);
         } catch (\Throwable $e) {
-            $this->error('Failed to send perbaikan reminders: ' . $e->getMessage());
+            $this->error('Failed to send perbaikan reminders: '.$e->getMessage());
 
             Log::error('akreditasi:send-perbaikan-reminders failed', [
                 'error' => $e->getMessage(),

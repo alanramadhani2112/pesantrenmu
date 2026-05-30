@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Pesantren;
 
+use App\Models\Ipm;
 use App\Models\Pesantren;
-use App\Models\PesantrenUnit;
 use App\Models\User;
 use App\Services\PesantrenService;
 use Database\Seeders\RoleSeeder;
@@ -23,7 +23,9 @@ class ProfileServiceTest extends TestCase
     use RefreshDatabase;
 
     private PesantrenService $service;
+
     private User $user;
+
     private Pesantren $pesantren;
 
     protected function setUp(): void
@@ -201,7 +203,7 @@ class ProfileServiceTest extends TestCase
     public function test_check_data_completeness_reports_missing_sdm(): void
     {
         $this->pesantren->update($this->fullProfileData());
-        \App\Models\Ipm::create([
+        Ipm::create([
             'user_id' => $this->user->id,
             'nsp_file' => 'nsp.pdf',
             'lulus_santri_file' => 'lulus.pdf',

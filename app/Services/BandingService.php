@@ -6,16 +6,16 @@ use App\Events\BandingDecided;
 use App\Events\BandingSubmitted;
 use App\Exceptions\InvalidTransitionException;
 use App\Models\Akreditasi;
-use App\Models\AkreditasiCatatan;
 use App\Models\AkreditasiBandingEdpm;
 use App\Models\AkreditasiBandingEdpmCatatan;
-use App\Models\AkreditasiEdpm;
+use App\Models\AkreditasiCatatan;
 use App\Models\Assessment;
 use App\Models\Banding;
 use App\Models\User;
 use App\Notifications\AkreditasiNotification;
 use App\StateMachine\AkreditasiStateMachine;
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Notification;
 class BandingService
 {
     protected PesantrenService $pesantrenService;
+
     protected AkreditasiStateMachine $stateMachine;
 
     public function __construct(
@@ -57,7 +58,7 @@ class BandingService
     {
         $akreditasi = Akreditasi::withTrashed()->find($akreditasiId);
 
-        if (!$akreditasi) {
+        if (! $akreditasi) {
             return ['success' => false, 'banding' => null, 'error' => 'Akreditasi tidak ditemukan.'];
         }
 
@@ -73,7 +74,7 @@ class BandingService
         // Validate: assessors were previously assigned (akreditasi reached status 4 or beyond)
         // This is indicated by the existence of Assessment records for this akreditasi
         $hasAssessors = Assessment::where('akreditasi_id', $akreditasiId)->exists();
-        if (!$hasAssessors) {
+        if (! $hasAssessors) {
             return [
                 'success' => false,
                 'banding' => null,
@@ -113,7 +114,7 @@ class BandingService
 
         // Perform the transition and create banding record in a transaction
         $pesantrenUser = User::find($pesantrenId);
-        if (!$pesantrenUser) {
+        if (! $pesantrenUser) {
             return ['success' => false, 'banding' => null, 'error' => 'Pengguna pesantren tidak ditemukan.'];
         }
 
@@ -140,7 +141,7 @@ class BandingService
                     Notification::send($admins, new AkreditasiNotification(
                         'banding_submitted',
                         'Pengajuan Banding Baru',
-                        'Pesantren telah mengajukan banding untuk akreditasi #' . $akreditasi->id . '.',
+                        'Pesantren telah mengajukan banding untuk akreditasi #'.$akreditasi->id.'.',
                         '#'
                     ));
                 }
@@ -159,6 +160,7 @@ class BandingService
                 'akreditasi_id' => $akreditasiId,
                 'error' => $e->getMessage(),
             ]);
+
             return ['success' => false, 'banding' => null, 'error' => 'Terjadi kesalahan saat mengajukan banding.'];
         }
     }
@@ -183,17 +185,17 @@ class BandingService
      */
     public function decideBanding(int $bandingId, int $adminId, string $result): array
     {
-        if (!in_array($result, ['diterima', 'ditolak'], true)) {
+        if (! in_array($result, ['diterima', 'ditolak'], true)) {
             return ['success' => false, 'error' => 'Hasil banding harus "diterima" atau "ditolak".'];
         }
 
         $banding = Banding::find($bandingId);
-        if (!$banding) {
+        if (! $banding) {
             return ['success' => false, 'error' => 'Banding tidak ditemukan.'];
         }
 
         $akreditasi = Akreditasi::withTrashed()->find($banding->akreditasi_id);
-        if (!$akreditasi) {
+        if (! $akreditasi) {
             return ['success' => false, 'error' => 'Akreditasi tidak ditemukan.'];
         }
 
@@ -202,7 +204,7 @@ class BandingService
         }
 
         $adminUser = User::find($adminId);
-        if (!$adminUser) {
+        if (! $adminUser) {
             return ['success' => false, 'error' => 'Pengguna admin tidak ditemukan.'];
         }
 
@@ -280,6 +282,7 @@ class BandingService
                 'banding_id' => $bandingId,
                 'error' => $e->getMessage(),
             ]);
+
             return ['success' => false, 'error' => 'Terjadi kesalahan saat memproses keputusan banding.'];
         }
     }
@@ -298,7 +301,7 @@ class BandingService
     public function shouldUseBandingTables(int $akreditasiId): bool
     {
         $akreditasi = Akreditasi::find($akreditasiId);
-        if (!$akreditasi || (int) $akreditasi->status !== AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
+        if (! $akreditasi || (int) $akreditasi->status !== AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
             return false;
         }
 
@@ -399,7 +402,7 @@ class BandingService
     {
         $eligibility = $this->checkBandingEligibility($akreditasiId);
 
-        if (!$eligibility['allowed']) {
+        if (! $eligibility['allowed']) {
             return null;
         }
 
@@ -419,7 +422,7 @@ class BandingService
     {
         $banding = Banding::find($bandingId);
 
-        if (!$banding || $banding->status !== 'pending') {
+        if (! $banding || $banding->status !== 'pending') {
             return false;
         }
 
@@ -464,7 +467,7 @@ class BandingService
     {
         $banding = Banding::find($bandingId);
 
-        if (!$banding || $banding->status !== 'under_review') {
+        if (! $banding || $banding->status !== 'under_review') {
             return false;
         }
 
@@ -488,7 +491,7 @@ class BandingService
     {
         $banding = Banding::find($bandingId);
 
-        if (!$banding || $banding->status !== 'under_review') {
+        if (! $banding || $banding->status !== 'under_review') {
             return null;
         }
 
@@ -499,7 +502,7 @@ class BandingService
         $reviewer = User::find($banding->reviewer_id);
         $akreditasi = Akreditasi::withTrashed()->find($banding->akreditasi_id);
 
-        if (!$reviewer || !$akreditasi || (int) $akreditasi->status !== AkreditasiStateMachine::STATUS_BANDING) {
+        if (! $reviewer || ! $akreditasi || (int) $akreditasi->status !== AkreditasiStateMachine::STATUS_BANDING) {
             return null;
         }
 
@@ -549,7 +552,7 @@ class BandingService
     {
         $banding = Banding::find($bandingId);
 
-        if (!$banding || $banding->status !== 'under_review') {
+        if (! $banding || $banding->status !== 'under_review') {
             return false;
         }
 
@@ -560,7 +563,7 @@ class BandingService
         $reviewer = User::find($banding->reviewer_id);
         $akreditasi = Akreditasi::withTrashed()->find($banding->akreditasi_id);
 
-        if (!$reviewer || !$akreditasi || (int) $akreditasi->status !== AkreditasiStateMachine::STATUS_BANDING) {
+        if (! $reviewer || ! $akreditasi || (int) $akreditasi->status !== AkreditasiStateMachine::STATUS_BANDING) {
             return false;
         }
 
@@ -591,7 +594,7 @@ class BandingService
                 $pesantrenUser->notify(new AkreditasiNotification(
                     'banding_rejected',
                     'Banding Ditolak',
-                    'Pengajuan banding Anda ditolak. Alasan: ' . $keputusan,
+                    'Pengajuan banding Anda ditolak. Alasan: '.$keputusan,
                     '#'
                 ));
             }
@@ -610,7 +613,7 @@ class BandingService
     /**
      * Get paginated banding list with optional status filter and search.
      */
-    public function getPaginatedBandings(?string $statusFilter = null, ?string $search = null, int $perPage = 10): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    public function getPaginatedBandings(?string $statusFilter = null, ?string $search = null, int $perPage = 10): LengthAwarePaginator
     {
         $query = Banding::with(['akreditasi.user.pesantren', 'reviewer'])
             ->orderBy('created_at', 'asc');
@@ -668,7 +671,7 @@ class BandingService
                 $reviewer->notify(new AkreditasiNotification(
                     'banding_reminder',
                     'Pengingat Deadline Review Banding',
-                    'Deadline review banding akan berakhir dalam ' . $banding->daysUntilDeadline() . ' hari.',
+                    'Deadline review banding akan berakhir dalam '.$banding->daysUntilDeadline().' hari.',
                     '#'
                 ));
                 $reminders++;
@@ -687,7 +690,7 @@ class BandingService
                 Notification::send($admins, new AkreditasiNotification(
                     'banding_escalation',
                     'Banding Melewati Deadline',
-                    'Banding #' . $banding->id . ' telah melewati deadline review (' . $banding->daysOverdue() . ' hari).',
+                    'Banding #'.$banding->id.' telah melewati deadline review ('.$banding->daysOverdue().' hari).',
                     '#'
                 ));
                 $escalations++;

@@ -11,8 +11,8 @@ use App\StateMachine\AkreditasiStateMachine;
 use Carbon\Carbon;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 /**
  * Property-Based Test: Property 10 — Visitasi Date Validation
@@ -24,7 +24,6 @@ use PHPUnit\Framework\Attributes\Group;
  *   - (tanggal_akhir - tanggal_mulai) ≤ 14 days
  *
  * **Validates: Requirements 5.2, 5.3, 5.7**
- *
  */
 #[Group('akreditasi-workflow-redesign')]
 class Property10VisitasiDateValidationTest extends TestCase
@@ -48,45 +47,40 @@ class Property10VisitasiDateValidationTest extends TestCase
      * Create a pesantren user, asesor user, akreditasi at status 4, and assessment.
      * Returns ['akreditasi' => Akreditasi, 'asesor1UserId' => int]
      */
-private function createAssessmentScenario(): array
+    private function createAssessmentScenario(): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
-        $asesor1User   = User::factory()->create(['role_id' => 2]);
+        $asesor1User = User::factory()->create(['role_id' => 2]);
 
         $asesor = Asesor::create([
-            'user_id'           => $asesor1User->id,
+            'user_id' => $asesor1User->id,
             'nama_dengan_gelar' => 'Dr. Asesor Satu',
-            'nama_tanpa_gelar'  => 'Asesor Satu',
+            'nama_tanpa_gelar' => 'Asesor Satu',
         ]);
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status'  => AkreditasiStateMachine::STATUS_ASSESSMENT, // 4
+            'status' => AkreditasiStateMachine::STATUS_ASSESSMENT, // 4
         ]);
 
         Assessment::create([
-            'akreditasi_id'  => $akreditasi->id,
-            'asesor_id'      => $asesor->id,
-            'tipe'           => 1,
-            'tanggal_mulai'  => now(),
+            'akreditasi_id' => $akreditasi->id,
+            'asesor_id' => $asesor->id,
+            'tipe' => 1,
+            'tanggal_mulai' => now(),
             'tanggal_berakhir' => now()->addDays(30),
         ]);
 
         return [
-            'akreditasi'    => $akreditasi,
+            'akreditasi' => $akreditasi,
             'asesor1UserId' => $asesor1User->id,
         ];
     }
 
     /**
      * Determine whether a date pair is valid per the visitasi date rules.
-     *
-     * @param Carbon $tanggalMulai
-     * @param Carbon $tanggalAkhir
-     * @param Carbon $today
-     * @return bool
      */
-private function isValidDatePair(Carbon $tanggalMulai, Carbon $tanggalAkhir, Carbon $today): bool
+    private function isValidDatePair(Carbon $tanggalMulai, Carbon $tanggalAkhir, Carbon $today): bool
     {
         $minMulai = $today->copy()->addDays(7);
 
@@ -119,11 +113,11 @@ private function isValidDatePair(Carbon $tanggalMulai, Carbon $tanggalAkhir, Car
      *
      * **Validates: Requirements 5.2, 5.4**
      */
-public function test_property10_valid_date_pairs_always_succeed(): void
+    public function test_property10_valid_date_pairs_always_succeed(): void
     {
         $iterations = 100;
-        $succeeded  = 0;
-        $today      = Carbon::today();
+        $succeeded = 0;
+        $today = Carbon::today();
 
         for ($i = 0; $i < $iterations; $i++) {
             ['akreditasi' => $akreditasi, 'asesor1UserId' => $asesor1UserId] = $this->createAssessmentScenario();
@@ -137,9 +131,9 @@ public function test_property10_valid_date_pairs_always_succeed(): void
             $tanggalAkhir = $tanggalMulai->copy()->addDays($durationDays);
 
             $scheduleData = [
-                'tanggal_mulai'    => $tanggalMulai->toDateString(),
-                'tanggal_akhir'    => $tanggalAkhir->toDateString(),
-                'catatan_visitasi' => 'Visitasi iteration ' . $i,
+                'tanggal_mulai' => $tanggalMulai->toDateString(),
+                'tanggal_akhir' => $tanggalAkhir->toDateString(),
+                'catatan_visitasi' => 'Visitasi iteration '.$i,
             ];
 
             $exception = null;
@@ -152,8 +146,8 @@ public function test_property10_valid_date_pairs_always_succeed(): void
 
             $this->assertNull(
                 $exception,
-                "Iteration {$i}: Valid dates (mulai={$tanggalMulai->toDateString()}, " .
-                "akhir={$tanggalAkhir->toDateString()}) should succeed, but threw: " .
+                "Iteration {$i}: Valid dates (mulai={$tanggalMulai->toDateString()}, ".
+                "akhir={$tanggalAkhir->toDateString()}) should succeed, but threw: ".
                 ($exception ? $exception->getMessage() : 'no exception')
             );
 
@@ -196,11 +190,11 @@ public function test_property10_valid_date_pairs_always_succeed(): void
      *
      * **Validates: Requirements 5.2, 5.3**
      */
-public function test_property10_tanggal_mulai_too_soon_always_fails(): void
+    public function test_property10_tanggal_mulai_too_soon_always_fails(): void
     {
         $iterations = 100;
-        $failed     = 0;
-        $today      = Carbon::today();
+        $failed = 0;
+        $today = Carbon::today();
 
         for ($i = 0; $i < $iterations; $i++) {
             ['akreditasi' => $akreditasi, 'asesor1UserId' => $asesor1UserId] = $this->createAssessmentScenario();
@@ -213,8 +207,8 @@ public function test_property10_tanggal_mulai_too_soon_always_fails(): void
             $tanggalAkhir = $tanggalMulai->copy()->addDays(rand(0, 7));
 
             $scheduleData = [
-                'tanggal_mulai'    => $tanggalMulai->toDateString(),
-                'tanggal_akhir'    => $tanggalAkhir->toDateString(),
+                'tanggal_mulai' => $tanggalMulai->toDateString(),
+                'tanggal_akhir' => $tanggalAkhir->toDateString(),
                 'catatan_visitasi' => '',
             ];
 
@@ -256,11 +250,11 @@ public function test_property10_tanggal_mulai_too_soon_always_fails(): void
      *
      * **Validates: Requirements 5.2, 5.3**
      */
-public function test_property10_tanggal_akhir_before_mulai_always_fails(): void
+    public function test_property10_tanggal_akhir_before_mulai_always_fails(): void
     {
         $iterations = 100;
-        $failed     = 0;
-        $today      = Carbon::today();
+        $failed = 0;
+        $today = Carbon::today();
 
         for ($i = 0; $i < $iterations; $i++) {
             ['akreditasi' => $akreditasi, 'asesor1UserId' => $asesor1UserId] = $this->createAssessmentScenario();
@@ -274,8 +268,8 @@ public function test_property10_tanggal_akhir_before_mulai_always_fails(): void
             $tanggalAkhir = $tanggalMulai->copy()->subDays($daysBefore);
 
             $scheduleData = [
-                'tanggal_mulai'    => $tanggalMulai->toDateString(),
-                'tanggal_akhir'    => $tanggalAkhir->toDateString(),
+                'tanggal_mulai' => $tanggalMulai->toDateString(),
+                'tanggal_akhir' => $tanggalAkhir->toDateString(),
                 'catatan_visitasi' => '',
             ];
 
@@ -289,7 +283,7 @@ public function test_property10_tanggal_akhir_before_mulai_always_fails(): void
 
             $this->assertNotNull(
                 $exception,
-                "Iteration {$i}: tanggal_akhir={$tanggalAkhir->toDateString()} before " .
+                "Iteration {$i}: tanggal_akhir={$tanggalAkhir->toDateString()} before ".
                 "tanggal_mulai={$tanggalMulai->toDateString()} should throw DomainException"
             );
 
@@ -317,11 +311,11 @@ public function test_property10_tanggal_akhir_before_mulai_always_fails(): void
      *
      * **Validates: Requirements 5.2, 5.3**
      */
-public function test_property10_duration_exceeds_14_days_always_fails(): void
+    public function test_property10_duration_exceeds_14_days_always_fails(): void
     {
         $iterations = 100;
-        $failed     = 0;
-        $today      = Carbon::today();
+        $failed = 0;
+        $today = Carbon::today();
 
         for ($i = 0; $i < $iterations; $i++) {
             ['akreditasi' => $akreditasi, 'asesor1UserId' => $asesor1UserId] = $this->createAssessmentScenario();
@@ -335,8 +329,8 @@ public function test_property10_duration_exceeds_14_days_always_fails(): void
             $tanggalAkhir = $tanggalMulai->copy()->addDays($durationDays);
 
             $scheduleData = [
-                'tanggal_mulai'    => $tanggalMulai->toDateString(),
-                'tanggal_akhir'    => $tanggalAkhir->toDateString(),
+                'tanggal_mulai' => $tanggalMulai->toDateString(),
+                'tanggal_akhir' => $tanggalAkhir->toDateString(),
                 'catatan_visitasi' => '',
             ];
 
@@ -380,17 +374,17 @@ public function test_property10_duration_exceeds_14_days_always_fails(): void
      *
      * **Validates: Requirements 5.2, 5.3**
      */
-public function test_property10_biconditional_accept_iff_all_rules_pass(): void
+    public function test_property10_biconditional_accept_iff_all_rules_pass(): void
     {
         $iterations = 100;
-        $today      = Carbon::today();
+        $today = Carbon::today();
 
         for ($i = 0; $i < $iterations; $i++) {
             ['akreditasi' => $akreditasi, 'asesor1UserId' => $asesor1UserId] = $this->createAssessmentScenario();
 
             // Randomly generate a date pair that may or may not be valid
-            $mulaiOffset  = rand(-5, 60);  // -5 to 60 days from today
-            $akhirOffset  = rand(-10, 30); // relative to tanggal_mulai
+            $mulaiOffset = rand(-5, 60);  // -5 to 60 days from today
+            $akhirOffset = rand(-10, 30); // relative to tanggal_mulai
 
             $tanggalMulai = $today->copy()->addDays($mulaiOffset)->startOfDay();
             $tanggalAkhir = $tanggalMulai->copy()->addDays($akhirOffset)->startOfDay();
@@ -398,8 +392,8 @@ public function test_property10_biconditional_accept_iff_all_rules_pass(): void
             $expectedValid = $this->isValidDatePair($tanggalMulai, $tanggalAkhir, $today);
 
             $scheduleData = [
-                'tanggal_mulai'    => $tanggalMulai->toDateString(),
-                'tanggal_akhir'    => $tanggalAkhir->toDateString(),
+                'tanggal_mulai' => $tanggalMulai->toDateString(),
+                'tanggal_akhir' => $tanggalAkhir->toDateString(),
                 'catatan_visitasi' => '',
             ];
 
@@ -414,8 +408,8 @@ public function test_property10_biconditional_accept_iff_all_rules_pass(): void
             if ($expectedValid) {
                 $this->assertNull(
                     $exception,
-                    "Iteration {$i}: Valid pair (mulai={$tanggalMulai->toDateString()}, " .
-                    "akhir={$tanggalAkhir->toDateString()}) should succeed, but threw: " .
+                    "Iteration {$i}: Valid pair (mulai={$tanggalMulai->toDateString()}, ".
+                    "akhir={$tanggalAkhir->toDateString()}) should succeed, but threw: ".
                     ($exception ? $exception->getMessage() : 'no exception')
                 );
 
@@ -427,7 +421,7 @@ public function test_property10_biconditional_accept_iff_all_rules_pass(): void
             } else {
                 $this->assertNotNull(
                     $exception,
-                    "Iteration {$i}: Invalid pair (mulai={$tanggalMulai->toDateString()}, " .
+                    "Iteration {$i}: Invalid pair (mulai={$tanggalMulai->toDateString()}, ".
                     "akhir={$tanggalAkhir->toDateString()}) should throw DomainException but succeeded"
                 );
 
@@ -451,10 +445,10 @@ public function test_property10_biconditional_accept_iff_all_rules_pass(): void
      *
      * **Validates: Requirement 5.2**
      */
-public function test_property10_boundary_exactly_7_days_ahead_is_valid(): void
+    public function test_property10_boundary_exactly_7_days_ahead_is_valid(): void
     {
         $iterations = 50;
-        $today      = Carbon::today();
+        $today = Carbon::today();
 
         for ($i = 0; $i < $iterations; $i++) {
             ['akreditasi' => $akreditasi, 'asesor1UserId' => $asesor1UserId] = $this->createAssessmentScenario();
@@ -463,8 +457,8 @@ public function test_property10_boundary_exactly_7_days_ahead_is_valid(): void
             $tanggalAkhir = $tanggalMulai->copy()->addDays(rand(0, 14));
 
             $scheduleData = [
-                'tanggal_mulai'    => $tanggalMulai->toDateString(),
-                'tanggal_akhir'    => $tanggalAkhir->toDateString(),
+                'tanggal_mulai' => $tanggalMulai->toDateString(),
+                'tanggal_akhir' => $tanggalAkhir->toDateString(),
                 'catatan_visitasi' => '',
             ];
 
@@ -500,10 +494,10 @@ public function test_property10_boundary_exactly_7_days_ahead_is_valid(): void
      *
      * **Validates: Requirement 5.2**
      */
-public function test_property10_boundary_6_days_ahead_is_invalid(): void
+    public function test_property10_boundary_6_days_ahead_is_invalid(): void
     {
         $iterations = 50;
-        $today      = Carbon::today();
+        $today = Carbon::today();
 
         for ($i = 0; $i < $iterations; $i++) {
             ['akreditasi' => $akreditasi, 'asesor1UserId' => $asesor1UserId] = $this->createAssessmentScenario();
@@ -512,8 +506,8 @@ public function test_property10_boundary_6_days_ahead_is_invalid(): void
             $tanggalAkhir = $tanggalMulai->copy()->addDays(rand(0, 7));
 
             $scheduleData = [
-                'tanggal_mulai'    => $tanggalMulai->toDateString(),
-                'tanggal_akhir'    => $tanggalAkhir->toDateString(),
+                'tanggal_mulai' => $tanggalMulai->toDateString(),
+                'tanggal_akhir' => $tanggalAkhir->toDateString(),
                 'catatan_visitasi' => '',
             ];
 
@@ -549,21 +543,21 @@ public function test_property10_boundary_6_days_ahead_is_invalid(): void
      *
      * **Validates: Requirement 5.2**
      */
-public function test_property10_boundary_exactly_14_day_duration_is_valid(): void
+    public function test_property10_boundary_exactly_14_day_duration_is_valid(): void
     {
         $iterations = 50;
-        $today      = Carbon::today();
+        $today = Carbon::today();
 
         for ($i = 0; $i < $iterations; $i++) {
             ['akreditasi' => $akreditasi, 'asesor1UserId' => $asesor1UserId] = $this->createAssessmentScenario();
 
-            $daysAhead    = rand(7, 60);
+            $daysAhead = rand(7, 60);
             $tanggalMulai = $today->copy()->addDays($daysAhead);
             $tanggalAkhir = $tanggalMulai->copy()->addDays(14); // exactly 14 days
 
             $scheduleData = [
-                'tanggal_mulai'    => $tanggalMulai->toDateString(),
-                'tanggal_akhir'    => $tanggalAkhir->toDateString(),
+                'tanggal_mulai' => $tanggalMulai->toDateString(),
+                'tanggal_akhir' => $tanggalAkhir->toDateString(),
                 'catatan_visitasi' => '',
             ];
 
@@ -600,36 +594,36 @@ public function test_property10_boundary_exactly_14_day_duration_is_valid(): voi
      *
      * **Validates: Requirements 5.7, 5.9**
      */
-public function test_property10_reschedule_applies_same_date_rules(): void
+    public function test_property10_reschedule_applies_same_date_rules(): void
     {
         $iterations = 100;
-        $today      = Carbon::today();
+        $today = Carbon::today();
 
         for ($i = 0; $i < $iterations; $i++) {
             $pesantrenUser = User::factory()->create(['role_id' => 3]);
-            $asesor1User   = User::factory()->create(['role_id' => 2]);
+            $asesor1User = User::factory()->create(['role_id' => 2]);
 
             $asesor = Asesor::create([
-                'user_id'           => $asesor1User->id,
+                'user_id' => $asesor1User->id,
                 'nama_dengan_gelar' => 'Dr. Asesor',
-                'nama_tanpa_gelar'  => 'Asesor',
+                'nama_tanpa_gelar' => 'Asesor',
             ]);
 
             // Create akreditasi at status 3 (Visitasi) with a current schedule far in the future
             // so the H-7 window is open
             $currentMulai = $today->copy()->addDays(30);
             $akreditasi = Akreditasi::create([
-                'user_id'            => $pesantrenUser->id,
-                'status'             => AkreditasiStateMachine::STATUS_VISITASI, // 3
-                'tgl_visitasi'       => $currentMulai->toDateString(),
+                'user_id' => $pesantrenUser->id,
+                'status' => AkreditasiStateMachine::STATUS_VISITASI, // 3
+                'tgl_visitasi' => $currentMulai->toDateString(),
                 'tgl_visitasi_akhir' => $currentMulai->copy()->addDays(3)->toDateString(),
             ]);
 
             Assessment::create([
-                'akreditasi_id'   => $akreditasi->id,
-                'asesor_id'       => $asesor->id,
-                'tipe'            => 1,
-                'tanggal_mulai'   => now(),
+                'akreditasi_id' => $akreditasi->id,
+                'asesor_id' => $asesor->id,
+                'tipe' => 1,
+                'tanggal_mulai' => now(),
                 'tanggal_berakhir' => now()->addDays(30),
             ]);
 
@@ -643,8 +637,8 @@ public function test_property10_reschedule_applies_same_date_rules(): void
             $expectedValid = $this->isValidDatePair($newMulai, $newAkhir, $today);
 
             $scheduleData = [
-                'tanggal_mulai'    => $newMulai->toDateString(),
-                'tanggal_akhir'    => $newAkhir->toDateString(),
+                'tanggal_mulai' => $newMulai->toDateString(),
+                'tanggal_akhir' => $newAkhir->toDateString(),
                 'catatan_visitasi' => '',
             ];
 
@@ -659,7 +653,7 @@ public function test_property10_reschedule_applies_same_date_rules(): void
             if ($expectedValid) {
                 $this->assertNull(
                     $exception,
-                    "Reschedule iteration {$i}: Valid pair should succeed, but threw: " .
+                    "Reschedule iteration {$i}: Valid pair should succeed, but threw: ".
                     ($exception ? $exception->getMessage() : 'no exception')
                 );
             } else {

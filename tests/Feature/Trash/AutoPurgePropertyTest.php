@@ -7,10 +7,11 @@ use App\Models\Pesantren;
 use App\Models\User;
 use App\Services\TrashService;
 use Database\Seeders\RoleSeeder;
+use Faker\Factory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\TestCase;
 
 /**
  * Feature: soft-delete-restore-flow
@@ -53,7 +54,7 @@ class AutoPurgePropertyTest extends TestCase
 
     public static function purgeScenarioProvider(): array
     {
-        $faker = \Faker\Factory::create();
+        $faker = Factory::create();
         $cases = [];
         for ($i = 0; $i < 100; $i++) {
             $retentionDays = $faker->numberBetween(10, 90);
@@ -63,12 +64,12 @@ class AutoPurgePropertyTest extends TestCase
             $freshDays = $faker->numberBetween(0, $retentionDays - 1);
             $cases[] = [$retentionDays, $expiredDays, $freshDays];
         }
+
         return $cases;
     }
 
-    /**     */
-#[DataProvider('purgeScenarioProvider')]
-public function test_property_5_purge_removes_only_expired_records(
+    #[DataProvider('purgeScenarioProvider')]
+    public function test_property_5_purge_removes_only_expired_records(
         int $retentionDays,
         int $expiredDays,
         int $freshDays

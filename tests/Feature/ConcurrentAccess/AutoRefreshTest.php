@@ -3,9 +3,6 @@
 namespace Tests\Feature\ConcurrentAccess;
 
 use App\Models\Akreditasi;
-use App\Models\AkreditasiEdpm;
-use App\Models\Asesor;
-use App\Models\Assessment;
 use App\Models\Edpm;
 use App\Models\Ipm;
 use App\Models\MasterEdpmButir;
@@ -13,17 +10,19 @@ use App\Models\MasterEdpmKomponen;
 use App\Models\Pesantren;
 use App\Models\SdmPesantren;
 use App\Models\User;
+use Carbon\Carbon;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Volt\Volt;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 /**
  * Example-Based Feature Tests for Auto-Refresh.
- *
  */
 #[Group('Feature:concurrent-access-handling')]
 class AutoRefreshTest extends TestCase
@@ -34,6 +33,8 @@ class AutoRefreshTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RolePermissionSeeder::class);
         Notification::fake();
     }
 
@@ -44,7 +45,7 @@ class AutoRefreshTest extends TestCase
      * update the component's akreditasi state and dispatch a notification.
      * Tests the logic directly without relying on Livewire poll infrastructure.
      */
-public function test_check_for_updates_detects_status_change_and_dispatches_notification(): void
+    public function test_check_for_updates_detects_status_change_and_dispatches_notification(): void
     {
         $adminUser = User::factory()->create(['role_id' => 1]);
         $this->actingAs($adminUser);
@@ -59,7 +60,7 @@ public function test_check_for_updates_detects_status_change_and_dispatches_noti
         $initialTimestamp = $akreditasi->updated_at->toISOString();
 
         // Simulate external status change with a future timestamp
-        $futureTime = \Carbon\Carbon::now()->addSeconds(10);
+        $futureTime = Carbon::now()->addSeconds(10);
         DB::table('akreditasis')
             ->where('id', $akreditasi->id)
             ->update([
@@ -86,7 +87,7 @@ public function test_check_for_updates_detects_status_change_and_dispatches_noti
     /**
      * Task 8.3 (variant): checkForUpdates() does NOT dispatch notification when status unchanged.
      */
-public function test_check_for_updates_no_notification_when_status_unchanged(): void
+    public function test_check_for_updates_no_notification_when_status_unchanged(): void
     {
         $adminUser = User::factory()->create(['role_id' => 1]);
         $this->actingAs($adminUser);
@@ -110,7 +111,7 @@ public function test_check_for_updates_no_notification_when_status_unchanged(): 
     /**
      * Task 8.4: akreditasiUpdatedAt is set on mount and updates after checkForUpdates().
      */
-public function test_akreditasi_updated_at_updates_after_check_for_updates(): void
+    public function test_akreditasi_updated_at_updates_after_check_for_updates(): void
     {
         $adminUser = User::factory()->create(['role_id' => 1]);
         $this->actingAs($adminUser);
@@ -128,8 +129,8 @@ public function test_akreditasi_updated_at_updates_after_check_for_updates(): vo
         $component->assertSet('akreditasiUpdatedAt', $initialTimestamp);
 
         // Simulate external update with a future timestamp (to avoid same-second issue)
-        $futureTime = \Carbon\Carbon::now()->addSeconds(5);
-        \Illuminate\Support\Facades\DB::table('akreditasis')
+        $futureTime = Carbon::now()->addSeconds(5);
+        DB::table('akreditasis')
             ->where('id', $akreditasi->id)
             ->update(['updated_at' => $futureTime->toDateTimeString()]);
 
@@ -150,7 +151,7 @@ public function test_akreditasi_updated_at_updates_after_check_for_updates(): vo
      *
      * After checkForUpdates() detects a terminal status, the action forms should be hidden.
      */
-public function test_action_forms_hidden_after_terminal_status_detected(): void
+    public function test_action_forms_hidden_after_terminal_status_detected(): void
     {
         $adminUser = User::factory()->create(['role_id' => 1]);
         $this->actingAs($adminUser);
@@ -165,7 +166,7 @@ public function test_action_forms_hidden_after_terminal_status_detected(): void
         $component = Volt::test('pages.admin.akreditasi-detail', ['uuid' => $akreditasi->uuid]);
 
         // Simulate external terminal status change with future timestamp
-        $futureTime = \Carbon\Carbon::now()->addSeconds(5);
+        $futureTime = Carbon::now()->addSeconds(5);
         DB::table('akreditasis')
             ->where('id', $akreditasi->id)
             ->update(['status' => 2, 'updated_at' => $futureTime->toDateTimeString()]);

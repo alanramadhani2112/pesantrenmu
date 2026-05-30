@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
-use App\Repositories\Contracts\UserRepositoryInterface;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\Asesor;
 use App\Models\User;
+use App\Repositories\Contracts\UserRepositoryInterface;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
@@ -40,7 +41,7 @@ class UserService
             'status' => $data['status'] ? 1 : 0,
         ];
 
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $payload['password'] = Hash::make($data['password']);
         }
 
@@ -57,11 +58,11 @@ class UserService
             // Auto-create asesor profile when role is Asesor (role_id = 2)
             // so the user immediately appears in asesor assignment dropdowns.
             if ((int) $data['role_id'] === 2) {
-                \App\Models\Asesor::firstOrCreate(
+                Asesor::firstOrCreate(
                     ['user_id' => $user->id],
                     [
                         'nama_dengan_gelar' => $data['name'],
-                        'nama_tanpa_gelar'  => $data['name'],
+                        'nama_tanpa_gelar' => $data['name'],
                     ]
                 );
             }
@@ -73,6 +74,7 @@ class UserService
         if ($id == auth()->id()) {
             return false;
         }
+
         return $this->userRepository->delete($id);
     }
 

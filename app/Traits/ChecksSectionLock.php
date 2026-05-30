@@ -18,8 +18,7 @@ trait ChecksSectionLock
     /**
      * Check if a specific section is editable for the current user.
      *
-     * @param string $section Section identifier (e.g., 'profil', 'ipm.nsp', 'sdm', 'edpm.butir.3')
-     * @return bool
+     * @param  string  $section  Section identifier (e.g., 'profil', 'ipm.nsp', 'sdm', 'edpm.butir.3')
      */
     protected function isSectionEditable(string $section): bool
     {
@@ -31,17 +30,18 @@ trait ChecksSectionLock
         $pesantren = auth()->user()->pesantren;
 
         // If pesantren is not locked, everything is editable
-        if (!$pesantren || !$pesantren->is_locked) {
+        if (! $pesantren || ! $pesantren->is_locked) {
             return true;
         }
 
         // Pesantren is locked — check if this section is unlocked via rejection
         $akreditasi = $this->getActiveAkreditasi();
-        if (!$akreditasi) {
+        if (! $akreditasi) {
             return false;
         }
 
         $rejectionService = app(RejectionService::class);
+
         return $rejectionService->isSectionUnlocked($akreditasi->id, $section);
     }
 
@@ -53,8 +53,7 @@ trait ChecksSectionLock
      * - 'locked' if section is locked
      * - 'unlocked_for_correction' if section is unlocked via rejection
      *
-     * @param string $section Section identifier
-     * @return string
+     * @param  string  $section  Section identifier
      */
     protected function getSectionLockStatus(string $section): string
     {
@@ -65,12 +64,12 @@ trait ChecksSectionLock
 
         $pesantren = auth()->user()->pesantren;
 
-        if (!$pesantren || !$pesantren->is_locked) {
+        if (! $pesantren || ! $pesantren->is_locked) {
             return 'unlocked';
         }
 
         $akreditasi = $this->getActiveAkreditasi();
-        if (!$akreditasi) {
+        if (! $akreditasi) {
             return 'locked';
         }
 
@@ -84,8 +83,6 @@ trait ChecksSectionLock
 
     /**
      * Get the active akreditasi at status 5 for the current user.
-     *
-     * @return Akreditasi|null
      */
     protected function getActiveAkreditasi(): ?Akreditasi
     {

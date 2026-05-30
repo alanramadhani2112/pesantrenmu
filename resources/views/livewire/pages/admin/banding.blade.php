@@ -115,7 +115,7 @@ new #[Layout('layouts.app')] class extends Component {
                 <tr wire:key="banding-{{ $banding->id }}" class="{{ $isOverdue ? 'bg-light-danger' : '' }}" data-overdue="{{ $isOverdue ? 'true' : 'false' }}">
                     <td>
                         <div class="d-flex flex-column">
-                            <span class="text-gray-900 fw-bold fs-6">{{ $pesantrenName }}</span>
+                            <span class="text-gray-900 fw-semibold fs-6">{{ $pesantrenName }}</span>
                         </div>
                     </td>
 
@@ -136,7 +136,7 @@ new #[Layout('layouts.app')] class extends Component {
                     </td>
 
                     <td class="text-center">
-                        <span class="fw-bold {{ $isOverdue ? 'text-danger' : 'text-gray-900' }}">{{ $daysSinceSubmission }} hari</span>
+                        <span class="fw-semibold {{ $isOverdue ? 'text-danger' : 'text-gray-900' }}">{{ $daysSinceSubmission }} hari</span>
                         @if($isOverdue)
                             <x-ui.badge variant="danger" class="ms-1">Terlambat</x-ui.badge>
                         @endif

@@ -6,6 +6,7 @@ use App\Models\Akreditasi;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class AkreditasiRelationshipTest extends TestCase
@@ -18,39 +19,23 @@ class AkreditasiRelationshipTest extends TestCase
         $this->seed(RoleSeeder::class);
     }
 
-    public function test_parent_akreditasi_relationship_resolves_correctly(): void
+    public function test_akreditasi_no_longer_has_legacy_submission_chain_column(): void
     {
-        $user = User::factory()->create(['role_id' => 3]);
-
-        $parent = Akreditasi::create([
-            'user_id' => $user->id,
-            'status' => 2,
-        ]);
-
-        $child = Akreditasi::create([
-            'user_id' => $user->id,
-            'parent' => $parent->id,
-            'status' => 6,
-        ]);
-
-        $this->assertEquals($parent->id, $child->parentAkreditasi->id);
+        $this->assertFalse(Schema::hasColumn('akreditasis', 'parent'));
+        $this->assertFalse(method_exists(Akreditasi::class, 'parentAkreditasi'));
+        $this->assertFalse(method_exists(Akreditasi::class, 'children'));
     }
 
-    public function test_children_relationship_resolves_correctly(): void
+    public function test_akreditasi_can_still_be_created_without_legacy_chain_data(): void
     {
         $user = User::factory()->create(['role_id' => 3]);
 
-        $parent = Akreditasi::create([
+        $akreditasi = Akreditasi::create([
             'user_id' => $user->id,
-            'status' => 2,
-        ]);
-
-        $child = Akreditasi::create([
-            'user_id' => $user->id,
-            'parent' => $parent->id,
             'status' => 6,
         ]);
 
-        $this->assertTrue($parent->children->contains($child));
+        $this->assertNotNull($akreditasi->id);
+        $this->assertSame($user->id, $akreditasi->user_id);
     }
 }

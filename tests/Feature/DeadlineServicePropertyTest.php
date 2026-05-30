@@ -13,16 +13,16 @@ use Carbon\Carbon;
 use Database\Seeders\RoleSeeder;
 use Faker\Factory as Faker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 /**
  * Property-Based Tests for DeadlineService
  *
  * Uses PHPUnit with randomized data to approximate property-based testing.
  * Each property test runs 100 iterations with randomly generated inputs.
- *
  */
 #[Group('Feature: assessment-visitasi-timeout')]
 class DeadlineServicePropertyTest extends TestCase
@@ -50,14 +50,15 @@ class DeadlineServicePropertyTest extends TestCase
      * Create an Asesor with an associated User (role_id=2).
      * Returns [$asesor, $user].
      */
-private function createAsesorWithUser(): array
+    private function createAsesorWithUser(): array
     {
         $user = User::factory()->create(['role_id' => 2]);
         $asesor = Asesor::create([
             'user_id' => $user->id,
-            'nama_dengan_gelar' => 'Asesor ' . $user->id,
-            'nama_tanpa_gelar' => 'Asesor ' . $user->id,
+            'nama_dengan_gelar' => 'Asesor '.$user->id,
+            'nama_tanpa_gelar' => 'Asesor '.$user->id,
         ]);
+
         return [$asesor, $user];
     }
 
@@ -65,17 +66,18 @@ private function createAsesorWithUser(): array
      * Create an Akreditasi with a pesantren user (role_id=3).
      * Returns [$akreditasi, $pesantrenUser].
      */
-private function createAkreditasiWithUser(int $status = 5): array
+    private function createAkreditasiWithUser(int $status = 5): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
             'user_id' => $pesantrenUser->id,
-            'nama_pesantren' => 'Pesantren Test ' . $pesantrenUser->id,
+            'nama_pesantren' => 'Pesantren Test '.$pesantrenUser->id,
         ]);
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
             'status' => $status,
         ]);
+
         return [$akreditasi, $pesantrenUser];
     }
 
@@ -93,7 +95,7 @@ private function createAkreditasiWithUser(int $status = 5): array
      *
      * **Validates: Requirements 1.2**
      */
-public function test_property_1_deadline_calculation_correctness(): void
+    public function test_property_1_deadline_calculation_correctness(): void
     {
         $faker = Faker::create();
 
@@ -167,7 +169,7 @@ public function test_property_1_deadline_calculation_correctness(): void
      *
      * **Validates: Requirements 2.2, 2.3**
      */
-public function test_property_2_overdue_akreditasi_identification(): void
+    public function test_property_2_overdue_akreditasi_identification(): void
     {
         $faker = Faker::create();
 
@@ -248,11 +250,11 @@ public function test_property_2_overdue_akreditasi_identification(): void
      *
      * **Validates: Requirements 3.3**
      */
-public function test_property_3_reminder_notification_content_completeness(): void
+    public function test_property_3_reminder_notification_content_completeness(): void
     {
         $faker = Faker::create();
 
-        \Illuminate\Support\Facades\Notification::fake();
+        Notification::fake();
 
         $today = Carbon::create(2025, 8, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -262,7 +264,7 @@ public function test_property_3_reminder_notification_content_completeness(): vo
 
         for ($i = 0; $i < 100; $i++) {
             // Random pesantren name
-            $pesantrenName = $faker->company . ' Pesantren ' . $i;
+            $pesantrenName = $faker->company.' Pesantren '.$i;
 
             // Random phase: status 4 (Review Asesor) or 5 (Review Awal)
             $status = $faker->randomElement([4, 5]);
@@ -304,9 +306,9 @@ public function test_property_3_reminder_notification_content_completeness(): vo
             $this->deadlineService->processReminders();
 
             // Verify notification was sent and contains required fields
-            \Illuminate\Support\Facades\Notification::assertSentTo(
+            Notification::assertSentTo(
                 $asesorUser,
-                \App\Notifications\AkreditasiNotification::class,
+                AkreditasiNotification::class,
                 function ($notification) use ($pesantrenName, $expectedPhase, $expectedDeadlineStr, $i) {
                     $message = $notification->message;
                     $containsPesantren = str_contains($message, $pesantrenName);
@@ -332,9 +334,9 @@ public function test_property_3_reminder_notification_content_completeness(): vo
 
             // Clean up for next iteration (bypass observer to avoid audit log user_id constraint)
             $assessment->forceDelete();
-            \Illuminate\Support\Facades\DB::table('akreditasis')->where('id', $akreditasi->id)->delete();
-            \Illuminate\Support\Facades\DB::table('users')->where('id', $pesantrenUser->id)->delete();
-            \Illuminate\Support\Facades\Notification::fake(); // reset
+            DB::table('akreditasis')->where('id', $akreditasi->id)->delete();
+            DB::table('users')->where('id', $pesantrenUser->id)->delete();
+            Notification::fake(); // reset
         }
 
         Carbon::setTestNow();
@@ -354,11 +356,11 @@ public function test_property_3_reminder_notification_content_completeness(): vo
      *
      * **Validates: Requirements 3.5, 7.3**
      */
-public function test_property_4_reminder_deduplication(): void
+    public function test_property_4_reminder_deduplication(): void
     {
         $faker = Faker::create();
 
-        \Illuminate\Support\Facades\Notification::fake();
+        Notification::fake();
 
         $today = Carbon::create(2025, 8, 15, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -377,7 +379,7 @@ public function test_property_4_reminder_deduplication(): void
             $pesantrenUser = User::factory()->create(['role_id' => 3]);
             Pesantren::create([
                 'user_id' => $pesantrenUser->id,
-                'nama_pesantren' => 'Pesantren Dedup ' . $i,
+                'nama_pesantren' => 'Pesantren Dedup '.$i,
             ]);
 
             $akreditasi = Akreditasi::create([
@@ -402,15 +404,15 @@ public function test_property_4_reminder_deduplication(): void
             $this->deadlineService->processReminders();
 
             // Verify NO notification was sent (deduplication)
-            \Illuminate\Support\Facades\Notification::assertNotSentTo(
+            Notification::assertNotSentTo(
                 $asesorUser,
-                \App\Notifications\AkreditasiNotification::class
+                AkreditasiNotification::class
             );
 
             // Clean up (bypass observer to avoid audit log user_id constraint)
             $assessment->forceDelete();
-            \Illuminate\Support\Facades\DB::table('akreditasis')->where('id', $akreditasi->id)->delete();
-            \Illuminate\Support\Facades\DB::table('users')->where('id', $pesantrenUser->id)->delete();
+            DB::table('akreditasis')->where('id', $akreditasi->id)->delete();
+            DB::table('users')->where('id', $pesantrenUser->id)->delete();
         }
 
         Carbon::setTestNow();
@@ -431,7 +433,7 @@ public function test_property_4_reminder_deduplication(): void
      *
      * **Validates: Requirements 4.2**
      */
-public function test_property_5_escalation_notification_content_completeness(): void
+    public function test_property_5_escalation_notification_content_completeness(): void
     {
         $faker = Faker::create();
 
@@ -441,7 +443,7 @@ public function test_property_5_escalation_notification_content_completeness(): 
         config(['akreditasi-timeout.escalation.interval_days' => 1]);
 
         for ($i = 0; $i < 100; $i++) {
-            \Illuminate\Support\Facades\Notification::fake();
+            Notification::fake();
 
             // Create admin user
             $adminUser = User::factory()->create(['role_id' => 1]);
@@ -457,7 +459,7 @@ public function test_property_5_escalation_notification_content_completeness(): 
 
             // Create pesantren user
             $pesantrenUser = User::factory()->create(['role_id' => 3]);
-            $pesantrenName = 'Pesantren Eskalasi ' . $i;
+            $pesantrenName = 'Pesantren Eskalasi '.$i;
             Pesantren::create([
                 'user_id' => $pesantrenUser->id,
                 'nama_pesantren' => $pesantrenName,
@@ -470,7 +472,7 @@ public function test_property_5_escalation_notification_content_completeness(): 
 
             // Create asesor
             $asesorUser = User::factory()->create(['role_id' => 2]);
-            $asesorName = 'Asesor Eskalasi ' . $i;
+            $asesorName = 'Asesor Eskalasi '.$i;
             $asesor = Asesor::create([
                 'user_id' => $asesorUser->id,
                 'nama_dengan_gelar' => $asesorName,
@@ -492,9 +494,9 @@ public function test_property_5_escalation_notification_content_completeness(): 
             $this->deadlineService->processEscalations();
 
             // Verify notification was sent to admin and contains required fields
-            \Illuminate\Support\Facades\Notification::assertSentTo(
+            Notification::assertSentTo(
                 $adminUser,
-                \App\Notifications\AkreditasiNotification::class,
+                AkreditasiNotification::class,
                 function ($notification) use ($pesantrenName, $asesorName, $expectedPhase, $expectedDeadlineStr, $daysOverdue, $i) {
                     $message = $notification->message;
                     $containsPesantren = str_contains($message, $pesantrenName);
@@ -515,9 +517,9 @@ public function test_property_5_escalation_notification_content_completeness(): 
 
             // Clean up (bypass observer to avoid audit log user_id constraint)
             $assessment->forceDelete();
-            \Illuminate\Support\Facades\DB::table('akreditasis')->where('id', $akreditasi->id)->delete();
-            \Illuminate\Support\Facades\DB::table('users')->where('id', $pesantrenUser->id)->delete();
-            \Illuminate\Support\Facades\DB::table('users')->where('id', $adminUser->id)->delete();
+            DB::table('akreditasis')->where('id', $akreditasi->id)->delete();
+            DB::table('users')->where('id', $pesantrenUser->id)->delete();
+            DB::table('users')->where('id', $adminUser->id)->delete();
         }
 
         Carbon::setTestNow();
@@ -536,7 +538,7 @@ public function test_property_5_escalation_notification_content_completeness(): 
      *
      * **Validates: Requirements 4.4, 7.4**
      */
-public function test_property_6_escalation_interval_enforcement(): void
+    public function test_property_6_escalation_interval_enforcement(): void
     {
         $faker = Faker::create();
 
@@ -544,7 +546,7 @@ public function test_property_6_escalation_interval_enforcement(): void
         Carbon::setTestNow($today);
 
         for ($i = 0; $i < 100; $i++) {
-            \Illuminate\Support\Facades\Notification::fake();
+            Notification::fake();
 
             // Random escalation interval (1–7 days)
             $intervalDays = $faker->numberBetween(1, 7);
@@ -564,7 +566,7 @@ public function test_property_6_escalation_interval_enforcement(): void
             $pesantrenUser = User::factory()->create(['role_id' => 3]);
             Pesantren::create([
                 'user_id' => $pesantrenUser->id,
-                'nama_pesantren' => 'Pesantren Interval ' . $i,
+                'nama_pesantren' => 'Pesantren Interval '.$i,
             ]);
 
             $akreditasi = Akreditasi::create([
@@ -589,25 +591,25 @@ public function test_property_6_escalation_interval_enforcement(): void
             $this->deadlineService->processEscalations();
 
             if ($shouldSend) {
-                \Illuminate\Support\Facades\Notification::assertSentTo(
+                Notification::assertSentTo(
                     $adminUser,
-                    \App\Notifications\AkreditasiNotification::class,
+                    AkreditasiNotification::class,
                     function ($notification) {
                         return $notification->type === 'deadline_overdue_escalation';
                     }
                 );
             } else {
-                \Illuminate\Support\Facades\Notification::assertNotSentTo(
+                Notification::assertNotSentTo(
                     $adminUser,
-                    \App\Notifications\AkreditasiNotification::class
+                    AkreditasiNotification::class
                 );
             }
 
             // Clean up (bypass observer to avoid audit log user_id constraint)
             $assessment->forceDelete();
-            \Illuminate\Support\Facades\DB::table('akreditasis')->where('id', $akreditasi->id)->delete();
-            \Illuminate\Support\Facades\DB::table('users')->where('id', $pesantrenUser->id)->delete();
-            \Illuminate\Support\Facades\DB::table('users')->where('id', $adminUser->id)->delete();
+            DB::table('akreditasis')->where('id', $akreditasi->id)->delete();
+            DB::table('users')->where('id', $pesantrenUser->id)->delete();
+            DB::table('users')->where('id', $adminUser->id)->delete();
         }
 
         Carbon::setTestNow();
@@ -626,14 +628,14 @@ public function test_property_6_escalation_interval_enforcement(): void
      *
      * **Validates: Requirements 3.4**
      */
-public function test_unit_3_7_reminder_notification_uses_database_channel(): void
+    public function test_unit_3_7_reminder_notification_uses_database_channel(): void
     {
         $today = Carbon::create(2025, 10, 1, 0, 0, 0);
         Carbon::setTestNow($today);
 
         config(['akreditasi-timeout.reminder.days_before_deadline' => 3]);
 
-        \Illuminate\Support\Facades\Notification::fake();
+        Notification::fake();
 
         // Create pesantren user
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
@@ -662,13 +664,14 @@ public function test_unit_3_7_reminder_notification_uses_database_channel(): voi
         $this->deadlineService->processReminders();
 
         // Verify notification was sent
-        \Illuminate\Support\Facades\Notification::assertSentTo(
+        Notification::assertSentTo(
             $asesorUser,
-            \App\Notifications\AkreditasiNotification::class,
+            AkreditasiNotification::class,
             function ($notification) use ($asesorUser) {
                 // Verify the notification's via() includes 'database'
                 $channels = $notification->via($asesorUser);
                 $this->assertContains('database', $channels, "Reminder notification should use 'database' channel");
+
                 return true;
             }
         );
@@ -689,14 +692,14 @@ public function test_unit_3_7_reminder_notification_uses_database_channel(): voi
      *
      * **Validates: Requirements 4.5**
      */
-public function test_unit_3_8_escalation_stops_when_status_changes(): void
+    public function test_unit_3_8_escalation_stops_when_status_changes(): void
     {
         $today = Carbon::create(2025, 10, 15, 0, 0, 0);
         Carbon::setTestNow($today);
 
         config(['akreditasi-timeout.escalation.interval_days' => 1]);
 
-        \Illuminate\Support\Facades\Notification::fake();
+        Notification::fake();
 
         // Create admin user
         $adminUser = User::factory()->create(['role_id' => 1]);
@@ -730,31 +733,31 @@ public function test_unit_3_8_escalation_stops_when_status_changes(): void
         $this->deadlineService->processEscalations();
 
         // Verify NO escalation was sent (status is not 4 or 5)
-        \Illuminate\Support\Facades\Notification::assertNotSentTo(
+        Notification::assertNotSentTo(
             $adminUser,
-            \App\Notifications\AkreditasiNotification::class
+            AkreditasiNotification::class
         );
 
         // Now change status to 5 (Review Awal) and verify escalation IS sent
         $akreditasi->update(['status' => 5]);
-        \Illuminate\Support\Facades\Notification::fake(); // reset
+        Notification::fake(); // reset
 
         $this->deadlineService->processEscalations();
 
-        \Illuminate\Support\Facades\Notification::assertSentTo(
+        Notification::assertSentTo(
             $adminUser,
-            \App\Notifications\AkreditasiNotification::class
+            AkreditasiNotification::class
         );
 
         // Now change status back to 1 (completed) and verify escalation stops
         $akreditasi->update(['status' => 1]);
-        \Illuminate\Support\Facades\Notification::fake(); // reset
+        Notification::fake(); // reset
 
         $this->deadlineService->processEscalations();
 
-        \Illuminate\Support\Facades\Notification::assertNotSentTo(
+        Notification::assertNotSentTo(
             $adminUser,
-            \App\Notifications\AkreditasiNotification::class
+            AkreditasiNotification::class
         );
 
         Carbon::setTestNow();
@@ -774,7 +777,7 @@ public function test_unit_3_8_escalation_stops_when_status_changes(): void
      *
      * **Validates: Requirements 6.2**
      */
-public function test_property_7_available_asesors_excludes_current(): void
+    public function test_property_7_available_asesors_excludes_current(): void
     {
         $faker = Faker::create();
 

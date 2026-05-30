@@ -11,9 +11,13 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 class PesantrenExport implements FromCollection, WithHeadings, WithMapping
 {
     protected $search;
+
     protected $filterStatus;
+
     protected $filterAkreditasi;
+
     protected $sortField;
+
     protected $sortAsc;
 
     public function __construct($search = '', $filterStatus = '', $filterAkreditasi = '', $sortField = 'name', $sortAsc = true)
@@ -30,11 +34,11 @@ class PesantrenExport implements FromCollection, WithHeadings, WithMapping
         return User::where('role_id', 3)
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('name', 'like', '%' . $this->search . '%')
-                        ->orWhere('email', 'like', '%' . $this->search . '%')
+                    $q->where('name', 'like', '%'.$this->search.'%')
+                        ->orWhere('email', 'like', '%'.$this->search.'%')
                         ->orWhereHas('pesantren', function ($pq) {
-                            $pq->where('nama_pesantren', 'like', '%' . $this->search . '%')
-                                ->orWhere('ns_pesantren', 'like', '%' . $this->search . '%');
+                            $pq->where('nama_pesantren', 'like', '%'.$this->search.'%')
+                                ->orWhere('ns_pesantren', 'like', '%'.$this->search.'%');
                         });
                 });
             })

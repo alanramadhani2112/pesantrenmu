@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Document;
+use App\Models\DocumentCategory;
 use App\Models\User;
 
 /**
@@ -33,16 +34,16 @@ class DocumentPolicy
         if ($user->isPesantren()) {
             // Pesantren see public + pesantren_secret categories.
             return in_array($category->visibility, [
-                \App\Models\DocumentCategory::VISIBILITY_PUBLIC,
-                \App\Models\DocumentCategory::VISIBILITY_PESANTREN_SECRET,
+                DocumentCategory::VISIBILITY_PUBLIC,
+                DocumentCategory::VISIBILITY_PESANTREN_SECRET,
             ], true);
         }
 
         if ($user->isAsesor()) {
             // Asesor see public + asesor_secret categories.
             return in_array($category->visibility, [
-                \App\Models\DocumentCategory::VISIBILITY_PUBLIC,
-                \App\Models\DocumentCategory::VISIBILITY_ASESOR_SECRET,
+                DocumentCategory::VISIBILITY_PUBLIC,
+                DocumentCategory::VISIBILITY_ASESOR_SECRET,
             ], true);
         }
 

@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Asesor;
 use App\Models\User;
 use App\Services\UserService;
 use Database\Seeders\RoleSeeder;
@@ -19,6 +18,7 @@ class UserServiceTest extends TestCase
     use RefreshDatabase;
 
     protected UserService $service;
+
     protected User $admin;
 
     protected function setUp(): void

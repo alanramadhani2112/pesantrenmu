@@ -335,7 +335,7 @@ new #[Layout('layouts.app')] class extends Component {
                                     @elseif($existing_files['foto'])
                                         <img src="{{ Storage::url($existing_files['foto']) }}" class="w-100 h-100 object-fit-cover" alt="Foto asesor" loading="lazy">
                                     @else
-                                        <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted fs-1 fw-bold">
+                                        <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted fs-1 fw-semibold">
                                             {{ substr($nama_dengan_gelar ?? 'A', 0, 1) }}
                                         </div>
                                     @endif
@@ -524,7 +524,7 @@ new #[Layout('layouts.app')] class extends Component {
                                     <option value="Dosen">Dosen</option>
                                     <option value="Kepala Sekolah">Kepala Sekolah</option>
                                     <option value="Widyaiswara Pendidikan">Widyaiswara Pendidikan</option>
-                                    <option value="Widyaprada Kemendikdasmen">Widyaprada Kemendikdasmen</option>
+                                    <option value="Widyaprada">Widyaprada</option>
                                     <option value="Lainnya">Lainnya</option>
                                 </x-ui.select>
                             </x-ui.form-field>
@@ -561,7 +561,7 @@ new #[Layout('layouts.app')] class extends Component {
                         {{-- Riwayat Pendidikan --}}
                         <div>
                             <div class="d-flex align-items-center justify-content-between mb-4">
-                                <div class="fw-bold fs-6">Riwayat Pendidikan</div>
+                                <div class="fw-semibold fs-6">Riwayat Pendidikan</div>
                                 <x-ui.button type="button" wire:click="addRow('riwayat_pendidikan')" variant="light" size="sm">
                                     <x-ui.icon name="plus" class="fs-5 me-1" /> Tambah
                                 </x-ui.button>
@@ -595,7 +595,7 @@ new #[Layout('layouts.app')] class extends Component {
                         {{-- Pengalaman Bekerja --}}
                         <div>
                             <div class="d-flex align-items-center justify-content-between mb-4">
-                                <div class="fw-bold fs-6">Pengalaman Bekerja</div>
+                                <div class="fw-semibold fs-6">Pengalaman Bekerja</div>
                                 <x-ui.button type="button" wire:click="addRow('pengalaman_bekerja')" variant="light" size="sm">
                                     <x-ui.icon name="plus" class="fs-5 me-1" /> Tambah
                                 </x-ui.button>
@@ -630,7 +630,7 @@ new #[Layout('layouts.app')] class extends Component {
                         <div class="row g-6">
                             <div class="col-lg-6">
                                 <div class="d-flex align-items-center justify-content-between mb-4">
-                                    <div class="fw-bold fs-6">Pengalaman Pelatihan</div>
+                                    <div class="fw-semibold fs-6">Pengalaman Pelatihan</div>
                                     <x-ui.button type="button" wire:click="addRow('pengalaman_pelatihan')" variant="light" size="sm">
                                         <x-ui.icon name="plus" class="fs-5 me-1" /> Tambah
                                     </x-ui.button>
@@ -663,7 +663,7 @@ new #[Layout('layouts.app')] class extends Component {
 
                             <div class="col-lg-6">
                                 <div class="d-flex align-items-center justify-content-between mb-4">
-                                    <div class="fw-bold fs-6">Pengalaman Berorganisasi</div>
+                                    <div class="fw-semibold fs-6">Pengalaman Berorganisasi</div>
                                     <x-ui.button type="button" wire:click="addRow('pengalaman_berorganisasi')" variant="light" size="sm">
                                         <x-ui.icon name="plus" class="fs-5 me-1" /> Tambah
                                     </x-ui.button>
@@ -700,7 +700,7 @@ new #[Layout('layouts.app')] class extends Component {
                         {{-- Karya Publikasi --}}
                         <div>
                             <div class="d-flex align-items-center justify-content-between mb-4">
-                                <div class="fw-bold fs-6">Karya Publikasi</div>
+                                <div class="fw-semibold fs-6">Karya Publikasi</div>
                                 <x-ui.button type="button" wire:click="addRow('karya_publikasi')" variant="light" size="sm">
                                     <x-ui.icon name="plus" class="fs-5 me-1" /> Tambah
                                 </x-ui.button>
@@ -753,11 +753,11 @@ new #[Layout('layouts.app')] class extends Component {
                                 >
                                     @if($$prop)
                                         <x-ui.icon name="document" class="fs-2x text-success mb-2" />
-                                        <span class="fs-8 fw-bold text-success">{{ $$prop->getClientOriginalName() }}</span>
+                                        <span class="fs-8 fw-semibold text-success">{{ $$prop->getClientOriginalName() }}</span>
                                         <span class="fs-9 text-muted">Siap diunggah</span>
                                     @elseif($existing_files[$doc['existing_key']])
                                         <x-ui.icon name="document" class="fs-2x text-primary mb-2" />
-                                        <span class="fs-8 fw-bold text-muted">File terunggah</span>
+                                        <span class="fs-8 fw-semibold text-muted">File terunggah</span>
                                         <span class="fs-9 text-primary">Klik untuk ganti</span>
                                     @else
                                         <x-ui.icon name="cloud-upload" class="fs-2x text-muted mb-2" />
@@ -815,7 +815,7 @@ new #[Layout('layouts.app')] class extends Component {
                             @endif
                         </div>
                         <h2 class="spm-card-title fs-4 mb-1">{{ $nama_dengan_gelar ?: '-' }}</h2>
-                        <div class="text-muted fw-bold fs-8 text-uppercase mb-1">
+                        <div class="text-muted fw-semibold fs-8 text-uppercase mb-1">
                             NIA PM: {{ $nomor_induk_asesor_pm ?: '-' }}
                         </div>
                         <div class="text-muted fs-8 mb-4">
@@ -876,7 +876,7 @@ new #[Layout('layouts.app')] class extends Component {
                         <div class="d-flex flex-column gap-8">
 
                             <div>
-                                <div class="text-uppercase fw-bold fs-8 text-muted mb-3">Riwayat Pendidikan</div>
+                                <div class="text-uppercase fw-semibold fs-8 text-muted mb-3">Riwayat Pendidikan</div>
                                 @forelse(array_filter($riwayat_pendidikan, fn($i) => !empty($i['dimana'])) as $item)
                                     <div class="d-flex align-items-center justify-content-between py-3 border-bottom border-dashed">
                                         <div class="d-flex align-items-center gap-3">
@@ -891,7 +891,7 @@ new #[Layout('layouts.app')] class extends Component {
                             </div>
 
                             <div>
-                                <div class="text-uppercase fw-bold fs-8 text-muted mb-3">Pengalaman Bekerja</div>
+                                <div class="text-uppercase fw-semibold fs-8 text-muted mb-3">Pengalaman Bekerja</div>
                                 @forelse(array_filter($pengalaman_bekerja, fn($i) => !empty($i['dimana'])) as $item)
                                     <div class="d-flex align-items-center justify-content-between py-3 border-bottom border-dashed">
                                         <div>
@@ -907,13 +907,13 @@ new #[Layout('layouts.app')] class extends Component {
 
                             <div class="row g-6">
                                 <div class="col-lg-6">
-                                    <div class="text-uppercase fw-bold fs-8 text-muted mb-3">Pelatihan</div>
+                                    <div class="text-uppercase fw-semibold fs-8 text-muted mb-3">Pelatihan</div>
                                     @forelse(array_filter($pengalaman_pelatihan, fn($i) => !empty($i['dimana'])) as $item)
                                         <div class="py-3 border-bottom border-dashed">
                                             <div class="fw-semibold fs-7">{{ $item['sebagai'] ?? '-' }}</div>
                                             <div class="d-flex justify-content-between mt-1">
                                                 <span class="text-muted fs-8 text-truncate" style="max-width:160px">{{ $item['dimana'] }}</span>
-                                                <span class="fw-bold fs-8 text-primary">{{ $item['kapan'] ?? '-' }}</span>
+                                                <span class="fw-semibold fs-8 text-primary">{{ $item['kapan'] ?? '-' }}</span>
                                             </div>
                                         </div>
                                     @empty
@@ -921,13 +921,13 @@ new #[Layout('layouts.app')] class extends Component {
                                     @endforelse
                                 </div>
                                 <div class="col-lg-6">
-                                    <div class="text-uppercase fw-bold fs-8 text-muted mb-3">Organisasi</div>
+                                    <div class="text-uppercase fw-semibold fs-8 text-muted mb-3">Organisasi</div>
                                     @forelse(array_filter($pengalaman_berorganisasi, fn($i) => !empty($i['dimana'])) as $item)
                                         <div class="py-3 border-bottom border-dashed">
                                             <div class="fw-semibold fs-7">{{ $item['sebagai'] ?? '-' }}</div>
                                             <div class="d-flex justify-content-between mt-1">
                                                 <span class="text-muted fs-8 text-truncate" style="max-width:160px">{{ $item['dimana'] }}</span>
-                                                <span class="fw-bold fs-8 text-primary">{{ $item['kapan'] ?? '-' }}</span>
+                                                <span class="fw-semibold fs-8 text-primary">{{ $item['kapan'] ?? '-' }}</span>
                                             </div>
                                         </div>
                                     @empty
@@ -937,7 +937,7 @@ new #[Layout('layouts.app')] class extends Component {
                             </div>
 
                             <div>
-                                <div class="text-uppercase fw-bold fs-8 text-muted mb-3">Karya Publikasi</div>
+                                <div class="text-uppercase fw-semibold fs-8 text-muted mb-3">Karya Publikasi</div>
                                 @forelse(array_filter($karya_publikasi, fn($i) => !empty($i['judul'])) as $item)
                                     <div class="d-flex align-items-center justify-content-between py-3 border-bottom border-dashed">
                                         <span class="fw-semibold fs-7 text-truncate pe-3">{{ $item['judul'] }}</span>

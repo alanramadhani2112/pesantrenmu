@@ -3,8 +3,8 @@
 namespace App\Repositories\Eloquent;
 
 use App\Models\Akreditasi;
-use App\Models\User;
 use App\Models\Pesantren;
+use App\Models\User;
 use App\Repositories\Contracts\PesantrenRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -15,11 +15,11 @@ class PesantrenRepository implements PesantrenRepositoryInterface
         return User::where('role_id', 3)
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('email', 'like', '%' . $search . '%')
+                    $q->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('email', 'like', '%'.$search.'%')
                         ->orWhereHas('pesantren', function ($pq) use ($search) {
-                            $pq->where('nama_pesantren', 'like', '%' . $search . '%')
-                                ->orWhere('ns_pesantren', 'like', '%' . $search . '%');
+                            $pq->where('nama_pesantren', 'like', '%'.$search.'%')
+                                ->orWhere('ns_pesantren', 'like', '%'.$search.'%');
                         });
                 });
             })
@@ -45,8 +45,7 @@ class PesantrenRepository implements PesantrenRepositoryInterface
             })
             ->with(['pesantren:id,user_id,nama_pesantren,is_locked'])
             ->withCount([
-                'akreditasis as akreditasi_aktif_count' => fn ($q) =>
-                    $q->whereIn('status', Akreditasi::activeStatuses()),
+                'akreditasis as akreditasi_aktif_count' => fn ($q) => $q->whereIn('status', Akreditasi::activeStatuses()),
             ])
             ->orderBy($sortField, $sortAsc ? 'asc' : 'desc')
             ->paginate($perPage);
@@ -65,6 +64,7 @@ class PesantrenRepository implements PesantrenRepositoryInterface
     public function updatePesantren(int $id, array $data): bool
     {
         $pesantren = Pesantren::find($id);
+
         return $pesantren ? $pesantren->update($data) : false;
     }
 

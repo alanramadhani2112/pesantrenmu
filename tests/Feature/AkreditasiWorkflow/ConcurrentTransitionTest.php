@@ -65,7 +65,7 @@ class ConcurrentTransitionTest extends TestCase
      *
      * Validates Requirement 1.5.
      */
-public function test_stale_state_exception_thrown_when_record_modified_concurrently(): void
+    public function test_stale_state_exception_thrown_when_record_modified_concurrently(): void
     {
         $akreditasi = $this->createAkreditasi(6);
         $admin = $this->createAdmin();
@@ -88,7 +88,7 @@ public function test_stale_state_exception_thrown_when_record_modified_concurren
      *
      * Validates Requirement 1.5.
      */
-public function test_status_remains_unchanged_after_stale_state_exception(): void
+    public function test_status_remains_unchanged_after_stale_state_exception(): void
     {
         $akreditasi = $this->createAkreditasi(6);
         $admin = $this->createAdmin();
@@ -114,7 +114,7 @@ public function test_status_remains_unchanged_after_stale_state_exception(): voi
      *
      * Validates Requirement 1.5.
      */
-public function test_first_transition_succeeds_second_on_stale_model_fails(): void
+    public function test_first_transition_succeeds_second_on_stale_model_fails(): void
     {
         $akreditasi = $this->createAkreditasi(6);
         $admin = $this->createAdmin();
@@ -141,7 +141,7 @@ public function test_first_transition_succeeds_second_on_stale_model_fails(): vo
      *
      * Validates Requirement 1.5.
      */
-public function test_stale_state_exception_contains_akreditasi_id(): void
+    public function test_stale_state_exception_contains_akreditasi_id(): void
     {
         $akreditasi = $this->createAkreditasi(6);
         $admin = $this->createAdmin();

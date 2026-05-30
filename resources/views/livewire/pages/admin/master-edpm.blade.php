@@ -192,13 +192,13 @@ new #[Layout('layouts.app')] class extends Component {
                     <div class="d-flex flex-column gap-4">
                         <div class="spm-soft-panel">
                             <div class="spm-detail-label">Skor per Komponen EDPM</div>
-                            <div class="spm-detail-value fw-bold font-monospace">Skor = (Ci / Cmaks) × BK</div>
+                            <div class="spm-detail-value fw-semibold font-monospace">Skor = (Ci / Cmaks) × BK</div>
                             <div class="text-muted fs-8 mt-1">Ci = total skor butir, Cmaks = jumlah butir × 4, BK = bobot komponen</div>
                         </div>
 
                         <div class="spm-soft-panel">
                             <div class="spm-detail-label">Skor Akhir</div>
-                            <div class="spm-detail-value fw-bold font-monospace">Nilai = (EDPM × 70%) + (IPR × 30%)</div>
+                            <div class="spm-detail-value fw-semibold font-monospace">Nilai = (EDPM × 70%) + (IPR × 30%)</div>
                             <div class="text-muted fs-8 mt-1">EDPM = rata-rata skor 4 komponen, IPR = skor komponen IPR skala ratusan</div>
                         </div>
 

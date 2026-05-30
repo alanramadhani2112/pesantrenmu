@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\AkreditasiNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Notification;
@@ -21,8 +22,8 @@ class FailedNotification extends Model
     ];
 
     protected $casts = [
-        'payload'     => 'array',
-        'failed_at'   => 'datetime',
+        'payload' => 'array',
+        'failed_at' => 'datetime',
         'resolved_at' => 'datetime',
     ];
 
@@ -45,7 +46,7 @@ class FailedNotification extends Model
         $user = User::find($this->notifiable_id);
 
         if ($user) {
-            $user->notify(new \App\Notifications\AkreditasiNotification(
+            $user->notify(new AkreditasiNotification(
                 $payload['type'],
                 $payload['title'],
                 $payload['message'],
@@ -53,7 +54,7 @@ class FailedNotification extends Model
             ));
 
             $this->update([
-                'status'      => 'resolved',
+                'status' => 'resolved',
                 'resolved_at' => now(),
             ]);
         }

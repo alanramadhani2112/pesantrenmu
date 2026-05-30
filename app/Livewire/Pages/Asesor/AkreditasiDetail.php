@@ -2,6 +2,19 @@
 
 namespace App\Livewire\Pages\Asesor;
 
+use App\Exceptions\ImmutableValueException;
+use App\Models\Akreditasi;
+use App\Models\AkreditasiEdpm;
+use App\Models\User;
+use App\Services\AkreditasiDocumentService;
+use App\Services\AkreditasiWorkflowService;
+use App\Services\AsesorService;
+use App\Services\AssessorScoringService;
+use App\Services\ProgressTracker;
+use App\Services\RejectionService;
+use App\Services\ScoreCalculationService;
+use App\StateMachine\AkreditasiStateMachine;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
@@ -17,8 +30,6 @@ class AkreditasiDetail extends Component
     public $akreditasi;
 
     public $pesantren;
-
-    public $laporan_visitasi_file;
 
     public $ipm;
 
@@ -74,10 +85,15 @@ class AkreditasiDetail extends Component
 
     // Progress tracking
     public $asesor1NaProgress = null;
+
     public $asesor1NkProgress = null;
+
     public $asesor2NaProgress = null;
+
     public bool $nilaiKetuaFinalComplete = false;
+
     public bool $nilaiAnggotaFinalComplete = false;
+
     public bool $nilaiKelompokUnlocked = false;
 
     #[Url]
@@ -107,13 +123,13 @@ class AkreditasiDetail extends Component
 
     public function mount($uuid)
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
         if (! $user->isAsesor()) {
             abort(403);
         }
 
-        $asesorService = app(\App\Services\AsesorService::class);
+        $asesorService = app(AsesorService::class);
         $data = $asesorService->getAkreditasiDetailAsesor($uuid, $user->id);
 
         if (empty($data)) {
@@ -136,16 +152,16 @@ class AkreditasiDetail extends Component
         }
 
         // Security check: scoring and report tabs only open after the related workflow phase.
-        if (($this->akreditasi->status == \App\StateMachine\AkreditasiStateMachine::STATUS_ASSESSMENT
-            || $this->akreditasi->status == \App\StateMachine\AkreditasiStateMachine::STATUS_VERIFIKASI_BERKAS)
+        if (($this->akreditasi->status == AkreditasiStateMachine::STATUS_ASSESSMENT
+            || $this->akreditasi->status == AkreditasiStateMachine::STATUS_VERIFIKASI_BERKAS)
             && $this->activeTab === 'laporan_visitasi') {
             $this->activeTab = 'profil';
         }
 
         if (! in_array((int) $this->akreditasi->status, [
-            \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI,
-            \App\StateMachine\AkreditasiStateMachine::STATUS_VALIDASI_ADMIN,
-            \App\StateMachine\AkreditasiStateMachine::STATUS_SELESAI,
+            AkreditasiStateMachine::STATUS_PASCA_VISITASI,
+            AkreditasiStateMachine::STATUS_VALIDASI_ADMIN,
+            AkreditasiStateMachine::STATUS_SELESAI,
         ], true) && $this->activeTab === 'instrumen') {
             $this->activeTab = 'profil';
         }
@@ -177,13 +193,13 @@ class AkreditasiDetail extends Component
 
         // Load rejection data for Asesor 1
         if ($this->asesorTipe == 1) {
-            $rejectionService = app(\App\Services\RejectionService::class);
+            $rejectionService = app(RejectionService::class);
             $this->rejectionStatus = $rejectionService->getRejectionStatus($this->akreditasi->id);
             $this->selectableItems = $rejectionService->getSelectableItems($this->akreditasi->id);
         }
 
         // Load scoring progress only after visitasi has been confirmed selesai.
-        if ($this->akreditasi->status == \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
+        if ($this->akreditasi->status == AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
             $progress = $data['progress'] ?? [];
             $this->asesor1NaProgress = $progress['asesor1_na'] ?? null;
             $this->asesor1NkProgress = $progress['asesor1_nk'] ?? null;
@@ -195,9 +211,9 @@ class AkreditasiDetail extends Component
         $this->akreditasiUpdatedAt = $this->akreditasi->updated_at->toISOString();
 
         // Load final status for each butir
-        $asesorId = $this->akreditasi->{'assessment' . $this->asesorTipe}?->asesor_id ?? null;
+        $asesorId = $this->akreditasi->{'assessment'.$this->asesorTipe}?->asesor_id ?? null;
         if ($asesorId) {
-            $finalRecords = \App\Models\AkreditasiEdpm::where('akreditasi_id', $this->akreditasi->id)
+            $finalRecords = AkreditasiEdpm::where('akreditasi_id', $this->akreditasi->id)
                 ->where('asesor_id', $asesorId)
                 ->where('is_final', true)
                 ->pluck('is_final', 'butir_id');
@@ -210,7 +226,7 @@ class AkreditasiDetail extends Component
      */
     public function checkForUpdates(): void
     {
-        $fresh = \App\Models\Akreditasi::find($this->akreditasi->id);
+        $fresh = Akreditasi::find($this->akreditasi->id);
         if (! $fresh) {
             return;
         }
@@ -227,7 +243,7 @@ class AkreditasiDetail extends Component
                     type: 'warning',
                     title: 'Status Diperbarui',
                     message: 'Status akreditasi telah diperbarui oleh pengguna lain. Status saat ini: '
-                        . \App\Models\Akreditasi::getStatusLabel($fresh->status)
+                        .Akreditasi::getStatusLabel($fresh->status)
                 );
             }
         }
@@ -262,7 +278,7 @@ class AkreditasiDetail extends Component
     {
         Gate::authorize('update', $this->akreditasi);
 
-        if ($this->akreditasi->status != \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
+        if ($this->akreditasi->status != AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
             $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Nilai asesor hanya dapat diisi setelah visitasi dikonfirmasi selesai.');
 
             return;
@@ -306,7 +322,7 @@ class AkreditasiDetail extends Component
 
         $this->validate($rules);
 
-        $asesorService = app(\App\Services\AsesorService::class);
+        $asesorService = app(AsesorService::class);
         $asesorId = Auth::user()->asesor->id;
 
         try {
@@ -334,45 +350,6 @@ class AkreditasiDetail extends Component
         }
 
         return false;
-    }
-
-    public function finalizeVerification()
-    {
-        $this->finalizeScoring();
-    }
-
-    public function uploadLaporanVisitasi()
-    {
-        Gate::authorize('update', $this->akreditasi);
-
-        if ($this->akreditasi->status != \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI
-            && $this->akreditasi->status != \App\StateMachine\AkreditasiStateMachine::STATUS_VISITASI) {
-            abort(403, 'Proses unggah laporan hanya dapat dilakukan pada masa Visitasi atau Pasca Visitasi.');
-
-            return;
-        }
-
-        $this->validate([
-            'laporan_visitasi_file' => 'required|file|mimes:pdf,docx|max:5120',
-        ], [
-            'laporan_visitasi_file.required' => 'File Laporan Visitasi wajib diunggah.',
-            'laporan_visitasi_file.mimes' => 'Format file harus PDF atau DOCX.',
-            'laporan_visitasi_file.max' => 'Ukuran file maksimal 5MB.',
-        ]);
-
-        $path = $this->laporan_visitasi_file->store('akreditasi/laporan_visitasi', 'public');
-
-        $asesorService = app(\App\Services\AsesorService::class);
-        $success = $asesorService->uploadLaporanVisitasi($this->akreditasi->id, $this->asesorTipe, $path);
-
-        if (! $success) {
-            // DB update failed — rollback: delete the newly stored file
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($path);
-            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Laporan Visitasi gagal disimpan.');
-            return;
-        }
-
-        $this->dispatch('notification-received', type: 'success', title: 'Berhasil Upload', message: 'Laporan Visitasi berhasil diunggah secara permanen.');
     }
 
     public function setTab($tab)
@@ -408,22 +385,24 @@ class AkreditasiDetail extends Component
             'rejectionExplanation.min' => 'Catatan penolakan minimal 10 karakter.',
         ]);
 
-        $asesorService = app(\App\Services\AsesorService::class);
-        $result = $asesorService->processVisitasi($this->akreditasi->id, \Illuminate\Support\Facades\Auth::id(), [
-            'rejected_items' => $this->rejectedItems,
-            'catatan' => $this->rejectionExplanation,
-        ], 'tolak');
+        try {
+            $workflowService = app(AkreditasiWorkflowService::class);
+            $workflowService->createDocumentRejection(
+                $this->akreditasi->id,
+                Auth::id(),
+                $this->rejectedItems,
+                $this->rejectionExplanation
+            );
 
-        if ($result) {
             $this->reset(['rejectedItems', 'rejectionExplanation']);
             // Reload rejection status
-            $rejectionService = app(\App\Services\RejectionService::class);
+            $rejectionService = app(RejectionService::class);
             $this->rejectionStatus = $rejectionService->getRejectionStatus($this->akreditasi->id);
             $this->akreditasi->refresh();
 
             $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Penolakan berhasil dikirim.');
-        } else {
-            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Penolakan gagal diproses.');
+        } catch (\DomainException $e) {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: $e->getMessage());
         }
     }
 
@@ -435,8 +414,8 @@ class AkreditasiDetail extends Component
             abort(403);
         }
 
-        $rejectionService = app(\App\Services\RejectionService::class);
-        $result = $rejectionService->acceptPerbaikan($this->akreditasi->id, \Illuminate\Support\Facades\Auth::id());
+        $rejectionService = app(RejectionService::class);
+        $result = $rejectionService->acceptPerbaikan($this->akreditasi->id, Auth::id());
 
         if ($result['success']) {
             $this->rejectionStatus = $rejectionService->getRejectionStatus($this->akreditasi->id);
@@ -457,7 +436,7 @@ class AkreditasiDetail extends Component
     public function confirmVisitasiSelesai(): void
     {
         try {
-            $workflowService = app(\App\Services\AkreditasiWorkflowService::class);
+            $workflowService = app(AkreditasiWorkflowService::class);
             $workflowService->confirmVisitasiSelesai($this->akreditasi->id, Auth::id());
             $this->akreditasi->refresh();
             $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Visitasi dikonfirmasi selesai. Tahap penilaian pasca visitasi dimulai.');
@@ -469,7 +448,7 @@ class AkreditasiDetail extends Component
     public function finalizeScoring(): void
     {
         try {
-            $workflowService = app(\App\Services\AkreditasiWorkflowService::class);
+            $workflowService = app(AkreditasiWorkflowService::class);
             $workflowService->finalizeAssessorScoring($this->akreditasi->id, Auth::id());
             $this->akreditasi->refresh();
             $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Penilaian difinalisasi. Akreditasi masuk tahap Validasi Admin.');
@@ -481,7 +460,7 @@ class AkreditasiDetail extends Component
     public function saveNaValue(int $butirId, int $value, bool $isFinal): void
     {
         try {
-            $scoringService = app(\App\Services\AssessorScoringService::class);
+            $scoringService = app(AssessorScoringService::class);
             $scoringService->saveNA($this->akreditasi->id, Auth::id(), $butirId, $value, $isFinal);
             $this->asesorEvaluasis[$butirId] = $value;
             $this->refreshScoringProgress();
@@ -489,7 +468,7 @@ class AkreditasiDetail extends Component
                 $this->asesorFinalStatus[$butirId] = true;
                 $this->dispatch('notification-received', type: 'success', title: 'Final!', message: "Nilai butir #{$butirId} dikunci sebagai Final.");
             }
-        } catch (\App\Exceptions\ImmutableValueException $e) {
+        } catch (ImmutableValueException $e) {
             $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Nilai sudah Final dan tidak dapat diubah.');
         } catch (\Throwable $e) {
             $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: $e->getMessage());
@@ -499,7 +478,7 @@ class AkreditasiDetail extends Component
     public function saveNkValue(int $butirId, int $value, bool $isFinal): void
     {
         try {
-            $scoringService = app(\App\Services\AssessorScoringService::class);
+            $scoringService = app(AssessorScoringService::class);
             // Get asesor2 user_id from assessment
             $asesor2UserId = $this->akreditasi->assessment2?->asesor?->user_id ?? 0;
             $scoringService->saveNK($this->akreditasi->id, Auth::id(), $asesor2UserId, $butirId, $value, $isFinal);
@@ -508,7 +487,7 @@ class AkreditasiDetail extends Component
             if ($isFinal) {
                 $this->dispatch('notification-received', type: 'success', title: 'Final!', message: "NK butir #{$butirId} dikunci sebagai Final.");
             }
-        } catch (\App\Exceptions\ImmutableValueException $e) {
+        } catch (ImmutableValueException $e) {
             $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Nilai sudah Final dan tidak dapat diubah.');
         } catch (\Throwable $e) {
             $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: $e->getMessage());
@@ -517,18 +496,18 @@ class AkreditasiDetail extends Component
 
     public function uploadLaporanIndividu(): void
     {
-        if ((int) $this->akreditasi->status !== \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
+        if ((int) $this->akreditasi->status !== AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
             return;
         }
         $this->validate(['laporan_individu_file' => 'required|file|mimes:pdf,docx|max:5120']);
         try {
-            $docService = app(\App\Services\AkreditasiDocumentService::class);
+            $docService = app(AkreditasiDocumentService::class);
             $docService->uploadLaporanIndividuForAsesor($this->akreditasi->id, Auth::id(), $this->laporan_individu_file);
             $this->reset(['laporan_individu_file']);
             $this->akreditasi->refresh();
             $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Laporan individu berhasil diunggah.');
         } catch (\Throwable $e) {
-            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Upload gagal: ' . $e->getMessage());
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Upload gagal: '.$e->getMessage());
         }
     }
 
@@ -537,24 +516,24 @@ class AkreditasiDetail extends Component
         if ($this->asesorTipe !== 1) {
             return;
         }
-        if ((int) $this->akreditasi->status !== \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
+        if ((int) $this->akreditasi->status !== AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
             return;
         }
         $this->validate(['laporan_kelompok_file' => 'required|file|mimes:pdf,docx|max:5120']);
         try {
-            $docService = app(\App\Services\AkreditasiDocumentService::class);
+            $docService = app(AkreditasiDocumentService::class);
             $docService->uploadLaporanKelompokForAsesor1($this->akreditasi->id, Auth::id(), $this->laporan_kelompok_file);
             $this->reset(['laporan_kelompok_file']);
             $this->akreditasi->refresh();
             $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Laporan kelompok berhasil diunggah.');
         } catch (\Throwable $e) {
-            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Upload gagal: ' . $e->getMessage());
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Upload gagal: '.$e->getMessage());
         }
     }
 
     private function refreshScoringProgress(): void
     {
-        $progress = app(\App\Services\ProgressTracker::class)->getAkreditasiProgress($this->akreditasi->id);
+        $progress = app(ProgressTracker::class)->getAkreditasiProgress($this->akreditasi->id);
         $this->asesor1NaProgress = $progress['asesor1_na'] ?? null;
         $this->asesor1NkProgress = $progress['asesor1_nk'] ?? null;
         $this->asesor2NaProgress = $progress['asesor2_na'] ?? null;
@@ -578,10 +557,77 @@ class AkreditasiDetail extends Component
             return;
         }
 
-        $scoringService = app(\App\Services\AssessorScoringService::class);
+        $scoringService = app(AssessorScoringService::class);
         $this->nilaiKetuaFinalComplete = $scoringService->allNA1Final($this->akreditasi->id, $ketuaUserId);
         $this->nilaiAnggotaFinalComplete = $scoringService->allNA2Final($this->akreditasi->id, $anggotaUserId);
         $this->nilaiKelompokUnlocked = $this->nilaiKetuaFinalComplete && $this->nilaiAnggotaFinalComplete;
+    }
+
+    public function asesorScoringProgressCards(): array
+    {
+        if ((int) $this->akreditasi->status !== AkreditasiStateMachine::STATUS_PASCA_VISITASI
+            || (! $this->asesor1NaProgress && ! $this->asesor2NaProgress)) {
+            return [];
+        }
+
+        $cards = $this->asesorTipe == 1
+            ? [
+                $this->scoringProgressCard($this->asesor1NaProgress, 'Nilai Ketua'),
+                $this->scoringProgressCard($this->asesor1NkProgress, 'Nilai Kelompok'),
+                $this->scoringProgressCard($this->asesor2NaProgress, 'Nilai Anggota'),
+            ]
+            : [
+                $this->scoringProgressCard($this->asesor2NaProgress, 'Nilai Anggota', 'col-lg-6'),
+                $this->scoringProgressCard($this->asesor1NaProgress, 'Nilai Ketua', 'col-lg-6'),
+            ];
+
+        return array_values(array_filter($cards));
+    }
+
+    public function isAsesorNaFinal(int $butirId): bool
+    {
+        return isset($this->asesorFinalStatus[$butirId]) && (bool) $this->asesorFinalStatus[$butirId];
+    }
+
+    public function asesorDeltaValue(int $butirId): ?int
+    {
+        $na1Value = $this->asesorEvaluasis[$butirId] ?? null;
+        $na2Value = $this->otherAsesorEvaluasis[$butirId] ?? null;
+
+        if (! is_numeric($na1Value) || ! is_numeric($na2Value)) {
+            return null;
+        }
+
+        return app(ScoreCalculationService::class)->calculateDelta((int) $na1Value, (int) $na2Value);
+    }
+
+    public function asesorDeltaVariant(int $butirId): string
+    {
+        return $this->asesorDeltaValue($butirId) === 0 ? 'success' : 'warning';
+    }
+
+    public function canConfirmVisitasi(): bool
+    {
+        if ((int) $this->akreditasi->status !== AkreditasiStateMachine::STATUS_VISITASI || $this->asesorTipe != 1) {
+            return false;
+        }
+
+        return $this->akreditasi->tgl_visitasi
+            && Carbon::today()->gte(Carbon::parse($this->akreditasi->tgl_visitasi)->startOfDay());
+    }
+
+    private function scoringProgressCard(?array $progress, string $label, string $column = 'col-lg-4'): ?array
+    {
+        if (empty($progress)) {
+            return null;
+        }
+
+        return [
+            'progress' => $progress,
+            'label' => $label,
+            'column' => $column,
+            'color' => app(ProgressTracker::class)->getColorClass((float) ($progress['percentage'] ?? 0)),
+        ];
     }
 
     public function render()

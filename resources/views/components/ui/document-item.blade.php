@@ -13,7 +13,7 @@
         </span>
 
         <span class="d-flex flex-column min-w-0">
-            <span class="fw-bold text-gray-800 spm-document-title">{{ $label }}</span>
+            <span class="fw-semibold text-gray-800 spm-document-title">{{ $label }}</span>
             @if($description)
                 <span class="text-muted fw-semibold fs-8">{{ $description }}</span>
             @else

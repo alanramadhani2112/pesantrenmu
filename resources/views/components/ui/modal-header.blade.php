@@ -23,7 +23,7 @@
         @endif
 
         <div class="min-w-0">
-            <h2 class="fw-bold text-gray-900 mb-1">{{ $title }}</h2>
+            <h2 class="fw-semibold text-gray-900 mb-1">{{ $title }}</h2>
 
             @if($subtitle)
                 <div class="text-muted fw-semibold fs-7">{{ $subtitle }}</div>

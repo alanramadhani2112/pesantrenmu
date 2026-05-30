@@ -259,7 +259,7 @@ new #[Layout('layouts.app')] class extends Component
                     @if($banding->reviewer)
                         <x-ui.section-card title="Reviewer">
                             <div class="p-6">
-                                <div class="fw-bold text-gray-900">{{ $banding->reviewer->name }}</div>
+                                <div class="fw-semibold text-gray-900">{{ $banding->reviewer->name }}</div>
                                 <div class="text-muted fs-7">{{ $banding->reviewer->email }}</div>
                             </div>
                         </x-ui.section-card>
@@ -288,7 +288,7 @@ new #[Layout('layouts.app')] class extends Component
                                     @foreach($banding->akreditasi->assessments as $assessment)
                                         <div class="d-flex justify-content-between py-2 border-bottom border-dashed">
                                             <span class="text-gray-600 fw-semibold">Tipe {{ $assessment->tipe }}</span>
-                                            <span class="fw-bold">{{ $assessment->nilai ?? '-' }}</span>
+                                            <span class="fw-semibold">{{ $assessment->nilai ?? '-' }}</span>
                                         </div>
                                     @endforeach
                                 @endif
@@ -320,7 +320,7 @@ new #[Layout('layouts.app')] class extends Component
                                         @endphp
                                         <div class="spm-soft-panel">
                                             <div class="d-flex align-items-center justify-content-between mb-2">
-                                                <div class="fw-bold">Banding #{{ $prevBanding->id }}</div>
+                                                <div class="fw-semibold">Banding #{{ $prevBanding->id }}</div>
                                                 <div class="d-flex align-items-center gap-2">
                                                     <x-ui.badge :variant="$prevVariant">{{ ucfirst($prevBanding->status) }}</x-ui.badge>
                                                     <span class="text-muted fs-8">{{ $prevBanding->created_at->format('d/m/Y') }}</span>

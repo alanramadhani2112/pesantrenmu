@@ -257,21 +257,21 @@ new #[Layout('layouts.app')] class extends Component {
                         <div class="d-flex align-items-start gap-3">
                             <span class="badge badge-circle badge-light-primary">1</span>
                             <div>
-                                <div class="fw-bold text-gray-900">Tahap proses</div>
+                                <div class="fw-semibold text-gray-900">Tahap proses</div>
                                 <div class="text-muted fs-7">Pengajuan, review asesor, visitasi, penilaian pasca visitasi, dan validasi admin punya keputusan berbeda.</div>
                             </div>
                         </div>
                         <div class="d-flex align-items-start gap-3">
                             <span class="badge badge-circle badge-light-primary">2</span>
                             <div>
-                                <div class="fw-bold text-gray-900">Konteks pesantren</div>
+                                <div class="fw-semibold text-gray-900">Konteks pesantren</div>
                                 <div class="text-muted fs-7">Nama, status, dan catatan menjadi dasar sebelum keputusan admin.</div>
                             </div>
                         </div>
                         <div class="d-flex align-items-start gap-3">
                             <span class="badge badge-circle badge-light-primary">3</span>
                             <div>
-                                <div class="fw-bold text-gray-900">Tindak lanjuti</div>
+                                <div class="fw-semibold text-gray-900">Tindak lanjuti</div>
                                 <div class="text-muted fs-7">Keputusan admin tercatat pada riwayat akreditasi pesantren.</div>
                             </div>
                         </div>
@@ -354,7 +354,7 @@ new #[Layout('layouts.app')] class extends Component {
 
                     <td>
                         <div class="d-flex flex-column">
-                            <span class="text-gray-900 fw-bold fs-6">{{ $item->user->pesantren->nama_pesantren ?? $item->user->name }}</span>
+                            <span class="text-gray-900 fw-semibold fs-6">{{ $item->user->pesantren->nama_pesantren ?? $item->user->name }}</span>
                             <span class="text-muted fw-semibold fs-7">{{ $item->user->email }}</span>
                         </div>
                     </td>
@@ -363,9 +363,6 @@ new #[Layout('layouts.app')] class extends Component {
                         <div class="d-flex flex-column gap-1">
                             <div class="d-flex align-items-center gap-2">
                                 <x-ui.badge :variant="$stage['variant']">{{ $stage['label'] }}</x-ui.badge>
-                                @if($item->parent)
-                                    <x-ui.badge variant="warning">Pengajuan Ulang</x-ui.badge>
-                                @endif
                             </div>
                             <span class="text-muted fw-semibold fs-7">
                                 {{ $stage['date'] }}
@@ -378,11 +375,11 @@ new #[Layout('layouts.app')] class extends Component {
                     </td>
 
                     <td class="text-center">
-                        <span class="fw-bold text-gray-900">{{ $item->nilai ?? '-' }}</span>
+                        <span class="fw-semibold text-gray-900">{{ $item->nilai ?? '-' }}</span>
                     </td>
 
                     <td class="text-center">
-                        <span class="fw-bold text-gray-900">{{ $item->peringkat ?? '-' }}</span>
+                        <span class="fw-semibold text-gray-900">{{ $item->peringkat ?? '-' }}</span>
                     </td>
 
                     <td class="text-center">
@@ -488,7 +485,7 @@ new #[Layout('layouts.app')] class extends Component {
                                 class="w-40px h-40px rounded-3 border border-white shadow-sm object-cover" alt="Avatar">
                             <div>
                                 <h3 class="fs-6 fw-semibold text-gray-900">{{ $catatan->user->name }}</h3>
-                                <p class="text-muted fs-8 fw-bold text-uppercase">
+                                <p class="text-muted fs-8 fw-semibold text-uppercase">
                                     {{ $catatan->user->isAsesor() ? 'Ketua Kelompok' : ($catatan->user->isAdmin() ? 'Administrator Pusat' : 'Pihak Berwenang') }}
                                 </p>
                             </div>
@@ -496,7 +493,7 @@ new #[Layout('layouts.app')] class extends Component {
 
                         <div class="row g-4 mb-6">
                             <div class="col-6">
-                                <p class="text-muted fs-8 fw-bold text-uppercase mb-2">Tipe Catatan:</p>
+                                <p class="text-muted fs-8 fw-semibold text-uppercase mb-2">Tipe Catatan:</p>
                                 @if($isNoteRejection)
                                 <x-ui.badge variant="warning">{{ $catatan->tipe ?? 'Umum' }}</x-ui.badge>
                                 @else
@@ -504,7 +501,7 @@ new #[Layout('layouts.app')] class extends Component {
                                 @endif
                             </div>
                             <div class="col-6">
-                                <p class="text-muted fs-8 fw-bold text-uppercase mb-2">Tanggal:</p>
+                                <p class="text-muted fs-8 fw-semibold text-uppercase mb-2">Tanggal:</p>
                                 <p class="fs-7 fw-semibold text-gray-700">
                                     {{ $catatan->created_at->translatedFormat('d F Y H:i') }}
                                 </p>

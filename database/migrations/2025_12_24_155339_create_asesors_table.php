@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('asesors', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            
+
             // IDENTITAS ASESOR
             $table->string('nama_dengan_gelar');
             $table->string('nama_tanpa_gelar');

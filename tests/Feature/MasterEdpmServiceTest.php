@@ -8,6 +8,7 @@ use App\Services\MasterEdpmService;
 use Database\Seeders\MasterEdpmSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 use Tests\TestCase;
 
 /**
@@ -19,7 +20,9 @@ class MasterEdpmServiceTest extends TestCase
     use RefreshDatabase;
 
     protected MasterEdpmService $service;
+
     protected MasterEdpmKomponen $komponen;
+
     protected MasterEdpmButir $butir;
 
     protected function setUp(): void
@@ -47,7 +50,7 @@ class MasterEdpmServiceTest extends TestCase
     {
         $result = $this->service->getKomponensData();
 
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $result);
+        $this->assertInstanceOf(Collection::class, $result);
     }
 
     public function test_get_komponens_data_includes_seeded_komponen(): void

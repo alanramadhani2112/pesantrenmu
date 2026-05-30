@@ -25,7 +25,7 @@ class SsoTimeoutTest extends TestCase
      * When the SSO server is down or times out during token exchange,
      * the user should be redirected to login with a flash error.
      */
-public function test_sso_auth_handles_connection_timeout_gracefully(): void
+    public function test_sso_auth_handles_connection_timeout_gracefully(): void
     {
         Http::fake(function (Request $request) {
             if (str_contains($request->url(), 'oauth/token')) {
@@ -47,7 +47,7 @@ public function test_sso_auth_handles_connection_timeout_gracefully(): void
      * When the SSO server is down during user profile fetch,
      * the user should be redirected to login with a flash error.
      */
-public function test_sso_login_handles_connection_timeout_gracefully(): void
+    public function test_sso_login_handles_connection_timeout_gracefully(): void
     {
         Http::fake(function (Request $request) {
             if (str_contains($request->url(), 'api/user')) {
@@ -67,7 +67,7 @@ public function test_sso_login_handles_connection_timeout_gracefully(): void
     /**
      * Test: SSO auth still works normally when server responds successfully.
      */
-public function test_sso_auth_proceeds_normally_on_successful_response(): void
+    public function test_sso_auth_proceeds_normally_on_successful_response(): void
     {
         Http::fake([
             'https://sso.example.com/oauth/token' => Http::response([
@@ -86,7 +86,7 @@ public function test_sso_auth_proceeds_normally_on_successful_response(): void
     /**
      * Test: SSO timeout config defaults to 10 seconds.
      */
-public function test_sso_timeout_config_defaults_to_10_seconds(): void
+    public function test_sso_timeout_config_defaults_to_10_seconds(): void
     {
         $this->assertEquals(10, config('sso.timeout'));
     }
@@ -95,7 +95,7 @@ public function test_sso_timeout_config_defaults_to_10_seconds(): void
      * Test: App does not crash with 500 error when SSO server is unreachable.
      * The response should always be a redirect, never a server error.
      */
-public function test_no_500_error_when_sso_server_unreachable(): void
+    public function test_no_500_error_when_sso_server_unreachable(): void
     {
         Http::fake(function (Request $request) {
             if (str_contains($request->url(), 'oauth/token')) {
@@ -111,7 +111,7 @@ public function test_no_500_error_when_sso_server_unreachable(): void
         // Should be a redirect (302), NOT a 500 error
         $this->assertTrue(
             $response->isRedirect(),
-            'Expected a redirect response, but got status: ' . $response->getStatusCode()
+            'Expected a redirect response, but got status: '.$response->getStatusCode()
         );
     }
 }

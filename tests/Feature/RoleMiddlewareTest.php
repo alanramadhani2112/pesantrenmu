@@ -22,7 +22,7 @@ class RoleMiddlewareTest extends TestCase
     }
 
     /** Task 1.4: pesantren user cannot access /admin/* routes → 403 */
-public function test_pesantren_user_cannot_access_admin_routes(): void
+    public function test_pesantren_user_cannot_access_admin_routes(): void
     {
         $user = User::factory()->create(['role_id' => 3]); // pesantren
 
@@ -32,7 +32,7 @@ public function test_pesantren_user_cannot_access_admin_routes(): void
     }
 
     /** Task 1.4: asesor user cannot access /admin/* routes → 403 */
-public function test_asesor_user_cannot_access_admin_routes(): void
+    public function test_asesor_user_cannot_access_admin_routes(): void
     {
         $user = User::factory()->create(['role_id' => 2]); // asesor
 
@@ -42,7 +42,7 @@ public function test_asesor_user_cannot_access_admin_routes(): void
     }
 
     /** Task 1.4: pesantren user cannot access /asesor/* routes → 403 */
-public function test_pesantren_user_cannot_access_asesor_routes(): void
+    public function test_pesantren_user_cannot_access_asesor_routes(): void
     {
         $user = User::factory()->create(['role_id' => 3]); // pesantren
 

@@ -20,9 +20,9 @@ class PermissionAuditLog extends Model
     protected $guarded = ['id'];
 
     protected $casts = [
-        'permissions_added'   => 'array',
+        'permissions_added' => 'array',
         'permissions_removed' => 'array',
-        'created_at'          => 'datetime',
+        'created_at' => 'datetime',
     ];
 
     // -------------------------------------------------------------------------

@@ -8,6 +8,7 @@ use App\Services\OnboardingService;
 use App\Services\SidebarProgressService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 use Tests\TestCase;
 
@@ -134,7 +135,7 @@ class OnboardingServiceTest extends TestCase
         ]);
 
         // Drop table to simulate DB failure
-        \Illuminate\Support\Facades\Schema::drop('user_onboardings');
+        Schema::drop('user_onboardings');
 
         $onboarding = $this->service->getOnboarding($user->id);
 
@@ -184,7 +185,7 @@ class OnboardingServiceTest extends TestCase
         Session::flush();
 
         // Drop table to simulate DB failure
-        \Illuminate\Support\Facades\Schema::drop('user_onboardings');
+        Schema::drop('user_onboardings');
 
         $onboarding = $this->service->getOnboarding($user->id);
 

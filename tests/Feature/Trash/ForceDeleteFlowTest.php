@@ -58,6 +58,7 @@ class ForceDeleteFlowTest extends TestCase
         ]);
 
         $akreditasi->delete();
+
         return $akreditasi->fresh();
     }
 

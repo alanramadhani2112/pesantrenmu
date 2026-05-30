@@ -10,13 +10,12 @@ use Database\Seeders\RoleSeeder;
 use Faker\Factory as Faker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 /**
  * Property-Based Tests for Timestamp Format (ISO 8601 Round-Trip).
- *
  */
 #[Group('Feature:concurrent-access-handling')]
 #[Group('Property6')]
@@ -59,10 +58,9 @@ class TimestampFormatPropertyTest extends TestCase
      * should produce the same datetime without loss of precision.
      *
      * **Validates: Requirements 6.4**
-     *
      */
-#[DataProvider('randomDatetimeProvider')]
-public function test_iso8601_round_trip_preserves_datetime(string $isoString): void
+    #[DataProvider('randomDatetimeProvider')]
+    public function test_iso8601_round_trip_preserves_datetime(string $isoString): void
     {
         // Parse the ISO string back to Carbon
         $parsed = Carbon::parse($isoString);
@@ -84,10 +82,9 @@ public function test_iso8601_round_trip_preserves_datetime(string $isoString): v
      * akreditasiUpdatedAt property SHALL be a valid ISO 8601 datetime string.
      *
      * **Validates: Requirements 6.4**
-     *
      */
-#[DataProvider('randomDatetimeProvider')]
-public function test_carbon_to_iso_string_is_valid_iso8601(string $isoString): void
+    #[DataProvider('randomDatetimeProvider')]
+    public function test_carbon_to_iso_string_is_valid_iso8601(string $isoString): void
     {
         // Verify the string matches ISO 8601 format
         // ISO 8601: YYYY-MM-DDTHH:MM:SS.sssZ or with timezone offset
@@ -105,7 +102,7 @@ public function test_carbon_to_iso_string_is_valid_iso8601(string $isoString): v
      *
      * **Validates: Requirements 6.1, 6.4**
      */
-public function test_akreditasi_updated_at_iso_string_round_trip(): void
+    public function test_akreditasi_updated_at_iso_string_round_trip(): void
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -138,7 +135,7 @@ public function test_akreditasi_updated_at_iso_string_round_trip(): void
      *
      * **Validates: Requirements 6.4**
      */
-public function test_timestamp_comparison_is_exact(): void
+    public function test_timestamp_comparison_is_exact(): void
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -166,7 +163,7 @@ public function test_timestamp_comparison_is_exact(): void
         $akreditasi->updated_at = $futureTime;
         $akreditasi->save(['timestamps' => false]);
         // Force update_at to a different value
-        \Illuminate\Support\Facades\DB::table('akreditasis')
+        DB::table('akreditasis')
             ->where('id', $akreditasi->id)
             ->update(['updated_at' => $futureTime->toDateTimeString()]);
 

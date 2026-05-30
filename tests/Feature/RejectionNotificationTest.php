@@ -9,6 +9,7 @@ use App\Models\Assessment;
 use App\Models\Pesantren;
 use App\Models\User;
 use App\Notifications\AkreditasiNotification;
+use App\Services\AkreditasiWorkflowService;
 use App\Services\RejectionService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -32,12 +33,12 @@ class RejectionNotificationTest extends TestCase
     /**
      * Helper: create a pesantren user with akreditasi at given status and an Asesor 1 assigned.
      */
-private function createAsesor1Setup(int $status = 5): array
+    private function createAsesor1Setup(int $status = 4): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
             'user_id' => $pesantrenUser->id,
-            'nama_pesantren' => 'Pesantren Notification Test ' . $pesantrenUser->id,
+            'nama_pesantren' => 'Pesantren Notification Test '.$pesantrenUser->id,
             'is_locked' => true,
         ]);
 
@@ -70,11 +71,11 @@ private function createAsesor1Setup(int $status = 5): array
     }
 
     /**
-     * Task 18.1: createRejection sends notification to pesantren with item summary.
+     * Task 18.1: createDocumentRejection sends notification to pesantren with item summary.
      *
      * Validates: Requirements 1.7
      */
-public function test_create_rejection_notifies_pesantren_with_item_summary(): void
+    public function test_create_rejection_notifies_pesantren_with_item_summary(): void
     {
         Notification::fake();
 
@@ -86,7 +87,7 @@ public function test_create_rejection_notifies_pesantren_with_item_summary(): vo
         $items = ['profil', 'ipm.kurikulum', 'sdm'];
         $explanation = 'Data profil tidak lengkap dan kurikulum perlu diperbaiki';
 
-        $this->rejectionService->createRejection($akreditasiId, $asesorUserId, $items, $explanation);
+        $this->rejectionService->createDocumentRejection($akreditasiId, $asesorUserId, $items, $explanation);
 
         Notification::assertSentTo(
             $pesantrenUser,
@@ -102,11 +103,11 @@ public function test_create_rejection_notifies_pesantren_with_item_summary(): vo
     }
 
     /**
-     * Task 18.1: createRejection sends notification to admin users.
+     * Task 18.1: createDocumentRejection sends notification to admin users.
      *
      * Validates: Requirements 1.8
      */
-public function test_create_rejection_notifies_admin_users(): void
+    public function test_create_rejection_notifies_admin_users(): void
     {
         Notification::fake();
 
@@ -121,7 +122,7 @@ public function test_create_rejection_notifies_admin_users(): void
         $items = ['profil', 'sdm'];
         $explanation = 'Data profil dan SDM perlu diperbaiki';
 
-        $this->rejectionService->createRejection($akreditasiId, $asesorUserId, $items, $explanation);
+        $this->rejectionService->createDocumentRejection($akreditasiId, $asesorUserId, $items, $explanation);
 
         Notification::assertSentTo(
             $admin1,
@@ -146,7 +147,7 @@ public function test_create_rejection_notifies_admin_users(): void
      *
      * Validates: Requirements 3.4
      */
-public function test_submit_perbaikan_notifies_asesor1(): void
+    public function test_submit_perbaikan_notifies_asesor1(): void
     {
         Notification::fake();
 
@@ -185,7 +186,7 @@ public function test_submit_perbaikan_notifies_asesor1(): void
      *
      * Validates: Requirements 3.5
      */
-public function test_submit_perbaikan_notifies_admin_users(): void
+    public function test_submit_perbaikan_notifies_admin_users(): void
     {
         Notification::fake();
 
@@ -225,7 +226,7 @@ public function test_submit_perbaikan_notifies_admin_users(): void
      *
      * Validates: Requirements 4.4
      */
-public function test_auto_rejection_limit_reached_notifies_pesantren(): void
+    public function test_auto_rejection_limit_reached_notifies_pesantren(): void
     {
         Notification::fake();
 
@@ -248,7 +249,7 @@ public function test_auto_rejection_limit_reached_notifies_pesantren(): void
         ]);
 
         // Second rejection triggers limit (count + 1 >= 2)
-        $this->rejectionService->createRejection(
+        $this->rejectionService->createDocumentRejection(
             $akreditasiId,
             $asesorUserId,
             ['sdm'],
@@ -270,7 +271,7 @@ public function test_auto_rejection_limit_reached_notifies_pesantren(): void
      *
      * Validates: Requirements 4.5
      */
-public function test_auto_rejection_limit_reached_notifies_admin(): void
+    public function test_auto_rejection_limit_reached_notifies_admin(): void
     {
         Notification::fake();
 
@@ -294,7 +295,7 @@ public function test_auto_rejection_limit_reached_notifies_admin(): void
         ]);
 
         // Second rejection triggers limit
-        $this->rejectionService->createRejection(
+        $this->rejectionService->createDocumentRejection(
             $akreditasiId,
             $asesorUserId,
             ['sdm'],
@@ -316,7 +317,7 @@ public function test_auto_rejection_limit_reached_notifies_admin(): void
      *
      * Validates: Requirements 8.5
      */
-public function test_auto_rejection_deadline_expired_notifies_all_parties(): void
+    public function test_auto_rejection_deadline_expired_notifies_all_parties(): void
     {
         Notification::fake();
 
@@ -379,15 +380,15 @@ public function test_auto_rejection_deadline_expired_notifies_all_parties(): voi
     }
 
     /**
-     * Task 18.5: createFinalRejection sends notification to pesantren with structured detail.
+     * Task 18.5: rejectAtValidasi sends notification to pesantren with structured detail.
      *
      * Validates: Requirements 9.6
      */
-public function test_final_rejection_notifies_pesantren_with_categories(): void
+    public function test_final_rejection_notifies_pesantren_with_categories(): void
     {
         Notification::fake();
 
-        $setup = $this->createAsesor1Setup(3); // status 3 for final rejection
+        $setup = $this->createAsesor1Setup(1); // status 1 for final rejection
         $pesantrenUser = $setup['pesantrenUser'];
         $akreditasiId = $setup['akreditasi']->id;
 
@@ -398,7 +399,12 @@ public function test_final_rejection_notifies_pesantren_with_categories(): void
             ['category' => 'inkonsistensi_data', 'explanation' => 'Data yang dilaporkan tidak konsisten dengan temuan lapangan'],
         ];
 
-        $this->rejectionService->createFinalRejection($akreditasiId, $adminUser->id, $categories);
+        $reason = collect($categories)
+            ->map(fn ($category) => $category['category'].': '.$category['explanation'])
+            ->implode('; ');
+
+        app(AkreditasiWorkflowService::class)
+            ->rejectAtValidasi($akreditasiId, $adminUser->id, $reason, '', $categories);
 
         Notification::assertSentTo(
             $pesantrenUser,
@@ -418,7 +424,7 @@ public function test_final_rejection_notifies_pesantren_with_categories(): void
      *
      * Validates: Requirements 8.3
      */
-public function test_process_deadlines_sends_reminder_to_pesantren(): void
+    public function test_process_deadlines_sends_reminder_to_pesantren(): void
     {
         Notification::fake();
 
@@ -461,7 +467,7 @@ public function test_process_deadlines_sends_reminder_to_pesantren(): void
     /**
      * Task 18.7 (additional): No notification sent when rejection validation fails.
      */
-public function test_no_notification_sent_on_failed_rejection(): void
+    public function test_no_notification_sent_on_failed_rejection(): void
     {
         Notification::fake();
 
@@ -470,7 +476,7 @@ public function test_no_notification_sent_on_failed_rejection(): void
         $asesorUserId = $setup['asesorUser']->id;
 
         // Empty items should fail validation
-        $result = $this->rejectionService->createRejection($akreditasiId, $asesorUserId, [], 'Some explanation text');
+        $result = $this->rejectionService->createDocumentRejection($akreditasiId, $asesorUserId, [], 'Some explanation text');
 
         $this->assertFalse($result['success']);
         Notification::assertNothingSent();

@@ -14,7 +14,9 @@ class OnboardingService
      * Role ID constants.
      */
     private const ROLE_ADMIN = 1;
+
     private const ROLE_ASESOR = 2;
+
     private const ROLE_PESANTREN = 3;
 
     /**
@@ -28,9 +30,6 @@ class OnboardingService
 
     /**
      * Get or create onboarding record for a user.
-     *
-     * @param int $userId
-     * @return UserOnboarding
      */
     public function getOnboarding(int $userId): UserOnboarding
     {
@@ -61,21 +60,17 @@ class OnboardingService
 
     /**
      * Check if onboarding should be shown (not completed/skipped).
-     *
-     * @param int $userId
-     * @return bool
      */
     public function shouldShowOnboarding(int $userId): bool
     {
         $onboarding = $this->getOnboarding($userId);
 
-        return !$onboarding->isCompleted();
+        return ! $onboarding->isCompleted();
     }
 
     /**
      * Get the onboarding steps configuration for a role.
      *
-     * @param int $roleId
      * @return array<int, array{key: string, label: string, route: string, completion_type: string}>
      */
     public function getStepsForRole(?int $roleId): array
@@ -91,8 +86,6 @@ class OnboardingService
     /**
      * Get completion status for each step.
      *
-     * @param int $userId
-     * @param int $roleId
      * @return array<string, bool>
      */
     public function getStepCompletionStatus(int $userId, ?int $roleId): array
@@ -109,10 +102,6 @@ class OnboardingService
 
     /**
      * Mark a step as visited (for Admin/Asesor visit-based completion).
-     *
-     * @param int $userId
-     * @param string $stepKey
-     * @return void
      */
     public function markStepVisited(int $userId, string $stepKey): void
     {
@@ -130,7 +119,7 @@ class OnboardingService
             $sessionState = Session::get("onboarding_state.{$userId}", []);
             $visitedSteps = $sessionState['visited_steps'] ?? [];
 
-            if (!in_array($stepKey, $visitedSteps)) {
+            if (! in_array($stepKey, $visitedSteps)) {
                 $visitedSteps[] = $stepKey;
             }
 
@@ -141,9 +130,6 @@ class OnboardingService
 
     /**
      * Mark onboarding as completed.
-     *
-     * @param int $userId
-     * @return void
      */
     public function completeOnboarding(int $userId): void
     {
@@ -165,9 +151,6 @@ class OnboardingService
 
     /**
      * Mark onboarding as skipped.
-     *
-     * @param int $userId
-     * @return void
      */
     public function skipOnboarding(int $userId): void
     {
@@ -312,10 +295,6 @@ class OnboardingService
 
     /**
      * Determine if a specific step is completed.
-     *
-     * @param int $userId
-     * @param array $step
-     * @return bool
      */
     private function isStepCompleted(int $userId, array $step): bool
     {
@@ -332,10 +311,6 @@ class OnboardingService
 
     /**
      * Check if a data-based step is completed by verifying data presence.
-     *
-     * @param int $userId
-     * @param string $stepKey
-     * @return bool
      */
     private function isDataBasedStepCompleted(int $userId, string $stepKey): bool
     {
@@ -351,10 +326,6 @@ class OnboardingService
 
     /**
      * Check if a visit-based step is completed by checking visited_steps.
-     *
-     * @param int $userId
-     * @param string $stepKey
-     * @return bool
      */
     private function isVisitBasedStepCompleted(int $userId, string $stepKey): bool
     {
@@ -365,9 +336,6 @@ class OnboardingService
 
     /**
      * Check if user has any AkreditasiEdpm records.
-     *
-     * @param int $userId
-     * @return bool
      */
     private function hasEdpmRecords(int $userId): bool
     {
@@ -379,9 +347,6 @@ class OnboardingService
 
     /**
      * Check if user has any Akreditasi with status >= submitted.
-     *
-     * @param int $userId
-     * @return bool
      */
     private function hasSubmittedAkreditasi(int $userId): bool
     {

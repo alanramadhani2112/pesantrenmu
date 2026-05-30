@@ -30,8 +30,9 @@ class PesantrenAkreditasiMenuContextTest extends TestCase
             ->get('/pesantren/akreditasi')
             ->assertOk()
             ->assertSee('Pengajuan Akreditasi')
-            ->assertSee('Ruang Kendali Pengajuan')
-            ->assertSee('Daftar Pengajuan');
+            ->assertSee('Daftar Pengajuan')
+            ->assertSee('data-ui-table="metronic"', false)
+            ->assertDontSee('Alur Menu Ini');
     }
 
     public function test_perbaikan_page_uses_repair_context(): void
@@ -40,12 +41,13 @@ class PesantrenAkreditasiMenuContextTest extends TestCase
         Akreditasi::create(['user_id' => $pesantren->id, 'status' => -1]);
 
         $this->actingAs($pesantren)
-            ->get('/pesantren/akreditasi?statusFilter=-1&focus=perbaikan')
+            ->get('/pesantren/akreditasi?focus=perbaikan')
             ->assertOk()
             ->assertSee('Status Perbaikan')
             ->assertSee('Daftar Perbaikan')
             ->assertSee('Bagian Perbaikan')
-            ->assertDontSee('Ruang Kendali Pengajuan');
+            ->assertDontSee('Ruang Kendali Pengajuan')
+            ->assertDontSee('Alur Menu Ini');
     }
 
     public function test_kartu_kendali_page_uses_post_visitasi_context(): void
@@ -54,14 +56,15 @@ class PesantrenAkreditasiMenuContextTest extends TestCase
         Akreditasi::create(['user_id' => $pesantren->id, 'status' => 2]);
 
         $this->actingAs($pesantren)
-            ->get('/pesantren/akreditasi?statusFilter=2&focus=kartu_kendali')
+            ->get('/pesantren/akreditasi?focus=kartu_kendali')
             ->assertOk()
             ->assertSee('Kartu Kendali Visitasi')
             ->assertSee('Daftar Kartu Kendali')
-            ->assertSee('Status Kartu');
+            ->assertSee('Status Kartu')
+            ->assertDontSee('Lihat Semua Pengajuan');
     }
 
-    public function test_hasil_sertifikat_and_banding_pages_use_distinct_contexts(): void
+    public function test_hasil_page_consolidates_result_certificate_and_banding_context(): void
     {
         $pesantren = User::factory()->create(['role_id' => Role::ID_PESANTREN]);
         $selesai = Akreditasi::create([
@@ -81,24 +84,27 @@ class PesantrenAkreditasiMenuContextTest extends TestCase
         ]);
 
         $this->actingAs($pesantren)
-            ->get('/pesantren/akreditasi?statusFilter=0&focus=hasil')
+            ->get('/pesantren/akreditasi?focus=hasil')
             ->assertOk()
             ->assertSee('Hasil Akhir Akreditasi')
-            ->assertSee('Nilai Akhir')
-            ->assertSee('Rekomendasi');
+            ->assertSee('Rekomendasi')
+            ->assertSee('Sertifikat')
+            ->assertSee('Status Banding')
+            ->assertSee('Unduh Sertifikat')
+            ->assertSee('Nilai perlu ditinjau ulang.')
+            ->assertSee('spm-table-shell--pesantren-hasil', false)
+            ->assertDontSee('Lihat Semua Pengajuan');
 
         $this->actingAs($pesantren)
             ->get('/pesantren/akreditasi?statusFilter=0&focus=sertifikat')
-            ->assertOk()
-            ->assertSee('Sertifikat Akreditasi')
-            ->assertSee('Nomor SK')
-            ->assertSee('Unduh Sertifikat');
+            ->assertRedirect(route('pesantren.akreditasi', ['focus' => 'hasil']));
 
         $this->actingAs($pesantren)
             ->get('/pesantren/akreditasi?statusFilter=-2&focus=banding')
-            ->assertOk()
-            ->assertSee('Banding Akreditasi')
-            ->assertSee('Status Banding')
-            ->assertSee('Alasan Banding');
+            ->assertRedirect(route('pesantren.akreditasi', ['focus' => 'hasil']));
+
+        $this->actingAs($pesantren)
+            ->get('/pesantren/akreditasi?statusFilter=0&focus=hasil')
+            ->assertRedirect(route('pesantren.akreditasi', ['focus' => 'hasil']));
     }
 }

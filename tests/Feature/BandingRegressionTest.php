@@ -32,7 +32,7 @@ class BandingRegressionTest extends TestCase
     /**
      * Helper: create a pesantren user with a rejected akreditasi that has assessments.
      */
-private function createPesantrenWithRejectedAkreditasi(): array
+    private function createPesantrenWithRejectedAkreditasi(): array
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -77,7 +77,7 @@ private function createPesantrenWithRejectedAkreditasi(): array
      * Task 12.2: Integration test — submitAppeals follows the canonical
      * banding transition (-1→-2) and notifies admin.
      */
-public function test_submit_appeals_uses_canonical_banding_status_and_notification(): void
+    public function test_submit_appeals_uses_canonical_banding_status_and_notification(): void
     {
         $data = $this->createPesantrenWithRejectedAkreditasi();
         $user = $data['user'];
@@ -129,7 +129,7 @@ public function test_submit_appeals_uses_canonical_banding_status_and_notificati
     /**
      * Task 12.3: Integration test — banding limit=0 disallows all appeals.
      */
-public function test_banding_limit_zero_disallows_all_appeals(): void
+    public function test_banding_limit_zero_disallows_all_appeals(): void
     {
         $data = $this->createPesantrenWithRejectedAkreditasi();
         $user = $data['user'];
@@ -160,7 +160,7 @@ public function test_banding_limit_zero_disallows_all_appeals(): void
     /**
      * Task 12.4: Integration test — multiple bandings for same akreditasi blocked when limit=1.
      */
-public function test_multiple_bandings_for_same_akreditasi_blocked_when_limit_is_one(): void
+    public function test_multiple_bandings_for_same_akreditasi_blocked_when_limit_is_one(): void
     {
         $data = $this->createPesantrenWithRejectedAkreditasi();
         $user = $data['user'];

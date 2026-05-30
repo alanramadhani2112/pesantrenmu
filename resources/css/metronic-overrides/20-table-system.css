@@ -1,0 +1,495 @@
+.spm-table-shell {
+    border: 1px solid #e8edf4;
+    border-radius: 8px;
+    background-color: #ffffff;
+}
+
+.spm-table-shell .table-responsive {
+    border-radius: inherit;
+}
+
+.spm-table {
+    width: 100%;
+    min-width: 100%;
+}
+
+.spm-table thead th {
+    color: #7c8aa0 !important;
+    padding: 13px 18px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.25;
+    letter-spacing: 0 !important;
+    background-color: #f8fafc;
+    border-color: #e8edf4 !important;
+}
+
+.spm-table tbody td {
+    color: #344054;
+    padding: 15px 18px !important;
+    font-size: 14px;
+    line-height: 1.45;
+    border-color: #eef2f7 !important;
+}
+
+.spm-table tbody tr:hover td {
+    background-color: #fbfcfe;
+}
+
+.spm-table--dense thead th,
+.spm-simple-table-dense thead th {
+    padding-top: 11px !important;
+    padding-bottom: 11px !important;
+}
+
+.spm-table--dense tbody td,
+.spm-simple-table-dense tbody td {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    font-size: 13px;
+}
+
+[data-ui-table="metronic"] .table-responsive {
+    -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+    overflow-y: visible;
+}
+
+@media (min-width: 992px) {
+    [data-ui-table="metronic"] .table-responsive {
+        overflow: visible;
+    }
+}
+
+[data-ui-table="metronic"],
+[data-ui-table="metronic"] .card,
+[data-ui-table="metronic"] .card-body,
+[data-ui-table="metronic"] .table-responsive,
+[data-ui-table="metronic"] .spm-datatable,
+[data-ui-table="metronic"] .spm-datatable tbody,
+[data-ui-table="metronic"] .spm-datatable tr,
+[data-ui-table="metronic"] .spm-datatable td {
+    overflow: visible;
+}
+
+[data-ui-table="metronic"].spm-table-shell {
+    overflow: visible;
+}
+
+.spm-table-header {
+    display: grid !important;
+    grid-template-columns: minmax(260px, 1fr) auto;
+    align-items: start !important;
+    gap: 18px 24px;
+    min-height: 0 !important;
+    padding: 24px 30px 18px !important;
+}
+
+.spm-table-heading {
+    min-width: 0;
+}
+
+.spm-table-heading .spm-card-title {
+    margin: 0;
+    color: #101828;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.spm-table-heading .spm-card-subtitle {
+    display: block;
+    max-width: 760px;
+    margin-top: 4px;
+    color: #667085 !important;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.55;
+}
+
+.spm-table-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    min-height: 42px;
+}
+
+.spm-table-actions .btn {
+    min-height: 42px;
+}
+
+.spm-table-controls {
+    grid-column: 1 / -1;
+    min-width: 0;
+    padding-top: 16px;
+    border-top: 1px solid #eef2f7;
+}
+
+.spm-table-filter-row,
+.spm-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.spm-table-filter-row > [data-ui-filter-bar="metronic"] {
+    display: contents;
+}
+
+.spm-table-filter-row > .d-flex {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px !important;
+}
+
+.spm-table-filter-row .btn,
+.spm-table-filter-row .form-control,
+.spm-table-filter-row .form-select {
+    min-height: 42px;
+}
+
+.spm-table-utility-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 42px;
+    margin-bottom: 18px;
+}
+
+[data-ui-table="metronic"] .table thead th {
+    padding: 13px 18px !important;
+    color: #7c8aa0 !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.25;
+    letter-spacing: 0 !important;
+    white-space: nowrap;
+    background-color: #f8fafc;
+    border-color: #e8edf4 !important;
+}
+
+[data-ui-table="metronic"] .table tbody td {
+    padding: 15px 18px !important;
+    color: #344054;
+    font-size: 14px;
+    line-height: 1.45;
+    border-color: #eef2f7 !important;
+}
+
+[data-ui-table="metronic"] .table tbody td.text-end {
+    position: relative;
+    overflow: visible !important;
+}
+
+[data-ui-table="metronic"] .table tbody tr.spm-action-row-open td {
+    position: relative;
+    z-index: 30;
+}
+
+[data-ui-table="metronic"] .table tbody td.spm-action-cell-open {
+    z-index: 35 !important;
+}
+
+[data-ui-table="metronic"] .table tbody tr {
+    transition: background-color 120ms ease;
+}
+
+[data-ui-table="metronic"] .table tbody tr:hover td {
+    background-color: #fbfcfe;
+}
+
+[data-ui-table="metronic"] .table th:first-child,
+[data-ui-table="metronic"] .table td:first-child {
+    padding-left: 22px !important;
+}
+
+[data-ui-table="metronic"] .table th:last-child,
+[data-ui-table="metronic"] .table td:last-child {
+    padding-right: 22px !important;
+}
+
+[data-ui-table="metronic"] .btn.btn-flush {
+    min-height: auto;
+    font-size: 12px;
+    line-height: 1.25;
+}
+
+[data-ui-table-search="metronic"] {
+    flex: 1 1 280px;
+    min-width: 220px;
+    max-width: 300px;
+}
+
+[data-ui-table-search="metronic"] .form-control {
+    width: 100% !important;
+    min-height: 42px;
+    padding-left: 3.1rem !important;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+[data-ui-filter-select="metronic"] {
+    flex: 0 1 176px;
+    min-width: 160px !important;
+    max-width: 210px;
+    min-height: 42px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+[data-ui-table="metronic"] [data-ui-tabs="metronic"] {
+    flex: 0 1 auto;
+    min-width: min(100%, 340px);
+}
+
+[data-ui-table="metronic"] [data-ui-tabs="metronic"] .nav {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    min-height: 42px;
+    padding: 4px;
+    background-color: #f8fafc;
+    border: 1px solid #e8edf4;
+    border-radius: 8px;
+}
+
+[data-ui-table="metronic"] [data-ui-tab="metronic"].nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    color: #667085 !important;
+    border: 0 !important;
+    border-radius: 6px;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+[data-ui-table="metronic"] [data-ui-tab="metronic"].nav-link.active {
+    color: var(--spm-primary) !important;
+    background-color: #ffffff;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+.spm-table-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 22px;
+}
+
+.spm-table-footer-start,
+.spm-table-footer-end {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.spm-table-footer-end {
+    justify-content: flex-end;
+}
+
+.spm-table-result-meta {
+    color: #667085;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+@media (min-width: 768px) {
+    .spm-table-footer {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .spm-table-footer-start {
+        flex: 1 1 auto;
+    }
+
+    .spm-table-footer-end {
+        flex: 0 0 auto;
+    }
+}
+
+[data-ui-table-per-page="metronic"] {
+    flex: 0 0 auto;
+    min-height: 42px;
+    padding: 0 10px 0 12px;
+    background: #ffffff;
+    border: 1px solid var(--spm-border, #e4e9f2);
+    border-radius: var(--spm-radius);
+}
+
+[data-ui-table-per-page="metronic"] .form-select {
+    min-height: 38px;
+    padding-top: 0.45rem;
+    padding-bottom: 0.45rem;
+    border-color: transparent !important;
+    background-color: #ffffff !important;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+[data-ui-table-per-page="metronic"] .spm-table-per-page-label {
+    color: #667085;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+[data-ui-table-per-page="metronic"].spm-table-per-page--compact {
+    min-height: 42px;
+    padding: 0 8px;
+}
+
+[data-ui-table-per-page="metronic"].spm-table-per-page--compact .form-select {
+    min-height: 40px;
+    padding-left: 12px;
+    padding-right: 34px;
+}
+
+[data-ui-table-checkbox="metronic"] {
+    min-height: 24px;
+}
+
+[data-ui-table-checkbox="metronic"] .form-check-input,
+[data-ui-checkbox="metronic"] .form-check-input,
+[data-ui-radio="metronic"] .form-check-input {
+    width: 22px !important;
+    height: 22px !important;
+    border-color: #cbd5e1;
+}
+
+[data-ui-table-checkbox="metronic"] .form-check-input {
+    margin: 0;
+}
+
+[data-ui-action-menu="metronic"] > .btn {
+    min-width: 96px;
+    justify-content: center;
+    gap: 0.35rem;
+}
+
+[data-ui-action-menu="metronic"] {
+    position: relative;
+    z-index: 5;
+}
+
+[data-ui-action-menu="metronic"].is-open {
+    z-index: 40;
+}
+
+[data-ui-action-menu="metronic"] .menu-sub-dropdown,
+[data-ui-action-menu-dropdown="metronic"] {
+    width: 210px !important;
+    left: auto;
+    right: 0;
+    max-width: min(210px, calc(100vw - 32px));
+    border: 1px solid #e8edf4;
+    box-shadow: 0 16px 42px rgba(15, 23, 42, 0.12);
+    max-height: min(420px, calc(100vh - 120px));
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 1200 !important;
+}
+
+[data-ui-action-menu="metronic"] .spm-action-menu-dropdown,
+[data-ui-action-menu-dropdown="metronic"].spm-action-menu-dropdown {
+    right: auto !important;
+}
+
+[data-ui-action-menu="metronic"] .menu-link,
+[data-ui-action-menu-dropdown="metronic"] .menu-link {
+    min-height: 38px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.25;
+    white-space: nowrap;
+}
+
+[data-ui-alert="metronic"].spm-alert {
+    border-radius: 8px;
+}
+
+.spm-alert-title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.spm-alert-content {
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+[data-ui-pagination="metronic"] {
+    margin-top: 4px;
+}
+
+[data-ui-pagination="metronic"] .pagination {
+    gap: 6px;
+}
+
+[data-ui-pagination="metronic"] .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    min-height: 34px;
+    border-radius: 8px !important;
+    border-color: #e4e7ec;
+    color: #667085;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+[data-ui-pagination="metronic"] .page-item.active .page-link {
+    background-color: var(--spm-primary);
+    border-color: var(--spm-primary);
+    color: #ffffff;
+}
+
+[data-ui-pagination="metronic"] .page-item:not(.active):not(.disabled) .page-link:hover {
+    background-color: var(--spm-primary-light, #e6f5ee);
+    border-color: var(--spm-primary-light, #e6f5ee);
+    color: var(--spm-primary);
+}
+
+[data-ui-progress="metronic"] .progress {
+    background-color: #eef2f7;
+}
+
+.spm-progress-label,
+.spm-progress-meta {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.spm-progress-label {
+    color: #344054;
+}
+
+[data-ui-table="metronic"] td[colspan] > [data-ui-empty-state="metronic"] {
+    min-width: 260px;
+}
+
+.spm-simple-table-dense tbody td {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    font-size: 13px;
+}
+

@@ -53,6 +53,7 @@ class SendAsesor2Reminders extends Command
             // Skip if already 100% complete
             if ($completion['percentage'] >= 100.0) {
                 $skipped++;
+
                 continue;
             }
 
@@ -63,12 +64,13 @@ class SendAsesor2Reminders extends Command
                 ->where('notifiable_type', get_class($asesorUser))
                 ->where('notifiable_id', $asesorUser->id)
                 ->where('data', 'like', '%reminder_asesor2%')
-                ->where('data', 'like', '%' . $akreditasi->uuid . '%')
+                ->where('data', 'like', '%'.$akreditasi->uuid.'%')
                 ->whereDate('created_at', Carbon::today())
                 ->exists();
 
             if ($alreadySentToday) {
                 $skipped++;
+
                 continue;
             }
 

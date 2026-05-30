@@ -106,9 +106,9 @@ class AkreditasiNotificationTest extends TestCase
 
         $this->assertDatabaseHas('failed_notifications', [
             'notification_type' => 'assessment',
-            'notifiable_id'     => $user->id,
-            'failure_reason'    => 'WebPush provider timeout',
-            'status'            => 'pending',
+            'notifiable_id' => $user->id,
+            'failure_reason' => 'WebPush provider timeout',
+            'status' => 'pending',
         ]);
 
         $record = FailedNotification::where('notifiable_id', $user->id)->first();
@@ -135,10 +135,10 @@ class AkreditasiNotificationTest extends TestCase
         $array = $notification->toArray($user);
 
         $this->assertSame([
-            'type'    => 'visitasi_diterima',
-            'title'   => 'Jadwal Visitasi',
+            'type' => 'visitasi_diterima',
+            'title' => 'Jadwal Visitasi',
             'message' => 'Visitasi dijadwalkan.',
-            'url'     => 'https://example.com/visitasi',
+            'url' => 'https://example.com/visitasi',
         ], $array);
     }
 }

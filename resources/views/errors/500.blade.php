@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>500 - Kesalahan Server</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand/favicon.svg') }}">
-    <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.css') }}">
     <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}">
     @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css'])
     <style>
@@ -33,21 +32,21 @@
 
             <div class="spm-error-code spm-error-code-danger mb-3">500</div>
 
-            <h1 class="fw-bold text-gray-900 fs-2 mb-3">Kesalahan Server</h1>
+            <h1 class="fw-semibold text-gray-900 fs-2 mb-3">Kesalahan Server</h1>
             <p class="text-gray-600 fw-semibold fs-6 mb-8">
                 Terjadi kesalahan pada server kami.<br>
                 Tim teknis sudah diberitahu. Silakan coba lagi beberapa saat.
             </p>
 
             <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-                <a href="{{ url('/dashboard') }}" class="btn btn-primary fw-bold px-6">
+                <a href="{{ url('/dashboard') }}" class="btn btn-primary fw-semibold px-6">
                     <i class="ki-solid ki-home fs-3 me-1">
                         <span class="path1"></span>
                         <span class="path2"></span>
                     </i>
                     Ke Dashboard
                 </a>
-                <a href="javascript:location.reload()" class="btn btn-light fw-bold px-6">
+                <a href="javascript:location.reload()" class="btn btn-light fw-semibold px-6">
                     <i class="ki-solid ki-arrows-circle fs-3 me-1">
                         <span class="path1"></span>
                         <span class="path2"></span>

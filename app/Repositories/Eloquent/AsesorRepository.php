@@ -3,6 +3,7 @@
 namespace App\Repositories\Eloquent;
 
 use App\Models\Akreditasi;
+use App\Models\Asesor;
 use App\Models\User;
 use App\Repositories\Contracts\AsesorRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -13,7 +14,7 @@ class AsesorRepository implements AsesorRepositoryInterface
     {
         $query = User::where('role_id', 2)
             ->when($filters['search'] ?? null, function ($query, $search) {
-                $query->where('name', 'like', '%' . $search . '%');
+                $query->where('name', 'like', '%'.$search.'%');
             })
             ->when(($filters['status'] ?? '') !== '', function ($query) use ($filters) {
                 $query->where('status', $filters['status']);
@@ -38,17 +39,17 @@ class AsesorRepository implements AsesorRepositoryInterface
             });
 
         return $query->with([
-                'asesor:id,user_id,nama_dengan_gelar',
-                'asesor.assessments' => function ($query) {
-                    $query
-                        ->latest()
-                        ->with([
-                            'akreditasi:id,user_id,status,uuid',
-                            'akreditasi.user:id,name',
-                            'akreditasi.user.pesantren:id,user_id,nama_pesantren',
-                        ]);
-                },
-            ])
+            'asesor:id,user_id,nama_dengan_gelar',
+            'asesor.assessments' => function ($query) {
+                $query
+                    ->latest()
+                    ->with([
+                        'akreditasi:id,user_id,status,uuid',
+                        'akreditasi.user:id,name',
+                        'akreditasi.user.pesantren:id,user_id,nama_pesantren',
+                    ]);
+            },
+        ])
             ->orderBy($sortField, $sortAsc ? 'asc' : 'desc')
             ->paginate($perPage);
     }
@@ -63,14 +64,16 @@ class AsesorRepository implements AsesorRepositoryInterface
         $user = User::find($id);
         if ($user) {
             $user->status = $user->status == 1 ? 0 : 1;
+
             return $user->save();
         }
+
         return false;
     }
 
-    public function findByUserId(int $userId): ?\App\Models\Asesor
+    public function findByUserId(int $userId): ?Asesor
     {
-        return \App\Models\Asesor::where('user_id', $userId)->first();
+        return Asesor::where('user_id', $userId)->first();
     }
 
     public function updateByUserId(int $userId, array $data): bool
@@ -79,11 +82,12 @@ class AsesorRepository implements AsesorRepositoryInterface
         if ($asesor) {
             return $asesor->update($data);
         }
+
         return false;
     }
 
-    public function firstOrCreate(array $attributes, array $values = []): \App\Models\Asesor
+    public function firstOrCreate(array $attributes, array $values = []): Asesor
     {
-        return \App\Models\Asesor::firstOrCreate($attributes, $values);
+        return Asesor::firstOrCreate($attributes, $values);
     }
 }

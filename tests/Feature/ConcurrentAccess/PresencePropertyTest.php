@@ -7,6 +7,7 @@ use App\Models\Pesantren;
 use App\Models\Role;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Broadcast;
@@ -22,6 +23,7 @@ class PresencePropertyTest extends TestCase
 
         $this->seed(RoleSeeder::class);
         $this->seed(PermissionSeeder::class);
+        $this->seed(RolePermissionSeeder::class);
     }
 
     public function test_channel_returns_user_payload_for_authorized_user(): void
@@ -59,7 +61,7 @@ class PresencePropertyTest extends TestCase
      * client (Alpine x-data init in presence-indicator.blade.php) can
      * filter `currentUserId` out of the displayed presence list.
      */
-public function test_payload_returns_current_user_identity_for_client_side_exclusion(): void
+    public function test_payload_returns_current_user_identity_for_client_side_exclusion(): void
     {
         [$user, $akreditasi] = $this->makeOwnerAndAkreditasi();
 
@@ -76,7 +78,7 @@ public function test_payload_returns_current_user_identity_for_client_side_exclu
     /**
      * @return array{0: User, 1: Akreditasi}
      */
-private function makeOwnerAndAkreditasi(): array
+    private function makeOwnerAndAkreditasi(): array
     {
         [$user] = $this->makePesantrenUser();
 
@@ -91,7 +93,7 @@ private function makeOwnerAndAkreditasi(): array
     /**
      * @return array{0: User, 1: Pesantren}
      */
-private function makePesantrenUser(): array
+    private function makePesantrenUser(): array
     {
         $user = User::factory()->create([
             'role_id' => Role::ID_PESANTREN,

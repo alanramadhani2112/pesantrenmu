@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Livewire;
 
+use App\Livewire\Pages\Asesor\AkreditasiDetail;
 use App\Models\Akreditasi;
 use App\Models\AkreditasiRejection;
 use App\Models\Asesor;
@@ -43,7 +44,7 @@ class AsesorRejectionUiTest extends TestCase
         [$asesorUser, $akreditasi] = $this->createAsesor1WithAkreditasi();
         $this->actingAs($asesorUser);
 
-        $component = Livewire::test(\App\Livewire\Pages\Asesor\AkreditasiDetail::class, ['uuid' => $akreditasi->uuid]);
+        $component = Livewire::test(AkreditasiDetail::class, ['uuid' => $akreditasi->uuid]);
 
         // Verify rejection form data is loaded
         $this->assertNotEmpty($component->get('selectableItems'));
@@ -75,7 +76,7 @@ class AsesorRejectionUiTest extends TestCase
         [$asesorUser, $akreditasi] = $this->createAsesor1WithAkreditasi();
         $this->actingAs($asesorUser);
 
-        $component = Livewire::test(\App\Livewire\Pages\Asesor\AkreditasiDetail::class, ['uuid' => $akreditasi->uuid]);
+        $component = Livewire::test(AkreditasiDetail::class, ['uuid' => $akreditasi->uuid]);
 
         $component->set('rejectedItems', [])
             ->set('rejectionExplanation', 'Some explanation text here.')
@@ -89,7 +90,7 @@ class AsesorRejectionUiTest extends TestCase
         [$asesorUser, $akreditasi] = $this->createAsesor1WithAkreditasi();
         $this->actingAs($asesorUser);
 
-        $component = Livewire::test(\App\Livewire\Pages\Asesor\AkreditasiDetail::class, ['uuid' => $akreditasi->uuid]);
+        $component = Livewire::test(AkreditasiDetail::class, ['uuid' => $akreditasi->uuid]);
 
         $component->set('rejectedItems', ['profil'])
             ->set('rejectionExplanation', 'short')
@@ -119,7 +120,7 @@ class AsesorRejectionUiTest extends TestCase
             'status' => 'submitted',
         ]);
 
-        $component = Livewire::test(\App\Livewire\Pages\Asesor\AkreditasiDetail::class, ['uuid' => $akreditasi->uuid]);
+        $component = Livewire::test(AkreditasiDetail::class, ['uuid' => $akreditasi->uuid]);
 
         $component->assertSee('Perbaikan Telah Dikirim')
             ->assertSee('Terima Perbaikan')
@@ -143,7 +144,7 @@ class AsesorRejectionUiTest extends TestCase
             'status' => 'submitted',
         ]);
 
-        $component = Livewire::test(\App\Livewire\Pages\Asesor\AkreditasiDetail::class, ['uuid' => $akreditasi->uuid]);
+        $component = Livewire::test(AkreditasiDetail::class, ['uuid' => $akreditasi->uuid]);
 
         $component->call('acceptPerbaikan');
 
@@ -170,7 +171,7 @@ class AsesorRejectionUiTest extends TestCase
             'status' => 'accepted',
         ]);
 
-        $component = Livewire::test(\App\Livewire\Pages\Asesor\AkreditasiDetail::class, ['uuid' => $akreditasi->uuid]);
+        $component = Livewire::test(AkreditasiDetail::class, ['uuid' => $akreditasi->uuid]);
 
         $component->assertSee('1 dari 3')
             ->assertSee('Sisa 2 kesempatan');
@@ -193,7 +194,7 @@ class AsesorRejectionUiTest extends TestCase
             'status' => 'accepted',
         ]);
 
-        $component = Livewire::test(\App\Livewire\Pages\Asesor\AkreditasiDetail::class, ['uuid' => $akreditasi->uuid]);
+        $component = Livewire::test(AkreditasiDetail::class, ['uuid' => $akreditasi->uuid]);
 
         $component->assertSee('Riwayat Penolakan')
             ->assertSee('Penolakan #1')
@@ -205,7 +206,7 @@ class AsesorRejectionUiTest extends TestCase
         [$asesorUser, $akreditasi] = $this->createAsesor1WithAkreditasi();
         $this->actingAs($asesorUser);
 
-        $component = Livewire::test(\App\Livewire\Pages\Asesor\AkreditasiDetail::class, ['uuid' => $akreditasi->uuid])
+        $component = Livewire::test(AkreditasiDetail::class, ['uuid' => $akreditasi->uuid])
             ->assertSee('Tolak Dokumen')
             ->assertSee('asesor-reject-documents-modal', false)
             ->assertSee('data-ui-modal="metronic"', false)
@@ -213,7 +214,8 @@ class AsesorRejectionUiTest extends TestCase
 
         $component
             ->call('setTab', 'edpm_pesantren')
-            ->assertSee('spm-score-table--readonly', false)
+            ->assertSee('data-ui-simple-table="metronic"', false)
+            ->assertSee('spm-edpm-review-table', false)
             ->assertSee('Catatan Komponen');
 
         $component
@@ -224,9 +226,12 @@ class AsesorRejectionUiTest extends TestCase
 
     public function test_asesor_detail_delta_display_uses_absolute_difference(): void
     {
-        $view = file_get_contents(resource_path('views/livewire/pages/asesor/akreditasi-detail.blade.php'));
+        $view = file_get_contents(resource_path('views/livewire/pages/asesor/akreditasi-detail/tabs/instrumen/score-table.blade.php'));
+        $component = file_get_contents(app_path('Livewire/Pages/Asesor/AkreditasiDetail.php'));
 
-        $this->assertStringContainsString('abs((int) $na1Value - (int) $na2Value)', $view);
+        $this->assertStringContainsString('asesorDeltaValue($butir->id)', $view);
+        $this->assertStringContainsString('calculateDelta((int) $na1Value, (int) $na2Value)', $component);
+        $this->assertStringNotContainsString('abs((int) $na1Value - (int) $na2Value)', $view);
         $this->assertStringNotContainsString('? ((int) $na1Value - (int) $na2Value)', $view);
     }
 

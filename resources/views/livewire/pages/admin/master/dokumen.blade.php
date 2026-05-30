@@ -275,7 +275,7 @@ new #[Layout('layouts.app')] class extends Component {
                                     <x-ui.icon name="document" class="fs-4" />
                                 </span>
                             </span>
-                            <span class="fw-bold text-gray-600 text-truncate">{{ basename($currentFile) }}</span>
+                            <span class="fw-semibold text-gray-600 text-truncate">{{ basename($currentFile) }}</span>
                         </div>
                     </x-ui.form-field>
                 @endif

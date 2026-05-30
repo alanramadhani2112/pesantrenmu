@@ -13,8 +13,7 @@ class DocumentService
 {
     public function __construct(
         protected DocumentRepositoryInterface $documentRepository,
-    ) {
-    }
+    ) {}
 
     public function getPaginatedDocuments(
         ?string $search = null,
@@ -83,7 +82,7 @@ class DocumentService
     public function deleteDocument(int $id): bool
     {
         $doc = $this->findDocument($id);
-        if (!$doc) {
+        if (! $doc) {
             return false;
         }
 
@@ -102,8 +101,8 @@ class DocumentService
      * "secret" categories impossible to leak through a misconfigured admin
      * checkbox.
      *
-     * @param  string|null  $role           'admin' | 'asesor' | 'pesantren' | null (guest)
-     * @param  string|null  $categorySlug   document_categories.slug, or 'all'/null
+     * @param  string|null  $role  'admin' | 'asesor' | 'pesantren' | null (guest)
+     * @param  string|null  $categorySlug  document_categories.slug, or 'all'/null
      */
     public function getActiveDocuments(
         ?string $role = null,

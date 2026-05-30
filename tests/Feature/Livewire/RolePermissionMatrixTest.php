@@ -242,14 +242,14 @@ class RolePermissionMatrixTest extends TestCase
         $superAdmin = User::factory()->create(['role_id' => Role::ID_SUPER_ADMIN]);
         $this->actingAs($superAdmin);
 
-        $adminRole   = Role::find(Role::ID_ADMIN);
+        $adminRole = Role::find(Role::ID_ADMIN);
         $permissions = Permission::take(2)->get();
 
         // Start with no permissions
         $adminRole->permissions()->detach();
 
         $component = Volt::test('pages.admin.master.role-permission');
-        $matrix    = $component->get('matrix');
+        $matrix = $component->get('matrix');
 
         $matrix[$adminRole->id][$permissions[0]->id] = true;
         $matrix[$adminRole->id][$permissions[1]->id] = true;
@@ -274,14 +274,14 @@ class RolePermissionMatrixTest extends TestCase
         $superAdmin = User::factory()->create(['role_id' => Role::ID_SUPER_ADMIN]);
         $this->actingAs($superAdmin);
 
-        $asesorRole  = Role::find(Role::ID_ASESOR);
+        $asesorRole = Role::find(Role::ID_ASESOR);
         $permissions = Permission::take(2)->get();
 
         // Pre-assign both permissions
         $asesorRole->syncPermissions($permissions->pluck('id')->all());
 
         $component = Volt::test('pages.admin.master.role-permission');
-        $matrix    = $component->get('matrix');
+        $matrix = $component->get('matrix');
 
         // Revoke the second permission
         $matrix[$asesorRole->id][$permissions[0]->id] = true;
@@ -300,7 +300,7 @@ class RolePermissionMatrixTest extends TestCase
         $superAdmin = User::factory()->create(['role_id' => Role::ID_SUPER_ADMIN]);
         $this->actingAs($superAdmin);
 
-        $adminRole   = Role::find(Role::ID_ADMIN);
+        $adminRole = Role::find(Role::ID_ADMIN);
         $permissions = Permission::take(2)->get();
 
         // Pre-assign permissions
@@ -323,12 +323,12 @@ class RolePermissionMatrixTest extends TestCase
         $this->actingAs($superAdmin);
 
         $pesantrenRole = Role::find(Role::ID_PESANTREN);
-        $permission    = Permission::first();
+        $permission = Permission::first();
 
         $pesantrenRole->permissions()->detach();
 
         $component = Volt::test('pages.admin.master.role-permission');
-        $matrix    = $component->get('matrix');
+        $matrix = $component->get('matrix');
         $matrix[$pesantrenRole->id][$permission->id] = true;
 
         $component->set('matrix', $matrix)->call('save');
@@ -345,20 +345,19 @@ class RolePermissionMatrixTest extends TestCase
         $superAdmin = User::factory()->create(['role_id' => Role::ID_SUPER_ADMIN]);
         $this->actingAs($superAdmin);
 
-        $adminRole  = Role::find(Role::ID_ADMIN);
+        $adminRole = Role::find(Role::ID_ADMIN);
         $permission = Permission::first();
 
         $adminRole->permissions()->detach();
 
         $component = Volt::test('pages.admin.master.role-permission');
-        $matrix    = $component->get('matrix');
+        $matrix = $component->get('matrix');
         $matrix[$adminRole->id][$permission->id] = true;
 
         $component->set('matrix', $matrix)->call('save');
 
         Log::shouldHaveReceived('info')
-            ->withArgs(fn ($channel, $context = []) =>
-                $channel === 'permission_matrix_changed' ||
+            ->withArgs(fn ($channel, $context = []) => $channel === 'permission_matrix_changed' ||
                 (is_array($context) && isset($context['role_id']))
             );
     }

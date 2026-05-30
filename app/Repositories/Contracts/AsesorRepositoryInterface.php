@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Contracts;
 
+use App\Models\Asesor;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -13,9 +14,9 @@ interface AsesorRepositoryInterface
 
     public function toggleStatus(int $id): bool;
 
-    public function findByUserId(int $userId): ?\App\Models\Asesor;
+    public function findByUserId(int $userId): ?Asesor;
 
     public function updateByUserId(int $userId, array $data): bool;
 
-    public function firstOrCreate(array $attributes, array $values = []): \App\Models\Asesor;
+    public function firstOrCreate(array $attributes, array $values = []): Asesor;
 }

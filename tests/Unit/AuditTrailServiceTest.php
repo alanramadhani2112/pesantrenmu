@@ -218,7 +218,7 @@ class AuditTrailServiceTest extends TestCase
         Auth::login($setup['user']);
 
         // Create log with specific date
-        $log1 = new AkreditasiAuditLog();
+        $log1 = new AkreditasiAuditLog;
         $log1->akreditasi_id = $setup['akreditasi']->id;
         $log1->user_id = $setup['user']->id;
         $log1->action_type = 'status_changed';
@@ -227,7 +227,7 @@ class AuditTrailServiceTest extends TestCase
         $log1->created_at = '2024-01-15 10:00:00';
         $log1->save();
 
-        $log2 = new AkreditasiAuditLog();
+        $log2 = new AkreditasiAuditLog;
         $log2->akreditasi_id = $setup['akreditasi']->id;
         $log2->user_id = $setup['user']->id;
         $log2->action_type = 'approved';

@@ -15,7 +15,7 @@ class QueueConfigTest extends TestCase
     {
         $this->assertTrue(
             config('queue.connections.database.after_commit'),
-            'queue.connections.database.after_commit must be true to ensure notifications ' .
+            'queue.connections.database.after_commit must be true to ensure notifications '.
             'are only dispatched after the transaction commits successfully.'
         );
     }

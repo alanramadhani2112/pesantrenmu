@@ -12,7 +12,7 @@
                 <x-ui.icon :name="$icon" class="fs-2" />
             </div>
         </div>
-        <span class="fw-bold text-gray-700">{{ $label }}</span>
+        <span class="fw-semibold text-gray-700">{{ $label }}</span>
     </div>
 
     <span class="fw-semibold text-gray-900">{{ $value }}</span>

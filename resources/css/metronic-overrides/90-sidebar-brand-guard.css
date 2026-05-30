@@ -1,0 +1,437 @@
+/* ============================================================
+   Metronic Sidebar Shell Normalization
+   ============================================================ */
+
+.spm-app-sidebar {
+    width: var(--bs-app-sidebar-width, 280px) !important;
+    background: var(--spm-primary-800) !important;
+    border-right: 1px solid var(--spm-primary-700) !important;
+}
+
+.spm-app-sidebar .app-sidebar-logo {
+    height: var(--bs-app-header-height) !important;
+    min-height: var(--bs-app-header-height) !important;
+    padding-inline: 24px !important;
+    border-bottom: 1px solid var(--spm-primary-700) !important;
+}
+
+.spm-app-sidebar .app-sidebar-logo-link {
+    min-width: 0;
+    min-height: 40px;
+    color: #ffffff !important;
+    text-decoration: none;
+}
+
+.spm-app-sidebar .spm-sidebar-logo-mark {
+    width: 32px !important;
+    height: 32px !important;
+    flex: 0 0 32px;
+    border-radius: 6px !important;
+}
+
+.spm-app-sidebar .spm-sidebar-brand-title {
+    color: #ffffff !important;
+    font-size: 17px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+}
+
+.spm-app-sidebar .spm-sidebar-mobile-dismiss {
+    color: rgba(255, 255, 255, 0.74) !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    border-radius: 8px !important;
+}
+
+.spm-app-sidebar .spm-sidebar-mobile-dismiss:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+.spm-app-sidebar .app-sidebar-menu {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.spm-app-sidebar .app-sidebar-wrapper {
+    min-height: 0 !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+.spm-app-sidebar .menu {
+    gap: 2px !important;
+}
+
+.spm-app-sidebar .spm-sidebar-section.menu-item {
+    padding: 18px 0 7px !important;
+}
+
+.spm-app-sidebar .spm-sidebar-section .menu-content {
+    padding: 0 12px !important;
+}
+
+.spm-app-sidebar .spm-sidebar-section .menu-heading {
+    color: rgba(255, 255, 255, 0.48) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+}
+
+.spm-app-sidebar .spm-sidebar-link.menu-link,
+.spm-app-sidebar .spm-sidebar-group-toggle {
+    min-height: 44px !important;
+    padding: 0 12px !important;
+    color: rgba(255, 255, 255, 0.74) !important;
+    border-color: transparent !important;
+    border-radius: 8px !important;
+    background-color: transparent !important;
+}
+
+.spm-app-sidebar .spm-sidebar-link.menu-link:hover,
+.spm-app-sidebar .spm-sidebar-group-toggle:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.spm-app-sidebar .spm-sidebar-link.menu-link.active,
+.spm-app-sidebar .menu-item.here > .spm-sidebar-group-toggle {
+    color: #ffffff !important;
+    background-color: var(--spm-primary-500) !important;
+}
+
+.spm-app-sidebar .spm-sidebar-link.menu-link.active::before {
+    left: -4px !important;
+    width: 3px !important;
+    height: 20px !important;
+    background-color: #ffffff !important;
+}
+
+.spm-app-sidebar .spm-sidebar-icon,
+.spm-app-sidebar .spm-sidebar-group-icon {
+    color: rgba(255, 255, 255, 0.55) !important;
+    background-color: transparent !important;
+}
+
+.spm-app-sidebar .spm-sidebar-link.menu-link:hover .spm-sidebar-icon,
+.spm-app-sidebar .spm-sidebar-link.menu-link.active .spm-sidebar-icon,
+.spm-app-sidebar .spm-sidebar-group-toggle:hover .spm-sidebar-group-icon,
+.spm-app-sidebar .menu-item.here > .spm-sidebar-group-toggle .spm-sidebar-group-icon {
+    color: #ffffff !important;
+    background-color: transparent !important;
+}
+
+.spm-app-sidebar .spm-sidebar-title,
+.spm-app-sidebar .menu-title {
+    min-width: 0;
+    color: inherit !important;
+}
+
+.spm-app-sidebar .menu-bullet .bullet {
+    background-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.spm-app-sidebar .spm-sidebar-link-child.menu-link {
+    color: rgba(255, 255, 255, 0.66) !important;
+}
+
+.spm-app-sidebar .spm-sidebar-link-child.menu-link:hover,
+.spm-app-sidebar .spm-sidebar-link-child.menu-link.active {
+    color: #ffffff !important;
+}
+
+.spm-app-sidebar .app-sidebar-footer {
+    flex: 0 0 auto !important;
+    min-height: 88px !important;
+    padding: 14px 16px !important;
+    overflow: visible !important;
+    border-top: 1px solid var(--spm-primary-700) !important;
+    background-color: var(--spm-primary-800) !important;
+}
+
+.spm-app-sidebar .spm-sidebar-user-card {
+    min-height: 58px !important;
+    width: 100%;
+    min-width: 0;
+    padding: 10px 12px !important;
+    overflow: visible !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 8px !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.spm-app-sidebar .spm-sidebar-user-card:hover {
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+    background-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.spm-app-sidebar .spm-sidebar-user-card .text-gray-800,
+.spm-app-sidebar .spm-sidebar-user-card .text-gray-600,
+.spm-app-sidebar .spm-sidebar-user-card .text-gray-700,
+.spm-app-sidebar .spm-sidebar-user-card .text-dark,
+.spm-app-sidebar .spm-sidebar-user-card .text-muted {
+    color: inherit !important;
+}
+
+.spm-app-sidebar .spm-sidebar-user-card .symbol-label {
+    color: var(--spm-primary-900) !important;
+    background-color: #ffffff !important;
+}
+
+.spm-app-sidebar .spm-sidebar-user-card .badge {
+    max-width: 100%;
+    min-height: 20px !important;
+    overflow: hidden;
+    color: #ffffff !important;
+    text-overflow: ellipsis;
+    background-color: rgba(255, 255, 255, 0.14) !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+.spm-app-sidebar .spm-sidebar-user-popover {
+    position: absolute !important;
+    right: 16px !important;
+    bottom: calc(100% + 10px) !important;
+    left: 16px !important;
+    z-index: 1090 !important;
+    width: auto !important;
+    padding: 6px !important;
+    overflow: visible !important;
+    background-color: #ffffff !important;
+    border: 1px solid var(--spm-border, #e4e9f2) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 18px 48px rgba(15, 23, 42, 0.18) !important;
+}
+
+.spm-app-sidebar .spm-sidebar-user-popover[x-cloak] {
+    display: none !important;
+}
+
+.spm-app-sidebar .spm-sidebar-user-link {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    min-height: 40px;
+    width: 100%;
+    color: var(--spm-text-body, #344054) !important;
+    border-radius: 6px !important;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.spm-app-sidebar .spm-sidebar-user-link i {
+    color: #667085 !important;
+}
+
+.spm-app-sidebar .spm-sidebar-user-link:hover {
+    color: var(--spm-primary) !important;
+    background-color: var(--spm-primary-light, #e6f0eb) !important;
+}
+
+.spm-app-sidebar .spm-sidebar-user-link:hover i {
+    color: var(--spm-primary) !important;
+}
+
+.spm-app-sidebar .spm-sidebar-user-link-danger {
+    color: #b42318 !important;
+}
+
+.spm-app-sidebar .spm-sidebar-user-link-danger i {
+    color: #d92d20 !important;
+}
+
+.spm-app-sidebar .spm-sidebar-user-link-danger:hover {
+    color: #b42318 !important;
+    background-color: #fef3f2 !important;
+}
+
+.spm-app-sidebar .spm-sidebar-user-link-danger:hover i {
+    color: #b42318 !important;
+}
+
+@media (min-width: 992px) {
+    .spm-app-sidebar .spm-sidebar-mobile-dismiss,
+    [data-ui-button="metronic"].d-lg-none,
+    .spm-btn.d-lg-none {
+        display: none !important;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .spm-app-sidebar {
+        width: min(280px, calc(100vw - 32px)) !important;
+    }
+
+    .spm-app-sidebar .spm-sidebar-mobile-dismiss {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.spm-btn.d-none,
+[data-ui-button="metronic"].d-none {
+    display: none !important;
+}
+
+/* ============================================================
+   Brand Chroming Guard
+   ============================================================
+   Metronic default blue can leak through async vendor CSS and
+   duotone icon paths. This final layer keeps product actions and
+   icons in the LP2M/PesantrenMu palette: green, orange, teal,
+   neutral, success, warning, danger. No default blue.
+   ============================================================ */
+
+:root,
+[data-bs-theme="light"],
+[data-bs-theme="dark"] {
+    --bs-primary: var(--spm-primary) !important;
+    --bs-primary-active: var(--spm-primary-active) !important;
+    --bs-primary-light: var(--spm-primary-light) !important;
+    --bs-primary-inverse: #ffffff !important;
+    --bs-primary-rgb: var(--spm-primary-rgb) !important;
+    --bs-primary-active-rgb: var(--spm-primary-rgb) !important;
+    --bs-text-primary: var(--spm-primary) !important;
+    --bs-component-active-bg: var(--spm-primary) !important;
+    --bs-component-hover-color: var(--spm-primary) !important;
+    --bs-component-checked-bg: var(--spm-primary) !important;
+    --bs-info: var(--spm-info) !important;
+    --bs-info-active: var(--spm-info-active) !important;
+    --bs-info-light: var(--spm-info-light) !important;
+    --bs-info-rgb: var(--spm-info-rgb) !important;
+    --bs-text-info: var(--spm-info-active) !important;
+    --kt-primary: var(--spm-primary) !important;
+    --kt-info: var(--spm-info) !important;
+}
+
+.spm-app-shell .btn.btn-primary,
+.spm-app-shell [data-ui-button="metronic"].btn-primary,
+.spm-app-shell .swal2-confirm.btn-primary {
+    color: #ffffff !important;
+    background-color: var(--spm-primary) !important;
+    border-color: var(--spm-primary) !important;
+    box-shadow: none !important;
+}
+
+.spm-app-shell .btn.btn-primary:hover,
+.spm-app-shell .btn.btn-primary:focus,
+.spm-app-shell [data-ui-button="metronic"].btn-primary:hover,
+.spm-app-shell [data-ui-button="metronic"].btn-primary:focus {
+    color: #ffffff !important;
+    background-color: var(--spm-primary-hover) !important;
+    border-color: var(--spm-primary-hover) !important;
+}
+
+.spm-app-shell .btn.btn-primary:active,
+.spm-app-shell [data-ui-button="metronic"].btn-primary:active {
+    background-color: var(--spm-primary-active) !important;
+    border-color: var(--spm-primary-active) !important;
+}
+
+.spm-app-shell .btn.btn-info,
+.spm-app-shell [data-ui-button="metronic"].btn-info {
+    color: #ffffff !important;
+    background-color: var(--spm-info) !important;
+    border-color: var(--spm-info) !important;
+}
+
+.spm-app-shell .btn.btn-info:hover,
+.spm-app-shell .btn.btn-info:focus,
+.spm-app-shell [data-ui-button="metronic"].btn-info:hover,
+.spm-app-shell [data-ui-button="metronic"].btn-info:focus {
+    color: #ffffff !important;
+    background-color: var(--spm-info-active) !important;
+    border-color: var(--spm-info-active) !important;
+}
+
+.spm-app-shell .btn.btn-light-primary,
+.spm-app-shell [data-ui-button="metronic"].btn-light-primary,
+.spm-app-shell .badge-light-primary,
+.spm-app-shell .bg-light-primary {
+    color: var(--spm-primary-700) !important;
+    background-color: var(--spm-primary-light) !important;
+    border-color: rgba(var(--spm-primary-rgb), 0.18) !important;
+}
+
+.spm-app-shell .btn.btn-light-info,
+.spm-app-shell [data-ui-button="metronic"].btn-light-info,
+.spm-app-shell .badge-light-info,
+.spm-app-shell .bg-light-info {
+    color: var(--spm-info-active) !important;
+    background-color: var(--spm-info-light) !important;
+    border-color: rgba(var(--spm-info-rgb), 0.2) !important;
+}
+
+.spm-app-shell .text-primary,
+.spm-app-shell .text-active-primary.active,
+.spm-app-shell .text-hover-primary:hover {
+    color: var(--spm-primary-700) !important;
+}
+
+.spm-app-shell .text-info {
+    color: var(--spm-info-active) !important;
+}
+
+.spm-app-shell .bg-primary,
+.spm-app-shell .badge-primary,
+.spm-app-shell .bullet.bg-primary {
+    background-color: var(--spm-primary) !important;
+}
+
+.spm-app-shell .border-primary {
+    border-color: var(--spm-primary) !important;
+}
+
+.spm-app-shell .ki-duotone,
+.spm-app-shell .ki-duotone [class^="path"]::before,
+.spm-app-shell .ki-duotone [class*=" path"]::before,
+.spm-app-shell .ki-outline,
+.spm-app-shell .ki-solid {
+    color: currentColor !important;
+}
+
+.spm-app-shell .spm-sidebar-icon,
+.spm-app-shell .spm-sidebar-icon .ki-duotone,
+.spm-app-shell .spm-sidebar-icon .ki-duotone [class^="path"]::before,
+.spm-app-shell .spm-sidebar-icon .ki-duotone [class*=" path"]::before {
+    color: #d6eadf !important;
+}
+
+.spm-app-shell .spm-sidebar-link.menu-link:hover .spm-sidebar-icon,
+.spm-app-shell .spm-sidebar-link.menu-link:hover .spm-sidebar-icon .ki-duotone,
+.spm-app-shell .spm-sidebar-link.menu-link:hover .spm-sidebar-icon .ki-duotone [class^="path"]::before,
+.spm-app-shell .spm-sidebar-link.menu-link:hover .spm-sidebar-icon .ki-duotone [class*=" path"]::before,
+.spm-app-shell .spm-sidebar-link.menu-link.active .spm-sidebar-icon,
+.spm-app-shell .spm-sidebar-link.menu-link.active .spm-sidebar-icon .ki-duotone,
+.spm-app-shell .spm-sidebar-link.menu-link.active .spm-sidebar-icon .ki-duotone [class^="path"]::before,
+.spm-app-shell .spm-sidebar-link.menu-link.active .spm-sidebar-icon .ki-duotone [class*=" path"]::before {
+    color: #ffffff !important;
+}
+
+.spm-app-shell .spm-quick-action .symbol-label.bg-light-primary,
+.spm-app-shell .spm-stat-card .symbol-label.bg-light-primary,
+.spm-app-shell .spm-dashboard-stat .symbol-label.bg-light-primary {
+    color: var(--spm-primary-700) !important;
+    background-color: #e6f0eb !important;
+}
+
+.spm-app-shell .spm-quick-action .symbol-label.bg-light-info,
+.spm-app-shell .spm-stat-card .symbol-label.bg-light-info,
+.spm-app-shell .spm-dashboard-stat .symbol-label.bg-light-info {
+    color: var(--spm-info-active) !important;
+    background-color: #e6f7f4 !important;
+}
+
+.spm-app-shell .spm-quick-action .symbol-label.bg-light-warning,
+.spm-app-shell .spm-stat-card .symbol-label.bg-light-warning,
+.spm-app-shell .spm-dashboard-stat .symbol-label.bg-light-warning {
+    color: #a34400 !important;
+    background-color: #fff4e8 !important;
+}

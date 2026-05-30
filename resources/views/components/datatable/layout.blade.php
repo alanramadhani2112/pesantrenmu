@@ -3,6 +3,9 @@
     'subtitle' => null,
     'records' => null,
     'showPerPage' => true,
+    'perPagePosition' => 'footer',
+    'perPageVariant' => 'compact',
+    'tableClass' => null,
 ])
 
 <x-ui.table
@@ -10,6 +13,9 @@
     :subtitle="$subtitle"
     :records="$records"
     :show-per-page="$showPerPage"
+    :per-page-position="$perPagePosition"
+    :per-page-variant="$perPageVariant"
+    :table-class="$tableClass"
     {{ $attributes->merge(['data-ui-table-adapter' => 'datatable']) }}
 >
     @isset($filters)

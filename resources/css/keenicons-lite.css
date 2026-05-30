@@ -1,0 +1,1425 @@
+/*
+ * Metronic KeenIcons Lite
+ * Generated from public/vendor/metronic/assets/plugins/global/plugins.bundle.css.
+ * Keep this file small: it includes font faces plus only icon rules used by SPM.
+ */
+
+@font-face {
+  font-family: "keenicons-duotone";
+  src: url("../../public/vendor/metronic/assets/plugins/global/fonts/keenicons/keenicons-duotone.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "keenicons-outline";
+  src: url("../../public/vendor/metronic/assets/plugins/global/fonts/keenicons/keenicons-outline.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "keenicons-solid";
+  src: url("../../public/vendor/metronic/assets/plugins/global/fonts/keenicons/keenicons-solid.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+.ki-duotone {
+  font-family: "keenicons-duotone" !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  display: inline-flex;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.ki-outline,
+.ki-solid {
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.ki-outline {
+  font-family: "keenicons-outline" !important;
+}
+
+.ki-solid {
+  font-family: "keenicons-solid" !important;
+}
+
+.ki-duotone i {
+  font-style: normal;
+}
+
+.ki-duotone,
+.ki-outline,
+.ki-solid {
+  line-height: 1;
+  color: currentColor;
+}
+
+.ki-abstract-26 .path1:before {
+  content: "\e931";
+  opacity: 0.3;
+}
+
+.ki-abstract-26 .path2:before {
+  content: "\e932";
+  margin-left: -1em;
+}
+
+.ki-arrow-down .path1:before {
+  content: "\e998";
+}
+
+.ki-arrow-down .path2:before {
+  content: "\e999";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-arrow-left .path1:before {
+  content: "\e99a";
+}
+
+.ki-arrow-left .path2:before {
+  content: "\e99b";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-arrow-right .path1:before {
+  content: "\e9a0";
+}
+
+.ki-arrow-right .path2:before {
+  content: "\e9a1";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-arrow-up-down .path1:before {
+  content: "\e9a7";
+  opacity: 0.3;
+}
+
+.ki-arrow-up-down .path2:before {
+  content: "\e9a8";
+  margin-left: -1em;
+}
+
+.ki-arrow-up .path1:before {
+  content: "\e9af";
+}
+
+.ki-arrow-up .path2:before {
+  content: "\e9b0";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-arrows-circle .path1:before {
+  content: "\e9b3";
+  opacity: 0.3;
+}
+
+.ki-arrows-circle .path2:before {
+  content: "\e9b4";
+  margin-left: -1em;
+}
+
+.ki-burger-menu .path1:before {
+  content: "\ea3d";
+  opacity: 0.3;
+}
+
+.ki-burger-menu .path2:before {
+  content: "\ea3e";
+  margin-left: -1em;
+}
+
+.ki-burger-menu .path3:before {
+  content: "\ea3f";
+  margin-left: -1em;
+}
+
+.ki-burger-menu .path4:before {
+  content: "\ea40";
+  margin-left: -1em;
+}
+
+.ki-calendar-tick .path1:before {
+  content: "\ea6a";
+  opacity: 0.3;
+}
+
+.ki-calendar-tick .path2:before {
+  content: "\ea6b";
+  margin-left: -1em;
+}
+
+.ki-calendar-tick .path3:before {
+  content: "\ea6c";
+  margin-left: -1em;
+}
+
+.ki-calendar-tick .path4:before {
+  content: "\ea6d";
+  margin-left: -1em;
+}
+
+.ki-calendar-tick .path5:before {
+  content: "\ea6e";
+  margin-left: -1em;
+}
+
+.ki-calendar-tick .path6:before {
+  content: "\ea6f";
+  margin-left: -1em;
+}
+
+.ki-calendar .path1:before {
+  content: "\ea70";
+  opacity: 0.3;
+}
+
+.ki-calendar .path2:before {
+  content: "\ea71";
+  margin-left: -1em;
+}
+
+.ki-category .path1:before {
+  content: "\ea8a";
+}
+
+.ki-category .path2:before {
+  content: "\ea8b";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-category .path3:before {
+  content: "\ea8c";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-category .path4:before {
+  content: "\ea8d";
+  margin-left: -1em;
+}
+
+.ki-chart-line-up .path1:before {
+  content: "\ea9c";
+}
+
+.ki-chart-line-up .path2:before {
+  content: "\ea9d";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-chart-line .path1:before {
+  content: "\ea9e";
+  opacity: 0.3;
+}
+
+.ki-chart-line .path2:before {
+  content: "\ea9f";
+  margin-left: -1em;
+}
+
+.ki-chart-pie-simple .path1:before {
+  content: "\eaa6";
+}
+
+.ki-chart-pie-simple .path2:before {
+  content: "\eaa7";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-check-circle .path1:before {
+  content: "\eab8";
+  opacity: 0.3;
+}
+
+.ki-check-circle .path2:before {
+  content: "\eab9";
+  margin-left: -1em;
+}
+
+.ki-check:before {
+  content: "\eabc";
+}
+
+.ki-cloud-add .path1:before {
+  content: "\ead0";
+}
+
+.ki-cloud-add .path2:before {
+  content: "\ead1";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-cloud-download .path1:before {
+  content: "\ead5";
+  opacity: 0.3;
+}
+
+.ki-cloud-download .path2:before {
+  content: "\ead6";
+  margin-left: -1em;
+}
+
+.ki-cross-circle .path1:before {
+  content: "\eb0c";
+  opacity: 0.3;
+}
+
+.ki-cross-circle .path2:before {
+  content: "\eb0d";
+  margin-left: -1em;
+}
+
+.ki-cross .path1:before {
+  content: "\eb10";
+}
+
+.ki-cross .path2:before {
+  content: "\eb11";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-data .path1:before {
+  content: "\eb22";
+}
+
+.ki-data .path2:before {
+  content: "\eb23";
+  margin-left: -1em;
+}
+
+.ki-data .path3:before {
+  content: "\eb24";
+  margin-left: -1em;
+}
+
+.ki-data .path4:before {
+  content: "\eb25";
+  margin-left: -1em;
+}
+
+.ki-data .path5:before {
+  content: "\eb26";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-disconnect .path1:before {
+  content: "\eb64";
+}
+
+.ki-disconnect .path2:before {
+  content: "\eb65";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-disconnect .path3:before {
+  content: "\eb66";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-disconnect .path4:before {
+  content: "\eb67";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-disconnect .path5:before {
+  content: "\eb68";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-document .path1:before {
+  content: "\eb70";
+  opacity: 0.3;
+}
+
+.ki-document .path2:before {
+  content: "\eb71";
+  margin-left: -1em;
+}
+
+.ki-down:before {
+  content: "\eba0";
+}
+
+.ki-entrance-right .path1:before {
+  content: "\ebf0";
+  opacity: 0.3;
+}
+
+.ki-entrance-right .path2:before {
+  content: "\ebf1";
+  margin-left: -1em;
+}
+
+.ki-exit-right .path1:before {
+  content: "\ebfe";
+  opacity: 0.3;
+}
+
+.ki-exit-right .path2:before {
+  content: "\ebff";
+  margin-left: -1em;
+}
+
+.ki-eye-slash .path1:before {
+  content: "\ec07";
+}
+
+.ki-eye-slash .path2:before {
+  content: "\ec08";
+  margin-left: -1em;
+}
+
+.ki-eye-slash .path3:before {
+  content: "\ec09";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-eye-slash .path4:before {
+  content: "\ec0a";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-eye .path1:before {
+  content: "\ec0b";
+}
+
+.ki-eye .path2:before {
+  content: "\ec0c";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-eye .path3:before {
+  content: "\ec0d";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-file-down .path1:before {
+  content: "\ec25";
+  opacity: 0.3;
+}
+
+.ki-file-down .path2:before {
+  content: "\ec26";
+  margin-left: -1em;
+}
+
+.ki-file-up .path1:before {
+  content: "\ec2d";
+  opacity: 0.3;
+}
+
+.ki-file-up .path2:before {
+  content: "\ec2e";
+  margin-left: -1em;
+}
+
+.ki-file .path1:before {
+  content: "\ec2f";
+}
+
+.ki-file .path2:before {
+  content: "\ec30";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-files-tablet .path1:before {
+  content: "\ec31";
+}
+
+.ki-files-tablet .path2:before {
+  content: "\ec32";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-geolocation .path1:before {
+  content: "\ec6a";
+  opacity: 0.3;
+}
+
+.ki-geolocation .path2:before {
+  content: "\ec6b";
+  margin-left: -1em;
+}
+
+.ki-home:before {
+  content: "\eca1";
+}
+
+.ki-icon .path1:before {
+  content: "\eca4";
+  opacity: 0.3;
+}
+
+.ki-icon .path2:before {
+  content: "\eca5";
+  margin-left: -1em;
+}
+
+.ki-icon .path3:before {
+  content: "\eca6";
+  margin-left: -1em;
+}
+
+.ki-information-2 .path1:before {
+  content: "\ecab";
+  opacity: 0.3;
+}
+
+.ki-information-2 .path2:before {
+  content: "\ecac";
+  margin-left: -1em;
+}
+
+.ki-information-2 .path3:before {
+  content: "\ecad";
+  margin-left: -1em;
+}
+
+.ki-information-5 .path1:before {
+  content: "\ecb4";
+  opacity: 0.3;
+}
+
+.ki-information-5 .path2:before {
+  content: "\ecb5";
+  margin-left: -1em;
+}
+
+.ki-information-5 .path3:before {
+  content: "\ecb6";
+  margin-left: -1em;
+}
+
+.ki-information .path1:before {
+  content: "\ecb7";
+  opacity: 0.3;
+}
+
+.ki-information .path2:before {
+  content: "\ecb8";
+  margin-left: -1em;
+}
+
+.ki-information .path3:before {
+  content: "\ecb9";
+  margin-left: -1em;
+}
+
+.ki-loading .path1:before {
+  content: "\ece2";
+}
+
+.ki-loading .path2:before {
+  content: "\ece3";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-lock-2 .path1:before {
+  content: "\ece4";
+}
+
+.ki-lock-2 .path2:before {
+  content: "\ece5";
+  margin-left: -1em;
+}
+
+.ki-lock-2 .path3:before {
+  content: "\ece6";
+  margin-left: -1em;
+}
+
+.ki-lock-2 .path4:before {
+  content: "\ece7";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-lock-2 .path5:before {
+  content: "\ece8";
+  margin-left: -1em;
+}
+
+.ki-lock .path1:before {
+  content: "\ecec";
+  opacity: 0.3;
+}
+
+.ki-lock .path2:before {
+  content: "\eced";
+  margin-left: -1em;
+}
+
+.ki-lock .path3:before {
+  content: "\ecee";
+  margin-left: -1em;
+}
+
+.ki-magnifier .path1:before {
+  content: "\ed02";
+  opacity: 0.3;
+}
+
+.ki-magnifier .path2:before {
+  content: "\ed03";
+  margin-left: -1em;
+}
+
+.ki-medal-star .path1:before {
+  content: "\ed0f";
+}
+
+.ki-medal-star .path2:before {
+  content: "\ed10";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-medal-star .path3:before {
+  content: "\ed11";
+  margin-left: -1em;
+}
+
+.ki-medal-star .path4:before {
+  content: "\ed12";
+  margin-left: -1em;
+}
+
+.ki-menu .path1:before {
+  content: "\ed13";
+  opacity: 0.3;
+}
+
+.ki-menu .path2:before {
+  content: "\ed14";
+  margin-left: -1em;
+}
+
+.ki-menu .path3:before {
+  content: "\ed15";
+  margin-left: -1em;
+}
+
+.ki-menu .path4:before {
+  content: "\ed16";
+  margin-left: -1em;
+}
+
+.ki-messages .path1:before {
+  content: "\ed30";
+}
+
+.ki-messages .path2:before {
+  content: "\ed31";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-messages .path3:before {
+  content: "\ed32";
+  margin-left: -1em;
+}
+
+.ki-messages .path4:before {
+  content: "\ed33";
+  margin-left: -1em;
+}
+
+.ki-messages .path5:before {
+  content: "\ed34";
+  margin-left: -1em;
+}
+
+.ki-minus-circle .path1:before {
+  content: "\ed3c";
+  opacity: 0.3;
+}
+
+.ki-minus-circle .path2:before {
+  content: "\ed3d";
+  margin-left: -1em;
+}
+
+.ki-minus:before {
+  content: "\ed42";
+}
+
+.ki-notification-bing .path1:before {
+  content: "\ed72";
+}
+
+.ki-notification-bing .path2:before {
+  content: "\ed73";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-notification-bing .path3:before {
+  content: "\ed74";
+  margin-left: -1em;
+}
+
+.ki-notification .path1:before {
+  content: "\ed83";
+  opacity: 0.3;
+}
+
+.ki-notification .path2:before {
+  content: "\ed84";
+  margin-left: -1em;
+}
+
+.ki-notification .path3:before {
+  content: "\ed85";
+  margin-left: -1em;
+}
+
+.ki-pencil .path1:before {
+  content: "\edbc";
+  opacity: 0.3;
+}
+
+.ki-pencil .path2:before {
+  content: "\edbd";
+  margin-left: -1em;
+}
+
+.ki-people .path1:before {
+  content: "\edbe";
+}
+
+.ki-people .path2:before {
+  content: "\edbf";
+  margin-left: -1em;
+}
+
+.ki-people .path3:before {
+  content: "\edc0";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-people .path4:before {
+  content: "\edc1";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-people .path5:before {
+  content: "\edc2";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-phone .path1:before {
+  content: "\edc5";
+  opacity: 0.3;
+}
+
+.ki-phone .path2:before {
+  content: "\edc6";
+  margin-left: -1em;
+}
+
+.ki-plus:before {
+  content: "\edd3";
+}
+
+.ki-profile-user .path1:before {
+  content: "\ede2";
+  opacity: 0.3;
+}
+
+.ki-profile-user .path2:before {
+  content: "\ede3";
+  margin-left: -1em;
+}
+
+.ki-profile-user .path3:before {
+  content: "\ede4";
+  margin-left: -1em;
+  opacity: 0.3;
+}
+
+.ki-profile-user .path4:before {
+  content: "\ede5";
+  margin-left: -1em;
+}
+
+.ki-rocket .path1:before {
+  content: "\ee04";
+  opacity: 0.3;
+}
+
+.ki-rocket .path2:before {
+  content: "\ee05";
+  margin-left: -1em;
+}
+
+.ki-security-user .path1:before {
+  content: "\ee3c";
+  opacity: 0.3;
+}
+
+.ki-security-user .path2:before {
+  content: "\ee3d";
+  margin-left: -1em;
+}
+
+.ki-setting-2 .path1:before {
+  content: "\ee40";
+  opacity: 0.3;
+}
+
+.ki-setting-2 .path2:before {
+  content: "\ee41";
+  margin-left: -1em;
+}
+
+.ki-shield-cross .path1:before {
+  content: "\ee50";
+  opacity: 0.3;
+}
+
+.ki-shield-cross .path2:before {
+  content: "\ee51";
+  margin-left: -1em;
+}
+
+.ki-shield-cross .path3:before {
+  content: "\ee52";
+  margin-left: -1em;
+}
+
+.ki-shield-tick .path1:before {
+  content: "\ee59";
+  opacity: 0.3;
+}
+
+.ki-shield-tick .path2:before {
+  content: "\ee5a";
+  margin-left: -1em;
+}
+
+.ki-sms .path1:before {
+  content: "\ee86";
+  opacity: 0.3;
+}
+
+.ki-sms .path2:before {
+  content: "\ee87";
+  margin-left: -1em;
+}
+
+.ki-teacher .path1:before {
+  content: "\eedd";
+  opacity: 0.3;
+}
+
+.ki-teacher .path2:before {
+  content: "\eede";
+  margin-left: -1em;
+}
+
+.ki-time .path1:before {
+  content: "\ef2c";
+  opacity: 0.3;
+}
+
+.ki-time .path2:before {
+  content: "\ef2d";
+  margin-left: -1em;
+}
+
+.ki-timer .path1:before {
+  content: "\ef2e";
+  opacity: 0.3;
+}
+
+.ki-timer .path2:before {
+  content: "\ef2f";
+  margin-left: -1em;
+}
+
+.ki-timer .path3:before {
+  content: "\ef30";
+  margin-left: -1em;
+}
+
+.ki-trash .path1:before {
+  content: "\ef44";
+  opacity: 0.3;
+}
+
+.ki-trash .path2:before {
+  content: "\ef45";
+  margin-left: -1em;
+}
+
+.ki-trash .path3:before {
+  content: "\ef46";
+  margin-left: -1em;
+}
+
+.ki-trash .path4:before {
+  content: "\ef47";
+  margin-left: -1em;
+}
+
+.ki-trash .path5:before {
+  content: "\ef48";
+  margin-left: -1em;
+}
+
+.ki-abstract-26.ki-outline:before {
+  content: "\e919";
+}
+
+.ki-arrow-down.ki-outline:before {
+  content: "\e945";
+}
+
+.ki-arrow-left.ki-outline:before {
+  content: "\e946";
+}
+
+.ki-arrow-right.ki-outline:before {
+  content: "\e949";
+}
+
+.ki-arrow-up-down.ki-outline:before {
+  content: "\e94b";
+}
+
+.ki-arrow-up.ki-outline:before {
+  content: "\e94f";
+}
+
+.ki-arrows-circle.ki-outline:before {
+  content: "\e951";
+}
+
+.ki-burger-menu.ki-outline:before {
+  content: "\e97c";
+}
+
+.ki-calendar-tick.ki-outline:before {
+  content: "\e985";
+}
+
+.ki-calendar.ki-outline:before {
+  content: "\e986";
+}
+
+.ki-category.ki-outline:before {
+  content: "\e98c";
+}
+
+.ki-chart-line-up.ki-outline:before {
+  content: "\e993";
+}
+
+.ki-chart-line.ki-outline:before {
+  content: "\e994";
+}
+
+.ki-chart-pie-simple.ki-outline:before {
+  content: "\e997";
+}
+
+.ki-check-circle.ki-outline:before {
+  content: "\e99d";
+}
+
+.ki-check.ki-outline:before {
+  content: "\e99f";
+}
+
+.ki-cloud-add.ki-outline:before {
+  content: "\e9a5";
+}
+
+.ki-cloud-download.ki-outline:before {
+  content: "\e9a7";
+}
+
+.ki-cross-circle.ki-outline:before {
+  content: "\e9b3";
+}
+
+.ki-cross.ki-outline:before {
+  content: "\e9b5";
+}
+
+.ki-data.ki-outline:before {
+  content: "\e9bd";
+}
+
+.ki-disconnect.ki-outline:before {
+  content: "\e9cf";
+}
+
+.ki-document.ki-outline:before {
+  content: "\e9d4";
+}
+
+.ki-down.ki-outline:before {
+  content: "\e9e5";
+}
+
+.ki-entrance-right.ki-outline:before {
+  content: "\e9fd";
+}
+
+.ki-exit-right.ki-outline:before {
+  content: "\ea03";
+}
+
+.ki-eye-slash.ki-outline:before {
+  content: "\ea06";
+}
+
+.ki-eye.ki-outline:before {
+  content: "\ea07";
+}
+
+.ki-file-down.ki-outline:before {
+  content: "\ea10";
+}
+
+.ki-file-up.ki-outline:before {
+  content: "\ea14";
+}
+
+.ki-file.ki-outline:before {
+  content: "\ea15";
+}
+
+.ki-files-tablet.ki-outline:before {
+  content: "\ea16";
+}
+
+.ki-geolocation.ki-outline:before {
+  content: "\ea2c";
+}
+
+.ki-home.ki-outline:before {
+  content: "\ea42";
+}
+
+.ki-icon.ki-outline:before {
+  content: "\ea44";
+}
+
+.ki-information-2.ki-outline:before {
+  content: "\ea46";
+}
+
+.ki-information-5.ki-outline:before {
+  content: "\ea49";
+}
+
+.ki-information.ki-outline:before {
+  content: "\ea4a";
+}
+
+.ki-loading.ki-outline:before {
+  content: "\ea5c";
+}
+
+.ki-lock-2.ki-outline:before {
+  content: "\ea5d";
+}
+
+.ki-lock.ki-outline:before {
+  content: "\ea5f";
+}
+
+.ki-magnifier.ki-outline:before {
+  content: "\ea64";
+}
+
+.ki-medal-star.ki-outline:before {
+  content: "\ea68";
+}
+
+.ki-menu.ki-outline:before {
+  content: "\ea69";
+}
+
+.ki-messages.ki-outline:before {
+  content: "\ea72";
+}
+
+.ki-minus-circle.ki-outline:before {
+  content: "\ea75";
+}
+
+.ki-minus.ki-outline:before {
+  content: "\ea78";
+}
+
+.ki-notification-bing.ki-outline:before {
+  content: "\ea87";
+}
+
+.ki-notification.ki-outline:before {
+  content: "\ea8c";
+}
+
+.ki-pencil.ki-outline:before {
+  content: "\ea97";
+}
+
+.ki-people.ki-outline:before {
+  content: "\ea98";
+}
+
+.ki-phone.ki-outline:before {
+  content: "\ea9a";
+}
+
+.ki-plus.ki-outline:before {
+  content: "\eaa1";
+}
+
+.ki-profile-user.ki-outline:before {
+  content: "\eaa6";
+}
+
+.ki-rocket.ki-outline:before {
+  content: "\eab4";
+}
+
+.ki-security-user.ki-outline:before {
+  content: "\eac4";
+}
+
+.ki-setting-2.ki-outline:before {
+  content: "\eac6";
+}
+
+.ki-shield-cross.ki-outline:before {
+  content: "\eacb";
+}
+
+.ki-shield-tick.ki-outline:before {
+  content: "\eace";
+}
+
+.ki-sms.ki-outline:before {
+  content: "\eadb";
+}
+
+.ki-teacher.ki-outline:before {
+  content: "\eaf8";
+}
+
+.ki-time.ki-outline:before {
+  content: "\eb0e";
+}
+
+.ki-timer.ki-outline:before {
+  content: "\eb0f";
+}
+
+.ki-trash.ki-outline:before {
+  content: "\eb18";
+}
+
+.ki-abstract-26.ki-solid:before {
+  content: "\e919";
+}
+
+.ki-arrow-down.ki-solid:before {
+  content: "\e945";
+}
+
+.ki-arrow-left.ki-solid:before {
+  content: "\e946";
+}
+
+.ki-arrow-right.ki-solid:before {
+  content: "\e949";
+}
+
+.ki-arrow-up-down.ki-solid:before {
+  content: "\e94b";
+}
+
+.ki-arrow-up.ki-solid:before {
+  content: "\e94f";
+}
+
+.ki-arrows-circle.ki-solid:before {
+  content: "\e951";
+}
+
+.ki-burger-menu.ki-solid:before {
+  content: "\e97c";
+}
+
+.ki-calendar-tick.ki-solid:before {
+  content: "\e985";
+}
+
+.ki-calendar.ki-solid:before {
+  content: "\e986";
+}
+
+.ki-category.ki-solid:before {
+  content: "\e98c";
+}
+
+.ki-chart-line-up.ki-solid:before {
+  content: "\e993";
+}
+
+.ki-chart-line.ki-solid:before {
+  content: "\e994";
+}
+
+.ki-chart-pie-simple.ki-solid:before {
+  content: "\e997";
+}
+
+.ki-check-circle.ki-solid:before {
+  content: "\e99d";
+}
+
+.ki-check.ki-solid:before {
+  content: "\e99f";
+}
+
+.ki-cloud-add.ki-solid:before {
+  content: "\e9a5";
+}
+
+.ki-cloud-download.ki-solid:before {
+  content: "\e9a7";
+}
+
+.ki-cross-circle.ki-solid:before {
+  content: "\e9b3";
+}
+
+.ki-cross.ki-solid:before {
+  content: "\e9b5";
+}
+
+.ki-data.ki-solid:before {
+  content: "\e9bd";
+}
+
+.ki-disconnect.ki-solid:before {
+  content: "\e9cf";
+}
+
+.ki-document.ki-solid:before {
+  content: "\e9d4";
+}
+
+.ki-down.ki-solid:before {
+  content: "\e9e5";
+}
+
+.ki-entrance-right.ki-solid:before {
+  content: "\e9fd";
+}
+
+.ki-exit-right.ki-solid:before {
+  content: "\ea03";
+}
+
+.ki-eye-slash.ki-solid:before {
+  content: "\ea06";
+}
+
+.ki-eye.ki-solid:before {
+  content: "\ea07";
+}
+
+.ki-file-down.ki-solid:before {
+  content: "\ea10";
+}
+
+.ki-file-up.ki-solid:before {
+  content: "\ea14";
+}
+
+.ki-file.ki-solid:before {
+  content: "\ea15";
+}
+
+.ki-files-tablet.ki-solid:before {
+  content: "\ea16";
+}
+
+.ki-geolocation.ki-solid:before {
+  content: "\ea2c";
+}
+
+.ki-home.ki-solid:before {
+  content: "\ea42";
+}
+
+.ki-icon.ki-solid:before {
+  content: "\ea44";
+}
+
+.ki-information-2.ki-solid:before {
+  content: "\ea46";
+}
+
+.ki-information-5.ki-solid:before {
+  content: "\ea49";
+}
+
+.ki-information.ki-solid:before {
+  content: "\ea4a";
+}
+
+.ki-loading.ki-solid:before {
+  content: "\ea5c";
+}
+
+.ki-lock-2.ki-solid:before {
+  content: "\ea5d";
+}
+
+.ki-lock.ki-solid:before {
+  content: "\ea5f";
+}
+
+.ki-magnifier.ki-solid:before {
+  content: "\ea64";
+}
+
+.ki-medal-star.ki-solid:before {
+  content: "\ea68";
+}
+
+.ki-menu.ki-solid:before {
+  content: "\ea69";
+}
+
+.ki-messages.ki-solid:before {
+  content: "\ea72";
+}
+
+.ki-minus-circle.ki-solid:before {
+  content: "\ea75";
+}
+
+.ki-minus.ki-solid:before {
+  content: "\ea78";
+}
+
+.ki-notification-bing.ki-solid:before {
+  content: "\ea87";
+}
+
+.ki-notification.ki-solid:before {
+  content: "\ea8c";
+}
+
+.ki-pencil.ki-solid:before {
+  content: "\ea97";
+}
+
+.ki-people.ki-solid:before {
+  content: "\ea98";
+}
+
+.ki-phone.ki-solid:before {
+  content: "\ea9a";
+}
+
+.ki-plus.ki-solid:before {
+  content: "\eaa1";
+}
+
+.ki-profile-user.ki-solid:before {
+  content: "\eaa6";
+}
+
+.ki-rocket.ki-solid:before {
+  content: "\eab4";
+}
+
+.ki-security-user.ki-solid:before {
+  content: "\eac4";
+}
+
+.ki-setting-2.ki-solid:before {
+  content: "\eac6";
+}
+
+.ki-shield-cross.ki-solid:before {
+  content: "\eacb";
+}
+
+.ki-shield-tick.ki-solid:before {
+  content: "\eace";
+}
+
+.ki-sms.ki-solid:before {
+  content: "\eadb";
+}
+
+.ki-teacher.ki-solid:before {
+  content: "\eaf8";
+}
+
+.ki-time.ki-solid:before {
+  content: "\eb0e";
+}
+
+.ki-timer.ki-solid:before {
+  content: "\eb0f";
+}
+
+.ki-trash.ki-solid:before {
+  content: "\eb18";
+}

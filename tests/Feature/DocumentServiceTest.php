@@ -21,7 +21,9 @@ class DocumentServiceTest extends TestCase
     use RefreshDatabase;
 
     protected DocumentService $service;
+
     protected User $admin;
+
     protected DocumentCategory $category;
 
     protected function setUp(): void

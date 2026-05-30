@@ -99,7 +99,7 @@ new class extends Component
                     <span wire:loading.remove wire:target="updateProfileInformation">{{ __('Simpan') }}</span>
                     <span wire:loading wire:target="updateProfileInformation">{{ __('Menyimpan...') }}</span>
                 </x-ui.button>
-                <x-action-message on="profile-updated" class="text-success fs-8 fw-bold">
+                <x-action-message on="profile-updated" class="text-success fs-8 fw-semibold">
                     {{ __('Tersimpan.') }}
                 </x-action-message>
             </div>

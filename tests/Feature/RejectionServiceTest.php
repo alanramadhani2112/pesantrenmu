@@ -8,7 +8,6 @@ use App\Models\Asesor;
 use App\Models\Assessment;
 use App\Models\Pesantren;
 use App\Models\User;
-use App\Services\AsesorService;
 use App\Services\RejectionService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -31,18 +30,18 @@ class RejectionServiceTest extends TestCase
     /**
      * Helper: create a pesantren user with akreditasi at status 5 and an Asesor 1 assigned.
      */
-private function createAsesor1Setup(): array
+    private function createAsesor1Setup(): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
             'user_id' => $pesantrenUser->id,
-            'nama_pesantren' => 'Pesantren Test ' . $pesantrenUser->id,
+            'nama_pesantren' => 'Pesantren Test '.$pesantrenUser->id,
             'is_locked' => true,
         ]);
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status' => 5,
+            'status' => 4,
         ]);
 
         $asesorUser = User::factory()->create(['role_id' => 2]);
@@ -73,7 +72,7 @@ private function createAsesor1Setup(): array
      *
      * Validates: Requirements 8.3
      */
-public function test_process_deadlines_sends_reminders_for_approaching_deadlines(): void
+    public function test_process_deadlines_sends_reminders_for_approaching_deadlines(): void
     {
         config(['akreditasi.perbaikan_reminder_days_before' => 3]);
         config(['akreditasi.rejection_limit' => 10]);
@@ -116,7 +115,7 @@ public function test_process_deadlines_sends_reminders_for_approaching_deadlines
      *
      * Validates: Requirements 8.3
      */
-public function test_process_deadlines_does_not_send_reminders_outside_threshold(): void
+    public function test_process_deadlines_does_not_send_reminders_outside_threshold(): void
     {
         config(['akreditasi.perbaikan_reminder_days_before' => 3]);
         config(['akreditasi.rejection_limit' => 10]);
@@ -152,7 +151,7 @@ public function test_process_deadlines_does_not_send_reminders_outside_threshold
      *
      * Validates: Requirements 8.4, 8.5
      */
-public function test_process_deadlines_auto_rejects_expired_rejections_and_unlocks_pesantren(): void
+    public function test_process_deadlines_auto_rejects_expired_rejections_and_unlocks_pesantren(): void
     {
         config(['akreditasi.perbaikan_reminder_days_before' => 3]);
         config(['akreditasi.rejection_limit' => 10]);
@@ -207,7 +206,7 @@ public function test_process_deadlines_auto_rejects_expired_rejections_and_unloc
      *
      * Validates: Requirements 8.4, 8.5
      */
-public function test_process_deadlines_handles_multiple_expired_rejections(): void
+    public function test_process_deadlines_handles_multiple_expired_rejections(): void
     {
         config(['akreditasi.perbaikan_reminder_days_before' => 3]);
         config(['akreditasi.rejection_limit' => 10]);
@@ -264,7 +263,7 @@ public function test_process_deadlines_handles_multiple_expired_rejections(): vo
      *
      * Validates: Requirements 8.4
      */
-public function test_process_deadlines_skips_submitted_perbaikan(): void
+    public function test_process_deadlines_skips_submitted_perbaikan(): void
     {
         config(['akreditasi.perbaikan_reminder_days_before' => 3]);
         config(['akreditasi.rejection_limit' => 10]);
@@ -294,7 +293,7 @@ public function test_process_deadlines_skips_submitted_perbaikan(): void
 
         // Verify akreditasi status unchanged
         $akreditasi = Akreditasi::find($akreditasiId);
-        $this->assertEquals(5, (int) $akreditasi->status, 'Akreditasi status should remain 5');
+        $this->assertEquals(4, (int) $akreditasi->status, 'Akreditasi status should remain 5');
 
         Carbon::setTestNow();
     }
@@ -304,27 +303,30 @@ public function test_process_deadlines_skips_submitted_perbaikan(): void
     // =========================================================================
 
     /**
-     * Integration test: processVisitasi with action='tolak' creates structured rejection record.
+     * Integration test: createDocumentRejection with action='tolak' creates structured rejection record.
      *
      * Validates: Requirements 1.1, 1.5
      */
-public function test_process_visitasi_tolak_creates_structured_rejection_record(): void
+    public function test_process_visitasi_tolak_creates_structured_rejection_record(): void
     {
         $setup = $this->createAsesor1Setup();
         $akreditasiId = $setup['akreditasi']->id;
         $asesorUserId = $setup['asesorUser']->id;
-
-        $asesorService = app(AsesorService::class);
 
         $data = [
             'rejected_items' => ['profil', 'ipm.kurikulum', 'sdm'],
             'catatan' => 'Data profil tidak lengkap dan kurikulum perlu diperbaiki',
         ];
 
-        $result = $asesorService->processVisitasi($akreditasiId, $asesorUserId, $data, 'tolak');
+        $result = $this->rejectionService->createDocumentRejection(
+            $akreditasiId,
+            $asesorUserId,
+            $data['rejected_items'],
+            $data['catatan']
+        );
 
         // Verify the call succeeded
-        $this->assertTrue($result, 'processVisitasi with action=tolak should return true');
+        $this->assertTrue($result['success'], 'createDocumentRejection should return success');
 
         // Verify rejection record was created
         $rejection = AkreditasiRejection::where('akreditasi_id', $akreditasiId)
@@ -339,17 +341,17 @@ public function test_process_visitasi_tolak_creates_structured_rejection_record(
         $this->assertEquals('pending', $rejection->status);
         $this->assertNotNull($rejection->perbaikan_deadline);
 
-        // Verify akreditasi status remains at 5
+        // Verify akreditasi status remains at Review Asesor
         $akreditasi = Akreditasi::find($akreditasiId);
-        $this->assertEquals(5, (int) $akreditasi->status);
+        $this->assertEquals(4, (int) $akreditasi->status);
     }
 
     /**
-     * Integration test: processVisitasi with action='tolak' fails for unauthorized user.
+     * Integration test: createDocumentRejection with action='tolak' fails for unauthorized user.
      *
      * Validates: Requirements 1.6
      */
-public function test_process_visitasi_tolak_fails_for_unauthorized_user(): void
+    public function test_process_visitasi_tolak_fails_for_unauthorized_user(): void
     {
         $setup = $this->createAsesor1Setup();
         $akreditasiId = $setup['akreditasi']->id;
@@ -357,17 +359,20 @@ public function test_process_visitasi_tolak_fails_for_unauthorized_user(): void
         // Create a different user who is NOT Asesor 1
         $unauthorizedUser = User::factory()->create(['role_id' => 2]);
 
-        $asesorService = app(AsesorService::class);
-
         $data = [
             'rejected_items' => ['profil'],
             'catatan' => 'This should fail because user is not authorized',
         ];
 
-        $result = $asesorService->processVisitasi($akreditasiId, $unauthorizedUser->id, $data, 'tolak');
+        $result = $this->rejectionService->createDocumentRejection(
+            $akreditasiId,
+            $unauthorizedUser->id,
+            $data['rejected_items'],
+            $data['catatan']
+        );
 
         // Should return false because user is not assigned Asesor 1
-        $this->assertFalse($result, 'processVisitasi should return false for unauthorized user');
+        $this->assertFalse($result['success'], 'createDocumentRejection should return false for unauthorized user');
 
         // Verify no rejection record was created
         $rejectionCount = AkreditasiRejection::where('akreditasi_id', $akreditasiId)->count();
@@ -375,11 +380,11 @@ public function test_process_visitasi_tolak_fails_for_unauthorized_user(): void
     }
 
     /**
-     * Integration test: processVisitasi with action='accept_perbaikan' clears rejection and enables visitasi.
+     * Integration test: createDocumentRejection with action='accept_perbaikan' clears rejection and enables visitasi.
      *
      * Validates: Requirements 7.1, 7.2
      */
-public function test_process_visitasi_accept_perbaikan_clears_rejection(): void
+    public function test_process_visitasi_accept_perbaikan_clears_rejection(): void
     {
         $setup = $this->createAsesor1Setup();
         $akreditasiId = $setup['akreditasi']->id;
@@ -398,39 +403,35 @@ public function test_process_visitasi_accept_perbaikan_clears_rejection(): void
             'status' => 'submitted',
         ]);
 
-        $asesorService = app(AsesorService::class);
-
-        $result = $asesorService->processVisitasi($akreditasiId, $asesorUserId, [], 'accept_perbaikan');
+        $result = $this->rejectionService->acceptPerbaikan($akreditasiId, $asesorUserId);
 
         // Verify the call succeeded
-        $this->assertTrue($result, 'processVisitasi with action=accept_perbaikan should return true');
+        $this->assertTrue($result['success'], 'acceptPerbaikan should return success');
 
         // Verify rejection status changed to 'accepted'
         $rejection = AkreditasiRejection::where('akreditasi_id', $akreditasiId)->first();
         $this->assertEquals('accepted', $rejection->status, 'Rejection status should be accepted');
 
-        // Verify akreditasi status remains at 5 (ready for visitasi scheduling)
+        // Verify akreditasi status remains at Review Asesor
         $akreditasi = Akreditasi::find($akreditasiId);
-        $this->assertEquals(5, (int) $akreditasi->status, 'Akreditasi status should remain 5');
+        $this->assertEquals(4, (int) $akreditasi->status, 'Akreditasi status should remain 4');
     }
 
     /**
-     * Integration test: processVisitasi with action='accept_perbaikan' fails when no submitted rejection exists.
+     * Integration test: createDocumentRejection with action='accept_perbaikan' fails when no submitted rejection exists.
      *
      * Validates: Requirements 7.1
      */
-public function test_process_visitasi_accept_perbaikan_fails_without_submitted_rejection(): void
+    public function test_process_visitasi_accept_perbaikan_fails_without_submitted_rejection(): void
     {
         $setup = $this->createAsesor1Setup();
         $akreditasiId = $setup['akreditasi']->id;
         $asesorUserId = $setup['asesorUser']->id;
 
-        $asesorService = app(AsesorService::class);
-
         // No rejection exists, so accept_perbaikan should fail
-        $result = $asesorService->processVisitasi($akreditasiId, $asesorUserId, [], 'accept_perbaikan');
+        $result = $this->rejectionService->acceptPerbaikan($akreditasiId, $asesorUserId);
 
-        $this->assertFalse($result, 'processVisitasi with action=accept_perbaikan should return false when no submitted rejection exists');
+        $this->assertFalse($result['success'], 'acceptPerbaikan should return false when no submitted rejection exists');
     }
 
     /**
@@ -438,23 +439,26 @@ public function test_process_visitasi_accept_perbaikan_fails_without_submitted_r
      *
      * Validates: Requirements 1.1, 3.1, 3.2, 7.1, 7.2
      */
-public function test_full_rejection_perbaikan_accept_lifecycle(): void
+    public function test_full_rejection_perbaikan_accept_lifecycle(): void
     {
         $setup = $this->createAsesor1Setup();
         $akreditasiId = $setup['akreditasi']->id;
         $asesorUserId = $setup['asesorUser']->id;
         $pesantrenUserId = $setup['pesantrenUser']->id;
 
-        $asesorService = app(AsesorService::class);
-
-        // Step 1: Asesor 1 rejects via processVisitasi
+        // Step 1: Asesor 1 rejects via createDocumentRejection
         $rejectData = [
             'rejected_items' => ['profil', 'ipm.nsp'],
             'catatan' => 'Profil pesantren tidak lengkap dan NSP perlu diperbarui',
         ];
 
-        $result = $asesorService->processVisitasi($akreditasiId, $asesorUserId, $rejectData, 'tolak');
-        $this->assertTrue($result, 'Step 1: Rejection should succeed');
+        $result = $this->rejectionService->createDocumentRejection(
+            $akreditasiId,
+            $asesorUserId,
+            $rejectData['rejected_items'],
+            $rejectData['catatan']
+        );
+        $this->assertTrue($result['success'], 'Step 1: Rejection should succeed');
 
         // Verify rejection record created
         $rejection = AkreditasiRejection::where('akreditasi_id', $akreditasiId)
@@ -477,22 +481,22 @@ public function test_full_rejection_perbaikan_accept_lifecycle(): void
         $this->assertEmpty($this->rejectionService->getUnlockedSections($akreditasiId));
         $this->assertFalse($this->rejectionService->isSectionUnlocked($akreditasiId, 'profil'));
 
-        // Verify rejection status is resolved after pesantren submits perbaikan.
+        // Verify rejection status waits for asesor review after pesantren submits perbaikan.
         $rejection->refresh();
-        $this->assertEquals('resolved', $rejection->status);
+        $this->assertEquals('submitted', $rejection->status);
         $this->assertNotNull($rejection->perbaikan_submitted_at);
 
-        // Step 3: Asesor 1 accepts perbaikan via processVisitasi
-        $result = $asesorService->processVisitasi($akreditasiId, $asesorUserId, [], 'accept_perbaikan');
-        $this->assertTrue($result, 'Step 3: Accept perbaikan should succeed');
+        // Step 3: Asesor 1 accepts perbaikan
+        $result = $this->rejectionService->acceptPerbaikan($akreditasiId, $asesorUserId);
+        $this->assertTrue($result['success'], 'Step 3: Accept perbaikan should succeed');
 
         // Verify rejection status is 'accepted'
         $rejection->refresh();
         $this->assertEquals('accepted', $rejection->status);
 
-        // Verify akreditasi status remains at 5 (ready for visitasi scheduling)
+        // Verify akreditasi status remains at Review Asesor
         $akreditasi = Akreditasi::find($akreditasiId);
-        $this->assertEquals(5, (int) $akreditasi->status);
+        $this->assertEquals(4, (int) $akreditasi->status);
 
         // Verify no active rejection remains
         $activeRejection = $this->rejectionService->getRejectionStatus($akreditasiId);

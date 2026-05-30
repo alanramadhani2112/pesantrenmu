@@ -13,8 +13,8 @@ class RoleRepository implements RoleRepositoryInterface
     {
         return Role::query()
             ->when($search, function ($query) use ($search) {
-                $query->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('parameter', 'like', '%' . $search . '%');
+                $query->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('parameter', 'like', '%'.$search.'%');
             })
             ->orderBy($sortField, $sortAsc ? 'asc' : 'desc')
             ->paginate($perPage);
@@ -38,12 +38,14 @@ class RoleRepository implements RoleRepositoryInterface
     public function update(int $id, array $data): bool
     {
         $role = $this->find($id);
+
         return $role ? $role->update($data) : false;
     }
 
     public function delete(int $id): bool
     {
         $role = $this->find($id);
+
         return $role ? $role->delete() : false;
     }
 }

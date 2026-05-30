@@ -8,8 +8,8 @@ use App\Notifications\AkreditasiNotification;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\TestCase;
 
 /**
  * Property-based tests for FailedNotification persistence and retry behavior.
@@ -76,10 +76,10 @@ class FailedNotificationPropertyTest extends TestCase
 
             $cases["iteration_{$i}"] = [
                 $type,
-                'Title ' . substr(str_repeat('abcdefghijklmnopqrstuvwxyz', 5), 0, $titleLen),
-                'Message ' . substr(str_repeat('Lorem ipsum dolor sit amet ', 10), 0, $messageLen),
-                $hasUrl ? 'https://example.com/path/' . mt_rand(1, 9999) : '#',
-                $exceptionMessages[mt_rand(0, count($exceptionMessages) - 1)] . ' [' . mt_rand(100, 999) . ']',
+                'Title '.substr(str_repeat('abcdefghijklmnopqrstuvwxyz', 5), 0, $titleLen),
+                'Message '.substr(str_repeat('Lorem ipsum dolor sit amet ', 10), 0, $messageLen),
+                $hasUrl ? 'https://example.com/path/'.mt_rand(1, 9999) : '#',
+                $exceptionMessages[mt_rand(0, count($exceptionMessages) - 1)].' ['.mt_rand(100, 999).']',
             ];
         }
 
@@ -91,10 +91,9 @@ class FailedNotificationPropertyTest extends TestCase
      * AkreditasiNotification and assert all fields are correctly persisted.
      *
      * **Validates: Requirements 3.3, 4.1**
-     *
      */
-#[DataProvider('randomNotificationPayloadsProvider')]
-public function test_property_1_failed_handler_persists_all_fields_correctly(
+    #[DataProvider('randomNotificationPayloadsProvider')]
+    public function test_property_1_failed_handler_persists_all_fields_correctly(
         string $type,
         string $title,
         string $message,
@@ -168,9 +167,9 @@ public function test_property_1_failed_handler_persists_all_fields_correctly(
 
             $cases["iteration_{$i}"] = [
                 $type,
-                'Title ' . $i,
-                'Message for iteration ' . $i . ' with some content.',
-                $hasUrl ? 'https://example.com/path/' . $i : '#',
+                'Title '.$i,
+                'Message for iteration '.$i.' with some content.',
+                $hasUrl ? 'https://example.com/path/'.$i : '#',
             ];
         }
 
@@ -183,10 +182,9 @@ public function test_property_1_failed_handler_persists_all_fields_correctly(
      * notification is queued.
      *
      * **Validates: Requirements 4.4**
-     *
      */
-#[DataProvider('randomFailedNotificationRecordsProvider')]
-public function test_property_2_retry_sets_status_resolved_and_queues_notification(
+    #[DataProvider('randomFailedNotificationRecordsProvider')]
+    public function test_property_2_retry_sets_status_resolved_and_queues_notification(
         string $type,
         string $title,
         string $message,
@@ -198,16 +196,16 @@ public function test_property_2_retry_sets_status_resolved_and_queues_notificati
 
         $record = FailedNotification::create([
             'notification_type' => $type,
-            'notifiable_id'     => $user->id,
-            'payload'           => [
-                'type'    => $type,
-                'title'   => $title,
+            'notifiable_id' => $user->id,
+            'payload' => [
+                'type' => $type,
+                'title' => $title,
                 'message' => $message,
-                'url'     => $url,
+                'url' => $url,
             ],
             'failure_reason' => 'Test failure reason',
-            'failed_at'      => now()->subMinutes(5),
-            'status'         => 'pending',
+            'failed_at' => now()->subMinutes(5),
+            'status' => 'pending',
         ]);
 
         $record->retry();
@@ -236,7 +234,7 @@ public function test_property_2_retry_sets_status_resolved_and_queues_notificati
      * Additional: retry() is a no-op when the user no longer exists.
      * Tests the code path where User::find returns null.
      */
-public function test_retry_is_noop_when_user_not_found(): void
+    public function test_retry_is_noop_when_user_not_found(): void
     {
         Notification::fake();
 
@@ -251,11 +249,11 @@ public function test_retry_is_noop_when_user_not_found(): void
 
         $record = FailedNotification::create([
             'notification_type' => 'test',
-            'notifiable_id'     => $user->id,
-            'payload'           => ['type' => 'test', 'title' => 'T', 'message' => 'M', 'url' => '#'],
-            'failure_reason'    => 'Test',
-            'failed_at'         => now(),
-            'status'            => 'pending',
+            'notifiable_id' => $user->id,
+            'payload' => ['type' => 'test', 'title' => 'T', 'message' => 'M', 'url' => '#'],
+            'failure_reason' => 'Test',
+            'failed_at' => now(),
+            'status' => 'pending',
         ]);
 
         // Simulate user not found by overriding the in-memory attribute
@@ -275,17 +273,17 @@ public function test_retry_is_noop_when_user_not_found(): void
     /**
      * Additional: dismiss() sets status to 'dismissed'.
      */
-public function test_dismiss_sets_status_to_dismissed(): void
+    public function test_dismiss_sets_status_to_dismissed(): void
     {
         $user = User::factory()->create(['role_id' => 3]);
 
         $record = FailedNotification::create([
             'notification_type' => 'test',
-            'notifiable_id'     => $user->id,
-            'payload'           => ['type' => 'test', 'title' => 'T', 'message' => 'M', 'url' => '#'],
-            'failure_reason'    => 'Test failure',
-            'failed_at'         => now(),
-            'status'            => 'pending',
+            'notifiable_id' => $user->id,
+            'payload' => ['type' => 'test', 'title' => 'T', 'message' => 'M', 'url' => '#'],
+            'failure_reason' => 'Test failure',
+            'failed_at' => now(),
+            'status' => 'pending',
         ]);
 
         $record->dismiss();

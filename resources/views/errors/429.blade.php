@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>429 - Terlalu Banyak Permintaan</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand/favicon.svg') }}">
-    <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.css') }}">
     <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}">
     @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css'])
     <style>
@@ -49,21 +48,21 @@
 
             <div class="error-code mb-3">429</div>
 
-            <h1 class="fw-bold text-gray-900 fs-2 mb-3">Terlalu Banyak Permintaan</h1>
+            <h1 class="fw-semibold text-gray-900 fs-2 mb-3">Terlalu Banyak Permintaan</h1>
             <p class="text-gray-600 fw-semibold fs-6 mb-8">
                 Anda telah melakukan terlalu banyak permintaan dalam waktu singkat.<br>
                 Tunggu sebentar lalu coba lagi.
             </p>
 
             <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-                <a href="javascript:history.back()" class="btn btn-primary fw-bold px-6">
+                <a href="javascript:history.back()" class="btn btn-primary fw-semibold px-6">
                     <i class="ki-solid ki-arrow-left fs-3 me-1">
                         <span class="path1"></span>
                         <span class="path2"></span>
                     </i>
                     Kembali
                 </a>
-                <a href="{{ url('/dashboard') }}" class="btn btn-light fw-bold px-6">
+                <a href="{{ url('/dashboard') }}" class="btn btn-light fw-semibold px-6">
                     <i class="ki-solid ki-home fs-3 me-1">
                         <span class="path1"></span>
                         <span class="path2"></span>

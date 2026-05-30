@@ -62,7 +62,7 @@ new #[Layout('layouts.guest')] class extends Component
         </div>
 
         <div class="text-center">
-            <a href="{{ route('login') }}" class="link-primary fw-bold fs-6">
+            <a href="{{ route('login') }}" class="link-primary fw-semibold fs-6">
                 <i class="ki-duotone ki-arrow-left fs-4 me-1"><span class="path1"></span><span class="path2"></span></i>
                 Kembali ke Login
             </a>

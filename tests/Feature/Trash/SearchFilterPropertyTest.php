@@ -7,9 +7,10 @@ use App\Models\Pesantren;
 use App\Models\User;
 use App\Services\TrashService;
 use Database\Seeders\RoleSeeder;
+use Faker\Factory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\TestCase;
 
 /**
  * Feature: soft-delete-restore-flow
@@ -40,18 +41,19 @@ class SearchFilterPropertyTest extends TestCase
         Pesantren::create(['user_id' => $user->id, 'nama_pesantren' => $pesantrenName]);
         $akreditasi = Akreditasi::create(['user_id' => $user->id, 'status' => 6]);
         $akreditasi->delete();
+
         return $akreditasi->fresh();
     }
 
     public static function searchDataProvider(): array
     {
-        $faker = \Faker\Factory::create('id_ID');
+        $faker = Factory::create('id_ID');
         $cases = [];
         for ($i = 0; $i < 100; $i++) {
             $names = [
-                $faker->company . ' ' . $faker->city,
-                $faker->company . ' ' . $faker->city,
-                $faker->company . ' ' . $faker->city,
+                $faker->company.' '.$faker->city,
+                $faker->company.' '.$faker->city,
+                $faker->company.' '.$faker->city,
             ];
             // Pick a full word from one of the names as the search term
             // to guarantee the search term is actually in the name.
@@ -62,12 +64,12 @@ class SearchFilterPropertyTest extends TestCase
             $searchTerm = $longWords ? $longWords[array_rand($longWords)] : $words[0];
             $cases[] = [$names, $searchTerm];
         }
+
         return $cases;
     }
 
-    /**     */
-#[DataProvider('searchDataProvider')]
-public function test_property_1_search_returns_only_matching_results(array $names, string $searchTerm): void
+    #[DataProvider('searchDataProvider')]
+    public function test_property_1_search_returns_only_matching_results(array $names, string $searchTerm): void
     {
         foreach ($names as $name) {
             $this->makeTrashedAkreditasi($name);

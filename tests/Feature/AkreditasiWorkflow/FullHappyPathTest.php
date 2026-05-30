@@ -4,7 +4,6 @@ namespace Tests\Feature\AkreditasiWorkflow;
 
 use App\Models\Akreditasi;
 use App\Models\AkreditasiEdpm;
-use App\Models\AkreditasiEdpmCatatan;
 use App\Models\Asesor;
 use App\Models\Assessment;
 use App\Models\Edpm;
@@ -15,9 +14,9 @@ use App\Models\Pesantren;
 use App\Models\SdmPesantren;
 use App\Models\User;
 use App\Services\AkreditasiWorkflowService;
-use App\Services\ScoreCalculationService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
@@ -60,7 +59,7 @@ class FullHappyPathTest extends TestCase
      *   IK: Mutu Lulusan (8), Proses Pembelajaran (10), Mutu Ustaz (10), Manajemen Pesantren (12)
      *   IPR: 22 butir (ipr=1)
      */
-private function seedMasterEdpmData(): void
+    private function seedMasterEdpmData(): void
     {
         $komponenConfig = [
             ['nama' => 'MUTU LULUSAN',        'count' => 8,  'ipr' => null],
@@ -82,7 +81,7 @@ private function seedMasterEdpmData(): void
                 $butir = MasterEdpmButir::create([
                     'komponen_id' => $komponen->id,
                     'no_sk' => (string) $butirSeq,
-                    'nomor_butir' => $butirSeq . '.' . $i,
+                    'nomor_butir' => $butirSeq.'.'.$i,
                     'butir_pernyataan' => "Butir {$butirSeq}.{$i} pernyataan.",
                 ]);
                 $this->butirs[] = $butir;
@@ -154,6 +153,7 @@ private function seedMasterEdpmData(): void
             'nama_dengan_gelar' => 'Asesor Test, S.Pd.',
             'nama_tanpa_gelar' => 'Asesor Test',
         ]);
+
         return $user;
     }
 
@@ -161,14 +161,9 @@ private function seedMasterEdpmData(): void
      * Save all 62 NA values as Final for a given asesor.
      * Also saves NK and catatan_butir for Asesor_1 (tipe=1).
      *
-     * Note: The service uses user_id to query asesor_id in akreditasi_edpms.
-     * We store user_id in asesor_id to match the service's query logic.
-     * We use DB::table() directly to bypass FK constraints since the service
-     * design uses user_id rather than asesors.id in this column.
-     *
-     * @param int $asesorUserId  The user_id of the asesor
+     * @param  int  $asesorUserId  The user_id of the asesor
      */
-private function saveAllNaAsFinal(
+    private function saveAllNaAsFinal(
         int $akreditasiId,
         int $asesorUserId,
         int $tipe,
@@ -182,12 +177,13 @@ private function saveAllNaAsFinal(
         }
 
         $now = now()->toDateTimeString();
+        $asesorModelId = Asesor::where('user_id', $asesorUserId)->value('id') ?? $asesorUserId;
 
         foreach ($this->butirs as $butir) {
             $data = [
                 'akreditasi_id' => $akreditasiId,
                 'pesantren_id' => $pesantrenUserId,
-                'asesor_id' => $asesorUserId,  // service uses user_id here
+                'asesor_id' => $asesorModelId,
                 'butir_id' => $butir->id,
                 'isian' => $naValue,
                 'is_final' => 1,
@@ -197,36 +193,36 @@ private function saveAllNaAsFinal(
 
             if ($tipe === 1) {
                 $data['nk'] = $naValue;
-                $data['catatan'] = 'Catatan butir ' . $butir->id;
+                $data['catatan'] = 'Catatan butir '.$butir->id;
                 $data['delta'] = 0;
             }
 
-            \Illuminate\Support\Facades\DB::table('akreditasi_edpms')->insert($data);
+            DB::table('akreditasi_edpms')->insert($data);
         }
     }
 
     /**
      * Save all 4 catatan_rekomendasi for Asesor_1.
-     * Note: stores user_id in asesor_id to match service query logic.
      */
-private function saveAllCatatanRekomendasi(int $akreditasiId, int $asesor1UserId): void
+    private function saveAllCatatanRekomendasi(int $akreditasiId, int $asesor1UserId): void
     {
         $now = now()->toDateTimeString();
 
         // Resolve pesantren_id from the akreditasi
         $akreditasi = Akreditasi::withTrashed()->find($akreditasiId);
         $pesantrenUserId = $akreditasi ? $akreditasi->user_id : $asesor1UserId;
+        $asesorModelId = Asesor::where('user_id', $asesor1UserId)->value('id') ?? $asesor1UserId;
 
         // Use the first 4 komponens (IK komponens)
         $ikKomponens = array_slice($this->komponens, 0, 4);
         foreach ($ikKomponens as $komponen) {
-            \Illuminate\Support\Facades\DB::table('akreditasi_edpm_catatans')->insert([
+            DB::table('akreditasi_edpm_catatans')->insert([
                 'akreditasi_id' => $akreditasiId,
                 'pesantren_id' => $pesantrenUserId,
-                'asesor_id' => $asesor1UserId,  // service uses user_id here
+                'asesor_id' => $asesorModelId,
                 'komponen_id' => $komponen->id,
-                'catatan' => 'Catatan rekomendasi untuk komponen ' . $komponen->nama,
-                'rekomendasi' => 'Rekomendasi untuk komponen ' . $komponen->nama,
+                'catatan' => 'Catatan rekomendasi untuk komponen '.$komponen->nama,
+                'rekomendasi' => 'Rekomendasi untuk komponen '.$komponen->nama,
                 'created_at' => $now,
                 'updated_at' => $now,
             ]);
@@ -236,7 +232,7 @@ private function saveAllCatatanRekomendasi(int $akreditasiId, int $asesor1UserId
     /**
      * Save all 62 NV values as Final for Admin.
      */
-private function saveAllNvAsFinal(int $akreditasiId, int $nvValue = 3): void
+    private function saveAllNvAsFinal(int $akreditasiId, int $nvValue = 3): void
     {
         AkreditasiEdpm::where('akreditasi_id', $akreditasiId)
             ->update(['nv' => $nvValue, 'is_final' => true]);
@@ -252,7 +248,7 @@ private function saveAllNvAsFinal(int $akreditasiId, int $nvValue = 3): void
      *
      * Validates Requirements 2, 3, 5, 6, 7, 8, 9, 10, 11.
      */
-public function test_full_happy_path_end_to_end(): void
+    public function test_full_happy_path_end_to_end(): void
     {
         // Create asesors FIRST so their user_ids match asesors.id
         // (service uses user_id to query asesor_id in akreditasi_edpms)
@@ -428,7 +424,7 @@ public function test_full_happy_path_end_to_end(): void
      * Verify that the score calculation produces correct nilai_akhir and peringkat
      * when all NV values are 4 (maximum score → should yield peringkat A).
      */
-public function test_maximum_nv_values_yield_peringkat_a(): void
+    public function test_maximum_nv_values_yield_peringkat_a(): void
     {
         $pesantrenUser = $this->createCompletePesantrenUser();
         $admin = $this->createAdmin();
@@ -464,7 +460,7 @@ public function test_maximum_nv_values_yield_peringkat_a(): void
                 'nk' => 4,
                 'nv' => 4,
                 'is_final' => true,
-                'catatan' => 'Catatan butir ' . $butir->id,
+                'catatan' => 'Catatan butir '.$butir->id,
             ]);
         }
 
@@ -487,7 +483,7 @@ public function test_maximum_nv_values_yield_peringkat_a(): void
      * Verify that the score calculation produces correct nilai_akhir and peringkat
      * when all NV values are 1 (minimum score → should yield peringkat C).
      */
-public function test_minimum_nv_values_yield_peringkat_c(): void
+    public function test_minimum_nv_values_yield_peringkat_c(): void
     {
         $pesantrenUser = $this->createCompletePesantrenUser();
         $admin = $this->createAdmin();
@@ -521,7 +517,7 @@ public function test_minimum_nv_values_yield_peringkat_c(): void
                 'nk' => 1,
                 'nv' => 1,
                 'is_final' => true,
-                'catatan' => 'Catatan butir ' . $butir->id,
+                'catatan' => 'Catatan butir '.$butir->id,
             ]);
         }
 
@@ -544,7 +540,7 @@ public function test_minimum_nv_values_yield_peringkat_c(): void
      *
      * Validates Requirement 8.10.
      */
-public function test_finalize_scoring_fails_when_documents_missing(): void
+    public function test_finalize_scoring_fails_when_documents_missing(): void
     {
         // Create asesors FIRST so their user_ids match asesors.id
         $asesor1User = $this->createAsesor();
@@ -577,7 +573,7 @@ public function test_finalize_scoring_fails_when_documents_missing(): void
      *
      * Validates Requirement 11.1.
      */
-public function test_issue_sk_fails_when_nv_not_all_final(): void
+    public function test_issue_sk_fails_when_nv_not_all_final(): void
     {
         $pesantrenUser = $this->createCompletePesantrenUser();
         $admin = $this->createAdmin();

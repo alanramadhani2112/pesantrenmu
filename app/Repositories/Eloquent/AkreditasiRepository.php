@@ -3,7 +3,11 @@
 namespace App\Repositories\Eloquent;
 
 use App\Models\Akreditasi;
+use App\Models\AkreditasiCatatan;
+use App\Models\AkreditasiEdpm;
+use App\Models\AkreditasiEdpmCatatan;
 use App\Models\Asesor;
+use App\Models\Assessment;
 use App\Repositories\Contracts\AkreditasiRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -25,22 +29,22 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
         ]);
 
         match ($statusFilter) {
-            'pengajuan'  => $query->where('status', 6),
+            'pengajuan' => $query->where('status', 6),
             'verifikasi' => $query->where('status', 5),
             'assessment' => $query->where('status', 4),
-            'visitasi'   => $query->whereIn('status', [3, 2]),
-            'validasi'   => $query->where('status', 1),
-            'selesai'    => $query->where('status', 0),
-            'ditolak'    => $query->where('status', -1),
-            'banding'    => $query->where('status', -2),
-            default      => null, // 'all' or empty — no filter
+            'visitasi' => $query->whereIn('status', [3, 2]),
+            'validasi' => $query->where('status', 1),
+            'selesai' => $query->where('status', 0),
+            'ditolak' => $query->where('status', -1),
+            'banding' => $query->where('status', -2),
+            default => null, // 'all' or empty — no filter
         };
 
         if ($search) {
             $query->whereHas('user', function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
+                $q->where('name', 'like', '%'.$search.'%')
                     ->orWhereHas('pesantren', function ($q2) use ($search) {
-                        $q2->where('nama_pesantren', 'like', '%' . $search . '%');
+                        $q2->where('nama_pesantren', 'like', '%'.$search.'%');
                     });
             });
         }
@@ -54,6 +58,7 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
         if (is_array($status)) {
             return Akreditasi::whereIn('status', $status)->count();
         }
+
         return Akreditasi::where('status', $status)->count();
     }
 
@@ -70,25 +75,27 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
     public function delete(int $id): bool
     {
         $akreditasi = $this->find($id);
+
         return $akreditasi ? $akreditasi->delete() : false;
     }
 
     public function update(int $id, array $data): bool
     {
         $akreditasi = $this->find($id);
+
         return $akreditasi ? $akreditasi->update($data) : false;
     }
 
     public function getAssessmentsByAsesor(int $asesorId, ?string $search = null, ?string $periodeFilter = null, ?string $statusFilter = null, int $perPage = 10, string $sortField = 'id', bool $sortAsc = false): LengthAwarePaginator
     {
-        $query = \App\Models\Assessment::with(['akreditasi.user.pesantren', 'akreditasi.catatans.user', 'akreditasi.assessment1'])
+        $query = Assessment::with(['akreditasi.user.pesantren', 'akreditasi.catatans.user', 'akreditasi.assessment1'])
             ->where('asesor_id', $asesorId);
 
         if ($search) {
             $query->whereHas('akreditasi.user.pesantren', function ($q) use ($search) {
-                $q->where('nama_pesantren', 'like', '%' . $search . '%');
+                $q->where('nama_pesantren', 'like', '%'.$search.'%');
             })->orWhereHas('akreditasi.user', function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%');
+                $q->where('name', 'like', '%'.$search.'%');
             });
         }
 
@@ -125,56 +132,77 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
             ->paginate($perPage);
     }
 
-    public function findAssessment(int $id, array $relations = []): ?\App\Models\Assessment
+    public function findAssessment(int $id, array $relations = []): ?Assessment
     {
-        return \App\Models\Assessment::with($relations)->find($id);
+        return Assessment::with($relations)->find($id);
     }
 
-    public function addCatatan(array $data): \App\Models\AkreditasiCatatan
+    public function addCatatan(array $data): AkreditasiCatatan
     {
-        return \App\Models\AkreditasiCatatan::create($data);
+        return AkreditasiCatatan::create($data);
     }
 
-    public function getEdpmData(int $akreditasiId, ?int $asesorId = null): \Illuminate\Support\Collection
+    public function getEdpmData(int $akreditasiId, ?int $asesorId = null): Collection
     {
-        $query = \App\Models\AkreditasiEdpm::where('akreditasi_id', $akreditasiId);
+        $query = AkreditasiEdpm::where('akreditasi_id', $akreditasiId);
         if ($asesorId) {
             $query->where('asesor_id', $asesorId);
         }
+
         return $query->get();
     }
 
-    public function getEdpmCatatans(int $akreditasiId, ?int $asesorId = null): \Illuminate\Support\Collection
+    public function getEdpmCatatans(int $akreditasiId, ?int $asesorId = null): Collection
     {
-        $query = \App\Models\AkreditasiEdpmCatatan::where('akreditasi_id', $akreditasiId);
+        $query = AkreditasiEdpmCatatan::where('akreditasi_id', $akreditasiId);
         if ($asesorId) {
             $query->where('asesor_id', $asesorId);
         }
+
         return $query->get();
     }
 
-    public function saveEdpmEvaluation(array $attributes, array $data): \App\Models\AkreditasiEdpm
+    public function saveEdpmEvaluation(array $attributes, array $data): AkreditasiEdpm
     {
-        return \App\Models\AkreditasiEdpm::updateOrCreate($attributes, $data);
+        return AkreditasiEdpm::updateOrCreate($attributes, $data);
     }
 
-    public function saveEdpmCatatan(array $attributes, array $data): \App\Models\AkreditasiEdpmCatatan
+    public function saveEdpmCatatan(array $attributes, array $data): AkreditasiEdpmCatatan
     {
-        return \App\Models\AkreditasiEdpmCatatan::updateOrCreate($attributes, $data);
+        return AkreditasiEdpmCatatan::updateOrCreate($attributes, $data);
     }
 
     public function getPaginatedByUserId(int $userId, ?string $search = null, ?string $periodeFilter = null, ?string $statusFilter = null, int $perPage = 10, string $sortField = 'created_at', bool $sortAsc = false): LengthAwarePaginator
     {
-        return \App\Models\Akreditasi::with(['assessments', 'catatans', 'assessment1', 'children', 'bandings'])
+        return Akreditasi::with(['assessments', 'catatans', 'assessment1', 'bandings'])
             ->where('user_id', $userId)
-            ->when($periodeFilter, fn($q) => $q->whereYear('created_at', $periodeFilter))
-            ->when($statusFilter, fn($q) => $q->where('status', $statusFilter))
+            ->when($periodeFilter, fn ($q) => $q->whereYear('created_at', $periodeFilter))
+            ->when($statusFilter, function ($query) use ($statusFilter) {
+                if ($statusFilter === 'hasil_akhir') {
+                    $query->whereIn('status', [
+                        Akreditasi::STATUS_SELESAI,
+                        Akreditasi::STATUS_BANDING,
+                    ]);
+
+                    return;
+                }
+
+                $query->where('status', $statusFilter);
+            })
             ->when($search, function ($query) use ($search) {
-                $query->where('nomor_sk', 'like', '%' . $search . '%')
-                    ->orWhere('peringkat', 'like', '%' . $search . '%');
+                $query->where('nomor_sk', 'like', '%'.$search.'%')
+                    ->orWhere('peringkat', 'like', '%'.$search.'%');
             })
             ->orderBy($sortField, $sortAsc ? 'asc' : 'desc')
             ->paginate($perPage);
+    }
+
+    public function latestForUser(int $userId): ?Akreditasi
+    {
+        return Akreditasi::query()
+            ->where('user_id', $userId)
+            ->latest()
+            ->first();
     }
 
     public function getAvailableAsesors(): Collection

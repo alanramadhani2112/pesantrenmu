@@ -101,7 +101,7 @@
 
                         <td>
                             <div class="d-flex flex-column">
-                                <span class="text-gray-900 fw-bold fs-6">
+                                <span class="text-gray-900 fw-semibold fs-6">
                                     {{ $item->notifiable?->name ?? '(Pengguna dihapus)' }}
                                 </span>
                                 <span class="text-muted fw-semibold fs-7">

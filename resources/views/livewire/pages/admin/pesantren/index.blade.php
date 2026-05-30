@@ -115,6 +115,7 @@ new #[Layout('layouts.app')] class extends Component {
             title="Daftar Pesantren"
             subtitle="Daftar pesantren beserta status akun dan progres akreditasi terbaru."
             :records="$this->pesantrens"
+            class="spm-table-shell--admin-pesantren"
         >
             <x-slot name="filters">
                 <x-ui.filter-bar>
@@ -165,7 +166,7 @@ new #[Layout('layouts.app')] class extends Component {
                         <x-ui.table-checkbox model="selectedIds" :value="$user->id" :label="'Pilih ' . ($user->pesantren->nama_pesantren ?? $user->name)" />
                     </td>
                     <td>
-                        <span class="text-gray-900 fw-bold fs-6">{{ $user->pesantren->nama_pesantren ?? $user->name }}</span>
+                        <span class="text-gray-900 fw-semibold fs-6">{{ $user->pesantren->nama_pesantren ?? $user->name }}</span>
                     </td>
                     <td class="text-center">
                         @php

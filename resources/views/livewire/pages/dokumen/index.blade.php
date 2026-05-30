@@ -92,6 +92,13 @@ new #[Layout('layouts.app')] class extends Component {
 }; ?>
 
 <div data-module-page="dokumen">
+    @php
+        $documents = $this->documents;
+        $activeDocLabel = $this->doc === 'all' || $this->doc === ''
+            ? 'Semua Dokumen'
+            : str($this->doc)->replace(['-', '_'], ' ')->upper()->toString();
+    @endphp
+
     <x-slot name="header">
         {{ $this->pageTitle }}
     </x-slot>
@@ -101,24 +108,30 @@ new #[Layout('layouts.app')] class extends Component {
         subtitle="Daftar dokumen yang tersedia sesuai hak akses pengguna."
     >
         <x-datatable.layout
-            title="Dokumen Tersedia"
+            :title="$this->pageTitle"
             subtitle="Buka berkas yang dibutuhkan untuk proses akreditasi."
+            :records="$documents"
+            class="spm-table-shell--document-category spm-table-shell--document-library"
         >
+            <x-slot name="toolbar">
+                <x-ui.badge variant="secondary">{{ $activeDocLabel }}</x-ui.badge>
+            </x-slot>
+
             <x-slot name="filters">
                 <x-datatable.search placeholder="Cari dokumen..." />
             </x-slot>
 
             <x-slot name="thead">
-                <x-ui.table-th>Dokumen</x-ui.table-th>
-                <x-ui.table-th>Format</x-ui.table-th>
-                <x-ui.table-th>Diunggah</x-ui.table-th>
-                <x-ui.table-th align="end">Aksi</x-ui.table-th>
+                <x-ui.table-th class="spm-document-title-col">Dokumen</x-ui.table-th>
+                <x-ui.table-th :min-width="false" align="center" class="spm-document-format-col">Format</x-ui.table-th>
+                <x-ui.table-th :min-width="false" align="center" class="spm-document-date-col">Diunggah</x-ui.table-th>
+                <x-ui.table-th align="end" class="spm-action-col">Aksi</x-ui.table-th>
             </x-slot>
 
             <x-slot name="tbody">
-                @forelse ($this->documents as $doc)
+                @forelse ($documents as $doc)
                     <tr wire:key="dokumen-{{ $doc->id }}">
-                        <td>
+                        <td class="spm-document-title-cell">
                             <div class="d-flex align-items-center gap-3">
                                 <div class="symbol symbol-40px">
                                     <div class="symbol-label bg-light-primary text-primary">
@@ -127,28 +140,29 @@ new #[Layout('layouts.app')] class extends Component {
                                 </div>
 
                                 <div class="d-flex flex-column">
-                                    <span class="text-gray-900 fw-bold fs-6">{{ $doc->title }}</span>
-                                    <span class="text-muted fw-semibold fs-7">{{ basename($doc->file_path) }}</span>
+                                    <span class="text-gray-900 fw-semibold fs-6">{{ $doc->title }}</span>
+                                    <span class="text-muted fw-semibold fs-7 spm-document-file-name">{{ basename($doc->file_path) }}</span>
                                 </div>
                             </div>
                         </td>
 
-                        <td>
+                        <td class="text-center spm-document-format-cell">
                             <x-ui.badge variant="info">{{ strtoupper(pathinfo($doc->file_path, PATHINFO_EXTENSION)) }}</x-ui.badge>
                         </td>
 
-                        <td>
+                        <td class="text-center spm-document-date-cell">
                             <span class="text-gray-700 fw-semibold">{{ $doc->created_at->translatedFormat('d M Y') }}</span>
                         </td>
 
-                        <td class="text-end">
+                        <td class="text-end spm-action-cell">
                             <x-ui.button
                                 :href="Storage::url($doc->file_path)"
                                 target="_blank"
-                                variant="primary"
+                                variant="light-primary"
                                 size="sm"
+                                icon="eye"
+                                class="spm-table-compact-action"
                             >
-                                <x-ui.icon name="eye" class="fs-4 me-1" />
                                 Buka Berkas
                             </x-ui.button>
                         </td>

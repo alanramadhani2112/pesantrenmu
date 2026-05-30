@@ -28,8 +28,11 @@ use InvalidArgumentException;
 class AssessorScoringService
 {
     public const SCORE_MIN = 1;
+
     public const SCORE_MAX = 4;
+
     public const TOTAL_BUTIR = 62;
+
     public const TOTAL_KOMPONEN = 4;
 
     public function __construct(
@@ -48,16 +51,13 @@ class AssessorScoringService
      * For Asesor_2: saves isian (NA2) on the asesor_id=asesor2Id record.
      * Automatically calculates Delta when both NA1 and NA2 are Final.
      *
-     * @param int  $akreditasiId
-     * @param int  $asesorId      The user_id of the asesor saving the value
-     * @param int  $butirId
-     * @param int  $naValue       Must be in {1,2,3,4}
-     * @param bool $isFinal       true = lock permanently, false = draft
-     * @return AkreditasiEdpm
+     * @param  int  $asesorId  The user_id of the asesor saving the value
+     * @param  int  $naValue  Must be in {1,2,3,4}
+     * @param  bool  $isFinal  true = lock permanently, false = draft
      *
-     * @throws \DomainException          When akreditasi not at status 2
-     * @throws ImmutableValueException   When value is already Final
-     * @throws InvalidArgumentException  When value out of range
+     * @throws \DomainException When akreditasi not at status 2
+     * @throws ImmutableValueException When value is already Final
+     * @throws InvalidArgumentException When value out of range
      */
     public function saveNA(
         int $akreditasiId,
@@ -94,11 +94,11 @@ class AssessorScoringService
             } else {
                 $record = AkreditasiEdpm::create([
                     'akreditasi_id' => $akreditasiId,
-                    'asesor_id'     => $resolvedAsesorId,
-                    'butir_id'      => $butirId,
-                    'isian'         => $naValue,
-                    'is_final'      => $isFinal,
-                    'pesantren_id'  => $akreditasi->user_id,
+                    'asesor_id' => $resolvedAsesorId,
+                    'butir_id' => $butirId,
+                    'isian' => $naValue,
+                    'is_final' => $isFinal,
+                    'pesantren_id' => $akreditasi->user_id,
                 ]);
             }
 
@@ -121,17 +121,13 @@ class AssessorScoringService
      * NK gate: all Nilai Ketua and all Nilai Anggota must be Final before
      * any Nilai Kelompok can be saved.
      *
-     * @param int  $akreditasiId
-     * @param int  $asesor1Id     The user_id of Asesor_1
-     * @param int  $asesor2Id     The user_id of Asesor_2
-     * @param int  $butirId
-     * @param int  $nkValue       Must be in {1,2,3,4}
-     * @param bool $isFinal
-     * @return AkreditasiEdpm
+     * @param  int  $asesor1Id  The user_id of Asesor_1
+     * @param  int  $asesor2Id  The user_id of Asesor_2
+     * @param  int  $nkValue  Must be in {1,2,3,4}
      *
-     * @throws \DomainException          When NK gate not satisfied or wrong status
-     * @throws ImmutableValueException   When NK is already Final
-     * @throws InvalidArgumentException  When value out of range
+     * @throws \DomainException When NK gate not satisfied or wrong status
+     * @throws ImmutableValueException When NK is already Final
+     * @throws InvalidArgumentException When value out of range
      */
     public function saveNK(
         int $akreditasiId,
@@ -159,17 +155,17 @@ class AssessorScoringService
         $ketuaFinal = $this->hasAllFinalNaValues($akreditasiId, $resolvedAsesor1Id);
         $anggotaFinal = $this->hasAllFinalNaValues($akreditasiId, $resolvedAsesor2Id);
 
-        if (!$ketuaFinal && !$anggotaFinal) {
+        if (! $ketuaFinal && ! $anggotaFinal) {
             throw new \DomainException(
                 'Nilai Kelompok belum dapat diisi karena Nilai Ketua dan Nilai Anggota belum disubmit final seluruhnya.'
             );
         }
-        if (!$ketuaFinal) {
+        if (! $ketuaFinal) {
             throw new \DomainException(
                 'Nilai Kelompok belum dapat diisi karena Nilai Ketua belum disubmit final seluruhnya.'
             );
         }
-        if (!$anggotaFinal) {
+        if (! $anggotaFinal) {
             throw new \DomainException(
                 'Nilai Kelompok belum dapat diisi karena Nilai Anggota belum disubmit final seluruhnya.'
             );
@@ -194,11 +190,11 @@ class AssessorScoringService
             } else {
                 $record = AkreditasiEdpm::create([
                     'akreditasi_id' => $akreditasiId,
-                    'asesor_id'     => $resolvedAsesor1Id,
-                    'butir_id'      => $butirId,
-                    'nk'            => $nkValue,
-                    'is_final'      => $isFinal,
-                    'pesantren_id'  => $akreditasi->user_id,
+                    'asesor_id' => $resolvedAsesor1Id,
+                    'butir_id' => $butirId,
+                    'nk' => $nkValue,
+                    'is_final' => $isFinal,
+                    'pesantren_id' => $akreditasi->user_id,
                 ]);
             }
 
@@ -220,11 +216,10 @@ class AssessorScoringService
      *  3. All values are visible to both assessors after BOTH have submitted all their
      *     Final values (is_nilai_asesor_final=true AND is_nilai_asesor2_final=true).
      *
-     * @param int  $akreditasiId
-     * @param int  $userId       The user requesting visibility
-     * @param int  $roleId       The role of the requesting user (1=Admin, 2=Asesor, 3=Pesantren)
-     * @param int  $asesorId     The asesor_id who owns the value being checked
-     * @param bool $isFinal      Whether the value is Final (is_final=true)
+     * @param  int  $userId  The user requesting visibility
+     * @param  int  $roleId  The role of the requesting user (1=Admin, 2=Asesor, 3=Pesantren)
+     * @param  int  $asesorId  The asesor_id who owns the value being checked
+     * @param  bool  $isFinal  Whether the value is Final (is_final=true)
      * @return bool
      *
      * Validates Requirements 7.7, 7.11, 15.6, 15.8
@@ -243,13 +238,13 @@ class AssessorScoringService
 
         // Rule 2: Draft values are only visible to the assessor who created them
         // Compare by user_id (both $userId and $asesorId are user_ids here)
-        if (!$isFinal) {
+        if (! $isFinal) {
             return $userId === $asesorId;
         }
 
         // Rule 3: Final values — visible to both assessors only after both have submitted all Finals
         $akreditasi = Akreditasi::find($akreditasiId);
-        if (!$akreditasi) {
+        if (! $akreditasi) {
             return false;
         }
 
@@ -283,17 +278,13 @@ class AssessorScoringService
      *  - Jika admin mengubah NV dari default (NK) saat finalisasi,
      *    alasan perubahan wajib diisi untuk audit trail.
      *
-     * @param int    $akreditasiId
-     * @param int    $adminId       The user_id of the Admin
-     * @param int    $butirId
-     * @param int    $nvValue       Must be in {1,2,3,4}
-     * @param bool   $isFinal
-     * @param string|null $reason   Required when NV differs from NK and isFinal
-     * @return AkreditasiEdpm
+     * @param  int  $adminId  The user_id of the Admin
+     * @param  int  $nvValue  Must be in {1,2,3,4}
+     * @param  string|null  $reason  Required when NV differs from NK and isFinal
      *
-     * @throws \DomainException          When akreditasi not at status 1, or reason missing on NV change
-     * @throws ImmutableValueException   When NV is already Final
-     * @throws InvalidArgumentException  When value out of range
+     * @throws \DomainException When akreditasi not at status 1, or reason missing on NV change
+     * @throws ImmutableValueException When NV is already Final
+     * @throws InvalidArgumentException When value out of range
      *
      * Validates Requirements 9.2, 9.3, 9.4, 9.6, 10.5 (NV audit trail)
      */
@@ -323,17 +314,18 @@ class AssessorScoringService
                 ->whereNotNull('nk')
                 ->first();
 
-            if (!$record) {
+            if (! $record) {
                 // No NK record yet — create a new record for admin NV
                 // Default NV from NK if available; otherwise use provided value
                 $record = AkreditasiEdpm::create([
                     'akreditasi_id' => $akreditasiId,
-                    'asesor_id'     => $adminId,
-                    'butir_id'      => $butirId,
-                    'nv'            => $nvValue,
-                    'is_final'      => $isFinal,
-                    'pesantren_id'  => $akreditasi->user_id,
+                    'asesor_id' => $adminId,
+                    'butir_id' => $butirId,
+                    'nv' => $nvValue,
+                    'is_final' => $isFinal,
+                    'pesantren_id' => $akreditasi->user_id,
                 ]);
+
                 return $record->fresh();
             }
 
@@ -386,22 +378,19 @@ class AssessorScoringService
     /**
      * Check if all 62 NA1 values are Final for Asesor_1.
      *
-     * @param int $akreditasiId
-     * @param int $asesor1Id  user_id of Asesor_1
-     * @return bool
+     * @param  int  $asesor1Id  user_id of Asesor_1
      */
     public function allNA1Final(int $akreditasiId, int $asesor1Id): bool
     {
         $resolvedId = $this->resolveAsesorId($asesor1Id);
+
         return $this->hasAllFinalNaValues($akreditasiId, $resolvedId);
     }
 
     /**
      * Check if all 62 NK values are Final for Asesor_1.
      *
-     * @param int $akreditasiId
-     * @param int $asesor1Id  user_id of Asesor_1
-     * @return bool
+     * @param  int  $asesor1Id  user_id of Asesor_1
      */
     public function allNKFinal(int $akreditasiId, int $asesor1Id): bool
     {
@@ -418,21 +407,17 @@ class AssessorScoringService
     /**
      * Check if all 62 NA2 values are Final for Asesor_2.
      *
-     * @param int $akreditasiId
-     * @param int $asesor2Id  user_id of Asesor_2
-     * @return bool
+     * @param  int  $asesor2Id  user_id of Asesor_2
      */
     public function allNA2Final(int $akreditasiId, int $asesor2Id): bool
     {
         $resolvedId = $this->resolveAsesorId($asesor2Id);
+
         return $this->hasAllFinalNaValues($akreditasiId, $resolvedId);
     }
 
     /**
      * Check if all 62 NV values are Final.
-     *
-     * @param int $akreditasiId
-     * @return bool
      */
     public function allNVFinal(int $akreditasiId): bool
     {
@@ -466,12 +451,13 @@ class AssessorScoringService
      * Resolve the asesors.id from a user_id.
      * Returns the user_id itself if no asesor record is found (fallback for tests).
      *
-     * @param int $userId  The users.id of the asesor
-     * @return int         The asesors.id
+     * @param  int  $userId  The users.id of the asesor
+     * @return int The asesors.id
      */
     private function resolveAsesorId(int $userId): int
     {
         $asesor = Asesor::where('user_id', $userId)->first();
+
         return $asesor ? $asesor->id : $userId;
     }
 
@@ -498,7 +484,7 @@ class AssessorScoringService
             ->where('asesor_id', $asesor1ModelId)
             ->exists();
 
-        if (!$ketuaAssigned) {
+        if (! $ketuaAssigned) {
             throw new \DomainException('Hanya Ketua Kelompok yang ditugaskan yang dapat mengisi Nilai Kelompok.');
         }
 
@@ -507,7 +493,7 @@ class AssessorScoringService
             ->where('asesor_id', $asesor2ModelId)
             ->exists();
 
-        if (!$anggotaAssigned) {
+        if (! $anggotaAssigned) {
             throw new \DomainException('Anggota Kelompok yang ditugaskan tidak sesuai untuk pengisian Nilai Kelompok.');
         }
     }
@@ -515,9 +501,6 @@ class AssessorScoringService
     /**
      * Recalculate Delta for a butir when both NA1 and NA2 are Final.
      * Delta = |NA1 - NA2|
-     *
-     * @param int $akreditasiId
-     * @param int $butirId
      */
     private function recalculateDelta(int $akreditasiId, int $butirId): void
     {

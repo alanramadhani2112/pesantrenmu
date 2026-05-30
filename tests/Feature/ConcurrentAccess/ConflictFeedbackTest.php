@@ -14,7 +14,7 @@ use App\Models\MasterEdpmKomponen;
 use App\Models\Pesantren;
 use App\Models\SdmPesantren;
 use App\Models\User;
-use App\Services\AkreditasiService;
+use App\Services\AkreditasiWorkflowService;
 use Carbon\Carbon;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RolePermissionSeeder;
@@ -43,14 +43,14 @@ class ConflictFeedbackTest extends TestCase
     }
 
     /**
-     * Task 8.1: Stale timestamp on finalizeAkreditasi service call throws ConflictException.
+     * Task 8.1: Stale timestamp on final admin rejection service call throws ConflictException.
      *
      * When finalizeAkreditasi() is called with a stale timestamp, the service should
      * throw a ConflictException.
      */
-public function test_approve_with_stale_timestamp_dispatches_conflict_notification(): void
+    public function test_approve_with_stale_timestamp_dispatches_conflict_notification(): void
     {
-        [$adminUser, $akreditasi] = $this->createAdminWithStatus3Akreditasi();
+        [$adminUser, $akreditasi] = $this->createAdminWithStatus1Akreditasi();
         $this->actingAs($adminUser);
 
         $staleTimestamp = Carbon::now()->subHours(2)->toISOString();
@@ -61,12 +61,14 @@ public function test_approve_with_stale_timestamp_dispatches_conflict_notificati
         // Call the service directly with a stale timestamp — should throw ConflictException
         $this->expectException(ConflictException::class);
 
-        $akreditasiService = app(AkreditasiService::class);
-        $akreditasiService->finalizeAkreditasi($akreditasi->id, [
-            'rejection_categories' => [
-                ['category' => 'lainnya', 'explanation' => 'Test rejection reason for conflict test.'],
-            ],
-        ], false, $staleTimestamp);
+        $workflowService = app(AkreditasiWorkflowService::class);
+        $workflowService->rejectAtValidasi(
+            $akreditasi->id,
+            $adminUser->id,
+            'Test rejection reason for conflict test.',
+            $staleTimestamp,
+            [['category' => 'lainnya', 'explanation' => 'Test rejection reason for conflict test.']]
+        );
     }
 
     /**
@@ -75,9 +77,9 @@ public function test_approve_with_stale_timestamp_dispatches_conflict_notificati
      * When reject() is called with a stale timestamp, the component should
      * dispatch a conflict notification (not throw an unhandled exception).
      */
-public function test_reject_with_stale_timestamp_dispatches_conflict_notification(): void
+    public function test_reject_with_stale_timestamp_dispatches_conflict_notification(): void
     {
-        [$adminUser, $akreditasi] = $this->createAdminWithStatus3Akreditasi();
+        [$adminUser, $akreditasi] = $this->createAdminWithStatus1Akreditasi();
         $this->actingAs($adminUser);
 
         $staleTimestamp = Carbon::now()->subHours(2)->toISOString();
@@ -99,15 +101,15 @@ public function test_reject_with_stale_timestamp_dispatches_conflict_notificatio
         $component->assertDispatched('notification-received');
 
         // Status should remain unchanged (still 3)
-        $this->assertEquals(3, $akreditasi->fresh()->status);
+        $this->assertEquals(1, $akreditasi->fresh()->status);
     }
 
     /**
      * Task 8.2 (variant): No 500 error on stale reject — graceful handling.
      */
-public function test_reject_with_stale_timestamp_does_not_throw_500(): void
+    public function test_reject_with_stale_timestamp_does_not_throw_500(): void
     {
-        [$adminUser, $akreditasi] = $this->createAdminWithStatus3Akreditasi();
+        [$adminUser, $akreditasi] = $this->createAdminWithStatus1Akreditasi();
         $this->actingAs($adminUser);
 
         $staleTimestamp = Carbon::now()->subHours(5)->toISOString();
@@ -122,15 +124,15 @@ public function test_reject_with_stale_timestamp_does_not_throw_500(): void
         $component->call('reject');
 
         // Component should still be alive (no redirect, no crash)
-        $this->assertEquals(3, $akreditasi->fresh()->status);
+        $this->assertEquals(1, $akreditasi->fresh()->status);
     }
 
     /**
      * Task 8.4: akreditasiUpdatedAt is set on mount.
      */
-public function test_akreditasi_updated_at_is_set_on_mount(): void
+    public function test_akreditasi_updated_at_is_set_on_mount(): void
     {
-        [$adminUser, $akreditasi] = $this->createAdminWithStatus3Akreditasi();
+        [$adminUser, $akreditasi] = $this->createAdminWithStatus1Akreditasi();
         $this->actingAs($adminUser);
 
         $component = Volt::test('pages.admin.akreditasi-detail', ['uuid' => $akreditasi->uuid])->assertOk();
@@ -145,7 +147,7 @@ public function test_akreditasi_updated_at_is_set_on_mount(): void
      *
      * When akreditasi status is 1 or 2, the approve/reject forms should not be shown.
      */
-public function test_action_forms_hidden_when_status_is_terminal(): void
+    public function test_action_forms_hidden_when_status_is_terminal(): void
     {
         $adminUser = User::factory()->create(['role_id' => 1]);
         $this->actingAs($adminUser);
@@ -209,16 +211,17 @@ public function test_action_forms_hidden_when_status_is_terminal(): void
         return $user->refresh();
     }
 
-    private function createAdminWithStatus3Akreditasi(): array
+    private function createAdminWithStatus1Akreditasi(): array
     {
         $adminUser = User::factory()->create(['role_id' => 1]);
         $pesantrenUser = $this->createCompletePesantrenUser();
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status' => 3,
+            'status' => 1,
             'kartu_kendali' => 'akreditasi/kartu_kendali/test.pdf',
             'laporan_visitasi_asesor1' => 'akreditasi/laporan/test.pdf',
+            'is_nv_final' => true,
         ]);
 
         $asesorUser = User::factory()->create(['role_id' => 2]);

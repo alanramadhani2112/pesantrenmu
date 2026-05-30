@@ -6,10 +6,10 @@ use App\Models\Akreditasi;
 use App\Models\Asesor;
 use App\Models\Assessment;
 use App\Models\Banding;
+use App\Models\Edpm;
 use App\Models\Ipm;
 use App\Models\MasterEdpmButir;
 use App\Models\MasterEdpmKomponen;
-use App\Models\Edpm;
 use App\Models\Pesantren;
 use App\Models\SdmPesantren;
 use App\Models\User;
@@ -44,6 +44,7 @@ class AdminBandingDetailTest extends TestCase
             'user_id' => $user->id,
             'nama_pesantren' => $pesantrenName,
         ]);
+
         return $user;
     }
 
@@ -84,7 +85,7 @@ class AdminBandingDetailTest extends TestCase
     /**
      * Task 9.7: Assign reviewer updates banding and shows under_review status
      */
-public function test_assign_reviewer_updates_banding_status(): void
+    public function test_assign_reviewer_updates_banding_status(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $reviewer = User::factory()->create(['role_id' => 1, 'name' => 'Reviewer Admin']);
@@ -106,7 +107,7 @@ public function test_assign_reviewer_updates_banding_status(): void
 
         $component = Volt::test('pages.admin.banding-detail', ['id' => $banding->id])
             ->assertOk()
-            ->assertSee('Pending')
+            ->assertSee('Tertunda')
             ->assertSee('Assign Reviewer');
 
         $component
@@ -124,13 +125,13 @@ public function test_assign_reviewer_updates_banding_status(): void
         $this->assertEquals($reviewer->id, $banding->reviewer_id);
 
         // Verify the component shows updated status
-        $component->assertSee('Under Review');
+        $component->assertSee('Dalam Peninjauan');
     }
 
     /**
      * Task 9.8: Accept decision returns akreditasi to final admin validation.
      */
-public function test_accept_decision_returns_to_validasi_admin(): void
+    public function test_accept_decision_returns_to_validasi_admin(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $pesantrenUser = $this->createPesantrenUser('Pesantren Accept');
@@ -184,16 +185,16 @@ public function test_accept_decision_returns_to_validasi_admin(): void
         // Verify akreditasi returns to Validasi Akhir Admin.
         $akreditasi->refresh();
         $this->assertEquals(1, $akreditasi->status);
-        $this->assertNull(Akreditasi::where('parent', $akreditasi->id)->first());
+        $this->assertSame(1, Akreditasi::where('id', $akreditasi->id)->count());
 
         // Verify the component shows accepted status
-        $component->assertSee('Accepted');
+        $component->assertSee('Diterima');
     }
 
     /**
      * Task 9.9: Reject decision reverts akreditasi and shows rejected status
      */
-public function test_reject_decision_reverts_akreditasi(): void
+    public function test_reject_decision_reverts_akreditasi(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $pesantrenUser = $this->createPesantrenUser('Pesantren Reject');
@@ -232,13 +233,13 @@ public function test_reject_decision_reverts_akreditasi(): void
         $this->assertEquals(-1, $akreditasi->status);
 
         // Verify the component shows rejected status
-        $component->assertSee('Rejected');
+        $component->assertSee('Ditolak');
     }
 
     /**
      * Task 9.10: Decision actions hidden when status is not under_review
      */
-public function test_decision_actions_hidden_when_not_under_review(): void
+    public function test_decision_actions_hidden_when_not_under_review(): void
     {
         $admin = User::factory()->create(['role_id' => 1]);
         $pesantrenUser = $this->createPesantrenUser('Pesantren Hidden');
@@ -260,8 +261,8 @@ public function test_decision_actions_hidden_when_not_under_review(): void
 
         Volt::test('pages.admin.banding-detail', ['id' => $pendingBanding->id])
             ->assertSee('Assign Reviewer')
-            ->assertDontSee('Accept')
-            ->assertDontSee('Reject');
+            ->assertDontSee('Terima Banding')
+            ->assertDontSee('Tolak Banding');
 
         // Test with accepted status - should not show any action buttons
         $acceptedBanding = Banding::create([
@@ -297,7 +298,7 @@ public function test_decision_actions_hidden_when_not_under_review(): void
     /**
      * Additional: Non-admin cannot access banding detail
      */
-public function test_non_admin_cannot_access_banding_detail(): void
+    public function test_non_admin_cannot_access_banding_detail(): void
     {
         $pesantrenUser = $this->createPesantrenUser('Pesantren Unauthorized');
 
@@ -315,7 +316,7 @@ public function test_non_admin_cannot_access_banding_detail(): void
 
         Volt::actingAs($pesantrenUser);
 
-        $response = $this->get('/admin/banding/' . $banding->id);
+        $response = $this->get('/admin/banding/'.$banding->id);
         $response->assertStatus(403);
     }
 }

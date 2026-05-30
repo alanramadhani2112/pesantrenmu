@@ -64,7 +64,7 @@ class Banding extends Model
      */
     public function daysOverdue(): int
     {
-        if (!$this->isOverdue()) {
+        if (! $this->isOverdue()) {
             return 0;
         }
 

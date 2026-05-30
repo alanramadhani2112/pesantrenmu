@@ -9,9 +9,10 @@ use App\Models\Banding;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\TestCase;
 
 /**
  * Property 2: Badge count equals filtered record count
@@ -90,10 +91,9 @@ class BadgeCountPropertyTest extends TestCase
      * Property 2: Badge count equals filtered record count (Admin badges)
      *
      * **Validates: Requirements 3.1, 3.2, 3.3**
-     *
      */
-#[DataProvider('randomBadgeCountCombinationsProvider')]
-public function test_property_2_admin_badge_count_equals_filtered_record_count(
+    #[DataProvider('randomBadgeCountCombinationsProvider')]
+    public function test_property_2_admin_badge_count_equals_filtered_record_count(
         array $akreditasiStatuses,
         array $bandingStatuses,
         array $asesorAkreditasiStatuses,
@@ -109,17 +109,17 @@ public function test_property_2_admin_badge_count_equals_filtered_record_count(
         foreach ($akreditasiStatuses as $status) {
             Akreditasi::create([
                 'user_id' => $pesantrenUser->id,
-                'uuid' => (string) \Illuminate\Support\Str::uuid(),
+                'uuid' => (string) Str::uuid(),
                 'status' => $status,
             ]);
         }
 
         // Create Banding records with random statuses
         // Each banding needs an akreditasi_id, so create one if needed
-        if (!empty($bandingStatuses)) {
+        if (! empty($bandingStatuses)) {
             $bandingAkreditasi = Akreditasi::create([
                 'user_id' => $pesantrenUser->id,
-                'uuid' => (string) \Illuminate\Support\Str::uuid(),
+                'uuid' => (string) Str::uuid(),
                 'status' => 1,
             ]);
 
@@ -134,8 +134,8 @@ public function test_property_2_admin_badge_count_equals_filtered_record_count(
         }
 
         // Calculate expected counts
-        $expectedPendingAkreditasi = count(array_filter($akreditasiStatuses, fn($s) => $s === 6));
-        $expectedPendingBanding = count(array_filter($bandingStatuses, fn($s) => $s === 'pending'));
+        $expectedPendingAkreditasi = count(array_filter($akreditasiStatuses, fn ($s) => $s === 6));
+        $expectedPendingBanding = count(array_filter($bandingStatuses, fn ($s) => $s === 'pending'));
 
         // Test the component as admin
         $this->actingAs($admin);
@@ -150,12 +150,12 @@ public function test_property_2_admin_badge_count_equals_filtered_record_count(
         if ($expectedPendingAkreditasi === 0) {
             $component->assertSeeHtml('data-pending-akreditasi="0"');
         } else {
-            $component->assertSeeHtml('data-pending-akreditasi="' . $expectedPendingAkreditasi . '"');
+            $component->assertSeeHtml('data-pending-akreditasi="'.$expectedPendingAkreditasi.'"');
         }
         if ($expectedPendingBanding === 0) {
             $component->assertSeeHtml('data-pending-banding="0"');
         } else {
-            $component->assertSeeHtml('data-pending-banding="' . $expectedPendingBanding . '"');
+            $component->assertSeeHtml('data-pending-banding="'.$expectedPendingBanding.'"');
         }
     }
 
@@ -163,10 +163,9 @@ public function test_property_2_admin_badge_count_equals_filtered_record_count(
      * Property 2: Badge count equals filtered record count (Asesor badges)
      *
      * **Validates: Requirements 4.1, 4.2**
-     *
      */
-#[DataProvider('randomBadgeCountCombinationsProvider')]
-public function test_property_2_asesor_badge_count_equals_filtered_record_count(
+    #[DataProvider('randomBadgeCountCombinationsProvider')]
+    public function test_property_2_asesor_badge_count_equals_filtered_record_count(
         array $akreditasiStatuses,
         array $bandingStatuses,
         array $asesorAkreditasiStatuses,
@@ -197,7 +196,7 @@ public function test_property_2_asesor_badge_count_equals_filtered_record_count(
         foreach ($asesorAkreditasiStatuses as $index => $status) {
             $akreditasi = Akreditasi::create([
                 'user_id' => $pesantrenUser->id,
-                'uuid' => (string) \Illuminate\Support\Str::uuid(),
+                'uuid' => (string) Str::uuid(),
                 'status' => $status,
             ]);
 
@@ -241,7 +240,7 @@ public function test_property_2_asesor_badge_count_equals_filtered_record_count(
         if ($expectedActiveTaskCount === 0) {
             $component->assertSeeHtml('data-active-tasks="0"');
         } else {
-            $component->assertSeeHtml('data-active-tasks="' . $expectedActiveTaskCount . '"');
+            $component->assertSeeHtml('data-active-tasks="'.$expectedActiveTaskCount.'"');
         }
     }
 }

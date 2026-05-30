@@ -69,6 +69,7 @@ class AkreditasiRejection extends Model
         if ($this->perbaikan_deadline === null) {
             return 0;
         }
+
         return max(0, (int) now()->diffInDays($this->perbaikan_deadline, false));
     }
 }

@@ -13,6 +13,8 @@ new #[Layout('layouts.app')] class extends Component {
 
     public $pesantren;
 
+    public $latestAkreditasi;
+
     // Form fields
     public $nama_pesantren;
     public $ns_pesantren;
@@ -93,6 +95,7 @@ new #[Layout('layouts.app')] class extends Component {
 
         $pesantrenService = app(\App\Services\PesantrenService::class);
         $this->pesantren = $pesantrenService->getProfile(auth()->id());
+        $this->latestAkreditasi = $pesantrenService->getLatestAkreditasi(auth()->id());
 
         $this->nama_pesantren = $this->pesantren->nama_pesantren;
         $this->ns_pesantren = $this->pesantren->ns_pesantren;
@@ -327,6 +330,8 @@ new #[Layout('layouts.app')] class extends Component {
             return;
         }
 
+        $this->syncProvinsiKodeFromNama();
+
         try {
             $this->validate($this->profileFinalRules());
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -400,6 +405,19 @@ new #[Layout('layouts.app')] class extends Component {
             '93' => 'Papua Selatan', '94' => 'Papua',
             '95' => 'Papua Tengah', '96' => 'Papua Pegunungan',
         ];
+    }
+
+    protected function syncProvinsiKodeFromNama(): void
+    {
+        if (filled($this->provinsi_kode) || blank($this->provinsi)) {
+            return;
+        }
+
+        $kode = array_search($this->provinsi, $this->provinsiMap(), true);
+
+        if ($kode !== false) {
+            $this->provinsi_kode = (string) $kode;
+        }
     }
 
     protected function buildProfileData(): array
@@ -749,7 +767,7 @@ new #[Layout('layouts.app')] class extends Component {
                             <i class="ki-outline ki-information-5 fs-2tx text-warning me-4 mt-1"></i>
                             <div class="d-flex flex-stack flex-grow-1 flex-wrap flex-md-nowrap">
                                 <div class="mb-3 mb-md-0 fw-semibold">
-                                    <h4 class="text-gray-900 fw-bold mb-2">Belum ada layanan satuan pendidikan dipilih</h4>
+                                    <h4 class="text-gray-900 fw-semibold mb-2">Belum ada layanan satuan pendidikan dipilih</h4>
                                     <div class="fs-7 text-gray-700 pe-7">
                                         Centang minimal satu satuan pendidikan di atas (SD, MI, SMP, MTS, SMA, MA, SMK, atau SPM) agar Anda dapat:
                                         <ul class="mt-2 mb-0 ps-4">
@@ -812,15 +830,15 @@ new #[Layout('layouts.app')] class extends Component {
                                             @else
                                                 <i class="ki-outline ki-file-up fs-3hx text-success mb-2"></i>
                                             @endif
-                                            <div class="fw-bold text-success fs-7 text-truncate w-100">{{ $$prop->getClientOriginalName() }}</div>
+                                            <div class="fw-semibold text-success fs-7 text-truncate w-100">{{ $$prop->getClientOriginalName() }}</div>
                                             <div class="text-muted fs-8 mt-1">Siap Diunggah</div>
                                         @elseif (!empty($existing_files[$dbField]))
                                             <i class="ki-outline ki-file fs-3hx text-primary mb-2"></i>
-                                            <div class="fw-bold text-primary fs-7">FILE TERUNGGAH</div>
+                                            <div class="fw-semibold text-primary fs-7">FILE TERUNGGAH</div>
                                             <div class="text-muted fs-8 mt-1">Klik untuk Ganti</div>
                                         @else
                                             <i class="ki-outline ki-cloud-add fs-3hx text-gray-500 mb-2"></i>
-                                            <div class="fw-bold text-gray-700 fs-7">Unggah File</div>
+                                            <div class="fw-semibold text-gray-700 fs-7">Unggah File</div>
                                             <div class="text-muted fs-8 mt-1">PDF/Gambar (Maks. 2MB)</div>
                                         @endif
                                     </div>
@@ -864,15 +882,15 @@ new #[Layout('layouts.app')] class extends Component {
                                             @else
                                                 <i class="ki-outline ki-file-up fs-3hx text-success mb-2"></i>
                                             @endif
-                                            <div class="fw-bold text-success fs-7 text-truncate w-100">{{ $$prop->getClientOriginalName() }}</div>
+                                            <div class="fw-semibold text-success fs-7 text-truncate w-100">{{ $$prop->getClientOriginalName() }}</div>
                                             <div class="text-muted fs-8 mt-1">Siap Diunggah</div>
                                         @elseif (!empty($existing_files[$dbField]))
                                             <i class="ki-outline ki-file fs-3hx text-primary mb-2"></i>
-                                            <div class="fw-bold text-primary fs-7">FILE TERUNGGAH</div>
+                                            <div class="fw-semibold text-primary fs-7">FILE TERUNGGAH</div>
                                             <div class="text-muted fs-8 mt-1">Klik untuk Ganti</div>
                                         @else
                                             <i class="ki-outline ki-cloud-add fs-3hx text-gray-500 mb-2"></i>
-                                            <div class="fw-bold text-gray-700 fs-7">Unggah File</div>
+                                            <div class="fw-semibold text-gray-700 fs-7">Unggah File</div>
                                             <div class="text-muted fs-8 mt-1">PDF/Gambar (Maks. 2MB)</div>
                                         @endif
                                     </div>
@@ -950,11 +968,11 @@ new #[Layout('layouts.app')] class extends Component {
                         <div class="row g-6">
                             <div class="col-md-6">
                                 <div class="text-gray-500 fw-semibold fs-8 text-uppercase mb-1">Nama Pesantren</div>
-                                <div class="fs-5 fw-bold text-gray-800">{{ $nama_pesantren ?: '-' }}</div>
+                                <div class="fs-5 fw-semibold text-gray-800">{{ $nama_pesantren ?: '-' }}</div>
                             </div>
                             <div class="col-md-6">
                                 <div class="text-gray-500 fw-semibold fs-8 text-uppercase mb-1">Nomor Statistik Pesantren (NSP)</div>
-                                <div class="fs-5 fw-bold text-gray-800">{{ $ns_pesantren ?: '-' }}</div>
+                                <div class="fs-5 fw-semibold text-gray-800">{{ $ns_pesantren ?: '-' }}</div>
                             </div>
                             <div class="col-12">
                                 <div class="text-gray-500 fw-semibold fs-8 text-uppercase mb-1">Alamat</div>
@@ -999,11 +1017,10 @@ new #[Layout('layouts.app')] class extends Component {
                             <div class="col-md-6">
                                 <div class="text-gray-500 fw-semibold fs-8 text-uppercase mb-1">Akreditasi</div>
                                 <div>
-                                    @php $akreditasi = auth()->user()->akreditasis()->latest()->first(); @endphp
-                                    @if($akreditasi && $akreditasi->status == 0)
-                                        <span class="badge badge-light-primary fs-7 fw-bold">{{ $akreditasi->peringkat ?? 'Terakreditasi' }}</span>
-                                    @elseif($akreditasi)
-                                        <span class="badge badge-light-warning fs-7 fw-bold">Proses</span>
+                                    @if($latestAkreditasi && $latestAkreditasi->status == 0)
+                                        <span class="badge badge-light-primary fs-7 fw-semibold">{{ $latestAkreditasi->peringkat ?? 'Terakreditasi' }}</span>
+                                    @elseif($latestAkreditasi)
+                                        <span class="badge badge-light-warning fs-7 fw-semibold">Proses</span>
                                     @else
                                         <span class="text-gray-600">-</span>
                                     @endif
@@ -1031,8 +1048,8 @@ new #[Layout('layouts.app')] class extends Component {
                                     @foreach($pesantren->units as $unit)
                                         <div class="col-md-4 col-sm-6">
                                             <div class="border border-gray-300 rounded p-4 bg-light d-flex justify-content-between align-items-center">
-                                                <span class="fw-bold text-gray-800 text-uppercase fs-7">{{ str_replace('_', ' ', $unit->unit) }}</span>
-                                                <span class="badge badge-light-primary fw-bold">{{ $unit->jumlah_rombel ?? 0 }} Rombel</span>
+                                                <span class="fw-semibold text-gray-800 text-uppercase fs-7">{{ str_replace('_', ' ', $unit->unit) }}</span>
+                                                <span class="badge badge-light-primary fw-semibold">{{ $unit->jumlah_rombel ?? 0 }} Rombel</span>
                                             </div>
                                         </div>
                                     @endforeach
@@ -1046,13 +1063,13 @@ new #[Layout('layouts.app')] class extends Component {
                             <div class="col-md-6">
                                 <div class="border border-gray-300 rounded p-5 bg-light-success">
                                     <div class="text-gray-500 fw-semibold fs-8 text-uppercase mb-2">Luas Tanah</div>
-                                    <div class="fs-2 fw-bold text-gray-800">{{ $luas_tanah ?: '0' }} <span class="fs-6 fw-semibold text-gray-600">m²</span></div>
+                                    <div class="fs-2 fw-semibold text-gray-800">{{ $luas_tanah ?: '0' }} <span class="fs-6 fw-semibold text-gray-600">m²</span></div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="border border-gray-300 rounded p-5 bg-light-info">
                                     <div class="text-gray-500 fw-semibold fs-8 text-uppercase mb-2">Luas Bangunan</div>
-                                    <div class="fs-2 fw-bold text-gray-800">{{ $luas_bangunan ?: '0' }} <span class="fs-6 fw-semibold text-gray-600">m²</span></div>
+                                    <div class="fs-2 fw-semibold text-gray-800">{{ $luas_bangunan ?: '0' }} <span class="fs-6 fw-semibold text-gray-600">m²</span></div>
                                 </div>
                             </div>
                         </div>
@@ -1071,7 +1088,7 @@ new #[Layout('layouts.app')] class extends Component {
                                         <a href="{{ Storage::url($existing_files[$dbField]) }}" target="_blank" class="d-flex align-items-center border border-gray-300 rounded p-4 text-decoration-none text-gray-800 hover-bg-light h-100">
                                             <i class="ki-outline ki-file fs-2hx text-primary me-3"></i>
                                             <div class="d-flex flex-column">
-                                                <span class="fw-bold fs-7 text-gray-800">{{ $label }}</span>
+                                                <span class="fw-semibold fs-7 text-gray-800">{{ $label }}</span>
                                                 <span class="text-muted fs-8">Klik untuk lihat dokumen</span>
                                             </div>
                                         </a>

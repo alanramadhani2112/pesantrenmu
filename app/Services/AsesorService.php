@@ -2,40 +2,43 @@
 
 namespace App\Services;
 
-use App\Repositories\Contracts\AkreditasiRepositoryInterface;
-use App\Services\RejectionService;
-use App\Services\AuditTrailService;
-use App\Services\Concerns\ChecksOptimisticLock;
-use App\Services\ProgressTracker;
-use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\Akreditasi;
+use App\Models\Asesor;
 use App\Models\Assessment;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use App\Notifications\AkreditasiNotification;
+use App\Models\Document;
+use App\Models\Edpm;
+use App\Models\EdpmCatatan;
+use App\Models\Ipm;
+use App\Models\MasterEdpmKomponen;
+use App\Models\Pesantren;
+use App\Models\SdmPesantren;
 use App\Models\User;
+use App\Notifications\AkreditasiNotification;
+use App\Repositories\Contracts\AkreditasiRepositoryInterface;
+use App\Repositories\Contracts\AsesorRepositoryInterface;
+use App\StateMachine\AkreditasiStateMachine;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Notification;
 
 class AsesorService
 {
-    use ChecksOptimisticLock;
     protected $akreditasiRepository;
+
     protected $asesorRepository;
-    protected AuditTrailService $auditTrailService;
+
     protected ProgressTracker $progressTracker;
 
     public function __construct(
         AkreditasiRepositoryInterface $akreditasiRepository,
-        \App\Repositories\Contracts\AsesorRepositoryInterface $asesorRepository,
-        AuditTrailService $auditTrailService,
+        AsesorRepositoryInterface $asesorRepository,
         ProgressTracker $progressTracker
     ) {
         $this->akreditasiRepository = $akreditasiRepository;
         $this->asesorRepository = $asesorRepository;
-        $this->auditTrailService = $auditTrailService;
         $this->progressTracker = $progressTracker;
     }
 
-    public function getProfile(int $userId): \App\Models\Asesor
+    public function getProfile(int $userId): Asesor
     {
         return $this->asesorRepository->firstOrCreate(
             ['user_id' => $userId],
@@ -76,139 +79,9 @@ class AsesorService
         return $this->akreditasiRepository->findAssessment($id, ['akreditasi.user.pesantren', 'akreditasi.catatans.user']);
     }
 
-    public function findAkreditasiByUuid(string $uuid): ?\App\Models\Akreditasi
+    public function findAkreditasiByUuid(string $uuid): ?Akreditasi
     {
         return $this->akreditasiRepository->findByUuid($uuid, ['user.pesantren', 'catatans.user', 'assessment1', 'assessment2']);
-    }
-
-    public function processVisitasi(int $akreditasiId, int $userId, array $data, string $action, string $clientUpdatedAt = ''): bool
-    {
-        $isAssignedAsesor1 = Assessment::where('akreditasi_id', $akreditasiId)
-            ->whereHas('asesor', fn($q) => $q->where('user_id', $userId))
-            ->where('tipe', 1)
-            ->exists();
-
-        if (!$isAssignedAsesor1) {
-            Log::warning('processVisitasi unauthorized asesor', [
-                'user_id' => $userId,
-                'akreditasi_id' => $akreditasiId,
-            ]);
-            return false;
-        }
-
-        $akreditasi = $this->akreditasiRepository->find($akreditasiId);
-        if (!$akreditasi) return false;
-
-        if ($action === 'tolak') {
-            $rejectionService = app(RejectionService::class);
-            $result = $rejectionService->createRejection(
-                $akreditasiId,
-                $userId,
-                $data['rejected_items'],
-                $data['catatan']
-            );
-            return $result['success'];
-        }
-
-        if ($action === 'accept_perbaikan') {
-            $rejectionService = app(RejectionService::class);
-            $result = $rejectionService->acceptPerbaikan($akreditasiId, $userId);
-            return $result['success'];
-        }
-
-        $asesorUser = User::find($userId);
-        $asesorName = $asesorUser->name;
-        $admins = User::whereHas('role', function ($q) { $q->where('id', 1); })->get();
-
-        // Compute notification data before transaction so it's available after commit
-        $notificationData = null;
-
-        $result = DB::transaction(function () use ($akreditasi, $akreditasiId, $userId, $data, $action, $clientUpdatedAt, &$notificationData, $asesorName) {
-            if ($clientUpdatedAt !== '') {
-                $this->assertNotStale($akreditasiId, $clientUpdatedAt);
-            }
-
-            if ($action === 'terima') {
-                $this->akreditasiRepository->update($akreditasiId, [
-                    'status' => 4, // Visitasi
-                    'tgl_visitasi' => $data['tanggal'],
-                    'tgl_visitasi_akhir' => $data['tanggal_akhir'],
-                ]);
-
-                if (!empty($data['catatan'])) {
-                    $this->akreditasiRepository->addCatatan([
-                        'akreditasi_id' => $akreditasiId,
-                        'user_id' => $userId,
-                        'tipe' => 'visitasi',
-                        'catatan' => $data['catatan'],
-                    ]);
-                }
-
-                $rangeStr = \Carbon\Carbon::parse($data['tanggal'])->format('d/m/Y');
-                if ($data['tanggal'] != $data['tanggal_akhir']) {
-                    $rangeStr .= ' s/d ' . \Carbon\Carbon::parse($data['tanggal_akhir'])->format('d/m/Y');
-                }
-
-                $notificationData = ['action' => 'terima', 'rangeStr' => $rangeStr];
-            } else {
-                $this->akreditasiRepository->update($akreditasiId, ['status' => 5]); // Kembali ke Review Awal.
-
-                $this->akreditasiRepository->addCatatan([
-                    'akreditasi_id' => $akreditasiId,
-                    'user_id' => $userId,
-                    'tipe' => 'visitasi',
-                    'catatan' => $data['catatan'],
-                    'perbaikan' => implode(', ', $data['perbaikan']),
-                ]);
-
-                $notificationData = ['action' => 'tolak_jadwal', 'catatan' => $data['catatan']];
-            }
-
-            return true;
-        });
-
-        // Dispatch notifications AFTER transaction commits (non-blocking)
-        if ($result && $notificationData) {
-            if ($notificationData['action'] === 'terima') {
-                $rangeStr = $notificationData['rangeStr'];
-
-                // Notify Pesantren
-                $akreditasi->user->notify(new AkreditasiNotification(
-                    'visitasi_diterima',
-                    'Jadwal Visitasi Ditetapkan',
-                    "Asesor $asesorName telah menjadwalkan visitasi pada tanggal $rangeStr.",
-                    route('pesantren.akreditasi')
-                ));
-
-                // Notify Admin
-                Notification::send($admins, new AkreditasiNotification(
-                    'visitasi_diterima',
-                    'Jadwal Visitasi Ditetapkan',
-                    "Asesor $asesorName telah menetapkan jadwal visitasi untuk pesantren " . ($akreditasi->user?->pesantren?->nama_pesantren ?? $akreditasi->user->name) . " pada tanggal $rangeStr.",
-                    route('admin.akreditasi')
-                ));
-            } else {
-                $catatan = $notificationData['catatan'];
-
-                // Notify Pesantren
-                $akreditasi->user->notify(new AkreditasiNotification(
-                    'visitasi_ditolak',
-                    'Pengajuan Visitasi Ditolak',
-                    "Asesor $asesorName menolak jadwal visitasi dengan catatan: " . $catatan . ". Silahkan periksa catatan perbaikan.",
-                    route('pesantren.akreditasi')
-                ));
-
-                // Notify Admin
-                Notification::send($admins, new AkreditasiNotification(
-                    'visitasi_ditolak',
-                    'Visitasi Ditolak Asesor',
-                    "Asesor $asesorName menolak visitasi untuk pesantren " . ($akreditasi->user?->pesantren?->nama_pesantren ?? $akreditasi->user->name) . ".",
-                    route('admin.akreditasi')
-                ));
-            }
-        }
-
-        return (bool) $result;
     }
 
     public function getEdpmEvaluationData(int $akreditasiId, int $asesorId, int $asesorTipe): array
@@ -252,11 +125,11 @@ class AsesorService
     public function saveAsesorEdpm(int $akreditasiId, int $asesorId, int $asesorTipe, int $pesantrenId, array $data): bool
     {
         $akreditasi = $this->akreditasiRepository->find($akreditasiId);
-        if (!$akreditasi) {
+        if (! $akreditasi) {
             throw new \DomainException("Akreditasi #{$akreditasiId} tidak ditemukan.");
         }
 
-        if ((int) $akreditasi->status !== \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
+        if ((int) $akreditasi->status !== AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
             throw new \DomainException('Nilai asesor hanya dapat diisi setelah visitasi dikonfirmasi selesai.');
         }
 
@@ -265,15 +138,17 @@ class AsesorService
         }
 
         foreach ($data['asesorEvaluasis'] as $butirId => $isian) {
-            if (empty($isian)) continue;
+            if (empty($isian)) {
+                continue;
+            }
 
             $saveData = [
                 'pesantren_id' => $pesantrenId,
                 'isian' => $isian,
-                'catatan' => $data['asesorButirCatatans'][$butirId] ?? null
+                'catatan' => $data['asesorButirCatatans'][$butirId] ?? null,
             ];
             if ($asesorTipe == 1) {
-                $saveData['nk'] = !empty($data['asesorNks'][$butirId]) ? $data['asesorNks'][$butirId] : null;
+                $saveData['nk'] = ! empty($data['asesorNks'][$butirId]) ? $data['asesorNks'][$butirId] : null;
             }
             $this->akreditasiRepository->saveEdpmEvaluation(
                 ['akreditasi_id' => $akreditasiId, 'butir_id' => $butirId, 'asesor_id' => $asesorId],
@@ -284,7 +159,7 @@ class AsesorService
         foreach ($data['asesorCatatans'] as $komponenId => $catatan) {
             $saveData = ['pesantren_id' => $pesantrenId, 'catatan' => $catatan];
             if ($asesorTipe == 1) {
-                $saveData['nk'] = !empty($data['asesorCatatanNks'][$komponenId]) ? $data['asesorCatatanNks'][$komponenId] : null;
+                $saveData['nk'] = ! empty($data['asesorCatatanNks'][$komponenId]) ? $data['asesorCatatanNks'][$komponenId] : null;
             }
             $this->akreditasiRepository->saveEdpmCatatan(
                 ['akreditasi_id' => $akreditasiId, 'komponen_id' => $komponenId, 'asesor_id' => $asesorId],
@@ -336,11 +211,13 @@ class AsesorService
     {
         $akreditasi = $this->akreditasiRepository->find($akreditasiId);
         $user = auth()->user();
-        $admins = User::whereHas('role', function ($q) { $q->where('id', 1); })->get();
+        $admins = User::whereHas('role', function ($q) {
+            $q->where('id', 1);
+        })->get();
         $pesantrenName = $akreditasi->user?->pesantren?->nama_pesantren ?? $akreditasi->user?->name;
 
         if ($asesorTipe == 1) {
-            $message = 'Ketua Kelompok (' . $user->name . ') telah mengisi draf Nilai Ketua untuk ' . $pesantrenName;
+            $message = 'Ketua Kelompok ('.$user->name.') telah mengisi draf Nilai Ketua untuk '.$pesantrenName;
             Notification::send($admins, new AkreditasiNotification('na1_diisi', 'Nilai Ketua diisi', $message, route('admin.akreditasi-detail', $akreditasi->uuid)));
 
             $assessor2 = $akreditasi->assessment2;
@@ -348,7 +225,7 @@ class AsesorService
                 $assessor2->asesor->user->notify(new AkreditasiNotification('na1_diisi', 'Nilai Ketua diisi', $message, route('asesor.akreditasi-detail', $akreditasi->uuid)));
             }
         } elseif ($asesorTipe == 2) {
-            $message = 'Anggota Kelompok (' . $user->name . ') telah mengisi Nilai Anggota untuk ' . $pesantrenName;
+            $message = 'Anggota Kelompok ('.$user->name.') telah mengisi Nilai Anggota untuk '.$pesantrenName;
             Notification::send($admins, new AkreditasiNotification('na2_diisi', 'Nilai Anggota diisi', $message, route('admin.akreditasi-detail', $akreditasi->uuid)));
 
             $assessor1 = $akreditasi->assessment1;
@@ -358,188 +235,45 @@ class AsesorService
         }
     }
 
-    /**
-     * Finalize verification for an akreditasi.
-     *
-     * @return array{success: bool, error: string|null, details: array|null}
-     */
-    public function finalizeVerification(int $akreditasiId, int $userId, string $clientUpdatedAt = ''): array
-    {
-        // Precondition 1: hanya Ketua Kelompok yang ditugaskan boleh finalisasi
-        $asesor1Assessment = Assessment::where('akreditasi_id', $akreditasiId)
-            ->where('tipe', 1)
-            ->whereHas('asesor', fn($q) => $q->where('user_id', $userId))
-            ->first();
-
-        if (!$asesor1Assessment) {
-            Log::warning('finalizeVerification unauthorized asesor', [
-                'user_id' => $userId,
-                'akreditasi_id' => $akreditasiId,
-            ]);
-            return ['success' => false, 'error' => 'unauthorized', 'details' => null];
-        }
-
-        $akreditasi = $this->akreditasiRepository->find($akreditasiId);
-        if (!$akreditasi) {
-            return ['success' => false, 'error' => 'not_found', 'details' => null];
-        }
-
-        if ((int) $akreditasi->status !== \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
-            return [
-                'success' => false,
-                'error'   => 'invalid_status',
-                'details' => ['status' => (int) $akreditasi->status],
-            ];
-        }
-
-        // Precondition 2: Kelengkapan butir di server (defense-in-depth)
-        // Ketua Kelompok: Nilai Ketua harus terisi untuk semua butir
-        $asesor1NaCompletion = $this->progressTracker->getCompletion($akreditasiId, $asesor1Assessment->asesor_id, 'isian');
-        if ($asesor1NaCompletion['percentage'] < 100.0) {
-            Log::warning('finalizeVerification incomplete asesor1 NA data', [
-                'akreditasi_id' => $akreditasiId,
-                'total_butir' => $asesor1NaCompletion['total'],
-                'asesor1_filled_na' => $asesor1NaCompletion['filled'],
-            ]);
-            return [
-                'success' => false,
-                'error'   => 'asesor1_na_incomplete',
-                'details' => $asesor1NaCompletion,
-            ];
-        }
-
-        // Ketua Kelompok: Nilai Kelompok harus terisi untuk semua butir
-        $asesor1NkCompletion = $this->progressTracker->getCompletion($akreditasiId, $asesor1Assessment->asesor_id, 'nk');
-        if ($asesor1NkCompletion['percentage'] < 100.0) {
-            Log::warning('finalizeVerification incomplete asesor1 NK data', [
-                'akreditasi_id' => $akreditasiId,
-                'total_butir' => $asesor1NkCompletion['total'],
-                'asesor1_filled_nk' => $asesor1NkCompletion['filled'],
-            ]);
-            return [
-                'success' => false,
-                'error'   => 'asesor1_nk_incomplete',
-                'details' => $asesor1NkCompletion,
-            ];
-        }
-
-        // Anggota Kelompok (bila ditugaskan): Nilai Anggota harus terisi untuk semua butir
-        $asesor2Assessment = Assessment::where('akreditasi_id', $akreditasiId)
-            ->where('tipe', 2)
-            ->first();
-
-        if ($asesor2Assessment) {
-            $asesor2NaCompletion = $this->progressTracker->getCompletion($akreditasiId, $asesor2Assessment->asesor_id, 'isian');
-            if ($asesor2NaCompletion['percentage'] < 100.0) {
-                Log::warning('finalizeVerification incomplete asesor2 data', [
-                    'akreditasi_id' => $akreditasiId,
-                    'total_butir' => $asesor2NaCompletion['total'],
-                    'asesor2_filled_na' => $asesor2NaCompletion['filled'],
-                ]);
-                return [
-                    'success' => false,
-                    'error'   => 'asesor2_incomplete',
-                    'details' => $asesor2NaCompletion,
-                ];
-            }
-        }
-
-        $result = DB::transaction(function () use ($akreditasi, $userId, $akreditasiId, $clientUpdatedAt) {
-            if ($clientUpdatedAt !== '') {
-                $this->assertNotStale($akreditasiId, $clientUpdatedAt);
-            }
-            $user = User::findOrFail($userId);
-
-            $akreditasi->update([
-                'is_nilai_asesor_final'  => true,
-                'is_nilai_asesor2_final' => true,
-            ]);
-            $akreditasi->refresh();
-
-            app(\App\StateMachine\AkreditasiStateMachine::class)->transition(
-                $akreditasi,
-                \App\StateMachine\AkreditasiStateMachine::STATUS_VALIDASI_ADMIN,
-                $user
-            );
-
-            // Audit trail: log finalization
-            $this->auditTrailService->log(
-                akreditasiId: $akreditasi->id,
-                actionType: 'finalized',
-                metadata: [
-                    'asesor_name' => $user->name,
-                ]
-            );
-
-            return true;
-        });
-
-        // Dispatch notifications AFTER transaction commits (non-blocking)
-        if ($result) {
-            $user = User::find($userId);
-            $admins = User::whereHas('role', function ($q) { $q->where('id', 1); })->get();
-            $pesantrenName = $akreditasi->user?->pesantren?->nama_pesantren ?? $akreditasi->user?->name;
-
-            // Notify Admin
-            Notification::send($admins, new AkreditasiNotification(
-                'assessment_selesai',
-                'Pemberitahuan: Penilaian Asesor Selesai',
-                "Penilaian asesor untuk $pesantrenName telah diselesaikan oleh $user->name. Menunggu unggahan Laporan Visitasi.",
-                route('admin.akreditasi-detail', $akreditasi->uuid)
-            ));
-
-            // Notify Assessors
-            $asesors = collect();
-            if ($akreditasi->assessment1?->asesor?->user) $asesors->push($akreditasi->assessment1->asesor->user);
-            if ($akreditasi->assessment2?->asesor?->user) $asesors->push($akreditasi->assessment2->asesor->user);
-
-            Notification::send($asesors->unique('id'), new AkreditasiNotification(
-                'input_laporan',
-                'Instruksi: Unggah Laporan Visitasi',
-                "Penilaian asesor untuk $pesantrenName telah diverifikasi. Silakan Ketua Kelompok atau Anggota Kelompok segera unggah Laporan Visitasi di tab yang tersedia.",
-                route('asesor.akreditasi-detail', $akreditasi->uuid)
-            ));
-
-            // Notify Pesantren
-            $akreditasi->user->notify(new AkreditasiNotification(
-                'validasi',
-                'Update Status: Validasi',
-                'Penilaian asesor telah selesai. Silakan unduh Kartu Kendali di menu dokumen, kemudian unggah kembali di menu akreditasi untuk melanjutkan proses validasi.',
-                route('pesantren.akreditasi')
-            ));
-        }
-
-        return ['success' => (bool) $result, 'error' => null, 'details' => null];
-    }
-
     public function getAkreditasiDetailAsesor(string $uuid, int $userId): array
     {
         $akreditasi = $this->findAkreditasiByUuid($uuid);
-        if (!$akreditasi) return [];
+        if (! $akreditasi) {
+            return [];
+        }
 
         $user = User::with('asesor')->find($userId);
-        if (!$user->asesor) return [];
+        if (! $user->asesor) {
+            return [];
+        }
 
         $currentAssessment = $akreditasi->assessments->where('asesor_id', $user->asesor->id)->first();
-        if (!$currentAssessment) return [];
+        if (! $currentAssessment) {
+            return [];
+        }
 
         $asesorTipe = $currentAssessment->tipe;
         $pesantrenUserId = $akreditasi->user_id;
 
-        $pesantren = \App\Models\Pesantren::with('units')->where('user_id', $pesantrenUserId)->first();
-        $ipm = \App\Models\Ipm::where('user_id', $pesantrenUserId)->first();
-        $sdm = \App\Models\SdmPesantren::where('user_id', $pesantrenUserId)->get()->keyBy('tingkat');
-        $komponens = \App\Models\MasterEdpmKomponen::with('butirs')->orderByRaw('COALESCE(ipr, 0) ASC')->orderBy('id', 'ASC')->get();
-        $visitasiTemplate = \App\Models\Document::where('type', 'visitasi')->where('status', 1)->first();
+        $pesantren = Pesantren::with('units')->where('user_id', $pesantrenUserId)->first();
+        $ipm = Ipm::where('user_id', $pesantrenUserId)->first();
+        $sdm = SdmPesantren::where('user_id', $pesantrenUserId)->get()->keyBy('tingkat');
+        $komponens = MasterEdpmKomponen::with('butirs')->orderByRaw('COALESCE(ipr, 0) ASC')->orderBy('id', 'ASC')->get();
+        $visitasiTemplate = Document::where('type', 'visitasi')->where('status', 1)->first();
 
         // Pesantren EDPM
-        $pEdpms = \App\Models\Edpm::where('user_id', $pesantrenUserId)->get();
+        $pEdpms = Edpm::where('user_id', $pesantrenUserId)->get();
         $pEvaluasis = $pEdpms->pluck('isian', 'butir_id');
         $pLinks = $pEdpms->pluck('link', 'butir_id');
-        $pCatatans = \App\Models\EdpmCatatan::where('user_id', $pesantrenUserId)->get()->pluck('catatan', 'komponen_id');
+        $pCatatans = EdpmCatatan::where('user_id', $pesantrenUserId)->get()->pluck('catatan', 'komponen_id');
 
         // Assessor EDPM Data
         $evaluationData = $this->getEdpmEvaluationData($akreditasi->id, $user->asesor->id, $asesorTipe);
+
+        $progress = [];
+        if ((int) $akreditasi->status === AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
+            $progress = $this->progressTracker->getAkreditasiProgress($akreditasi->id);
+        }
 
         return [
             'akreditasi' => $akreditasi,
@@ -555,24 +289,7 @@ class AsesorService
                 'catatans' => $pCatatans,
             ],
             'evaluation' => $evaluationData,
-            'progress' => $this->progressTracker->getAkreditasiProgress($akreditasi->id),
+            'progress' => $progress,
         ];
-    }
-
-    public function uploadLaporanVisitasi(int $akreditasiId, int $asesorTipe, string $filePath): bool
-    {
-        $akreditasi = \App\Models\Akreditasi::find($akreditasiId);
-        if (!$akreditasi) return false;
-
-        if ((int) $akreditasi->status !== \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
-            return false;
-        }
-
-        if (!in_array((int) $asesorTipe, [1, 2], true)) {
-            return false;
-        }
-
-        $field = $asesorTipe == 1 ? 'laporan_visitasi_asesor1' : 'laporan_visitasi_asesor2';
-        return $akreditasi->update([$field => $filePath]);
     }
 }

@@ -26,7 +26,7 @@
     >
 
     <span class="d-flex flex-column min-w-0">
-        <span class="fw-bold text-gray-800">{{ $title }}</span>
+        <span class="fw-semibold text-gray-800">{{ $title }}</span>
         @if($description)
             <span class="fs-8 text-muted fw-semibold lh-base">{{ $description }}</span>
         @endif

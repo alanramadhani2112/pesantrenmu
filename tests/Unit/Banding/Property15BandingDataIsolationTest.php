@@ -4,16 +4,16 @@ namespace Tests\Unit\Banding;
 
 use App\Models\Akreditasi;
 use App\Models\AkreditasiBandingEdpm;
-use App\Models\AkreditasiBandingEdpmCatatan;
 use App\Models\AkreditasiEdpm;
+use App\Models\AkreditasiEdpmCatatan;
 use App\Models\Banding;
 use App\Models\User;
 use App\Services\BandingService;
 use App\StateMachine\AkreditasiStateMachine;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 /**
  * Property-Based Test: Property 15 — Banding Data Isolation
@@ -24,7 +24,6 @@ use PHPUnit\Framework\Attributes\Group;
  * akreditasi_edpms SHALL remain unchanged.
  *
  * **Validates: Requirements 14.7, 14.8**
- *
  */
 #[Group('akreditasi-workflow-redesign')]
 class Property15BandingDataIsolationTest extends TestCase
@@ -54,7 +53,7 @@ class Property15BandingDataIsolationTest extends TestCase
      *
      * **Validates: Requirements 14.7, 14.8**
      */
-public function test_property15_scoring_stored_in_banding_tables_not_original(): void
+    public function test_property15_scoring_stored_in_banding_tables_not_original(): void
     {
         $iterations = 100;
 
@@ -76,7 +75,7 @@ public function test_property15_scoring_stored_in_banding_tables_not_original():
             $isian = random_int(1, 4);
             $nk = random_int(1, 4);
             $nv = random_int(1, 4);
-            $catatanButir = 'Catatan butir ' . $butirId . ' - ' . str_repeat('x', random_int(5, 50));
+            $catatanButir = 'Catatan butir '.$butirId.' - '.str_repeat('x', random_int(5, 50));
             $isFinal = (bool) random_int(0, 1);
 
             // Verify shouldUseBandingTables returns true for this setup
@@ -158,7 +157,7 @@ public function test_property15_scoring_stored_in_banding_tables_not_original():
      *
      * **Validates: Requirements 14.7, 14.8**
      */
-public function test_property15_catatan_stored_in_banding_tables_not_original(): void
+    public function test_property15_catatan_stored_in_banding_tables_not_original(): void
     {
         $iterations = 100;
 
@@ -168,12 +167,12 @@ public function test_property15_catatan_stored_in_banding_tables_not_original():
             $bandingId = $setup['banding']->id;
 
             // Record original catatan count
-            $originalCatatanCount = \App\Models\AkreditasiEdpmCatatan::where('akreditasi_id', $akreditasiId)->count();
+            $originalCatatanCount = AkreditasiEdpmCatatan::where('akreditasi_id', $akreditasiId)->count();
 
             // Generate random catatan data
             $komponenId = random_int(1, 4);
-            $catatan = 'Catatan komponen ' . $komponenId . ' - ' . str_repeat('y', random_int(5, 50));
-            $rekomendasi = 'Rekomendasi - ' . str_repeat('z', random_int(5, 30));
+            $catatan = 'Catatan komponen '.$komponenId.' - '.str_repeat('y', random_int(5, 50));
+            $rekomendasi = 'Rekomendasi - '.str_repeat('z', random_int(5, 30));
 
             // Store catatan via BandingService
             $bandingCatatan = $this->bandingService->storeBandingEdpmCatatan($akreditasiId, $bandingId, [
@@ -195,7 +194,7 @@ public function test_property15_catatan_stored_in_banding_tables_not_original():
             ]);
 
             // Assert: original akreditasi_edpm_catatans is UNCHANGED
-            $currentCatatanCount = \App\Models\AkreditasiEdpmCatatan::where('akreditasi_id', $akreditasiId)->count();
+            $currentCatatanCount = AkreditasiEdpmCatatan::where('akreditasi_id', $akreditasiId)->count();
             $this->assertSame(
                 $originalCatatanCount,
                 $currentCatatanCount,
@@ -212,7 +211,7 @@ public function test_property15_catatan_stored_in_banding_tables_not_original():
      *
      * **Validates: Requirements 14.7**
      */
-public function test_property15_should_not_use_banding_tables_without_accepted_banding(): void
+    public function test_property15_should_not_use_banding_tables_without_accepted_banding(): void
     {
         $iterations = 100;
 
@@ -234,7 +233,7 @@ public function test_property15_should_not_use_banding_tables_without_accepted_b
                     'akreditasi_id' => $akreditasi->id,
                     'user_id' => $pesantrenUser->id,
                     'status' => $status,
-                    'alasan' => 'Banding dengan status ' . $status,
+                    'alasan' => 'Banding dengan status '.$status,
                 ]);
             }
 
@@ -242,8 +241,8 @@ public function test_property15_should_not_use_banding_tables_without_accepted_b
 
             $this->assertFalse(
                 $result,
-                "Iteration {$i}: shouldUseBandingTables should return false when no accepted banding exists " .
-                "(hasBanding: " . ($hasBanding ? 'yes' : 'no') . ")"
+                "Iteration {$i}: shouldUseBandingTables should return false when no accepted banding exists ".
+                '(hasBanding: '.($hasBanding ? 'yes' : 'no').')'
             );
         }
     }
@@ -256,7 +255,7 @@ public function test_property15_should_not_use_banding_tables_without_accepted_b
      *
      * **Validates: Requirements 14.7**
      */
-public function test_property15_should_not_use_banding_tables_for_non_status_2(): void
+    public function test_property15_should_not_use_banding_tables_for_non_status_2(): void
     {
         $iterations = 100;
 
@@ -287,8 +286,8 @@ public function test_property15_should_not_use_banding_tables_for_non_status_2()
 
             $this->assertFalse(
                 $result,
-                "Iteration {$i}: shouldUseBandingTables should return false for status {$status} " .
-                "(only status 2 with accepted banding should return true)"
+                "Iteration {$i}: shouldUseBandingTables should return false for status {$status} ".
+                '(only status 2 with accepted banding should return true)'
             );
         }
     }
@@ -301,7 +300,7 @@ public function test_property15_should_not_use_banding_tables_for_non_status_2()
      *
      * **Validates: Requirements 14.7**
      */
-public function test_property15_should_use_banding_tables_for_status_2_with_accepted_banding(): void
+    public function test_property15_should_use_banding_tables_for_status_2_with_accepted_banding(): void
     {
         $iterations = 100;
 
@@ -327,7 +326,7 @@ public function test_property15_should_use_banding_tables_for_status_2_with_acce
      *
      * **Validates: Requirements 14.7, 14.8**
      */
-public function test_property15_multiple_banding_edpm_entries_are_isolated(): void
+    public function test_property15_multiple_banding_edpm_entries_are_isolated(): void
     {
         $iterations = 100;
 
@@ -391,7 +390,7 @@ public function test_property15_multiple_banding_edpm_entries_are_isolated(): vo
      * Create an akreditasi at status 2 (Pasca Visitasi) with an accepted banding.
      * This represents the post-banding assessment scenario.
      */
-private function createPostBandingSetup(): array
+    private function createPostBandingSetup(): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         $asesorUser = User::factory()->create(['role_id' => 2]);

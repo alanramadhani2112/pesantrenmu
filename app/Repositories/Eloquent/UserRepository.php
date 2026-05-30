@@ -14,8 +14,8 @@ class UserRepository implements UserRepositoryInterface
             ->where('role_id', $roleId)
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('email', 'like', '%' . $search . '%');
+                    $q->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('email', 'like', '%'.$search.'%');
                 });
             })
             ->orderBy($sortField, $sortAsc ? 'asc' : 'desc')
@@ -43,6 +43,7 @@ class UserRepository implements UserRepositoryInterface
         if ($user) {
             return $user->update($data);
         }
+
         return false;
     }
 
@@ -52,6 +53,7 @@ class UserRepository implements UserRepositoryInterface
         if ($user) {
             return $user->delete();
         }
+
         return false;
     }
 
@@ -60,8 +62,10 @@ class UserRepository implements UserRepositoryInterface
         $user = $this->find($id);
         if ($user) {
             $user->status = $user->status == 1 ? 0 : 1;
+
             return $user->save();
         }
+
         return false;
     }
 }

@@ -8,14 +8,14 @@ use App\Models\Assessment;
 use App\Models\Pesantren;
 use App\Models\User;
 use App\Notifications\AkreditasiNotification;
-use App\Services\AkreditasiService;
+use App\Services\AkreditasiWorkflowService;
 use App\Services\DeadlineService;
 use Carbon\Carbon;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 /**
  * End-to-end integration tests for the assessment/visitasi timeout feature.
@@ -24,7 +24,6 @@ use PHPUnit\Framework\Attributes\Group;
  *  - Task 9.2: Complete flow from approval → deadline approach → reminder → overdue → escalation → reassignment
  *  - Task 9.3: Command handles edge cases: no assessments, all completed, mixed states
  *  - Task 9.4: Notification deduplication works across multiple command runs on same day
- *
  */
 #[Group('Feature: assessment-visitasi-timeout')]
 class AssessmentTimeoutIntegrationTest extends TestCase
@@ -55,6 +54,7 @@ class AssessmentTimeoutIntegrationTest extends TestCase
             'user_id' => $user->id,
             'nama_pesantren' => $pesantrenName,
         ]);
+
         return $user;
     }
 
@@ -66,6 +66,7 @@ class AssessmentTimeoutIntegrationTest extends TestCase
             'nama_dengan_gelar' => $name,
             'nama_tanpa_gelar' => $name,
         ]);
+
         return [$asesor, $user];
     }
 
@@ -82,7 +83,7 @@ class AssessmentTimeoutIntegrationTest extends TestCase
      * 3. Time advances past deadline → escalation sent to admin
      * 4. Admin reassigns asesor → new deadline set, notifications sent
      */
-public function test_complete_flow_approval_to_reassignment(): void
+    public function test_complete_flow_approval_to_reassignment(): void
     {
         Notification::fake();
 
@@ -96,27 +97,28 @@ public function test_complete_flow_approval_to_reassignment(): void
         $adminUser = User::factory()->create(['role_id' => 1]);
         $pesantrenUser = $this->createPesantrenUser('Pesantren E2E Test');
         [$asesor, $asesorUser] = $this->createAsesorWithUser('Asesor E2E');
+        [$asesor2] = $this->createAsesorWithUser('Asesor 2 E2E');
         [$newAsesor, $newAsesorUser] = $this->createAsesorWithUser('Asesor Baru E2E');
+        [$newAsesor2] = $this->createAsesorWithUser('Asesor Baru 2 E2E');
 
         // Create akreditasi at status 6 (pengajuan)
         $akreditasi = Akreditasi::create(['user_id' => $pesantrenUser->id, 'status' => 6]);
 
-        // ---- Step 2: Approve pengajuan (simulate approvePengajuan) ----
+        // ---- Step 2: Open review and approve berkas with canonical workflow ----
         $startDate = Carbon::create(2025, 9, 1);
         Carbon::setTestNow($startDate);
 
-        $akreditasiService = app(AkreditasiService::class);
-        $akreditasiService->approvePengajuan($akreditasi->id, [
-            'asesor_id1' => $asesor->id,
-            'tanggal_mulai' => $startDate->toDateString(),
-            // No tanggal_berakhir → should use config (30 days)
-        ]);
+        $workflowService = app(AkreditasiWorkflowService::class);
+        $workflowService->openForReview($akreditasi->id, $adminUser->id);
+        $workflowService->approveBerkas($akreditasi->id, $adminUser->id, $asesor->user_id, $asesor2->user_id);
 
         $akreditasi->refresh();
-        $this->assertEquals(5, $akreditasi->status, 'After approval, status should be 5 (Assessment)');
+        $this->assertEquals(4, $akreditasi->status, 'After berkas approval, status should be 4 (Review Asesor)');
 
         $assessment = Assessment::where('akreditasi_id', $akreditasi->id)->where('tipe', 1)->first();
+        $assessment2 = Assessment::where('akreditasi_id', $akreditasi->id)->where('tipe', 2)->first();
         $this->assertNotNull($assessment, 'Assessment record should be created');
+        $this->assertNotNull($assessment2, 'Second assessor record should be created');
 
         $expectedDeadline = $startDate->copy()->addDays(30)->toDateString();
         $this->assertEquals($expectedDeadline, $assessment->tanggal_berakhir->toDateString(),
@@ -132,11 +134,15 @@ public function test_complete_flow_approval_to_reassignment(): void
         Notification::assertSentTo(
             $asesorUser,
             AkreditasiNotification::class,
-            fn($n) => in_array($n->type, ['deadline_reminder', 'deadline_today'])
+            fn ($n) => in_array($n->type, ['deadline_reminder', 'deadline_today'])
         );
 
         // No escalation yet (not overdue)
-        Notification::assertNotSentTo($adminUser, AkreditasiNotification::class);
+        Notification::assertNotSentTo(
+            $adminUser,
+            AkreditasiNotification::class,
+            fn ($n) => $n->type === 'deadline_overdue_escalation'
+        );
 
         // ---- Step 4: Advance past deadline (overdue) ----
         $overdueDate = $startDate->copy()->addDays(35); // 5 days past deadline
@@ -148,7 +154,7 @@ public function test_complete_flow_approval_to_reassignment(): void
         Notification::assertSentTo(
             $adminUser,
             AkreditasiNotification::class,
-            fn($n) => $n->type === 'deadline_overdue_escalation'
+            fn ($n) => $n->type === 'deadline_overdue_escalation'
         );
 
         // Verify overdue status
@@ -158,6 +164,7 @@ public function test_complete_flow_approval_to_reassignment(): void
 
         // ---- Step 5: Admin reassigns asesor ----
         $this->deadlineService->reassignAsesor($assessment, $newAsesor->id);
+        $this->deadlineService->reassignAsesor($assessment2, $newAsesor2->id);
 
         $assessment->refresh();
         $this->assertEquals($newAsesor->id, $assessment->asesor_id, 'Asesor should be updated');
@@ -173,13 +180,13 @@ public function test_complete_flow_approval_to_reassignment(): void
         Notification::assertSentTo(
             $newAsesorUser,
             AkreditasiNotification::class,
-            fn($n) => $n->type === 'asesor_reassigned_new'
+            fn ($n) => $n->type === 'asesor_reassigned_new'
         );
 
         Notification::assertSentTo(
             $asesorUser,
             AkreditasiNotification::class,
-            fn($n) => $n->type === 'asesor_reassigned_old'
+            fn ($n) => $n->type === 'asesor_reassigned_old'
         );
 
         // ---- Step 6: After reassignment, no more escalations for old overdue state ----
@@ -189,8 +196,12 @@ public function test_complete_flow_approval_to_reassignment(): void
 
         $this->artisan('akreditasi:check-deadlines')->assertExitCode(0);
 
-        // No escalation since new deadline is in the future
-        Notification::assertNotSentTo($adminUser, AkreditasiNotification::class);
+        // No escalation since new deadlines are in the future
+        Notification::assertNotSentTo(
+            $adminUser,
+            AkreditasiNotification::class,
+            fn ($n) => $n->type === 'deadline_overdue_escalation'
+        );
 
         Carbon::setTestNow();
     }
@@ -202,7 +213,7 @@ public function test_complete_flow_approval_to_reassignment(): void
     /**
      * Task 9.3: Command handles edge case — no assessments at all.
      */
-public function test_command_handles_no_assessments(): void
+    public function test_command_handles_no_assessments(): void
     {
         Notification::fake();
 
@@ -214,7 +225,7 @@ public function test_command_handles_no_assessments(): void
     /**
      * Task 9.3: Command handles edge case — all akreditasi are completed (status 1 or 2).
      */
-public function test_command_handles_all_completed_akreditasi(): void
+    public function test_command_handles_all_completed_akreditasi(): void
     {
         Notification::fake();
 
@@ -258,7 +269,7 @@ public function test_command_handles_all_completed_akreditasi(): void
      * Mix of: completed, approaching deadline, overdue, future deadline.
      * Only approaching and overdue should trigger notifications.
      */
-public function test_command_handles_mixed_states(): void
+    public function test_command_handles_mixed_states(): void
     {
         Notification::fake();
 
@@ -329,14 +340,14 @@ public function test_command_handles_mixed_states(): void
         Notification::assertSentTo(
             $asesorUser2,
             AkreditasiNotification::class,
-            fn($n) => in_array($n->type, ['deadline_reminder', 'deadline_today'])
+            fn ($n) => in_array($n->type, ['deadline_reminder', 'deadline_today'])
         );
 
         // Scenario 3: Escalation for overdue
         Notification::assertSentTo(
             $adminUser,
             AkreditasiNotification::class,
-            fn($n) => $n->type === 'deadline_overdue_escalation'
+            fn ($n) => $n->type === 'deadline_overdue_escalation'
         );
 
         // Scenario 4: No notification for future deadline
@@ -351,7 +362,7 @@ public function test_command_handles_mixed_states(): void
      * Note: tanggal_berakhir is NOT NULL in the database, so we test with a very
      * far future date that won't trigger any notifications.
      */
-public function test_command_handles_assessments_with_null_deadline(): void
+    public function test_command_handles_assessments_with_null_deadline(): void
     {
         Notification::fake();
 
@@ -389,7 +400,7 @@ public function test_command_handles_assessments_with_null_deadline(): void
      * Running the command multiple times on the same day should only send
      * one reminder notification per assessment.
      */
-public function test_reminder_deduplication_across_multiple_runs_same_day(): void
+    public function test_reminder_deduplication_across_multiple_runs_same_day(): void
     {
         Notification::fake();
 
@@ -428,7 +439,7 @@ public function test_reminder_deduplication_across_multiple_runs_same_day(): voi
      * Running the command multiple times on the same day should only send
      * one escalation notification per assessment (when interval is 1 day).
      */
-public function test_escalation_deduplication_across_multiple_runs_same_day(): void
+    public function test_escalation_deduplication_across_multiple_runs_same_day(): void
     {
         Notification::fake();
 
@@ -466,7 +477,7 @@ public function test_escalation_deduplication_across_multiple_runs_same_day(): v
     /**
      * Task 9.4: Reminder IS sent again the next day (deduplication is per-day).
      */
-public function test_reminder_sent_again_next_day(): void
+    public function test_reminder_sent_again_next_day(): void
     {
         Notification::fake();
 
@@ -506,7 +517,7 @@ public function test_reminder_sent_again_next_day(): void
     /**
      * Task 9.4: Escalation IS sent again after the configured interval.
      */
-public function test_escalation_sent_again_after_interval(): void
+    public function test_escalation_sent_again_after_interval(): void
     {
         Notification::fake();
 
@@ -548,7 +559,7 @@ public function test_escalation_sent_again_after_interval(): void
     /**
      * Task 9.4: Escalation NOT sent again before the configured interval.
      */
-public function test_escalation_not_sent_before_interval(): void
+    public function test_escalation_not_sent_before_interval(): void
     {
         Notification::fake();
 

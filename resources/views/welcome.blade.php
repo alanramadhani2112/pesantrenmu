@@ -5,15 +5,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('app.name', 'PesantrenMu') }} - Sistem Akreditasi LP2M</title>
-    <meta name="description" content="Sistem akreditasi pesantren Muhammadiyah yang dikembangkan oleh LabMu untuk LP2M.">
+    <meta name="description" content="Sistem akreditasi pesantren Muhammadiyah untuk pengajuan, review, visitasi, validasi akhir, dan hasil akreditasi LP2M.">
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand/favicon.svg') }}">
 
-    <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}">
     @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css'])
 </head>
 
-<body data-bs-theme="light" class="spm-landing spm-landing-v2">
+<body data-bs-theme="light" class="spm-landing spm-landing-v3">
     <div class="spm-landing-page">
         <header class="spm-landing-header">
             <div class="spm-landing-container">
@@ -31,12 +33,12 @@
                     <div class="spm-landing-actions">
                         @if (Route::has('login'))
                             @auth
-                                <a href="{{ url('/dashboard') }}" class="btn btn-sm btn-primary fw-bold">
+                                <a href="{{ url('/dashboard') }}" class="btn btn-sm btn-primary fw-semibold">
                                     Dashboard
                                 </a>
                             @else
-                                <a href="{{ route('login') }}" class="btn btn-sm btn-light fw-bold">
-                                    Masuk
+                                <a href="{{ route('login') }}" class="btn btn-sm btn-primary fw-semibold spm-landing-login-btn">
+                                    Masuk Sistem
                                 </a>
                             @endauth
                         @endif
@@ -50,10 +52,10 @@
                 <div class="spm-landing-hero-panel">
                     <div class="spm-landing-hero-copy">
                         <span class="spm-landing-eyebrow">
-                            Dikembangkan oleh LabMu untuk LP2M
+                            Platform Akreditasi LP2M
                         </span>
 
-                        <h1>Sistem Akreditasi Pesantren Muhammadiyah</h1>
+                        <h1>Akreditasi pesantren yang tertib, terukur, dan mudah ditindaklanjuti</h1>
 
                         <p>
                             PesantrenMu membantu LP2M mengelola pengajuan, review berkas,
@@ -64,59 +66,71 @@
                         <div class="spm-landing-hero-actions">
                             @if (Route::has('login'))
                                 @auth
-                                    <a href="{{ url('/dashboard') }}" class="btn btn-primary btn-lg fw-bold">
+                                    <a href="{{ url('/dashboard') }}" class="btn btn-primary btn-lg fw-semibold">
                                         Buka Dashboard
                                     </a>
                                 @else
-                                    <a href="{{ route('login') }}" class="btn btn-primary btn-lg fw-bold">
+                                    <a href="{{ route('login') }}" class="btn btn-primary btn-lg fw-semibold">
                                         Masuk Sistem
                                         <i class="ki-duotone ki-arrow-right fs-3 ms-1"><span class="path1"></span><span class="path2"></span></i>
                                     </a>
-                                    <a href="#tentang" class="btn btn-light btn-lg fw-bold">
+                                    <a href="#tentang" class="btn btn-light btn-lg fw-semibold">
                                         Lihat Ringkasan
                                     </a>
                                 @endauth
                             @endif
                         </div>
+
+                        <div class="spm-landing-proof">
+                            <span>Review berkas</span>
+                            <span>Visitasi</span>
+                            <span>Nilai akhir</span>
+                            <span>Sertifikat</span>
+                        </div>
                     </div>
 
-                    <div class="spm-landing-product-preview" aria-label="Preview dashboard akreditasi">
-                        <div class="spm-preview-topbar">
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </div>
-                        <div class="spm-preview-header">
+                    <div class="spm-landing-product-preview spm-accreditation-dossier" aria-label="Berkas akreditasi digital">
+                        <div class="spm-dossier-ribbon">LP2M</div>
+
+                        <div class="spm-dossier-head">
                             <div>
-                                <span class="spm-preview-label">Status Akreditasi</span>
-                                <strong>Validasi Akhir Admin</strong>
+                                <span>Nomor Registrasi</span>
+                                <strong>AKR-PM/2026/0142</strong>
                             </div>
-                            <span class="badge badge-light-primary">LP2M</span>
+                            <span class="spm-dossier-status">Visitasi</span>
                         </div>
-                        <div class="spm-preview-grid">
-                            <div class="spm-preview-stat">
-                                <span>Pengajuan</span>
-                                <strong>128</strong>
+
+                        <div class="spm-dossier-score">
+                            <span>Nilai sementara</span>
+                            <strong>86.4</strong>
+                            <small>Menunggu nilai verifikasi admin</small>
+                        </div>
+
+                        <div class="spm-dossier-docs">
+                            <div>
+                                <span>EDPM/IPR</span>
+                                <strong>Lengkap</strong>
                             </div>
-                            <div class="spm-preview-stat">
-                                <span>Visitasi</span>
-                                <strong>34</strong>
+                            <div>
+                                <span>Kartu Kendali</span>
+                                <strong>Siap unggah</strong>
                             </div>
-                            <div class="spm-preview-stat">
-                                <span>Selesai</span>
-                                <strong>87</strong>
+                            <div>
+                                <span>Laporan Visitasi</span>
+                                <strong>Asesor</strong>
                             </div>
                         </div>
-                        <div class="spm-preview-flow">
-                            <div class="is-done">Pengajuan</div>
-                            <div class="is-done">Review Admin</div>
-                            <div class="is-active">Visitasi</div>
-                            <div>Validasi</div>
+
+                        <div class="spm-dossier-track">
+                            <div class="is-done"><span></span>Pengajuan</div>
+                            <div class="is-done"><span></span>Review</div>
+                            <div class="is-current"><span></span>Visitasi</div>
+                            <div><span></span>Hasil</div>
                         </div>
-                        <div class="spm-preview-table">
-                            <div><span>Pesantren Al-Falah</span><strong>Unggul</strong></div>
-                            <div><span>Pesantren Darul Ilmi</span><strong>Baik</strong></div>
-                            <div><span>Pesantren Madani</span><strong>Proses</strong></div>
+
+                        <div class="spm-dossier-note">
+                            <span>Rekomendasi asesor</span>
+                            <p>Penguatan tata kelola mutu dan dokumentasi pembelajaran perlu menjadi prioritas tindak lanjut.</p>
                         </div>
                     </div>
                 </div>
@@ -137,8 +151,8 @@
                     <div class="spm-about-grid">
                         <div class="spm-about-block">
                             <span class="spm-about-number">01</span>
-                            <h3>LabMu sebagai pengembang</h3>
-                            <p>Fokus pada produk digital yang stabil, mudah dirawat, dan selaras dengan proses akreditasi pesantren.</p>
+                            <h3>Satu alur kerja</h3>
+                            <p>Pengajuan, review, visitasi, penilaian, validasi, hasil, dan rekomendasi berada dalam rangkaian proses yang sama.</p>
                         </div>
                         <div class="spm-about-block">
                             <span class="spm-about-number">02</span>
@@ -228,9 +242,9 @@
                         </div>
                         @if (Route::has('login'))
                             @auth
-                                <a href="{{ url('/dashboard') }}" class="btn btn-light btn-lg fw-bold">Buka Dashboard</a>
+                                <a href="{{ url('/dashboard') }}" class="btn btn-light btn-lg fw-semibold">Buka Dashboard</a>
                             @else
-                                <a href="{{ route('login') }}" class="btn btn-light btn-lg fw-bold">Masuk Sistem</a>
+                                <a href="{{ route('login') }}" class="btn btn-light btn-lg fw-semibold">Masuk Sistem</a>
                             @endauth
                         @endif
                     </div>

@@ -10,7 +10,7 @@ class ConflictExceptionTest extends TestCase
     /**
      * Test that ConflictException can be constructed with required parameters.
      */
-public function test_construction_with_required_parameters(): void
+    public function test_construction_with_required_parameters(): void
     {
         $exception = new ConflictException(42, 3);
 
@@ -24,7 +24,7 @@ public function test_construction_with_required_parameters(): void
     /**
      * Test that ConflictException can be constructed with a custom message.
      */
-public function test_construction_with_custom_message(): void
+    public function test_construction_with_custom_message(): void
     {
         $exception = new ConflictException(10, 5, 'Custom conflict message');
 
@@ -36,7 +36,7 @@ public function test_construction_with_custom_message(): void
     /**
      * Test getStatusLabel() returns correct label for status 1 (Validasi Admin).
      */
-public function test_get_status_label_for_status_1(): void
+    public function test_get_status_label_for_status_1(): void
     {
         $exception = new ConflictException(1, 1);
         $this->assertEquals('Validasi Admin', $exception->getStatusLabel());
@@ -45,7 +45,7 @@ public function test_get_status_label_for_status_1(): void
     /**
      * Test getStatusLabel() returns correct label for status 2 (Penilaian Pasca Visitasi).
      */
-public function test_get_status_label_for_status_2(): void
+    public function test_get_status_label_for_status_2(): void
     {
         $exception = new ConflictException(1, 2);
         $this->assertEquals('Penilaian Pasca Visitasi', $exception->getStatusLabel());
@@ -54,7 +54,7 @@ public function test_get_status_label_for_status_2(): void
     /**
      * Test getStatusLabel() returns correct label for status 3 (Visitasi).
      */
-public function test_get_status_label_for_status_3(): void
+    public function test_get_status_label_for_status_3(): void
     {
         $exception = new ConflictException(1, 3);
         $this->assertEquals('Visitasi', $exception->getStatusLabel());
@@ -63,7 +63,7 @@ public function test_get_status_label_for_status_3(): void
     /**
      * Test getStatusLabel() returns correct label for status 4 (Review Asesor).
      */
-public function test_get_status_label_for_status_4(): void
+    public function test_get_status_label_for_status_4(): void
     {
         $exception = new ConflictException(1, 4);
         $this->assertEquals('Review Asesor', $exception->getStatusLabel());
@@ -72,7 +72,7 @@ public function test_get_status_label_for_status_4(): void
     /**
      * Test getStatusLabel() returns correct label for status 5 (Verifikasi Berkas).
      */
-public function test_get_status_label_for_status_5(): void
+    public function test_get_status_label_for_status_5(): void
     {
         $exception = new ConflictException(1, 5);
         $this->assertEquals('Verifikasi Berkas', $exception->getStatusLabel());
@@ -81,7 +81,7 @@ public function test_get_status_label_for_status_5(): void
     /**
      * Test getStatusLabel() returns correct label for status 6 (Pengajuan).
      */
-public function test_get_status_label_for_status_6(): void
+    public function test_get_status_label_for_status_6(): void
     {
         $exception = new ConflictException(1, 6);
         $this->assertEquals('Pengajuan', $exception->getStatusLabel());
@@ -90,7 +90,7 @@ public function test_get_status_label_for_status_6(): void
     /**
      * Test getStatusLabel() returns correct label for status 0 (Selesai).
      */
-public function test_get_status_label_for_status_0(): void
+    public function test_get_status_label_for_status_0(): void
     {
         $exception = new ConflictException(1, 0);
         $this->assertEquals('Selesai', $exception->getStatusLabel());
@@ -99,7 +99,7 @@ public function test_get_status_label_for_status_0(): void
     /**
      * Test getStatusLabel() returns correct label for status -1 (Ditolak).
      */
-public function test_get_status_label_for_status_minus_1(): void
+    public function test_get_status_label_for_status_minus_1(): void
     {
         $exception = new ConflictException(1, -1);
         $this->assertEquals('Ditolak', $exception->getStatusLabel());
@@ -108,7 +108,7 @@ public function test_get_status_label_for_status_minus_1(): void
     /**
      * Test getStatusLabel() returns correct label for status -2 (Banding).
      */
-public function test_get_status_label_for_status_minus_2(): void
+    public function test_get_status_label_for_status_minus_2(): void
     {
         $exception = new ConflictException(1, -2);
         $this->assertEquals('Banding', $exception->getStatusLabel());
@@ -117,7 +117,7 @@ public function test_get_status_label_for_status_minus_2(): void
     /**
      * Test getStatusLabel() returns 'Unknown' for an unrecognized status.
      */
-public function test_get_status_label_for_unknown_status(): void
+    public function test_get_status_label_for_unknown_status(): void
     {
         $exception = new ConflictException(1, 99);
         $this->assertEquals('Unknown', $exception->getStatusLabel());
@@ -126,7 +126,7 @@ public function test_get_status_label_for_unknown_status(): void
     /**
      * Test that akreditasiId and currentStatus are readonly.
      */
-public function test_properties_are_readonly(): void
+    public function test_properties_are_readonly(): void
     {
         $exception = new ConflictException(5, 3);
 

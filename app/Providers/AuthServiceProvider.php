@@ -54,7 +54,15 @@ class AuthServiceProvider extends ServiceProvider
         // a true super admin always wins; everyone else falls through to the
         // policy method which makes the actual decision.
         Gate::before(function ($user, $ability) {
-            return $user->isSuperAdmin() ? true : null;
+            if ($user->isSuperAdmin()) {
+                return true;
+            }
+
+            if (is_string($ability) && str_contains($ability, '.')) {
+                return $user->hasPermission($ability);
+            }
+
+            return null;
         });
 
         $this->registerPermissionGates();

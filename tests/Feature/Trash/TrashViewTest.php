@@ -40,6 +40,7 @@ class TrashViewTest extends TestCase
         Pesantren::create(['user_id' => $user->id, 'nama_pesantren' => $pesantrenName]);
         $akreditasi = Akreditasi::create(['user_id' => $user->id, 'status' => 6]);
         $akreditasi->delete();
+
         return $akreditasi->fresh();
     }
 

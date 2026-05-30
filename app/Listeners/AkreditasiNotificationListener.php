@@ -3,17 +3,22 @@
 namespace App\Listeners;
 
 use App\Events\AkreditasiTransitioned;
+use App\Events\AsesorAssigned;
+use App\Events\AsesorPackageSubmitted;
 use App\Events\BandingDecided;
 use App\Events\BandingSubmitted;
 use App\Events\PerbaikanDeadlineApproaching;
+use App\Events\PerbaikanRequested;
 use App\Events\PerbaikanSubmitted;
 use App\Events\ScoringCompleted;
 use App\Events\SKIssued;
 use App\Events\VisitasiScheduled;
+use App\Models\Akreditasi;
 use App\Models\Assessment;
 use App\Models\User;
 use App\Notifications\AkreditasiNotification;
 use App\StateMachine\AkreditasiStateMachine;
+use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
@@ -141,12 +146,12 @@ class AkreditasiNotificationListener implements ShouldQueue
             $schedule = $event->schedule;
             $isReschedule = $event->isReschedule;
 
-            $mulaiFormatted = \Carbon\Carbon::parse($schedule['tanggal_mulai'])->format('d/m/Y');
-            $akhirFormatted = \Carbon\Carbon::parse($schedule['tanggal_akhir'])->format('d/m/Y');
+            $mulaiFormatted = Carbon::parse($schedule['tanggal_mulai'])->format('d/m/Y');
+            $akhirFormatted = Carbon::parse($schedule['tanggal_akhir'])->format('d/m/Y');
             $catatan = $schedule['catatan_visitasi'] ?? '';
             $action = $isReschedule ? 'dijadwalkan ulang' : 'dijadwalkan';
             $title = $isReschedule ? 'Visitasi Dijadwalkan Ulang' : 'Visitasi Dijadwalkan';
-            $message = "Visitasi telah {$action}: {$mulaiFormatted} s/d {$akhirFormatted}." .
+            $message = "Visitasi telah {$action}: {$mulaiFormatted} s/d {$akhirFormatted}.".
                 ($catatan ? " Catatan: {$catatan}" : '');
 
             // Notify Pesantren
@@ -158,6 +163,24 @@ class AkreditasiNotificationListener implements ShouldQueue
                     $message,
                     '#'
                 ));
+            }
+
+            // Notify Anggota Kelompok (Asesor 2)
+            $assessment2 = Assessment::where('akreditasi_id', $akreditasi->id)
+                ->where('tipe', 2)
+                ->with('asesor')
+                ->first();
+
+            if ($assessment2 && $assessment2->asesor) {
+                $asesor2User = User::find($assessment2->asesor->user_id);
+                if ($asesor2User) {
+                    $asesor2User->notify(new AkreditasiNotification(
+                        $isReschedule ? 'visitasi_rescheduled_asesor2' : 'visitasi_scheduled_asesor2',
+                        $title,
+                        $message,
+                        '#'
+                    ));
+                }
             }
 
             // Notify Admins
@@ -242,7 +265,7 @@ class AkreditasiNotificationListener implements ShouldQueue
                 Notification::send($admins, new AkreditasiNotification(
                     'banding_submitted',
                     'Pengajuan Banding Baru',
-                    'Pesantren telah mengajukan banding untuk akreditasi #' . $event->akreditasi->id . '.',
+                    'Pesantren telah mengajukan banding untuk akreditasi #'.$event->akreditasi->id.'.',
                     '#'
                 ));
             }
@@ -317,24 +340,116 @@ class AkreditasiNotificationListener implements ShouldQueue
         }
     }
 
+    /**
+     * Handle AsesorAssigned events.
+     *
+     * Notifies both Ketua Kelompok and Anggota Kelompok when assigned to an akreditasi.
+     */
+    public function handleAsesorAssigned(AsesorAssigned $event): void
+    {
+        try {
+            $akreditasi = $event->akreditasi;
+
+            // Notify Ketua Kelompok (Asesor 1)
+            $event->asesor1User->notify(new AkreditasiNotification(
+                'asesor_assigned_ketua',
+                'Penugasan Asesor',
+                "Anda ditugaskan sebagai Ketua Kelompok untuk akreditasi pesantren #{$akreditasi->id}.",
+                '#'
+            ));
+
+            // Notify Anggota Kelompok (Asesor 2)
+            $event->asesor2User->notify(new AkreditasiNotification(
+                'asesor_assigned_anggota',
+                'Penugasan Asesor',
+                "Anda ditugaskan sebagai Anggota Kelompok untuk akreditasi pesantren #{$akreditasi->id}.",
+                '#'
+            ));
+        } catch (\Throwable $e) {
+            Log::error('AkreditasiNotificationListener: handleAsesorAssigned failed', [
+                'akreditasi_id' => $event->akreditasi->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Handle PerbaikanRequested events.
+     *
+     * Notifies Pesantren when admin returns application for administrative revision.
+     */
+    public function handlePerbaikanRequested(PerbaikanRequested $event): void
+    {
+        try {
+            $akreditasi = $event->akreditasi;
+            $pesantrenUser = User::find($akreditasi->user_id);
+
+            if ($pesantrenUser) {
+                $message = 'Akreditasi Anda dikembalikan untuk perbaikan administratif. Silakan perbaiki dan submit ulang.';
+                if ($event->catatan) {
+                    $message .= " Catatan: {$event->catatan}";
+                }
+
+                $pesantrenUser->notify(new AkreditasiNotification(
+                    'perbaikan_requested',
+                    'Perbaikan Diperlukan',
+                    $message,
+                    '#'
+                ));
+            }
+        } catch (\Throwable $e) {
+            Log::error('AkreditasiNotificationListener: handlePerbaikanRequested failed', [
+                'akreditasi_id' => $event->akreditasi->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Handle AsesorPackageSubmitted events.
+     *
+     * Notifies Admin when Ketua Kelompok submits final asesor package.
+     */
+    public function handleAsesorPackageSubmitted(AsesorPackageSubmitted $event): void
+    {
+        try {
+            $akreditasi = $event->akreditasi;
+            $admins = User::where('role_id', 1)->get();
+
+            if ($admins->isNotEmpty()) {
+                Notification::send($admins, new AkreditasiNotification(
+                    'asesor_package_submitted',
+                    'Paket Asesor Lengkap',
+                    "Ketua Kelompok telah menyelesaikan penilaian untuk akreditasi #{$akreditasi->id}. Silakan lakukan validasi akhir.",
+                    '#'
+                ));
+            }
+        } catch (\Throwable $e) {
+            Log::error('AkreditasiNotificationListener: handleAsesorPackageSubmitted failed', [
+                'akreditasi_id' => $event->akreditasi->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
     // =========================================================================
     // Private notification helpers for AkreditasiTransitioned sub-cases
     // =========================================================================
 
-    private function notifyOpenForReview(\App\Models\Akreditasi $akreditasi): void
+    private function notifyOpenForReview(Akreditasi $akreditasi): void
     {
         $admins = User::where('role_id', 1)->get();
         if ($admins->isNotEmpty()) {
             Notification::send($admins, new AkreditasiNotification(
                 'open_for_review',
                 'Akreditasi Dibuka untuk Review',
-                'Akreditasi #' . $akreditasi->id . ' telah dibuka untuk verifikasi berkas.',
+                'Akreditasi #'.$akreditasi->id.' telah dibuka untuk verifikasi berkas.',
                 '#'
             ));
         }
     }
 
-    private function notifyBerkasRejected(\App\Models\Akreditasi $akreditasi): void
+    private function notifyBerkasRejected(Akreditasi $akreditasi): void
     {
         $pesantrenUser = User::find($akreditasi->user_id);
         if ($pesantrenUser) {
@@ -347,7 +462,7 @@ class AkreditasiNotificationListener implements ShouldQueue
         }
     }
 
-    private function notifyAssessmentRejected(\App\Models\Akreditasi $akreditasi): void
+    private function notifyAssessmentRejected(Akreditasi $akreditasi): void
     {
         $pesantrenUser = User::find($akreditasi->user_id);
         if ($pesantrenUser) {
@@ -360,7 +475,7 @@ class AkreditasiNotificationListener implements ShouldQueue
         }
     }
 
-    private function notifyVisitasiSelesai(\App\Models\Akreditasi $akreditasi): void
+    private function notifyVisitasiSelesai(Akreditasi $akreditasi): void
     {
         $title = 'Visitasi Selesai — Tahap Penilaian Dimulai';
         $message = 'Visitasi telah dikonfirmasi selesai. Tahap penilaian pasca visitasi telah dimulai.';
@@ -406,7 +521,7 @@ class AkreditasiNotificationListener implements ShouldQueue
         }
     }
 
-    private function notifyValidasiRejected(\App\Models\Akreditasi $akreditasi): void
+    private function notifyValidasiRejected(Akreditasi $akreditasi): void
     {
         $pesantrenUser = User::find($akreditasi->user_id);
         if ($pesantrenUser) {
@@ -419,7 +534,7 @@ class AkreditasiNotificationListener implements ShouldQueue
         }
     }
 
-    private function notifyBandingAcceptedValidasiAdmin(\App\Models\Akreditasi $akreditasi): void
+    private function notifyBandingAcceptedValidasiAdmin(Akreditasi $akreditasi): void
     {
         $pesantrenUser = User::find($akreditasi->user_id);
         if ($pesantrenUser) {
@@ -432,7 +547,7 @@ class AkreditasiNotificationListener implements ShouldQueue
         }
     }
 
-    private function notifyBandingRejectedFinal(\App\Models\Akreditasi $akreditasi): void
+    private function notifyBandingRejectedFinal(Akreditasi $akreditasi): void
     {
         $pesantrenUser = User::find($akreditasi->user_id);
         if ($pesantrenUser) {

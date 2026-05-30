@@ -4,7 +4,6 @@ namespace Tests\Unit\Workflow;
 
 use App\Models\Akreditasi;
 use App\Models\Edpm;
-use App\Models\EdpmCatatan;
 use App\Models\Ipm;
 use App\Models\MasterEdpmButir;
 use App\Models\MasterEdpmKomponen;
@@ -15,8 +14,8 @@ use App\Services\AkreditasiWorkflowService;
 use Database\Seeders\RoleSeeder;
 use Faker\Factory as Faker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 /**
  * Property-Based Test: Property 17 — Submission Completeness Validation
@@ -25,7 +24,6 @@ use PHPUnit\Framework\Attributes\Group;
  * all mandatory fields in all required sections (Profil, IPM, SDM, EDPM) are non-empty.
  *
  * **Validates: Requirements 2.1, 2.2**
- *
  */
 #[Group('akreditasi-workflow-redesign')]
 class Property17SubmissionCompletenessTest extends TestCase
@@ -73,7 +71,7 @@ class Property17SubmissionCompletenessTest extends TestCase
      * Ensure master EDPM data exists (komponens + butirs).
      * Returns the total number of butirs.
      */
-private function ensureMasterEdpmData(): int
+    private function ensureMasterEdpmData(): int
     {
         $komponens = [
             ['nama' => 'Mutu Lulusan',        'ipr' => 0],
@@ -94,7 +92,7 @@ private function ensureMasterEdpmData(): int
             $count = $butirCounts[$idx];
             for ($b = 1; $b <= $count; $b++) {
                 MasterEdpmButir::firstOrCreate(
-                    ['komponen_id' => $komponen->id, 'nomor_butir' => ($idx + 1) . '.' . $b],
+                    ['komponen_id' => $komponen->id, 'nomor_butir' => ($idx + 1).'.'.$b],
                     ['no_sk' => (string) ($idx + 1), 'butir_pernyataan' => "Butir {$b} komponen {$komponen->nama}"]
                 );
             }
@@ -111,37 +109,37 @@ private function ensureMasterEdpmData(): int
     /**
      * Create a pesantren user with fully complete data across all sections.
      */
-private function createCompletePesantrenUser(): User
+    private function createCompletePesantrenUser(): User
     {
         $user = User::factory()->create(['role_id' => 3]);
 
         // Complete Profil
         Pesantren::create([
-            'user_id'                    => $user->id,
-            'nama_pesantren'             => 'Pesantren Al-Muhammadiyah',
-            'ns_pesantren'               => '510012345678',
-            'alamat'                     => 'Jl. Raya Pesantren No. 1',
-            'provinsi'                   => 'Jawa Barat',
-            'kota_kabupaten'             => 'Bandung',
-            'tahun_pendirian'            => '1990',
-            'nama_mudir'                 => 'KH. Ahmad Fauzi',
-            'layanan_satuan_pendidikan'  => ['MTs', 'MA'],
-            'is_locked'                  => false,
+            'user_id' => $user->id,
+            'nama_pesantren' => 'Pesantren Al-Muhammadiyah',
+            'ns_pesantren' => '510012345678',
+            'alamat' => 'Jl. Raya Pesantren No. 1',
+            'provinsi' => 'Jawa Barat',
+            'kota_kabupaten' => 'Bandung',
+            'tahun_pendirian' => '1990',
+            'nama_mudir' => 'KH. Ahmad Fauzi',
+            'layanan_satuan_pendidikan' => ['MTs', 'MA'],
+            'is_locked' => false,
         ]);
 
         // Complete IPM
         Ipm::create([
-            'user_id'          => $user->id,
-            'nsp_file'         => 'ipm/nsp_file.pdf',
+            'user_id' => $user->id,
+            'nsp_file' => 'ipm/nsp_file.pdf',
             'lulus_santri_file' => 'ipm/lulus_santri.pdf',
-            'kurikulum_file'   => 'ipm/kurikulum.pdf',
-            'buku_ajar_file'   => 'ipm/buku_ajar.pdf',
+            'kurikulum_file' => 'ipm/kurikulum.pdf',
+            'buku_ajar_file' => 'ipm/buku_ajar.pdf',
         ]);
 
         // Complete SDM (at least one record)
         SdmPesantren::create([
-            'user_id'  => $user->id,
-            'tingkat'  => 'MTs',
+            'user_id' => $user->id,
+            'tingkat' => 'MTs',
             'santri_l' => 100,
             'santri_p' => 80,
         ]);
@@ -150,9 +148,9 @@ private function createCompletePesantrenUser(): User
         $butirs = MasterEdpmButir::all();
         foreach ($butirs as $butir) {
             Edpm::create([
-                'user_id'  => $user->id,
+                'user_id' => $user->id,
                 'butir_id' => $butir->id,
-                'isian'    => 3,
+                'isian' => 3,
             ]);
         }
 
@@ -167,10 +165,10 @@ private function createCompletePesantrenUser(): User
      * Create a pesantren user with one or more mandatory fields missing.
      * Returns the user and a description of what's missing.
      *
-     * @param string $missingSection  Which section to make incomplete: 'profil', 'ipm', 'sdm', 'edpm', 'random'
-     * @param string|null $missingField  Specific field to omit (null = random within section)
+     * @param  string  $missingSection  Which section to make incomplete: 'profil', 'ipm', 'sdm', 'edpm', 'random'
+     * @param  string|null  $missingField  Specific field to omit (null = random within section)
      */
-private function createIncompletePesantrenUser(string $missingSection = 'random', ?string $missingField = null): array
+    private function createIncompletePesantrenUser(string $missingSection = 'random', ?string $missingField = null): array
     {
         $faker = Faker::create();
         $user = User::factory()->create(['role_id' => 3]);
@@ -183,16 +181,16 @@ private function createIncompletePesantrenUser(string $missingSection = 'random'
 
         // Build Profil data
         $profilData = [
-            'user_id'                    => $user->id,
-            'nama_pesantren'             => 'Pesantren Test',
-            'ns_pesantren'               => '510012345678',
-            'alamat'                     => 'Jl. Test No. 1',
-            'provinsi'                   => 'Jawa Barat',
-            'kota_kabupaten'             => 'Bandung',
-            'tahun_pendirian'            => '1990',
-            'nama_mudir'                 => 'KH. Test',
-            'layanan_satuan_pendidikan'  => ['MTs'],
-            'is_locked'                  => false,
+            'user_id' => $user->id,
+            'nama_pesantren' => 'Pesantren Test',
+            'ns_pesantren' => '510012345678',
+            'alamat' => 'Jl. Test No. 1',
+            'provinsi' => 'Jawa Barat',
+            'kota_kabupaten' => 'Bandung',
+            'tahun_pendirian' => '1990',
+            'nama_mudir' => 'KH. Test',
+            'layanan_satuan_pendidikan' => ['MTs'],
+            'is_locked' => false,
         ];
 
         if ($missingSection === 'profil') {
@@ -215,11 +213,11 @@ private function createIncompletePesantrenUser(string $missingSection = 'random'
 
         // Build IPM data
         $ipmData = [
-            'user_id'           => $user->id,
-            'nsp_file'          => 'ipm/nsp.pdf',
+            'user_id' => $user->id,
+            'nsp_file' => 'ipm/nsp.pdf',
             'lulus_santri_file' => 'ipm/lulus.pdf',
-            'kurikulum_file'    => 'ipm/kurikulum.pdf',
-            'buku_ajar_file'    => 'ipm/buku.pdf',
+            'kurikulum_file' => 'ipm/kurikulum.pdf',
+            'buku_ajar_file' => 'ipm/buku.pdf',
         ];
 
         if ($missingSection === 'ipm') {
@@ -233,8 +231,8 @@ private function createIncompletePesantrenUser(string $missingSection = 'random'
         // SDM
         if ($missingSection !== 'sdm') {
             SdmPesantren::create([
-                'user_id'  => $user->id,
-                'tingkat'  => 'MTs',
+                'user_id' => $user->id,
+                'tingkat' => 'MTs',
                 'santri_l' => 50,
                 'santri_p' => 40,
             ]);
@@ -247,9 +245,9 @@ private function createIncompletePesantrenUser(string $missingSection = 'random'
         if ($missingSection !== 'edpm') {
             foreach ($butirs as $butir) {
                 Edpm::create([
-                    'user_id'  => $user->id,
+                    'user_id' => $user->id,
                     'butir_id' => $butir->id,
-                    'isian'    => 3,
+                    'isian' => 3,
                 ]);
             }
         } else {
@@ -258,9 +256,9 @@ private function createIncompletePesantrenUser(string $missingSection = 'random'
             $butirIds = $butirs->pluck('id')->shuffle()->take($fillCount);
             foreach ($butirIds as $butirId) {
                 Edpm::create([
-                    'user_id'  => $user->id,
+                    'user_id' => $user->id,
                     'butir_id' => $butirId,
-                    'isian'    => 3,
+                    'isian' => 3,
                 ]);
             }
             $actualMissing[] = 'edpm';
@@ -282,7 +280,7 @@ private function createIncompletePesantrenUser(string $missingSection = 'random'
      *
      * **Validates: Requirements 2.1, 2.4**
      */
-public function test_property17_complete_data_always_succeeds(): void
+    public function test_property17_complete_data_always_succeeds(): void
     {
         $this->ensureMasterEdpmData();
 
@@ -303,7 +301,7 @@ public function test_property17_complete_data_always_succeeds(): void
 
             $this->assertNull(
                 $exception,
-                "Iteration {$i}: submitPengajuan should succeed for complete data, but threw: " .
+                "Iteration {$i}: submitPengajuan should succeed for complete data, but threw: ".
                 ($exception ? $exception->getMessage() : 'no exception')
             );
 
@@ -360,7 +358,7 @@ public function test_property17_complete_data_always_succeeds(): void
      *
      * **Validates: Requirements 2.1, 2.2**
      */
-public function test_property17_incomplete_data_always_fails(): void
+    public function test_property17_incomplete_data_always_fails(): void
     {
         $this->ensureMasterEdpmData();
 
@@ -385,8 +383,8 @@ public function test_property17_incomplete_data_always_fails(): void
 
             $this->assertNotNull(
                 $exception,
-                "Iteration {$i}: submitPengajuan should throw DomainException for incomplete data " .
-                "(missing: " . implode(', ', $missing) . ")"
+                "Iteration {$i}: submitPengajuan should throw DomainException for incomplete data ".
+                '(missing: '.implode(', ', $missing).')'
             );
 
             $this->assertNull(
@@ -397,7 +395,7 @@ public function test_property17_incomplete_data_always_fails(): void
             // Verify no Akreditasi record was created in the database
             $this->assertDatabaseMissing('akreditasis', [
                 'user_id' => $user->id,
-                'status'  => 6,
+                'status' => 6,
             ]);
 
             // Verify pesantren data is NOT locked (submission failed)
@@ -431,7 +429,7 @@ public function test_property17_incomplete_data_always_fails(): void
      *
      * **Validates: Requirements 2.1, 2.2**
      */
-public function test_property17_each_missing_profil_field_causes_failure(): void
+    public function test_property17_each_missing_profil_field_causes_failure(): void
     {
         $this->ensureMasterEdpmData();
 
@@ -459,14 +457,14 @@ public function test_property17_each_missing_profil_field_causes_failure(): void
 
                 $this->assertDatabaseMissing('akreditasis', [
                     'user_id' => $user->id,
-                    'status'  => 6,
+                    'status' => 6,
                 ]);
 
                 $iterations++;
             }
         }
 
-        $this->assertGreaterThanOrEqual(100, $iterations, "Should run at least 100 iterations total");
+        $this->assertGreaterThanOrEqual(100, $iterations, 'Should run at least 100 iterations total');
     }
 
     // =========================================================================
@@ -481,7 +479,7 @@ public function test_property17_each_missing_profil_field_causes_failure(): void
      *
      * **Validates: Requirements 2.1, 2.2**
      */
-public function test_property17_each_missing_ipm_field_causes_failure(): void
+    public function test_property17_each_missing_ipm_field_causes_failure(): void
     {
         $this->ensureMasterEdpmData();
 
@@ -508,14 +506,14 @@ public function test_property17_each_missing_ipm_field_causes_failure(): void
 
                 $this->assertDatabaseMissing('akreditasis', [
                     'user_id' => $user->id,
-                    'status'  => 6,
+                    'status' => 6,
                 ]);
 
                 $iterations++;
             }
         }
 
-        $this->assertGreaterThanOrEqual(100, $iterations, "Should run at least 100 iterations total");
+        $this->assertGreaterThanOrEqual(100, $iterations, 'Should run at least 100 iterations total');
     }
 
     // =========================================================================
@@ -530,7 +528,7 @@ public function test_property17_each_missing_ipm_field_causes_failure(): void
      *
      * **Validates: Requirements 2.1, 2.2**
      */
-public function test_property17_missing_sdm_causes_failure(): void
+    public function test_property17_missing_sdm_causes_failure(): void
     {
         $this->ensureMasterEdpmData();
 
@@ -554,7 +552,7 @@ public function test_property17_missing_sdm_causes_failure(): void
 
             $this->assertDatabaseMissing('akreditasis', [
                 'user_id' => $user->id,
-                'status'  => 6,
+                'status' => 6,
             ]);
         }
     }
@@ -571,7 +569,7 @@ public function test_property17_missing_sdm_causes_failure(): void
      *
      * **Validates: Requirements 2.1, 2.2**
      */
-public function test_property17_incomplete_edpm_causes_failure(): void
+    public function test_property17_incomplete_edpm_causes_failure(): void
     {
         $totalButirs = $this->ensureMasterEdpmData();
 
@@ -595,7 +593,7 @@ public function test_property17_incomplete_edpm_causes_failure(): void
 
             $this->assertDatabaseMissing('akreditasis', [
                 'user_id' => $user->id,
-                'status'  => 6,
+                'status' => 6,
             ]);
         }
     }
@@ -613,7 +611,7 @@ public function test_property17_incomplete_edpm_causes_failure(): void
      *
      * **Validates: Requirement 2.3**
      */
-public function test_property17_active_akreditasi_blocks_new_submission(): void
+    public function test_property17_active_akreditasi_blocks_new_submission(): void
     {
         $this->ensureMasterEdpmData();
 
@@ -630,7 +628,7 @@ public function test_property17_active_akreditasi_blocks_new_submission(): void
                 // Create an existing active akreditasi
                 Akreditasi::create([
                     'user_id' => $user->id,
-                    'status'  => $activeStatus,
+                    'status' => $activeStatus,
                 ]);
 
                 $exception = null;
@@ -658,7 +656,7 @@ public function test_property17_active_akreditasi_blocks_new_submission(): void
             }
         }
 
-        $this->assertGreaterThanOrEqual(100, $iterations, "Should run at least 100 iterations total");
+        $this->assertGreaterThanOrEqual(100, $iterations, 'Should run at least 100 iterations total');
     }
 
     // =========================================================================
@@ -676,7 +674,7 @@ public function test_property17_active_akreditasi_blocks_new_submission(): void
      *
      * **Validates: Requirements 2.1, 2.2**
      */
-public function test_property17_biconditional_success_iff_all_sections_complete(): void
+    public function test_property17_biconditional_success_iff_all_sections_complete(): void
     {
         $this->ensureMasterEdpmData();
 
@@ -708,7 +706,7 @@ public function test_property17_biconditional_success_iff_all_sections_complete(
             if ($expectedSuccess) {
                 $this->assertNull(
                     $exception,
-                    "Iteration {$i} (complete): Should succeed but threw: " .
+                    "Iteration {$i} (complete): Should succeed but threw: ".
                     ($exception ? $exception->getMessage() : 'no exception')
                 );
                 $this->assertNotNull($akreditasi, "Iteration {$i} (complete): Should return Akreditasi");

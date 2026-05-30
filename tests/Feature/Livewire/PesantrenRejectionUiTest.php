@@ -13,6 +13,8 @@ use App\Models\MasterEdpmKomponen;
 use App\Models\Pesantren;
 use App\Models\SdmPesantren;
 use App\Models\User;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -27,13 +29,15 @@ class PesantrenRejectionUiTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RolePermissionSeeder::class);
         Notification::fake();
     }
 
     /**
      * Task 14.8: Pesantren sees rejection history and status
      */
-public function test_pesantren_sees_rejection_count_and_status(): void
+    public function test_pesantren_sees_rejection_count_and_status(): void
     {
         $user = $this->createCompletePesantrenUser();
         $this->actingAs($user);
@@ -165,7 +169,7 @@ public function test_pesantren_sees_rejection_count_and_status(): void
 
         $akreditasi = Akreditasi::create([
             'user_id' => $user->id,
-            'status' => 2,
+            'status' => -1,
             'catatan' => 'Ditolak',
         ]);
 

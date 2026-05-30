@@ -127,9 +127,9 @@ new #[Layout('layouts.app')] class extends Component {
             <div class="d-flex align-items-start gap-3 p-4">
                 <x-ui.icon name="information-5" class="fs-2x text-info" />
                 <div>
-                    <div class="fw-bold text-gray-900">Masa Retensi</div>
+                    <div class="fw-semibold text-gray-900">Masa Retensi</div>
                     <div class="text-muted fs-7">
-                        Akreditasi yang dihapus akan otomatis dihapus permanen setelah <span class="fw-bold">{{ $this->retentionDays }} hari</span>.
+                        Akreditasi yang dihapus akan otomatis dihapus permanen setelah <span class="fw-semibold">{{ $this->retentionDays }} hari</span>.
                         Pulihkan sebelum waktu retensi habis jika dibutuhkan kembali.
                     </div>
                 </div>
@@ -165,7 +165,7 @@ new #[Layout('layouts.app')] class extends Component {
                     <tr>
                         <td>
                             <div class="d-flex flex-column">
-                                <span class="text-gray-900 fw-bold fs-6">
+                                <span class="text-gray-900 fw-semibold fs-6">
                                     {{ $item->user?->pesantren?->nama_pesantren ?? $item->user?->name ?? '(Akun terhapus)' }}
                                 </span>
                                 <span class="text-muted fs-8">
@@ -248,7 +248,7 @@ new #[Layout('layouts.app')] class extends Component {
                     <li><strong>Penugasan Asesor:</strong> {{ $previewData['children']['assessment'] }} record</li>
                     <li><strong>EDPM:</strong> {{ $previewData['children']['akreditasi_edpm'] }} record</li>
                     <li><strong>Catatan EDPM:</strong> {{ $previewData['children']['akreditasi_edpm_catatan'] }} record</li>
-                    <li class="text-success fw-bold mt-2">Total: {{ $previewData['children']['total'] + 1 }} record</li>
+                    <li class="text-success fw-semibold mt-2">Total: {{ $previewData['children']['total'] + 1 }} record</li>
                 </ul>
             @endif
         </x-ui.modal-body>
@@ -284,7 +284,7 @@ new #[Layout('layouts.app')] class extends Component {
                     <li><strong>Penugasan Asesor:</strong> {{ $previewData['children']['assessment'] }} record</li>
                     <li><strong>EDPM:</strong> {{ $previewData['children']['akreditasi_edpm'] }} record</li>
                     <li><strong>Catatan EDPM:</strong> {{ $previewData['children']['akreditasi_edpm_catatan'] }} record</li>
-                    <li class="text-danger fw-bold mt-2">Total dihapus permanen: {{ $previewData['children']['total'] + 1 }} record</li>
+                    <li class="text-danger fw-semibold mt-2">Total dihapus permanen: {{ $previewData['children']['total'] + 1 }} record</li>
                 </ul>
             @endif
         </x-ui.modal-body>

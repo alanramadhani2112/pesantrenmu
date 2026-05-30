@@ -46,7 +46,6 @@ class PesantrenAkreditasiWorkflowTest extends TestCase
 
         $this->assertNotNull($akreditasi);
         $this->assertSame(6, $akreditasi->status);
-        $this->assertNull($akreditasi->parent);
         $this->assertTrue($user->pesantren->fresh()->is_locked);
         $this->assertDatabaseHas('akreditasis', [
             'id' => $akreditasi->id,
@@ -70,22 +69,18 @@ class PesantrenAkreditasiWorkflowTest extends TestCase
         $this->assertSame(1, Akreditasi::where('user_id', $user->id)->count());
     }
 
-    public function test_pengajuan_ulang_hanya_bisa_dibuat_sekali_untuk_pengajuan_yang_ditolak(): void
+    public function test_pengajuan_baru_ditolak_saat_masih_ada_proses_pasca_visitasi(): void
     {
         $user = $this->createCompletePesantrenUser();
-        $rejected = Akreditasi::create([
+        Akreditasi::create([
             'user_id' => $user->id,
             'status' => 2,
-            'updated_at' => now()->subDays(31),
         ]);
 
-        $firstResubmission = $this->service()->createSubmission($user->id, $rejected->id);
-        $secondResubmission = $this->service()->createSubmission($user->id, $rejected->id);
+        $akreditasi = $this->service()->createSubmission($user->id);
 
-        $this->assertNotNull($firstResubmission);
-        $this->assertSame($rejected->id, $firstResubmission->parent);
-        $this->assertNull($secondResubmission);
-        $this->assertSame(2, Akreditasi::where('user_id', $user->id)->count());
+        $this->assertNull($akreditasi);
+        $this->assertSame(1, Akreditasi::where('user_id', $user->id)->count());
     }
 
     private function service(): PesantrenService

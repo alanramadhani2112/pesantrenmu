@@ -58,6 +58,7 @@ class RestoreFlowTest extends TestCase
         ]);
 
         $akreditasi->delete();
+
         return $akreditasi->fresh();
     }
 

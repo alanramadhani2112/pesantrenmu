@@ -8,8 +8,8 @@ use App\Models\User;
 use App\StateMachine\AkreditasiStateMachine;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 /**
  * Property-Based Test: Property 16 — Terminal State Immutability
@@ -18,7 +18,6 @@ use PHPUnit\Framework\Attributes\Group;
  * permitted and no modification to akreditasi data SHALL succeed.
  *
  * **Validates: Requirements 12.4, 12.5**
- *
  */
 #[Group('akreditasi-workflow-redesign')]
 class Property16TerminalStateImmutabilityTest extends TestCase
@@ -55,16 +54,16 @@ class Property16TerminalStateImmutabilityTest extends TestCase
     /**
      * Create an akreditasi at status 0 (Selesai).
      */
-private function createSelesaiAkreditasi(): Akreditasi
+    private function createSelesaiAkreditasi(): Akreditasi
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
 
         return Akreditasi::create([
-            'user_id'     => $pesantrenUser->id,
-            'status'      => AkreditasiStateMachine::STATUS_SELESAI, // 0
-            'nomor_sk'    => 'SK-TEST-' . random_int(1000, 9999),
-            'nilai'       => round(random_int(7000, 10000) / 100, 2),
-            'peringkat'   => ['A', 'B', 'C'][random_int(0, 2)],
+            'user_id' => $pesantrenUser->id,
+            'status' => AkreditasiStateMachine::STATUS_SELESAI, // 0
+            'nomor_sk' => 'SK-TEST-'.random_int(1000, 9999),
+            'nilai' => round(random_int(7000, 10000) / 100, 2),
+            'peringkat' => ['A', 'B', 'C'][random_int(0, 2)],
             'masa_berlaku' => now()->toDateString(),
             'masa_berlaku_akhir' => now()->addYears(5)->toDateString(),
         ]);
@@ -82,7 +81,7 @@ private function createSelesaiAkreditasi(): Akreditasi
      *
      * **Validates: Requirements 12.4**
      */
-public function test_property16_no_transition_from_status_0_is_permitted(): void
+    public function test_property16_no_transition_from_status_0_is_permitted(): void
     {
         $iterations = 100;
         $validStatuses = self::VALID_STATUSES;
@@ -115,7 +114,7 @@ public function test_property16_no_transition_from_status_0_is_permitted(): void
      *
      * **Validates: Requirements 12.4**
      */
-public function test_property16_transition_throws_for_any_target_from_status_0(): void
+    public function test_property16_transition_throws_for_any_target_from_status_0(): void
     {
         $iterations = 100;
         $validStatuses = self::VALID_STATUSES;
@@ -123,7 +122,7 @@ public function test_property16_transition_throws_for_any_target_from_status_0()
 
         for ($i = 0; $i < $iterations; $i++) {
             $akreditasi = $this->createSelesaiAkreditasi();
-            $adminUser  = User::factory()->create(['role_id' => 1]);
+            $adminUser = User::factory()->create(['role_id' => 1]);
 
             $targetStatus = $validStatuses[random_int(0, $count - 1)];
 
@@ -160,13 +159,13 @@ public function test_property16_transition_throws_for_any_target_from_status_0()
      *
      * **Validates: Requirements 12.4**
      */
-public function test_property16_status_0_preserved_after_failed_transition(): void
+    public function test_property16_status_0_preserved_after_failed_transition(): void
     {
         $iterations = 100;
 
         for ($i = 0; $i < $iterations; $i++) {
             $akreditasi = $this->createSelesaiAkreditasi();
-            $adminUser  = User::factory()->create(['role_id' => 1]);
+            $adminUser = User::factory()->create(['role_id' => 1]);
 
             // Try all valid statuses as targets
             foreach (self::VALID_STATUSES as $targetStatus) {
@@ -197,7 +196,7 @@ public function test_property16_status_0_preserved_after_failed_transition(): vo
      *
      * **Validates: Requirements 12.4**
      */
-public function test_property16_get_permitted_transitions_returns_empty_for_status_0(): void
+    public function test_property16_get_permitted_transitions_returns_empty_for_status_0(): void
     {
         $iterations = 100;
 
@@ -228,7 +227,7 @@ public function test_property16_get_permitted_transitions_returns_empty_for_stat
      *
      * **Validates: Requirements 12.5**
      */
-public function test_property16_status_0_cannot_be_changed_via_any_transition(): void
+    public function test_property16_status_0_cannot_be_changed_via_any_transition(): void
     {
         $iterations = 100;
 
@@ -278,7 +277,7 @@ public function test_property16_status_0_cannot_be_changed_via_any_transition():
      *
      * **Validates: Requirements 12.4**
      */
-public function test_property16_exhaustive_all_valid_targets_rejected_from_status_0(): void
+    public function test_property16_exhaustive_all_valid_targets_rejected_from_status_0(): void
     {
         $iterations = 100;
 

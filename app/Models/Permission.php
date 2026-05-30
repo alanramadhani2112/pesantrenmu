@@ -13,12 +13,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Permission extends Model
 {
     public const GROUP_AKREDITASI = 'akreditasi';
+
     public const GROUP_ASESOR = 'asesor';
+
     public const GROUP_PESANTREN = 'pesantren';
+
     public const GROUP_BANDING = 'banding';
+
     public const GROUP_MASTER = 'master';
+
     public const GROUP_ACCOUNT = 'account';
+
     public const GROUP_TRASH = 'trash';
+
     public const GROUP_NOTIFICATION = 'notification';
 
     protected $fillable = [

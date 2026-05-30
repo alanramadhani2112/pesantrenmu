@@ -27,8 +27,14 @@ new #[Layout('layouts.guest')] class extends Component
 <div>
     <div class="text-center mb-10">
         <x-ui.badge variant="primary" class="mb-4">Akses Sistem</x-ui.badge>
-        <h1 class="text-gray-900 fw-semibold mb-3">Masuk ke SPM</h1>
-        <div class="text-gray-500 fw-semibold fs-6">Gunakan akun yang sudah terdaftar.</div>
+        <h1 class="text-gray-900 fw-semibold fs-2x mb-3">Masuk ke PesantrenMu</h1>
+        <div class="text-gray-500 fw-semibold fs-6">Gunakan akun LP2M, asesor, atau pesantren yang sudah terdaftar.</div>
+    </div>
+
+    <div class="spm-auth-role-strip mb-8" aria-label="Role yang didukung">
+        <span>Admin</span>
+        <span>Asesor</span>
+        <span>Pesantren</span>
     </div>
 
     <x-auth-session-status :status="session('status')" />
@@ -98,7 +104,7 @@ new #[Layout('layouts.guest')] class extends Component
         <div class="d-grid">
             <x-ui.button type="submit" variant="primary" size="lg">
                 <span class="indicator-label d-flex align-items-center justify-content-center gap-2">
-                    Masuk
+                    Masuk Dashboard
                     <i class="ki-duotone ki-arrow-right fs-2 text-white">
                         <span class="path1"></span>
                         <span class="path2"></span>
@@ -116,7 +122,7 @@ new #[Layout('layouts.guest')] class extends Component
     <div class="d-grid">
         {{-- SSO button menggunakan Metronic btn-flex tanpa inline style --}}
         <a href="{{ route('sso.preflight') }}"
-           class="btn btn-flex btn-lg btn-sso-muhammadiyah fw-bold">
+           class="btn btn-flex btn-lg btn-sso-muhammadiyah fw-semibold">
              <img src="{{ asset('images/brand/logo-horizontal.svg') }}"
                   alt="Login via Muhammadiyah ID"
                   loading="lazy"

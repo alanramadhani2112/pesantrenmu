@@ -32,7 +32,9 @@ class DocumentCategory extends Model
     use SoftDeletes;
 
     public const VISIBILITY_PUBLIC = 'public';
+
     public const VISIBILITY_PESANTREN_SECRET = 'pesantren_secret';
+
     public const VISIBILITY_ASESOR_SECRET = 'asesor_secret';
 
     public const VISIBILITIES = [

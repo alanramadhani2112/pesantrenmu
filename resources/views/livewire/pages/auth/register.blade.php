@@ -80,7 +80,7 @@ new #[Layout('layouts.guest')] class extends Component
 
         <div class="text-center">
             <span class="text-gray-500 fw-semibold fs-6">Sudah punya akun?</span>
-            <a href="{{ route('login') }}" class="link-primary fw-bold fs-6 ms-1">Masuk</a>
+            <a href="{{ route('login') }}" class="link-primary fw-semibold fs-6 ms-1">Masuk</a>
         </div>
     </form>
 </div>

@@ -33,7 +33,7 @@ class BandingLifecycleTest extends TestCase
     /**
      * Helper: create a pesantren user with complete supporting data.
      */
-private function createCompletePesantrenUser(): User
+    private function createCompletePesantrenUser(): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -76,7 +76,7 @@ private function createCompletePesantrenUser(): User
      * Integration test: full accept lifecycle
      * submit banding → assign reviewer → accept → akreditasi returns to Validasi Akhir Admin.
      */
-public function test_full_accept_lifecycle(): void
+    public function test_full_accept_lifecycle(): void
     {
         // Setup: create a complete pesantren user with a rejected akreditasi
         $user = $this->createCompletePesantrenUser();
@@ -128,7 +128,6 @@ public function test_full_accept_lifecycle(): void
         $this->assertDatabaseHas('akreditasis', [
             'id' => $akreditasi->id,
             'status' => 1,
-            'parent' => null,
             'user_id' => $user->id,
         ]);
     }
@@ -137,7 +136,7 @@ public function test_full_accept_lifecycle(): void
      * Integration test: full reject lifecycle
      * submit banding → assign reviewer → reject → akreditasi back to Ditolak and catatan created
      */
-public function test_full_reject_lifecycle(): void
+    public function test_full_reject_lifecycle(): void
     {
         // Setup: create a pesantren user with a rejected akreditasi
         $user = User::factory()->create(['role_id' => 3]);

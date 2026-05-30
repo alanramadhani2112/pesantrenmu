@@ -3,15 +3,19 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use NotificationChannels\WebPush\HasPushSubscriptions;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasPushSubscriptions;
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, HasPushSubscriptions, Notifiable;
 
     protected static function boot()
     {
@@ -19,7 +23,7 @@ class User extends Authenticatable
 
         static::creating(function ($model) {
             if (empty($model->uuid)) {
-                $model->uuid = (string) \Illuminate\Support\Str::uuid();
+                $model->uuid = (string) Str::uuid();
             }
         });
 
@@ -27,7 +31,7 @@ class User extends Authenticatable
             // P-6 fix: wrap entire cascade in a single transaction so a mid-loop
             // failure doesn't leave partial state (e.g. pesantren deleted but
             // akreditasi children still exist).
-            \Illuminate\Support\Facades\DB::transaction(function () use ($user) {
+            DB::transaction(function () use ($user) {
                 // Delete related models that might have their own deleting events
                 if ($user->pesantren) {
                     $user->pesantren->delete();
@@ -186,7 +190,7 @@ class User extends Authenticatable
         return $this->hasMany(Akreditasi::class);
     }
 
-    public function profile_data(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function profile_data(): HasOne
     {
         return $this->hasOne(Profile::class, 'user_id', 'id');
     }

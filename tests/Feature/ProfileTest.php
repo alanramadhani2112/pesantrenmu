@@ -19,9 +19,9 @@ class ProfileTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSeeVolt('profile.update-profile-information-form')
-            ->assertSeeVolt('profile.update-password-form')
-            ->assertDontSeeVolt('profile.delete-user-form')
+            ->assertSee('Informasi Profil')
+            ->assertSee('Ubah Password')
+            ->assertDontSee('profile.delete-user-form', false)
             ->assertSee('Penghapusan akun dilakukan oleh admin');
     }
 

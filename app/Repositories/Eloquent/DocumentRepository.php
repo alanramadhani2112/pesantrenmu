@@ -14,7 +14,7 @@ class DocumentRepository implements DocumentRepositoryInterface
         return Document::query()
             ->with('category:id,name,slug,visibility')
             ->when($search, function (Builder $query) use ($search) {
-                $query->where('title', 'like', '%' . $search . '%');
+                $query->where('title', 'like', '%'.$search.'%');
             })
             ->orderBy($sortField, $sortAsc ? 'asc' : 'desc')
             ->paginate($perPage);
@@ -36,6 +36,7 @@ class DocumentRepository implements DocumentRepositoryInterface
         if ($doc) {
             return $doc->update($data);
         }
+
         return false;
     }
 
@@ -45,6 +46,7 @@ class DocumentRepository implements DocumentRepositoryInterface
         if ($doc) {
             return $doc->delete();
         }
+
         return false;
     }
 
@@ -64,7 +66,7 @@ class DocumentRepository implements DocumentRepositoryInterface
         }
 
         if ($search) {
-            $query->where('title', 'like', '%' . $search . '%');
+            $query->where('title', 'like', '%'.$search.'%');
         }
 
         return $query->orderBy('created_at', 'desc')->paginate($perPage);

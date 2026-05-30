@@ -3,8 +3,8 @@
 namespace Tests\Unit\Banding;
 
 use App\Models\Akreditasi;
-use App\Models\Assessment;
 use App\Models\Asesor;
+use App\Models\Assessment;
 use App\Models\Banding;
 use App\Models\User;
 use App\Services\BandingService;
@@ -13,8 +13,8 @@ use Carbon\Carbon;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 /**
  * Property-Based Test: Property 14 — Banding Uniqueness
@@ -23,7 +23,6 @@ use PHPUnit\Framework\Attributes\Group;
  * a second banding SHALL be rejected.
  *
  * **Validates: Requirements 14.3**
- *
  */
 #[Group('akreditasi-workflow-redesign')]
 class Property14BandingUniquenessTest extends TestCase
@@ -53,7 +52,7 @@ class Property14BandingUniquenessTest extends TestCase
      *
      * **Validates: Requirements 14.3**
      */
-public function test_property14_second_banding_always_rejected(): void
+    public function test_property14_second_banding_always_rejected(): void
     {
         $iterations = 100;
 
@@ -84,7 +83,7 @@ public function test_property14_second_banding_always_rejected(): void
 
             $this->assertFalse(
                 $result['success'],
-                "Iteration {$i}: submitBanding should be rejected when a banding already exists " .
+                "Iteration {$i}: submitBanding should be rejected when a banding already exists ".
                 "(existing status: {$existingStatus})"
             );
 
@@ -117,7 +116,7 @@ public function test_property14_second_banding_always_rejected(): void
      *
      * **Validates: Requirements 14.1, 14.2**
      */
-public function test_property14_first_banding_is_accepted(): void
+    public function test_property14_first_banding_is_accepted(): void
     {
         $iterations = 100;
 
@@ -134,7 +133,7 @@ public function test_property14_first_banding_is_accepted(): void
             );
 
             // Submit first banding
-            $alasan = 'Alasan banding pertama yang valid - ' . str_repeat('x', random_int(10, 100));
+            $alasan = 'Alasan banding pertama yang valid - '.str_repeat('x', random_int(10, 100));
             $result = $this->bandingService->submitBanding(
                 $akreditasiId,
                 $pesantrenUserId,
@@ -143,7 +142,7 @@ public function test_property14_first_banding_is_accepted(): void
 
             $this->assertTrue(
                 $result['success'],
-                "Iteration {$i}: First banding submission should succeed. Error: " . ($result['error'] ?? 'none')
+                "Iteration {$i}: First banding submission should succeed. Error: ".($result['error'] ?? 'none')
             );
 
             $this->assertNotNull(
@@ -182,7 +181,7 @@ public function test_property14_first_banding_is_accepted(): void
      *
      * **Validates: Requirements 14.3**
      */
-public function test_property14_uniqueness_enforced_for_decided_bandings(): void
+    public function test_property14_uniqueness_enforced_for_decided_bandings(): void
     {
         $iterations = 100;
 
@@ -231,7 +230,7 @@ public function test_property14_uniqueness_enforced_for_decided_bandings(): void
      *
      * **Validates: Requirements 13.2, 13.3**
      */
-public function test_property14_banding_rejected_without_assessors(): void
+    public function test_property14_banding_rejected_without_assessors(): void
     {
         $iterations = 100;
 
@@ -277,7 +276,7 @@ public function test_property14_banding_rejected_without_assessors(): void
      *
      * **Validates: Requirements 14.10**
      */
-public function test_property14_banding_rejected_outside_14_day_window(): void
+    public function test_property14_banding_rejected_outside_14_day_window(): void
     {
         $iterations = 100;
 
@@ -316,9 +315,9 @@ public function test_property14_banding_rejected_outside_14_day_window(): void
      * Create a pesantren user with akreditasi at status -1 (Ditolak) and
      * assessors assigned (Assessment records exist).
      *
-     * @param int $daysAgo How many days ago the rejection occurred (default: within 14-day window)
+     * @param  int  $daysAgo  How many days ago the rejection occurred (default: within 14-day window)
      */
-private function createRejectedAkreditasiWithAssessors(int $daysAgo = 1): array
+    private function createRejectedAkreditasiWithAssessors(int $daysAgo = 1): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
 
@@ -374,7 +373,7 @@ private function createRejectedAkreditasiWithAssessors(int $daysAgo = 1): array
     /**
      * Create an akreditasi at status -2 (Banding) for testing decideBanding scenarios.
      */
-private function createAkreditasiAtBandingStatus(): array
+    private function createAkreditasiAtBandingStatus(): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
 

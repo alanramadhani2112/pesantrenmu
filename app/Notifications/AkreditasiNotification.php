@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Models\FailedNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\WebPush\WebPushChannel;
 use NotificationChannels\WebPush\WebPushMessage;
@@ -75,16 +76,16 @@ class AkreditasiNotification extends Notification implements ShouldQueue
     {
         FailedNotification::create([
             'notification_type' => $this->type,
-            'notifiable_id'     => $this->notifiableId,
-            'payload'           => [
-                'type'    => $this->type,
-                'title'   => $this->title,
+            'notifiable_id' => $this->notifiableId,
+            'payload' => [
+                'type' => $this->type,
+                'title' => $this->title,
                 'message' => $this->message,
-                'url'     => $this->url,
+                'url' => $this->url,
             ],
             'failure_reason' => $exception->getMessage(),
-            'failed_at'      => now(),
-            'status'         => 'pending',
+            'failed_at' => now(),
+            'status' => 'pending',
         ]);
     }
 
@@ -109,10 +110,10 @@ class AkreditasiNotification extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'type'    => $this->type,
-            'title'   => $this->title,
+            'type' => $this->type,
+            'title' => $this->title,
             'message' => $this->message,
-            'url'     => $this->url,
+            'url' => $this->url,
         ];
     }
 
@@ -121,7 +122,7 @@ class AkreditasiNotification extends Notification implements ShouldQueue
      *
      * @param  mixed  $notifiable
      * @param  mixed  $notification
-     * @return \NotificationChannels\WebPush\WebPushMessage
+     * @return WebPushMessage
      */
     public function toWebPush($notifiable, $notification)
     {
@@ -135,13 +136,13 @@ class AkreditasiNotification extends Notification implements ShouldQueue
     /**
      * Get the broadcastable representation of the notification.
      */
-    public function toBroadcast(object $notifiable): \Illuminate\Notifications\Messages\BroadcastMessage
+    public function toBroadcast(object $notifiable): BroadcastMessage
     {
-        return new \Illuminate\Notifications\Messages\BroadcastMessage([
-            'type'    => $this->type,
-            'title'   => $this->title,
+        return new BroadcastMessage([
+            'type' => $this->type,
+            'title' => $this->title,
             'message' => $this->message,
-            'url'     => $this->url,
+            'url' => $this->url,
         ]);
     }
 }

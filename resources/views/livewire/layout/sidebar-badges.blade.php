@@ -83,7 +83,7 @@ new class extends Component {
     }
 }; ?>
 
-<div wire:poll.30s="getBadgeCounts">
+<div wire:poll.visible.60s="getBadgeCounts">
     {{-- This component provides badge count data to the sidebar.
          The actual badge rendering is handled by sidebar-link components
          that reference these public properties. --}}

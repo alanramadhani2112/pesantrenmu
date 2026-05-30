@@ -34,20 +34,21 @@ class BandingNotificationTest extends TestCase
     /**
      * Helper: create a pesantren user with basic data.
      */
-private function createPesantrenUser(): User
+    private function createPesantrenUser(): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
             'user_id' => $user->id,
-            'nama_pesantren' => 'Pesantren Notification Test ' . $user->id,
+            'nama_pesantren' => 'Pesantren Notification Test '.$user->id,
         ]);
+
         return $user;
     }
 
     /**
      * Helper: create a pesantren user with COMPLETE data for createSubmission compatibility.
      */
-private function createCompletePesantrenUser(): User
+    private function createCompletePesantrenUser(): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -93,7 +94,7 @@ private function createCompletePesantrenUser(): User
      * - The reviewer receives a notification with type 'banding_review'
      * - The pesantren user receives a notification with type 'banding_under_review'
      */
-public function test_assign_reviewer_sends_notification_to_reviewer(): void
+    public function test_assign_reviewer_sends_notification_to_reviewer(): void
     {
         Notification::fake();
 
@@ -129,7 +130,7 @@ public function test_assign_reviewer_sends_notification_to_reviewer(): void
     /**
      * Task 11.4: assignReviewer sends notification to pesantren user.
      */
-public function test_assign_reviewer_sends_notification_to_pesantren_user(): void
+    public function test_assign_reviewer_sends_notification_to_pesantren_user(): void
     {
         Notification::fake();
 
@@ -165,7 +166,7 @@ public function test_assign_reviewer_sends_notification_to_pesantren_user(): voi
     /**
      * Task 11.4: assignReviewer sends notifications to BOTH reviewer and pesantren user.
      */
-public function test_assign_reviewer_sends_notifications_to_both_reviewer_and_pesantren_user(): void
+    public function test_assign_reviewer_sends_notifications_to_both_reviewer_and_pesantren_user(): void
     {
         Notification::fake();
 
@@ -215,7 +216,7 @@ public function test_assign_reviewer_sends_notifications_to_both_reviewer_and_pe
      * - The pesantren user receives a notification with type 'banding_accepted'
      * - The notification message indicates the appeal returns to final admin validation
      */
-public function test_accept_banding_sends_notification_to_pesantren_user(): void
+    public function test_accept_banding_sends_notification_to_pesantren_user(): void
     {
         Notification::fake();
 
@@ -259,7 +260,7 @@ public function test_accept_banding_sends_notification_to_pesantren_user(): void
      * - The pesantren user receives a notification with type 'banding_rejected'
      * - The notification message includes the rejection explanation
      */
-public function test_reject_banding_sends_notification_to_pesantren_user_with_explanation(): void
+    public function test_reject_banding_sends_notification_to_pesantren_user_with_explanation(): void
     {
         Notification::fake();
 
@@ -299,7 +300,7 @@ public function test_reject_banding_sends_notification_to_pesantren_user_with_ex
     /**
      * Task 11.6 (additional): rejectBanding notification message contains the full rejection explanation.
      */
-public function test_reject_banding_notification_contains_rejection_explanation(): void
+    public function test_reject_banding_notification_contains_rejection_explanation(): void
     {
         Notification::fake();
 

@@ -17,9 +17,10 @@ use Carbon\Carbon;
 use Database\Seeders\RoleSeeder;
 use Faker\Factory as Faker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 /**
  * Tests for DeadlineService::reassignAsesor()
@@ -30,7 +31,6 @@ use PHPUnit\Framework\Attributes\Group;
  *  - Task 6.4 (Property 9): EDPM data preserved after reassignment
  *  - Task 6.5: Notifications sent to both old and new asesor
  *  - Task 6.6: DomainException thrown when akreditasi is not overdue
- *
  */
 #[Group('Feature: assessment-visitasi-timeout')]
 class ReassignAsesorTest extends TestCase
@@ -58,15 +58,16 @@ class ReassignAsesorTest extends TestCase
      * Create an Asesor with an associated User (role_id=2).
      * Returns [$asesor, $user].
      */
-private function createAsesorWithUser(string $name = null): array
+    private function createAsesorWithUser(?string $name = null): array
     {
         $user = User::factory()->create(['role_id' => 2]);
-        $displayName = $name ?? ('Asesor ' . $user->id);
+        $displayName = $name ?? ('Asesor '.$user->id);
         $asesor = Asesor::create([
             'user_id' => $user->id,
             'nama_dengan_gelar' => $displayName,
             'nama_tanpa_gelar' => $displayName,
         ]);
+
         return [$asesor, $user];
     }
 
@@ -74,24 +75,25 @@ private function createAsesorWithUser(string $name = null): array
      * Create an Akreditasi with a pesantren user (role_id=3).
      * Returns [$akreditasi, $pesantrenUser].
      */
-private function createAkreditasiWithUser(int $status = 5): array
+    private function createAkreditasiWithUser(int $status = 5): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
             'user_id' => $pesantrenUser->id,
-            'nama_pesantren' => 'Pesantren Test ' . $pesantrenUser->id,
+            'nama_pesantren' => 'Pesantren Test '.$pesantrenUser->id,
         ]);
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
             'status' => $status,
         ]);
+
         return [$akreditasi, $pesantrenUser];
     }
 
     /**
      * Create an overdue Assessment for the given akreditasi and asesor.
      */
-private function createOverdueAssessment(Akreditasi $akreditasi, Asesor $asesor, Carbon $today): Assessment
+    private function createOverdueAssessment(Akreditasi $akreditasi, Asesor $asesor, Carbon $today): Assessment
     {
         return Assessment::create([
             'akreditasi_id' => $akreditasi->id,
@@ -105,19 +107,23 @@ private function createOverdueAssessment(Akreditasi $akreditasi, Asesor $asesor,
     }
 
     /**
-     * Create a MasterEdpmKomponen and MasterEdpmButir for EDPM test data.
-     * Returns [$komponen, $butir].
+     * Create a MasterEdpmKomponen and distinct MasterEdpmButir records.
      */
-private function createEdpmMasterData(): array
+    private function createEdpmMasterData(int $butirCount = 1): array
     {
         $komponen = MasterEdpmKomponen::create(['nama' => 'Komponen Test']);
-        $butir = MasterEdpmButir::create([
-            'komponen_id' => $komponen->id,
-            'no_sk' => 'SK-001',
-            'nomor_butir' => '1.1',
-            'butir_pernyataan' => 'Butir pernyataan test',
-        ]);
-        return [$komponen, $butir];
+        $butirs = collect();
+
+        for ($i = 1; $i <= $butirCount; $i++) {
+            $butirs->push(MasterEdpmButir::create([
+                'komponen_id' => $komponen->id,
+                'no_sk' => sprintf('SK-%03d', $i),
+                'nomor_butir' => "1.{$i}",
+                'butir_pernyataan' => "Butir pernyataan test {$i}",
+            ]));
+        }
+
+        return [$komponen, $butirs];
     }
 
     // =========================================================================
@@ -135,7 +141,7 @@ private function createEdpmMasterData(): array
      *
      * **Validates: Requirements 6.3**
      */
-public function test_property_8_reassignment_updates_asesor_and_resets_deadline(): void
+    public function test_property_8_reassignment_updates_asesor_and_resets_deadline(): void
     {
         $faker = Faker::create();
 
@@ -223,7 +229,7 @@ public function test_property_8_reassignment_updates_asesor_and_resets_deadline(
      *
      * **Validates: Requirements 6.6**
      */
-public function test_property_9_edpm_data_preserved_after_reassignment(): void
+    public function test_property_9_edpm_data_preserved_after_reassignment(): void
     {
         $faker = Faker::create();
 
@@ -235,7 +241,7 @@ public function test_property_9_edpm_data_preserved_after_reassignment(): void
         config(['akreditasi-timeout.assessment.default_duration_days' => 30]);
 
         // Create master EDPM data once (reused across iterations)
-        [$komponen, $butir] = $this->createEdpmMasterData();
+        [$komponen, $butirs] = $this->createEdpmMasterData(5);
 
         for ($i = 0; $i < 100; $i++) {
             // Create a fresh akreditasi for each iteration
@@ -262,7 +268,7 @@ public function test_property_9_edpm_data_preserved_after_reassignment(): void
                     'akreditasi_id' => $akreditasi->id,
                     'pesantren_id' => $pesantrenUser->id,
                     'asesor_id' => $oldAsesor->id,
-                    'butir_id' => $butir->id,
+                    'butir_id' => $butirs[$j]->id,
                     'isian' => $faker->randomElement(['A', 'B', 'C', 'D']),
                     'nk' => $faker->numberBetween(1, 100),
                     'nv' => $faker->numberBetween(1, 100),
@@ -342,8 +348,8 @@ public function test_property_9_edpm_data_preserved_after_reassignment(): void
             $assessment->forceDelete();
             AkreditasiEdpm::where('akreditasi_id', $akreditasi->id)->forceDelete();
             AkreditasiEdpmCatatan::where('akreditasi_id', $akreditasi->id)->forceDelete();
-            \Illuminate\Support\Facades\DB::table('akreditasis')->where('id', $akreditasi->id)->delete();
-            \Illuminate\Support\Facades\DB::table('users')->where('id', $pesantrenUser->id)->delete();
+            DB::table('akreditasis')->where('id', $akreditasi->id)->delete();
+            DB::table('users')->where('id', $pesantrenUser->id)->delete();
         }
 
         Carbon::setTestNow();
@@ -363,7 +369,7 @@ public function test_property_9_edpm_data_preserved_after_reassignment(): void
      *
      * **Validates: Requirements 6.4, 6.5**
      */
-public function test_integration_reassignment_sends_notifications_to_both_asesors(): void
+    public function test_integration_reassignment_sends_notifications_to_both_asesors(): void
     {
         Notification::fake();
 
@@ -406,7 +412,7 @@ public function test_integration_reassignment_sends_notifications_to_both_asesor
      *
      * **Validates: Requirements 6.4**
      */
-public function test_integration_new_asesor_notification_contains_pesantren_and_deadline(): void
+    public function test_integration_new_asesor_notification_contains_pesantren_and_deadline(): void
     {
         Notification::fake();
 
@@ -463,7 +469,7 @@ public function test_integration_new_asesor_notification_contains_pesantren_and_
      *
      * **Validates: Requirements 6.7**
      */
-public function test_unit_reassignment_on_non_overdue_throws_domain_exception(): void
+    public function test_unit_reassignment_on_non_overdue_throws_domain_exception(): void
     {
         $today = Carbon::create(2025, 9, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -497,7 +503,7 @@ public function test_unit_reassignment_on_non_overdue_throws_domain_exception():
      *
      * **Validates: Requirements 6.7**
      */
-public function test_unit_reassignment_on_deadline_today_throws_domain_exception(): void
+    public function test_unit_reassignment_on_deadline_today_throws_domain_exception(): void
     {
         $today = Carbon::create(2025, 9, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -529,7 +535,7 @@ public function test_unit_reassignment_on_deadline_today_throws_domain_exception
      *
      * **Validates: Requirements 6.1**
      */
-public function test_unit_reassignment_on_overdue_does_not_throw(): void
+    public function test_unit_reassignment_on_overdue_does_not_throw(): void
     {
         Notification::fake();
 
@@ -561,7 +567,7 @@ public function test_unit_reassignment_on_overdue_does_not_throw(): void
      *
      * **Validates: Requirements 6.7**
      */
-public function test_unit_reassignment_on_far_future_deadline_throws_domain_exception(): void
+    public function test_unit_reassignment_on_far_future_deadline_throws_domain_exception(): void
     {
         $today = Carbon::create(2025, 9, 1, 0, 0, 0);
         Carbon::setTestNow($today);

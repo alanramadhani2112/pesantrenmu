@@ -5,14 +5,20 @@ namespace App\Services;
 use App\Models\Akreditasi;
 use App\Models\Asesor;
 use App\Models\Assessment;
+use App\Models\User;
+use App\Notifications\AkreditasiNotification;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class DeadlineService
 {
     protected int $assessmentDurationDays;
+
     protected int $visitasiDurationDays;
+
     protected int $reminderDaysBeforeDeadline;
+
     protected int $escalationIntervalDays;
 
     public function __construct()
@@ -146,7 +152,7 @@ class DeadlineService
                     : "Deadline {$phase} untuk {$pesantrenName} adalah {$deadline}. Segera selesaikan tugas Anda.";
 
                 $assessment->asesor->user->notify(
-                    new \App\Notifications\AkreditasiNotification($type, $title, $message)
+                    new AkreditasiNotification($type, $title, $message)
                 );
 
                 $assessment->update(['last_reminder_sent_at' => now()]);
@@ -162,10 +168,11 @@ class DeadlineService
     {
         $overdueAkreditasiList = $this->getOverdueAkreditasi()->load(['user.pesantren', 'assessments.asesor.user']);
 
-        $admins = \App\Models\User::where('role_id', 1)->get();
+        $admins = User::where('role_id', 1)->get();
 
         if ($admins->isEmpty()) {
-            \Illuminate\Support\Facades\Log::error('DeadlineService: No admin users found for escalation notifications.');
+            Log::error('DeadlineService: No admin users found for escalation notifications.');
+
             return;
         }
 
@@ -201,13 +208,13 @@ class DeadlineService
                 $type = 'deadline_overdue_escalation';
                 $title = "Eskalasi: {$phase} Terlambat - {$pesantrenName}";
                 $message = "{$phase} untuk {$pesantrenName} telah melewati deadline. "
-                    . "Asesor: {$asesorName}. "
-                    . "Deadline: {$deadline}. "
-                    . "Terlambat: {$daysOverdue} hari.";
+                    ."Asesor: {$asesorName}. "
+                    ."Deadline: {$deadline}. "
+                    ."Terlambat: {$daysOverdue} hari.";
 
                 foreach ($admins as $admin) {
                     $admin->notify(
-                        new \App\Notifications\AkreditasiNotification($type, $title, $message)
+                        new AkreditasiNotification($type, $title, $message)
                     );
                 }
 
@@ -238,6 +245,7 @@ class DeadlineService
         $newDeadline = Carbon::today()->addDays($duration);
 
         $oldAsesorId = $assessment->asesor_id;
+        $oldAsesor = Asesor::with('user')->find($oldAsesorId);
 
         $assessment->update([
             'asesor_id' => $newAsesorId,
@@ -258,8 +266,22 @@ class DeadlineService
 
         // Notify new asesor
         $newAsesor = Asesor::with('user')->find($newAsesorId);
+
+        app(AuditTrailService::class)->log(
+            akreditasiId: $assessment->akreditasi_id,
+            actionType: 'asesor_reassigned',
+            oldValue: $oldAsesor?->nama_dengan_gelar ?? $oldAsesor?->nama_tanpa_gelar,
+            newValue: $newAsesor?->nama_dengan_gelar ?? $newAsesor?->nama_tanpa_gelar,
+            metadata: [
+                'old_asesor_id' => $oldAsesorId,
+                'new_asesor_id' => $newAsesorId,
+                'assessment_id' => $assessment->id,
+                'tipe' => $assessment->tipe,
+            ],
+        );
+
         if ($newAsesor && $newAsesor->user) {
-            $newAsesor->user->notify(new \App\Notifications\AkreditasiNotification(
+            $newAsesor->user->notify(new AkreditasiNotification(
                 'asesor_reassigned_new',
                 "Tugas {$phaseLabel} Baru",
                 "Anda telah ditugaskan untuk {$phaseLabel} pesantren {$pesantrenName}. Deadline: {$deadlineFormatted}."
@@ -267,9 +289,8 @@ class DeadlineService
         }
 
         // Notify old asesor
-        $oldAsesor = Asesor::with('user')->find($oldAsesorId);
         if ($oldAsesor && $oldAsesor->user) {
-            $oldAsesor->user->notify(new \App\Notifications\AkreditasiNotification(
+            $oldAsesor->user->notify(new AkreditasiNotification(
                 'asesor_reassigned_old',
                 "Tugas {$phaseLabel} Dialihkan",
                 "Tugas {$phaseLabel} Anda untuk pesantren {$pesantrenName} telah dialihkan ke asesor lain."

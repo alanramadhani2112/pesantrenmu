@@ -36,6 +36,14 @@
     $classes = $unstyled
         ? trim($sizes[$size] ?? '')
         : trim('btn spm-btn ' . ($variants[$variant] ?? $variants['primary']) . ' fw-semibold ' . ($sizes[$size] ?? ''));
+
+    $buttonAttributes = $attributes->merge(['class' => $classes]);
+
+    if ($type === 'submit') {
+        $buttonAttributes = $buttonAttributes->merge([
+            'data-spm-submit-button' => 'true',
+        ]);
+    }
 @endphp
 
 @if($href)
@@ -49,7 +57,7 @@
         @endif
     </a>
 @else
-    <button type="{{ $type }}" data-ui-button="metronic" {{ $attributes->merge(['class' => $classes]) }}>
+    <button type="{{ $type }}" data-ui-button="metronic" {{ $buttonAttributes }}>
         @if($icon && $iconPosition === 'start')
             <x-ui.icon :name="$icon" :class="$iconClasses" />
         @endif

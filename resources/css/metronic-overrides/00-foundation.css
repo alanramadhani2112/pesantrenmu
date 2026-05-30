@@ -1,0 +1,465 @@
+/*
+ * SPM brand layer for Metronic.
+ *
+ * Keep this file isolated from resources/css/app.css so the existing
+ * Tailwind-based layout remains unchanged until a Metronic layout opts in.
+ */
+
+/*
+ * ── SPM Brand Color System ───────────────────────────────────
+ *
+ *  Primary    #005533  hsl(156,100%,17%)  — Hijau tua Islami / akademik
+ *  Secondary  #F36500  hsl(25,100%,48%)   — Oranye energi / CTA
+ *  Text       #1A1A1A  body, #111111      — headings (hitam)
+ *
+ *  Usage:
+ *    Primary   → sidebar, header, links, tabs, primary buttons, accents
+ *    Secondary → CTAs, danger/warning badges, highlight elements
+ *    Text      → always black; never green or orange for readability
+ * ───────────────────────────────────────────────────────────── */
+
+:root,
+[data-bs-theme="light"] {
+
+    /* ── Primary Green (hijau merek) ── */
+    --spm-primary-50:  #e6f0eb;
+    --spm-primary-100: #b3d1c2;
+    --spm-primary-200: #80b399;
+    --spm-primary-300: #4d9470;
+    --spm-primary-400: #1a7547;
+    --spm-primary-500: #005533;
+    --spm-primary-600: #004d2d;
+    --spm-primary-700: #003d24;
+    --spm-primary-800: #002e1b;
+    --spm-primary-900: #001f12;
+
+    --spm-primary:         var(--spm-primary-500);
+    --spm-primary-active:  var(--spm-primary-700);
+    --spm-primary-hover:   var(--spm-primary-600);
+    --spm-primary-light:   var(--spm-primary-50);
+    --spm-primary-subtle:  #f0faf5;
+    --spm-primary-rgb:     0, 85, 51;
+
+    /* ── Secondary Orange (aksen / CTA) ── */
+    --spm-secondary-50:  #fff0e6;
+    --spm-secondary-100: #ffd1b3;
+    --spm-secondary-200: #ffb380;
+    --spm-secondary-300: #ff944d;
+    --spm-secondary-400: #ff751a;
+    --spm-secondary-500: #f36500;
+    --spm-secondary-600: #cc5500;
+    --spm-secondary-700: #a34400;
+    --spm-secondary-800: #7a3300;
+    --spm-secondary-900: #522200;
+
+    --spm-secondary:        var(--spm-secondary-500);
+    --spm-secondary-hover:  var(--spm-secondary-600);
+    --spm-secondary-active: var(--spm-secondary-700);
+    --spm-secondary-light:  var(--spm-secondary-50);
+    --spm-secondary-rgb:    243, 101, 0;
+
+    /* ── Text (hitam) ── */
+    --spm-text-body:    #1A1A1A;
+    --spm-text-heading: #111111;
+    --spm-text-muted:   #667085;
+    --spm-text-subtle:  #7c8aa0;
+
+    /* ── Semantic ── */
+    --spm-success: #10b981;
+    --spm-success-active: #059669;
+    --spm-success-light: #ecfdf5;
+    --spm-warning: #f59e0b;
+    --spm-warning-active: #d97706;
+    --spm-warning-light: #fffbeb;
+    --spm-danger: #ef4444;
+    --spm-danger-active: #dc2626;
+    --spm-danger-light: #fef2f2;
+    --spm-info: #0e9384;
+    --spm-info-active: #0a6f60;
+    --spm-info-light: #e6f7f4;
+    --spm-info-rgb: 14, 147, 132;
+
+    /* ── Bootstrap bridge ── */
+    --bs-font-sans-serif: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+    --bs-primary:          var(--spm-primary);
+    --bs-primary-active:   var(--spm-primary-active);
+    --bs-primary-light:    var(--spm-primary-light);
+    --bs-primary-inverse:  #ffffff;
+    --bs-primary-rgb:      var(--spm-primary-rgb);
+    --bs-text-primary:     var(--spm-primary);
+
+    --bs-secondary:        var(--spm-secondary);
+    --bs-secondary-active: var(--spm-secondary-active);
+    --bs-secondary-light:  var(--spm-secondary-light);
+    --bs-secondary-rgb:    var(--spm-secondary-rgb);
+
+    --bs-component-active-bg:  var(--spm-primary);
+    --bs-component-hover-color: var(--spm-primary);
+    --bs-component-checked-bg:  var(--spm-primary);
+
+    --bs-success:         var(--spm-success);
+    --bs-success-active:  var(--spm-success-active);
+    --bs-success-light:   var(--spm-success-light);
+    --bs-warning:         var(--spm-warning);
+    --bs-warning-active:  var(--spm-warning-active);
+    --bs-warning-light:   var(--spm-warning-light);
+    --bs-danger:          var(--spm-danger);
+    --bs-danger-active:   var(--spm-danger-active);
+    --bs-danger-light:    var(--spm-danger-light);
+    --bs-info:            var(--spm-info);
+    --bs-info-active:     var(--spm-info-active);
+    --bs-info-light:      var(--spm-info-light);
+    --bs-info-rgb:        var(--spm-info-rgb);
+
+    /* ── Metronic KTUil bridge (JS themes, charts) ── */
+    --kt-primary:   var(--spm-primary);
+    --kt-secondary: var(--spm-secondary);
+    --kt-success:   var(--spm-success);
+    --kt-info:      var(--spm-info);
+    --kt-warning:   var(--spm-warning);
+    --kt-danger:    var(--spm-danger);
+    --kt-dark:      var(--spm-primary-900);
+    --kt-light:     var(--spm-primary-50);
+}
+
+html,
+body {
+    font-family: var(--bs-font-sans-serif);
+    font-size: 16px;
+    line-height: 1.5;
+    letter-spacing: 0;
+    color: var(--spm-text-body);
+}
+
+h1, h2, h3, h4, h5, h6,
+.page-title,
+.spm-heading {
+    color: var(--spm-text-heading);
+}
+
+.font-sans,
+body.font-sans {
+    font-family: var(--bs-font-sans-serif) !important;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+    font-family: var(--bs-font-sans-serif);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    letter-spacing: 0;
+}
+
+#nprogress {
+    display: none !important;
+    pointer-events: none;
+}
+
+.spm-page-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 2200;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+}
+
+body:not([data-kt-app-page-loading="on"]) .spm-page-loader {
+    display: none !important;
+}
+
+body[data-kt-app-page-loading="on"] .spm-page-loader {
+    display: flex !important;
+}
+
+.spm-page-loader .spinner-border {
+    width: 3rem;
+    height: 3rem;
+    color: var(--spm-primary) !important;
+    border-width: 0.32rem;
+}
+
+.spm-auth-body {
+    background-color: #f5f7fa;
+}
+
+.spm-auth-shell {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background:
+        linear-gradient(115deg, rgba(var(--spm-primary-rgb), 0.07) 0 1px, transparent 1px 96px),
+        linear-gradient(180deg, #ffffff 0%, #f5f7fa 100%);
+}
+
+.spm-auth-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+        linear-gradient(135deg, transparent 0 58%, rgba(var(--spm-primary-rgb), 0.08) 58% 100%),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0));
+    pointer-events: none;
+}
+
+.spm-auth-shell > * {
+    position: relative;
+    z-index: 1;
+}
+
+.spm-auth-form-pane {
+    background-color: rgba(255, 255, 255, 0.78);
+}
+
+.spm-auth-card {
+    position: relative;
+    border: 1px solid #dde5ee !important;
+    border-radius: 8px;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.1);
+}
+
+.spm-auth-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    background: linear-gradient(90deg, var(--spm-primary), var(--spm-secondary));
+    border-radius: 8px 8px 0 0;
+}
+
+.spm-auth-card .form-control,
+.spm-auth-card .form-control.form-control-solid {
+    background-color: #f8fafc !important;
+    border: 1px solid #e4e9f2 !important;
+    box-shadow: inset 0 1px 0 rgba(16, 24, 40, 0.02);
+}
+
+.spm-auth-card .form-control:focus {
+    background-color: #ffffff !important;
+    border-color: rgba(var(--spm-primary-rgb), 0.42) !important;
+    box-shadow: 0 0 0 3px rgba(var(--spm-primary-rgb), 0.1);
+}
+
+.spm-auth-aside {
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 84px),
+        linear-gradient(160deg, var(--spm-primary-900), var(--spm-primary-700));
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.spm-auth-aside-card {
+    position: relative;
+    overflow: hidden;
+    padding: 44px;
+    color: #ffffff;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 80px),
+        linear-gradient(180deg, rgba(0, 46, 27, 0.94), rgba(0, 31, 18, 0.9));
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    box-shadow: 0 24px 70px rgba(0, 31, 18, 0.36);
+}
+
+.spm-auth-aside-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    background: linear-gradient(90deg, var(--spm-secondary), rgba(255, 255, 255, 0.7));
+}
+
+.spm-auth-aside-card .text-gray-900 {
+    color: #ffffff !important;
+}
+
+.spm-auth-aside-card .text-gray-600 {
+    color: #b3d1c2 !important;
+}
+
+.spm-auth-aside-kicker {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 0 10px;
+    margin-bottom: 22px;
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.spm-auth-access-board {
+    display: grid;
+    gap: 10px;
+}
+
+.spm-auth-access-item {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+    min-height: 82px;
+    padding: 14px;
+    background-color: rgba(255, 255, 255, 0.09);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+}
+
+.spm-auth-access-item > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.13);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.spm-auth-access-item strong {
+    display: block;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.spm-auth-access-item small {
+    display: block;
+    margin-top: 4px;
+    color: #b3d1c2;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.45;
+}
+
+.spm-auth-access-item.is-current {
+    background-color: rgba(var(--spm-secondary-rgb), 0.18);
+    border-color: rgba(var(--spm-secondary-rgb), 0.42);
+}
+
+.spm-auth-access-item.is-current > span {
+    background-color: var(--spm-secondary);
+    border-color: var(--spm-secondary);
+}
+
+.spm-auth-metric {
+    height: 100%;
+    padding: 16px;
+    background-color: #f8fafc;
+    border: 1px solid #e8edf4;
+    border-radius: 8px;
+}
+
+.spm-auth-role-strip,
+.spm-auth-workflow {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.spm-auth-role-strip span {
+    min-width: 0;
+    min-height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    color: var(--spm-primary);
+    background-color: var(--spm-primary-subtle);
+    border: 1px solid rgba(var(--spm-primary-rgb), 0.14);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.spm-auth-step {
+    min-width: 0;
+    padding: 14px;
+    color: #667085;
+    background-color: #f8fafc;
+    border: 1px solid #e8edf4;
+    border-radius: 8px;
+}
+
+.spm-auth-step span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin-bottom: 10px;
+    color: #667085;
+    background-color: #ffffff;
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.spm-auth-step strong {
+    display: block;
+    color: #344054;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.spm-auth-step.is-done {
+    border-color: rgba(var(--spm-primary-rgb), 0.2);
+    background-color: var(--spm-primary-subtle);
+}
+
+.spm-auth-step.is-done span,
+.spm-auth-step.is-active span {
+    color: #ffffff;
+    background-color: var(--spm-primary);
+    border-color: var(--spm-primary);
+}
+
+.spm-auth-step.is-active {
+    border-color: rgba(var(--spm-secondary-rgb), 0.28);
+    background-color: var(--spm-secondary-light);
+}
+
+.spm-auth-step.is-active span {
+    background-color: var(--spm-secondary);
+    border-color: var(--spm-secondary);
+}
+
+.spm-auth-footer {
+    min-height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 20px;
+    color: #667085;
+    background-color: rgba(255, 255, 255, 0.82);
+    border-top: 1px solid #e8edf4;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.5;
+    text-align: center;
+}
+

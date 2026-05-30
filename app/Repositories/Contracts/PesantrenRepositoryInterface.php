@@ -2,8 +2,8 @@
 
 namespace App\Repositories\Contracts;
 
-use App\Models\User;
 use App\Models\Pesantren;
+use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 interface PesantrenRepositoryInterface
@@ -16,7 +16,7 @@ interface PesantrenRepositoryInterface
 
     public function updatePesantren(int $id, array $data): bool;
 
-    public function findByUserId(int $userId): ?\App\Models\Pesantren;
+    public function findByUserId(int $userId): ?Pesantren;
 
     public function updateByUserId(int $userId, array $data): bool;
 }

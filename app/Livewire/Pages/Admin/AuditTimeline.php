@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Pages\Admin;
 
-use App\Models\AkreditasiAuditLog;
 use App\Services\AuditTrailService;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -60,7 +60,7 @@ class AuditTimeline extends Component
     /**
      * Get the list of actors (users) who have audit logs for this akreditasi.
      */
-    public function getActorsProperty(): \Illuminate\Support\Collection
+    public function getActorsProperty(): Collection
     {
         return DB::table('akreditasi_audit_logs')
             ->join('users', 'akreditasi_audit_logs.user_id', '=', 'users.id')

@@ -3,7 +3,10 @@
 namespace App\Services\Sso;
 
 use App\Models\Profile;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -13,19 +16,18 @@ class UserService
 
     protected static function serverUrl(string $path): string
     {
-        return rtrim((string) config('sso.server_url'), '/') . '/' . ltrim($path, '/');
+        return rtrim((string) config('sso.server_url'), '/').'/'.ltrim($path, '/');
     }
-    
+
     protected static function getCredentials(string $token): mixed
     {
         self::$token = $token;
 
-        $req = \Illuminate\Support\Facades\Http::timeout(config('sso.timeout', 10))
+        $req = Http::timeout(config('sso.timeout', 10))
             ->withHeaders([
                 'Accept' => 'application/json',
-                'Authorization' => 'Bearer ' . self::$token,
+                'Authorization' => 'Bearer '.self::$token,
             ])->get(self::serverUrl('api/user'));
-
 
         if ($req->successful()) {
             return $req->json();
@@ -40,7 +42,7 @@ class UserService
             return null;
         }
 
-        $user = \App\Models\User::with('profile_data')->where('email', $user_data['email'])->first();
+        $user = User::with('profile_data')->where('email', $user_data['email'])->first();
 
         if (empty($user)) {
             $profile = Profile::with('user')->where('data->id', $user_data['id'])->first();
@@ -55,10 +57,10 @@ class UserService
         };
 
         if (empty($user)) {
-            $user = \App\Models\User::create([
+            $user = User::create([
                 'email' => $user_data['email'],
                 'name' => $user_data['name'],
-                'password' => \Illuminate\Support\Facades\Hash::make(Str::random()),
+                'password' => Hash::make(Str::random()),
                 'uuid' => str()->uuid(),
                 'role_id' => $role_id,
                 'sso_linked_at' => now(),
@@ -115,11 +117,13 @@ class UserService
         return $user;
     }
 
-    public static function getUser(string $token): Model | null
+    public static function getUser(string $token): ?Model
     {
         $credentials = self::getCredentials($token);
 
-        if (empty($credentials['id'])) return null;
+        if (empty($credentials['id'])) {
+            return null;
+        }
 
         return self::findOrCreate($credentials);
     }

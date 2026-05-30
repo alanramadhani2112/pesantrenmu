@@ -21,6 +21,7 @@ class RejectionServiceUnitTest extends TestCase
     use RefreshDatabase;
 
     protected RejectionService $rejectionService;
+
     protected PesantrenService $pesantrenService;
 
     protected function setUp(): void
@@ -34,12 +35,12 @@ class RejectionServiceUnitTest extends TestCase
     /**
      * Helper: create a pesantren user with locked pesantren and akreditasi at status 5.
      */
-private function createLockedPesantrenSetup(array $rejectedItems = ['profil']): array
+    private function createLockedPesantrenSetup(array $rejectedItems = ['profil']): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         $pesantren = Pesantren::create([
             'user_id' => $pesantrenUser->id,
-            'nama_pesantren' => 'Pesantren Test ' . $pesantrenUser->id,
+            'nama_pesantren' => 'Pesantren Test '.$pesantrenUser->id,
             'is_locked' => true,
         ]);
 
@@ -87,8 +88,8 @@ private function createLockedPesantrenSetup(array $rejectedItems = ['profil']): 
     // =========================================================================
     // Task 13.6: Profile editing allowed only when 'profil' is in rejected items
     // =========================================================================
-#[Test]
-public function profile_editing_allowed_when_profil_is_in_rejected_items(): void
+    #[Test]
+    public function profile_editing_allowed_when_profil_is_in_rejected_items(): void
     {
         $setup = $this->createLockedPesantrenSetup(['profil']);
 
@@ -99,8 +100,9 @@ public function profile_editing_allowed_when_profil_is_in_rejected_items(): void
 
         $this->assertTrue($isUnlocked);
     }
-#[Test]
-public function profile_editing_blocked_when_profil_is_not_in_rejected_items(): void
+
+    #[Test]
+    public function profile_editing_blocked_when_profil_is_not_in_rejected_items(): void
     {
         $setup = $this->createLockedPesantrenSetup(['ipm.nsp', 'sdm']);
 
@@ -111,8 +113,9 @@ public function profile_editing_blocked_when_profil_is_not_in_rejected_items(): 
 
         $this->assertFalse($isUnlocked);
     }
-#[Test]
-public function profile_editing_blocked_when_no_active_rejection(): void
+
+    #[Test]
+    public function profile_editing_blocked_when_no_active_rejection(): void
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -133,8 +136,9 @@ public function profile_editing_blocked_when_no_active_rejection(): void
 
         $this->assertFalse($isUnlocked);
     }
-#[Test]
-public function profile_update_service_allows_when_profil_unlocked(): void
+
+    #[Test]
+    public function profile_update_service_allows_when_profil_unlocked(): void
     {
         $setup = $this->createLockedPesantrenSetup(['profil']);
 
@@ -147,8 +151,9 @@ public function profile_update_service_allows_when_profil_unlocked(): void
         $setup['pesantren']->refresh();
         $this->assertEquals('Pesantren Updated Name', $setup['pesantren']->nama_pesantren);
     }
-#[Test]
-public function profile_update_service_blocks_when_profil_not_unlocked(): void
+
+    #[Test]
+    public function profile_update_service_blocks_when_profil_not_unlocked(): void
     {
         $setup = $this->createLockedPesantrenSetup(['ipm.nsp']);
 
@@ -161,8 +166,9 @@ public function profile_update_service_blocks_when_profil_not_unlocked(): void
         $setup['pesantren']->refresh();
         $this->assertNotEquals('Should Not Update', $setup['pesantren']->nama_pesantren);
     }
-#[Test]
-public function profile_update_service_allows_when_pesantren_not_locked(): void
+
+    #[Test]
+    public function profile_update_service_allows_when_pesantren_not_locked(): void
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -182,8 +188,8 @@ public function profile_update_service_allows_when_pesantren_not_locked(): void
     // =========================================================================
     // Task 13.7: IPM sub-item granular unlock works correctly
     // =========================================================================
-#[Test]
-public function ipm_nsp_unlocked_when_in_rejected_items(): void
+    #[Test]
+    public function ipm_nsp_unlocked_when_in_rejected_items(): void
     {
         $setup = $this->createLockedPesantrenSetup(['ipm.nsp']);
 
@@ -192,8 +198,9 @@ public function ipm_nsp_unlocked_when_in_rejected_items(): void
         $this->assertFalse($this->rejectionService->isSectionUnlocked($setup['akreditasi']->id, 'ipm.buku_ajar'));
         $this->assertFalse($this->rejectionService->isSectionUnlocked($setup['akreditasi']->id, 'ipm.lulus_santri'));
     }
-#[Test]
-public function ipm_multiple_sub_items_unlocked(): void
+
+    #[Test]
+    public function ipm_multiple_sub_items_unlocked(): void
     {
         $setup = $this->createLockedPesantrenSetup(['ipm.kurikulum', 'ipm.buku_ajar']);
 
@@ -202,8 +209,9 @@ public function ipm_multiple_sub_items_unlocked(): void
         $this->assertTrue($this->rejectionService->isSectionUnlocked($setup['akreditasi']->id, 'ipm.buku_ajar'));
         $this->assertFalse($this->rejectionService->isSectionUnlocked($setup['akreditasi']->id, 'ipm.lulus_santri'));
     }
-#[Test]
-public function ipm_update_service_allows_only_unlocked_sub_items(): void
+
+    #[Test]
+    public function ipm_update_service_allows_only_unlocked_sub_items(): void
     {
         $setup = $this->createLockedPesantrenSetup(['ipm.nsp', 'ipm.kurikulum']);
 
@@ -230,8 +238,9 @@ public function ipm_update_service_allows_only_unlocked_sub_items(): void
         $this->assertNull($ipm->buku_ajar_file); // Should not be updated
         $this->assertNull($ipm->lulus_santri_file); // Should not be updated
     }
-#[Test]
-public function ipm_update_service_blocks_all_when_no_ipm_items_unlocked(): void
+
+    #[Test]
+    public function ipm_update_service_blocks_all_when_no_ipm_items_unlocked(): void
     {
         $setup = $this->createLockedPesantrenSetup(['profil', 'sdm']);
 
@@ -245,8 +254,9 @@ public function ipm_update_service_blocks_all_when_no_ipm_items_unlocked(): void
 
         $this->assertFalse($result);
     }
-#[Test]
-public function ipm_update_service_allows_all_when_pesantren_not_locked(): void
+
+    #[Test]
+    public function ipm_update_service_allows_all_when_pesantren_not_locked(): void
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
@@ -274,8 +284,8 @@ public function ipm_update_service_allows_all_when_pesantren_not_locked(): void
     // =========================================================================
     // Task 13.8: EDPM butir-level granular unlock works correctly
     // =========================================================================
-#[Test]
-public function edpm_butir_unlocked_when_in_rejected_items(): void
+    #[Test]
+    public function edpm_butir_unlocked_when_in_rejected_items(): void
     {
         $setup = $this->createLockedPesantrenSetup(['edpm.butir.3', 'edpm.butir.7']);
 
@@ -284,8 +294,9 @@ public function edpm_butir_unlocked_when_in_rejected_items(): void
         $this->assertFalse($this->rejectionService->isSectionUnlocked($setup['akreditasi']->id, 'edpm.butir.1'));
         $this->assertFalse($this->rejectionService->isSectionUnlocked($setup['akreditasi']->id, 'edpm.butir.5'));
     }
-#[Test]
-public function edpm_butir_not_unlocked_when_other_sections_rejected(): void
+
+    #[Test]
+    public function edpm_butir_not_unlocked_when_other_sections_rejected(): void
     {
         $setup = $this->createLockedPesantrenSetup(['profil', 'ipm.nsp', 'sdm']);
 
@@ -293,8 +304,9 @@ public function edpm_butir_not_unlocked_when_other_sections_rejected(): void
         $this->assertFalse($this->rejectionService->isSectionUnlocked($setup['akreditasi']->id, 'edpm.butir.3'));
         $this->assertFalse($this->rejectionService->isSectionUnlocked($setup['akreditasi']->id, 'edpm.butir.99'));
     }
-#[Test]
-public function edpm_mixed_sections_with_butir_unlock(): void
+
+    #[Test]
+    public function edpm_mixed_sections_with_butir_unlock(): void
     {
         $setup = $this->createLockedPesantrenSetup(['profil', 'edpm.butir.5', 'ipm.kurikulum']);
 
@@ -304,8 +316,9 @@ public function edpm_mixed_sections_with_butir_unlock(): void
         $this->assertFalse($this->rejectionService->isSectionUnlocked($setup['akreditasi']->id, 'sdm'));
         $this->assertFalse($this->rejectionService->isSectionUnlocked($setup['akreditasi']->id, 'edpm.butir.1'));
     }
-#[Test]
-public function edpm_unlock_not_active_after_perbaikan_submitted(): void
+
+    #[Test]
+    public function edpm_unlock_not_active_after_perbaikan_submitted(): void
     {
         $setup = $this->createLockedPesantrenSetup(['edpm.butir.3']);
 
@@ -315,8 +328,9 @@ public function edpm_unlock_not_active_after_perbaikan_submitted(): void
         // After submission, no sections should be unlocked
         $this->assertFalse($this->rejectionService->isSectionUnlocked($setup['akreditasi']->id, 'edpm.butir.3'));
     }
-#[Test]
-public function get_unlocked_sections_returns_all_rejected_items(): void
+
+    #[Test]
+    public function get_unlocked_sections_returns_all_rejected_items(): void
     {
         $items = ['profil', 'ipm.nsp', 'edpm.butir.3', 'edpm.butir.7'];
         $setup = $this->createLockedPesantrenSetup($items);
@@ -325,8 +339,9 @@ public function get_unlocked_sections_returns_all_rejected_items(): void
 
         $this->assertEquals($items, $unlocked);
     }
-#[Test]
-public function get_unlocked_sections_returns_empty_when_no_active_rejection(): void
+
+    #[Test]
+    public function get_unlocked_sections_returns_empty_when_no_active_rejection(): void
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([

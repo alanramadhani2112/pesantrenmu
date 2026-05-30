@@ -2,8 +2,6 @@
 
 namespace Tests\Feature\Trash;
 
-use App\Models\Akreditasi;
-use App\Models\Pesantren;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RolePermissionSeeder;

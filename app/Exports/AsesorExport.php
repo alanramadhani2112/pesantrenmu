@@ -11,10 +11,15 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 class AsesorExport implements FromCollection, WithHeadings, WithMapping
 {
     protected $search;
+
     protected $filterPeran;
+
     protected $filterPenugasan;
+
     protected $filterStatus;
+
     protected $sortField;
+
     protected $sortAsc;
 
     public function __construct($search = '', $filterPeran = '', $filterPenugasan = '', $filterStatus = '', $sortField = 'name', $sortAsc = true)
@@ -31,7 +36,7 @@ class AsesorExport implements FromCollection, WithHeadings, WithMapping
     {
         return User::where('role_id', 2)
             ->when($this->search, function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%');
+                $query->where('name', 'like', '%'.$this->search.'%');
             })
             ->when($this->filterStatus !== '', function ($query) {
                 $query->where('status', $this->filterStatus);

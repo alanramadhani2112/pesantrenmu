@@ -347,7 +347,7 @@ new #[Layout('layouts.app')] class extends Component {
                         >
                             <span class="{{ $badgeClass }} me-3">{{ $index + 1 }}</span>
                             <span class="d-flex flex-column text-start min-w-0">
-                                <span class="fw-bold text-truncate">{{ $komponen->nama }}</span>
+                                <span class="fw-semibold text-truncate">{{ $komponen->nama }}</span>
                                 <span class="fs-8 opacity-75 text-truncate">{{ count($komponen->butirs) }} butir</span>
                             </span>
                         </x-ui.button>
@@ -383,11 +383,11 @@ new #[Layout('layouts.app')] class extends Component {
                                 @php $butirEditable = $this->isButirEditable($butir->id); @endphp
                                 <tr class="{{ ($isLocked && $butirEditable) ? 'bg-warning bg-opacity-10' : '' }}">
                                     <td class="ps-4 align-top">
-                                        <div class="fw-bold text-gray-900">{{ $currentKomponen->nama }}</div>
+                                        <div class="fw-semibold text-gray-900">{{ $currentKomponen->nama }}</div>
                                         <div class="text-muted fs-8">{{ $groupLabel }}</div>
                                     </td>
                                     <td class="align-top">
-                                        <div class="fw-bold text-gray-900">
+                                        <div class="fw-semibold text-gray-900">
                                             <x-ui.badge variant="primary">{{ $butir->nomor_butir }}</x-ui.badge>
                                         </div>
                                         <div class="text-muted fs-8 mt-2">SK {{ $butir->no_sk ?: '-' }}</div>

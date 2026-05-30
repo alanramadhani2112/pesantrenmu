@@ -3,10 +3,20 @@
     'subtitle' => null,
     'records' => null,
     'showPerPage' => true,
+    'perPagePosition' => 'toolbar',
+    'perPageVariant' => 'labeled',
+    'tableClass' => null,
 ])
 
+@php
+    $perPagePosition = in_array($perPagePosition, ['toolbar', 'footer'], true) ? $perPagePosition : 'toolbar';
+    $showToolbarPerPage = $showPerPage && $perPagePosition === 'toolbar';
+    $showFooterPerPage = $showPerPage && $perPagePosition === 'footer';
+    $tableClasses = $tableClass ?: 'table table-striped table-row-bordered align-middle gy-5 gs-7 mb-0 spm-datatable spm-table spm-table--list spm-table--metronic-docs';
+@endphp
+
 <div data-ui-table="metronic" {{ $attributes->merge(['class' => 'card spm-table-shell spm-table-shell--standard']) }}>
-    @if($title || $subtitle || isset($filters) || isset($toolbar))
+    @if($title || $subtitle || isset($filters) || isset($toolbar) || $showToolbarPerPage)
         <div class="card-header border-0 spm-table-header">
             <div class="spm-table-heading">
                 @if($title)
@@ -26,8 +36,27 @@
 
             @isset($filters)
                 <div class="spm-table-controls">
-                    <div class="spm-table-filter-row">
-                        {{ $filters }}
+                    <div class="spm-table-dom-row">
+                        <div class="spm-table-dom-start">
+                            <div class="spm-table-filter-row">
+                                {{ $filters }}
+                            </div>
+                        </div>
+
+                        @if($showToolbarPerPage)
+                            <div class="spm-table-dom-end">
+                                <x-ui.table-per-page :variant="$perPageVariant" />
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @elseif($showToolbarPerPage)
+                <div class="spm-table-controls">
+                    <div class="spm-table-dom-row">
+                        <div class="spm-table-dom-start"></div>
+                        <div class="spm-table-dom-end">
+                            <x-ui.table-per-page :variant="$perPageVariant" />
+                        </div>
                     </div>
                 </div>
             @endisset
@@ -35,14 +64,8 @@
     @endif
 
     <div class="card-body pt-0 spm-table-body-wrap">
-        @if($showPerPage)
-            <div class="spm-table-utility-row">
-                <x-ui.table-per-page />
-            </div>
-        @endif
-
         <div class="table-responsive spm-table-scroll">
-            <table class="table table-row-dashed align-middle gs-0 gy-4 mb-0 spm-datatable spm-table spm-table--list">
+            <table class="{{ $tableClasses }}">
                 <thead>
                     <tr class="text-start text-gray-500 fw-semibold gs-0 spm-table-head">
                         {{ $thead }}
@@ -55,12 +78,18 @@
         </div>
 
         @if($records && method_exists($records, 'links'))
-            <div class="spm-table-footer">
-                <div class="spm-table-result-meta">
-                    Menampilkan {{ $records->firstItem() ?? 0 }} sampai {{ $records->lastItem() ?? 0 }} dari {{ $records->total() ?? 0 }} data
+            <div class="spm-table-footer {{ $showFooterPerPage ? 'spm-table-footer--datatable' : '' }}">
+                <div class="spm-table-footer-start">
+                    @if($showFooterPerPage)
+                        <x-ui.table-per-page variant="compact" />
+                    @endif
+
+                    <div class="spm-table-result-meta">
+                        Menampilkan {{ $records->firstItem() ?? 0 }}-{{ $records->lastItem() ?? 0 }} dari {{ $records->total() ?? 0 }} entri
+                    </div>
                 </div>
 
-                <div class="pagination-indonesia">
+                <div class="spm-table-footer-end pagination-indonesia">
                     {{ $records->links('livewire.datatable-pagination') }}
                 </div>
             </div>

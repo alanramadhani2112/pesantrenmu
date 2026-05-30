@@ -30,12 +30,14 @@ class MasterEdpmRepository implements MasterEdpmRepositoryInterface
     public function updateKomponen(int $id, array $data): bool
     {
         $komponen = $this->findKomponen($id);
+
         return $komponen ? $komponen->update($data) : false;
     }
 
     public function deleteKomponen(int $id): bool
     {
         $komponen = $this->findKomponen($id);
+
         return $komponen ? $komponen->delete() : false;
     }
 
@@ -52,12 +54,14 @@ class MasterEdpmRepository implements MasterEdpmRepositoryInterface
     public function updateButir(int $id, array $data): bool
     {
         $butir = $this->findButir($id);
+
         return $butir ? $butir->update($data) : false;
     }
 
     public function deleteButir(int $id): bool
     {
         $butir = $this->findButir($id);
+
         return $butir ? $butir->delete() : false;
     }
 }

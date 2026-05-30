@@ -37,7 +37,7 @@ class UserOnboarding extends Model
     public function markStepVisited(string $stepKey): void
     {
         $visited = $this->visited_steps ?? [];
-        if (!in_array($stepKey, $visited)) {
+        if (! in_array($stepKey, $visited)) {
             $visited[] = $stepKey;
             $this->update(['visited_steps' => $visited]);
         }

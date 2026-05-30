@@ -7,6 +7,7 @@ use App\Models\Asesor;
 use App\Models\Document;
 use App\Models\Pesantren;
 use App\Models\User;
+use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -17,18 +18,66 @@ class MetronicFrontendTest extends TestCase
 {
     use RefreshDatabase;
 
+    private function metronicOverrideCss(): string
+    {
+        $entry = file_get_contents(resource_path('css/metronic-overrides.css'));
+        $modules = collect(glob(resource_path('css/metronic-overrides/*.css')) ?: [])
+            ->sort()
+            ->map(fn (string $path): string => file_get_contents($path))
+            ->implode("\n");
+
+        return $entry."\n".$modules;
+    }
+
+    private function viewSourceWithDescendantPartials(string $path): string
+    {
+        $absolutePath = base_path($path);
+        $source = file_get_contents($absolutePath);
+        $partialRoot = preg_replace('/\.blade\.php$/', '', $absolutePath);
+
+        if (! is_dir($partialRoot)) {
+            return $source;
+        }
+
+        $partials = [];
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($partialRoot)
+        );
+
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getExtension() === 'php') {
+                $partials[] = $file->getPathname();
+            }
+        }
+
+        sort($partials);
+
+        foreach ($partials as $partial) {
+            $source .= "\n".file_get_contents($partial);
+        }
+
+        return $source;
+    }
+
     public function test_public_landing_page_uses_lp2m_positioning_without_legacy_dikdasmen_copy(): void
     {
         $this->withoutVite();
 
-        $this->get('/')
-            ->assertOk()
+        $response = $this->get('/');
+
+        $response->assertOk()
             ->assertSee('Dikembangkan oleh LabMu untuk LP2M')
-            ->assertSee('Sistem Akreditasi Pesantren Muhammadiyah')
+            ->assertSee('Platform Akreditasi LP2M')
+            ->assertSee('Akreditasi pesantren yang tertib, terukur, dan mudah ditindaklanjuti')
             ->assertSee('spm-landing-container', false)
             ->assertDontSee('Dikdasmen', false)
             ->assertDontSee('didaksmen', false)
             ->assertDontSee('didaksemen', false);
+
+        $contentWithoutFooter = preg_replace('/<footer\b[^>]*>.*<\/footer>/sU', '', $response->getContent()) ?? '';
+
+        $this->assertStringNotContainsString('LabMu', $contentWithoutFooter);
+        $this->assertStringNotContainsString('Dikembangkan oleh LabMu', $contentWithoutFooter);
     }
 
     public function test_login_page_loads_metronic_foundation_assets(): void
@@ -37,7 +86,7 @@ class MetronicFrontendTest extends TestCase
 
         $this->get('/login')
             ->assertOk()
-            ->assertSee('vendor/metronic/assets/plugins/global/plugins.bundle.css', false)
+            ->assertDontSee('vendor/metronic/assets/plugins/global/plugins.bundle.css', false)
             ->assertSee('vendor/metronic/assets/css/style.bundle.css', false)
             ->assertDontSee('vendor/metronic/assets/plugins/global/plugins.bundle.js', false)
             ->assertDontSee('vendor/metronic/assets/js/scripts.bundle.js', false)
@@ -55,6 +104,7 @@ class MetronicFrontendTest extends TestCase
     {
         $html = Blade::render(<<<'BLADE'
             <x-ui.button variant="primary">Masuk</x-ui.button>
+            <x-ui.button type="submit" variant="primary">Simpan</x-ui.button>
             <x-ui.badge variant="success">Aktif</x-ui.badge>
             <x-ui.card title="Ringkasan">Konten</x-ui.card>
             <x-ui.breadcrumb :items="[['label' => 'Dashboard', 'url' => '/dashboard'], ['label' => 'Akreditasi']]" />
@@ -84,6 +134,8 @@ class MetronicFrontendTest extends TestCase
             BLADE);
 
         $this->assertStringContainsString('btn btn-primary', $html);
+        $this->assertStringContainsString('type="submit"', $html);
+        $this->assertStringContainsString('data-spm-submit-button="true"', $html);
         $this->assertStringContainsString('badge badge-light-success', $html);
         $this->assertStringContainsString('card', $html);
         $this->assertStringContainsString('Ringkasan', $html);
@@ -92,6 +144,7 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('data-ui-sidebar-section="metronic"', $html);
         $this->assertStringContainsString('spm-sidebar-section-compact', $html);
         $this->assertStringContainsString('data-ui-tabs="metronic"', $html);
+        $this->assertStringContainsString('nav nav-tabs nav-line-tabs', $html);
         $this->assertStringContainsString('nav-line-tabs', $html);
         $this->assertStringContainsString('data-ui-tab="metronic"', $html);
         $this->assertStringContainsString('data-ui-icon-button="metronic"', $html);
@@ -115,6 +168,36 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('data-ui-table-checkbox="metronic"', $html);
         $this->assertStringContainsString('wire:model.live="selectedIds"', $html);
         $this->assertStringContainsString('data-ui-file-upload="metronic"', $html);
+    }
+
+    public function test_keenicons_component_renders_supported_names_and_complete_duotone_paths(): void
+    {
+        $html = Blade::render(<<<'BLADE'
+            <x-ui.icon name="notification-bing" />
+            <x-ui.icon name="lock-2" />
+            <x-ui.icon name="eye-slash" />
+            <x-ui.icon name="disconnect" />
+            <x-ui.icon name="warning-2" />
+            <x-ui.icon name="camera" />
+            <x-ui.icon name="building" />
+            <x-ui.icon name="cloud-upload" />
+            <x-ui.icon name="layers" />
+            BLADE);
+
+        $this->assertStringContainsString('ki-notification-bing', $html);
+        $this->assertMatchesRegularExpression('/ki-notification-bing[^>]*>.*class="path3"/s', $html);
+        $this->assertMatchesRegularExpression('/ki-lock-2[^>]*>.*class="path5"/s', $html);
+        $this->assertMatchesRegularExpression('/ki-eye-slash[^>]*>.*class="path4"/s', $html);
+        $this->assertMatchesRegularExpression('/ki-disconnect[^>]*>.*class="path5"/s', $html);
+        $this->assertStringContainsString('ki-information-5', $html);
+        $this->assertStringContainsString('ki-file-up', $html);
+        $this->assertStringContainsString('ki-category', $html);
+        $this->assertStringContainsString('ki-data', $html);
+        $this->assertStringNotContainsString('ki-warning-2', $html);
+        $this->assertStringNotContainsString('ki-camera', $html);
+        $this->assertStringNotContainsString('ki-building', $html);
+        $this->assertStringNotContainsString('ki-cloud-upload', $html);
+        $this->assertStringNotContainsString('ki-layers', $html);
     }
 
     public function test_sidebar_link_component_uses_metronic_sidebar_contract(): void
@@ -157,15 +240,71 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringNotContainsString('>Lengkap<', $progressHtml);
     }
 
+    public function test_sidebar_shell_uses_metronic_drawer_markup_without_button_display_conflict(): void
+    {
+        $source = file_get_contents(resource_path('views/components/layout/app-sidebar.blade.php'));
+        $css = $this->metronicOverrideCss();
+
+        $this->assertStringContainsString('data-kt-drawer="true"', $source);
+        $this->assertStringContainsString('data-kt-drawer-toggle="#kt_app_sidebar_mobile_toggle"', $source);
+        $this->assertStringContainsString('hover-scroll-overlay-y my-5', $source);
+        $this->assertStringContainsString('spm-sidebar-mobile-dismiss', $source);
+        $this->assertStringContainsString('ki-duotone ki-cross-circle', $source);
+        $this->assertStringNotContainsString('class="btn-icon btn-active-color-primary d-lg-none"', $source);
+        $this->assertStringNotContainsString('<x-ui.button', substr($source, strpos($source, 'id="kt_app_sidebar_logo"'), 1400));
+
+        $this->assertStringContainsString('Metronic Sidebar Shell Normalization', $css);
+        $this->assertStringContainsString('.spm-app-sidebar .app-sidebar-logo', $css);
+        $this->assertStringContainsString('[data-ui-button="metronic"].d-lg-none', $css);
+        $this->assertStringContainsString('.spm-btn.d-lg-none', $css);
+        $this->assertStringContainsString('display: none !important;', $css);
+    }
+
+    public function test_header_profile_badge_is_removed_and_sidebar_user_menu_owns_account_actions(): void
+    {
+        $header = file_get_contents(resource_path('views/components/layout/app-header.blade.php'));
+        $sidebar = file_get_contents(resource_path('views/components/layout/app-sidebar.blade.php'));
+        $css = $this->metronicOverrideCss();
+
+        $this->assertStringContainsString('<livewire:layout.notification-menu', $header);
+        $this->assertStringNotContainsString('kt_app_header_user_menu', $header);
+        $this->assertStringNotContainsString('spm-header-user-menu', $header);
+        $this->assertStringNotContainsString('aria-label="Menu pengguna"', $header);
+
+        $this->assertStringContainsString('id="kt_app_sidebar_user_menu"', $sidebar);
+        $this->assertStringContainsString('x-on:mouseenter="open = true"', $sidebar);
+        $this->assertStringContainsString("route('profile')", $sidebar);
+        $this->assertStringContainsString("route('logout')", $sidebar);
+        $this->assertStringContainsString('Pengaturan Profil', $sidebar);
+        $this->assertStringContainsString('Keluar', $sidebar);
+
+        $this->assertStringContainsString('.spm-app-sidebar .spm-sidebar-user-popover', $css);
+        $this->assertStringContainsString('.spm-app-sidebar .spm-sidebar-user-link-danger', $css);
+    }
+
     public function test_metronic_overrides_apply_enterprise_typography_and_hide_navigation_progress(): void
     {
-        $css = file_get_contents(resource_path('css/metronic-overrides.css'));
+        $css = $this->metronicOverrideCss();
         $appCss = file_get_contents(resource_path('css/app.css'));
+        $appJs = file_get_contents(resource_path('js/app.js'));
+        $appLayout = file_get_contents(resource_path('views/layouts/app.blade.php'));
+        $tailwindConfig = file_get_contents(base_path('tailwind.config.js'));
 
         $this->assertStringContainsString('--bs-font-sans-serif: "Inter"', $css);
+        $this->assertStringContainsString("sans: ['Inter'", $tailwindConfig);
         $this->assertStringContainsString('@fontsource/inter/latin-400.css', $appCss);
         $this->assertStringContainsString('@fontsource/inter/latin-500.css', $appCss);
         $this->assertStringContainsString('@fontsource/inter/latin-600.css', $appCss);
+        $this->assertStringContainsString('@import "./keenicons-lite.css";', $appCss);
+        $this->assertFileExists(resource_path('css/keenicons-lite.css'));
+        $keeniconsCss = file_get_contents(resource_path('css/keenicons-lite.css'));
+        $this->assertStringContainsString('font-family: "keenicons-duotone"', $keeniconsCss);
+        $this->assertStringContainsString('/vendor/metronic/assets/plugins/global/fonts/keenicons/keenicons-duotone.woff', $keeniconsCss);
+        $this->assertStringContainsString('.ki-notification .path1:before', $keeniconsCss);
+        $this->assertStringContainsString('.ki-burger-menu .path1:before', $keeniconsCss);
+        $this->assertStringContainsString('.ki-setting-2 .path1:before', $keeniconsCss);
+        $this->assertStringContainsString('.ki-check.ki-outline:before', $keeniconsCss);
+        $this->assertStringContainsString('.ki-home.ki-solid:before', $keeniconsCss);
         $this->assertStringNotContainsString('@fontsource/inter/latin-700.css', $appCss);
         $this->assertStringNotContainsString('@fontsource/inter/latin-800.css', $appCss);
         $this->assertStringContainsString('font-size: 15px;', $css);
@@ -184,7 +323,23 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('.spm-stat-card', $css);
         $this->assertStringContainsString('.spm-workflow-stepper', $css);
         $this->assertStringContainsString('#nprogress', $css);
+        $this->assertStringContainsString('.spm-page-loader', $css);
+        $this->assertStringContainsString('data-kt-app-page-loading="on"', $css);
         $this->assertStringContainsString('display: none !important;', $css);
+        $this->assertStringContainsString('livewire:navigate', $appJs);
+        $this->assertStringContainsString('showPageLoadingOverlay', $appJs);
+        $this->assertStringContainsString('hidePageLoadingOverlay', $appJs);
+        $this->assertStringNotContainsString('spm-navigation-loading', $appJs);
+        $this->assertStringContainsString('initSubmitLockGuard', $appJs);
+        $this->assertStringContainsString('data-spm-submit-lock', $appJs);
+        $this->assertStringContainsString('data-spm-submit-button', $appJs);
+        $this->assertStringContainsString('stopImmediatePropagation', $appJs);
+        $this->assertStringContainsString('releaseAllSubmitLockGuards', $appJs);
+        $this->assertStringContainsString('!result.isConfirmed', $appJs);
+        $this->assertStringContainsString('.spm-submit-locking', $css);
+        $this->assertStringContainsString('data-kt-app-page-loading-enabled="true"', $appLayout);
+        $this->assertStringContainsString('page-loader flex-column bg-dark bg-opacity-25 spm-page-loader', $appLayout);
+        $this->assertStringContainsString('data-spm-page-loader', $appLayout);
         $this->assertStringContainsString('Final Typography Guard', $css);
         $this->assertStringContainsString('Production UI Polish V2', $css);
         $this->assertStringContainsString('body .fw-bold', $css);
@@ -192,7 +347,202 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('"keenicons-duotone"', $css);
         $this->assertStringContainsString('"keenicons-outline"', $css);
         $this->assertStringContainsString('"keenicons-solid"', $css);
+        $this->assertStringContainsString('Brand Chroming Guard', $css);
+        $this->assertStringContainsString('--spm-info: #0e9384;', $css);
+        $this->assertStringContainsString('--bs-primary: var(--spm-primary) !important;', $css);
+        $this->assertStringContainsString('--bs-primary-rgb: var(--spm-primary-rgb) !important;', $css);
+        $this->assertStringContainsString('--bs-info: var(--spm-info) !important;', $css);
+        $this->assertStringContainsString('.spm-app-shell .btn.btn-primary', $css);
+        $this->assertStringContainsString('.spm-app-shell .spm-sidebar-icon .ki-duotone [class^="path"]::before', $css);
+        $this->assertStringNotContainsString('--spm-info: #0088ff;', $css);
+        $this->assertStringNotContainsString('#3b82f6', $css);
+        $this->assertStringNotContainsString('#0d6efd', $css);
+        $this->assertStringNotContainsString('#009ef7', $css);
         $this->assertDoesNotMatchRegularExpression('/font-weight:\s*(?:650|700|750|800|900)\b/', $css);
+    }
+
+    public function test_metronic_overrides_are_split_into_architecture_modules(): void
+    {
+        $entry = file_get_contents(resource_path('css/metronic-overrides.css'));
+
+        foreach ([
+            '00-foundation.css',
+            '10-layout-header.css',
+            '20-table-system.css',
+            '30-detail-components.css',
+            '40-sidebar.css',
+            '45-form-modal.css',
+            '50-dashboard.css',
+            '55-landing.css',
+            '70-button-typography-density.css',
+            '80-production-polish.css',
+            '90-sidebar-brand-guard.css',
+        ] as $module) {
+            $this->assertFileExists(resource_path("css/metronic-overrides/{$module}"));
+            $this->assertStringContainsString("@import \"./metronic-overrides/{$module}\";", $entry);
+        }
+
+        $this->assertLessThanOrEqual(
+            40,
+            substr_count($entry, "\n"),
+            'The stable metronic-overrides.css entry should remain a short import aggregator.'
+        );
+    }
+
+    public function test_blade_views_do_not_use_bootstrap_bold_utility_classes(): void
+    {
+        $violations = [];
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator(resource_path('views'))
+        );
+
+        foreach ($iterator as $file) {
+            if (! $file->isFile() || $file->getExtension() !== 'php') {
+                continue;
+            }
+
+            $path = $file->getPathname();
+            $contents = file_get_contents($path);
+
+            if (preg_match('/\bfw-bold(?:er)?\b/', $contents) === 1) {
+                $violations[] = str_replace(base_path(DIRECTORY_SEPARATOR), '', $path);
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $violations,
+            'Use fw-semibold in Blade markup; the CSS guard only exists for third-party or legacy output.'
+        );
+    }
+
+    public function test_pesantren_profile_keeps_latest_akreditasi_query_out_of_render_markup(): void
+    {
+        $view = file_get_contents(resource_path('views/livewire/pages/pesantren/profile.blade.php'));
+        $service = file_get_contents(app_path('Services/PesantrenService.php'));
+
+        $this->assertStringContainsString('public $latestAkreditasi', $view);
+        $this->assertStringContainsString('getLatestAkreditasi(auth()->id())', $view);
+        $this->assertStringContainsString('function getLatestAkreditasi', $service);
+        $this->assertStringNotContainsString('auth()->user()->akreditasis()->latest()->first()', $view);
+    }
+
+    public function test_priority_livewire_render_markup_does_not_contain_direct_queries(): void
+    {
+        $views = [
+            'resources/views/livewire/pages/admin/akreditasi-detail.blade.php',
+            'resources/views/livewire/pages/pesantren/profile.blade.php',
+            'resources/views/livewire/pages/asesor/profile.blade.php',
+            'resources/views/livewire/pages/asesor/akreditasi-detail.blade.php',
+            'resources/views/livewire/pages/pesantren/akreditasi-detail.blade.php',
+        ];
+
+        foreach ($views as $path) {
+            $contents = $this->viewSourceWithDescendantPartials($path);
+            $renderMarkup = str_contains($contents, '?>')
+                ? substr($contents, strpos($contents, '?>') + 2)
+                : $contents;
+
+            foreach (['::query(', 'DB::', 'auth()->user()->', '->latest()->first(', '->paginate('] as $forbidden) {
+                $this->assertStringNotContainsString($forbidden, $renderMarkup, "{$path} should keep data access in the Livewire/service layer, not render markup.");
+            }
+        }
+    }
+
+    public function test_akreditasi_detail_uses_tab_partials_for_large_sections(): void
+    {
+        $detailViews = [
+            'admin' => [
+                'path' => 'views/livewire/pages/admin/akreditasi-detail.blade.php',
+                'includePrefix' => 'livewire.pages.admin.akreditasi-detail.tabs',
+                'tabs' => ['profil', 'ipm', 'sdm', 'edpm-pesantren', 'instrumen', 'laporan-visitasi', 'audit-trail'],
+                'maxLines' => 1150,
+            ],
+            'asesor' => [
+                'path' => 'views/livewire/pages/asesor/akreditasi-detail.blade.php',
+                'includePrefix' => 'livewire.pages.asesor.akreditasi-detail.tabs',
+                'tabs' => ['profil', 'ipm', 'sdm', 'edpm-pesantren', 'instrumen', 'laporan-visitasi'],
+                'maxLines' => 450,
+            ],
+            'pesantren' => [
+                'path' => 'views/livewire/pages/pesantren/akreditasi-detail.blade.php',
+                'includePrefix' => 'livewire.pages.pesantren.akreditasi-detail.tabs',
+                'tabs' => ['profil', 'ipm', 'sdm', 'edpm', 'hasil', 'kartu-kendali'],
+                'maxLines' => 650,
+            ],
+        ];
+
+        foreach ($detailViews as $role => $detailView) {
+            $view = file_get_contents(resource_path($detailView['path']));
+
+            foreach ($detailView['tabs'] as $tab) {
+                $this->assertStringContainsString(
+                    "@include('{$detailView['includePrefix']}.{$tab}')",
+                    $view,
+                    "{$role} akreditasi detail should include the {$tab} tab partial."
+                );
+                $this->assertFileExists(resource_path(str_replace('.blade.php', "/tabs/{$tab}.blade.php", $detailView['path'])));
+            }
+
+            $this->assertLessThan(
+                $detailView['maxLines'],
+                substr_count($view, "\n"),
+                "The {$role} akreditasi detail shell should stay small enough to scan."
+            );
+        }
+    }
+
+    public function test_instrumen_tabs_use_nested_partials_and_livewire_view_helpers(): void
+    {
+        $views = [
+            'admin' => [
+                'root' => 'resources/views/livewire/pages/admin/akreditasi-detail/tabs/instrumen.blade.php',
+                'includePrefix' => 'livewire.pages.admin.akreditasi-detail.tabs.instrumen',
+                'partials' => ['gate-status', 'document-alert', 'progress', 'score-table', 'nv-actions', 'score-summary', 'final-decision', 'scroll-actions'],
+            ],
+            'asesor' => [
+                'root' => 'resources/views/livewire/pages/asesor/akreditasi-detail/tabs/instrumen.blade.php',
+                'includePrefix' => 'livewire.pages.asesor.akreditasi-detail.tabs.instrumen',
+                'partials' => ['status-alert', 'progress', 'score-table', 'component-recommendations', 'finalization-alert', 'action-panel', 'scroll-actions', 'visitasi-confirmation', 'finalize-scoring'],
+            ],
+        ];
+
+        foreach ($views as $role => $view) {
+            $root = file_get_contents(base_path($view['root']));
+
+            foreach ($view['partials'] as $partial) {
+                $this->assertStringContainsString(
+                    "@include('{$view['includePrefix']}.{$partial}')",
+                    $root,
+                    "{$role} instrumen shell should include {$partial}."
+                );
+                $this->assertFileExists(str_replace('.blade.php', "/{$partial}.blade.php", base_path($view['root'])));
+            }
+
+            $this->assertLessThan(40, substr_count($root, "\n"), "{$role} instrumen shell should stay small after nested split.");
+        }
+
+        $adminSource = $this->viewSourceWithDescendantPartials($views['admin']['root']);
+        $asesorSource = $this->viewSourceWithDescendantPartials($views['asesor']['root']);
+        $adminComponent = file_get_contents(resource_path('views/livewire/pages/admin/akreditasi-detail.blade.php'));
+        $adminViewData = file_get_contents(app_path('Livewire/Concerns/AdminAkreditasiInstrumenViewData.php'));
+        $asesorComponent = file_get_contents(app_path('Livewire/Pages/Asesor/AkreditasiDetail.php'));
+
+        foreach ([$adminSource, $asesorSource] as $source) {
+            $this->assertStringNotContainsString(">= 100 ? 'green'", $source);
+            $this->assertStringNotContainsString('abs((int) $na1Value - (int) $na2Value)', $source);
+        }
+
+        $this->assertStringContainsString('AdminAkreditasiInstrumenViewData', $adminComponent);
+        $this->assertStringContainsString('adminScoringProgressCards', $adminViewData);
+        $this->assertStringContainsString('adminScoreSummaryViewData', $adminViewData);
+        $this->assertStringContainsString('ScoreCalculationService::class', $adminViewData);
+        $this->assertStringContainsString('getColorClass', $adminViewData);
+
+        $this->assertStringContainsString('asesorScoringProgressCards', $asesorComponent);
+        $this->assertStringContainsString('calculateDelta', $asesorComponent);
+        $this->assertStringContainsString('canConfirmVisitasi', $asesorComponent);
+        $this->assertStringContainsString('getColorClass', $asesorComponent);
     }
 
     public function test_akreditasi_workflow_stepper_renders_metronic_detail_contract(): void
@@ -221,6 +571,52 @@ class MetronicFrontendTest extends TestCase
                 "{$path} should include the reusable akreditasi workflow stepper."
             );
         }
+    }
+
+    public function test_edpm_review_component_groups_edpm_and_ipr_with_metronic_tables(): void
+    {
+        $komponens = collect([
+            (object) [
+                'id' => 1,
+                'nama' => 'Mutu Lulusan',
+                'ipr' => null,
+                'butirs' => collect([
+                    (object) ['id' => 11, 'no_sk' => '1', 'nomor_butir' => '1', 'butir_pernyataan' => 'Santri memiliki capaian kompetensi utama.'],
+                ]),
+            ],
+            (object) [
+                'id' => 2,
+                'nama' => 'Indikator Pemenuhan Relatif',
+                'ipr' => 1,
+                'butirs' => collect([
+                    (object) ['id' => 21, 'no_sk' => '', 'nomor_butir' => '1', 'butir_pernyataan' => 'Pesantren memiliki ruang belajar yang mencukupi.'],
+                ]),
+            ],
+        ]);
+
+        $html = Blade::render(<<<'BLADE'
+            <x-akreditasi.edpm-review
+                :komponens="$komponens"
+                :evaluasis="$evaluasis"
+                :links="$links"
+                :catatans="$catatans"
+            />
+            BLADE, [
+            'komponens' => $komponens,
+            'evaluasis' => [11 => 4, 21 => 3],
+            'links' => [11 => 'https://example.test/bukti'],
+            'catatans' => [1 => 'Catatan mutu lulusan'],
+        ]);
+
+        $this->assertStringContainsString('data-akreditasi-edpm-review="metronic"', $html);
+        $this->assertStringContainsString('data-ui-edpm-component="metronic"', $html);
+        $this->assertStringContainsString('data-ui-simple-table="metronic"', $html);
+        $this->assertStringContainsString('Komponen EDPM', $html);
+        $this->assertStringContainsString('Komponen IPR', $html);
+        $this->assertStringContainsString('Mutu Lulusan', $html);
+        $this->assertStringContainsString('Indikator Pemenuhan Relatif', $html);
+        $this->assertStringContainsString('Catatan mutu lulusan', $html);
+        $this->assertStringContainsString('Bukti', $html);
     }
 
     public function test_metronic_table_components_render_reusable_classes(): void
@@ -254,15 +650,21 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('spm-table-header', $html);
         $this->assertStringContainsString('spm-table-heading', $html);
         $this->assertStringContainsString('spm-table-controls', $html);
+        $this->assertStringContainsString('spm-table-dom-row', $html);
+        $this->assertStringContainsString('spm-table-dom-start', $html);
+        $this->assertStringContainsString('spm-table-dom-end', $html);
         $this->assertStringContainsString('spm-table-filter-row', $html);
         $this->assertStringContainsString('spm-table-actions', $html);
         $this->assertStringContainsString('spm-table-body-wrap', $html);
         $this->assertStringContainsString('spm-table-scroll', $html);
-        $this->assertStringContainsString('spm-table-utility-row', $html);
+        $this->assertStringNotContainsString('spm-table-utility-row', $html);
         $this->assertStringContainsString('spm-table-footer', $html);
-        $this->assertStringContainsString('table table-row-dashed', $html);
+        $this->assertStringContainsString('Menampilkan 0-0 dari 0 entri', $html);
+        $this->assertStringContainsString('table table-striped table-row-bordered align-middle gy-5 gs-7', $html);
+        $this->assertStringContainsString('spm-table--metronic-docs', $html);
         $this->assertStringContainsString('spm-datatable', $html);
         $this->assertStringContainsString('spm-table-search-input', $html);
+        $this->assertStringContainsString('entri', $html);
         $this->assertStringContainsString('Ekspor Data', $html);
         $this->assertStringContainsString('wire:model.live.debounce.300ms="search"', $html);
         $this->assertStringContainsString("wire:click=\"sortBy('created_at')\"", $html);
@@ -292,10 +694,54 @@ class MetronicFrontendTest extends TestCase
 
         $this->assertStringContainsString('data-ui-table="metronic"', $html);
         $this->assertStringContainsString('data-ui-table-adapter="datatable"', $html);
-        $this->assertStringContainsString('table table-row-dashed', $html);
+        $this->assertStringContainsString('table table-striped table-row-bordered align-middle gy-5 gs-7', $html);
+        $this->assertStringContainsString('spm-table-footer--datatable', $html);
+        $this->assertStringContainsString('spm-table-per-page--compact', $html);
         $this->assertStringContainsString('data-ui-table-search="metronic"', $html);
         $this->assertStringContainsString('data-ui-table-per-page="metronic"', $html);
+        $this->assertStringContainsString('spm-table-dom-row', $html);
+        $this->assertStringNotContainsString('spm-table-dom-end', $html);
         $this->assertStringContainsString("wire:click=\"sortBy('name')\"", $html);
+    }
+
+    public function test_datatable_can_render_metronic_footer_length_menu(): void
+    {
+        $records = new LengthAwarePaginator([], 0, 10);
+
+        $html = Blade::render(<<<'BLADE'
+            <x-datatable.layout
+                title="Pesantren"
+                :records="$records"
+            >
+                <x-slot name="filters">
+                    <x-datatable.search placeholder="Cari Pesantren..." />
+                </x-slot>
+
+                <x-slot name="thead">
+                    <x-datatable.th field="name" sortField="name" :sortAsc="true">
+                        Nama Pesantren
+                    </x-datatable.th>
+                </x-slot>
+
+                <x-slot name="tbody">
+                    <tr><td>Pondok Mutu</td></tr>
+                </x-slot>
+            </x-datatable.layout>
+            BLADE, ['records' => $records]);
+
+        $this->assertStringContainsString('table table-striped table-row-bordered align-middle gy-5 gs-7', $html);
+        $this->assertStringContainsString('spm-table-footer--datatable', $html);
+        $this->assertStringContainsString('spm-table-footer-start', $html);
+        $this->assertStringContainsString('spm-table-footer-end', $html);
+        $this->assertStringContainsString('data-ui-table-per-page="metronic"', $html);
+        $this->assertStringContainsString('spm-table-per-page--compact', $html);
+        $this->assertStringContainsString('aria-label="Jumlah entri per halaman"', $html);
+        $this->assertStringContainsString('Menampilkan 0-0 dari 0 entri', $html);
+        $this->assertGreaterThan(
+            strpos($html, 'spm-table-footer--datatable'),
+            strpos($html, 'data-ui-table-per-page="metronic"')
+        );
+        $this->assertStringNotContainsString('<span class="spm-table-per-page-label">Tampilkan</span>', $html);
     }
 
     public function test_simple_table_component_supports_non_paginated_tables(): void
@@ -337,7 +783,7 @@ class MetronicFrontendTest extends TestCase
 
     public function test_admin_master_edpm_uses_simple_table_component(): void
     {
-        $this->seed(\Database\Seeders\DatabaseSeeder::class);
+        $this->seed(DatabaseSeeder::class);
         $admin = User::query()->where('email', 'admin@spm.test')->firstOrFail();
 
         $this->actingAs($admin)
@@ -416,7 +862,7 @@ class MetronicFrontendTest extends TestCase
         ];
 
         foreach ($views as $path => $expectedComponents) {
-            $view = file_get_contents(base_path($path));
+            $view = $this->viewSourceWithDescendantPartials($path);
 
             foreach ($expectedComponents as $component) {
                 $this->assertStringContainsString($component, $view, "{$path} should use {$component}");
@@ -648,7 +1094,7 @@ class MetronicFrontendTest extends TestCase
                 ->assertSee('data-ui-sidebar-section="metronic"', false)
                 ->assertSee('id="kt_app_header"', false)
                 ->assertDontSee('id="kt_app_toolbar"', false)
-                ->assertDontSeeVolt('layout.onboarding-guide')
+                ->assertDontSee('open-onboarding-guide', false)
                 ->assertDontSee('onboarding-modal-title', false)
                 ->assertSee('data-ui-breadcrumb="metronic"', false)
                 ->assertSee('data-dashboard-page="metronic"', false)
@@ -670,7 +1116,7 @@ class MetronicFrontendTest extends TestCase
     public function test_header_uses_route_aware_title_and_breadcrumb_for_module_pages(): void
     {
         $this->withoutVite();
-        $this->seed(\Database\Seeders\DatabaseSeeder::class);
+        $this->seed(DatabaseSeeder::class);
 
         $admin = User::query()->where('email', 'admin@spm.test')->firstOrFail();
 
@@ -716,7 +1162,8 @@ class MetronicFrontendTest extends TestCase
             ->assertSee('Tahapan Akreditasi LP2M', false)
             ->assertSee('current spm-workflow-step', false)
             ->assertSee('data-ui-table="metronic"', false)
-            ->assertSee('table table-row-dashed', false)
+            ->assertSee('table table-striped table-row-bordered', false)
+            ->assertSee('spm-table-footer--datatable', false)
             ->assertSee('form-control form-control-solid', false)
             ->assertSee('data-ui-action-menu="metronic"', false)
             ->assertSee('Pengajuan (1)', false)
@@ -731,7 +1178,7 @@ class MetronicFrontendTest extends TestCase
 
     public function test_admin_module_list_pages_use_page_heading_and_reusable_tables(): void
     {
-        $this->seed(\Database\Seeders\DatabaseSeeder::class);
+        $this->seed(DatabaseSeeder::class);
         $admin = User::query()->where('email', 'admin@spm.test')->firstOrFail();
         $superAdmin = User::query()->where('email', 'superadmin@spm.test')->firstOrFail();
 
@@ -767,7 +1214,7 @@ class MetronicFrontendTest extends TestCase
 
     public function test_user_module_list_pages_use_page_heading_and_reusable_tables(): void
     {
-        $this->seed(\Database\Seeders\DatabaseSeeder::class);
+        $this->seed(DatabaseSeeder::class);
 
         Document::query()->create([
             'title' => 'Panduan IAPM',
@@ -794,11 +1241,19 @@ class MetronicFrontendTest extends TestCase
                 ->assertSee('spm-page-title', false)
                 ->assertSee('data-ui-table="metronic"', false);
         }
+
+        $this->actingAs($pesantren)
+            ->get('/documents/iapm')
+            ->assertOk()
+            ->assertSee('spm-table-shell--document-library', false)
+            ->assertSee('spm-document-title-col', false)
+            ->assertSee('data-ui-table-per-page="metronic"', false)
+            ->assertSee('Menampilkan', false);
     }
 
     public function test_detail_pages_render_metronic_detail_foundation(): void
     {
-        $this->seed(\Database\Seeders\DatabaseSeeder::class);
+        $this->seed(DatabaseSeeder::class);
 
         $admin = User::query()->where('email', 'admin@spm.test')->firstOrFail();
         $pesantren = User::query()->where('email', 'pesantren@spm.test')->firstOrFail();
@@ -857,9 +1312,40 @@ class MetronicFrontendTest extends TestCase
         }
     }
 
+    public function test_detail_edpm_tabs_render_grouped_edpm_ipr_review_component_for_each_role(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $admin = User::query()->where('email', 'admin@spm.test')->firstOrFail();
+        $pesantren = User::query()->where('email', 'pesantren@spm.test')->firstOrFail();
+        $asesor = User::query()->where('email', 'asesor@spm.test')->firstOrFail();
+        $akreditasi = Akreditasi::query()->where('user_id', $pesantren->id)->firstOrFail();
+
+        foreach ([
+            [$admin, "/admin/akreditasi/{$akreditasi->uuid}?activeTab=edpm_pesantren"],
+            [$pesantren, "/pesantren/akreditasi/{$akreditasi->uuid}?activeTab=edpm"],
+            [$asesor, "/asesor/akreditasi/{$akreditasi->uuid}?activeTab=edpm_pesantren"],
+        ] as [$user, $uri]) {
+            $this->actingAs($user)
+                ->get($uri)
+                ->assertOk()
+                ->assertSee('data-akreditasi-edpm-review="metronic"', false)
+                ->assertSee('data-ui-edpm-component="metronic"', false)
+                ->assertSee('Komponen EDPM', false)
+                ->assertSee('Komponen IPR', false)
+                ->assertSee('Mutu Lulusan', false)
+                ->assertSee('Indikator Pemenuhan Relatif', false)
+                ->assertSee('spm-detail-tabs-shell', false)
+                ->assertSee('spm-detail-tab-content', false)
+                ->assertSee('nav nav-tabs nav-line-tabs', false)
+                ->assertSee('spm-tabs-nav', false)
+                ->assertSee('spm-tab-link', false);
+        }
+    }
+
     public function test_pesantren_input_pages_render_reusable_metronic_form_foundation(): void
     {
-        $this->seed(\Database\Seeders\DatabaseSeeder::class);
+        $this->seed(DatabaseSeeder::class);
         $pesantren = User::query()->where('email', 'pesantren@spm.test')->firstOrFail();
 
         $pages = [
@@ -977,7 +1463,7 @@ class MetronicFrontendTest extends TestCase
         ];
 
         foreach ($views as $path => $expectedComponents) {
-            $view = file_get_contents(base_path($path));
+            $view = $this->viewSourceWithDescendantPartials($path);
 
             foreach ($expectedComponents as $component) {
                 $this->assertStringContainsString($component, $view, "{$path} should use {$component}");

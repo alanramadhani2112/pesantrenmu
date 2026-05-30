@@ -109,7 +109,7 @@ class BusinessStatusMappingTest extends TestCase
         $rejectedUser = $this->createPesantrenWithAkreditasi('Export Ditolak', -1);
         $activeUser = $this->createPesantrenWithAkreditasi('Export Validasi', 1);
 
-        $export = new PesantrenExport();
+        $export = new PesantrenExport;
 
         $this->assertSame('Terakreditasi', $export->map($completedUser->load(['pesantren', 'akreditasis']))[4]);
         $this->assertSame('Ditolak', $export->map($rejectedUser->load(['pesantren', 'akreditasis']))[4]);
@@ -135,7 +135,7 @@ class BusinessStatusMappingTest extends TestCase
         Pesantren::create([
             'user_id' => $user->id,
             'nama_pesantren' => $name,
-            'ns_pesantren' => 'NSP-' . $user->id,
+            'ns_pesantren' => 'NSP-'.$user->id,
         ]);
 
         return $user;
@@ -155,7 +155,7 @@ class BusinessStatusMappingTest extends TestCase
             'nama_tanpa_gelar' => $name,
         ]);
 
-        $pesantren = $this->createPesantrenWithAkreditasi('Tugas ' . $name, $akreditasiStatus);
+        $pesantren = $this->createPesantrenWithAkreditasi('Tugas '.$name, $akreditasiStatus);
         $akreditasi = $pesantren->akreditasis()->latest()->first();
 
         Assessment::create([

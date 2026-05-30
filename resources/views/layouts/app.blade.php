@@ -9,14 +9,12 @@
     <title>@hasSection('title')@yield('title') — {{ config('app.name', 'PesantrenMu') }}@else{{ config('app.name', 'PesantrenMu') }}@endif</title>
     <meta name="description" content="Sistem Penjaminan Mutu PesantrenMu — Platform akreditasi pesantren Muhammadiyah.">
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand/favicon.svg') }}">
-    <link rel="preload" href="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.css') }}" as="style">
     <link rel="preload" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}" as="style">
     <link rel="preconnect" href="{{ url('/') }}" crossorigin>
 
     <!-- Styles -->
     @livewireStyles
-    {{-- Defer non-critical Metronic CSS to prevent render blocking (~2.25 MB) --}}
-    <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.css') }}" media="print" onload="this.media='all'">
+    {{-- Defer non-critical Metronic shell CSS to prevent render blocking. --}}
     <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}" media="print" onload="this.media='all'">
     {{-- Critical app CSS loaded normally --}}
     @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css'])
@@ -33,6 +31,7 @@
     data-kt-app-sidebar-fixed="true"
     data-kt-app-sidebar-push-header="true"
     data-kt-app-sidebar-push-footer="true"
+    data-kt-app-page-loading-enabled="true"
     x-data
 >
     @php
@@ -82,6 +81,17 @@
 
         $routeTitle = $routeMeta[$routeName]['title'] ?? null;
         $routeSection = $routeMeta[$routeName]['section'] ?? null;
+
+        if ($routeName === 'pesantren.akreditasi') {
+            $akreditasiFocus = request()->query('focus');
+            $routeTitle = match ($akreditasiFocus) {
+                'perbaikan' => __('Status Perbaikan'),
+                'kartu_kendali' => __('Kartu Kendali Visitasi'),
+                'hasil', 'sertifikat', 'banding' => __('Hasil Akhir Akreditasi'),
+                default => $routeTitle,
+            };
+        }
+
         $slotHeaderTitle = isset($header) ? trim(strip_tags((string) $header)) : '';
         $pageTitle = $routeTitle ?: ($slotHeaderTitle !== '' ? $slotHeaderTitle : __('Dashboard'));
 
@@ -97,6 +107,15 @@
             $breadcrumbItems[] = ['label' => $pageTitle];
         }
     @endphp
+
+    <!--begin::Page loading-->
+    <div class="page-loader flex-column bg-dark bg-opacity-25 spm-page-loader" data-spm-page-loader aria-live="polite" aria-label="Memuat halaman">
+        <span class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </span>
+        <span class="text-white fs-6 fw-semibold mt-5">Memuat halaman...</span>
+    </div>
+    <!--end::Page loading-->
 
     <div class="d-flex flex-column flex-root app-root spm-app-shell" id="kt_app_root">
         <div class="app-page flex-column flex-column-fluid" id="kt_app_page">

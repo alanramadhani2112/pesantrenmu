@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\MasterEdpmKomponen;
 use App\Models\MasterEdpmButir;
+use App\Models\MasterEdpmKomponen;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class MasterEdpmSeeder extends Seeder
@@ -29,7 +29,7 @@ class MasterEdpmSeeder extends Seeder
                     ['no_sk' => '4', 'nomor_butir' => '6', 'butir_pernyataan' => 'Santri berjiwa mandiri dan wirausaha.'],
                     ['no_sk' => '3', 'nomor_butir' => '7', 'butir_pernyataan' => 'Memiliki Keterampilan Sosial dan Public Speaking'],
                     ['no_sk' => '2', 'nomor_butir' => '8', 'butir_pernyataan' => 'Memiliki Keterampilan Berkemajuan (Menguasai Kutub Turats, IPTEK, TIK, dan Jejaring)'],
-                ]
+                ],
             ],
             [
                 'nama' => 'PROSES PEMBELAJARAN',
@@ -44,7 +44,7 @@ class MasterEdpmSeeder extends Seeder
                     ['no_sk' => '3', 'nomor_butir' => '16', 'butir_pernyataan' => 'Santri Menunjukkan Sikap Tawadhu\' dan Ihtiram Kepada Ustadz'],
                     ['no_sk' => '2', 'nomor_butir' => '17', 'butir_pernyataan' => 'Peningkatan Soft Skills dan Hard Skills secara Seimbang.'],
                     ['no_sk' => '1', 'nomor_butir' => '18', 'butir_pernyataan' => 'Menggunakan Bahasa Asing Sebagai Bahasa Pengantar'],
-                ]
+                ],
             ],
             [
                 'nama' => 'MUTU USTAZ',
@@ -59,7 +59,7 @@ class MasterEdpmSeeder extends Seeder
                     ['no_sk' => '3', 'nomor_butir' => '26', 'butir_pernyataan' => 'Ustadz Menjadi Uswatun Hasanah'],
                     ['no_sk' => '1', 'nomor_butir' => '27', 'butir_pernyataan' => 'Menyusun Perencanaan dengan Mengembangkan Strategi, Model, Metode, Teknik, dan Media Pembelajaran Yang Aktif, Kreatif, dan Inovatif'],
                     ['no_sk' => '1', 'nomor_butir' => '28', 'butir_pernyataan' => 'Memiliki kemampuan Informasi dan Teknologi (IT)'],
-                ]
+                ],
             ],
             [
                 'nama' => 'MANAJEMEN PESANTREN',
@@ -76,7 +76,7 @@ class MasterEdpmSeeder extends Seeder
                     ['no_sk' => '4', 'nomor_butir' => '38', 'butir_pernyataan' => 'Pesantren Melakukan Pembinaan dan Pengelolaan alumni'],
                     ['no_sk' => '3', 'nomor_butir' => '39', 'butir_pernyataan' => 'Pesantren Menyelenggarakan Pembinaan Kegiatan Kesantrian Untuk Mengembangkan Minat dan Bakat Santri.'],
                     ['no_sk' => '4', 'nomor_butir' => '40', 'butir_pernyataan' => 'Pesantren melaksanakan Penjaminan Mutu Internal'],
-                ]
+                ],
             ],
             [
                 'nama' => 'B. INDIKATOR PEMENUHAN RELATIF',
@@ -104,7 +104,7 @@ class MasterEdpmSeeder extends Seeder
                     ['no_sk' => '', 'nomor_butir' => '20', 'butir_pernyataan' => 'Pesantren memiliki ruang tamu'],
                     ['no_sk' => '', 'nomor_butir' => '21', 'butir_pernyataan' => 'Pesantren memiliki rumah ustadz pesantren'],
                     ['no_sk' => '', 'nomor_butir' => '22', 'butir_pernyataan' => 'Pesantren memiliki Poskestren'],
-                ]
+                ],
             ],
         ];
 
@@ -119,7 +119,7 @@ class MasterEdpmSeeder extends Seeder
                     'komponen_id' => $komponen->id,
                     'no_sk' => $butirData['no_sk'],
                     'nomor_butir' => $butirData['nomor_butir'],
-                    'butir_pernyataan' => $butirData['butir_pernyataan']
+                    'butir_pernyataan' => $butirData['butir_pernyataan'],
                 ]);
             }
         }

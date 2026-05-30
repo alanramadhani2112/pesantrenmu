@@ -212,7 +212,7 @@ new #[Layout('layouts.app')] class extends Component {
             <x-slot name="tbody">
                 @forelse ($this->categories as $cat)
                 <tr wire:key="cat-{{ $cat->id }}">
-                    <td class="text-center fw-bold text-gray-700">{{ $cat->sort_order }}</td>
+                    <td class="text-center fw-semibold text-gray-700">{{ $cat->sort_order }}</td>
                     <td>
                         <div class="d-flex align-items-center gap-2">
                             <span class="symbol symbol-30px">

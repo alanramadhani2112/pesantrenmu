@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Akreditasi;
-use App\Models\Assessment;
 use App\Models\Asesor;
+use App\Models\Assessment;
 use App\Models\Edpm;
 use App\Models\Ipm;
 use App\Models\MasterEdpmButir;
@@ -155,7 +155,7 @@ class DatabaseSeeder extends Seeder
         }
 
         Akreditasi::firstOrCreate(
-            ['user_id' => $user->id, 'parent' => null],
+            ['user_id' => $user->id],
             ['status' => 6]
         );
 
@@ -210,7 +210,6 @@ class DatabaseSeeder extends Seeder
 
         $akreditasi = Akreditasi::query()
             ->where('user_id', User::where('email', 'pesantren@spm.test')->value('id'))
-            ->whereNull('parent')
             ->first();
 
         if ($akreditasi) {

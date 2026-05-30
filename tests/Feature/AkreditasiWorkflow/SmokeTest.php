@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\AkreditasiWorkflow;
 
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
@@ -198,7 +200,7 @@ class SmokeTest extends TestCase
         $akreditasiId = DB::table('akreditasis')->insertGetId([
             'user_id' => $userId,
             'status' => 2,
-            'uuid' => \Illuminate\Support\Str::uuid(),
+            'uuid' => Str::uuid(),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -225,7 +227,7 @@ class SmokeTest extends TestCase
         ]);
 
         // Attempt to insert duplicate — should throw
-        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectException(QueryException::class);
 
         DB::table('akreditasi_banding_edpms')->insert([
             'akreditasi_id' => $akreditasiId,
@@ -268,7 +270,7 @@ class SmokeTest extends TestCase
         $akreditasiId = DB::table('akreditasis')->insertGetId([
             'user_id' => $userId,
             'status' => 2,
-            'uuid' => \Illuminate\Support\Str::uuid(),
+            'uuid' => Str::uuid(),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -335,7 +337,7 @@ class SmokeTest extends TestCase
         $akreditasiId = DB::table('akreditasis')->insertGetId([
             'user_id' => $userId,
             'status' => -1,
-            'uuid' => \Illuminate\Support\Str::uuid(),
+            'uuid' => Str::uuid(),
             'created_at' => now(),
             'updated_at' => now(),
         ]);

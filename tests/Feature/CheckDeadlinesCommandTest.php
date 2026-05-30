@@ -13,12 +13,11 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schedule;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 /**
  * Tests for CheckDeadlinesCommand (akreditasi:check-deadlines)
- *
  */
 #[Group('Feature: assessment-visitasi-timeout')]
 class CheckDeadlinesCommandTest extends TestCase
@@ -34,20 +33,21 @@ class CheckDeadlinesCommandTest extends TestCase
     /**
      * Helper: create a pesantren user with a Pesantren record.
      */
-private function createPesantrenUser(string $pesantrenName = 'Pesantren Test'): User
+    private function createPesantrenUser(string $pesantrenName = 'Pesantren Test'): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
             'user_id' => $user->id,
             'nama_pesantren' => $pesantrenName,
         ]);
+
         return $user;
     }
 
     /**
      * Helper: create an Asesor with an associated User.
      */
-private function createAsesorWithUser(string $name = 'Asesor Test'): array
+    private function createAsesorWithUser(string $name = 'Asesor Test'): array
     {
         $user = User::factory()->create(['role_id' => 2]);
         $asesor = Asesor::create([
@@ -55,6 +55,7 @@ private function createAsesorWithUser(string $name = 'Asesor Test'): array
             'nama_dengan_gelar' => $name,
             'nama_tanpa_gelar' => $name,
         ]);
+
         return [$asesor, $user];
     }
 
@@ -65,7 +66,7 @@ private function createAsesorWithUser(string $name = 'Asesor Test'): array
     /**
      * Task 4.4: Verify the command is registered and scheduled daily.
      */
-public function test_command_is_registered(): void
+    public function test_command_is_registered(): void
     {
         // Verify the command exists and can be called
         $this->artisan('akreditasi:check-deadlines')
@@ -75,7 +76,7 @@ public function test_command_is_registered(): void
     /**
      * Task 4.4: Verify the command is scheduled daily in routes/console.php.
      */
-public function test_command_is_scheduled_daily(): void
+    public function test_command_is_scheduled_daily(): void
     {
         // Read the console routes file and verify the schedule entry exists
         $consoleRoutesPath = base_path('routes/console.php');
@@ -85,7 +86,7 @@ public function test_command_is_scheduled_daily(): void
         $this->assertStringContainsString(
             "Schedule::command('akreditasi:check-deadlines')->daily()",
             $content,
-            "The akreditasi:check-deadlines command should be scheduled daily in routes/console.php"
+            'The akreditasi:check-deadlines command should be scheduled daily in routes/console.php'
         );
     }
 
@@ -103,7 +104,7 @@ public function test_command_is_scheduled_daily(): void
      * - One assessment with future deadline (not approaching) → no notification
      * - One akreditasi with status 1 (completed) → no notification
      */
-public function test_full_command_run_with_mixed_data_dispatches_correct_notifications(): void
+    public function test_full_command_run_with_mixed_data_dispatches_correct_notifications(): void
     {
         Notification::fake();
 
@@ -207,7 +208,7 @@ public function test_full_command_run_with_mixed_data_dispatches_correct_notific
     /**
      * Task 4.5: Command handles edge case — no assessments, exits successfully.
      */
-public function test_command_exits_successfully_with_no_assessments(): void
+    public function test_command_exits_successfully_with_no_assessments(): void
     {
         Notification::fake();
 

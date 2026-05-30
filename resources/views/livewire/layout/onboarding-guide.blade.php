@@ -182,7 +182,7 @@ new class extends Component {
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header border-0 pb-0">
-                    <h3 class="modal-title fw-bold text-gray-800" id="onboarding-modal-title">
+                    <h3 class="modal-title fw-semibold text-gray-800" id="onboarding-modal-title">
                         <x-ui.icon name="rocket" class="fs-2x text-primary me-2" />
                         Panduan Memulai PesantrenMu
                     </h3>
@@ -196,7 +196,7 @@ new class extends Component {
                         {{-- Congratulatory message when all steps completed --}}
                         <div class="text-center py-10">
                             <x-ui.icon name="check-circle" class="fs-5x text-success mb-5" />
-                            <h2 class="fw-bold text-gray-800 mb-3">Selamat! 🎉</h2>
+                            <h2 class="fw-semibold text-gray-800 mb-3">Selamat! 🎉</h2>
                             <p class="text-gray-600 fs-5 mb-8">
                                 Anda telah menyelesaikan semua langkah panduan. Sistem siap digunakan sepenuhnya.
                             </p>
@@ -242,7 +242,7 @@ new class extends Component {
 
                                     {{-- Step label + description --}}
                                     <div class="flex-grow-1 min-w-0">
-                                        <div class="fw-bold fs-6 {{ $isCompleted ? 'text-success text-decoration-line-through' : 'text-gray-800' }}">
+                                        <div class="fw-semibold fs-6 {{ $isCompleted ? 'text-success text-decoration-line-through' : 'text-gray-800' }}">
                                             {{ $step['label'] }}
                                         </div>
                                         @if($description)

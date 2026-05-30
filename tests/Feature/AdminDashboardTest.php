@@ -26,12 +26,12 @@ class AdminDashboardTest extends TestCase
     /**
      * Helper: create a pesantren user with an akreditasi at the given status.
      */
-private function createAkreditasiWithStatus(int $status): Akreditasi
+    private function createAkreditasiWithStatus(int $status): Akreditasi
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
             'user_id' => $pesantrenUser->id,
-            'nama_pesantren' => 'Pesantren Dashboard Test ' . $pesantrenUser->id,
+            'nama_pesantren' => 'Pesantren Dashboard Test '.$pesantrenUser->id,
         ]);
 
         return Akreditasi::create([

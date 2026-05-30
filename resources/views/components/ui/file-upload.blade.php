@@ -45,7 +45,7 @@
             </span>
 
             <span class="d-flex flex-column min-w-0 flex-grow-1">
-                <span class="fw-bold text-gray-700 text-truncate">{{ $fileName }}</span>
+                <span class="fw-semibold text-gray-700 text-truncate">{{ $fileName }}</span>
                 @if($hasFile)
                     <span class="text-success fw-semibold fs-8">File siap diunggah</span>
                 @elseif($hint)

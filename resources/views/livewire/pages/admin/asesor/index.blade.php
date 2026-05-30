@@ -185,7 +185,7 @@ new #[Layout('layouts.app')] class extends Component {
                         <x-ui.table-checkbox model="selectedIds" :value="$user->id" :label="'Pilih ' . $user->name" />
                     </td>
                     <td>
-                        <span class="text-gray-900 fw-bold fs-6">{{ $user->name }}</span>
+                        <span class="text-gray-900 fw-semibold fs-6">{{ $user->name }}</span>
                     </td>
                     <td>
                         @php
@@ -203,7 +203,7 @@ new #[Layout('layouts.app')] class extends Component {
                             {{ $latestTask->tipe == 1 ? 'Ketua Kelompok' : 'Anggota Kelompok' }}
                         </x-ui.status-badge>
                         @else
-                        <span class="text-muted fw-bold">-</span>
+                        <span class="text-muted fw-semibold">-</span>
                         @endif
                     </td>
                     <td class="text-center">
@@ -225,7 +225,7 @@ new #[Layout('layouts.app')] class extends Component {
                             {{ $penugasanText }}
                         </x-ui.status-badge>
                         @else
-                        <span class="text-muted fw-bold">-</span>
+                        <span class="text-muted fw-semibold">-</span>
                         @endif
                     </td>
                     <td class="text-center">

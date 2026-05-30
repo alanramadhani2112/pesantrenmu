@@ -54,6 +54,24 @@
             "@php artisan config:clear --ansi",
             "@php artisan test"
         ],
+        "perf:cache": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan config:clear --ansi",
+            "@php artisan route:clear --ansi",
+            "@php artisan event:clear --ansi",
+            "@php artisan view:clear --ansi",
+            "@composer dump-autoload -o",
+            "@php artisan config:cache",
+            "@php artisan route:cache",
+            "@php artisan event:cache",
+            "@php artisan view:cache"
+        ],
+        "perf:clear": [
+            "@php artisan optimize:clear --ansi"
+        ],
+        "prod:check": [
+            "@php artisan test tests/Feature/ProductionReadinessTest.php tests/Feature/PerformanceOptimizationTest.php --stop-on-failure"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

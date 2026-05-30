@@ -289,7 +289,7 @@ new #[Layout('layouts.app')] class extends Component {
                                 @endphp
 
                                 <tr>
-                                    <td class="ps-4 fw-bold text-gray-800">
+                                    <td class="ps-4 fw-semibold text-gray-800">
                                         {{ Str::of($level)->replace('_', ' ')->title() }}
                                     </td>
                                     <td class="text-center">
@@ -330,14 +330,14 @@ new #[Layout('layouts.app')] class extends Component {
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td class="ps-4 fw-bold text-gray-900">Total Rekap</td>
-                                <td class="text-center fw-bold text-primary">
+                                <td class="ps-4 fw-semibold text-gray-900">Total Rekap</td>
+                                <td class="text-center fw-semibold text-primary">
                                     {{ $this->getCategoryTotal($category['key'], 'l') }}
                                 </td>
-                                <td class="text-center fw-bold text-primary">
+                                <td class="text-center fw-semibold text-primary">
                                     {{ $this->getCategoryTotal($category['key'], 'p') }}
                                 </td>
-                                <td class="text-center pe-4 fw-bold text-success">
+                                <td class="text-center pe-4 fw-semibold text-success">
                                     {{ $this->getGrandTotal($category['key']) }}
                                 </td>
                             </tr>
@@ -346,7 +346,7 @@ new #[Layout('layouts.app')] class extends Component {
                     @else
                         <div class="text-center py-6">
                             <x-ui.icon name="information-2" class="fs-2hx text-gray-400 mb-3 d-block mx-auto" />
-                            <div class="fw-bold text-gray-700 fs-6 mb-1">Belum ada unit pendidikan</div>
+                            <div class="fw-semibold text-gray-700 fs-6 mb-1">Belum ada unit pendidikan</div>
                             <div class="text-muted fs-7 mb-4">Pilih layanan satuan pendidikan di halaman Profil terlebih dahulu agar data SDM bisa diinput per unit.</div>
                             <x-ui.button :href="route('pesantren.profile')" variant="light-primary" size="sm">
                                 <x-ui.icon name="pencil" class="fs-5 me-1" />

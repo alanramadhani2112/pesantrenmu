@@ -23,7 +23,9 @@ class IpmServiceTest extends TestCase
     use RefreshDatabase;
 
     private PesantrenService $service;
+
     private User $user;
+
     private Pesantren $pesantren;
 
     protected function setUp(): void
@@ -186,8 +188,7 @@ class IpmServiceTest extends TestCase
         $missing = $this->service->checkDataCompleteness($this->user->id);
 
         // IPM-specific items should not appear in missing list
-        $ipmMissing = collect($missing)->filter(fn ($m) =>
-            str_contains($m, 'NSP') ||
+        $ipmMissing = collect($missing)->filter(fn ($m) => str_contains($m, 'NSP') ||
             str_contains($m, 'Santri') ||
             str_contains($m, 'Kurikulum') ||
             str_contains($m, 'Buku Ajar')

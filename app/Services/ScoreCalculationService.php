@@ -12,17 +12,20 @@ class ScoreCalculationService
      * Total bobot: 35 + 29 + 18 + 18 = 100
      */
     public const KOMPONEN_CONFIG = [
-        'MUTU LULUSAN'        => ['butir_count' => 8,  'bobot' => 35],
+        'MUTU LULUSAN' => ['butir_count' => 8,  'bobot' => 35],
         'PROSES PEMBELAJARAN' => ['butir_count' => 10, 'bobot' => 29],
-        'MUTU USTAZ'          => ['butir_count' => 10, 'bobot' => 18],
+        'MUTU USTAZ' => ['butir_count' => 10, 'bobot' => 18],
         'MANAJEMEN PESANTREN' => ['butir_count' => 12, 'bobot' => 18],
     ];
 
     public const IPR_BUTIR_COUNT = 22;
+
     public const IPR_CMAKS = 88; // 22 * 4
 
     public const TOTAL_BUTIR = 62; // 40 IK + 22 IPR
+
     public const SCORE_MIN = 1;
+
     public const SCORE_MAX = 4;
 
     // -------------------------------------------------------------------------
@@ -37,33 +40,33 @@ class ScoreCalculationService
      *   Cmaks = butir_count × 4
      *   Bobot = weight from KOMPONEN_CONFIG
      *
-     * @param  array<int>  $nvValues     NV values for each butir in this komponen (each must be 1–4)
-     * @param  string      $komponenName Key in KOMPONEN_CONFIG
-     * @return float                     Rounded to 2 decimal places
+     * @param  array<int>  $nvValues  NV values for each butir in this komponen (each must be 1–4)
+     * @param  string  $komponenName  Key in KOMPONEN_CONFIG
+     * @return float Rounded to 2 decimal places
      *
-     * @throws InvalidArgumentException  If komponenName is unknown or any NV value is outside 1–4
+     * @throws InvalidArgumentException If komponenName is unknown or any NV value is outside 1–4
      */
     public function calculateSkorKomponen(array $nvValues, string $komponenName): float
     {
-        if (!array_key_exists($komponenName, self::KOMPONEN_CONFIG)) {
+        if (! array_key_exists($komponenName, self::KOMPONEN_CONFIG)) {
             throw new InvalidArgumentException(
-                "Unknown komponen name: '{$komponenName}'. Valid names: " .
+                "Unknown komponen name: '{$komponenName}'. Valid names: ".
                 implode(', ', array_keys(self::KOMPONEN_CONFIG))
             );
         }
 
         foreach ($nvValues as $nv) {
-            if (!is_int($nv) || $nv < self::SCORE_MIN || $nv > self::SCORE_MAX) {
+            if (! is_int($nv) || $nv < self::SCORE_MIN || $nv > self::SCORE_MAX) {
                 throw new InvalidArgumentException(
-                    "NV value must be an integer in range 1–4, got: " . var_export($nv, true)
+                    'NV value must be an integer in range 1–4, got: '.var_export($nv, true)
                 );
             }
         }
 
-        $config   = self::KOMPONEN_CONFIG[$komponenName];
-        $bobot    = $config['bobot'];
+        $config = self::KOMPONEN_CONFIG[$komponenName];
+        $bobot = $config['bobot'];
         $butirCount = $config['butir_count'];
-        $cmaks    = $butirCount * 4;
+        $cmaks = $butirCount * 4;
 
         $ci = array_sum($nvValues);
 
@@ -78,7 +81,7 @@ class ScoreCalculationService
      * Calculate Total_Skor_IK as the sum of all 4 Skor_Komponen values.
      *
      * @param  array<float>  $skorKomponens  Array of 4 Skor_Komponen values
-     * @return float                         Rounded to 2 decimal places
+     * @return float Rounded to 2 decimal places
      */
     public function calculateTotalSkorIK(array $skorKomponens): float
     {
@@ -97,16 +100,16 @@ class ScoreCalculationService
      *   88     = IPR_CMAKS (22 × 4)
      *
      * @param  array<int>  $iprNvValues  NV values for each of the 22 IPR butir (each must be 1–4)
-     * @return float                     Rounded to 2 decimal places
+     * @return float Rounded to 2 decimal places
      *
-     * @throws InvalidArgumentException  If any NV value is outside 1–4
+     * @throws InvalidArgumentException If any NV value is outside 1–4
      */
     public function calculateSkorIPR(array $iprNvValues): float
     {
         foreach ($iprNvValues as $nv) {
-            if (!is_int($nv) || $nv < self::SCORE_MIN || $nv > self::SCORE_MAX) {
+            if (! is_int($nv) || $nv < self::SCORE_MIN || $nv > self::SCORE_MAX) {
                 throw new InvalidArgumentException(
-                    "IPR NV value must be an integer in range 1–4, got: " . var_export($nv, true)
+                    'IPR NV value must be an integer in range 1–4, got: '.var_export($nv, true)
                 );
             }
         }
@@ -126,8 +129,8 @@ class ScoreCalculationService
      * Formula: (0.7 × Total_Skor_IK) + (0.3 × Skor_IPR)
      *
      * @param  float  $totalSkorIK  Total IK score (sum of 4 Skor_Komponen)
-     * @param  float  $skorIPR      IPR score
-     * @return float                Rounded to 2 decimal places
+     * @param  float  $skorIPR  IPR score
+     * @return float Rounded to 2 decimal places
      */
     public function calculateNilaiAkhir(float $totalSkorIK, float $skorIPR): float
     {
@@ -146,8 +149,8 @@ class ScoreCalculationService
      *   B / Baik  / Jayyid   : 71.00 <= Nilai_Akhir < 86.00
      *   C / Cukup            : Nilai_Akhir < 71.00
      *
-     * @param  float   $nilaiAkhir  Final accreditation score
-     * @return string               'A', 'B', or 'C'
+     * @param  float  $nilaiAkhir  Final accreditation score
+     * @return string 'A', 'B', or 'C'
      */
     public function determinePeringkat(float $nilaiAkhir): string
     {
@@ -170,9 +173,8 @@ class ScoreCalculationService
      * Orchestrate all score calculations from raw NV values.
      *
      * @param  array{ik: array<string, array<int>>, ipr: array<int>}  $allNvValues
-     *         'ik'  => associative array keyed by komponen name, each value is an array of NV ints
-     *         'ipr' => flat array of 22 NV ints for IPR butir
-     *
+     *                                                                              'ik'  => associative array keyed by komponen name, each value is an array of NV ints
+     *                                                                              'ipr' => flat array of 22 NV ints for IPR butir
      * @return array{
      *   skor_komponen: array<string, float>,
      *   total_skor_ik: float,
@@ -191,16 +193,16 @@ class ScoreCalculationService
         }
 
         $totalSkorIK = $this->calculateTotalSkorIK(array_values($skorKomponens));
-        $skorIPR     = $this->calculateSkorIPR($allNvValues['ipr'] ?? []);
-        $nilaiAkhir  = $this->calculateNilaiAkhir($totalSkorIK, $skorIPR);
-        $peringkat   = $this->determinePeringkat($nilaiAkhir);
+        $skorIPR = $this->calculateSkorIPR($allNvValues['ipr'] ?? []);
+        $nilaiAkhir = $this->calculateNilaiAkhir($totalSkorIK, $skorIPR);
+        $peringkat = $this->determinePeringkat($nilaiAkhir);
 
         return [
             'skor_komponen' => $skorKomponens,
             'total_skor_ik' => $totalSkorIK,
-            'skor_ipr'      => $skorIPR,
-            'nilai_akhir'   => $nilaiAkhir,
-            'peringkat'     => $peringkat,
+            'skor_ipr' => $skorIPR,
+            'nilai_akhir' => $nilaiAkhir,
+            'peringkat' => $peringkat,
         ];
     }
 
@@ -209,7 +211,7 @@ class ScoreCalculationService
      *
      * @param  int  $na1  Nilai Asesor 1 (1–4)
      * @param  int  $na2  Nilai Asesor 2 (1–4)
-     * @return int        Absolute difference (0–3)
+     * @return int Absolute difference (0–3)
      */
     public function calculateDelta(int $na1, int $na2): int
     {

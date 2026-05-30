@@ -29,12 +29,13 @@ class MigrateAsesorPrivateDocs extends Command
 
         if ($asesors->isEmpty()) {
             $this->info('No asesor records with private documents found.');
+
             return self::SUCCESS;
         }
 
-        $moved   = 0;
+        $moved = 0;
         $skipped = 0;
-        $errors  = 0;
+        $errors = 0;
 
         foreach ($asesors as $asesor) {
             foreach ($this->privateFields as $field) {
@@ -48,6 +49,7 @@ class MigrateAsesorPrivateDocs extends Command
                 if (Storage::disk('local')->exists($path)) {
                     $this->line("  SKIP (already private): asesor #{$asesor->id} {$field}");
                     $skipped++;
+
                     continue;
                 }
 
@@ -55,10 +57,11 @@ class MigrateAsesorPrivateDocs extends Command
                 if (! Storage::disk('public')->exists($path)) {
                     $this->warn("  MISSING on public disk: asesor #{$asesor->id} {$field} → {$path}");
                     $errors++;
+
                     continue;
                 }
 
-                $newPath = 'asesor_private_docs/' . basename($path);
+                $newPath = 'asesor_private_docs/'.basename($path);
 
                 $this->line("  MOVE: {$path} → {$newPath} (asesor #{$asesor->id} {$field})");
 

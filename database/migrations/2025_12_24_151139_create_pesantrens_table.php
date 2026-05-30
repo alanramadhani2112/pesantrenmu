@@ -34,7 +34,6 @@ return new class extends Migration
             // DATA PESANTREN
             $table->text('layanan_satuan_pendidikan')->nullable();
 
-
             // DOKUMEN (Paths)
             $table->string('status_kepemilikan_tanah')->nullable();
             $table->string('sertifikat_nsp')->nullable();

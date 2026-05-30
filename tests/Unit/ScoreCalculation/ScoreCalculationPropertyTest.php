@@ -4,14 +4,13 @@ namespace Tests\Unit\ScoreCalculation;
 
 use App\Services\ScoreCalculationService;
 use InvalidArgumentException;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Property-Based Tests for ScoreCalculationService
  *
  * Covers Properties 2, 4, 5, 6, 7, 8 from the design document.
- *
  */
 #[Group('akreditasi-workflow-redesign')]
 class ScoreCalculationPropertyTest extends TestCase
@@ -32,7 +31,7 @@ class ScoreCalculationPropertyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->svc = new ScoreCalculationService();
+        $this->svc = new ScoreCalculationService;
     }
 
     // =========================================================================
@@ -42,7 +41,7 @@ class ScoreCalculationPropertyTest extends TestCase
     /**
      * Generate a random valid NV value (1–4).
      */
-private function randomNv(): int
+    private function randomNv(): int
     {
         return self::VALID_NV[random_int(0, 3)];
     }
@@ -51,11 +50,12 @@ private function randomNv(): int
      * Generate a random integer strictly outside 1–4.
      * Samples from [-100, 0] ∪ [5, 100].
      */
-private function randomInvalidNv(): int
+    private function randomInvalidNv(): int
     {
         if (random_int(0, 1) === 0) {
             return random_int(-100, 0);
         }
+
         return random_int(5, 100);
     }
 
@@ -64,14 +64,14 @@ private function randomInvalidNv(): int
      *
      * @return array{ik: array<string, array<int>>, ipr: array<int>}
      */
-private function buildRandomAllNvValues(): array
+    private function buildRandomAllNvValues(): array
     {
         $ik = [];
         foreach (ScoreCalculationService::KOMPONEN_CONFIG as $name => $config) {
-            $ik[$name] = array_map(fn() => $this->randomNv(), range(1, $config['butir_count']));
+            $ik[$name] = array_map(fn () => $this->randomNv(), range(1, $config['butir_count']));
         }
 
-        $ipr = array_map(fn() => $this->randomNv(), range(1, ScoreCalculationService::IPR_BUTIR_COUNT));
+        $ipr = array_map(fn () => $this->randomNv(), range(1, ScoreCalculationService::IPR_BUTIR_COUNT));
 
         return ['ik' => $ik, 'ipr' => $ipr];
     }
@@ -86,13 +86,13 @@ private function buildRandomAllNvValues(): array
      *
      * @param  array{ik: array<string, array<int>>, ipr: array<int>}  $allNvValues
      */
-private function referenceNilaiAkhir(array $allNvValues): float
+    private function referenceNilaiAkhir(array $allNvValues): float
     {
         $skorKomponens = [];
 
         foreach (ScoreCalculationService::KOMPONEN_CONFIG as $name => $config) {
-            $nvs   = $allNvValues['ik'][$name];
-            $ci    = array_sum($nvs);
+            $nvs = $allNvValues['ik'][$name];
+            $ci = array_sum($nvs);
             $cmaks = $config['butir_count'] * 4;
             $bobot = $config['bobot'];
             // Round each Skor_Komponen to 2dp (same as service)
@@ -101,7 +101,7 @@ private function referenceNilaiAkhir(array $allNvValues): float
 
         $totalSkorIK = round(array_sum($skorKomponens), 2);
 
-        $ciIpr   = array_sum($allNvValues['ipr']);
+        $ciIpr = array_sum($allNvValues['ipr']);
         $skorIPR = round(($ciIpr / ScoreCalculationService::IPR_CMAKS) * 100, 2);
 
         return round((0.7 * $totalSkorIK) + (0.3 * $skorIPR), 2);
@@ -125,18 +125,18 @@ private function referenceNilaiAkhir(array $allNvValues): float
      *
      * **Validates: Requirements 7.1, 7.2, 7.10, 9.2, 9.3**
      */
-public function test_property2_valid_nv_values_are_accepted(): void
+    public function test_property2_valid_nv_values_are_accepted(): void
     {
         $iterations = 200;
 
         for ($i = 0; $i < $iterations; $i++) {
             // Pick a random komponen
             $komponenName = self::KOMPONEN_NAMES[random_int(0, 3)];
-            $config       = ScoreCalculationService::KOMPONEN_CONFIG[$komponenName];
-            $butirCount   = $config['butir_count'];
+            $config = ScoreCalculationService::KOMPONEN_CONFIG[$komponenName];
+            $butirCount = $config['butir_count'];
 
             // Build array of valid NV values
-            $nvValues = array_map(fn() => $this->randomNv(), range(1, $butirCount));
+            $nvValues = array_map(fn () => $this->randomNv(), range(1, $butirCount));
 
             // Must not throw
             $result = $this->svc->calculateSkorKomponen($nvValues, $komponenName);
@@ -152,17 +152,17 @@ public function test_property2_valid_nv_values_are_accepted(): void
      *
      * **Validates: Requirements 7.1, 7.2, 7.10, 9.2, 9.3**
      */
-public function test_property2_invalid_nv_values_are_rejected(): void
+    public function test_property2_invalid_nv_values_are_rejected(): void
     {
         $iterations = 200;
 
         for ($i = 0; $i < $iterations; $i++) {
             $komponenName = self::KOMPONEN_NAMES[random_int(0, 3)];
-            $config       = ScoreCalculationService::KOMPONEN_CONFIG[$komponenName];
-            $butirCount   = $config['butir_count'];
+            $config = ScoreCalculationService::KOMPONEN_CONFIG[$komponenName];
+            $butirCount = $config['butir_count'];
 
             // Build array with one invalid NV value injected at a random position
-            $nvValues = array_map(fn() => $this->randomNv(), range(1, $butirCount));
+            $nvValues = array_map(fn () => $this->randomNv(), range(1, $butirCount));
             $invalidPos = random_int(0, $butirCount - 1);
             $nvValues[$invalidPos] = $this->randomInvalidNv();
 
@@ -177,21 +177,21 @@ public function test_property2_invalid_nv_values_are_rejected(): void
      *
      * **Validates: Requirements 7.1, 7.2, 7.10, 9.2, 9.3**
      */
-public function test_property2_exhaustive_boundary_values(): void
+    public function test_property2_exhaustive_boundary_values(): void
     {
         $komponenName = 'MUTU LULUSAN';
-        $butirCount   = ScoreCalculationService::KOMPONEN_CONFIG[$komponenName]['butir_count'];
+        $butirCount = ScoreCalculationService::KOMPONEN_CONFIG[$komponenName]['butir_count'];
 
         // All valid values must be accepted
         foreach ([1, 2, 3, 4] as $validNv) {
             $nvValues = array_fill(0, $butirCount, $validNv);
-            $result   = $this->svc->calculateSkorKomponen($nvValues, $komponenName);
+            $result = $this->svc->calculateSkorKomponen($nvValues, $komponenName);
             $this->assertIsFloat($result, "Value {$validNv} should be accepted.");
         }
 
         // Boundary invalids: 0 and 5
         foreach ([0, 5] as $invalidNv) {
-            $nvValues    = array_fill(0, $butirCount, 1); // all valid
+            $nvValues = array_fill(0, $butirCount, 1); // all valid
             $nvValues[0] = $invalidNv;                    // inject one invalid
 
             try {
@@ -220,15 +220,15 @@ public function test_property2_exhaustive_boundary_values(): void
      *
      * **Validates: Requirements 10.1, 10.3, 10.4, 10.5**
      */
-public function test_property4_formula_correctness(): void
+    public function test_property4_formula_correctness(): void
     {
         $iterations = 200;
 
         for ($i = 0; $i < $iterations; $i++) {
             $allNvValues = $this->buildRandomAllNvValues();
 
-            $result    = $this->svc->calculateAll($allNvValues);
-            $expected  = $this->referenceNilaiAkhir($allNvValues);
+            $result = $this->svc->calculateAll($allNvValues);
+            $expected = $this->referenceNilaiAkhir($allNvValues);
 
             $this->assertSame(
                 $expected,
@@ -254,14 +254,14 @@ public function test_property4_formula_correctness(): void
      *
      * **Validates: Requirements 10.7**
      */
-public function test_property5_nilai_akhir_range_invariant(): void
+    public function test_property5_nilai_akhir_range_invariant(): void
     {
         $iterations = 200;
 
         for ($i = 0; $i < $iterations; $i++) {
             $allNvValues = $this->buildRandomAllNvValues();
-            $result      = $this->svc->calculateAll($allNvValues);
-            $nilaiAkhir  = $result['nilai_akhir'];
+            $result = $this->svc->calculateAll($allNvValues);
+            $nilaiAkhir = $result['nilai_akhir'];
 
             $this->assertGreaterThanOrEqual(
                 0.0,
@@ -282,14 +282,14 @@ public function test_property5_nilai_akhir_range_invariant(): void
      *
      * **Validates: Requirements 10.7**
      */
-public function test_property5_boundary_min_max(): void
+    public function test_property5_boundary_min_max(): void
     {
         // All NV = 1 → minimum score
         $allMin = [
             'ik' => [
-                'MUTU LULUSAN'        => array_fill(0, 8,  1),
+                'MUTU LULUSAN' => array_fill(0, 8, 1),
                 'PROSES PEMBELAJARAN' => array_fill(0, 10, 1),
-                'MUTU USTAZ'          => array_fill(0, 10, 1),
+                'MUTU USTAZ' => array_fill(0, 10, 1),
                 'MANAJEMEN PESANTREN' => array_fill(0, 12, 1),
             ],
             'ipr' => array_fill(0, 22, 1),
@@ -302,9 +302,9 @@ public function test_property5_boundary_min_max(): void
         // All NV = 4 → maximum score (should be 100.00)
         $allMax = [
             'ik' => [
-                'MUTU LULUSAN'        => array_fill(0, 8,  4),
+                'MUTU LULUSAN' => array_fill(0, 8, 4),
                 'PROSES PEMBELAJARAN' => array_fill(0, 10, 4),
-                'MUTU USTAZ'          => array_fill(0, 10, 4),
+                'MUTU USTAZ' => array_fill(0, 10, 4),
                 'MANAJEMEN PESANTREN' => array_fill(0, 12, 4),
             ],
             'ipr' => array_fill(0, 22, 4),
@@ -329,7 +329,7 @@ public function test_property5_boundary_min_max(): void
      *
      * **Validates: Requirements 10.8**
      */
-public function test_property6_idempotence(): void
+    public function test_property6_idempotence(): void
     {
         $iterations = 200;
 
@@ -363,7 +363,7 @@ public function test_property6_idempotence(): void
      *
      * **Validates: Requirements 10.6**
      */
-public function test_property7_peringkat_classification_random(): void
+    public function test_property7_peringkat_classification_random(): void
     {
         $iterations = 200;
 
@@ -388,7 +388,7 @@ public function test_property7_peringkat_classification_random(): void
      *
      * **Validates: Requirements 10.6**
      */
-public function test_property7_peringkat_exact_boundaries(): void
+    public function test_property7_peringkat_exact_boundaries(): void
     {
         $cases = [
             [0.0,   'C'],
@@ -416,13 +416,13 @@ public function test_property7_peringkat_exact_boundaries(): void
      *
      * **Validates: Requirements 10.6**
      */
-public function test_property7_peringkat_consistent_with_calculateAll(): void
+    public function test_property7_peringkat_consistent_with_calculate_all(): void
     {
         $iterations = 200;
 
         for ($i = 0; $i < $iterations; $i++) {
             $allNvValues = $this->buildRandomAllNvValues();
-            $result      = $this->svc->calculateAll($allNvValues);
+            $result = $this->svc->calculateAll($allNvValues);
 
             $expectedPeringkat = $this->svc->determinePeringkat($result['nilai_akhir']);
 
@@ -448,14 +448,14 @@ public function test_property7_peringkat_consistent_with_calculateAll(): void
      *
      * **Validates: Requirements 7.12**
      */
-public function test_property8_delta_exhaustive_all_16_combinations(): void
+    public function test_property8_delta_exhaustive_all_16_combinations(): void
     {
         $checkedCount = 0;
 
         foreach (self::VALID_NV as $na1) {
             foreach (self::VALID_NV as $na2) {
                 $expected = abs($na1 - $na2);
-                $actual   = $this->svc->calculateDelta($na1, $na2);
+                $actual = $this->svc->calculateDelta($na1, $na2);
 
                 $this->assertSame(
                     $expected,
@@ -476,7 +476,7 @@ public function test_property8_delta_exhaustive_all_16_combinations(): void
      *
      * **Validates: Requirements 7.12**
      */
-public function test_property8_delta_range_is_0_to_3(): void
+    public function test_property8_delta_range_is_0_to_3(): void
     {
         foreach (self::VALID_NV as $na1) {
             foreach (self::VALID_NV as $na2) {
@@ -495,7 +495,7 @@ public function test_property8_delta_range_is_0_to_3(): void
      *
      * **Validates: Requirements 7.12**
      */
-public function test_property8_delta_symmetry(): void
+    public function test_property8_delta_symmetry(): void
     {
         $iterations = 200;
 

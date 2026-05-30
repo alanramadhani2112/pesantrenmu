@@ -11,8 +11,11 @@ class SidebarMenuService
      * Role ID constants.
      */
     private const ROLE_ADMIN = 1;
+
     private const ROLE_ASESOR = 2;
+
     private const ROLE_PESANTREN = 3;
+
     private const ROLE_SUPER_ADMIN = 4;
 
     /**
@@ -27,7 +30,6 @@ class SidebarMenuService
      * Returns the menu configuration for a given role.
      * Each section contains a label and an array of menu items.
      *
-     * @param int $roleId
      * @return array<int, array{label: string, items: array}>
      */
     public function getMenuForRole(int $roleId): array
@@ -111,12 +113,8 @@ class SidebarMenuService
         return $menu;
     }
 
-
     /**
      * Returns tooltip text for a given menu item key.
-     *
-     * @param string $menuKey
-     * @return string|null
      */
     public function getTooltip(string $menuKey): ?string
     {
@@ -194,10 +192,10 @@ class SidebarMenuService
                         'key' => 'status_perbaikan',
                         'label' => 'Status Perbaikan',
                         'route' => 'pesantren.akreditasi',
-                        'route_query' => ['statusFilter' => '-1', 'focus' => 'perbaikan'],
+                        'route_query' => ['focus' => 'perbaikan'],
                         'icon' => 'messages',
                         'active_pattern' => 'pesantren.akreditasi*',
-                        'active_query' => ['statusFilter' => '-1', 'focus' => 'perbaikan'],
+                        'active_query' => ['focus' => 'perbaikan'],
                         'tooltip' => 'Pantau catatan penolakan dan tindak lanjut perbaikan berkas',
                         'show_progress' => false,
                         'show_badge' => false,
@@ -211,10 +209,10 @@ class SidebarMenuService
                         'key' => 'kartu_kendali_visitasi',
                         'label' => 'Kartu Kendali',
                         'route' => 'pesantren.akreditasi',
-                        'route_query' => ['statusFilter' => '2', 'focus' => 'kartu_kendali'],
+                        'route_query' => ['focus' => 'kartu_kendali'],
                         'icon' => 'clipboard-check',
                         'active_pattern' => 'pesantren.akreditasi*',
-                        'active_query' => ['statusFilter' => '2', 'focus' => 'kartu_kendali'],
+                        'active_query' => ['focus' => 'kartu_kendali'],
                         'tooltip' => 'Unggah dan pantau kartu kendali setelah visitasi selesai',
                         'show_progress' => false,
                         'show_badge' => false,
@@ -228,35 +226,11 @@ class SidebarMenuService
                         'key' => 'hasil_akhir',
                         'label' => 'Hasil Akhir',
                         'route' => 'pesantren.akreditasi',
-                        'route_query' => ['statusFilter' => '0', 'focus' => 'hasil'],
+                        'route_query' => ['focus' => 'hasil'],
                         'icon' => 'chart-line-up',
                         'active_pattern' => 'pesantren.akreditasi*',
-                        'active_query' => ['statusFilter' => '0', 'focus' => 'hasil'],
-                        'tooltip' => 'Lihat nilai akhir, peringkat, dan rekomendasi hasil akreditasi',
-                        'show_progress' => false,
-                        'show_badge' => false,
-                    ],
-                    [
-                        'key' => 'sertifikat_akreditasi',
-                        'label' => 'Sertifikat',
-                        'route' => 'pesantren.akreditasi',
-                        'route_query' => ['statusFilter' => '0', 'focus' => 'sertifikat'],
-                        'icon' => 'file-down',
-                        'active_pattern' => 'pesantren.akreditasi*',
-                        'active_query' => ['statusFilter' => '0', 'focus' => 'sertifikat'],
-                        'tooltip' => 'Unduh sertifikat akreditasi jika sudah diterbitkan',
-                        'show_progress' => false,
-                        'show_badge' => false,
-                    ],
-                    [
-                        'key' => 'banding_pesantren',
-                        'label' => 'Banding',
-                        'route' => 'pesantren.akreditasi',
-                        'route_query' => ['statusFilter' => '-2', 'focus' => 'banding'],
-                        'icon' => 'shield-lock',
-                        'active_pattern' => 'pesantren.akreditasi*',
-                        'active_query' => ['statusFilter' => '-2', 'focus' => 'banding'],
-                        'tooltip' => 'Ajukan dan pantau banding hasil akreditasi',
+                        'active_query' => ['focus' => 'hasil'],
+                        'tooltip' => 'Lihat nilai akhir, rekomendasi, sertifikat, dan status banding dalam satu tempat',
                         'show_progress' => false,
                         'show_badge' => false,
                     ],
@@ -517,7 +491,7 @@ class SidebarMenuService
             ->reject(fn (DocumentCategory $cat) => in_array($cat->slug, $excludeSlugs, true));
 
         $items = $categories->map(function (DocumentCategory $cat) use ($roleScope) {
-            $key = 'dokumen_' . $roleScope . '_' . $cat->slug;
+            $key = 'dokumen_'.$roleScope.'_'.$cat->slug;
 
             return [
                 'key' => $key,
@@ -525,15 +499,15 @@ class SidebarMenuService
                 'route' => 'documents.index',
                 'route_params' => ['doc' => $cat->slug],
                 'icon' => $cat->icon ?: 'document-stack',
-                'active_pattern' => 'documents.index.' . $cat->slug,
-                'tooltip' => $cat->description ?: ('Lihat dokumen ' . $cat->name),
+                'active_pattern' => 'documents.index.'.$cat->slug,
+                'tooltip' => $cat->description ?: ('Lihat dokumen '.$cat->name),
                 'show_progress' => false,
                 'show_badge' => false,
             ];
         })->all();
 
         $items[] = [
-            'key' => 'semua_dokumen_' . $roleScope,
+            'key' => 'semua_dokumen_'.$roleScope,
             'label' => 'Semua Dokumen',
             'route' => 'documents.index',
             'route_params' => ['doc' => 'all'],
@@ -591,9 +565,7 @@ class SidebarMenuService
             'pengajuan' => 'Ajukan dan pantau status akreditasi pesantren',
             'status_perbaikan' => 'Pantau catatan penolakan dan tindak lanjut perbaikan berkas',
             'kartu_kendali_visitasi' => 'Unggah dan pantau kartu kendali setelah visitasi selesai',
-            'hasil_akhir' => 'Lihat nilai akhir, peringkat, dan rekomendasi hasil akreditasi',
-            'sertifikat_akreditasi' => 'Unduh sertifikat akreditasi jika sudah diterbitkan',
-            'banding_pesantren' => 'Ajukan dan pantau banding hasil akreditasi',
+            'hasil_akhir' => 'Lihat nilai akhir, rekomendasi, sertifikat, dan status banding dalam satu tempat',
 
             // Admin tooltips
             'dashboard' => 'Lihat ringkasan dan statistik sistem akreditasi',

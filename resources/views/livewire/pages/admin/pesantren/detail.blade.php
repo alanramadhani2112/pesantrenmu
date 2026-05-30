@@ -98,7 +98,7 @@ new #[Layout('layouts.app')] class extends Component {
                         </div>
 
                         <h2 class="spm-card-title fs-4 mb-2">{{ $profileName }}</h2>
-                        <div class="text-muted fw-bold fs-8 text-uppercase mb-4">NSP: {{ $pesantren?->ns_pesantren ?? '-' }}</div>
+                        <div class="text-muted fw-semibold fs-8 text-uppercase mb-4">NSP: {{ $pesantren?->ns_pesantren ?? '-' }}</div>
 
                         <div class="d-flex flex-wrap justify-content-center gap-2">
                             <x-ui.status-badge :variant="$user->status == 1 ? 'success' : 'danger'">
@@ -191,7 +191,7 @@ new #[Layout('layouts.app')] class extends Component {
                                             <tbody>
                                                 @foreach($pesantren->units as $unit)
                                                     <tr>
-                                                        <td class="ps-4 text-uppercase fw-bold">{{ str_replace('_', ' ', $unit->unit) }}</td>
+                                                        <td class="ps-4 text-uppercase fw-semibold">{{ str_replace('_', ' ', $unit->unit) }}</td>
                                                         <td class="text-end pe-4">
                                                             <x-ui.badge variant="success">{{ $unit->jumlah_rombel ?? 0 }} Rombel</x-ui.badge>
                                                         </td>

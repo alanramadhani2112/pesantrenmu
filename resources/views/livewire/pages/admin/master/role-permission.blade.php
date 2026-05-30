@@ -486,7 +486,7 @@ new #[Layout('layouts.app')] class extends Component {
             <div class="p-0">
                 <x-ui.simple-table dense class="spm-permission-matrix-wrap" table-class="spm-permission-matrix">
                     <thead>
-                        <tr class="text-uppercase fw-bold text-muted fs-7">
+                        <tr class="text-uppercase fw-semibold text-muted fs-7">
                             <th class="ps-4 spm-permission-name-col">Permission</th>
                             @foreach ($roles as $role)
                                 @php
@@ -595,7 +595,7 @@ new #[Layout('layouts.app')] class extends Component {
         >
             <x-ui.simple-table dense table-class="spm-permission-audit-table">
                 <thead>
-                    <tr class="text-uppercase fw-bold text-muted fs-7">
+                    <tr class="text-uppercase fw-semibold text-muted fs-7">
                         <th class="ps-4 min-w-150px">Waktu</th>
                         <th class="min-w-180px">Aktor</th>
                         <th class="min-w-140px">Role</th>

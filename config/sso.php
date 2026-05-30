@@ -16,7 +16,7 @@ return [
     |--------------------------------------------------------------------------
     | SSO Server
     |--------------------------------------------------------------------------
-    | 
+    |
     | Contains the base url for requesting SSO, or you can called it
     | parent application.
     |
@@ -27,7 +27,7 @@ return [
     |--------------------------------------------------------------------------
     | SSO Client ID
     |--------------------------------------------------------------------------
-    | 
+    |
     | Contains the client for authenticating SSO request.
     | M-3 fix: tidak ada default value — jika SSO_CLIENT_ID tidak di-set,
     | config akan null dan request ke IdP akan gagal dengan error yang jelas.
@@ -39,7 +39,7 @@ return [
     |--------------------------------------------------------------------------
     | SSO Client Secret
     |--------------------------------------------------------------------------
-    | 
+    |
     | Contains the secret for authenticating SSO request.
     | M-3 fix: tidak ada default value — jika SSO_CLIENT_SECRET tidak di-set,
     | config akan null. Jangan pernah commit secret ke source code.
@@ -51,12 +51,12 @@ return [
     |--------------------------------------------------------------------------
     | Redirect URL
     |--------------------------------------------------------------------------
-    | 
+    |
     | Contains the the redirect url after successful login.
     |
      */
 
-     'redirect_url' => '/dashboard',
+    'redirect_url' => '/dashboard',
 
     /*
     |--------------------------------------------------------------------------

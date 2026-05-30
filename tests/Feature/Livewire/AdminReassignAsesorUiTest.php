@@ -14,12 +14,14 @@ use App\Models\SdmPesantren;
 use App\Models\User;
 use App\Notifications\AkreditasiNotification;
 use Carbon\Carbon;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Volt\Volt;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 /**
  * Livewire component tests for admin akreditasi detail reassignment UI.
@@ -27,7 +29,6 @@ use PHPUnit\Framework\Attributes\Group;
  * Covers:
  *  - Task 8.5: Reassign button disabled when not overdue, enabled when overdue
  *  - Task 8.6: Reassignment action updates the view and shows success message
- *
  */
 #[Group('Feature: assessment-visitasi-timeout')]
 class AdminReassignAsesorUiTest extends TestCase
@@ -38,6 +39,8 @@ class AdminReassignAsesorUiTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RolePermissionSeeder::class);
         Notification::fake();
     }
 
@@ -58,6 +61,7 @@ class AdminReassignAsesorUiTest extends TestCase
             'nama_dengan_gelar' => $name,
             'nama_tanpa_gelar' => $name,
         ]);
+
         return [$asesor, $user];
     }
 
@@ -135,7 +139,7 @@ class AdminReassignAsesorUiTest extends TestCase
      * When the akreditasi is in assessment/visitasi phase but not overdue,
      * the "Ganti Asesor" button should be present but disabled.
      */
-public function test_reassign_button_disabled_when_not_overdue(): void
+    public function test_reassign_button_disabled_when_not_overdue(): void
     {
         $today = Carbon::create(2025, 11, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -146,7 +150,7 @@ public function test_reassign_button_disabled_when_not_overdue(): void
         $pesantrenUser = $this->createCompletePesantrenUser('Pesantren Tepat Waktu');
         [$asesor] = $this->createAsesorWithUser('Asesor Aktif');
 
-        $akreditasi = $this->createAkreditasiWithAssessment($pesantrenUser, $asesor, 5, false);
+        $akreditasi = $this->createAkreditasiWithAssessment($pesantrenUser, $asesor, 4, false);
 
         $component = Volt::test('pages.admin.akreditasi-detail', ['uuid' => $akreditasi->uuid]);
 
@@ -166,7 +170,7 @@ public function test_reassign_button_disabled_when_not_overdue(): void
      * When the akreditasi is overdue, the "Ganti Asesor" button should be
      * enabled (not disabled) and styled as danger.
      */
-public function test_reassign_button_enabled_when_overdue(): void
+    public function test_reassign_button_enabled_when_overdue(): void
     {
         $today = Carbon::create(2025, 11, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -177,7 +181,7 @@ public function test_reassign_button_enabled_when_overdue(): void
         $pesantrenUser = $this->createCompletePesantrenUser('Pesantren Terlambat');
         [$asesor] = $this->createAsesorWithUser('Asesor Terlambat');
 
-        $akreditasi = $this->createAkreditasiWithAssessment($pesantrenUser, $asesor, 5, true);
+        $akreditasi = $this->createAkreditasiWithAssessment($pesantrenUser, $asesor, 4, true);
 
         $component = Volt::test('pages.admin.akreditasi-detail', ['uuid' => $akreditasi->uuid]);
 
@@ -193,7 +197,7 @@ public function test_reassign_button_enabled_when_overdue(): void
     /**
      * Task 8.5: Reassign button is NOT shown for completed akreditasi (status 1).
      */
-public function test_reassign_button_not_shown_for_completed_akreditasi(): void
+    public function test_reassign_button_not_shown_for_completed_akreditasi(): void
     {
         $today = Carbon::create(2025, 11, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -226,7 +230,7 @@ public function test_reassign_button_not_shown_for_completed_akreditasi(): void
     /**
      * Task 8.5: Overdue badge is shown in toolbar when akreditasi is overdue.
      */
-public function test_overdue_badge_shown_in_toolbar_when_overdue(): void
+    public function test_overdue_badge_shown_in_toolbar_when_overdue(): void
     {
         $today = Carbon::create(2025, 11, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -237,7 +241,7 @@ public function test_overdue_badge_shown_in_toolbar_when_overdue(): void
         $pesantrenUser = $this->createCompletePesantrenUser('Pesantren Terlambat');
         [$asesor] = $this->createAsesorWithUser('Asesor Terlambat');
 
-        $akreditasi = $this->createAkreditasiWithAssessment($pesantrenUser, $asesor, 5, true);
+        $akreditasi = $this->createAkreditasiWithAssessment($pesantrenUser, $asesor, 4, true);
 
         $component = Volt::test('pages.admin.akreditasi-detail', ['uuid' => $akreditasi->uuid]);
 
@@ -258,7 +262,7 @@ public function test_overdue_badge_shown_in_toolbar_when_overdue(): void
      * - A success flash message should be shown
      * - Notifications should be sent to old and new asesor
      */
-public function test_reassignment_action_updates_view_and_shows_success_message(): void
+    public function test_reassignment_action_updates_view_and_shows_success_message(): void
     {
         $today = Carbon::create(2025, 11, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -272,7 +276,7 @@ public function test_reassignment_action_updates_view_and_shows_success_message(
         [$oldAsesor, $oldAsesorUser] = $this->createAsesorWithUser('Asesor Lama');
         [$newAsesor, $newAsesorUser] = $this->createAsesorWithUser('Asesor Baru');
 
-        $akreditasi = $this->createAkreditasiWithAssessment($pesantrenUser, $oldAsesor, 5, true);
+        $akreditasi = $this->createAkreditasiWithAssessment($pesantrenUser, $oldAsesor, 4, true);
 
         $component = Volt::test('pages.admin.akreditasi-detail', ['uuid' => $akreditasi->uuid]);
 
@@ -293,13 +297,13 @@ public function test_reassignment_action_updates_view_and_shows_success_message(
         Notification::assertSentTo(
             $newAsesorUser,
             AkreditasiNotification::class,
-            fn($n) => $n->type === 'asesor_reassigned_new'
+            fn ($n) => $n->type === 'asesor_reassigned_new'
         );
 
         Notification::assertSentTo(
             $oldAsesorUser,
             AkreditasiNotification::class,
-            fn($n) => $n->type === 'asesor_reassigned_old'
+            fn ($n) => $n->type === 'asesor_reassigned_old'
         );
 
         Carbon::setTestNow();
@@ -308,7 +312,7 @@ public function test_reassignment_action_updates_view_and_shows_success_message(
     /**
      * Task 8.6: Reassignment action fails with error when no asesor selected.
      */
-public function test_reassignment_action_fails_with_validation_error_when_no_asesor_selected(): void
+    public function test_reassignment_action_fails_with_validation_error_when_no_asesor_selected(): void
     {
         $today = Carbon::create(2025, 11, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -319,7 +323,7 @@ public function test_reassignment_action_fails_with_validation_error_when_no_ase
         $pesantrenUser = $this->createCompletePesantrenUser('Pesantren Terlambat');
         [$asesor] = $this->createAsesorWithUser('Asesor Terlambat');
 
-        $akreditasi = $this->createAkreditasiWithAssessment($pesantrenUser, $asesor, 5, true);
+        $akreditasi = $this->createAkreditasiWithAssessment($pesantrenUser, $asesor, 4, true);
 
         $component = Volt::test('pages.admin.akreditasi-detail', ['uuid' => $akreditasi->uuid]);
 
@@ -338,7 +342,7 @@ public function test_reassignment_action_fails_with_validation_error_when_no_ase
      * If somehow the reassign action is called on a non-overdue akreditasi,
      * it should show an error message.
      */
-public function test_reassignment_action_shows_error_when_not_overdue(): void
+    public function test_reassignment_action_shows_error_when_not_overdue(): void
     {
         $today = Carbon::create(2025, 11, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -351,7 +355,7 @@ public function test_reassignment_action_shows_error_when_not_overdue(): void
         [$newAsesor] = $this->createAsesorWithUser('Asesor Baru');
 
         // Non-overdue akreditasi
-        $akreditasi = $this->createAkreditasiWithAssessment($pesantrenUser, $asesor, 5, false);
+        $akreditasi = $this->createAkreditasiWithAssessment($pesantrenUser, $asesor, 4, false);
 
         $component = Volt::test('pages.admin.akreditasi-detail', ['uuid' => $akreditasi->uuid]);
 
@@ -371,7 +375,7 @@ public function test_reassignment_action_shows_error_when_not_overdue(): void
     /**
      * Task 8.6: After successful reassignment, the new deadline is reset.
      */
-public function test_reassignment_resets_deadline_to_configured_duration(): void
+    public function test_reassignment_resets_deadline_to_configured_duration(): void
     {
         $today = Carbon::create(2025, 11, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -386,7 +390,7 @@ public function test_reassignment_resets_deadline_to_configured_duration(): void
         [$oldAsesor] = $this->createAsesorWithUser('Asesor Lama');
         [$newAsesor] = $this->createAsesorWithUser('Asesor Baru');
 
-        $akreditasi = $this->createAkreditasiWithAssessment($pesantrenUser, $oldAsesor, 5, true);
+        $akreditasi = $this->createAkreditasiWithAssessment($pesantrenUser, $oldAsesor, 4, true);
 
         $component = Volt::test('pages.admin.akreditasi-detail', ['uuid' => $akreditasi->uuid]);
 
@@ -401,7 +405,7 @@ public function test_reassignment_resets_deadline_to_configured_duration(): void
         ]);
 
         // Verify the deadline was reset correctly
-        $updatedAssessment = \App\Models\Assessment::where('akreditasi_id', $akreditasi->id)->first();
+        $updatedAssessment = Assessment::where('akreditasi_id', $akreditasi->id)->first();
         $this->assertEquals($expectedDeadline, $updatedAssessment->tanggal_berakhir->toDateString());
 
         Carbon::setTestNow();
@@ -410,7 +414,7 @@ public function test_reassignment_resets_deadline_to_configured_duration(): void
     /**
      * Task 8.6: Available asesors list excludes the currently assigned asesor.
      */
-public function test_available_asesors_excludes_current_asesor(): void
+    public function test_available_asesors_excludes_current_asesor(): void
     {
         $today = Carbon::create(2025, 11, 1, 0, 0, 0);
         Carbon::setTestNow($today);
@@ -422,7 +426,7 @@ public function test_available_asesors_excludes_current_asesor(): void
         [$currentAsesor] = $this->createAsesorWithUser('Asesor Saat Ini');
         [$otherAsesor] = $this->createAsesorWithUser('Asesor Lain');
 
-        $akreditasi = $this->createAkreditasiWithAssessment($pesantrenUser, $currentAsesor, 5, true);
+        $akreditasi = $this->createAkreditasiWithAssessment($pesantrenUser, $currentAsesor, 4, true);
 
         $component = Volt::test('pages.admin.akreditasi-detail', ['uuid' => $akreditasi->uuid]);
 

@@ -14,6 +14,7 @@ use App\Models\Role;
 use App\Models\SdmPesantren;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
@@ -37,7 +38,7 @@ class TenantPolicyTest extends TestCase
         parent::setUp();
         $this->seed(RoleSeeder::class);
         $this->seed(PermissionSeeder::class);
-        $this->seed(\Database\Seeders\RolePermissionSeeder::class);
+        $this->seed(RolePermissionSeeder::class);
     }
 
     // ─── Pesantren policy ──────────────────────────────────────────────────────
@@ -327,7 +328,7 @@ class TenantPolicyTest extends TestCase
     /**
      * @return array{0: User, 1: Pesantren}
      */
-private function makePesantrenUser(): array
+    private function makePesantrenUser(): array
     {
         $user = $this->makeUser(Role::ID_PESANTREN);
         $pesantren = Pesantren::create([
@@ -341,7 +342,7 @@ private function makePesantrenUser(): array
     /**
      * @return array{0: User, 1: Asesor}
      */
-private function makeAsesorUser(): array
+    private function makeAsesorUser(): array
     {
         $user = $this->makeUser(Role::ID_ASESOR);
         $asesor = Asesor::create([

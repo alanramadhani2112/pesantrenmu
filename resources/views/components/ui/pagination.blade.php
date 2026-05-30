@@ -1,6 +1,7 @@
 @props([
     'paginator',
     'elements' => [],
+    'showInfo' => true,
 ])
 
 @if ($paginator->hasPages())
@@ -10,11 +11,13 @@
         role="navigation"
         aria-label="Pagination Navigation"
     >
-        <div class="text-gray-500 fw-semibold fs-7">
-            @if($paginator->total())
-                Menampilkan {{ $paginator->firstItem() }} sampai {{ $paginator->lastItem() }} dari {{ $paginator->total() }} data
-            @endif
-        </div>
+        @if($showInfo)
+            <div class="text-gray-500 fw-semibold fs-7">
+                @if($paginator->total())
+                    Menampilkan {{ $paginator->firstItem() }}-{{ $paginator->lastItem() }} dari {{ $paginator->total() }} entri
+                @endif
+            </div>
+        @endif
 
         <ul class="pagination pagination-circle pagination-outline mb-0">
             <li class="page-item previous {{ $paginator->onFirstPage() ? 'disabled' : '' }}">

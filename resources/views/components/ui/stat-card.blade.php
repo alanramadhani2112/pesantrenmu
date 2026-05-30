@@ -14,7 +14,7 @@
     <div class="d-flex align-items-center justify-content-between">
         <div>
             <span class="text-muted fw-semibold fs-7">{{ $label }}</span>
-            <div class="fs-2 fw-bold text-gray-900 mt-2">{{ $value }}</div>
+            <div class="fs-2 fw-semibold text-gray-900 mt-2">{{ $value }}</div>
         </div>
 
         @if($icon)

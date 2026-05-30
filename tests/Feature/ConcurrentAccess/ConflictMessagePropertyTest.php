@@ -23,10 +23,10 @@ class ConflictMessagePropertyTest extends TestCase
         return [
             'status_1_validasi_admin' => [1, 'Validasi Admin'],
             'status_2_pasca_visitasi' => [2, 'Penilaian Pasca Visitasi'],
-            'status_3_visitasi'       => [3, 'Visitasi'],
-            'status_4_assessment'     => [4, 'Review Asesor'],
-            'status_5_verifikasi'     => [5, 'Verifikasi Berkas'],
-            'status_6_pengajuan'      => [6, 'Pengajuan'],
+            'status_3_visitasi' => [3, 'Visitasi'],
+            'status_4_assessment' => [4, 'Review Asesor'],
+            'status_5_verifikasi' => [5, 'Verifikasi Berkas'],
+            'status_6_pengajuan' => [6, 'Pengajuan'],
         ];
     }
 

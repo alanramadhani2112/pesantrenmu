@@ -65,7 +65,7 @@ new class extends Component {
             class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-700 menu-state-bg-light-primary fw-semibold py-3 fs-7 show position-absolute end-0 mt-2"
             style="display: none; z-index: 1080; width: min(360px, calc(100vw - 24px));">
         <div class="px-4 py-2 border-bottom border-gray-200 d-flex justify-content-between align-items-center">
-                <h3 class="fs-6 fw-bold text-gray-800 mb-0">Notifikasi</h3>
+                <h3 class="fs-6 fw-semibold text-gray-800 mb-0">Notifikasi</h3>
                 @if($this->unreadCount > 0)
                     <x-ui.button type="button" wire:click="markAllAsRead" variant="link" size="sm" class="p-0 fs-8 fw-semibold">Tandai semua dibaca</x-ui.button>
                 @endif

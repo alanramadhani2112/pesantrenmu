@@ -9,7 +9,6 @@ use App\Models\MasterEdpmKomponen;
 use App\Models\Pesantren;
 use App\Models\User;
 use App\Services\PesantrenService;
-use Database\Seeders\MasterEdpmSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -28,10 +27,15 @@ class EdpmServiceTest extends TestCase
     use RefreshDatabase;
 
     private PesantrenService $service;
+
     private User $user;
+
     private Pesantren $pesantren;
+
     private MasterEdpmKomponen $komponen;
+
     private MasterEdpmButir $butir1;
+
     private MasterEdpmButir $butir2;
 
     protected function setUp(): void

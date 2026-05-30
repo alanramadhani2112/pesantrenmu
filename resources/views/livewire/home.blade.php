@@ -207,7 +207,7 @@
 
                             <div class="d-flex align-items-center justify-content-between px-6 pt-4 pb-3">
                                 <div>
-                                    <span class="fw-bold text-gray-900 fs-6">{{ $doneCount }}/{{ $totalSteps }} langkah selesai</span>
+                                    <span class="fw-semibold text-gray-900 fs-6">{{ $doneCount }}/{{ $totalSteps }} langkah selesai</span>
                                 </div>
                                 <span class="fw-semibold fs-6 {{ $progressPercent === 100 ? 'text-success' : 'text-primary' }}">{{ $progressPercent }}%</span>
                             </div>
@@ -241,7 +241,7 @@
                                         @if($step['done'])
                                             <x-ui.badge variant="success">Lengkap</x-ui.badge>
                                         @else
-                                            <span class="text-primary fw-bold fs-8">Lengkapi →</span>
+                                            <span class="text-primary fw-semibold fs-8">Lengkapi →</span>
                                         @endif
                                     </div>
                                 </a>
@@ -252,7 +252,7 @@
                                     <div class="d-flex align-items-center gap-3">
                                         <x-ui.icon name="check-circle" class="fs-2x text-success" />
                                         <div>
-                                            <div class="fw-bold text-gray-900">Data Anda sudah lengkap!</div>
+                                            <div class="fw-semibold text-gray-900">Data Anda sudah lengkap!</div>
                                             <div class="text-muted fs-7">Anda bisa mengajukan akreditasi sekarang.</div>
                                         </div>
                                         <x-ui.button :href="route('pesantren.akreditasi')" variant="success" size="sm" class="ms-auto">
@@ -378,7 +378,7 @@
                                 <canvas id="statusChart"></canvas>
                                 <div class="position-absolute top-50 start-50 translate-middle text-center pe-none">
                                     <span class="fs-2hx fw-semibold text-gray-900">{{ $stats['terakreditasi'] + $stats['ditolak'] }}</span>
-                                    <span class="d-block text-muted fw-bold fs-8 text-uppercase">Selesai</span>
+                                    <span class="d-block text-muted fw-semibold fs-8 text-uppercase">Selesai</span>
                                 </div>
                             </div>
 
@@ -419,7 +419,7 @@
                     @if($recentActivities->count() > 0)
                         <x-ui.simple-table>
                             <thead>
-                                <tr class="text-uppercase fs-8 fw-bold text-muted">
+                                <tr class="text-uppercase fs-8 fw-semibold text-muted">
                                     <th class="min-w-200px ps-4">Pesantren</th>
                                     <th class="min-w-100px">Status</th>
                                     <th class="min-w-100px d-none d-md-table-cell">Peringkat</th>
@@ -438,7 +438,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="d-flex flex-column min-w-0">
-                                                    <span class="text-gray-900 fw-bold fs-7 fs-md-6 text-truncate">{{ $activity['pesantren_name'] }}</span>
+                                                    <span class="text-gray-900 fw-semibold fs-7 fs-md-6 text-truncate">{{ $activity['pesantren_name'] }}</span>
                                                     <span class="text-muted fw-semibold fs-8 d-sm-none">
                                                         {{ $activity['updated_at']->translatedFormat('d M Y') }}
                                                     </span>
@@ -452,7 +452,7 @@
                                         </td>
                                         <td class="d-none d-md-table-cell">
                                             @if($activity['peringkat'])
-                                                <span class="fw-bold text-gray-700">{{ $activity['peringkat'] }}</span>
+                                                <span class="fw-semibold text-gray-700">{{ $activity['peringkat'] }}</span>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif

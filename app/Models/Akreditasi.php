@@ -3,31 +3,33 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use App\Models\AkreditasiEdpm;
-use App\Models\AkreditasiEdpmCatatan;
-use App\Models\AkreditasiBandingEdpm;
-use App\Models\AkreditasiBandingEdpmCatatan;
 
 class Akreditasi extends Model
 {
     use SoftDeletes;
 
     public const STATUS_PENGAJUAN = 6;
+
     public const STATUS_VERIFIKASI_BERKAS = 5;
+
     public const STATUS_ASSESSMENT = 4;
+
     public const STATUS_VISITASI = 3;
+
     public const STATUS_PASCA_VISITASI = 2;
+
     public const STATUS_VALIDASI_ADMIN = 1;
+
     public const STATUS_SELESAI = 0;
+
     public const STATUS_DITOLAK = -1;
+
     public const STATUS_BANDING = -2;
 
     public const ACTIVE_STATUSES = [
@@ -46,7 +48,6 @@ class Akreditasi extends Model
      */
     public const PESANTREN_FILLABLE = [
         'user_id',
-        'parent',
         'uuid',
         'catatan',
         'status',
@@ -59,7 +60,6 @@ class Akreditasi extends Model
      */
     protected $fillable = [
         'user_id',
-        'parent',
         'uuid',
         'nomor_sk',
         'catatan',
@@ -138,16 +138,6 @@ class Akreditasi extends Model
         });
     }
 
-    public function parentAkreditasi()
-    {
-        return $this->belongsTo(Akreditasi::class, 'parent');
-    }
-
-    public function children()
-    {
-        return $this->hasMany(Akreditasi::class, 'parent');
-    }
-
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -167,10 +157,12 @@ class Akreditasi extends Model
     {
         return $this->hasOne(Assessment::class)->where('tipe', 2);
     }
+
     public function catatans()
     {
         return $this->hasMany(AkreditasiCatatan::class);
     }
+
     public static function getStatusLabel($status): string
     {
         return match ((int) $status) {
@@ -208,14 +200,14 @@ class Akreditasi extends Model
     public static function getStatusBadgeClass($status): string
     {
         return match ((int) $status) {
-            0      => 'bg-green-100 text-green-800',
+            0 => 'bg-green-100 text-green-800',
             -1, -2 => 'bg-red-100 text-red-800',
-            1      => 'bg-indigo-100 text-indigo-800',
-            2      => 'bg-purple-100 text-purple-800',
-            3      => 'bg-amber-100 text-amber-800',
-            4      => 'bg-blue-100 text-blue-800',
-            5      => 'bg-yellow-100 text-yellow-800',
-            6      => 'bg-gray-100 text-gray-800',
+            1 => 'bg-indigo-100 text-indigo-800',
+            2 => 'bg-purple-100 text-purple-800',
+            3 => 'bg-amber-100 text-amber-800',
+            4 => 'bg-blue-100 text-blue-800',
+            5 => 'bg-yellow-100 text-yellow-800',
+            6 => 'bg-gray-100 text-gray-800',
             default => 'bg-gray-100 text-gray-800',
         };
     }

@@ -1,12 +1,10 @@
 import axios from 'axios';
-import Swal from 'sweetalert2';
 import { Livewire, Alpine as LivewireAlpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
 
 const Alpine = LivewireAlpine;
 
 window.axios = axios;
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-window.Swal = Swal;
 window.Alpine = Alpine;
 
 const initMetronic = () => {
@@ -21,6 +19,106 @@ const initMetronic = () => {
 
 window.initMetronic = initMetronic;
 
+let pageLoadingTimer = null;
+
+const showPageLoadingOverlay = () => {
+    clearTimeout(pageLoadingTimer);
+
+    document.body?.setAttribute('data-kt-app-page-loading', 'on');
+    document.body?.classList.add('page-loading');
+
+    window.KTApp?.showPageLoading?.();
+};
+
+const hidePageLoadingOverlay = () => {
+    clearTimeout(pageLoadingTimer);
+
+    pageLoadingTimer = window.setTimeout(() => {
+        window.KTApp?.hidePageLoading?.();
+        document.body?.removeAttribute('data-kt-app-page-loading');
+        document.body?.classList.remove('page-loading');
+    }, 120);
+};
+
+window.showPageLoadingOverlay = showPageLoadingOverlay;
+window.hidePageLoadingOverlay = hidePageLoadingOverlay;
+
+const submitLockButtonSelector = [
+    'button[type="submit"]',
+    'input[type="submit"]',
+    '[data-spm-submit-button="true"]',
+].join(',');
+
+const getSubmitLockButtons = (form) => Array.from(form.querySelectorAll(submitLockButtonSelector))
+    .filter((button) => !button.matches('[data-spm-submit-lock="off"]'));
+
+const lockSubmitButtons = (form) => {
+    form.setAttribute('data-spm-submit-lock', 'active');
+    form.setAttribute('aria-busy', 'true');
+
+    getSubmitLockButtons(form).forEach((button) => {
+        if (button.disabled) {
+            button.setAttribute('data-spm-submit-was-disabled', 'true');
+        } else {
+            button.setAttribute('data-spm-submit-locked-by-guard', 'true');
+            button.disabled = true;
+        }
+
+        button.setAttribute('aria-disabled', 'true');
+        button.classList.add('spm-submit-locking');
+    });
+};
+
+const releaseSubmitLockGuard = (form) => {
+    form.removeAttribute('data-spm-submit-lock');
+    form.removeAttribute('data-spm-submit-started-at');
+    form.removeAttribute('aria-busy');
+
+    getSubmitLockButtons(form).forEach((button) => {
+        if (button.getAttribute('data-spm-submit-locked-by-guard') === 'true') {
+            button.disabled = false;
+        }
+
+        button.removeAttribute('data-spm-submit-locked-by-guard');
+        button.removeAttribute('data-spm-submit-was-disabled');
+        button.removeAttribute('aria-disabled');
+        button.classList.remove('spm-submit-locking');
+    });
+};
+
+const releaseAllSubmitLockGuards = () => {
+    document
+        .querySelectorAll('form[data-spm-submit-lock="active"]')
+        .forEach((form) => releaseSubmitLockGuard(form));
+};
+
+const initSubmitLockGuard = () => {
+    document.addEventListener('submit', (event) => {
+        const form = event.target;
+
+        if (!(form instanceof HTMLFormElement)) return;
+        if (form.matches('[data-spm-submit-lock="off"]')) return;
+
+        if (form.getAttribute('data-spm-submit-lock') === 'active') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            return;
+        }
+
+        const submitter = event.submitter;
+
+        if (submitter?.matches?.('[data-spm-submit-lock="off"]')) return;
+        if (!form.noValidate && typeof form.checkValidity === 'function' && !form.checkValidity()) return;
+
+        form.setAttribute('data-spm-submit-lock', 'active');
+        form.setAttribute('data-spm-submit-started-at', String(Date.now()));
+        window.requestAnimationFrame(() => lockSubmitButtons(form));
+    }, true);
+};
+
+window.releaseSubmitLockGuard = releaseSubmitLockGuard;
+window.releaseAllSubmitLockGuards = releaseAllSubmitLockGuards;
+
 const swalButtonClasses = {
     primary: 'btn btn-primary',
     secondary: 'btn btn-secondary',
@@ -30,6 +128,21 @@ const swalButtonClasses = {
     info: 'btn btn-info',
     light: 'btn btn-light',
 };
+
+let swalPromise = null;
+
+const getSwal = () => {
+    swalPromise ??= import('sweetalert2').then((module) => {
+        const Swal = module.default ?? module;
+        window.Swal = Swal;
+
+        return Swal;
+    });
+
+    return swalPromise;
+};
+
+window.getSpmSwal = getSwal;
 
 const buildMetronicSwalOptions = (options = {}) => {
     const confirmVariant = options.confirmVariant ?? 'primary';
@@ -60,13 +173,25 @@ const buildMetronicSwalOptions = (options = {}) => {
     };
 };
 
-const fireMetronicSwal = (options = {}) => Swal.fire(buildMetronicSwalOptions(options));
+const fireMetronicSwal = async (options = {}) => {
+    const Swal = await getSwal();
+
+    return Swal.fire(buildMetronicSwalOptions(options));
+};
 
 const ask = (options = {}) => fireMetronicSwal({
     text: 'Lanjutkan proses ini?',
     ...options,
     showCancelButton: true,
     confirmButtonText: options.confirmButtonText ?? 'Ya, lanjutkan',
+}).then((result) => {
+    if (!result.isConfirmed) releaseAllSubmitLockGuards();
+
+    return result;
+}).catch((error) => {
+    releaseAllSubmitLockGuards();
+
+    throw error;
 });
 
 window.SpmSwal = {
@@ -267,7 +392,7 @@ window.adminManagement = () => ({
             title: isReject ? 'Stop pengajuan?' : 'Lanjutkan pengajuan?',
             text: isReject
                 ? 'Pengajuan akan dikembalikan dengan catatan penolakan.'
-                : 'Pengajuan akan masuk ke tahap assessment sesuai asesor dan jadwal yang dipilih.',
+                : 'Pengajuan akan masuk ke tahap Review Asesor sesuai tim penilai yang dipilih.',
             icon: isReject ? 'warning' : 'success',
             confirmVariant: isReject ? 'danger' : 'success',
             confirmButtonText: isReject ? 'Ya, stop' : 'Ya, lanjutkan',
@@ -336,7 +461,7 @@ window.adminManagement = () => ({
         ask({
             title: isAccept ? 'Terima banding?' : 'Tolak banding?',
             text: isAccept
-                ? 'Banding akan diterima dan pengajuan ulang akreditasi akan dibuat.'
+                ? 'Banding akan diterima dan proses akreditasi kembali ke tahap Validasi Admin.'
                 : 'Banding akan ditolak. Keputusan ini tidak dapat dibatalkan.',
             icon: isAccept ? 'success' : 'warning',
             confirmVariant: isAccept ? 'success' : 'danger',
@@ -367,15 +492,6 @@ window.akreditasiPesantren = () => ({
             if (result.isConfirmed) callWire(this.$wire, 'cancelSubmission', id);
         });
     },
-    confirmResubmit(id) {
-        ask({
-            title: 'Ajukan ulang?',
-            text: 'Sistem akan membuat pengajuan baru berdasarkan pengajuan yang ditolak.',
-            confirmButtonText: 'Ya, ajukan ulang',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(this.$wire, 'create', id);
-        });
-    },
     confirmSubmitPerbaikan(wire) {
         ask({
             title: 'Kirim perbaikan?',
@@ -383,15 +499,6 @@ window.akreditasiPesantren = () => ({
             confirmButtonText: 'Ya, kirim',
         }).then((result) => {
             if (result.isConfirmed) callWire(wire, 'submitPerbaikan');
-        });
-    },
-    confirmResubmitDetail(wire) {
-        ask({
-            title: 'Buat pengajuan ulang?',
-            text: 'Data profil akan dikunci kembali selama proses akreditasi berjalan.',
-            confirmButtonText: 'Ya, ajukan ulang',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'resubmit');
         });
     },
 });
@@ -460,7 +567,7 @@ window.akreditasiManagement = () => ({
     },
     confirmSaveDraft(wire) {
         ask({
-            title: 'Simpan draf assessment?',
+            title: 'Simpan draf penilaian?',
             text: 'Nilai yang sudah diisi akan disimpan sebagai draf.',
             confirmButtonText: 'Ya, simpan',
         }).then((result) => {
@@ -487,15 +594,6 @@ window.akreditasiManagement = () => ({
             confirmButtonText: 'Ya, finalkan',
         }).then((result) => {
             if (result.isConfirmed) callWire(wire, 'saveAsesorEdpm', true);
-        });
-    },
-    confirmUploadLaporan(wire) {
-        ask({
-            title: 'Unggah laporan visitasi?',
-            text: 'File laporan akan disimpan permanen.',
-            confirmButtonText: 'Ya, unggah',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'uploadLaporanVisitasi');
         });
     },
     confirmRescheduleVisitasi(wire) {
@@ -882,6 +980,11 @@ window.addEventListener('show-metronic-alert', (event) => {
 });
 
 document.addEventListener('livewire:initialized', () => {
+    Livewire.hook?.('commit', ({ succeed, fail }) => {
+        succeed?.(() => releaseAllSubmitLockGuards());
+        fail?.(() => releaseAllSubmitLockGuards());
+    });
+
     Livewire.on('swal:success', (data) => {
         const payload = Array.isArray(data) ? data[0] : data;
 
@@ -898,9 +1001,22 @@ document.addEventListener('livewire:initialized', () => {
     });
 });
 
+initSubmitLockGuard();
 document.addEventListener('DOMContentLoaded', initMetronic);
+document.addEventListener('DOMContentLoaded', hidePageLoadingOverlay);
+document.addEventListener('DOMContentLoaded', releaseAllSubmitLockGuards);
 document.addEventListener('livewire:initialized', initMetronic);
-document.addEventListener('livewire:navigated', initMetronic);
+document.addEventListener('livewire:navigate', showPageLoadingOverlay);
+document.addEventListener('livewire:navigating', showPageLoadingOverlay);
+document.addEventListener('livewire:navigated', () => {
+    initMetronic();
+    releaseAllSubmitLockGuards();
+    hidePageLoadingOverlay();
+});
+window.addEventListener('pageshow', () => {
+    releaseAllSubmitLockGuards();
+    hidePageLoadingOverlay();
+});
 
 Alpine.store('sidebar', { open: false });
 Alpine.data('deleteConfirmation', window.deleteConfirmation);

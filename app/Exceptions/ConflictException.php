@@ -2,6 +2,8 @@
 
 namespace App\Exceptions;
 
+use App\Models\Akreditasi;
+
 class ConflictException extends \DomainException
 {
     public function __construct(
@@ -14,6 +16,6 @@ class ConflictException extends \DomainException
 
     public function getStatusLabel(): string
     {
-        return \App\Models\Akreditasi::getStatusLabel($this->currentStatus);
+        return Akreditasi::getStatusLabel($this->currentStatus);
     }
 }

@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\MasterEdpmButir;
+use App\Models\MasterEdpmKomponen;
 use App\Repositories\Contracts\MasterEdpmRepositoryInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-use App\Models\MasterEdpmKomponen;
-use App\Models\MasterEdpmButir;
 
 class MasterEdpmService
 {
@@ -46,6 +46,7 @@ class MasterEdpmService
     {
         $result = $this->masterEdpmRepository->deleteKomponen($id);
         $this->flushCache();
+
         return $result;
     }
 
@@ -63,6 +64,7 @@ class MasterEdpmService
     {
         $result = $this->masterEdpmRepository->deleteButir($id);
         $this->flushCache();
+
         return $result;
     }
 

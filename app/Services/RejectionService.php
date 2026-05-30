@@ -38,20 +38,18 @@ class RejectionService
      * Creates AkreditasiRejection with type='admin_verifikasi'.
      * Soft deletes the akreditasi and transitions status to -1.
      *
-     * @param int $akreditasiId
-     * @param int $adminId
-     * @param array $rejectionData  ['sections' => [...], 'catatan' => '...']
+     * @param  array  $rejectionData  ['sections' => [...], 'catatan' => '...']
      * @return array{success: bool, error: ?string}
      */
     public function rejectBerkas(int $akreditasiId, int $adminId, array $rejectionData): array
     {
         $akreditasi = $this->akreditasiRepository->find($akreditasiId);
-        if (!$akreditasi || (int) $akreditasi->status !== 5) {
+        if (! $akreditasi || (int) $akreditasi->status !== 5) {
             return ['success' => false, 'error' => 'invalid_status'];
         }
 
         $adminUser = User::find($adminId);
-        if (!$adminUser || (int) $adminUser->role_id !== 1) {
+        if (! $adminUser || (int) $adminUser->role_id !== 1) {
             return ['success' => false, 'error' => 'unauthorized'];
         }
 
@@ -92,7 +90,7 @@ class RejectionService
                 $pesantrenUser->notify(new AkreditasiNotification(
                     'berkas_rejected',
                     'Berkas Akreditasi Ditolak',
-                    'Berkas akreditasi Anda ditolak. Bagian bermasalah: ' . $sectionList . '. Catatan: ' . $catatan,
+                    'Berkas akreditasi Anda ditolak. Bagian bermasalah: '.$sectionList.'. Catatan: '.$catatan,
                     '#'
                 ));
             }
@@ -114,16 +112,12 @@ class RejectionService
      * Creates AkreditasiRejection with type='asesor'.
      * Unlocks only the rejected sections and sets 14-day deadline.
      *
-     * @param int $akreditasiId
-     * @param int $asesor1Id
-     * @param array $items
-     * @param string $explanation
      * @return array{success: bool, error: ?string, rejection: ?AkreditasiRejection}
      */
     public function createDocumentRejection(int $akreditasiId, int $asesor1Id, array $items, string $explanation): array
     {
         $akreditasi = $this->akreditasiRepository->find($akreditasiId);
-        if (!$akreditasi || (int) $akreditasi->status !== 4) {
+        if (! $akreditasi || (int) $akreditasi->status !== 4) {
             return ['success' => false, 'error' => 'invalid_status', 'rejection' => null];
         }
 
@@ -133,7 +127,7 @@ class RejectionService
             ->where('tipe', 1)
             ->exists();
 
-        if (!$isAsesor1) {
+        if (! $isAsesor1) {
             return ['success' => false, 'error' => 'unauthorized', 'rejection' => null];
         }
 
@@ -159,7 +153,7 @@ class RejectionService
 
         // Count existing asesor rejections for this akreditasi
         $currentCount = $this->rejectionRepository->countByAkreditasi($akreditasiId);
-        $maxRejections = 3;
+        $maxRejections = (int) config('akreditasi.rejection_limit', 3);
 
         return DB::transaction(function () use (
             $akreditasiId, $asesor1Id, $items, $explanation, $currentCount, $maxRejections, $akreditasi
@@ -184,6 +178,7 @@ class RejectionService
                     $this->stateMachine->transition($akreditasi, AkreditasiStateMachine::STATUS_DITOLAK, $asesor1User);
                 }
                 $akreditasi->delete();
+                $this->pesantrenRepository->updateByUserId($akreditasi->user_id, ['is_locked' => false]);
 
                 // Notify pesantren and admin
                 $this->notifyDocumentRejection($akreditasi, $items, $explanation, isAutoRejection: true);
@@ -192,7 +187,7 @@ class RejectionService
             }
 
             // Normal rejection: create record with 14-day deadline
-            $deadline = now()->addDays(14);
+            $deadline = now()->addDays((int) config('akreditasi.perbaikan_deadline_days', 14));
             $rejection = $this->rejectionRepository->create([
                 'akreditasi_id' => $akreditasiId,
                 'user_id' => $asesor1Id,
@@ -211,7 +206,6 @@ class RejectionService
         });
     }
 
-
     // =========================================================================
     // Task 6.4: Perbaikan — unlock rejected sections, re-lock on submit — Req 4.4-4.6
     // =========================================================================
@@ -219,31 +213,29 @@ class RejectionService
     /**
      * Submit perbaikan (corrections) by Pesantren.
      *
-     * Re-locks the corrected sections by marking the rejection as 'resolved'.
+     * Re-locks the corrected sections by marking the rejection as 'submitted'.
      * Allows Asesor_1 to review again.
      *
-     * @param int $akreditasiId
-     * @param int $pesantrenId
      * @return array{success: bool, error: ?string}
      */
     public function submitPerbaikan(int $akreditasiId, int $pesantrenId): array
     {
         // Validate: active rejection exists for this akreditasi
         $activeRejection = $this->rejectionRepository->findActiveByAkreditasi($akreditasiId);
-        if (!$activeRejection) {
+        if (! $activeRejection) {
             return ['success' => false, 'error' => 'no_active_rejection'];
         }
 
         // Validate: user is the pesantren owner of the akreditasi
         $akreditasi = $this->akreditasiRepository->find($akreditasiId);
-        if (!$akreditasi || (int) $akreditasi->user_id !== $pesantrenId) {
+        if (! $akreditasi || (int) $akreditasi->user_id !== $pesantrenId) {
             return ['success' => false, 'error' => 'unauthorized'];
         }
 
         return DB::transaction(function () use ($activeRejection, $akreditasiId) {
-            // Re-lock sections: mark rejection as 'resolved', record submission timestamp
+            // Re-lock sections and mark the correction ready for assessor review.
             $this->rejectionRepository->update($activeRejection->id, [
-                'status' => 'resolved',
+                'status' => 'submitted',
                 'perbaikan_submitted_at' => now(),
             ]);
 
@@ -276,9 +268,9 @@ class RejectionService
                 ));
 
                 // Task 12.3: Dispatch PerbaikanSubmitted event for extensibility
-                // Reload the rejection to get the resolved state
-                $resolvedRejection = \App\Models\AkreditasiRejection::find($activeRejection->id) ?? $activeRejection;
-                event(new PerbaikanSubmitted($akreditasi, $resolvedRejection));
+                // Reload the rejection to get the submitted state
+                $submittedRejection = AkreditasiRejection::find($activeRejection->id) ?? $activeRejection;
+                event(new PerbaikanSubmitted($akreditasi, $submittedRejection));
             }
 
             return ['success' => true, 'error' => null];
@@ -294,13 +286,12 @@ class RejectionService
      *
      * Transitions to -1 with soft delete.
      *
-     * @param int $akreditasiId
      * @return array{success: bool, error: ?string}
      */
     public function autoRejectOnDeadlineExpiry(int $akreditasiId): array
     {
         $akreditasi = $this->akreditasiRepository->find($akreditasiId);
-        if (!$akreditasi) {
+        if (! $akreditasi) {
             return ['success' => false, 'error' => 'akreditasi_not_found'];
         }
 
@@ -313,7 +304,7 @@ class RejectionService
             ->latest()
             ->first();
 
-        if (!$expiredRejection) {
+        if (! $expiredRejection) {
             return ['success' => false, 'error' => 'no_expired_rejection'];
         }
 
@@ -375,7 +366,6 @@ class RejectionService
         });
     }
 
-
     // =========================================================================
     // Section unlock helpers — used by Pesantren to check edit permissions
     // =========================================================================
@@ -383,15 +373,13 @@ class RejectionService
     /**
      * Check if a specific section/item is unlocked for editing.
      *
-     * @param int $akreditasiId
-     * @param string $section  e.g. 'profil', 'ipm.kurikulum', 'edpm.butir.3'
-     * @return bool
+     * @param  string  $section  e.g. 'profil', 'ipm.kurikulum', 'edpm.butir.3'
      */
     public function isSectionUnlocked(int $akreditasiId, string $section): bool
     {
         $activeRejection = $this->rejectionRepository->findActiveByAkreditasi($akreditasiId);
 
-        if (!$activeRejection) {
+        if (! $activeRejection) {
             return false;
         }
 
@@ -402,15 +390,12 @@ class RejectionService
 
     /**
      * Get all currently unlocked sections for an akreditasi.
-     *
-     * @param int $akreditasiId
-     * @return array
      */
     public function getUnlockedSections(int $akreditasiId): array
     {
         $activeRejection = $this->rejectionRepository->findActiveByAkreditasi($akreditasiId);
 
-        if (!$activeRejection) {
+        if (! $activeRejection) {
             return [];
         }
 
@@ -423,9 +408,6 @@ class RejectionService
 
     /**
      * Get the selectable rejection items structure.
-     *
-     * @param int $akreditasiId
-     * @return array
      */
     public function getSelectableItems(int $akreditasiId): array
     {
@@ -451,12 +433,12 @@ class RejectionService
             $butirItems = [];
             foreach ($komponen->butirs as $butir) {
                 $butirItems[] = [
-                    'id' => 'edpm.butir.' . $butir->id,
-                    'label' => $butir->nomor_butir . ' - ' . $butir->butir_pernyataan,
+                    'id' => 'edpm.butir.'.$butir->id,
+                    'label' => $butir->nomor_butir.' - '.$butir->butir_pernyataan,
                 ];
             }
             $edpmChildren[] = [
-                'id' => 'edpm.komponen.' . $komponen->id,
+                'id' => 'edpm.komponen.'.$komponen->id,
                 'label' => $komponen->nama,
                 'children' => $butirItems,
             ];
@@ -470,8 +452,6 @@ class RejectionService
     /**
      * Accept corrections after perbaikan (Asesor_1 action).
      *
-     * @param int $akreditasiId
-     * @param int $userId
      * @return array{success: bool, error: ?string}
      */
     public function acceptPerbaikan(int $akreditasiId, int $userId): array
@@ -481,7 +461,7 @@ class RejectionService
             ->where('tipe', 1)
             ->exists();
 
-        if (!$isAsesor1) {
+        if (! $isAsesor1) {
             return ['success' => false, 'error' => 'unauthorized'];
         }
 
@@ -491,12 +471,13 @@ class RejectionService
             ->latest()
             ->first();
 
-        if (!$rejection) {
+        if (! $rejection) {
             return ['success' => false, 'error' => 'no_submitted_rejection'];
         }
 
         return DB::transaction(function () use ($rejection) {
             $this->rejectionRepository->update($rejection->id, ['status' => 'accepted']);
+
             return ['success' => true, 'error' => null];
         });
     }
@@ -504,7 +485,6 @@ class RejectionService
     /**
      * Get the current rejection status for an akreditasi.
      *
-     * @param int $akreditasiId
      * @return array{count: int, limit: int, active: ?AkreditasiRejection, history: Collection}
      */
     public function getRejectionStatus(int $akreditasiId): array
@@ -567,7 +547,7 @@ class RejectionService
                     $pesantrenUser->notify(new AkreditasiNotification(
                         'perbaikan_deadline_reminder',
                         'Pengingat Deadline Perbaikan',
-                        'Batas waktu perbaikan dokumen akan berakhir dalam ' . $daysLeft . ' hari. Segera kirimkan perbaikan Anda.',
+                        'Batas waktu perbaikan dokumen akan berakhir dalam '.$daysLeft.' hari. Segera kirimkan perbaikan Anda.',
                         '#'
                     ));
                 }
@@ -603,7 +583,7 @@ class RejectionService
                 $pesantrenUser->notify(new AkreditasiNotification(
                     'document_rejection_created',
                     'Dokumen Ditolak',
-                    'Asesor telah menolak dokumen Anda. Item yang perlu diperbaiki: ' . $itemSummary . '. Penjelasan: ' . $explanation,
+                    'Asesor telah menolak dokumen Anda. Item yang perlu diperbaiki: '.$itemSummary.'. Penjelasan: '.$explanation,
                     '#'
                 ));
             }
@@ -612,7 +592,7 @@ class RejectionService
         $admins = User::where('role_id', 1)->get();
         $adminMessage = $isAutoRejection
             ? 'Akreditasi ditolak otomatis karena batas penolakan tercapai.'
-            : 'Asesor telah menolak dokumen akreditasi. Item: ' . $itemSummary;
+            : 'Asesor telah menolak dokumen akreditasi. Item: '.$itemSummary;
 
         Notification::send($admins, new AkreditasiNotification(
             $isAutoRejection ? 'rejection_limit_reached_admin' : 'document_rejection_created_admin',
@@ -620,158 +600,5 @@ class RejectionService
             $adminMessage,
             '#'
         ));
-    }
-
-    // =========================================================================
-    // Legacy methods — preserved for backward compatibility with existing tests
-    // =========================================================================
-
-    /**
-     * Legacy: Create a structured rejection by Asesor 1 (originally at status 5).
-     * Delegates to createDocumentRejection but also supports status 5 for backward compat.
-     *
-     * @deprecated Use createDocumentRejection() for status 4 or rejectBerkas() for status 5.
-     */
-    public function createRejection(int $akreditasiId, int $userId, array $items, string $explanation): array
-    {
-        // Validate: user is Asesor 1 (tipe=1) for the akreditasi
-        $isAsesor1 = Assessment::where('akreditasi_id', $akreditasiId)
-            ->whereHas('asesor', fn ($q) => $q->where('user_id', $userId))
-            ->where('tipe', 1)
-            ->exists();
-
-        if (!$isAsesor1) {
-            return ['success' => false, 'error' => 'unauthorized', 'rejection' => null];
-        }
-
-        $akreditasi = $this->akreditasiRepository->find($akreditasiId);
-        if (!$akreditasi || !in_array((int) $akreditasi->status, [4, 5], true)) {
-            return ['success' => false, 'error' => 'invalid_status', 'rejection' => null];
-        }
-
-        if (empty($items)) {
-            return ['success' => false, 'error' => 'items_required', 'rejection' => null];
-        }
-
-        if (strlen($explanation) < 10) {
-            return ['success' => false, 'error' => 'explanation_too_short', 'rejection' => null];
-        }
-
-        // Block if a perbaikan is currently pending
-        $pendingRejection = $this->rejectionRepository->findActiveByAkreditasi($akreditasiId);
-        if ($pendingRejection) {
-            return ['success' => false, 'error' => 'perbaikan_pending', 'rejection' => null];
-        }
-
-        $currentCount = $this->rejectionRepository->countByAkreditasi($akreditasiId);
-        $limit = (int) config('akreditasi.rejection_limit', 3);
-
-        return DB::transaction(function () use ($akreditasiId, $userId, $items, $explanation, $currentCount, $limit, $akreditasi) {
-            $newCount = $currentCount + 1;
-
-            if ($newCount >= $limit) {
-                $rejection = $this->rejectionRepository->create([
-                    'akreditasi_id' => $akreditasiId,
-                    'user_id' => $userId,
-                    'type' => 'asesor',
-                    'items' => $items,
-                    'explanation' => $explanation,
-                    'rejection_number' => $newCount,
-                    'status' => 'limit_reached',
-                ]);
-
-                $this->akreditasiRepository->update($akreditasiId, ['status' => -1]);
-
-                // Unlock pesantren data
-                if ($akreditasi) {
-                    $this->pesantrenRepository->updateByUserId($akreditasi->user_id, ['is_locked' => false]);
-                }
-
-                $this->notifyDocumentRejection($akreditasi, $items, $explanation, isAutoRejection: true);
-
-                return ['success' => true, 'error' => null, 'rejection' => $rejection];
-            }
-
-            $deadlineDays = (int) config('akreditasi.perbaikan_deadline_days', 14);
-            $deadline = now()->addDays($deadlineDays);
-
-            $rejection = $this->rejectionRepository->create([
-                'akreditasi_id' => $akreditasiId,
-                'user_id' => $userId,
-                'type' => 'asesor',
-                'items' => $items,
-                'explanation' => $explanation,
-                'rejection_number' => $newCount,
-                'perbaikan_deadline' => $deadline,
-                'status' => 'pending',
-            ]);
-
-            $this->notifyDocumentRejection($akreditasi, $items, $explanation, isAutoRejection: false);
-
-            return ['success' => true, 'error' => null, 'rejection' => $rejection];
-        });
-    }
-
-    /**
-     * Legacy: Create a structured final rejection by Admin at status 3.
-     *
-     * @deprecated Use rejectBerkas() for admin rejection at status 5.
-     */
-    public function createFinalRejection(int $akreditasiId, int $adminUserId, array $categories): array
-    {
-        $akreditasi = $this->akreditasiRepository->find($akreditasiId);
-        if (!$akreditasi || (int) $akreditasi->status !== 3) {
-            return ['success' => false, 'error' => 'invalid_status'];
-        }
-
-        $adminUser = User::find($adminUserId);
-        if (!$adminUser || (int) $adminUser->role_id !== 1) {
-            return ['success' => false, 'error' => 'unauthorized'];
-        }
-
-        if (empty($categories)) {
-            return ['success' => false, 'error' => 'categories_required'];
-        }
-
-        $validKeys = array_keys(config('akreditasi.final_rejection_categories', []));
-        foreach ($categories as $entry) {
-            if (!isset($entry['category']) || (!empty($validKeys) && !in_array($entry['category'], $validKeys, true))) {
-                return ['success' => false, 'error' => 'invalid_category'];
-            }
-            if (!isset($entry['explanation']) || strlen($entry['explanation']) < 10) {
-                return ['success' => false, 'error' => 'explanation_too_short'];
-            }
-        }
-
-        return DB::transaction(function () use ($akreditasiId, $adminUserId, $categories, $akreditasi) {
-            $this->rejectionRepository->create([
-                'akreditasi_id' => $akreditasiId,
-                'user_id' => $adminUserId,
-                'type' => 'admin_final',
-                'categories' => $categories,
-                'status' => 'final',
-            ]);
-
-            $this->akreditasiRepository->update($akreditasiId, ['status' => -1]);
-            $this->pesantrenRepository->updateByUserId($akreditasi->user_id, ['is_locked' => false]);
-
-            $pesantrenUser = User::find($akreditasi->user_id);
-            if ($pesantrenUser) {
-                $categoryLabels = config('akreditasi.final_rejection_categories', []);
-                $details = collect($categories)->map(function ($entry) use ($categoryLabels) {
-                    $label = $categoryLabels[$entry['category']] ?? $entry['category'];
-                    return $label . ': ' . $entry['explanation'];
-                })->implode('; ');
-
-                $pesantrenUser->notify(new AkreditasiNotification(
-                    'final_rejection',
-                    'Akreditasi Ditolak',
-                    'Akreditasi Anda ditolak pada tahap validasi. Alasan: ' . $details,
-                    '#'
-                ));
-            }
-
-            return ['success' => true, 'error' => null];
-        });
     }
 }

@@ -1,0 +1,355 @@
+/* ============================================================
+   SPM Button Standardization
+   ============================================================
+   Ensures all buttons share the same visual DNA regardless
+   of variant (primary, light, danger, etc.) or size (sm, md, lg).
+   Targets both <x-ui.button> (.spm-btn) and bare Metronic .btn.
+   ============================================================ */
+
+[data-ui-button="metronic"],
+.spm-btn,
+.btn.spm-btn {
+    min-height: 42px;
+    padding: 0.55rem 1.3rem;
+    font-family: var(--bs-font-sans-serif) !important;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.35;
+    border-radius: 8px !important;
+    border: 1px solid transparent;
+    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+[data-ui-button="metronic"].btn-sm,
+.spm-btn.btn-sm {
+    min-height: 34px;
+    padding: 0.35rem 0.9rem;
+    font-size: 12px;
+}
+
+[data-ui-button="metronic"].btn-lg,
+.spm-btn.btn-lg {
+    min-height: 48px;
+    padding: 0.65rem 1.7rem;
+    font-size: 14px;
+}
+
+.spm-submit-locking {
+    cursor: progress !important;
+    opacity: 0.72;
+    pointer-events: none;
+}
+
+form[data-spm-submit-lock="active"] {
+    cursor: progress;
+}
+
+/* Light variant buttons — tighter visual weight */
+[data-ui-button="metronic"].btn-light-primary,
+[data-ui-button="metronic"].btn-light-success,
+[data-ui-button="metronic"].btn-light-warning,
+[data-ui-button="metronic"].btn-light-danger,
+[data-ui-button="metronic"].btn-light-info,
+.spm-btn.btn-light-primary,
+.spm-btn.btn-light-success,
+.spm-btn.btn-light-warning,
+.spm-btn.btn-light-danger,
+.spm-btn.btn-light-info {
+    font-weight: 600;
+}
+
+/* Icon-only buttons — compact */
+[data-ui-button="metronic"].btn-icon,
+.spm-btn.btn-icon {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0;
+    aspect-ratio: 1;
+}
+
+[data-ui-button="metronic"].btn-icon.btn-sm,
+.spm-btn.btn-icon.btn-sm {
+    min-width: 30px;
+    min-height: 30px;
+}
+
+/* Action menu trigger buttons */
+[data-ui-action-menu="metronic"] > .btn {
+    min-height: 38px;
+    padding: 0.45rem 1.1rem;
+    font-family: var(--bs-font-sans-serif) !important;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0;
+    border-radius: 8px !important;
+    transition: background-color 140ms ease, border-color 140ms ease;
+}
+
+/* ============================================================
+   Font-Family Reinforcement
+   ============================================================
+   Metronic ships its own font stack. These rules ensure Inter
+   always wins everywhere it matters — even inside Metronic
+   widgets, dropdowns, modals, and notification elements.
+   ============================================================ */
+
+/* Global reset — apply to every element inside the app shell.
+   Does NOT touch icon elements (i tags, ki-* icon fonts). */
+.spm-app-shell,
+.spm-app-shell *:not(i):not([class*="ki-"]):not([class*="svg-icon"]):not(.svg-icon):not(.bullet):not(.bullet-dot),
+.app-default,
+.app-default *:not(i):not([class*="ki-"]):not([class*="svg-icon"]):not(.svg-icon):not(.bullet):not(.bullet-dot),
+[data-ui-table="metronic"],
+[data-ui-table="metronic"] *:not(i):not([class*="ki-"]):not([class*="svg-icon"]):not(.svg-icon):not(.bullet):not(.bullet-dot),
+[data-ui-button="metronic"] {
+    font-family: var(--bs-font-sans-serif) !important;
+}
+
+/* Allow monospace for code/pre blocks */
+pre,
+code,
+kbd,
+samp,
+[data-ui-table="metronic"] pre,
+[data-ui-table="metronic"] code {
+    font-family: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", "Consolas", "Courier New", monospace !important;
+}
+
+/* Metronic menu dropdown font */
+#kt_app_header_menu_wrapper,
+#kt_app_header_menu_wrapper *,
+[data-ui-action-menu-dropdown="metronic"],
+[data-ui-action-menu-dropdown="metronic"] * {
+    font-family: var(--bs-font-sans-serif) !important;
+}
+
+/* KeenIcons render their glyphs through nested .path* spans.
+   Keep those descendants on the icon font so the global Inter reset
+   never turns icon glyphs into missing-character boxes. */
+.ki-duotone,
+.ki-duotone *,
+.ki-duotone::before,
+.ki-duotone *::before {
+    font-family: "keenicons-duotone" !important;
+}
+
+.ki-outline,
+.ki-outline *,
+.ki-outline::before,
+.ki-outline *::before {
+    font-family: "keenicons-outline" !important;
+}
+
+.ki-solid,
+.ki-solid *,
+.ki-solid::before,
+.ki-solid *::before {
+    font-family: "keenicons-solid" !important;
+}
+
+/* ============================================================
+   Text Readability — Lighten heavy dashboard text
+   ============================================================
+   Reduces visual weight on stat cards, headings, and labels
+   so the UI feels airier and easier to scan.
+   ============================================================ */
+
+/* Dashboard stat cards — dial back aggressive font weights */
+.spm-dashboard-stat .fs-2,
+.spm-dashboard-stat .fs-1 {
+    font-weight: 600 !important;
+    letter-spacing: -0.01em;
+}
+
+.spm-dashboard-stat .text-muted {
+    font-weight: 600 !important;
+    letter-spacing: 0.04em;
+}
+
+/* Table headings — slightly lighter */
+.spm-table-heading .spm-card-title {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+/* Card titles — reduce from 800 to 700 */
+.spm-card-title {
+    font-weight: 600;
+}
+
+/* Section heading in detail pages */
+.spm-section-card .card-header h5,
+.spm-section-card .card-header .spm-card-title {
+    font-weight: 600;
+}
+
+/* Status badges — slightly less aggressive */
+[data-ui-badge="metronic"].badge {
+    font-weight: 600 !important;
+    letter-spacing: 0.01em;
+}
+
+/* Detail values — improve line-height for readability */
+.spm-detail-value {
+    line-height: 1.6;
+}
+
+/* ============================================================
+   Spacing & Whitespace
+   ============================================================
+   Adds breathing room to commonly dense areas.
+   ============================================================ */
+
+/* Dashboard hero card — more padding */
+.spm-dashboard-hero {
+    padding: 2rem 2rem !important;
+}
+
+@media (min-width: 768px) {
+    .spm-dashboard-hero {
+        padding: 2.5rem 2.5rem !important;
+    }
+}
+
+/* Quick action cards — better spacing */
+.spm-quick-action .card-body {
+    padding: 1.2rem 1rem !important;
+}
+
+/* Stat cards — give them more internal space */
+.spm-dashboard-stat .card-body {
+    padding: 1.5rem 1.5rem !important;
+}
+
+/* Main content area — more breathing room at top */
+.spm-main-content {
+    padding-top: 32px !important;
+}
+
+@media (min-width: 768px) {
+    .spm-main-content {
+        padding-top: 36px !important;
+    }
+}
+
+@media (min-width: 1200px) {
+    .spm-main-content {
+        padding-top: 40px !important;
+    }
+}
+
+/* ============================================================
+   Form & Input Consistency
+   ============================================================ */
+
+.spm-main-content .form-control,
+.spm-main-content .form-select {
+    min-height: 42px;
+    font-family: var(--bs-font-sans-serif) !important;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+}
+
+.spm-main-content .form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #344054;
+    margin-bottom: 6px;
+}
+
+/* ============================================================
+   Link consistency
+   ============================================================ */
+
+a:not(.btn):not(.nav-link):not(.menu-link):not(.page-link) {
+    color: var(--spm-primary);
+    text-decoration: none;
+    transition: color 140ms ease;
+}
+
+a:not(.btn):not(.nav-link):not(.menu-link):not(.page-link):hover {
+    color: var(--spm-primary-hover);
+}
+
+/* ============================================================
+   Final Typography Guard
+   ============================================================
+   All visible UI text uses Inter and maxes out at semibold.
+   Icon fonts are restored after the text reset so KeenIcons keep
+   their glyph font instead of inheriting Inter.
+   ============================================================ */
+
+body,
+body *:not(i):not(pre):not(code):not(kbd):not(samp):not(.font-monospace):not([class*="ki-"]):not([class*="svg-icon"]):not(.svg-icon):not(.bullet):not(.bullet-dot) {
+    font-family: var(--bs-font-sans-serif) !important;
+}
+
+body .fw-bold,
+body .fw-bolder,
+body .font-bold,
+body .font-extrabold,
+body .font-black,
+body b,
+body strong,
+body h1,
+body h2,
+body h3,
+body h4,
+body h5,
+body h6,
+body .card-title,
+body .modal-title,
+body .page-heading,
+body .spm-card-title,
+body .spm-header-title,
+body .spm-page-title,
+body .spm-table-heading .spm-card-title,
+body .symbol-label,
+body [data-ui-badge="metronic"].badge,
+body .badge,
+body .btn,
+body .form-label,
+body th,
+body .menu-title,
+body .nav-link,
+body .apexcharts-title-text,
+body .apexcharts-legend-text {
+    font-weight: 600 !important;
+}
+
+/* Keep code and technical snippets readable without forcing Inter. */
+body pre,
+body code,
+body kbd,
+body samp,
+body .font-monospace {
+    font-family: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", "Consolas", "Courier New", monospace !important;
+}
+
+/* Final icon-font escape hatch after every typography rule. */
+.ki-duotone,
+.ki-duotone *,
+.ki-duotone::before,
+.ki-duotone *::before {
+    font-family: "keenicons-duotone" !important;
+    font-weight: normal !important;
+}
+
+.ki-outline,
+.ki-outline *,
+.ki-outline::before,
+.ki-outline *::before {
+    font-family: "keenicons-outline" !important;
+    font-weight: normal !important;
+}
+
+.ki-solid,
+.ki-solid *,
+.ki-solid::before,
+.ki-solid *::before {
+    font-family: "keenicons-solid" !important;
+    font-weight: normal !important;
+}
+

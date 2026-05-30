@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Services\RoleService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Tests\TestCase;
 
 /**
@@ -43,7 +45,7 @@ class RoleServiceTest extends TestCase
     {
         $roles = $this->service->getAllRoles();
 
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $roles);
+        $this->assertInstanceOf(Collection::class, $roles);
     }
 
     // ─── getPaginatedRoles ────────────────────────────────────────────────────
@@ -52,7 +54,7 @@ class RoleServiceTest extends TestCase
     {
         $result = $this->service->getPaginatedRoles(null, 10, 'name', true);
 
-        $this->assertInstanceOf(\Illuminate\Pagination\LengthAwarePaginator::class, $result);
+        $this->assertInstanceOf(LengthAwarePaginator::class, $result);
     }
 
     public function test_get_paginated_roles_returns_all_when_no_search(): void

@@ -24,8 +24,11 @@ class SdmServiceTest extends TestCase
     use RefreshDatabase;
 
     private PesantrenService $service;
+
     private User $user;
+
     private Pesantren $pesantren;
+
     private PesantrenUnit $unit;
 
     protected function setUp(): void

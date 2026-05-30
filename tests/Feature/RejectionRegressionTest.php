@@ -9,6 +9,7 @@ use App\Models\Assessment;
 use App\Models\Pesantren;
 use App\Models\User;
 use App\Notifications\AkreditasiNotification;
+use App\Services\AkreditasiWorkflowService;
 use App\Services\RejectionService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -32,18 +33,18 @@ class RejectionRegressionTest extends TestCase
     /**
      * Helper: create a pesantren user with akreditasi at status 5 and an Asesor 1 assigned.
      */
-private function createAsesor1Setup(): array
+    private function createAsesor1Setup(): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
             'user_id' => $pesantrenUser->id,
-            'nama_pesantren' => 'Pesantren Test ' . $pesantrenUser->id,
+            'nama_pesantren' => 'Pesantren Test '.$pesantrenUser->id,
             'is_locked' => true,
         ]);
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status' => 5,
+            'status' => 4,
         ]);
 
         $asesorUser = User::factory()->create(['role_id' => 2]);
@@ -78,7 +79,7 @@ private function createAsesor1Setup(): array
      *
      * Validates: Requirements 1.1, 2.1, 3.1, 7.1
      */
-public function test_full_rejection_perbaikan_accept_lifecycle_end_to_end(): void
+    public function test_full_rejection_perbaikan_accept_lifecycle_end_to_end(): void
     {
         Notification::fake();
 
@@ -88,7 +89,7 @@ public function test_full_rejection_perbaikan_accept_lifecycle_end_to_end(): voi
         $pesantrenUserId = $setup['pesantrenUser']->id;
 
         // Step 1: Asesor 1 creates rejection with items
-        $result = $this->rejectionService->createRejection(
+        $result = $this->rejectionService->createDocumentRejection(
             $akreditasiId,
             $asesorUserId,
             ['profil', 'ipm.kurikulum', 'sdm'],
@@ -120,7 +121,7 @@ public function test_full_rejection_perbaikan_accept_lifecycle_end_to_end(): voi
 
         // Verify akreditasi status remains at 5
         $akreditasi = Akreditasi::find($akreditasiId);
-        $this->assertEquals(5, (int) $akreditasi->status);
+        $this->assertEquals(4, (int) $akreditasi->status);
 
         // Step 3: Pesantren submits perbaikan
         $perbaikanResult = $this->rejectionService->submitPerbaikan($akreditasiId, $pesantrenUserId);
@@ -132,14 +133,14 @@ public function test_full_rejection_perbaikan_accept_lifecycle_end_to_end(): voi
         $this->assertFalse($this->rejectionService->isSectionUnlocked($akreditasiId, 'sdm'));
         $this->assertEmpty($this->rejectionService->getUnlockedSections($akreditasiId));
 
-        // Verify rejection status is resolved after pesantren submits perbaikan.
+        // Verify rejection status marks the assessor review queue after pesantren submits perbaikan.
         $rejection = AkreditasiRejection::where('akreditasi_id', $akreditasiId)->first();
-        $this->assertEquals('resolved', $rejection->status);
+        $this->assertEquals('submitted', $rejection->status);
         $this->assertNotNull($rejection->perbaikan_submitted_at);
 
         // Verify akreditasi status still at 5
         $akreditasi->refresh();
-        $this->assertEquals(5, (int) $akreditasi->status);
+        $this->assertEquals(4, (int) $akreditasi->status);
 
         // Step 5: Asesor 1 accepts perbaikan
         $acceptResult = $this->rejectionService->acceptPerbaikan($akreditasiId, $asesorUserId);
@@ -151,7 +152,7 @@ public function test_full_rejection_perbaikan_accept_lifecycle_end_to_end(): voi
 
         // Verify akreditasi status remains at 5 (ready for visitasi scheduling)
         $akreditasi->refresh();
-        $this->assertEquals(5, (int) $akreditasi->status);
+        $this->assertEquals(4, (int) $akreditasi->status);
 
         // Verify no active rejection remains
         $status = $this->rejectionService->getRejectionStatus($akreditasiId);
@@ -174,11 +175,11 @@ public function test_full_rejection_perbaikan_accept_lifecycle_end_to_end(): voi
 
     /**
      * Integration test: rejection limit reached triggers auto-rejection with
-     * banding/resubmission still available.
+     * the banding path still available.
      *
      * Validates: Requirements 4.3, 4.6, 4.8
      */
-public function test_rejection_limit_reached_triggers_auto_rejection_with_banding_available(): void
+    public function test_rejection_limit_reached_triggers_auto_rejection_with_banding_available(): void
     {
         Notification::fake();
 
@@ -191,7 +192,7 @@ public function test_rejection_limit_reached_triggers_auto_rejection_with_bandin
         $pesantrenUserId = $setup['pesantrenUser']->id;
 
         // Step 1: Create first rejection and accept it
-        $result1 = $this->rejectionService->createRejection(
+        $result1 = $this->rejectionService->createDocumentRejection(
             $akreditasiId,
             $asesorUserId,
             ['profil'],
@@ -209,10 +210,10 @@ public function test_rejection_limit_reached_triggers_auto_rejection_with_bandin
 
         // Verify akreditasi still at status 5
         $akreditasi = Akreditasi::find($akreditasiId);
-        $this->assertEquals(5, (int) $akreditasi->status);
+        $this->assertEquals(4, (int) $akreditasi->status);
 
         // Step 2: Create second rejection (should trigger auto-reject since limit=2)
-        $result2 = $this->rejectionService->createRejection(
+        $result2 = $this->rejectionService->createDocumentRejection(
             $akreditasiId,
             $asesorUserId,
             ['sdm'],
@@ -235,8 +236,8 @@ public function test_rejection_limit_reached_triggers_auto_rejection_with_bandin
         $pesantren = Pesantren::where('user_id', $pesantrenUserId)->first();
         $this->assertFalse((bool) $pesantren->is_locked, 'Pesantren should be unlocked after auto-rejection');
 
-        // Step 5: Verify banding/resubmission mechanisms are still available
-        $this->assertEquals(-1, (int) $akreditasi->status, 'Status -1 allows banding/resubmission');
+        // Step 5: Verify the banding path is still available
+        $this->assertEquals(-1, (int) $akreditasi->status, 'Status -1 allows banding');
 
         // Verify the rejection record has no perbaikan_deadline (no further correction cycle)
         $this->assertNull($result2['rejection']->perbaikan_deadline, 'No deadline should be set for limit_reached rejection');
@@ -260,7 +261,7 @@ public function test_rejection_limit_reached_triggers_auto_rejection_with_bandin
      *
      * Validates: Requirements 8.4, 8.5
      */
-public function test_perbaikan_deadline_expiry_triggers_auto_rejection(): void
+    public function test_perbaikan_deadline_expiry_triggers_auto_rejection(): void
     {
         Notification::fake();
 
@@ -340,11 +341,11 @@ public function test_perbaikan_deadline_expiry_triggers_auto_rejection(): void
      *
      * Validates: Requirements 9.1, 9.2, 9.3
      */
-public function test_admin_final_rejection_stores_categories_and_changes_status(): void
+    public function test_admin_final_rejection_stores_categories_and_changes_status(): void
     {
         Notification::fake();
 
-        // Step 1: Create akreditasi at status 3
+        // Step 1: Create akreditasi at Validasi Admin
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
             'user_id' => $pesantrenUser->id,
@@ -354,7 +355,7 @@ public function test_admin_final_rejection_stores_categories_and_changes_status(
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status' => 3,
+            'status' => 1,
         ]);
 
         $adminUser = User::factory()->create(['role_id' => 1]);
@@ -370,14 +371,13 @@ public function test_admin_final_rejection_stores_categories_and_changes_status(
             ],
         ];
 
-        // Step 2: Admin calls createFinalRejection with categories
-        $result = $this->rejectionService->createFinalRejection(
-            $akreditasi->id,
-            $adminUser->id,
-            $categories
-        );
+        // Step 2: Admin calls canonical final rejection workflow
+        $reason = collect($categories)
+            ->map(fn ($category) => $category['category'].': '.$category['explanation'])
+            ->implode('; ');
 
-        $this->assertTrue($result['success'], 'Final rejection should succeed');
+        app(AkreditasiWorkflowService::class)
+            ->rejectAtValidasi($akreditasi->id, $adminUser->id, $reason, '', $categories);
 
         // Step 3: Verify rejection record stored with correct categories
         $rejectionRecord = AkreditasiRejection::where('akreditasi_id', $akreditasi->id)

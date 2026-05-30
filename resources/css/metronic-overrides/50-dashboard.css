@@ -1,0 +1,219 @@
+.spm-navigate-progress {
+    background: rgba(var(--spm-primary-rgb), 0.1);
+}
+
+.spm-navigate-progress-bar {
+    height: 100%;
+    width: 30%;
+    background: linear-gradient(90deg, var(--spm-primary), var(--spm-primary-active));
+    border-radius: 0 2px 2px 0;
+    animation: spm-progress-indeterminate 1.2s ease-in-out infinite;
+}
+
+@keyframes spm-progress-indeterminate {
+    0% { width: 0%; margin-left: 0%; }
+    50% { width: 60%; margin-left: 20%; }
+    100% { width: 0%; margin-left: 100%; }
+}
+
+/* ===== Dashboard Hero & Quick Actions ===== */
+.spm-dashboard-hero {
+    background: linear-gradient(135deg, var(--spm-primary) 0%, var(--spm-primary-active) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.spm-dashboard-hero::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.spm-dashboard-hero::after {
+    content: "";
+    position: absolute;
+    bottom: -30%;
+    right: 20%;
+    width: 180px;
+    height: 180px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.spm-dashboard-hero > * {
+    position: relative;
+    z-index: 1;
+}
+
+.spm-quick-action {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    border: 1px solid transparent !important;
+}
+
+.spm-quick-action:hover {
+    transform: translateY(-2px);
+    border-color: rgba(var(--spm-primary-rgb), 0.15) !important;
+    box-shadow: 0 6px 20px rgba(var(--spm-primary-rgb), 0.12) !important;
+}
+
+.spm-quick-action:hover .symbol-label {
+    transform: scale(1.05);
+    transition: transform 0.15s ease;
+}
+
+/* ===== Responsive Utility Helpers ===== */
+@media (min-width: 768px) {
+    .fs-md-1 { font-size: 1.75rem !important; }
+    .fs-md-2 { font-size: 1.5rem !important; }
+    .fs-md-6 { font-size: 1.075rem !important; }
+    .fs-md-7 { font-size: 0.95rem !important; }
+    .w-md-auto { width: auto !important; }
+    .symbol-md-50px { width: 50px !important; height: 50px !important; }
+}
+
+@media (min-width: 576px) {
+    .btn-sm-auto { width: auto !important; }
+}
+
+/* Hero banner adjustments on mobile */
+@media (max-width: 767.98px) {
+    .spm-dashboard-hero {
+        padding: 1.5rem !important;
+    }
+    .spm-dashboard-hero::before {
+        width: 200px;
+        height: 200px;
+    }
+    .spm-dashboard-hero::after {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+/* Quick action cards more compact on mobile */
+@media (max-width: 575.98px) {
+    .spm-quick-action .card-body {
+        padding: 1rem !important;
+    }
+}
+
+/* ===== Sidebar Polish (PesantrenMu rebrand) ===== */
+
+/* Active state lebih kontras dengan border indicator kiri */
+.spm-app-sidebar .spm-sidebar-link.menu-link.active {
+    background-color: rgba(var(--spm-primary-rgb), 0.08) !important;
+    color: var(--spm-primary) !important;
+    font-weight: 600;
+    position: relative;
+}
+
+.spm-app-sidebar .spm-sidebar-link.menu-link.active::before {
+    content: "";
+    position: absolute;
+    left: -3px;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background-color: var(--spm-primary);
+}
+
+/* Section heading: konsisten 1 selektor */
+.spm-app-sidebar .spm-sidebar-section.menu-item {
+    padding: 16px 0 4px;
+}
+
+.spm-app-sidebar .spm-sidebar-section-compact.menu-item {
+    padding-top: 8px !important;
+}
+
+.spm-app-sidebar .spm-sidebar-section .menu-content {
+    padding: 0 16px;
+}
+
+.spm-app-sidebar .spm-sidebar-section .menu-heading {
+    color: #98a2b3 !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase;
+}
+
+/* Group toggle: hover state seragam dengan link */
+.spm-app-sidebar .spm-sidebar-group-toggle {
+    border-radius: 8px;
+    padding: 10px 14px;
+    min-height: 42px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.spm-app-sidebar .spm-sidebar-group-toggle:hover {
+    background-color: rgba(var(--spm-primary-rgb), 0.04) !important;
+    color: var(--spm-primary) !important;
+}
+
+/* Group toggle ketika ada child active */
+.spm-app-sidebar .menu-item.here > .spm-sidebar-group-toggle,
+.spm-app-sidebar .menu-item.show > .spm-sidebar-group-toggle {
+    background-color: transparent !important;
+    color: var(--spm-primary) !important;
+    font-weight: 600;
+}
+
+/* Sub menu indention: lebih halus */
+.spm-app-sidebar .menu-sub {
+    padding: 2px 0 4px 22px !important;
+    border-left: 1px dashed rgba(var(--spm-primary-rgb), 0.15);
+    margin-left: 22px;
+}
+
+/* Child link: pakai bullet dot bukan dash */
+.spm-app-sidebar .spm-sidebar-link-child.menu-link {
+    min-height: 36px !important;
+    padding: 6px 12px !important;
+    font-size: 0.9rem;
+}
+
+.spm-app-sidebar .spm-sidebar-link-child.menu-link.active {
+    background-color: rgba(var(--spm-primary-rgb), 0.08) !important;
+    color: var(--spm-primary) !important;
+}
+
+.spm-app-sidebar .spm-sidebar-link-child.menu-link.active::before {
+    display: none;
+}
+
+/* Hover regular link */
+.spm-app-sidebar .spm-sidebar-link.menu-link:hover {
+    background-color: rgba(var(--spm-primary-rgb), 0.04) !important;
+    color: var(--spm-primary) !important;
+}
+
+/* Footer user card: lebih elegan */
+.spm-app-sidebar .spm-sidebar-user-card {
+    transition: all 0.15s ease;
+    border: 1px solid transparent;
+}
+
+.spm-app-sidebar .spm-sidebar-user-card:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+/* ===== Modal: Vertical Center (handled in main .spm-modal-overlay above) ===== */
+
+/* When content overflows, scroll within modal body */
+.spm-modal-panel .spm-modal-body,
+.spm-modal-panel [data-ui-modal-body] {
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+

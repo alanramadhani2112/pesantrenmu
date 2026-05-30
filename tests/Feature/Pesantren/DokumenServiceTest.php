@@ -27,13 +27,18 @@ class DokumenServiceTest extends TestCase
     use RefreshDatabase;
 
     private DocumentService $service;
+
     private User $pesantrenUser;
+
     private User $asesorUser;
+
     private User $adminUser;
 
     // Categories
     private DocumentCategory $publicCategory;
+
     private DocumentCategory $pesantrenSecretCategory;
+
     private DocumentCategory $asesorSecretCategory;
 
     protected function setUp(): void

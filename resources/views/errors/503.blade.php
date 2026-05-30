@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>503 - Layanan Tidak Tersedia</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand/favicon.svg') }}">
-    <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.css') }}">
     <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}">
     @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css'])
     <style>
@@ -14,7 +13,7 @@
             width: 96px;
             height: 96px;
             border-radius: 50%;
-            background: #e8f4fd;
+            background: #e6f0eb;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -25,7 +24,7 @@
             font-weight: 600;
             line-height: 1;
             letter-spacing: -0.04em;
-            color: #0d6efd;
+            color: #005533;
         }
         .pulse {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -56,7 +55,7 @@
 
             <div class="error-code mb-3">503</div>
 
-            <h1 class="fw-bold text-gray-900 fs-2 mb-3">Sedang Dalam Pemeliharaan</h1>
+            <h1 class="fw-semibold text-gray-900 fs-2 mb-3">Sedang Dalam Pemeliharaan</h1>
             <p class="text-gray-600 fw-semibold fs-6 mb-8">
                 Sistem sedang dalam pemeliharaan terjadwal.<br>
                 Kami akan segera kembali. Terima kasih atas kesabaran Anda.
@@ -74,7 +73,7 @@
             @endif
 
             <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-                <a href="javascript:location.reload()" class="btn btn-primary fw-bold px-6">
+                <a href="javascript:location.reload()" class="btn btn-primary fw-semibold px-6">
                     <i class="ki-solid ki-arrows-circle fs-3 me-1">
                         <span class="path1"></span>
                         <span class="path2"></span>

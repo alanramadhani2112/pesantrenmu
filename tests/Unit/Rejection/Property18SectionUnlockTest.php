@@ -3,7 +3,6 @@
 namespace Tests\Unit\Rejection;
 
 use App\Models\Akreditasi;
-use App\Models\AkreditasiRejection;
 use App\Models\Asesor;
 use App\Models\Assessment;
 use App\Models\MasterEdpmButir;
@@ -13,8 +12,8 @@ use App\Models\User;
 use App\Services\RejectionService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 /**
  * Property-Based Test: Property 18 — Rejection-Based Section Unlock
@@ -24,7 +23,6 @@ use PHPUnit\Framework\Attributes\Group;
  * and all other sections SHALL remain locked.
  *
  * **Validates: Requirements 4.4, 4.6**
- *
  */
 #[Group('akreditasi-workflow-redesign')]
 class Property18SectionUnlockTest extends TestCase
@@ -64,7 +62,7 @@ class Property18SectionUnlockTest extends TestCase
      *
      * **Validates: Requirements 4.4, 4.6**
      */
-public function test_property18_only_rejected_sections_become_unlocked(): void
+    public function test_property18_only_rejected_sections_become_unlocked(): void
     {
         $iterations = 100;
 
@@ -90,7 +88,7 @@ public function test_property18_only_rejected_sections_become_unlocked(): void
 
             $this->assertTrue(
                 $result['success'],
-                "Iteration {$i}: createDocumentRejection should succeed. Error: " . ($result['error'] ?? 'none')
+                "Iteration {$i}: createDocumentRejection should succeed. Error: ".($result['error'] ?? 'none')
             );
 
             // Assert: every rejected section IS unlocked
@@ -130,7 +128,7 @@ public function test_property18_only_rejected_sections_become_unlocked(): void
      *
      * **Validates: Requirements 4.4**
      */
-public function test_property18_single_section_unlock_exactness(): void
+    public function test_property18_single_section_unlock_exactness(): void
     {
         $iterations = 100;
 
@@ -184,7 +182,7 @@ public function test_property18_single_section_unlock_exactness(): void
      *
      * **Validates: Requirements 4.6**
      */
-public function test_property18_all_sections_relocked_after_perbaikan(): void
+    public function test_property18_all_sections_relocked_after_perbaikan(): void
     {
         $iterations = 100;
 
@@ -239,7 +237,7 @@ public function test_property18_all_sections_relocked_after_perbaikan(): void
      *
      * **Validates: Requirements 4.4**
      */
-public function test_property18_no_sections_unlocked_without_rejection(): void
+    public function test_property18_no_sections_unlocked_without_rejection(): void
     {
         $iterations = 100;
 
@@ -270,12 +268,12 @@ public function test_property18_no_sections_unlocked_without_rejection(): void
     /**
      * Create a pesantren user with akreditasi at status 4 and an Asesor_1 assigned.
      */
-private function createAsesor1SetupAtStatus4(): array
+    private function createAsesor1SetupAtStatus4(): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
             'user_id' => $pesantrenUser->id,
-            'nama_pesantren' => 'Pesantren Test ' . $pesantrenUser->id,
+            'nama_pesantren' => 'Pesantren Test '.$pesantrenUser->id,
             'is_locked' => true,
         ]);
 
@@ -310,7 +308,7 @@ private function createAsesor1SetupAtStatus4(): array
     /**
      * Seed EDPM komponen and butirs for testing.
      */
-private function seedEdpmData(): void
+    private function seedEdpmData(): void
     {
         $komponens = [
             ['nama' => 'Standar Isi', 'ipr' => 0],
@@ -321,7 +319,7 @@ private function seedEdpmData(): void
             $komponen = MasterEdpmKomponen::firstOrCreate(['nama' => $k['nama']], ['ipr' => $k['ipr']]);
             for ($b = 1; $b <= 3; $b++) {
                 MasterEdpmButir::firstOrCreate(
-                    ['komponen_id' => $komponen->id, 'nomor_butir' => $k['nama'][0] . ".{$b}"],
+                    ['komponen_id' => $komponen->id, 'nomor_butir' => $k['nama'][0].".{$b}"],
                     ['no_sk' => '1', 'butir_pernyataan' => "Butir {$b} dari {$k['nama']}"]
                 );
             }
@@ -331,7 +329,7 @@ private function seedEdpmData(): void
     /**
      * Build the complete list of valid section identifiers.
      */
-private function buildAllSections(): array
+    private function buildAllSections(): array
     {
         $sections = [
             'profil',
@@ -345,7 +343,7 @@ private function buildAllSections(): array
         // Add EDPM butir identifiers
         $butirs = MasterEdpmButir::all();
         foreach ($butirs as $butir) {
-            $sections[] = 'edpm.butir.' . $butir->id;
+            $sections[] = 'edpm.butir.'.$butir->id;
         }
 
         return $sections;
@@ -354,20 +352,21 @@ private function buildAllSections(): array
     /**
      * Return a random subset of $array with exactly $size elements.
      */
-private function randomSubset(array $array, int $size): array
+    private function randomSubset(array $array, int $size): array
     {
         $size = min($size, count($array));
         $keys = array_rand($array, $size);
-        if (!is_array($keys)) {
+        if (! is_array($keys)) {
             $keys = [$keys];
         }
+
         return array_values(array_map(fn ($k) => $array[$k], $keys));
     }
 
     /**
      * Generate a random explanation string of length between $min and $max.
      */
-private function randomExplanation(int $min, int $max): string
+    private function randomExplanation(int $min, int $max): string
     {
         $length = random_int($min, $max);
         $chars = 'abcdefghijklmnopqrstuvwxyz ';
@@ -375,6 +374,7 @@ private function randomExplanation(int $min, int $max): string
         for ($i = 0; $i < $length; $i++) {
             $result .= $chars[random_int(0, strlen($chars) - 1)];
         }
+
         // Ensure no leading/trailing spaces that might reduce length
         return str_pad(trim($result), $min, 'x');
     }

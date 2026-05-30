@@ -102,9 +102,9 @@ class PesantrenSdmFlowTest extends TestCase
     }
 
     /**
-     * @param list<string> $units
+     * @param  list<string>  $units
      */
-private function createPesantrenUserWithUnits(array $units): User
+    private function createPesantrenUserWithUnits(array $units): User
     {
         $user = User::factory()->create(['role_id' => 3]);
 

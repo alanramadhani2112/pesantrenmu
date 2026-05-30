@@ -48,6 +48,7 @@ class PerbaikanDeadlineExpiryTest extends TestCase
             'user_id' => $user->id,
             'nama_pesantren' => 'Pesantren Deadline Test',
         ]);
+
         return $user;
     }
 
@@ -59,13 +60,14 @@ class PerbaikanDeadlineExpiryTest extends TestCase
             'nama_dengan_gelar' => 'Asesor Test, S.Pd.',
             'nama_tanpa_gelar' => 'Asesor Test',
         ]);
+
         return $user;
     }
 
     /**
      * Create an akreditasi at status 4 with an expired perbaikan rejection.
      */
-private function createAkreditasiWithExpiredRejection(
+    private function createAkreditasiWithExpiredRejection(
         User $pesantrenUser,
         User $asesor1User,
         int $daysExpiredAgo = 1
@@ -108,7 +110,7 @@ private function createAkreditasiWithExpiredRejection(
      *
      * Validates Requirement 4.9.
      */
-public function test_expired_perbaikan_deadline_auto_rejects_akreditasi(): void
+    public function test_expired_perbaikan_deadline_auto_rejects_akreditasi(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $asesor1User = $this->createAsesor1User();
@@ -139,7 +141,7 @@ public function test_expired_perbaikan_deadline_auto_rejects_akreditasi(): void
      *
      * Validates Requirement 4.9.
      */
-public function test_rejection_status_set_to_expired_after_auto_rejection(): void
+    public function test_rejection_status_set_to_expired_after_auto_rejection(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $asesor1User = $this->createAsesor1User();
@@ -157,7 +159,7 @@ public function test_rejection_status_set_to_expired_after_auto_rejection(): voi
      *
      * Validates Requirement 4.9.
      */
-public function test_check_perbaikan_deadlines_command_auto_rejects_expired(): void
+    public function test_check_perbaikan_deadlines_command_auto_rejects_expired(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $asesor1User = $this->createAsesor1User();
@@ -178,7 +180,7 @@ public function test_check_perbaikan_deadlines_command_auto_rejects_expired(): v
      *
      * Validates Requirement 4.9.
      */
-public function test_non_expired_rejection_is_not_auto_rejected(): void
+    public function test_non_expired_rejection_is_not_auto_rejected(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $asesor1User = $this->createAsesor1User();
@@ -224,7 +226,7 @@ public function test_non_expired_rejection_is_not_auto_rejected(): void
      *
      * Validates Requirement 4.9.
      */
-public function test_multiple_expired_rejections_all_auto_rejected(): void
+    public function test_multiple_expired_rejections_all_auto_rejected(): void
     {
         $asesor1User = $this->createAsesor1User();
 
@@ -250,7 +252,7 @@ public function test_multiple_expired_rejections_all_auto_rejected(): void
      *
      * Validates Requirement 4.10.
      */
-public function test_reminder_sent_for_rejection_approaching_deadline(): void
+    public function test_reminder_sent_for_rejection_approaching_deadline(): void
     {
         config(['akreditasi.perbaikan_reminder_days_before' => 3]);
 

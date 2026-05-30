@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Ipm;
 use App\Models\Edpm;
+use App\Models\Ipm;
 use App\Models\MasterEdpmButir;
 use App\Models\Pesantren;
 use App\Models\SdmPesantren;
@@ -38,7 +38,6 @@ class SidebarProgressService
      * Returns progress status for each trackable section.
      * Status: 'complete', 'incomplete', 'not_started'
      *
-     * @param int $userId
      * @return array<string, string>
      */
     public function getProgressForUser(int $userId): array
@@ -54,8 +53,7 @@ class SidebarProgressService
     /**
      * Calculate completion status for a specific section.
      *
-     * @param int $userId
-     * @param string $section One of: 'profil', 'ipm', 'sdm', 'edpm'
+     * @param  string  $section  One of: 'profil', 'ipm', 'sdm', 'edpm'
      * @return array{status: string, filled: int, total: int}
      */
     public function getSectionProgress(int $userId, string $section): array
@@ -77,7 +75,7 @@ class SidebarProgressService
         $total = count(self::PROFIL_REQUIRED_FIELDS);
         $pesantren = Pesantren::where('user_id', $userId)->first();
 
-        if (!$pesantren) {
+        if (! $pesantren) {
             return ['status' => 'not_started', 'filled' => 0, 'total' => $total];
         }
 
@@ -85,7 +83,7 @@ class SidebarProgressService
         foreach (self::PROFIL_REQUIRED_FIELDS as $field) {
             $value = $pesantren->{$field};
 
-            if (is_array($value) ? $value !== [] : !empty($value)) {
+            if (is_array($value) ? $value !== [] : ! empty($value)) {
                 $filled++;
             }
         }
@@ -105,13 +103,13 @@ class SidebarProgressService
         $total = count(self::IPM_REQUIRED_FIELDS);
         $ipm = Ipm::where('user_id', $userId)->first();
 
-        if (!$ipm) {
+        if (! $ipm) {
             return ['status' => 'not_started', 'filled' => 0, 'total' => $total];
         }
 
         $filled = 0;
         foreach (self::IPM_REQUIRED_FIELDS as $field) {
-            if (!empty($ipm->{$field})) {
+            if (! empty($ipm->{$field})) {
                 $filled++;
             }
         }

@@ -8,8 +8,8 @@ use App\Models\Ipm;
 use App\Models\MasterEdpmButir;
 use App\Models\MasterEdpmKomponen;
 use App\Models\Pesantren;
-use App\Models\SdmPesantren;
 use App\Models\PesantrenUnit;
+use App\Models\SdmPesantren;
 use App\Models\User;
 use App\Services\PesantrenService;
 use Database\Seeders\RoleSeeder;
@@ -31,7 +31,9 @@ class PengajuanServiceTest extends TestCase
     use RefreshDatabase;
 
     private PesantrenService $service;
+
     private User $user;
+
     private Pesantren $pesantren;
 
     protected function setUp(): void
@@ -174,17 +176,6 @@ class PengajuanServiceTest extends TestCase
 
         // Lock should remain because akreditasi2 (status 5) is still active
         $this->assertTrue($this->pesantren->fresh()->is_locked);
-    }
-
-    public function test_delete_submission_returns_false_when_child_resubmission_exists(): void
-    {
-        $parent = Akreditasi::create(['user_id' => $this->user->id, 'status' => 6]);
-        // Child references parent
-        Akreditasi::create(['user_id' => $this->user->id, 'status' => 6, 'parent' => $parent->id]);
-
-        $result = $this->service->deleteSubmission($parent->id, $this->user->id);
-
-        $this->assertFalse($result);
     }
 
     // ─── cancelSubmission ────────────────────────────────────────────────────

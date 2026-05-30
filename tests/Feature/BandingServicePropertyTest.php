@@ -35,13 +35,14 @@ class BandingServicePropertyTest extends TestCase
     /**
      * Helper: create a pesantren user with basic profile data.
      */
-private function createPesantrenUser(): User
+    private function createPesantrenUser(): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
             'user_id' => $user->id,
-            'nama_pesantren' => 'Pesantren Test ' . $user->id,
+            'nama_pesantren' => 'Pesantren Test '.$user->id,
         ]);
+
         return $user;
     }
 
@@ -53,7 +54,7 @@ private function createPesantrenUser(): User
      *
      * **Validates: Requirements 1.1**
      */
-public function test_property_1_banding_creation_correctness(): void
+    public function test_property_1_banding_creation_correctness(): void
     {
         $faker = Faker::create();
 
@@ -90,7 +91,7 @@ public function test_property_1_banding_creation_correctness(): void
      *
      * **Validates: Requirements 2.2, 2.3**
      */
-public function test_property_4_appeal_limit_enforcement(): void
+    public function test_property_4_appeal_limit_enforcement(): void
     {
         $faker = Faker::create();
 
@@ -134,7 +135,7 @@ public function test_property_4_appeal_limit_enforcement(): void
      *
      * **Validates: Requirements 1.3, 4.3**
      */
-public function test_property_2_reviewer_assignment_state_transition(): void
+    public function test_property_2_reviewer_assignment_state_transition(): void
     {
         $faker = Faker::create();
 
@@ -171,7 +172,7 @@ public function test_property_2_reviewer_assignment_state_transition(): void
      *
      * **Validates: Requirements 1.4, 5.1, 5.3**
      */
-public function test_property_3_decision_state_transition(): void
+    public function test_property_3_decision_state_transition(): void
     {
         $faker = Faker::create();
 
@@ -225,7 +226,7 @@ public function test_property_3_decision_state_transition(): void
      *
      * **Validates: Requirements 5.5**
      */
-public function test_property_7_explanation_minimum_length_validation(): void
+    public function test_property_7_explanation_minimum_length_validation(): void
     {
         $faker = Faker::create();
 
@@ -254,10 +255,10 @@ public function test_property_7_explanation_minimum_length_validation(): void
 
             if ($decision === 'accept') {
                 $result = $this->bandingService->acceptBanding($banding->id, $shortKeputusan);
-                $this->assertNull($result, "Iteration {$i}: acceptBanding should return null for short keputusan ('{$shortKeputusan}', len=" . strlen($shortKeputusan) . ")");
+                $this->assertNull($result, "Iteration {$i}: acceptBanding should return null for short keputusan ('{$shortKeputusan}', len=".strlen($shortKeputusan).')');
             } else {
                 $result = $this->bandingService->rejectBanding($banding->id, $shortKeputusan);
-                $this->assertFalse($result, "Iteration {$i}: rejectBanding should return false for short keputusan ('{$shortKeputusan}', len=" . strlen($shortKeputusan) . ")");
+                $this->assertFalse($result, "Iteration {$i}: rejectBanding should return false for short keputusan ('{$shortKeputusan}', len=".strlen($shortKeputusan).')');
             }
 
             // Banding should remain unchanged
@@ -272,12 +273,12 @@ public function test_property_7_explanation_minimum_length_validation(): void
      * Helper: create a pesantren user with complete supporting data.
      * This includes Pesantren, IPM, SDM, and EDPM data.
      */
-private function createCompletePesantrenUser(): User
+    private function createCompletePesantrenUser(): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
             'user_id' => $user->id,
-            'nama_pesantren' => 'Pesantren Complete ' . $user->id,
+            'nama_pesantren' => 'Pesantren Complete '.$user->id,
             'is_locked' => false,
         ]);
 
@@ -319,7 +320,7 @@ private function createCompletePesantrenUser(): User
      *
      * **Validates: Requirements 5.2**
      */
-public function test_property_5_accept_outcome_returns_to_validasi_admin(): void
+    public function test_property_5_accept_outcome_returns_to_validasi_admin(): void
     {
         $faker = Faker::create();
 
@@ -357,7 +358,6 @@ public function test_property_5_accept_outcome_returns_to_validasi_admin(): void
             $this->assertDatabaseHas('akreditasis', [
                 'id' => $akreditasi->id,
                 'status' => 1,
-                'parent' => null,
             ]);
 
             // Clean up the banding and akreditasi.
@@ -378,7 +378,7 @@ public function test_property_5_accept_outcome_returns_to_validasi_admin(): void
      *
      * **Validates: Requirements 5.4**
      */
-public function test_property_6_reject_outcome_akreditasi_status_revert(): void
+    public function test_property_6_reject_outcome_akreditasi_status_revert(): void
     {
         $faker = Faker::create();
 
@@ -431,7 +431,7 @@ public function test_property_6_reject_outcome_akreditasi_status_revert(): void
      *
      * **Validates: Requirements 5.6**
      */
-public function test_property_8_status_guard_on_decisions(): void
+    public function test_property_8_status_guard_on_decisions(): void
     {
         $faker = Faker::create();
 
@@ -495,7 +495,7 @@ public function test_property_8_status_guard_on_decisions(): void
      *
      * **Validates: Requirements 4.4, 7.1**
      */
-public function test_property_9_deadline_calculation(): void
+    public function test_property_9_deadline_calculation(): void
     {
         $faker = Faker::create();
 
@@ -557,7 +557,7 @@ public function test_property_9_deadline_calculation(): void
      *
      * **Validates: Requirements 7.4, 7.5**
      */
-public function test_property_10_overdue_detection(): void
+    public function test_property_10_overdue_detection(): void
     {
         $faker = Faker::create();
 
@@ -620,7 +620,7 @@ public function test_property_10_overdue_detection(): void
     /**
      * Additional check for Property 10: non-under_review status should never be overdue
      */
-public function test_property_10_non_under_review_never_overdue(): void
+    public function test_property_10_non_under_review_never_overdue(): void
     {
         $faker = Faker::create();
 
@@ -663,7 +663,7 @@ public function test_property_10_non_under_review_never_overdue(): void
      *
      * **Validates: Requirements 3.5**
      */
-public function test_property_11_banding_list_sorting(): void
+    public function test_property_11_banding_list_sorting(): void
     {
         $faker = Faker::create();
 
@@ -708,7 +708,7 @@ public function test_property_11_banding_list_sorting(): void
 
             $this->assertTrue(
                 $prev->lessThanOrEqualTo($curr),
-                "Item at index {$i} (created_at={$curr}) should be >= item at index " . ($i - 1) . " (created_at={$prev}). List is not sorted ascending."
+                "Item at index {$i} (created_at={$curr}) should be >= item at index ".($i - 1)." (created_at={$prev}). List is not sorted ascending."
             );
         }
     }

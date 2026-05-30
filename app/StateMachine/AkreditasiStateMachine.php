@@ -37,29 +37,35 @@ class AkreditasiStateMachine
      *  -2  Banding
      */
     public const TRANSITIONS = [
-        6  => [5],
-        5  => [4, -1],
-        4  => [3, -1],
-        3  => [2],
-        2  => [1],
-        1  => [0, -1],
+        6 => [5],
+        5 => [4, -1],
+        4 => [3, -1],
+        3 => [2],
+        2 => [1],
+        1 => [0, -1],
         -1 => [-2],
         -2 => [1, -1],
     ];
 
     public const STATUS_PENGAJUAN = 6;
+
     public const STATUS_VERIFIKASI_BERKAS = 5;
+
     public const STATUS_ASSESSMENT = 4;
+
     public const STATUS_VISITASI = 3;
+
     public const STATUS_PASCA_VISITASI = 2;
+
     public const STATUS_VALIDASI_ADMIN = 1;
+
     public const STATUS_SELESAI = 0;
+
     public const STATUS_DITOLAK = -1;
+
     public const STATUS_BANDING = -2;
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * Return the list of statuses that the given current status may transition to.
@@ -83,7 +89,7 @@ class AkreditasiStateMachine
      */
     public function canTransition(int $from, int $to): bool
     {
-        if (!isset(self::TRANSITIONS[$from])) {
+        if (! isset(self::TRANSITIONS[$from])) {
             return false;
         }
 
@@ -108,13 +114,13 @@ class AkreditasiStateMachine
      * Validates Requirements 1.3, 1.4, 1.5.
      *
      * @throws InvalidTransitionException When the transition is not permitted.
-     * @throws StaleStateException        When the record was modified concurrently.
+     * @throws StaleStateException When the record was modified concurrently.
      */
     public function transition(Akreditasi $akreditasi, int $toStatus, User $actor): void
     {
         $fromStatus = (int) $akreditasi->status;
 
-        if (!$this->canTransition($fromStatus, $toStatus)) {
+        if (! $this->canTransition($fromStatus, $toStatus)) {
             throw new InvalidTransitionException($fromStatus, $toStatus);
         }
 
@@ -175,7 +181,7 @@ class AkreditasiStateMachine
         \DateTimeInterface $timestamp,
     ): void {
         try {
-            $log = new AkreditasiAuditLog();
+            $log = new AkreditasiAuditLog;
             $log->akreditasi_id = $akreditasiId;
             $log->user_id = $actor->id;
             $log->action_type = 'status_changed';
@@ -194,9 +200,7 @@ class AkreditasiStateMachine
             $log->created_at = $timestamp;
             $log->save();
         } catch (\Throwable $e) {
-            // TODO: Audit infrastructure unavailable — fall back to structured
-            // log so the transition is still observable. Replace once audit
-            // logging is guaranteed to succeed.
+            // Keep workflow transitions observable even when audit persistence is unavailable.
             Log::info('akreditasi.status_transition', [
                 'akreditasi_id' => $akreditasiId,
                 'action' => 'status_transition',

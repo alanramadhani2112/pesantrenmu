@@ -39,7 +39,7 @@ class AkreditasiStateMachineTransitionTest extends TestCase
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
             'user_id' => $pesantrenUser->id,
-            'nama_pesantren' => 'Pesantren Test ' . $pesantrenUser->id,
+            'nama_pesantren' => 'Pesantren Test '.$pesantrenUser->id,
         ]);
 
         return Akreditasi::create([

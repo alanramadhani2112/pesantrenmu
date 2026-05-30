@@ -257,7 +257,7 @@ new #[Layout('layouts.app')] class extends Component {
                     <td>
                         <div class="d-flex align-items-center gap-3">
                             <div class="symbol symbol-40px">
-                                <div class="symbol-label bg-light-primary text-primary fw-bold text-uppercase">
+                                <div class="symbol-label bg-light-primary text-primary fw-semibold text-uppercase">
                                     {{ substr($user->name, 0, 2) }}
                                 </div>
                             </div>

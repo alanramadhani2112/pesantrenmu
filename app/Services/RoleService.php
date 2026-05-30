@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Role;
 use App\Repositories\Contracts\RoleRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -25,16 +26,17 @@ class RoleService
         return $this->roleRepository->getAll();
     }
 
-    public function findRole(int $id): ?\App\Models\Role
+    public function findRole(int $id): ?Role
     {
         return $this->roleRepository->find($id);
     }
 
-    public function saveRole(array $data, ?int $id = null): \App\Models\Role|bool
+    public function saveRole(array $data, ?int $id = null): Role|bool
     {
         if ($id) {
             return $this->roleRepository->update($id, $data);
         }
+
         return $this->roleRepository->create($data);
     }
 

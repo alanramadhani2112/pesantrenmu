@@ -38,7 +38,7 @@ class AdminRejectionUiTest extends TestCase
     /**
      * Task 16.4: Reject button hidden at status 6
      */
-public function test_reject_button_hidden_at_status_6(): void
+    public function test_reject_button_hidden_at_status_6(): void
     {
         $adminUser = User::factory()->create(['role_id' => 1]);
         $this->actingAs($adminUser);
@@ -60,7 +60,7 @@ public function test_reject_button_hidden_at_status_6(): void
     /**
      * Task 16.5: Structured final rejection form validates and submits
      */
-public function test_structured_final_rejection_form_validates_empty_categories(): void
+    public function test_structured_final_rejection_form_validates_empty_categories(): void
     {
         [$adminUser, $akreditasi] = $this->createAdminWithStatus3Akreditasi();
         $this->actingAs($adminUser);

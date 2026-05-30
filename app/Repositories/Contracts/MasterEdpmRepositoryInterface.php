@@ -2,9 +2,9 @@
 
 namespace App\Repositories\Contracts;
 
-use Illuminate\Support\Collection;
-use App\Models\MasterEdpmKomponen;
 use App\Models\MasterEdpmButir;
+use App\Models\MasterEdpmKomponen;
+use Illuminate\Support\Collection;
 
 interface MasterEdpmRepositoryInterface
 {

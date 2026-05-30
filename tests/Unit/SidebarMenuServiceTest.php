@@ -16,7 +16,7 @@ class SidebarMenuServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new SidebarMenuService();
+        $this->service = new SidebarMenuService;
         $this->seedDocumentCategories();
     }
 
@@ -252,7 +252,7 @@ class SidebarMenuServiceTest extends TestCase
         $hasilKeys = array_column($menu[3]['items'], 'key');
 
         $this->assertSame(['kartu_kendali_visitasi'], $visitasiKeys);
-        $this->assertSame(['hasil_akhir', 'sertifikat_akreditasi', 'banding_pesantren'], $hasilKeys);
+        $this->assertSame(['hasil_akhir'], $hasilKeys);
     }
 
     public function test_pesantren_menu_dokumen_includes_public_and_pesantren_secret_only(): void
@@ -279,7 +279,7 @@ class SidebarMenuServiceTest extends TestCase
         DocumentCategory::query()->where('slug', 'kartu_kendali')->update(['is_active' => false]);
 
         // Force a fresh service so the in-memory cache is bypassed
-        $service = new SidebarMenuService();
+        $service = new SidebarMenuService;
         $menu = $service->getMenuForRole(3);
         $items = $menu[4]['items'];
 
@@ -465,8 +465,8 @@ class SidebarMenuServiceTest extends TestCase
         $item = $menu[2]['items'][0];
 
         $this->assertSame('kartu_kendali_visitasi', $item['key']);
-        $this->assertSame(['statusFilter' => '2', 'focus' => 'kartu_kendali'], $item['route_query']);
-        $this->assertSame(['statusFilter' => '2', 'focus' => 'kartu_kendali'], $item['active_query']);
+        $this->assertSame(['focus' => 'kartu_kendali'], $item['route_query']);
+        $this->assertSame(['focus' => 'kartu_kendali'], $item['active_query']);
     }
 
     public function test_dokumen_items_share_documents_route(): void
@@ -505,7 +505,7 @@ class SidebarMenuServiceTest extends TestCase
                         $this->assertArrayHasKey(
                             $key,
                             $item,
-                            "Missing key '{$key}' on item '" . ($item['key'] ?? '?') . "'"
+                            "Missing key '{$key}' on item '".($item['key'] ?? '?')."'"
                         );
                     }
                 }

@@ -116,7 +116,6 @@ Pada finalisasi penilaian asesor, query scoring diselaraskan agar memakai
 
 - `tests/Feature/AkreditasiWorkflow/PostVisitasiDocumentsTest.php`
 - `tests/Feature/AkreditasiWorkflow/FullHappyPathTest.php`
-- `tests/Feature/AkreditasiWorkflow/RejectionResubmissionPathTest.php`
 - `tests/Feature/Asesor/AkreditasiDetailTest.php`
 - `tests/Feature/PesantrenUploadTest.php`
 - `tests/Feature/NonBlockingNotificationsTest.php`

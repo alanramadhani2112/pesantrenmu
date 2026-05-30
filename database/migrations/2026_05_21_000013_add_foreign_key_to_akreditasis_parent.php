@@ -22,6 +22,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (DB::connection()->getDriverName() === 'sqlite' || ! Schema::hasColumn('akreditasis', 'parent')) {
+            return;
+        }
+
         // Bersihkan dulu parent yang menunjuk ke ID yang tidak ada
         DB::statement('
             UPDATE akreditasis
@@ -48,6 +52,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (DB::connection()->getDriverName() === 'sqlite' || ! Schema::hasColumn('akreditasis', 'parent')) {
+            return;
+        }
+
         Schema::table('akreditasis', function (Blueprint $table) {
             $table->dropForeign('akreditasis_parent_fk');
             $table->bigInteger('parent')->nullable()->change();

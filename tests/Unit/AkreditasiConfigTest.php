@@ -6,16 +6,13 @@ use Tests\TestCase;
 
 class AkreditasiConfigTest extends TestCase
 {
-    public function test_resubmission_limit_defaults_to_3(): void
+    public function test_banding_limit_defaults_to_1(): void
     {
-        $this->assertEquals(3, config('akreditasi.resubmission_limit'));
+        $this->assertEquals(1, config('akreditasi.banding_limit'));
     }
 
-    public function test_cooling_period_days_defaults_to_30(): void
+    public function test_perbaikan_deadline_defaults_to_14_days(): void
     {
-        // In testing environment, AKREDITASI_COOLING_PERIOD_DAYS=0 is set to avoid
-        // breaking existing workflow tests. Verify the config reads from env correctly.
-        config(['akreditasi.cooling_period_days' => 30]);
-        $this->assertEquals(30, config('akreditasi.cooling_period_days'));
+        $this->assertEquals(14, config('akreditasi.perbaikan_deadline_days'));
     }
 }

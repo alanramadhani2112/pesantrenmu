@@ -1,1 +1,1 @@
-<x-ui.pagination :paginator="$paginator" :elements="$elements" />
+<x-ui.pagination :paginator="$paginator" :elements="$elements" :show-info="false" />

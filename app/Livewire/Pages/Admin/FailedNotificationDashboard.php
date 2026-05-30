@@ -3,6 +3,7 @@
 namespace App\Livewire\Pages\Admin;
 
 use App\Models\FailedNotification;
+use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -15,7 +16,9 @@ class FailedNotificationDashboard extends Component
     use WithPagination;
 
     public string $search = '';
+
     public string $statusFilter = 'pending';
+
     public int $perPage = 15;
 
     public function updatedSearch(): void
@@ -30,7 +33,7 @@ class FailedNotificationDashboard extends Component
 
     public function mount(): void
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
         if (! $user || ! $user->canAccessAdminArea()) {
             abort(403);
@@ -51,12 +54,12 @@ class FailedNotificationDashboard extends Component
 
         if ($this->search !== '') {
             $query->where(function ($q) {
-                $q->where('notification_type', 'like', '%' . $this->search . '%')
-                  ->orWhere('failure_reason', 'like', '%' . $this->search . '%')
-                  ->orWhereHas('notifiable', function ($uq) {
-                      $uq->where('name', 'like', '%' . $this->search . '%')
-                         ->orWhere('email', 'like', '%' . $this->search . '%');
-                  });
+                $q->where('notification_type', 'like', '%'.$this->search.'%')
+                    ->orWhere('failure_reason', 'like', '%'.$this->search.'%')
+                    ->orWhereHas('notifiable', function ($uq) {
+                        $uq->where('name', 'like', '%'.$this->search.'%')
+                            ->orWhere('email', 'like', '%'.$this->search.'%');
+                    });
             });
         }
 
@@ -76,7 +79,7 @@ class FailedNotificationDashboard extends Component
      */
     public function retry(int $id): void
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
         abort_unless($user && $user->canAccessAdminArea(), 403);
 
@@ -91,7 +94,7 @@ class FailedNotificationDashboard extends Component
      */
     public function dismiss(int $id): void
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
         abort_unless($user && $user->canAccessAdminArea(), 403);
 
@@ -105,7 +108,7 @@ class FailedNotificationDashboard extends Component
     {
         return view('livewire.pages.admin.failed-notification-dashboard', [
             'failedNotifications' => $this->failedNotifications,
-            'pendingCount'        => $this->pendingCount,
+            'pendingCount' => $this->pendingCount,
         ]);
     }
 }

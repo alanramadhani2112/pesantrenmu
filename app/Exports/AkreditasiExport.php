@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Akreditasi;
+use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -10,8 +11,11 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 class AkreditasiExport implements FromCollection, WithHeadings, WithMapping
 {
     protected $status;
+
     protected $search;
+
     protected $sortField;
+
     protected $sortAsc;
 
     public function __construct($status = null, $search = null, $sortField = 'created_at', $sortAsc = false)
@@ -40,9 +44,9 @@ class AkreditasiExport implements FromCollection, WithHeadings, WithMapping
 
         if ($this->search) {
             $query->whereHas('user', function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
+                $q->where('name', 'like', '%'.$this->search.'%')
                     ->orWhereHas('pesantren', function ($q2) {
-                        $q2->where('nama_pesantren', 'like', '%' . $this->search . '%');
+                        $q2->where('nama_pesantren', 'like', '%'.$this->search.'%');
                     });
             });
         }
@@ -71,15 +75,15 @@ class AkreditasiExport implements FromCollection, WithHeadings, WithMapping
         $statusLabel = Akreditasi::getStatusLabel($akreditasi->status);
 
         if ((int) $akreditasi->status === Akreditasi::STATUS_PENGAJUAN) {
-            $tahap = 'Pengajuan: ' . $akreditasi->created_at->format('d/m/Y');
+            $tahap = 'Pengajuan: '.$akreditasi->created_at->format('d/m/Y');
         } elseif ((int) $akreditasi->status === Akreditasi::STATUS_ASSESSMENT) {
-            $tahap = 'Review Asesor: ' . ($akreditasi->assessment1 ? \Carbon\Carbon::parse($akreditasi->assessment1->tanggal_mulai)->format('d/m/Y') : '-');
+            $tahap = 'Review Asesor: '.($akreditasi->assessment1 ? Carbon::parse($akreditasi->assessment1->tanggal_mulai)->format('d/m/Y') : '-');
         } elseif ((int) $akreditasi->status === Akreditasi::STATUS_PASCA_VISITASI) {
-            $tahap = 'Penilaian Pasca Visitasi: ' . ($akreditasi->visitasi_confirmed_at ? \Carbon\Carbon::parse($akreditasi->visitasi_confirmed_at)->format('d/m/Y') : ($akreditasi->tgl_visitasi ? \Carbon\Carbon::parse($akreditasi->tgl_visitasi)->format('d/m/Y') : '-'));
+            $tahap = 'Penilaian Pasca Visitasi: '.($akreditasi->visitasi_confirmed_at ? Carbon::parse($akreditasi->visitasi_confirmed_at)->format('d/m/Y') : ($akreditasi->tgl_visitasi ? Carbon::parse($akreditasi->tgl_visitasi)->format('d/m/Y') : '-'));
         } elseif ((int) $akreditasi->status === Akreditasi::STATUS_VISITASI) {
-            $tahap = Akreditasi::getStatusLabel($akreditasi->status) . ': ' . ($akreditasi->tgl_visitasi ? \Carbon\Carbon::parse($akreditasi->tgl_visitasi)->format('d/m/Y') : '-');
+            $tahap = Akreditasi::getStatusLabel($akreditasi->status).': '.($akreditasi->tgl_visitasi ? Carbon::parse($akreditasi->tgl_visitasi)->format('d/m/Y') : '-');
         } else {
-            $tahap = Akreditasi::getStatusLabel($akreditasi->status) . ': ' . $akreditasi->updated_at->format('d/m/Y');
+            $tahap = Akreditasi::getStatusLabel($akreditasi->status).': '.$akreditasi->updated_at->format('d/m/Y');
         }
 
         return [

@@ -9,9 +9,12 @@
     <title>{{ config('app.name', 'PesantrenMu') }}</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand/favicon.svg') }}">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+
     <!-- Styles -->
     @livewireStyles
-    <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.css') }}">
     <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}">
     @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css', 'resources/js/app.js'])
     @livewireScriptConfig
@@ -36,27 +39,40 @@
 
             <div class="d-none d-lg-flex flex-lg-row-fluid align-items-center justify-content-center p-12 spm-auth-aside">
                 <div class="mw-500px spm-auth-aside-card">
-                    <x-ui.badge variant="primary" class="mb-6">PesantrenMu</x-ui.badge>
-                    <h1 class="fs-2hx fw-bold text-gray-900 mb-4">Sistem Penjaminan Mutu PesantrenMu</h1>
-                    <p class="fs-5 fw-semibold text-gray-600 mb-8">Dikembangkan oleh LabMu untuk LP2M</p>
+                    <div class="spm-auth-aside-kicker">PesantrenMu / LP2M</div>
+                    <h1 class="fs-2hx fw-semibold text-gray-900 mb-4">Masuk ke ruang kerja akreditasi</h1>
+                    <p class="fs-5 fw-semibold text-gray-600 mb-8">Portal ini memisahkan tugas pesantren, asesor, dan admin supaya setiap tahap akreditasi mudah diawasi.</p>
 
-                    <div class="row g-4">
-                        <div class="col-6">
-                            <div class="spm-auth-metric">
-                                <div class="fs-7 fw-bold text-gray-500 text-uppercase mb-1">Role</div>
-                                <div class="fs-5 fw-semibold text-gray-900">3 Aktor</div>
+                    <div class="spm-auth-access-board">
+                        <div class="spm-auth-access-item">
+                            <span>01</span>
+                            <div>
+                                <strong>Pesantren</strong>
+                                <small>Pengajuan, data mutu, dan kartu kendali.</small>
                             </div>
                         </div>
-                        <div class="col-6">
-                            <div class="spm-auth-metric">
-                                <div class="fs-7 fw-bold text-gray-500 text-uppercase mb-1">Workflow</div>
-                                <div class="fs-5 fw-semibold text-gray-900">Akreditasi</div>
+                        <div class="spm-auth-access-item is-current">
+                            <span>02</span>
+                            <div>
+                                <strong>Asesor</strong>
+                                <small>Review berkas, visitasi, nilai, dan rekomendasi.</small>
+                            </div>
+                        </div>
+                        <div class="spm-auth-access-item">
+                            <span>03</span>
+                            <div>
+                                <strong>Admin LP2M</strong>
+                                <small>Validasi akhir, SK, sertifikat, dan hasil.</small>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <footer class="spm-auth-footer">
+            <span>&copy; {{ date('Y') }} PesantrenMu. Dikembangkan oleh LabMu untuk LP2M.</span>
+        </footer>
     </div>
 </body>
 

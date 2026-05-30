@@ -1,0 +1,258 @@
+/* ===== Auth Pages V3 - Editorial Refinement ===== */
+
+.spm-auth-body {
+    background: linear-gradient(135deg, #fdfbf7 0%, #f5f1e8 100%);
+    position: relative;
+}
+
+/* Grain texture */
+.spm-auth-body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+}
+
+.spm-auth-shell {
+    position: relative;
+    z-index: 2;
+}
+
+/* Form Pane */
+.spm-auth-form-pane {
+    background: transparent;
+}
+
+.spm-auth-card {
+    background: #ffffff;
+    border: 1px solid rgba(0, 85, 51, 0.12);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+}
+
+.spm-auth-card .card-body {
+    padding: 48px !important;
+}
+
+/* Typography */
+.spm-auth-card h1 {
+    font-family: 'Crimson Pro', serif;
+    font-size: 32px;
+    font-weight: 600;
+    color: #1a1a1a;
+    line-height: 1.2;
+}
+
+.spm-auth-card .text-gray-500 {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    color: #6b6b6b;
+    line-height: 1.6;
+}
+
+/* Role Strip */
+.spm-auth-role-strip {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 85, 51, 0.04);
+    border: 1px solid rgba(0, 85, 51, 0.1);
+    border-radius: 8px;
+}
+
+.spm-auth-role-strip span {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #005533;
+    padding: 6px 14px;
+    background: #ffffff;
+    border-radius: 6px;
+}
+
+/* Form Elements */
+.spm-auth-card .form-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+}
+
+.spm-auth-card .form-control {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    border: 1px solid #d4d4d4;
+    border-radius: 8px;
+    padding: 12px 16px;
+    transition: all 200ms ease;
+}
+
+.spm-auth-card .form-control:focus {
+    border-color: #005533;
+    box-shadow: 0 0 0 3px rgba(0, 85, 51, 0.1);
+}
+
+.spm-auth-card .form-control-lg {
+    padding: 14px 16px;
+}
+
+/* Buttons */
+.spm-auth-card .btn-primary {
+    background: #005533;
+    border: 2px solid #005533;
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 14px 24px;
+    border-radius: 8px;
+    transition: all 220ms ease;
+}
+
+.spm-auth-card .btn-primary:hover {
+    background: #003d24;
+    border-color: #003d24;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 85, 51, 0.25);
+}
+/* Aside Panel */
+.spm-auth-aside {
+    background: linear-gradient(135deg, #005533 0%, #003d24 100%);
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
+}
+
+.spm-auth-aside::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulance type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+    pointer-events: none;
+}
+
+.spm-auth-aside-card {
+    position: relative;
+    z-index: 2;
+}
+
+.spm-auth-aside-kicker {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 20px;
+}
+
+.spm-auth-aside h1 {
+    font-family: 'Crimson Pro', serif;
+    font-size: 42px;
+    font-weight: 600;
+    color: #ffffff;
+    line-height: 1.2;
+    margin-bottom: 20px;
+}
+
+.spm-auth-aside p {
+    font-family: 'Inter', sans-serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.6;
+}
+
+/* Access Board */
+.spm-auth-access-board {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.spm-auth-access-item {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    transition: all 220ms ease;
+}
+
+.spm-auth-access-item:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.spm-auth-access-item.is-current {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.spm-auth-access-item > span {
+    font-family: 'Crimson Pro', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.5);
+    line-height: 1;
+    min-width: 40px;
+}
+
+.spm-auth-access-item.is-current > span {
+    color: #ffffff;
+}
+
+.spm-auth-access-item strong {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.spm-auth-access-item small {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .spm-auth-aside {
+        display: none !important;
+    }
+    
+    .spm-auth-card .card-body {
+        padding: 32px !important;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.spm-auth-card {
+    animation: fadeIn 600ms ease-out;
+}
+
+.spm-auth-aside-card {
+    animation: fadeIn 600ms ease-out 200ms backwards;
+}

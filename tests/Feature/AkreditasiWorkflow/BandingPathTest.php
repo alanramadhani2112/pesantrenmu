@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\BandingService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
@@ -48,6 +49,7 @@ class BandingPathTest extends TestCase
             'user_id' => $user->id,
             'nama_pesantren' => 'Pesantren Banding Test',
         ]);
+
         return $user;
     }
 
@@ -64,13 +66,14 @@ class BandingPathTest extends TestCase
             'nama_dengan_gelar' => 'Asesor Test, S.Pd.',
             'nama_tanpa_gelar' => 'Asesor Test',
         ]);
+
         return $user;
     }
 
     /**
      * Create a rejected akreditasi that had assessors assigned (eligible for banding).
      */
-private function createRejectedAkreditasiWithAssessors(User $pesantrenUser): array
+    private function createRejectedAkreditasiWithAssessors(User $pesantrenUser): array
     {
         $asesor1User = $this->createAsesor();
         $asesor2User = $this->createAsesor();
@@ -114,7 +117,7 @@ private function createRejectedAkreditasiWithAssessors(User $pesantrenUser): arr
      *
      * Validates Requirements 14.1, 14.2.
      */
-public function test_submit_banding_transitions_status_to_minus_two(): void
+    public function test_submit_banding_transitions_status_to_minus_two(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         [$akreditasi] = $this->createRejectedAkreditasiWithAssessors($pesantrenUser);
@@ -137,7 +140,7 @@ public function test_submit_banding_transitions_status_to_minus_two(): void
      *
      * Validates Requirement 14.1.
      */
-public function test_banding_record_created_on_submission(): void
+    public function test_banding_record_created_on_submission(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         [$akreditasi] = $this->createRejectedAkreditasiWithAssessors($pesantrenUser);
@@ -159,7 +162,7 @@ public function test_banding_record_created_on_submission(): void
      *
      * Validates Requirement 14.3.
      */
-public function test_second_banding_submission_is_rejected(): void
+    public function test_second_banding_submission_is_rejected(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         [$akreditasi] = $this->createRejectedAkreditasiWithAssessors($pesantrenUser);
@@ -173,7 +176,7 @@ public function test_second_banding_submission_is_rejected(): void
         $this->assertTrue($result1['success']);
 
         // Revert status to -1 to simulate trying again
-        \Illuminate\Support\Facades\DB::table('akreditasis')
+        DB::table('akreditasis')
             ->where('id', $akreditasi->id)
             ->update(['status' => -1]);
 
@@ -192,7 +195,7 @@ public function test_second_banding_submission_is_rejected(): void
      *
      * Validates Requirement 13.3.
      */
-public function test_banding_not_available_when_no_assessors_assigned(): void
+    public function test_banding_not_available_when_no_assessors_assigned(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
 
@@ -218,13 +221,13 @@ public function test_banding_not_available_when_no_assessors_assigned(): void
      *
      * Validates Requirement 14.10.
      */
-public function test_banding_rejected_after_14_day_window(): void
+    public function test_banding_rejected_after_14_day_window(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         [$akreditasi] = $this->createRejectedAkreditasiWithAssessors($pesantrenUser);
 
         // Simulate rejection happened 15 days ago
-        \Illuminate\Support\Facades\DB::table('akreditasis')
+        DB::table('akreditasis')
             ->where('id', $akreditasi->id)
             ->update(['updated_at' => now()->subDays(15)]);
 
@@ -247,7 +250,7 @@ public function test_banding_rejected_after_14_day_window(): void
      *
      * Validates Requirements 14.4, 14.5.
      */
-public function test_banding_accepted_transitions_to_validasi_admin(): void
+    public function test_banding_accepted_transitions_to_validasi_admin(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $admin = $this->createAdmin();
@@ -265,7 +268,7 @@ public function test_banding_accepted_transitions_to_validasi_admin(): void
         // Admin accepts banding
         $decideResult = $this->bandingService->decideBanding($banding->id, $admin->id, 'diterima');
 
-        $this->assertTrue($decideResult['success'], 'Banding decision should succeed: ' . ($decideResult['error'] ?? ''));
+        $this->assertTrue($decideResult['success'], 'Banding decision should succeed: '.($decideResult['error'] ?? ''));
 
         // Status should be 1 (Validasi Akhir Admin)
         $akreditasi->refresh();
@@ -277,7 +280,7 @@ public function test_banding_accepted_transitions_to_validasi_admin(): void
      *
      * Validates Requirement 14.5.
      */
-public function test_banding_record_updated_to_accepted(): void
+    public function test_banding_record_updated_to_accepted(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $admin = $this->createAdmin();
@@ -303,7 +306,7 @@ public function test_banding_record_updated_to_accepted(): void
      *
      * Validates Requirement 14.5.
      */
-public function test_assessors_reassigned_when_banding_accepted(): void
+    public function test_assessors_reassigned_when_banding_accepted(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $admin = $this->createAdmin();
@@ -332,7 +335,7 @@ public function test_assessors_reassigned_when_banding_accepted(): void
      *
      * Validates Requirements 14.4, 14.6.
      */
-public function test_banding_rejected_transitions_to_ditolak(): void
+    public function test_banding_rejected_transitions_to_ditolak(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $admin = $this->createAdmin();
@@ -350,7 +353,7 @@ public function test_banding_rejected_transitions_to_ditolak(): void
         // Admin rejects banding
         $decideResult = $this->bandingService->decideBanding($banding->id, $admin->id, 'ditolak');
 
-        $this->assertTrue($decideResult['success'], 'Banding rejection should succeed: ' . ($decideResult['error'] ?? ''));
+        $this->assertTrue($decideResult['success'], 'Banding rejection should succeed: '.($decideResult['error'] ?? ''));
 
         // Status should be -1 (Ditolak)
         $akreditasi->refresh();
@@ -362,7 +365,7 @@ public function test_banding_rejected_transitions_to_ditolak(): void
      *
      * Validates Requirement 14.6.
      */
-public function test_banding_record_updated_to_rejected(): void
+    public function test_banding_record_updated_to_rejected(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $admin = $this->createAdmin();
@@ -388,7 +391,7 @@ public function test_banding_record_updated_to_rejected(): void
      *
      * Validates Requirement 14.4.
      */
-public function test_invalid_banding_decision_is_rejected(): void
+    public function test_invalid_banding_decision_is_rejected(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $admin = $this->createAdmin();

@@ -37,7 +37,7 @@ class AuditTrailService
     ): AkreditasiAuditLog {
         $this->validateActionType($actionType);
 
-        $log = new AkreditasiAuditLog();
+        $log = new AkreditasiAuditLog;
         $log->akreditasi_id = $akreditasiId;
         $log->user_id = Auth::id();
         $log->action_type = $actionType;
@@ -69,23 +69,23 @@ class AuditTrailService
         $query = AkreditasiAuditLog::where('akreditasi_id', $akreditasiId)
             ->with('user');
 
-        if (!empty($filters['action_type'])) {
+        if (! empty($filters['action_type'])) {
             $actionTypes = is_array($filters['action_type'])
                 ? $filters['action_type']
                 : [$filters['action_type']];
             $query->whereIn('action_type', $actionTypes);
         }
 
-        if (!empty($filters['user_id'])) {
+        if (! empty($filters['user_id'])) {
             $query->where('user_id', (int) $filters['user_id']);
         }
 
-        if (!empty($filters['date_from'])) {
+        if (! empty($filters['date_from'])) {
             $query->where('created_at', '>=', $filters['date_from']);
         }
 
-        if (!empty($filters['date_to'])) {
-            $query->where('created_at', '<=', $filters['date_to'] . ' 23:59:59');
+        if (! empty($filters['date_to'])) {
+            $query->where('created_at', '<=', $filters['date_to'].' 23:59:59');
         }
 
         return $query->orderBy('created_at', 'desc')->paginate($perPage);
@@ -98,9 +98,9 @@ class AuditTrailService
      */
     protected function validateActionType(string $actionType): void
     {
-        if (!in_array($actionType, self::ALLOWED_ACTION_TYPES, true)) {
+        if (! in_array($actionType, self::ALLOWED_ACTION_TYPES, true)) {
             throw new \InvalidArgumentException(
-                "Invalid action type '{$actionType}'. Allowed types: " . implode(', ', self::ALLOWED_ACTION_TYPES)
+                "Invalid action type '{$actionType}'. Allowed types: ".implode(', ', self::ALLOWED_ACTION_TYPES)
             );
         }
     }

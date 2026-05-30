@@ -3,8 +3,8 @@
 namespace Tests\Unit\StateMachine;
 
 use App\StateMachine\AkreditasiStateMachine;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Property-Based Test: Property 1 — State Machine Transition Validity
@@ -16,7 +16,6 @@ use PHPUnit\Framework\Attributes\Group;
  * current status preserved unchanged.
  *
  * **Validates: Requirements 1.2, 1.3**
- *
  */
 #[Group('akreditasi-workflow-redesign')]
 class Property1TransitionValidityTest extends TestCase
@@ -29,7 +28,7 @@ class Property1TransitionValidityTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->sm = new AkreditasiStateMachine();
+        $this->sm = new AkreditasiStateMachine;
     }
 
     // -------------------------------------------------------------------------
@@ -43,7 +42,7 @@ class Property1TransitionValidityTest extends TestCase
      *
      * @return array<array{int, int}>
      */
-private function buildPermittedPairs(): array
+    private function buildPermittedPairs(): array
     {
         $pairs = [];
         foreach (AkreditasiStateMachine::TRANSITIONS as $from => $targets) {
@@ -51,19 +50,21 @@ private function buildPermittedPairs(): array
                 $pairs[] = [$from, $to];
             }
         }
+
         return $pairs;
     }
 
     /**
      * Return true if the given (from, to) pair is in the permitted set.
      */
-private function isPermitted(int $from, int $to): bool
+    private function isPermitted(int $from, int $to): bool
     {
         foreach ($this->buildPermittedPairs() as [$f, $t]) {
             if ($f === $from && $t === $to) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -80,7 +81,7 @@ private function isPermitted(int $from, int $to): bool
      *
      * **Validates: Requirements 1.2, 1.3**
      */
-public function test_property1_exhaustive_all_valid_status_combinations(): void
+    public function test_property1_exhaustive_all_valid_status_combinations(): void
     {
         $permittedPairs = $this->buildPermittedPairs();
         $permittedCount = count($permittedPairs);
@@ -92,7 +93,7 @@ public function test_property1_exhaustive_all_valid_status_combinations(): void
         foreach (self::VALID_STATUSES as $from) {
             foreach (self::VALID_STATUSES as $to) {
                 $expected = $this->isPermitted($from, $to);
-                $actual   = $this->sm->canTransition($from, $to);
+                $actual = $this->sm->canTransition($from, $to);
 
                 $this->assertSame(
                     $expected,
@@ -141,7 +142,7 @@ public function test_property1_exhaustive_all_valid_status_combinations(): void
      *
      * **Validates: Requirements 1.2, 1.3**
      */
-public function test_property1_random_valid_range_at_least_100_iterations(): void
+    public function test_property1_random_valid_range_at_least_100_iterations(): void
     {
         $iterations = 200; // well above the 100-iteration minimum
         $validStatuses = self::VALID_STATUSES;
@@ -149,10 +150,10 @@ public function test_property1_random_valid_range_at_least_100_iterations(): voi
 
         for ($i = 0; $i < $iterations; $i++) {
             $from = $validStatuses[random_int(0, $count - 1)];
-            $to   = $validStatuses[random_int(0, $count - 1)];
+            $to = $validStatuses[random_int(0, $count - 1)];
 
             $expected = $this->isPermitted($from, $to);
-            $actual   = $this->sm->canTransition($from, $to);
+            $actual = $this->sm->canTransition($from, $to);
 
             $this->assertSame(
                 $expected,
@@ -183,7 +184,7 @@ public function test_property1_random_valid_range_at_least_100_iterations(): voi
      *
      * **Validates: Requirements 1.2, 1.3**
      */
-public function test_property1_out_of_range_values_always_return_false(): void
+    public function test_property1_out_of_range_values_always_return_false(): void
     {
         $iterations = 200; // well above the 100-iteration minimum
 
@@ -228,7 +229,7 @@ public function test_property1_out_of_range_values_always_return_false(): void
      *
      * **Validates: Requirements 1.2**
      */
-public function test_property1_all_permitted_pairs_return_true(): void
+    public function test_property1_all_permitted_pairs_return_true(): void
     {
         $expectedPermitted = [
             [6,  5],   // Pengajuan → Verifikasi Berkas
@@ -256,7 +257,7 @@ public function test_property1_all_permitted_pairs_return_true(): void
         $this->assertSame(
             count($expectedPermitted),
             count($this->buildPermittedPairs()),
-            'TRANSITIONS map must encode exactly ' . count($expectedPermitted) . ' permitted pairs.'
+            'TRANSITIONS map must encode exactly '.count($expectedPermitted).' permitted pairs.'
         );
     }
 
@@ -267,7 +268,7 @@ public function test_property1_all_permitted_pairs_return_true(): void
      *
      * **Validates: Requirements 1.2, 1.3**
      */
-public function test_property1_terminal_state_selesai_has_no_outgoing_transitions(): void
+    public function test_property1_terminal_state_selesai_has_no_outgoing_transitions(): void
     {
         foreach (self::VALID_STATUSES as $to) {
             $this->assertFalse(
@@ -284,9 +285,10 @@ public function test_property1_terminal_state_selesai_has_no_outgoing_transition
     /**
      * Return a random integer from the valid status set {-2, -1, 0, 1, 2, 3, 4, 5, 6}.
      */
-private function randomValidStatus(): int
+    private function randomValidStatus(): int
     {
         $statuses = self::VALID_STATUSES;
+
         return $statuses[random_int(0, count($statuses) - 1)];
     }
 
@@ -294,12 +296,13 @@ private function randomValidStatus(): int
      * Return a random integer strictly outside the valid status range.
      * Samples from [-100, -3] ∪ [7, 100].
      */
-private function randomOutOfRangeStatus(): int
+    private function randomOutOfRangeStatus(): int
     {
         // Two equally-likely bands: low [-100..-3] and high [7..100]
         if (random_int(0, 1) === 0) {
             return random_int(-100, -3);
         }
+
         return random_int(7, 100);
     }
 
@@ -307,7 +310,7 @@ private function randomOutOfRangeStatus(): int
      * Return a random integer from the full test range [-100, 100].
      * May be in-range or out-of-range.
      */
-private function randomAnyStatus(): int
+    private function randomAnyStatus(): int
     {
         return random_int(-100, 100);
     }

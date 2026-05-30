@@ -30,7 +30,9 @@ class FileUploadRaceConditionTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private Pesantren $pesantren;
+
     private PesantrenService $service;
 
     protected function setUp(): void
@@ -57,7 +59,7 @@ class FileUploadRaceConditionTest extends TestCase
      * This test verifies the service correctly returns false so the component
      * can trigger its rollback branch.
      */
-public function test_update_profile_returns_false_when_locked_so_component_can_rollback(): void
+    public function test_update_profile_returns_false_when_locked_so_component_can_rollback(): void
     {
         $this->pesantren->update(['is_locked' => true]);
 
@@ -116,7 +118,7 @@ public function test_update_profile_returns_false_when_locked_so_component_can_r
         // Simulate what the Volt component does:
         // 1. Store new file to disk
         Storage::disk('public')->put('pesantren_docs/old_nsp.pdf', 'old content');
-        $newPath = 'pesantren_docs/new_nsp_' . uniqid() . '.pdf';
+        $newPath = 'pesantren_docs/new_nsp_'.uniqid().'.pdf';
         Storage::disk('public')->put($newPath, 'new content');
 
         // 2. Attempt DB update — returns false (locked)
@@ -138,7 +140,7 @@ public function test_update_profile_returns_false_when_locked_so_component_can_r
         Storage::disk('public')->put('pesantren_docs/old_nsp.pdf', 'old content');
         $this->pesantren->update(['sertifikat_nsp' => 'pesantren_docs/old_nsp.pdf']);
 
-        $newPath = 'pesantren_docs/new_nsp_' . uniqid() . '.pdf';
+        $newPath = 'pesantren_docs/new_nsp_'.uniqid().'.pdf';
         Storage::disk('public')->put($newPath, 'new content');
 
         $data = [
@@ -207,7 +209,7 @@ public function test_update_profile_returns_false_when_locked_so_component_can_r
         Ipm::create(['user_id' => $this->user->id, 'nsp_file' => 'ipm_docs/old_nsp.pdf']);
 
         // Simulate component: store new file first
-        $newPath = 'ipm_docs/new_nsp_' . uniqid() . '.pdf';
+        $newPath = 'ipm_docs/new_nsp_'.uniqid().'.pdf';
         Storage::disk('public')->put($newPath, 'new content');
 
         // Attempt DB update — returns false (locked)
@@ -227,7 +229,7 @@ public function test_update_profile_returns_false_when_locked_so_component_can_r
         Storage::disk('public')->put('ipm_docs/old_nsp.pdf', 'old content');
         Ipm::create(['user_id' => $this->user->id, 'nsp_file' => 'ipm_docs/old_nsp.pdf']);
 
-        $newPath = 'ipm_docs/new_nsp_' . uniqid() . '.pdf';
+        $newPath = 'ipm_docs/new_nsp_'.uniqid().'.pdf';
         Storage::disk('public')->put($newPath, 'new content');
 
         $result = $this->service->updateIpm($this->user->id, ['nsp_file' => $newPath]);

@@ -1,9 +1,6 @@
 <?php
 
 return [
-    'resubmission_limit' => (int) env('AKREDITASI_RESUBMISSION_LIMIT', 3),
-    'cooling_period_days' => (int) env('AKREDITASI_COOLING_PERIOD_DAYS', 30),
-
     // Banding (appeal) settings
     'banding_limit' => (int) env('AKREDITASI_BANDING_LIMIT', 1),
     'banding_review_days' => (int) env('AKREDITASI_BANDING_REVIEW_DAYS', 14),

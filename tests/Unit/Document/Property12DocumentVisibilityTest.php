@@ -5,8 +5,8 @@ namespace Tests\Unit\Document;
 use App\Models\Akreditasi;
 use App\Services\AkreditasiDocumentService;
 use App\Services\AuditTrailService;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Property-Based Test: Property 12 — Document Visibility Matrix
@@ -21,7 +21,6 @@ use PHPUnit\Framework\Attributes\Group;
  *   - Pesantren cannot view any Laporan Visitasi
  *
  * **Validates: Requirements 8.5, 8.6, 8.7, 15.1, 15.2, 15.3, 15.4, 15.5**
- *
  */
 #[Group('akreditasi-workflow-redesign')]
 class Property12DocumentVisibilityTest extends TestCase
@@ -32,9 +31,12 @@ class Property12DocumentVisibilityTest extends TestCase
     private const VALID_STATUSES = [-2, -1, 0, 1, 2, 3, 4, 5, 6];
 
     /** All role IDs in the domain. */
-    private const ROLE_ADMIN      = 1;
-    private const ROLE_ASESOR     = 2;
-    private const ROLE_PESANTREN  = 3;
+    private const ROLE_ADMIN = 1;
+
+    private const ROLE_ASESOR = 2;
+
+    private const ROLE_PESANTREN = 3;
+
     private const ROLE_SUPER_ADMIN = 4;
 
     private const ALL_ROLES = [
@@ -70,18 +72,18 @@ class Property12DocumentVisibilityTest extends TestCase
      * Returns true if the given role should be able to view the document type
      * for an akreditasi at the given status.
      */
-private function expectedCanView(int $roleId, string $documentType, int $status): bool
+    private function expectedCanView(int $roleId, string $documentType, int $status): bool
     {
-        $isAdmin     = ($roleId === self::ROLE_ADMIN || $roleId === self::ROLE_SUPER_ADMIN);
+        $isAdmin = ($roleId === self::ROLE_ADMIN || $roleId === self::ROLE_SUPER_ADMIN);
         $isPesantren = ($roleId === self::ROLE_PESANTREN);
 
         return match ($documentType) {
-            AkreditasiDocumentService::DOC_KARTU_KENDALI             => $isAdmin,
-            AkreditasiDocumentService::DOC_LAPORAN_VISITASI_ASESOR1  => $isAdmin,
-            AkreditasiDocumentService::DOC_LAPORAN_VISITASI_ASESOR2  => $isAdmin,
+            AkreditasiDocumentService::DOC_KARTU_KENDALI => $isAdmin,
+            AkreditasiDocumentService::DOC_LAPORAN_VISITASI_ASESOR1 => $isAdmin,
+            AkreditasiDocumentService::DOC_LAPORAN_VISITASI_ASESOR2 => $isAdmin,
             AkreditasiDocumentService::DOC_LAPORAN_VISITASI_KELOMPOK => $isAdmin,
-            AkreditasiDocumentService::DOC_SERTIFIKAT                => $isPesantren && ($status === 0),
-            default                                                   => false,
+            AkreditasiDocumentService::DOC_SERTIFIKAT => $isPesantren && ($status === 0),
+            default => false,
         };
     }
 
@@ -89,11 +91,12 @@ private function expectedCanView(int $roleId, string $documentType, int $status)
      * Build a mock Akreditasi model with the given status.
      * Uses a plain stdClass to avoid database dependency.
      */
-private function makeAkreditasi(int $status): Akreditasi
+    private function makeAkreditasi(int $status): Akreditasi
     {
         /** @var Akreditasi $akreditasi */
-        $akreditasi = new Akreditasi();
+        $akreditasi = new Akreditasi;
         $akreditasi->status = $status;
+
         return $akreditasi;
     }
 
@@ -109,7 +112,7 @@ private function makeAkreditasi(int $status): Akreditasi
      *
      * **Validates: Requirements 8.5, 8.6, 8.7, 15.1, 15.2, 15.3, 15.4, 15.5**
      */
-public function test_property12_exhaustive_all_combinations(): void
+    public function test_property12_exhaustive_all_combinations(): void
     {
         $checkedCount = 0;
 
@@ -117,10 +120,10 @@ public function test_property12_exhaustive_all_combinations(): void
             foreach (self::ALL_DOC_TYPES as $docType) {
                 foreach (self::VALID_STATUSES as $status) {
                     $akreditasi = $this->makeAkreditasi($status);
-                    $userId     = $roleId * 100; // arbitrary user ID
+                    $userId = $roleId * 100; // arbitrary user ID
 
                     $expected = $this->expectedCanView($roleId, $docType, $status);
-                    $actual   = $this->svc->canView($userId, $roleId, $docType, $akreditasi);
+                    $actual = $this->svc->canView($userId, $roleId, $docType, $akreditasi);
 
                     $this->assertSame(
                         $expected,
@@ -154,23 +157,23 @@ public function test_property12_exhaustive_all_combinations(): void
      *
      * **Validates: Requirements 8.5, 8.6, 8.7, 15.1, 15.2, 15.3, 15.4, 15.5**
      */
-public function test_property12_random_combinations_at_least_100_iterations(): void
+    public function test_property12_random_combinations_at_least_100_iterations(): void
     {
         $iterations = 200;
-        $roles      = self::ALL_ROLES;
-        $docTypes   = self::ALL_DOC_TYPES;
-        $statuses   = self::VALID_STATUSES;
+        $roles = self::ALL_ROLES;
+        $docTypes = self::ALL_DOC_TYPES;
+        $statuses = self::VALID_STATUSES;
 
         for ($i = 0; $i < $iterations; $i++) {
-            $roleId   = $roles[random_int(0, count($roles) - 1)];
-            $docType  = $docTypes[random_int(0, count($docTypes) - 1)];
-            $status   = $statuses[random_int(0, count($statuses) - 1)];
-            $userId   = random_int(1, 9999);
+            $roleId = $roles[random_int(0, count($roles) - 1)];
+            $docType = $docTypes[random_int(0, count($docTypes) - 1)];
+            $status = $statuses[random_int(0, count($statuses) - 1)];
+            $userId = random_int(1, 9999);
 
             $akreditasi = $this->makeAkreditasi($status);
 
             $expected = $this->expectedCanView($roleId, $docType, $status);
-            $actual   = $this->svc->canView($userId, $roleId, $docType, $akreditasi);
+            $actual = $this->svc->canView($userId, $roleId, $docType, $akreditasi);
 
             $this->assertSame(
                 $expected,
@@ -199,7 +202,7 @@ public function test_property12_random_combinations_at_least_100_iterations(): v
      *
      * **Validates: Requirements 15.1, 8.5**
      */
-public function test_property12_kartu_kendali_only_admin_can_view(): void
+    public function test_property12_kartu_kendali_only_admin_can_view(): void
     {
         $docType = AkreditasiDocumentService::DOC_KARTU_KENDALI;
 
@@ -233,7 +236,7 @@ public function test_property12_kartu_kendali_only_admin_can_view(): void
      *
      * **Validates: Requirements 15.2, 15.3, 15.4, 8.6**
      */
-public function test_property12_laporan_visitasi_only_admin_can_view(): void
+    public function test_property12_laporan_visitasi_only_admin_can_view(): void
     {
         $laporanTypes = [
             AkreditasiDocumentService::DOC_LAPORAN_VISITASI_ASESOR1,
@@ -274,7 +277,7 @@ public function test_property12_laporan_visitasi_only_admin_can_view(): void
      *
      * **Validates: Requirements 15.5**
      */
-public function test_property12_sertifikat_only_pesantren_after_status_0(): void
+    public function test_property12_sertifikat_only_pesantren_after_status_0(): void
     {
         $docType = AkreditasiDocumentService::DOC_SERTIFIKAT;
 
@@ -286,7 +289,7 @@ public function test_property12_sertifikat_only_pesantren_after_status_0(): void
             $this->assertSame(
                 $expectedPesantren,
                 $this->svc->canView(3, self::ROLE_PESANTREN, $docType, $akreditasi),
-                "Pesantren canView(sertifikat, status={$status}) should be " . ($expectedPesantren ? 'true' : 'false') . '.'
+                "Pesantren canView(sertifikat, status={$status}) should be ".($expectedPesantren ? 'true' : 'false').'.'
             );
 
             // Admin must NOT view sertifikat (Req 15.5: view by Pesantren only)
@@ -310,15 +313,15 @@ public function test_property12_sertifikat_only_pesantren_after_status_0(): void
      *
      * **Validates: Requirements 15.5**
      */
-public function test_property12_sertifikat_pesantren_denied_before_status_0(): void
+    public function test_property12_sertifikat_pesantren_denied_before_status_0(): void
     {
-        $docType    = AkreditasiDocumentService::DOC_SERTIFIKAT;
-        $nonZero    = array_filter(self::VALID_STATUSES, fn($s) => $s !== 0);
-        $nonZero    = array_values($nonZero);
+        $docType = AkreditasiDocumentService::DOC_SERTIFIKAT;
+        $nonZero = array_filter(self::VALID_STATUSES, fn ($s) => $s !== 0);
+        $nonZero = array_values($nonZero);
         $iterations = 200;
 
         for ($i = 0; $i < $iterations; $i++) {
-            $status     = $nonZero[random_int(0, count($nonZero) - 1)];
+            $status = $nonZero[random_int(0, count($nonZero) - 1)];
             $akreditasi = $this->makeAkreditasi($status);
 
             $this->assertFalse(
@@ -335,13 +338,13 @@ public function test_property12_sertifikat_pesantren_denied_before_status_0(): v
      *
      * **Validates: Requirements 8.5, 15.1**
      */
-public function test_property12_asesor_cannot_view_kartu_kendali(): void
+    public function test_property12_asesor_cannot_view_kartu_kendali(): void
     {
-        $docType    = AkreditasiDocumentService::DOC_KARTU_KENDALI;
+        $docType = AkreditasiDocumentService::DOC_KARTU_KENDALI;
         $iterations = 200;
 
         for ($i = 0; $i < $iterations; $i++) {
-            $status     = self::VALID_STATUSES[random_int(0, count(self::VALID_STATUSES) - 1)];
+            $status = self::VALID_STATUSES[random_int(0, count(self::VALID_STATUSES) - 1)];
             $akreditasi = $this->makeAkreditasi($status);
 
             $this->assertFalse(
@@ -358,7 +361,7 @@ public function test_property12_asesor_cannot_view_kartu_kendali(): void
      *
      * **Validates: Requirements 8.6, 15.2, 15.3, 15.4**
      */
-public function test_property12_pesantren_cannot_view_laporan_visitasi(): void
+    public function test_property12_pesantren_cannot_view_laporan_visitasi(): void
     {
         $laporanTypes = [
             AkreditasiDocumentService::DOC_LAPORAN_VISITASI_ASESOR1,
@@ -368,8 +371,8 @@ public function test_property12_pesantren_cannot_view_laporan_visitasi(): void
         $iterations = 200;
 
         for ($i = 0; $i < $iterations; $i++) {
-            $status   = self::VALID_STATUSES[random_int(0, count(self::VALID_STATUSES) - 1)];
-            $docType  = $laporanTypes[random_int(0, count($laporanTypes) - 1)];
+            $status = self::VALID_STATUSES[random_int(0, count(self::VALID_STATUSES) - 1)];
+            $docType = $laporanTypes[random_int(0, count($laporanTypes) - 1)];
             $akreditasi = $this->makeAkreditasi($status);
 
             $this->assertFalse(
@@ -387,7 +390,7 @@ public function test_property12_pesantren_cannot_view_laporan_visitasi(): void
      *
      * **Validates: Requirements 8.7, 15.1, 15.2, 15.3, 15.4**
      */
-public function test_property12_admin_can_view_all_laporan_and_kartu_kendali(): void
+    public function test_property12_admin_can_view_all_laporan_and_kartu_kendali(): void
     {
         $adminViewableTypes = [
             AkreditasiDocumentService::DOC_KARTU_KENDALI,
@@ -398,8 +401,8 @@ public function test_property12_admin_can_view_all_laporan_and_kartu_kendali(): 
         $iterations = 200;
 
         for ($i = 0; $i < $iterations; $i++) {
-            $status   = self::VALID_STATUSES[random_int(0, count(self::VALID_STATUSES) - 1)];
-            $docType  = $adminViewableTypes[random_int(0, count($adminViewableTypes) - 1)];
+            $status = self::VALID_STATUSES[random_int(0, count(self::VALID_STATUSES) - 1)];
+            $docType = $adminViewableTypes[random_int(0, count($adminViewableTypes) - 1)];
             $akreditasi = $this->makeAkreditasi($status);
 
             $this->assertTrue(
@@ -414,7 +417,7 @@ public function test_property12_admin_can_view_all_laporan_and_kartu_kendali(): 
      *
      * **Validates: Requirements 15.1–15.5 (deny-by-default)**
      */
-public function test_property12_unknown_document_type_always_denied(): void
+    public function test_property12_unknown_document_type_always_denied(): void
     {
         $unknownType = 'unknown_document_type';
 

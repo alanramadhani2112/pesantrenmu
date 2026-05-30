@@ -13,9 +13,10 @@ use App\Models\Pesantren;
 use App\Models\User;
 use App\Services\TrashService;
 use Database\Seeders\RoleSeeder;
+use Faker\Factory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\TestCase;
 
 /**
  * Feature: soft-delete-restore-flow
@@ -69,8 +70,8 @@ class RestorePreviewCountPropertyTest extends TestCase
             $butir = MasterEdpmButir::create([
                 'komponen_id' => $komponen->id,
                 'no_sk' => (string) ($i + 1),
-                'nomor_butir' => '1.' . ($i + 1),
-                'butir_pernyataan' => 'Butir ' . ($i + 1),
+                'nomor_butir' => '1.'.($i + 1),
+                'butir_pernyataan' => 'Butir '.($i + 1),
             ]);
             AkreditasiEdpm::create([
                 'akreditasi_id' => $akreditasi->id,
@@ -81,22 +82,23 @@ class RestorePreviewCountPropertyTest extends TestCase
         }
 
         for ($i = 0; $i < $catatanCount; $i++) {
-            $k = MasterEdpmKomponen::create(['nama' => 'Komponen Catatan ' . $i]);
+            $k = MasterEdpmKomponen::create(['nama' => 'Komponen Catatan '.$i]);
             AkreditasiEdpmCatatan::create([
                 'akreditasi_id' => $akreditasi->id,
                 'pesantren_id' => $user->id,
                 'komponen_id' => $k->id,
-                'catatan' => 'Catatan ' . $i,
+                'catatan' => 'Catatan '.$i,
             ]);
         }
 
         $akreditasi->delete();
+
         return $akreditasi->fresh();
     }
 
     public static function childCountDataProvider(): array
     {
-        $faker = \Faker\Factory::create();
+        $faker = Factory::create();
         $cases = [];
         for ($i = 0; $i < 100; $i++) {
             $cases[] = [
@@ -105,12 +107,12 @@ class RestorePreviewCountPropertyTest extends TestCase
                 $faker->numberBetween(0, 5),  // catatan
             ];
         }
+
         return $cases;
     }
 
-    /**     */
-#[DataProvider('childCountDataProvider')]
-public function test_property_2_preview_counts_match_actual_db_counts(
+    #[DataProvider('childCountDataProvider')]
+    public function test_property_2_preview_counts_match_actual_db_counts(
         int $assessmentCount,
         int $edpmCount,
         int $catatanCount

@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Sso;
 
 use App\Http\Controllers\Controller;
 use App\Services\Sso\UserService;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -12,7 +15,7 @@ class SsoController extends Controller
 {
     private function serverUrl(string $path): string
     {
-        return rtrim((string) config('sso.server_url'), '/') . '/' . ltrim($path, '/');
+        return rtrim((string) config('sso.server_url'), '/').'/'.ltrim($path, '/');
     }
 
     private function redirectUri(): string
@@ -62,7 +65,7 @@ class SsoController extends Controller
         }
 
         try {
-            $response = \Illuminate\Support\Facades\Http::timeout(config('sso.timeout', 10))
+            $response = Http::timeout(config('sso.timeout', 10))
                 ->asForm()
                 ->post(
                     $this->serverUrl('oauth/token'),
@@ -74,7 +77,7 @@ class SsoController extends Controller
                         'code' => $request->code,
                     ]
                 );
-        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+        } catch (ConnectionException $e) {
             Log::error('sso.callback_failed', [
                 'ip' => $request->ip(),
                 'reason' => 'connection_timeout',
@@ -125,7 +128,7 @@ class SsoController extends Controller
 
         try {
             $user = UserService::getUser($token);
-        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+        } catch (ConnectionException $e) {
             Log::error('SSO server unreachable during user fetch', [
                 'exception' => $e->getMessage(),
             ]);
@@ -149,7 +152,7 @@ class SsoController extends Controller
             return redirect(route('login'))->with('error', 'Akun Anda telah dinonaktifkan. Silakan hubungi administrator.');
         }
 
-        \Illuminate\Support\Facades\Auth::login($user);
+        Auth::login($user);
 
         $url = session()->pull('intended_url');
 

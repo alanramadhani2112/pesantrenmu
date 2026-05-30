@@ -39,7 +39,6 @@ Semua halaman menggunakan Volt single-file components di `resources/views/livewi
 | `UserService` | Manajemen akun |
 | `RejectionService` | Alur penolakan terstruktur + partial unlock |
 | `BandingService` | Alur banding (appeal) |
-| `ResubmissionService` | Limit dan cooling period pengajuan ulang |
 | `TrashService` | Restore/force-delete akreditasi yang di-soft-delete |
 | `AuditTrailService` | Log perubahan status akreditasi |
 | `DeadlineService` | Reminder dan eskalasi deadline assessment |

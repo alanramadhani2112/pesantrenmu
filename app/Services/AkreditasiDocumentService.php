@@ -54,11 +54,15 @@ class AkreditasiDocumentService
     // Document type constants (map to akreditasis table columns)
     // -------------------------------------------------------------------------
 
-    public const DOC_KARTU_KENDALI              = 'kartu_kendali';
-    public const DOC_LAPORAN_VISITASI_ASESOR1   = 'laporan_visitasi_asesor1';
-    public const DOC_LAPORAN_VISITASI_ASESOR2   = 'laporan_visitasi_asesor2';
-    public const DOC_LAPORAN_VISITASI_KELOMPOK  = 'laporan_visitasi_kelompok';
-    public const DOC_SERTIFIKAT                 = 'sertifikat_path';
+    public const DOC_KARTU_KENDALI = 'kartu_kendali';
+
+    public const DOC_LAPORAN_VISITASI_ASESOR1 = 'laporan_visitasi_asesor1';
+
+    public const DOC_LAPORAN_VISITASI_ASESOR2 = 'laporan_visitasi_asesor2';
+
+    public const DOC_LAPORAN_VISITASI_KELOMPOK = 'laporan_visitasi_kelompok';
+
+    public const DOC_SERTIFIKAT = 'sertifikat_path';
 
     public const REQUIRED_POST_VISITASI_DOCUMENTS = [
         self::DOC_LAPORAN_VISITASI_ASESOR1,
@@ -71,8 +75,10 @@ class AkreditasiDocumentService
     // Role ID constants
     // -------------------------------------------------------------------------
 
-    private const ROLE_ADMIN     = 1;
-    private const ROLE_ASESOR    = 2;
+    private const ROLE_ADMIN = 1;
+
+    private const ROLE_ASESOR = 2;
+
     private const ROLE_PESANTREN = 3;
 
     // -------------------------------------------------------------------------
@@ -84,8 +90,7 @@ class AkreditasiDocumentService
      *
      * Returns an array of error strings. An empty array means the file is valid.
      *
-     * @param  UploadedFile  $file
-     * @param  string        $documentType  One of the DOC_* constants
+     * @param  string  $documentType  One of the DOC_* constants
      * @return string[]
      */
     public function validateFile(UploadedFile $file, string $documentType): array
@@ -94,7 +99,7 @@ class AkreditasiDocumentService
 
         // MIME type validation
         $mimeType = $file->getMimeType();
-        if (!in_array($mimeType, self::ALLOWED_MIME_TYPES, true)) {
+        if (! in_array($mimeType, self::ALLOWED_MIME_TYPES, true)) {
             $errors[] = 'Tipe file tidak diizinkan. Hanya PDF dan DOCX yang diterima.';
         }
 
@@ -121,13 +126,11 @@ class AkreditasiDocumentService
      * If a previous file exists for the same akreditasi + document type, it is
      * deleted from storage before the new file is saved (re-upload replacement).
      *
-     * @param  int           $akreditasiId
-     * @param  string        $documentType  One of the DOC_* constants
-     * @param  UploadedFile  $file
-     * @param  int           $uploaderId    ID of the user performing the upload
-     * @return string        The stored file path
+     * @param  string  $documentType  One of the DOC_* constants
+     * @param  int  $uploaderId  ID of the user performing the upload
+     * @return string The stored file path
      *
-     * @throws \RuntimeException  If the file cannot be stored
+     * @throws \RuntimeException If the file cannot be stored
      */
     public function upload(
         int $akreditasiId,
@@ -198,7 +201,7 @@ class AkreditasiDocumentService
             Notification::send($admins, new AkreditasiNotification(
                 'dokumen_pasca_visitasi_lengkap',
                 'Dokumen Penilaian Pasca Visitasi Lengkap',
-                "Semua dokumen penilaian pasca visitasi telah lengkap dan siap untuk divalidasi.",
+                'Semua dokumen penilaian pasca visitasi telah lengkap dan siap untuk divalidasi.',
                 route('admin.akreditasi-detail', $akreditasi->uuid)
             ));
         }
@@ -228,7 +231,7 @@ class AkreditasiDocumentService
         $akreditasi = Akreditasi::findOrFail($akreditasiId);
         $assessment = $this->findAssignedAssessment($akreditasi->id, $asesorUserId);
 
-        if (!$assessment) {
+        if (! $assessment) {
             throw new \DomainException('Hanya asesor yang ditugaskan yang dapat mengunggah laporan individu.');
         }
 
@@ -249,7 +252,7 @@ class AkreditasiDocumentService
         $akreditasi = Akreditasi::findOrFail($akreditasiId);
         $assessment = $this->findAssignedAssessment($akreditasi->id, $asesorUserId);
 
-        if (!$assessment || (int) $assessment->tipe !== 1) {
+        if (! $assessment || (int) $assessment->tipe !== 1) {
             throw new \DomainException('Hanya Ketua Kelompok yang ditugaskan yang dapat mengunggah laporan kelompok.');
         }
 
@@ -288,11 +291,7 @@ class AkreditasiDocumentService
      *
      * Super_Admin (role_id=4) is treated as Admin for visibility purposes.
      *
-     * @param  int         $userId
-     * @param  int         $roleId
-     * @param  string      $documentType  One of the DOC_* constants
-     * @param  Akreditasi  $akreditasi
-     * @return bool
+     * @param  string  $documentType  One of the DOC_* constants
      */
     public function canView(
         int $userId,
@@ -300,17 +299,17 @@ class AkreditasiDocumentService
         string $documentType,
         Akreditasi $akreditasi
     ): bool {
-        $isAdmin     = ($roleId === self::ROLE_ADMIN || $roleId === 4); // Super_Admin also has admin access
+        $isAdmin = ($roleId === self::ROLE_ADMIN || $roleId === 4); // Super_Admin also has admin access
         $isPesantren = ($roleId === self::ROLE_PESANTREN);
-        $isAsesor    = ($roleId === self::ROLE_ASESOR);
+        $isAsesor = ($roleId === self::ROLE_ASESOR);
 
         return match ($documentType) {
             // Kartu Kendali: only Admin can view (Req 15.1, 8.5)
             self::DOC_KARTU_KENDALI => $isAdmin,
 
             // Laporan Visitasi (all types): only Admin can view (Req 15.2, 15.3, 15.4, 8.6)
-            self::DOC_LAPORAN_VISITASI_ASESOR1  => $isAdmin,
-            self::DOC_LAPORAN_VISITASI_ASESOR2  => $isAdmin,
+            self::DOC_LAPORAN_VISITASI_ASESOR1 => $isAdmin,
+            self::DOC_LAPORAN_VISITASI_ASESOR2 => $isAdmin,
             self::DOC_LAPORAN_VISITASI_KELOMPOK => $isAdmin,
 
             // Sertifikat SK: only Pesantren can view, and only after status = 0 (Req 15.5)
@@ -328,15 +327,13 @@ class AkreditasiDocumentService
     /**
      * Return the stored file path for a document type, or null if not uploaded.
      *
-     * @param  int     $akreditasiId
      * @param  string  $documentType  One of the DOC_* constants
-     * @return string|null
      */
     public function getDocument(int $akreditasiId, string $documentType): ?string
     {
         $akreditasi = Akreditasi::find($akreditasiId);
 
-        if (!$akreditasi) {
+        if (! $akreditasi) {
             return null;
         }
 
@@ -352,7 +349,7 @@ class AkreditasiDocumentService
         int $uploaderId
     ): string {
         $errors = $this->validateFile($file, $documentType);
-        if (!empty($errors)) {
+        if (! empty($errors)) {
             throw new \DomainException(implode(' ', $errors));
         }
 

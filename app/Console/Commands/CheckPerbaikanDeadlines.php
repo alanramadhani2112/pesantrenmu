@@ -53,7 +53,7 @@ class CheckPerbaikanDeadlines extends Command
                 'reminders_sent' => $remindersSent,
             ]);
         } catch (\Throwable $e) {
-            $this->error('Failed to process perbaikan deadlines: ' . $e->getMessage());
+            $this->error('Failed to process perbaikan deadlines: '.$e->getMessage());
 
             Log::error('akreditasi:check-perbaikan-deadlines failed', [
                 'error' => $e->getMessage(),

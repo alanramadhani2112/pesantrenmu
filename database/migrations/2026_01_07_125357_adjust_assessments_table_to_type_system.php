@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::table('assessments', function (Blueprint $table) {
             // Rename asesor_id1 back to asesor_id
             $table->renameColumn('asesor_id1', 'asesor_id');
-            
+
             // Drop asesor_id2 foreign key and column
             $table->dropForeign(['asesor_id2']);
             $table->dropColumn('asesor_id2');
-            
+
             // Add tipe column
             $table->integer('tipe')->default(1)->after('asesor_id');
         });

@@ -1,7 +1,12 @@
 <?php
 
 use App\Livewire\Home;
+use App\Livewire\Pages\Admin\FailedNotificationDashboard;
+use App\Livewire\Pages\Asesor\AkreditasiDetail;
+use App\Models\Asesor;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Volt\Volt;
 
 Route::view('/', 'welcome');
@@ -83,7 +88,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])
             ->middleware('permission:pesantren.view')
             ->name('pesantren.detail');
 
-        Route::get('failed-notifications', \App\Livewire\Pages\Admin\FailedNotificationDashboard::class)
+        Route::get('failed-notifications', FailedNotificationDashboard::class)
             ->middleware('permission:notification.view')
             ->name('failed-notifications');
 
@@ -107,7 +112,7 @@ Route::middleware(['auth', 'verified', 'role:asesor'])
         Volt::route('akreditasi', 'pages.asesor.akreditasi')
             ->name('akreditasi');
 
-        Route::get('akreditasi/{uuid}', \App\Livewire\Pages\Asesor\AkreditasiDetail::class)
+        Route::get('akreditasi/{uuid}', AkreditasiDetail::class)
             ->name('akreditasi-detail');
     });
 
@@ -153,9 +158,9 @@ Route::get('secure/asesor-docs/{asesorId}/{field}', function (int $asesorId, str
         abort(404);
     }
 
-    $asesor = \App\Models\Asesor::findOrFail($asesorId);
+    $asesor = Asesor::findOrFail($asesorId);
 
-    /** @var \App\Models\User $user */
+    /** @var User $user */
     $user = auth()->user();
 
     if ($asesor->user_id !== $user->id && ! $user->canAccessAdminArea()) {
@@ -164,12 +169,12 @@ Route::get('secure/asesor-docs/{asesorId}/{field}', function (int $asesorId, str
 
     $path = $asesor->$field;
 
-    if (! $path || ! \Illuminate\Support\Facades\Storage::disk('local')->exists($path)) {
+    if (! $path || ! Storage::disk('local')->exists($path)) {
         abort(404);
     }
 
-    return \Illuminate\Support\Facades\Storage::disk('local')->response($path);
+    return Storage::disk('local')->response($path);
 })->middleware(['auth', 'verified'])->name('secure.asesor-docs');
 
-require __DIR__ . '/auth.php';
-require __DIR__ . '/sso/sso.php';
+require __DIR__.'/auth.php';
+require __DIR__.'/sso/sso.php';

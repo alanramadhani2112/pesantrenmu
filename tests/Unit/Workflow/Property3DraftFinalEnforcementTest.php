@@ -14,9 +14,8 @@ use App\Services\AssessorScoringService;
 use App\StateMachine\AkreditasiStateMachine;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use InvalidArgumentException;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 /**
  * Property-Based Test: Property 3 — Draft/Final Mode Enforcement
@@ -26,7 +25,6 @@ use PHPUnit\Framework\Attributes\Group;
  * For any value with is_final=false, modification SHALL be permitted.
  *
  * **Validates: Requirements 7.5, 7.6, 9.4, 9.6**
- *
  */
 #[Group('akreditasi-workflow-redesign')]
 class Property3DraftFinalEnforcementTest extends TestCase
@@ -50,7 +48,7 @@ class Property3DraftFinalEnforcementTest extends TestCase
      * Create 62 master butir records to satisfy the FK constraint on akreditasi_edpms.butir_id.
      * Stores the mapping from butir index (1-62) to master_edpm_butirs.id.
      */
-private function createMasterButirs(): void
+    private function createMasterButirs(): void
     {
         $komponen = MasterEdpmKomponen::firstOrCreate(['nama' => 'TEST KOMPONEN'], ['ipr' => false]);
 
@@ -58,8 +56,8 @@ private function createMasterButirs(): void
             $butir = MasterEdpmButir::firstOrCreate(
                 ['nomor_butir' => "T.{$i}"],
                 [
-                    'komponen_id'      => $komponen->id,
-                    'no_sk'            => (string) $i,
+                    'komponen_id' => $komponen->id,
+                    'no_sk' => (string) $i,
                     'butir_pernyataan' => "Butir pernyataan {$i}",
                 ]
             );
@@ -70,7 +68,7 @@ private function createMasterButirs(): void
     /**
      * Get the master_edpm_butirs.id for a given butir index (1-62).
      */
-private function getButirId(int $index): int
+    private function getButirId(int $index): int
     {
         return $this->butirIds[$index];
     }
@@ -83,51 +81,51 @@ private function getButirId(int $index): int
      * Create a scenario with akreditasi at status 2 (Pasca Visitasi),
      * two assessors, and an assessment record.
      */
-private function createScoringScenario(): array
+    private function createScoringScenario(): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
-        $asesor1User   = User::factory()->create(['role_id' => 2]);
-        $asesor2User   = User::factory()->create(['role_id' => 2]);
+        $asesor1User = User::factory()->create(['role_id' => 2]);
+        $asesor2User = User::factory()->create(['role_id' => 2]);
 
         $asesor1 = Asesor::create([
-            'user_id'           => $asesor1User->id,
+            'user_id' => $asesor1User->id,
             'nama_dengan_gelar' => 'Dr. Asesor Satu',
-            'nama_tanpa_gelar'  => 'Asesor Satu',
+            'nama_tanpa_gelar' => 'Asesor Satu',
         ]);
 
         $asesor2 = Asesor::create([
-            'user_id'           => $asesor2User->id,
+            'user_id' => $asesor2User->id,
             'nama_dengan_gelar' => 'Dr. Asesor Dua',
-            'nama_tanpa_gelar'  => 'Asesor Dua',
+            'nama_tanpa_gelar' => 'Asesor Dua',
         ]);
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status'  => AkreditasiStateMachine::STATUS_PASCA_VISITASI, // 2
+            'status' => AkreditasiStateMachine::STATUS_PASCA_VISITASI, // 2
         ]);
 
         Assessment::create([
-            'akreditasi_id'   => $akreditasi->id,
-            'asesor_id'       => $asesor1->id,
-            'tipe'            => 1,
-            'tanggal_mulai'   => now(),
+            'akreditasi_id' => $akreditasi->id,
+            'asesor_id' => $asesor1->id,
+            'tipe' => 1,
+            'tanggal_mulai' => now(),
             'tanggal_berakhir' => now()->addDays(30),
         ]);
 
         Assessment::create([
-            'akreditasi_id'   => $akreditasi->id,
-            'asesor_id'       => $asesor2->id,
-            'tipe'            => 2,
-            'tanggal_mulai'   => now(),
+            'akreditasi_id' => $akreditasi->id,
+            'asesor_id' => $asesor2->id,
+            'tipe' => 2,
+            'tanggal_mulai' => now(),
             'tanggal_berakhir' => now()->addDays(30),
         ]);
 
         return [
-            'akreditasi'      => $akreditasi,
-            'asesor1UserId'   => $asesor1User->id,   // users.id (for service calls)
-            'asesor2UserId'   => $asesor2User->id,   // users.id (for service calls)
-            'asesor1Id'       => $asesor1->id,       // asesors.id (for DB queries)
-            'asesor2Id'       => $asesor2->id,       // asesors.id (for DB queries)
+            'akreditasi' => $akreditasi,
+            'asesor1UserId' => $asesor1User->id,   // users.id (for service calls)
+            'asesor2UserId' => $asesor2User->id,   // users.id (for service calls)
+            'asesor1Id' => $asesor1->id,       // asesors.id (for DB queries)
+            'asesor2Id' => $asesor2->id,       // asesors.id (for DB queries)
             'pesantrenUserId' => $pesantrenUser->id,
         ];
     }
@@ -144,18 +142,18 @@ private function createScoringScenario(): array
      *
      * **Validates: Requirements 7.5, 7.6**
      */
-public function test_property3_final_na1_cannot_be_modified(): void
+    public function test_property3_final_na1_cannot_be_modified(): void
     {
         $iterations = 100;
 
         for ($i = 0; $i < $iterations; $i++) {
             $scenario = $this->createScoringScenario();
-            $akreditasiId  = $scenario['akreditasi']->id;
+            $akreditasiId = $scenario['akreditasi']->id;
             $asesor1UserId = $scenario['asesor1UserId'];
 
-            $butirIndex    = random_int(1, 62);
-            $butirId       = $this->getButirId($butirIndex);
-            $initialValue  = random_int(1, 4);
+            $butirIndex = random_int(1, 62);
+            $butirId = $this->getButirId($butirIndex);
+            $initialValue = random_int(1, 4);
             $modifiedValue = random_int(1, 4);
 
             // Save as Final
@@ -201,18 +199,18 @@ public function test_property3_final_na1_cannot_be_modified(): void
      *
      * **Validates: Requirements 7.5**
      */
-public function test_property3_draft_na1_can_be_modified(): void
+    public function test_property3_draft_na1_can_be_modified(): void
     {
         $iterations = 100;
 
         for ($i = 0; $i < $iterations; $i++) {
             $scenario = $this->createScoringScenario();
-            $akreditasiId  = $scenario['akreditasi']->id;
+            $akreditasiId = $scenario['akreditasi']->id;
             $asesor1UserId = $scenario['asesor1UserId'];
 
-            $butirIndex    = random_int(1, 62);
-            $butirId       = $this->getButirId($butirIndex);
-            $initialValue  = random_int(1, 4);
+            $butirIndex = random_int(1, 62);
+            $butirId = $this->getButirId($butirIndex);
+            $initialValue = random_int(1, 4);
             $modifiedValue = random_int(1, 4);
 
             // Save as Draft
@@ -228,7 +226,7 @@ public function test_property3_draft_na1_can_be_modified(): void
 
             $this->assertNull(
                 $exception,
-                "Iteration {$i}: Modifying Draft NA1 (butir={$butirId}) should succeed, but threw: " .
+                "Iteration {$i}: Modifying Draft NA1 (butir={$butirId}) should succeed, but threw: ".
                 ($exception ? $exception->getMessage() : 'no exception')
             );
 
@@ -259,18 +257,18 @@ public function test_property3_draft_na1_can_be_modified(): void
      *
      * **Validates: Requirements 7.5, 7.6**
      */
-public function test_property3_final_na2_cannot_be_modified(): void
+    public function test_property3_final_na2_cannot_be_modified(): void
     {
         $iterations = 100;
 
         for ($i = 0; $i < $iterations; $i++) {
             $scenario = $this->createScoringScenario();
-            $akreditasiId  = $scenario['akreditasi']->id;
+            $akreditasiId = $scenario['akreditasi']->id;
             $asesor2UserId = $scenario['asesor2UserId'];
 
-            $butirIndex    = random_int(1, 62);
-            $butirId       = $this->getButirId($butirIndex);
-            $initialValue  = random_int(1, 4);
+            $butirIndex = random_int(1, 62);
+            $butirId = $this->getButirId($butirIndex);
+            $initialValue = random_int(1, 4);
             $modifiedValue = random_int(1, 4);
 
             // Save NA2 as Final
@@ -315,20 +313,20 @@ public function test_property3_final_na2_cannot_be_modified(): void
      *
      * **Validates: Requirements 7.5, 7.6**
      */
-public function test_property3_biconditional_final_rejects_draft_permits(): void
+    public function test_property3_biconditional_final_rejects_draft_permits(): void
     {
         $iterations = 100;
 
         for ($i = 0; $i < $iterations; $i++) {
             $scenario = $this->createScoringScenario();
-            $akreditasiId  = $scenario['akreditasi']->id;
+            $akreditasiId = $scenario['akreditasi']->id;
             $asesor1UserId = $scenario['asesor1UserId'];
 
-            $butirIndex   = random_int(1, 62);
-            $butirId      = $this->getButirId($butirIndex);
+            $butirIndex = random_int(1, 62);
+            $butirId = $this->getButirId($butirIndex);
             $initialValue = random_int(1, 4);
-            $newValue     = random_int(1, 4);
-            $saveAsFinal  = (bool) random_int(0, 1);
+            $newValue = random_int(1, 4);
+            $saveAsFinal = (bool) random_int(0, 1);
 
             // Save with chosen finality
             $this->scoringService->saveNA($akreditasiId, $asesor1UserId, $butirId, $initialValue, $saveAsFinal);
@@ -349,7 +347,7 @@ public function test_property3_biconditional_final_rejects_draft_permits(): void
             } else {
                 $this->assertNull(
                     $exception,
-                    "Iteration {$i}: Draft value (butir={$butirId}) modification should be permitted, but threw: " .
+                    "Iteration {$i}: Draft value (butir={$butirId}) modification should be permitted, but threw: ".
                     ($exception ? $exception->getMessage() : 'no exception')
                 );
             }
@@ -368,19 +366,19 @@ public function test_property3_biconditional_final_rejects_draft_permits(): void
      *
      * **Validates: Requirements 7.5, 7.6**
      */
-public function test_property3_draft_can_be_promoted_to_final(): void
+    public function test_property3_draft_can_be_promoted_to_final(): void
     {
         $iterations = 100;
 
         for ($i = 0; $i < $iterations; $i++) {
             $scenario = $this->createScoringScenario();
-            $akreditasiId  = $scenario['akreditasi']->id;
+            $akreditasiId = $scenario['akreditasi']->id;
             $asesor1UserId = $scenario['asesor1UserId'];
 
-            $butirIndex   = random_int(1, 62);
-            $butirId      = $this->getButirId($butirIndex);
-            $draftValue   = random_int(1, 4);
-            $finalValue   = random_int(1, 4);
+            $butirIndex = random_int(1, 62);
+            $butirId = $this->getButirId($butirIndex);
+            $draftValue = random_int(1, 4);
+            $finalValue = random_int(1, 4);
 
             // Step 1: Save as Draft
             $this->scoringService->saveNA($akreditasiId, $asesor1UserId, $butirId, $draftValue, false);
@@ -395,7 +393,7 @@ public function test_property3_draft_can_be_promoted_to_final(): void
 
             $this->assertNull(
                 $exception,
-                "Iteration {$i}: Promoting Draft to Final should succeed, but threw: " .
+                "Iteration {$i}: Promoting Draft to Final should succeed, but threw: ".
                 ($exception ? $exception->getMessage() : 'no exception')
             );
 

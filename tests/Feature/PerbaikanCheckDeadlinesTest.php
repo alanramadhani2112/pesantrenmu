@@ -24,13 +24,14 @@ class PerbaikanCheckDeadlinesTest extends TestCase
     /**
      * Helper: create a pesantren user with basic data.
      */
-private function createPesantrenUser(): User
+    private function createPesantrenUser(): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
             'user_id' => $user->id,
-            'nama_pesantren' => 'Pesantren Perbaikan Test ' . $user->id,
+            'nama_pesantren' => 'Pesantren Perbaikan Test '.$user->id,
         ]);
+
         return $user;
     }
 
@@ -38,7 +39,7 @@ private function createPesantrenUser(): User
      * Test: command calls RejectionService::processDeadlines() and outputs summary
      * with reminders sent and auto-rejected count.
      */
-public function test_command_calls_process_deadlines_and_outputs_summary(): void
+    public function test_command_calls_process_deadlines_and_outputs_summary(): void
     {
         Notification::fake();
 
@@ -92,7 +93,7 @@ public function test_command_calls_process_deadlines_and_outputs_summary(): void
     /**
      * Test: command exits successfully with no pending rejections.
      */
-public function test_command_exits_successfully_with_no_pending_deadlines(): void
+    public function test_command_exits_successfully_with_no_pending_deadlines(): void
     {
         Notification::fake();
 

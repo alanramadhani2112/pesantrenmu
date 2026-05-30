@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\Ipm;
 use App\Models\Edpm;
+use App\Models\Ipm;
 use App\Models\MasterEdpmButir;
 use App\Models\MasterEdpmKomponen;
 use App\Models\Pesantren;

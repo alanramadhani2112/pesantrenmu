@@ -2,10 +2,13 @@
 
 namespace App\Services;
 
-use App\Exceptions\InvalidTransitionException;
+use App\Events\AsesorAssigned;
+use App\Events\AsesorPackageSubmitted;
+use App\Events\PerbaikanRequested;
 use App\Events\ScoringCompleted;
 use App\Events\SKIssued;
 use App\Events\VisitasiScheduled;
+use App\Exceptions\InvalidTransitionException;
 use App\Models\Akreditasi;
 use App\Models\AkreditasiEdpm;
 use App\Models\AkreditasiEdpmCatatan;
@@ -16,19 +19,18 @@ use App\Models\Pesantren;
 use App\Models\User;
 use App\Notifications\AkreditasiNotification;
 use App\Repositories\Contracts\AkreditasiRepositoryInterface;
-use App\StateMachine\AkreditasiStateMachine;
 use App\Services\Concerns\ChecksOptimisticLock;
+use App\StateMachine\AkreditasiStateMachine;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
-use App\Services\ScoreCalculationService;
 
 /**
  * AkreditasiWorkflowService
  *
  * Orchestrates business logic for each workflow step of the akreditasi process.
- * Delegates to sub-services for specific concerns (rejection, banding, resubmission, etc.)
+ * Delegates to sub-services for specific concerns (rejection, banding, documents, scoring, etc.)
  * and uses AkreditasiStateMachine for all status transitions.
  *
  * Task 9: WorkflowService Pengajuan & Verifikasi — Req 2.1-2.6, 3.1-3.8
@@ -42,10 +44,10 @@ class AkreditasiWorkflowService
         protected AkreditasiRepositoryInterface $akreditasiRepository,
         protected RejectionService $rejectionService,
         protected BandingService $bandingService,
-        protected ResubmissionService $resubmissionService,
         protected DocumentService $documentService,
         protected ScoreCalculationService $scoreCalculationService,
         protected PesantrenService $pesantrenService,
+        protected AuditTrailService $auditTrailService,
     ) {}
 
     // =========================================================================
@@ -64,10 +66,10 @@ class AkreditasiWorkflowService
      *  - Locks pesantren data (is_locked = true)
      *  - Dispatches notification to all Admin users
      *
-     * @param int $pesantrenUserId  The user_id of the pesantren submitting
-     * @return Akreditasi           The newly created akreditasi record
+     * @param  int  $pesantrenUserId  The user_id of the pesantren submitting
+     * @return Akreditasi The newly created akreditasi record
      *
-     * @throws \DomainException     When validation fails or active akreditasi exists
+     * @throws \DomainException When validation fails or active akreditasi exists
      *
      * Validates Requirements 2.1, 2.2, 2.3, 2.4, 2.5, 2.6
      */
@@ -75,9 +77,9 @@ class AkreditasiWorkflowService
     {
         // Req 2.1, 2.2: Validate all mandatory fields in all required sections
         $missingFields = $this->pesantrenService->checkDataCompleteness($pesantrenUserId);
-        if (!empty($missingFields)) {
+        if (! empty($missingFields)) {
             throw new \DomainException(
-                'Data tidak lengkap. Bagian yang belum terisi: ' . implode('; ', $missingFields)
+                'Data tidak lengkap. Bagian yang belum terisi: '.implode('; ', $missingFields)
             );
         }
 
@@ -121,19 +123,16 @@ class AkreditasiWorkflowService
     /**
      * Admin opens a pengajuan for review, transitioning status 6 → 5.
      *
-     * @param int $akreditasiId
-     * @param int $adminId
-     * @return void
      *
-     * @throws \DomainException             When akreditasi not found or not at status 6
-     * @throws InvalidTransitionException   When transition is not permitted
+     * @throws \DomainException When akreditasi not found or not at status 6
+     * @throws InvalidTransitionException When transition is not permitted
      *
      * Validates Requirement 3.1
      */
     public function openForReview(int $akreditasiId, int $adminId): void
     {
         $akreditasi = $this->akreditasiRepository->find($akreditasiId);
-        if (!$akreditasi) {
+        if (! $akreditasi) {
             throw new \DomainException("Akreditasi #{$akreditasiId} tidak ditemukan.");
         }
 
@@ -165,14 +164,11 @@ class AkreditasiWorkflowService
      *  - Transitions status 5 → 4
      *  - Notifies Pesantren, Asesor_1, Asesor_2 (Req 3.5)
      *
-     * @param int $akreditasiId
-     * @param int $adminId
-     * @param int $asesor1Id     Asesor user_id for Asesor_1 (tipe=1)
-     * @param int $asesor2Id     Asesor user_id for Asesor_2 (tipe=2)
-     * @return void
+     * @param  int  $asesor1Id  Asesor user_id for Asesor_1 (tipe=1)
+     * @param  int  $asesor2Id  Asesor user_id for Asesor_2 (tipe=2)
      *
-     * @throws \DomainException             When validation fails
-     * @throws InvalidTransitionException   When transition is not permitted
+     * @throws \DomainException When validation fails
+     * @throws InvalidTransitionException When transition is not permitted
      *
      * Validates Requirements 3.2, 3.3, 3.4, 3.5
      */
@@ -186,7 +182,7 @@ class AkreditasiWorkflowService
         }
 
         $akreditasi = $this->akreditasiRepository->find($akreditasiId);
-        if (!$akreditasi) {
+        if (! $akreditasi) {
             throw new \DomainException("Akreditasi #{$akreditasiId} tidak ditemukan.");
         }
 
@@ -200,10 +196,10 @@ class AkreditasiWorkflowService
         $asesor1 = Asesor::where('user_id', $asesor1Id)->first();
         $asesor2 = Asesor::where('user_id', $asesor2Id)->first();
 
-        if (!$asesor1) {
+        if (! $asesor1) {
             throw new \DomainException("Asesor_1 dengan user_id={$asesor1Id} tidak ditemukan.");
         }
-        if (!$asesor2) {
+        if (! $asesor2) {
             throw new \DomainException("Asesor_2 dengan user_id={$asesor2Id} tidak ditemukan.");
         }
 
@@ -213,13 +209,18 @@ class AkreditasiWorkflowService
             // Remove any existing assessments for this akreditasi
             Assessment::where('akreditasi_id', $akreditasiId)->delete();
 
+            $tanggalMulai = now();
+            $tanggalBerakhir = $tanggalMulai->copy()->addDays(
+                (int) config('akreditasi-timeout.assessment.default_duration_days', 30)
+            );
+
             // Create Assessment for Asesor_1 (tipe=1)
             Assessment::create([
                 'akreditasi_id' => $akreditasiId,
                 'asesor_id' => $asesor1->id,
                 'tipe' => 1,
-                'tanggal_mulai' => now(),
-                'tanggal_berakhir' => now()->addDays(30),
+                'tanggal_mulai' => $tanggalMulai,
+                'tanggal_berakhir' => $tanggalBerakhir,
             ]);
 
             // Create Assessment for Asesor_2 (tipe=2)
@@ -227,16 +228,42 @@ class AkreditasiWorkflowService
                 'akreditasi_id' => $akreditasiId,
                 'asesor_id' => $asesor2->id,
                 'tipe' => 2,
-                'tanggal_mulai' => now(),
-                'tanggal_berakhir' => now()->addDays(30),
+                'tanggal_mulai' => $tanggalMulai,
+                'tanggal_berakhir' => $tanggalBerakhir,
             ]);
 
             // Req 3.4: Transition 5 → 4 via state machine
             $this->stateMachine->transition($akreditasi, AkreditasiStateMachine::STATUS_ASSESSMENT, $adminUser);
+
+            $this->auditTrailService->log(
+                akreditasiId: $akreditasiId,
+                actionType: 'asesor_assigned',
+                newValue: $asesor1->nama_dengan_gelar.'; '.$asesor2->nama_dengan_gelar,
+                metadata: [
+                    'asesor_1_id' => $asesor1->id,
+                    'asesor_1_user_id' => $asesor1->user_id,
+                    'asesor_2_id' => $asesor2->id,
+                    'asesor_2_user_id' => $asesor2->user_id,
+                ],
+            );
+
+            $this->auditTrailService->log(
+                akreditasiId: $akreditasiId,
+                actionType: 'approved',
+                newValue: 'Berkas disetujui dan tim asesor ditugaskan.',
+                metadata: ['stage' => 'verifikasi_berkas'],
+            );
         });
 
         // Req 3.5: Notify Pesantren, Asesor_1, Asesor_2 (after transaction)
         $this->notifyApproveBerkas($akreditasi, $asesor1, $asesor2);
+
+        // Dispatch AsesorAssigned event for notification system
+        $asesor1User = User::find($asesor1->user_id);
+        $asesor2User = User::find($asesor2->user_id);
+        if ($asesor1User && $asesor2User) {
+            event(new AsesorAssigned($akreditasi, $asesor1User, $asesor2User));
+        }
     }
 
     // =========================================================================
@@ -248,12 +275,9 @@ class AkreditasiWorkflowService
      *
      * Delegates structured rejection logic to RejectionService::rejectBerkas().
      *
-     * @param int   $akreditasiId
-     * @param int   $adminId
-     * @param array $rejectionData  ['sections' => [...], 'catatan' => '...']
-     * @return void
+     * @param  array  $rejectionData  ['sections' => [...], 'catatan' => '...']
      *
-     * @throws \DomainException  When rejection fails
+     * @throws \DomainException When rejection fails
      *
      * Validates Requirements 3.6, 3.7, 3.8
      */
@@ -261,16 +285,16 @@ class AkreditasiWorkflowService
     {
         $result = $this->rejectionService->rejectBerkas($akreditasiId, $adminId, $rejectionData);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             $errorMessages = [
-                'invalid_status'    => 'Akreditasi tidak berada pada status Verifikasi Berkas.',
-                'unauthorized'      => 'Hanya Admin yang dapat menolak berkas.',
+                'invalid_status' => 'Akreditasi tidak berada pada status Verifikasi Berkas.',
+                'unauthorized' => 'Hanya Admin yang dapat menolak berkas.',
                 'sections_required' => 'Minimal satu bagian harus dipilih untuk penolakan.',
-                'catatan_required'  => 'Catatan penolakan wajib diisi.',
-                'catatan_too_long'  => 'Catatan penolakan tidak boleh melebihi 2000 karakter.',
+                'catatan_required' => 'Catatan penolakan wajib diisi.',
+                'catatan_too_long' => 'Catatan penolakan tidak boleh melebihi 2000 karakter.',
             ];
 
-            $message = $errorMessages[$result['error']] ?? ('Penolakan berkas gagal: ' . $result['error']);
+            $message = $errorMessages[$result['error']] ?? ('Penolakan berkas gagal: '.$result['error']);
             throw new \DomainException($message);
         }
     }
@@ -287,8 +311,8 @@ class AkreditasiWorkflowService
     public function createDocumentRejection(int $akreditasiId, int $asesor1Id, array $items, string $explanation): void
     {
         $result = $this->rejectionService->createDocumentRejection($akreditasiId, $asesor1Id, $items, $explanation);
-        if (!$result['success']) {
-            throw new \DomainException('Penolakan dokumen gagal: ' . ($result['error'] ?? 'unknown'));
+        if (! $result['success']) {
+            throw new \DomainException('Penolakan dokumen gagal: '.($result['error'] ?? 'unknown'));
         }
     }
 
@@ -300,8 +324,8 @@ class AkreditasiWorkflowService
     public function submitPerbaikan(int $akreditasiId, int $pesantrenId): void
     {
         $result = $this->rejectionService->submitPerbaikan($akreditasiId, $pesantrenId);
-        if (!$result['success']) {
-            throw new \DomainException('Submit perbaikan gagal: ' . ($result['error'] ?? 'unknown'));
+        if (! $result['success']) {
+            throw new \DomainException('Submit perbaikan gagal: '.($result['error'] ?? 'unknown'));
         }
     }
 
@@ -325,19 +349,16 @@ class AkreditasiWorkflowService
      *  - Transitions 4 → 3 via AkreditasiStateMachine
      *  - Notifies Pesantren and Admin with schedule details (Req 5.5)
      *
-     * @param int   $akreditasiId
-     * @param int   $asesor1Id
-     * @param array $scheduleData  ['tanggal_mulai' => 'Y-m-d', 'tanggal_akhir' => 'Y-m-d', 'catatan_visitasi' => '...']
-     * @return void
+     * @param  array  $scheduleData  ['tanggal_mulai' => 'Y-m-d', 'tanggal_akhir' => 'Y-m-d', 'catatan_visitasi' => '...']
      *
-     * @throws \DomainException  When validation fails
+     * @throws \DomainException When validation fails
      *
      * Validates Requirements 5.1, 5.2, 5.3, 5.4, 5.5
      */
     public function scheduleVisitasi(int $akreditasiId, int $asesor1Id, array $scheduleData): void
     {
         $akreditasi = $this->akreditasiRepository->find($akreditasiId);
-        if (!$akreditasi) {
+        if (! $akreditasi) {
             throw new \DomainException("Akreditasi #{$akreditasiId} tidak ditemukan.");
         }
 
@@ -354,7 +375,7 @@ class AkreditasiWorkflowService
             ->where('tipe', 1)
             ->exists();
 
-        if (!$isAsesor1) {
+        if (! $isAsesor1) {
             throw new \DomainException(
                 'Hanya Ketua Kelompok yang ditugaskan yang dapat menjadwalkan visitasi.'
             );
@@ -376,9 +397,9 @@ class AkreditasiWorkflowService
         DB::transaction(function () use ($akreditasi, $tanggalMulai, $tanggalAkhir, $catatan, $asesor1User) {
             // Save schedule data to akreditasi
             $akreditasi->update([
-                'tgl_visitasi'      => $tanggalMulai,
+                'tgl_visitasi' => $tanggalMulai,
                 'tgl_visitasi_akhir' => $tanggalAkhir,
-                'catatan_visitasi'  => $catatan,
+                'catatan_visitasi' => $catatan,
             ]);
 
             // Transition 4 → 3 via state machine
@@ -390,8 +411,8 @@ class AkreditasiWorkflowService
 
         // Task 12.3: Dispatch VisitasiScheduled event for extensibility
         event(new VisitasiScheduled($akreditasi, [
-            'tanggal_mulai'    => $tanggalMulai,
-            'tanggal_akhir'    => $tanggalAkhir,
+            'tanggal_mulai' => $tanggalMulai,
+            'tanggal_akhir' => $tanggalAkhir,
             'catatan_visitasi' => $catatan,
         ], isReschedule: false));
     }
@@ -414,19 +435,16 @@ class AkreditasiWorkflowService
      *  - Updates tgl_visitasi, tgl_visitasi_akhir, catatan_visitasi on akreditasi
      *  - Notifies Pesantren and Admin with updated schedule (Req 5.8)
      *
-     * @param int   $akreditasiId
-     * @param int   $asesor1Id
-     * @param array $scheduleData  ['tanggal_mulai' => 'Y-m-d', 'tanggal_akhir' => 'Y-m-d', 'catatan_visitasi' => '...']
-     * @return void
+     * @param  array  $scheduleData  ['tanggal_mulai' => 'Y-m-d', 'tanggal_akhir' => 'Y-m-d', 'catatan_visitasi' => '...']
      *
-     * @throws \DomainException  When validation fails
+     * @throws \DomainException When validation fails
      *
      * Validates Requirements 5.6, 5.7, 5.8, 5.9
      */
     public function rescheduleVisitasi(int $akreditasiId, int $asesor1Id, array $scheduleData): void
     {
         $akreditasi = $this->akreditasiRepository->find($akreditasiId);
-        if (!$akreditasi) {
+        if (! $akreditasi) {
             throw new \DomainException("Akreditasi #{$akreditasiId} tidak ditemukan.");
         }
 
@@ -443,7 +461,7 @@ class AkreditasiWorkflowService
             ->where('tipe', 1)
             ->exists();
 
-        if (!$isAsesor1) {
+        if (! $isAsesor1) {
             throw new \DomainException(
                 'Hanya Ketua Kelompok yang ditugaskan yang dapat menjadwalkan ulang visitasi.'
             );
@@ -452,8 +470,8 @@ class AkreditasiWorkflowService
         // Req 5.6, 5.9: Validate H-7 window — current date must be at least 7 days before tanggal_mulai
         $currentTanggalMulai = $akreditasi->tgl_visitasi;
         if ($currentTanggalMulai) {
-            $mulaiDate = \Carbon\Carbon::parse($currentTanggalMulai)->startOfDay();
-            $today = \Carbon\Carbon::today();
+            $mulaiDate = Carbon::parse($currentTanggalMulai)->startOfDay();
+            $today = Carbon::today();
             $daysUntilVisitasi = $today->diffInDays($mulaiDate, false);
 
             if ($daysUntilVisitasi < 7) {
@@ -477,9 +495,9 @@ class AkreditasiWorkflowService
 
         // Update schedule data on akreditasi
         $akreditasi->update([
-            'tgl_visitasi'       => $tanggalMulai,
+            'tgl_visitasi' => $tanggalMulai,
             'tgl_visitasi_akhir' => $tanggalAkhir,
-            'catatan_visitasi'   => $catatan,
+            'catatan_visitasi' => $catatan,
         ]);
 
         // Req 5.8: Notify Pesantren and Admin with updated schedule (after update)
@@ -487,8 +505,8 @@ class AkreditasiWorkflowService
 
         // Task 12.3: Dispatch VisitasiScheduled event for extensibility
         event(new VisitasiScheduled($akreditasi, [
-            'tanggal_mulai'    => $tanggalMulai,
-            'tanggal_akhir'    => $tanggalAkhir,
+            'tanggal_mulai' => $tanggalMulai,
+            'tanggal_akhir' => $tanggalAkhir,
             'catatan_visitasi' => $catatan,
         ], isReschedule: true));
     }
@@ -510,18 +528,15 @@ class AkreditasiWorkflowService
      *  - Transitions 3 → 2 via AkreditasiStateMachine
      *  - Notifies Admin, Asesor_2, Pesantren (Req 6.4)
      *
-     * @param int $akreditasiId
-     * @param int $asesor1Id
-     * @return void
      *
-     * @throws \DomainException  When validation fails
+     * @throws \DomainException When validation fails
      *
      * Validates Requirements 6.2, 6.3, 6.4, 6.6, 6.7
      */
     public function confirmVisitasiSelesai(int $akreditasiId, int $asesor1Id): void
     {
         $akreditasi = $this->akreditasiRepository->find($akreditasiId);
-        if (!$akreditasi) {
+        if (! $akreditasi) {
             throw new \DomainException("Akreditasi #{$akreditasiId} tidak ditemukan.");
         }
 
@@ -538,7 +553,7 @@ class AkreditasiWorkflowService
             ->where('tipe', 1)
             ->exists();
 
-        if (!$isAsesor1) {
+        if (! $isAsesor1) {
             throw new \DomainException(
                 'Hanya Ketua Kelompok yang ditugaskan yang dapat mengonfirmasi visitasi selesai.'
             );
@@ -547,13 +562,13 @@ class AkreditasiWorkflowService
         // Req 6.2, 6.6: Validate current date ≥ tgl_visitasi (tanggal_mulai)
         $tanggalMulai = $akreditasi->tgl_visitasi;
         if ($tanggalMulai) {
-            $mulaiDate = \Carbon\Carbon::parse($tanggalMulai)->startOfDay();
-            $today = \Carbon\Carbon::today();
+            $mulaiDate = Carbon::parse($tanggalMulai)->startOfDay();
+            $today = Carbon::today();
 
             if ($today->lt($mulaiDate)) {
                 throw new \DomainException(
-                    'Visitasi belum dapat dikonfirmasi selesai. Periode visitasi belum dimulai (tanggal mulai: ' .
-                    $mulaiDate->format('d/m/Y') . ').'
+                    'Visitasi belum dapat dikonfirmasi selesai. Periode visitasi belum dimulai (tanggal mulai: '.
+                    $mulaiDate->format('d/m/Y').').'
                 );
             }
         }
@@ -561,13 +576,15 @@ class AkreditasiWorkflowService
         $asesor1User = User::findOrFail($asesor1Id);
 
         DB::transaction(function () use ($akreditasi, $asesor1User) {
+            // Transition 3 → 2 via state machine.
+            // Keep the transition as the first write so its optimistic lock
+            // checks the row state loaded at the start of this action.
+            $this->stateMachine->transition($akreditasi, AkreditasiStateMachine::STATUS_PASCA_VISITASI, $asesor1User);
+
             // Req 6.3: Record visitasi_confirmed_at = now()
             $akreditasi->update([
                 'visitasi_confirmed_at' => now(),
             ]);
-
-            // Transition 3 → 2 via state machine
-            $this->stateMachine->transition($akreditasi, AkreditasiStateMachine::STATUS_PASCA_VISITASI, $asesor1User);
         });
 
         // Req 6.4: Notify Admin, Asesor_2, Pesantren (after transaction)
@@ -596,18 +613,15 @@ class AkreditasiWorkflowService
      *  - Transitions 2 → 1 via AkreditasiStateMachine
      *  - Notifies Admin
      *
-     * @param int $akreditasiId
-     * @param int $asesor1Id
-     * @return void
      *
-     * @throws \DomainException  When any precondition fails
+     * @throws \DomainException When any precondition fails
      *
      * Validates Requirements 7.11, 7.13, 7.14, 8.10
      */
     public function finalizeAssessorScoring(int $akreditasiId, int $asesor1Id): void
     {
         $akreditasi = $this->akreditasiRepository->find($akreditasiId);
-        if (!$akreditasi) {
+        if (! $akreditasi) {
             throw new \DomainException("Akreditasi #{$akreditasiId} tidak ditemukan.");
         }
 
@@ -623,7 +637,7 @@ class AkreditasiWorkflowService
             ->where('tipe', 1)
             ->first();
 
-        if (!$asesor1Assessment) {
+        if (! $asesor1Assessment) {
             throw new \DomainException('Hanya Ketua Kelompok yang ditugaskan yang dapat memfinalisasi penilaian.');
         }
 
@@ -635,7 +649,7 @@ class AkreditasiWorkflowService
             ->with('asesor')
             ->first();
 
-        if (!$asesor2Assessment || !$asesor2Assessment->asesor) {
+        if (! $asesor2Assessment || ! $asesor2Assessment->asesor) {
             throw new \DomainException('Anggota Kelompok tidak ditemukan untuk akreditasi ini.');
         }
 
@@ -713,7 +727,7 @@ class AkreditasiWorkflowService
         DB::transaction(function () use ($akreditasi, $asesor1User) {
             // Set both finalization flags
             $akreditasi->update([
-                'is_nilai_asesor_final'  => true,
+                'is_nilai_asesor_final' => true,
                 'is_nilai_asesor2_final' => true,
             ]);
 
@@ -726,6 +740,9 @@ class AkreditasiWorkflowService
 
         // Task 12.3: Dispatch ScoringCompleted event for extensibility
         event(new ScoringCompleted($akreditasi));
+
+        // Dispatch AsesorPackageSubmitted event for notification system
+        event(new AsesorPackageSubmitted($akreditasi));
     }
 
     // =========================================================================
@@ -750,25 +767,22 @@ class AkreditasiWorkflowService
      *  - Transitions 1 → 0 via AkreditasiStateMachine
      *  - Notifies Pesantren with nilai_akhir, peringkat, nomor_sk
      *
-     * @param int   $akreditasiId
-     * @param int   $adminId
-     * @param array $skData  [
-     *   'nomor_sk'                 => string,
-     *   'masa_berlaku'             => 'Y-m-d',
-     *   'masa_berlaku_akhir'       => 'Y-m-d',
-     *   'sertifikat_path'          => string,
-     *   'catatan_rekomendasi_admin'=> string (optional),
-     * ]
-     * @return void
+     * @param  array  $skData  [
+     *                         'nomor_sk'                 => string,
+     *                         'masa_berlaku'             => 'Y-m-d',
+     *                         'masa_berlaku_akhir'       => 'Y-m-d',
+     *                         'sertifikat_path'          => string,
+     *                         'catatan_rekomendasi_admin'=> string (optional),
+     *                         ]
      *
-     * @throws \DomainException  When any precondition or validation fails
+     * @throws \DomainException When any precondition or validation fails
      *
      * Validates Requirements 11.1-11.8
      */
     public function issueSK(int $akreditasiId, int $adminId, array $skData): void
     {
         $akreditasi = $this->akreditasiRepository->find($akreditasiId);
-        if (!$akreditasi) {
+        if (! $akreditasi) {
             throw new \DomainException("Akreditasi #{$akreditasiId} tidak ditemukan.");
         }
 
@@ -818,7 +832,7 @@ class AkreditasiWorkflowService
             throw new \DomainException('Masa berlaku akhir wajib diisi.');
         }
         $masaBerlakuAkhir = Carbon::parse($masaBerlakuAkhirRaw)->startOfDay();
-        if (!$masaBerlakuAkhir->gt($masaBerlaku)) {
+        if (! $masaBerlakuAkhir->gt($masaBerlaku)) {
             throw new \DomainException('Masa berlaku akhir harus setelah masa berlaku.');
         }
 
@@ -860,12 +874,12 @@ class AkreditasiWorkflowService
         }
 
         $scoreResult = $this->scoreCalculationService->calculateAll([
-            'ik'  => $ikByKomponen,
+            'ik' => $ikByKomponen,
             'ipr' => $iprNvFlat,
         ]);
 
         $nilaiAkhir = $scoreResult['nilai_akhir'];
-        $peringkat  = $scoreResult['peringkat'];
+        $peringkat = $scoreResult['peringkat'];
 
         $adminUser = User::findOrFail($adminId);
 
@@ -875,18 +889,30 @@ class AkreditasiWorkflowService
         ) {
             // Set is_nv_final=true and save SK data
             $akreditasi->update([
-                'is_nv_final'               => true,
-                'nomor_sk'                  => $nomorSk,
-                'masa_berlaku'              => $masaBerlaku->toDateString(),
-                'masa_berlaku_akhir'        => $masaBerlakuAkhir->toDateString(),
-                'sertifikat_path'           => $sertifikatPath,
+                'is_nv_final' => true,
+                'nomor_sk' => $nomorSk,
+                'masa_berlaku' => $masaBerlaku->toDateString(),
+                'masa_berlaku_akhir' => $masaBerlakuAkhir->toDateString(),
+                'sertifikat_path' => $sertifikatPath,
                 'catatan_rekomendasi_admin' => $catatanRekomendasiAdmin,
-                'nilai'                     => $nilaiAkhir,
-                'peringkat'                 => $peringkat,
+                'nilai' => $nilaiAkhir,
+                'peringkat' => $peringkat,
             ]);
 
             // Transition 1 → 0 via state machine
             $this->stateMachine->transition($akreditasi, AkreditasiStateMachine::STATUS_SELESAI, $adminUser);
+
+            $this->auditTrailService->log(
+                akreditasiId: $akreditasi->id,
+                actionType: 'approved',
+                newValue: 'Akreditasi disetujui dan SK diterbitkan.',
+                metadata: [
+                    'stage' => 'validasi_admin',
+                    'nomor_sk' => $nomorSk,
+                    'nilai' => $nilaiAkhir,
+                    'peringkat' => $peringkat,
+                ],
+            );
         });
 
         // Req 11.5: Notify Pesantren with nilai_akhir, peringkat, nomor_sk (after transaction)
@@ -910,12 +936,9 @@ class AkreditasiWorkflowService
      *  - Creates AkreditasiRejection with type='admin_final'
      *  - Transitions 1 → -1 via AkreditasiStateMachine
      *
-     * @param int    $akreditasiId
-     * @param int    $adminId
-     * @param string $reason  Rejection reason (required, max 2000 chars)
-     * @return void
+     * @param  string  $reason  Rejection reason (required, max 2000 chars)
      *
-     * @throws \DomainException  When validation fails
+     * @throws \DomainException When validation fails
      *
      * Validates Requirement 11.6
      */
@@ -925,8 +948,7 @@ class AkreditasiWorkflowService
         string $reason,
         string $clientUpdatedAt = '',
         ?array $categories = null,
-    ): void
-    {
+    ): void {
         if (empty(trim($reason))) {
             throw new \DomainException('Alasan penolakan wajib diisi.');
         }
@@ -936,7 +958,7 @@ class AkreditasiWorkflowService
         }
 
         $akreditasi = $this->akreditasiRepository->find($akreditasiId);
-        if (!$akreditasi) {
+        if (! $akreditasi) {
             throw new \DomainException("Akreditasi #{$akreditasiId} tidak ditemukan.");
         }
 
@@ -957,16 +979,49 @@ class AkreditasiWorkflowService
             // Create AkreditasiRejection with type='admin_final'
             AkreditasiRejection::create([
                 'akreditasi_id' => $akreditasi->id,
-                'user_id'       => $adminId,
-                'type'          => 'admin_final',
-                'explanation'   => $reason,
-                'categories'    => $categories,
-                'status'        => 'final',
+                'user_id' => $adminId,
+                'type' => 'admin_final',
+                'explanation' => $reason,
+                'categories' => $categories,
+                'status' => 'final',
             ]);
 
             // Transition 1 → -1 via state machine
             $this->stateMachine->transition($akreditasi, AkreditasiStateMachine::STATUS_DITOLAK, $adminUser);
+            $this->auditTrailService->log(
+                akreditasiId: $akreditasi->id,
+                actionType: 'rejected',
+                oldValue: Akreditasi::getStatusLabel(AkreditasiStateMachine::STATUS_VALIDASI_ADMIN),
+                newValue: Akreditasi::getStatusLabel(AkreditasiStateMachine::STATUS_DITOLAK),
+                metadata: [
+                    'stage' => 'validasi_admin',
+                    'reason' => $reason,
+                    'categories' => $categories,
+                ],
+            );
+            Pesantren::where('user_id', $akreditasi->user_id)->update(['is_locked' => false]);
         });
+
+        $categorySummary = collect($categories ?? [])
+            ->map(function (array $entry): string {
+                $category = $entry['category'] ?? '';
+                $label = config('akreditasi.final_rejection_categories.'.$category, $category);
+                $explanation = $entry['explanation'] ?? '';
+
+                return trim($label.($explanation !== '' ? ': '.$explanation : ''));
+            })
+            ->filter()
+            ->implode('; ');
+
+        $pesantrenUser = User::find($akreditasi->user_id);
+        if ($pesantrenUser) {
+            $pesantrenUser->notify(new AkreditasiNotification(
+                'final_rejection',
+                'Akreditasi Ditolak',
+                'Akreditasi ditolak pada tahap validasi admin.'.($categorySummary !== '' ? ' Catatan validasi: '.$categorySummary : ' Catatan: '.$reason),
+                '#'
+            ));
+        }
     }
 
     /**
@@ -976,8 +1031,8 @@ class AkreditasiWorkflowService
     public function submitBanding(int $akreditasiId, int $pesantrenId, string $alasan): void
     {
         $result = $this->bandingService->submitBanding($akreditasiId, $pesantrenId, $alasan);
-        if (!$result['success']) {
-            throw new \DomainException('Submit banding gagal: ' . ($result['error'] ?? 'unknown'));
+        if (! $result['success']) {
+            throw new \DomainException('Submit banding gagal: '.($result['error'] ?? 'unknown'));
         }
     }
 
@@ -988,27 +1043,18 @@ class AkreditasiWorkflowService
     public function decideBanding(int $bandingId, int $adminId, string $result): void
     {
         $outcome = $this->bandingService->decideBanding($bandingId, $adminId, $result);
-        if (!$outcome['success']) {
-            throw new \DomainException('Keputusan banding gagal: ' . ($outcome['error'] ?? 'unknown'));
+        if (! $outcome['success']) {
+            throw new \DomainException('Keputusan banding gagal: '.($outcome['error'] ?? 'unknown'));
         }
-    }
-
-    /**
-     * Create a resubmission after rejection.
-     * Delegates to ResubmissionService::createResubmission().
-     */
-    public function createResubmission(int $akreditasiId, int $pesantrenId): Akreditasi
-    {
-        return $this->resubmissionService->createResubmission($akreditasiId, $pesantrenId);
     }
 
     private function assertPostVisitasiDocumentsComplete(Akreditasi $akreditasi): void
     {
         $missingDocs = app(AkreditasiDocumentService::class)->missingPostVisitasiDocuments($akreditasi);
 
-        if (!empty($missingDocs)) {
+        if (! empty($missingDocs)) {
             throw new \DomainException(
-                'Dokumen berikut belum diunggah: ' . implode(', ', $missingDocs) . '.'
+                'Dokumen berikut belum diunggah: '.implode(', ', $missingDocs).'.'
             );
         }
     }
@@ -1056,30 +1102,31 @@ class AkreditasiWorkflowService
      *  - tanggal_akhir ≥ tanggal_mulai
      *  - (tanggal_akhir - tanggal_mulai) ≤ 14 days
      *
-     * @param array $scheduleData  ['tanggal_mulai' => 'Y-m-d', 'tanggal_akhir' => 'Y-m-d']
-     * @throws \DomainException  When any date rule is violated
+     * @param  array  $scheduleData  ['tanggal_mulai' => 'Y-m-d', 'tanggal_akhir' => 'Y-m-d']
+     *
+     * @throws \DomainException When any date rule is violated
      */
     private function validateVisitasiDates(array $scheduleData): void
     {
         $tanggalMulaiRaw = $scheduleData['tanggal_mulai'] ?? null;
         $tanggalAkhirRaw = $scheduleData['tanggal_akhir'] ?? null;
 
-        if (!$tanggalMulaiRaw) {
+        if (! $tanggalMulaiRaw) {
             throw new \DomainException('Tanggal mulai visitasi wajib diisi.');
         }
-        if (!$tanggalAkhirRaw) {
+        if (! $tanggalAkhirRaw) {
             throw new \DomainException('Tanggal akhir visitasi wajib diisi.');
         }
 
-        $tanggalMulai = \Carbon\Carbon::parse($tanggalMulaiRaw)->startOfDay();
-        $tanggalAkhir = \Carbon\Carbon::parse($tanggalAkhirRaw)->startOfDay();
-        $minMulai = \Carbon\Carbon::today()->addDays(7);
+        $tanggalMulai = Carbon::parse($tanggalMulaiRaw)->startOfDay();
+        $tanggalAkhir = Carbon::parse($tanggalAkhirRaw)->startOfDay();
+        $minMulai = Carbon::today()->addDays(7);
 
         // Rule 1: tanggal_mulai ≥ today + 7 days
         if ($tanggalMulai->lt($minMulai)) {
             throw new \DomainException(
-                'Tanggal mulai visitasi harus minimal 7 hari dari sekarang (minimal: ' .
-                $minMulai->format('d/m/Y') . ').'
+                'Tanggal mulai visitasi harus minimal 7 hari dari sekarang (minimal: '.
+                $minMulai->format('d/m/Y').').'
             );
         }
 
@@ -1114,11 +1161,11 @@ class AkreditasiWorkflowService
         bool $isReschedule,
     ): void {
         try {
-            $mulaiFormatted = \Carbon\Carbon::parse($tanggalMulai)->format('d/m/Y');
-            $akhirFormatted = \Carbon\Carbon::parse($tanggalAkhir)->format('d/m/Y');
+            $mulaiFormatted = Carbon::parse($tanggalMulai)->format('d/m/Y');
+            $akhirFormatted = Carbon::parse($tanggalAkhir)->format('d/m/Y');
             $action = $isReschedule ? 'dijadwalkan ulang' : 'dijadwalkan';
             $title = $isReschedule ? 'Visitasi Dijadwalkan Ulang' : 'Visitasi Dijadwalkan';
-            $message = "Visitasi telah {$action}: {$mulaiFormatted} s/d {$akhirFormatted}." .
+            $message = "Visitasi telah {$action}: {$mulaiFormatted} s/d {$akhirFormatted}.".
                 ($catatan ? " Catatan: {$catatan}" : '');
 
             // Notify Pesantren

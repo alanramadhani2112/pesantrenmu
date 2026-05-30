@@ -5,10 +5,12 @@ namespace Tests\Feature;
 use App\Http\Middleware\EnsureUserHasPermission;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
 class PermissionMiddlewareTest extends TestCase
@@ -27,7 +29,7 @@ class PermissionMiddlewareTest extends TestCase
         $middleware = new EnsureUserHasPermission;
         $request = Request::create('/test', 'GET');
 
-        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+        $this->expectException(HttpException::class);
 
         $middleware->handle($request, fn () => new Response, 'akreditasi.view');
     }
@@ -40,14 +42,14 @@ class PermissionMiddlewareTest extends TestCase
         $request = Request::create('/test', 'GET');
         $request->setUserResolver(fn () => $user);
 
-        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+        $this->expectException(HttpException::class);
 
         $middleware->handle($request, fn () => new Response, 'users.manage');
     }
 
     public function test_user_with_permission_passes_through(): void
     {
-        $this->seed(\Database\Seeders\RolePermissionSeeder::class);
+        $this->seed(RolePermissionSeeder::class);
 
         $user = User::factory()->create(['role_id' => 2]); // asesor
         $user->load('role.permissions');

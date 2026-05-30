@@ -24,11 +24,11 @@ class SsoControllerTest extends TestCase
         parent::setUp();
         $this->seed(RoleSeeder::class);
         config([
-            'sso.server_url'    => 'https://sso.example.com/',
-            'sso.client_id'     => 'test-client-id',
+            'sso.server_url' => 'https://sso.example.com/',
+            'sso.client_id' => 'test-client-id',
             'sso.client_secret' => 'test-client-secret',
-            'sso.redirect_url'  => '/dashboard',
-            'sso.timeout'       => 10,
+            'sso.redirect_url' => '/dashboard',
+            'sso.timeout' => 10,
         ]);
     }
 
@@ -77,7 +77,7 @@ class SsoControllerTest extends TestCase
 
         $state = session('state');
         $location = $response->headers->get('Location');
-        $this->assertStringContainsString('state=' . $state, $location);
+        $this->assertStringContainsString('state='.$state, $location);
     }
 
     // ─── auth: state validation ───────────────────────────────────────────────
@@ -115,7 +115,7 @@ class SsoControllerTest extends TestCase
         Http::fake([
             'https://sso.example.com/oauth/token' => Http::response([
                 'access_token' => 'my-access-token',
-                'token_type'   => 'Bearer',
+                'token_type' => 'Bearer',
             ], 200),
         ]);
 
@@ -176,6 +176,7 @@ class SsoControllerTest extends TestCase
             if (str_contains($request->url(), 'oauth/token')) {
                 throw new ConnectionException('Connection timed out');
             }
+
             return Http::response('', 200);
         });
 
@@ -195,7 +196,7 @@ class SsoControllerTest extends TestCase
         $response = $this->withSession(['state' => 'valid-state'])
             ->get('/sso/auth?state=valid-state&code=code');
 
-        $this->assertTrue($response->isRedirect(), 'Expected redirect, got: ' . $response->getStatusCode());
+        $this->assertTrue($response->isRedirect(), 'Expected redirect, got: '.$response->getStatusCode());
     }
 
     // ─── login: missing token ─────────────────────────────────────────────────
@@ -237,6 +238,7 @@ class SsoControllerTest extends TestCase
             if (str_contains($request->url(), 'api/user')) {
                 throw new ConnectionException('Connection timed out');
             }
+
             return Http::response('', 200);
         });
 
@@ -255,8 +257,8 @@ class SsoControllerTest extends TestCase
 
         Http::fake([
             'https://sso.example.com/api/user' => Http::response([
-                'id'    => 'sso-uid-disabled',
-                'name'  => $user->name,
+                'id' => 'sso-uid-disabled',
+                'name' => $user->name,
                 'email' => $user->email,
                 'level' => 2,
             ], 200),
@@ -277,8 +279,8 @@ class SsoControllerTest extends TestCase
 
         Http::fake([
             'https://sso.example.com/api/user' => Http::response([
-                'id'    => 'sso-uid-ok',
-                'name'  => $user->name,
+                'id' => 'sso-uid-ok',
+                'name' => $user->name,
                 'email' => $user->email,
                 'level' => 2,
             ], 200),
@@ -297,8 +299,8 @@ class SsoControllerTest extends TestCase
 
         Http::fake([
             'https://sso.example.com/api/user' => Http::response([
-                'id'    => 'sso-uid-redir',
-                'name'  => $user->name,
+                'id' => 'sso-uid-redir',
+                'name' => $user->name,
                 'email' => $user->email,
                 'level' => 2,
             ], 200),
@@ -316,8 +318,8 @@ class SsoControllerTest extends TestCase
 
         Http::fake([
             'https://sso.example.com/api/user' => Http::response([
-                'id'    => 'sso-uid-intended',
-                'name'  => $user->name,
+                'id' => 'sso-uid-intended',
+                'name' => $user->name,
                 'email' => $user->email,
                 'level' => 2,
             ], 200),
@@ -325,7 +327,7 @@ class SsoControllerTest extends TestCase
 
         $response = $this->withSession([
             'sso_access_token' => 'valid-token',
-            'intended_url'     => '/pesantren/profile',
+            'intended_url' => '/pesantren/profile',
         ])->get(route('sso.login'));
 
         $response->assertRedirect('/pesantren/profile');
@@ -337,8 +339,8 @@ class SsoControllerTest extends TestCase
 
         Http::fake([
             'https://sso.example.com/api/user' => Http::response([
-                'id'    => 'sso-uid-consume',
-                'name'  => $user->name,
+                'id' => 'sso-uid-consume',
+                'name' => $user->name,
                 'email' => $user->email,
                 'level' => 2,
             ], 200),

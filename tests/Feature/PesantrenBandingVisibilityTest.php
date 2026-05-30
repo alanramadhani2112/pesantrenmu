@@ -35,7 +35,7 @@ class PesantrenBandingVisibilityTest extends TestCase
     /**
      * Task 10.7: Pesantren sees banding status on akreditasi detail
      */
-public function test_pesantren_sees_banding_status_on_akreditasi_detail(): void
+    public function test_pesantren_sees_banding_status_on_akreditasi_detail(): void
     {
         $user = $this->createCompletePesantrenUser();
         Volt::actingAs($user);
@@ -47,7 +47,6 @@ public function test_pesantren_sees_banding_status_on_akreditasi_detail(): void
             'user_id' => $user->id,
             'status' => -2,
             'catatan' => 'Data tidak lengkap',
-            'parent' => null,
         ]);
 
         // Create a banding record for this akreditasi
@@ -75,7 +74,7 @@ public function test_pesantren_sees_banding_status_on_akreditasi_detail(): void
     /**
      * Task 10.7: Pesantren sees banding under_review status
      */
-public function test_pesantren_sees_banding_under_review_status(): void
+    public function test_pesantren_sees_banding_under_review_status(): void
     {
         $user = $this->createCompletePesantrenUser();
         $reviewer = User::factory()->create(['role_id' => 1]);
@@ -87,7 +86,6 @@ public function test_pesantren_sees_banding_under_review_status(): void
             'user_id' => $user->id,
             'status' => -2,
             'catatan' => 'Data tidak lengkap',
-            'parent' => null,
         ]);
 
         $banding = Banding::create([
@@ -110,7 +108,7 @@ public function test_pesantren_sees_banding_under_review_status(): void
     /**
      * Task 10.7: Pesantren sees banding decision when accepted
      */
-public function test_pesantren_sees_banding_accepted_decision(): void
+    public function test_pesantren_sees_banding_accepted_decision(): void
     {
         $user = $this->createCompletePesantrenUser();
         $reviewer = User::factory()->create(['role_id' => 1]);
@@ -122,7 +120,6 @@ public function test_pesantren_sees_banding_accepted_decision(): void
             'user_id' => $user->id,
             'status' => 1,
             'catatan' => 'Data tidak lengkap',
-            'parent' => null,
         ]);
 
         // Create accepted banding
@@ -149,7 +146,7 @@ public function test_pesantren_sees_banding_accepted_decision(): void
     /**
      * Task 10.7: Pesantren sees banding decision when rejected
      */
-public function test_pesantren_sees_banding_rejected_decision(): void
+    public function test_pesantren_sees_banding_rejected_decision(): void
     {
         $user = $this->createCompletePesantrenUser();
         $reviewer = User::factory()->create(['role_id' => 1]);
@@ -161,7 +158,6 @@ public function test_pesantren_sees_banding_rejected_decision(): void
             'user_id' => $user->id,
             'status' => -1,
             'catatan' => 'Data tidak lengkap',
-            'parent' => null,
         ]);
 
         $banding = Banding::create([
@@ -185,7 +181,7 @@ public function test_pesantren_sees_banding_rejected_decision(): void
     /**
      * Task 10.7: Pesantren sees remaining appeal count
      */
-public function test_pesantren_sees_remaining_appeal_count(): void
+    public function test_pesantren_sees_remaining_appeal_count(): void
     {
         $user = $this->createCompletePesantrenUser();
         Volt::actingAs($user);
@@ -196,7 +192,6 @@ public function test_pesantren_sees_remaining_appeal_count(): void
             'user_id' => $user->id,
             'status' => -1,
             'catatan' => 'Data tidak lengkap',
-            'parent' => null,
         ]);
 
         // Create one banding (so remaining = 1 out of limit 2)
@@ -224,7 +219,7 @@ public function test_pesantren_sees_remaining_appeal_count(): void
     /**
      * Task 10.8: Banding button disabled when limit reached
      */
-public function test_banding_button_disabled_when_limit_reached(): void
+    public function test_banding_button_disabled_when_limit_reached(): void
     {
         $user = $this->createCompletePesantrenUser();
         Volt::actingAs($user);
@@ -235,7 +230,6 @@ public function test_banding_button_disabled_when_limit_reached(): void
             'user_id' => $user->id,
             'status' => -1,
             'catatan' => 'Data tidak lengkap',
-            'parent' => null,
         ]);
 
         // Create one banding (limit = 1, so no more allowed)
@@ -263,7 +257,7 @@ public function test_banding_button_disabled_when_limit_reached(): void
     /**
      * Task 10.8: Banding button enabled when limit not reached
      */
-public function test_banding_button_enabled_when_limit_not_reached(): void
+    public function test_banding_button_enabled_when_limit_not_reached(): void
     {
         $user = $this->createCompletePesantrenUser();
         Volt::actingAs($user);
@@ -274,7 +268,6 @@ public function test_banding_button_enabled_when_limit_not_reached(): void
             'user_id' => $user->id,
             'status' => -1,
             'catatan' => 'Data tidak lengkap',
-            'parent' => null,
         ]);
 
         // No banding yet, limit is 2

@@ -52,7 +52,7 @@ return new class extends Migration
                 'pengalaman_pelatihan',
                 'pengalaman_bekerja',
                 'pengalaman_berorganisasi',
-                'karya_publikasi'
+                'karya_publikasi',
             ]);
         });
     }

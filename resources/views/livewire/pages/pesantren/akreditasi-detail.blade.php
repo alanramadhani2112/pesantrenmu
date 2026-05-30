@@ -3,7 +3,6 @@
 use App\Services\BandingService;
 use App\Services\PesantrenService;
 use App\Services\RejectionService;
-use App\Services\ResubmissionService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
@@ -58,14 +57,14 @@ new #[Layout('layouts.app')] class extends Component
 
     public $asesorCatatans = [];
 
+    public $asesorRekomendasis = [];
+
     #[Url]
     public $activeTab = 'profil';
 
     public $kartu_kendali_file;
 
     public $visitasiTemplate;
-
-    public $resubmissionStatus = [];
 
     public $bandingStatus = null;
 
@@ -110,6 +109,7 @@ new #[Layout('layouts.app')] class extends Component
             $this->adminNvs = $data['asesor1']['nvs'];
             $this->asesorButirCatatans = $data['asesor1']['butir_catatans'];
             $this->asesorCatatans = $data['asesor1']['catatans'];
+            $this->asesorRekomendasis = $data['asesor1']['rekomendasis'] ?? [];
         }
 
         // Assessor 2
@@ -122,12 +122,6 @@ new #[Layout('layouts.app')] class extends Component
             if (! isset($this->pesantrenCatatans[$komponen->id])) {
                 $this->pesantrenCatatans[$komponen->id] = '';
             }
-        }
-
-        // Load resubmission status when akreditasi is rejected (status -1)
-        if ((int) $this->akreditasi->status === \App\StateMachine\AkreditasiStateMachine::STATUS_DITOLAK) {
-            $resubmissionService = app(ResubmissionService::class);
-            $this->resubmissionStatus = $resubmissionService->getResubmissionStatus($this->akreditasi->id);
         }
 
         // Load banding status data
@@ -222,20 +216,6 @@ new #[Layout('layouts.app')] class extends Component
             $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Kartu Kendali berhasil diunggah.');
         } catch (\Throwable $e) {
             $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: 'Upload gagal: ' . $e->getMessage());
-        }
-    }
-
-    public function resubmit()
-    {
-        Gate::authorize('update', $this->akreditasi);
-
-        try {
-            $workflowService = app(\App\Services\AkreditasiWorkflowService::class);
-            $newAkreditasi = $workflowService->createResubmission($this->akreditasi->id, Auth::id());
-            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Pengajuan ulang berhasil dibuat.');
-            $this->redirect(route('pesantren.akreditasi-detail', $newAkreditasi->uuid), navigate: true);
-        } catch (\DomainException $e) {
-            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: $e->getMessage());
         }
     }
 
@@ -425,7 +405,7 @@ new #[Layout('layouts.app')] class extends Component
                             @foreach($rejectionStatus['history'] as $rejection)
                                 <div class="spm-soft-panel">
                                     <div class="d-flex align-items-center justify-content-between mb-2">
-                                        <div class="fw-bold">
+                                        <div class="fw-semibold">
                                             @if($rejection->type === 'admin_final')
                                                 Penolakan Final (Admin)
                                             @else
@@ -484,7 +464,7 @@ new #[Layout('layouts.app')] class extends Component
     @endif
 
     <x-ui.card flush>
-        <div class="px-6 pt-5">
+        <div class="spm-detail-tabs-shell px-6 pt-5 pb-5">
             <x-ui.tabs>
                 <x-ui.tab wire:click="setTab('profil')" :active="$activeTab === 'profil'">Profil</x-ui.tab>
                 <x-ui.tab wire:click="setTab('ipm')" :active="$activeTab === 'ipm'">IPM</x-ui.tab>
@@ -499,471 +479,13 @@ new #[Layout('layouts.app')] class extends Component
             </x-ui.tabs>
         </div>
 
-        <div class="p-6">
-            @if ($activeTab === 'profil')
-                <div class="d-flex flex-column gap-6">
-                    <x-ui.section-card title="Profil Pesantren" subtitle="Identitas pesantren pada pengajuan akreditasi.">
-                        <div class="p-6">
-                            <div class="row g-5">
-                                <x-ui.detail-item label="Nama Pesantren" value="{{ $pesantren->nama_pesantren ?? '-' }}" />
-                                <x-ui.detail-item label="NSP" value="{{ $pesantren->ns_pesantren ?? '-' }}" />
-                                <x-ui.detail-item label="Alamat" span="2">
-                                    <div class="spm-detail-block spm-detail-value-muted">{{ $pesantren->alamat ?? '-' }}</div>
-                                </x-ui.detail-item>
-                                <x-ui.detail-item label="Kota/Kabupaten" value="{{ $pesantren->kota_kabupaten ?? '-' }}" />
-                                <x-ui.detail-item label="Provinsi" value="{{ $pesantren->provinsi ?? '-' }}" />
-
-                                @if($akreditasi->tgl_visitasi)
-                                    <x-ui.detail-item label="Jadwal Visitasi" span="2">
-                                        <div class="spm-detail-block">
-                                            {{ \Carbon\Carbon::parse($akreditasi->tgl_visitasi)->format('d F Y') }}
-                                            @if($akreditasi->tgl_visitasi_akhir && $akreditasi->tgl_visitasi != $akreditasi->tgl_visitasi_akhir)
-                                                - {{ \Carbon\Carbon::parse($akreditasi->tgl_visitasi_akhir)->format('d F Y') }}
-                                            @endif
-                                        </div>
-                                    </x-ui.detail-item>
-                                @endif
-                            </div>
-                        </div>
-                    </x-ui.section-card>
-
-                    <x-ui.section-card title="Layanan & Fasilitas" subtitle="Unit layanan pendidikan dan kapasitas sarana.">
-                        <div class="p-6">
-                            <div class="row g-6">
-                                <div class="col-lg-7">
-                                    @if($pesantren && $pesantren->units && $pesantren->units->count() > 0)
-                                        <x-ui.simple-table dense>
-                                            <thead>
-                                                <tr>
-                                                    <th class="ps-4">Unit</th>
-                                                    <th class="text-end pe-4">Jumlah Rombel</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach($pesantren->units as $unit)
-                                                    <tr>
-                                                        <td class="ps-4 text-uppercase fw-bold">{{ $unit->unit }}</td>
-                                                        <td class="text-end pe-4">
-                                                            <x-ui.badge variant="success">{{ $unit->jumlah_rombel }} Rombel</x-ui.badge>
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </x-ui.simple-table>
-                                    @else
-                                        <x-ui.empty-state title="Belum Ada Unit" description="Data unit pendidikan belum diisi." />
-                                    @endif
-                                </div>
-                                <div class="col-lg-5">
-                                    <div class="d-flex flex-column gap-4">
-                                        <x-ui.stat-card label="Total Luas Tanah" value="{{ $pesantren->luas_tanah ?? '-' }} m2" variant="success" icon="geolocation" />
-                                        <x-ui.stat-card label="Total Luas Bangunan" value="{{ $pesantren->luas_bangunan ?? '-' }} m2" variant="info" icon="category" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </x-ui.section-card>
-
-                    <x-ui.section-card title="Dokumen Pengajuan" subtitle="Status dokumen pendukung pengajuan.">
-                        <div class="p-6">
-                            <div class="row g-5">
-                                <div class="col-lg-6">
-                                    <div class="spm-detail-label mb-3">Dokumen Utama</div>
-                                    <div class="spm-document-list">
-                                        @foreach($dokumenUtama as $field => $label)
-                                            <x-ui.document-item :label="$label" :href="$pesantren && $pesantren->$field ? Storage::url($pesantren->$field) : null" />
-                                        @endforeach
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="spm-detail-label mb-3">Dokumen Sekunder</div>
-                                    <div class="spm-document-list">
-                                        @foreach($dokumenSekunder as $field => $label)
-                                            <x-ui.document-item :label="$label" :href="$pesantren && $pesantren->$field ? Storage::url($pesantren->$field) : null" />
-                                        @endforeach
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </x-ui.section-card>
-                </div>
-            @endif
-
-            @if ($activeTab === 'ipm')
-                <x-ui.section-card title="Indikator Pemenuhan Mutlak" subtitle="Dokumen IPM yang sudah dikirim.">
-                    <div class="p-6">
-                        <div class="spm-document-list">
-                            @foreach ($ipmItems as $field => $label)
-                                <x-ui.document-item :label="$label" :href="$ipm && $ipm->$field ? Storage::url($ipm->$field) : null" />
-                            @endforeach
-                        </div>
-                    </div>
-                </x-ui.section-card>
-            @endif
-
-            @if ($activeTab === 'sdm')
-                <x-ui.section-card title="Rekapitulasi Data SDM" subtitle="Rekap santri, ustadz, pamong, musyrif, dan tenaga kependidikan.">
-                    <div class="p-6">
-                        <x-ui.simple-table tableClass="spm-wide-table">
-                            <thead>
-                                <tr class="text-center">
-                                    <th rowspan="2" class="ps-4">No.</th>
-                                    <th rowspan="2" class="text-start">Bentuk</th>
-                                    <th colspan="2">Santri</th>
-                                    <th colspan="2">Ustadz Dirosah</th>
-                                    <th colspan="2">Ustadz Non Dirosah</th>
-                                    <th colspan="2">Pamong</th>
-                                    <th colspan="2">Musyrif/Ah</th>
-                                    <th colspan="2" class="pe-4">Tenaga Kependidikan</th>
-                                </tr>
-                                <tr class="text-center">
-                                    @for($i = 0; $i < 6; $i++)
-                                        <th>L</th>
-                                        <th>P</th>
-                                    @endfor
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($levels as $index => $level)
-                                    <tr class="text-center">
-                                        <td class="ps-4 fw-bold">{{ $index + 1 }}</td>
-                                        <td class="text-start text-uppercase fw-bold">{{ $level }}</td>
-                                        @foreach($fields as $field)
-                                            <td>{{ $sdm[$level]->$field ?? 0 }}</td>
-                                        @endforeach
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                            <tfoot>
-                                <tr class="text-center">
-                                    <td colspan="2" class="ps-4 text-uppercase text-start">Jumlah</td>
-                                    @foreach($fields as $field)
-                                        <td>{{ $this->getTotal($field) }}</td>
-                                    @endforeach
-                                </tr>
-                            </tfoot>
-                        </x-ui.simple-table>
-                    </div>
-                </x-ui.section-card>
-            @endif
-
-            @if ($activeTab === 'edpm')
-                <div class="d-flex flex-column gap-6">
-                    <x-ui.section-card title="EDPM Pesantren" subtitle="Isian evaluasi diri dan tautan bukti pesantren.">
-                        <div class="p-6">
-                            <x-ui.simple-table tableClass="spm-edpm-review-table">
-                                <thead>
-                                    <tr>
-                                        <th class="ps-4 w-100px">No Butir</th>
-                                        <th>Pernyataan</th>
-                                        <th class="text-center w-125px">Isian</th>
-                                        <th class="text-center pe-4 w-150px">Bukti</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($komponens as $komponen)
-                                        @foreach ($komponen->butirs as $butir)
-                                            <tr>
-                                                <td class="ps-4 fw-bold text-primary">{{ $butir->nomor_butir }}</td>
-                                                <td class="spm-edpm-statement">{{ $butir->butir_pernyataan }}</td>
-                                                <td class="text-center">
-                                                    <x-ui.badge variant="warning">{{ $pesantrenEvaluasis[$butir->id] ?? '-' }}</x-ui.badge>
-                                                </td>
-                                                <td class="text-center pe-4">
-                                                    @if(!empty($pesantrenLinks[$butir->id]))
-                                                        <x-ui.button :href="$pesantrenLinks[$butir->id]" target="_blank" variant="light" size="sm">Bukti</x-ui.button>
-                                                    @else
-                                                        <x-ui.status-badge variant="secondary">-</x-ui.status-badge>
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    @endforeach
-                                </tbody>
-                            </x-ui.simple-table>
-                        </div>
-                    </x-ui.section-card>
-
-                    <x-ui.section-card title="Catatan Kinerja Satuan Pendidikan" subtitle="Catatan pesantren per komponen.">
-                        <div class="p-6">
-                            <div class="row g-5">
-                                @foreach ($komponens as $komponen)
-                                    <div class="col-lg-6">
-                                        <div class="spm-soft-panel h-100">
-                                            <div class="spm-detail-label">{{ $komponen->nama }}</div>
-                                            <div class="spm-detail-value spm-detail-value-muted">
-                                                {{ $pesantrenCatatans[$komponen->id] ?: 'Tidak ada catatan.' }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    </x-ui.section-card>
-                </div>
-            @endif
-
-            @if ($activeTab === 'hasil')
-                <div class="d-flex flex-column gap-6">
-                    @if((int) $akreditasi->status === 0)
-                        <x-ui.section-card title="Hasil Akreditasi Akhir" subtitle="Nilai, peringkat, SK, dan masa berlaku.">
-                            <div class="p-6">
-                                <div class="row g-5">
-                                    <div class="col-md-6"><div class="spm-result-metric"><div class="spm-detail-label">Nilai Akhir</div><div class="fs-2 fw-bold text-success">{{ $akreditasi->nilai }}</div></div></div>
-                                    <div class="col-md-6"><div class="spm-result-metric"><div class="spm-detail-label">Peringkat</div><div class="fs-2 fw-bold text-success">{{ $akreditasi->peringkat }}</div></div></div>
-                                    <x-ui.detail-item label="Nomor SK" value="{{ $akreditasi->nomor_sk }}" />
-                                    <x-ui.detail-item label="Masa Berlaku">
-                                        {{ \Carbon\Carbon::parse($akreditasi->masa_berlaku)->format('d F Y') }}
-                                        @if($akreditasi->masa_berlaku_akhir && $akreditasi->masa_berlaku != $akreditasi->masa_berlaku_akhir)
-                                            - {{ \Carbon\Carbon::parse($akreditasi->masa_berlaku_akhir)->format('d F Y') }}
-                                        @endif
-                                    </x-ui.detail-item>
-                                    @if($akreditasi->sertifikat_path)
-                                        <div class="col-12">
-                                            <x-ui.button :href="Storage::url($akreditasi->sertifikat_path)" target="_blank" variant="success">Unduh Sertifikat</x-ui.button>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </x-ui.section-card>
-                    @elseif((int) $akreditasi->status === -1)
-                        <x-ui.alert variant="danger" icon="cross-circle" title="Pengajuan Ditolak">
-                            Catatan: {{ $akreditasi->catatan }}
-                        </x-ui.alert>
-
-                        {{-- Resubmission Status Section --}}
-                        @if(!empty($resubmissionStatus))
-                            <x-ui.section-card title="Pengajuan Ulang" subtitle="Status dan informasi pengajuan ulang akreditasi.">
-                                <div class="p-6">
-                                    <div class="d-flex flex-column gap-4">
-                                        {{-- Resubmission count/limit --}}
-                                        <div class="d-flex align-items-center gap-3">
-                                            <span class="fw-semibold">Pengajuan Ulang:</span>
-                                            <x-ui.badge variant="{{ $resubmissionStatus['count'] >= $resubmissionStatus['limit'] ? 'danger' : 'info' }}">
-                                                {{ $resubmissionStatus['count'] }}/{{ $resubmissionStatus['limit'] }}
-                                            </x-ui.badge>
-                                        </div>
-
-                                        {{-- Status message --}}
-                                        @if($resubmissionStatus['count'] >= $resubmissionStatus['limit'])
-                                            <div class="text-danger fw-semibold">
-                                                Batas pengajuan ulang telah tercapai
-                                            </div>
-                                        @elseif($resubmissionStatus['cooling_remaining_days'] > 0)
-                                            <div class="text-warning fw-semibold">
-                                                Anda dapat mengajukan ulang pada tanggal {{ $resubmissionStatus['cooling_end_date'] }} ({{ $resubmissionStatus['cooling_remaining_days'] }} hari lagi)
-                                            </div>
-                                        @endif
-
-                                        {{-- Resubmit button --}}
-                                        <div>
-                                            @if($resubmissionStatus['can_resubmit'])
-                                                <x-ui.button @click="confirmResubmitDetail($wire)" wire:loading.attr="disabled">
-                                                    <span wire:loading.remove wire:target="resubmit">Pengajuan Ulang</span>
-                                                    <span wire:loading wire:target="resubmit">Memproses...</span>
-                                                </x-ui.button>
-                                            @else
-                                                <x-ui.button disabled
-                                                    title="{{ $resubmissionStatus['count'] >= $resubmissionStatus['limit'] ? 'Batas pengajuan ulang telah tercapai' : 'Masa tunggu pengajuan ulang belum berakhir' }}">
-                                                    Pengajuan Ulang
-                                                </x-ui.button>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            </x-ui.section-card>
-                        @endif
-                    @endif
-
-                    {{-- Banding Status Section --}}
-                    @if($bandingStatus)
-                        <x-ui.section-card title="Status Banding" subtitle="Status dan informasi pengajuan banding akreditasi.">
-                            <div class="p-6">
-                                <div class="d-flex flex-column gap-4">
-                                    {{-- Banding status badge --}}
-                                    <div class="d-flex align-items-center gap-3">
-                                        <span class="fw-semibold">Status:</span>
-                                        @php
-                                            $bandingVariant = match ($bandingStatus->status) {
-                                                'pending' => 'warning',
-                                                'under_review' => 'info',
-                                                'accepted' => 'success',
-                                                'rejected' => 'danger',
-                                                default => 'secondary',
-                                            };
-                                            $bandingLabel = match ($bandingStatus->status) {
-                                                'pending' => 'Menunggu',
-                                                'under_review' => 'Sedang Direview',
-                                                'accepted' => 'Diterima',
-                                                'rejected' => 'Ditolak',
-                                                default => $bandingStatus->status,
-                                            };
-                                        @endphp
-                                        <x-ui.badge variant="{{ $bandingVariant }}">{{ $bandingLabel }}</x-ui.badge>
-                                    </div>
-
-                                    {{-- Submission date --}}
-                                    <div class="d-flex align-items-center gap-3">
-                                        <span class="fw-semibold">Tanggal Pengajuan:</span>
-                                        <span>{{ $bandingStatus->created_at->format('d F Y') }}</span>
-                                    </div>
-
-                                    {{-- Reason --}}
-                                    <div>
-                                        <span class="fw-semibold">Alasan Banding:</span>
-                                        <div class="mt-1 text-muted">{{ $bandingStatus->alasan }}</div>
-                                    </div>
-
-                                    {{-- Decision (when decided) --}}
-                                    @if(in_array($bandingStatus->status, ['accepted', 'rejected']))
-                                        <div>
-                                            <span class="fw-semibold">Keputusan:</span>
-                                            <div class="mt-1 text-muted">{{ $bandingStatus->keputusan }}</div>
-                                        </div>
-                                    @endif
-
-                                    {{-- Accepted banding returns to final admin validation. --}}
-                                    @if($bandingStatus->status === 'accepted')
-                                        <x-ui.alert variant="info" icon="timer" title="Menunggu Validasi Akhir Admin">
-                                            Banding diterima dan proses akreditasi kembali ke tahap Validasi Akhir Admin.
-                                        </x-ui.alert>
-                                    @endif
-
-                                    {{-- Remaining appeal count --}}
-                                    <div class="d-flex align-items-center gap-3">
-                                        <span class="fw-semibold">Sisa kesempatan banding:</span>
-                                        <x-ui.badge variant="{{ $bandingEligibility['remaining'] <= 0 ? 'danger' : 'info' }}">
-                                            {{ $bandingEligibility['remaining'] }}/{{ config('akreditasi.banding_limit') }}
-                                        </x-ui.badge>
-                                    </div>
-
-                                    {{-- Ajukan Banding button --}}
-                                    @if((int) $akreditasi->status === -1)
-                                        <div>
-                                            @if($bandingEligibility['allowed'])
-                                                <x-ui.button type="button" variant="primary" size="sm" x-on:click="$dispatch('open-modal', 'banding-modal')">
-                                                    Ajukan Banding
-                                                </x-ui.button>
-                                            @else
-                                                <x-ui.button disabled title="Batas pengajuan banding telah tercapai">
-                                                    Ajukan Banding
-                                                </x-ui.button>
-                                                <div class="text-danger fw-semibold mt-2">
-                                                    Batas pengajuan banding telah tercapai
-                                                </div>
-                                            @endif
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </x-ui.section-card>
-                    @elseif(!empty($bandingEligibility))
-                        {{-- Show banding eligibility even when no banding exists yet --}}
-                        <x-ui.section-card title="Banding" subtitle="Informasi pengajuan banding akreditasi.">
-                            <div class="p-6">
-                                <div class="d-flex flex-column gap-4">
-                                    {{-- Remaining appeal count --}}
-                                    <div class="d-flex align-items-center gap-3">
-                                        <span class="fw-semibold">Sisa kesempatan banding:</span>
-                                        <x-ui.badge variant="{{ $bandingEligibility['remaining'] <= 0 ? 'danger' : 'info' }}">
-                                            {{ $bandingEligibility['remaining'] }}/{{ config('akreditasi.banding_limit') }}
-                                        </x-ui.badge>
-                                    </div>
-
-                                    {{-- Ajukan Banding button --}}
-                                    @if((int) $akreditasi->status === -1)
-                                        <div>
-                                            @if($bandingEligibility['allowed'])
-                                                <x-ui.button type="button" variant="primary" size="sm" x-on:click="$dispatch('open-modal', 'banding-modal')">
-                                                    Ajukan Banding
-                                                </x-ui.button>
-                                            @else
-                                                <x-ui.button disabled title="Batas pengajuan banding telah tercapai">
-                                                    Ajukan Banding
-                                                </x-ui.button>
-                                                <div class="text-danger fw-semibold mt-2">
-                                                    Batas pengajuan banding telah tercapai
-                                                </div>
-                                            @endif
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </x-ui.section-card>
-                    @endif
-
-                    <x-ui.section-card title="Data Penilaian" subtitle="Catatan rekomendasi asesor per komponen.">
-                        <div class="p-6">
-                            <x-ui.simple-table>
-                                <thead>
-                                    <tr>
-                                        <th class="ps-4">Komponen</th>
-                                        <th class="pe-4">Catatan Rekomendasi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($komponens as $komponen)
-                                        <tr>
-                                            <td class="ps-4 text-uppercase fw-bold">{{ $komponen->nama }}</td>
-                                            <td class="pe-4">{!! $asesorCatatans[$komponen->id] ?? '-' !!}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </x-ui.simple-table>
-                        </div>
-                    </x-ui.section-card>
-                </div>
-            @endif
-
-            @if ($activeTab === 'kartu')
-                <x-ui.section-card title="Kartu Kendali" subtitle="Unduh, tinjau, lalu unggah kembali kartu kendali final.">
-                    <div class="p-6">
-                        <div class="row g-5">
-                            <div class="col-lg-4">
-                                <div class="spm-soft-panel h-100">
-                                    <div class="spm-detail-label">Langkah 1</div>
-                                    <div class="spm-detail-value">Unduh template kartu kendali dari menu dokumen.</div>
-                                    <x-ui.button :href="route('documents.index', ['doc' => 'kartu_kendali'])" variant="light" size="sm" class="mt-4">Unduh Template</x-ui.button>
-                                </div>
-                            </div>
-                            <div class="col-lg-4">
-                                <div class="spm-soft-panel h-100">
-                                    <div class="spm-detail-label">Langkah 2</div>
-                                    <div class="spm-detail-value">Tinjau kelengkapan data dan tanda tangan hasil visitasi.</div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4">
-                                <div class="spm-soft-panel h-100">
-                                    <div class="spm-detail-label">Langkah 3</div>
-                                    @if($akreditasi->status == 2 && $akreditasi->kartu_kendali && !$errors->has('kartu_kendali_file'))
-                                        <x-ui.document-item label="Kartu Kendali" :href="Storage::url($akreditasi->kartu_kendali)" />
-                                    @elseif($akreditasi->status == 2)
-                                        <x-ui.form-field label="Unggah Kartu Kendali" for="kartu_kendali_file" :error="$errors->get('kartu_kendali_file')">
-                                            <x-ui.file-upload
-                                                model="kartu_kendali_file"
-                                                id="kartu_kendali_file"
-                                                accept=".pdf,.docx"
-                                                :file="$kartu_kendali_file"
-                                                placeholder="Pilih file kartu kendali"
-                                                hint="PDF/DOCX maksimal 5MB"
-                                            />
-                                        </x-ui.form-field>
-
-                                        @if($kartu_kendali_file)
-                                            <x-ui.button type="button" @click="confirmUploadKartu($wire)" wire:loading.attr="disabled" class="w-100 justify-content-center">
-                                                <span wire:loading.remove wire:target="uploadKartuKendali">Simpan Kartu Kendali</span>
-                                                <span wire:loading wire:target="uploadKartuKendali">Mengunggah...</span>
-                                            </x-ui.button>
-                                        @endif
-                                    @else
-                                        <div class="text-muted fw-semibold fs-7">Menu unggah muncul saat status pengajuan Validasi.</div>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </x-ui.section-card>
-            @endif
+        <div class="spm-detail-tab-content p-6">
+            @include('livewire.pages.pesantren.akreditasi-detail.tabs.profil')
+            @include('livewire.pages.pesantren.akreditasi-detail.tabs.ipm')
+            @include('livewire.pages.pesantren.akreditasi-detail.tabs.sdm')
+            @include('livewire.pages.pesantren.akreditasi-detail.tabs.edpm')
+            @include('livewire.pages.pesantren.akreditasi-detail.tabs.hasil')
+            @include('livewire.pages.pesantren.akreditasi-detail.tabs.kartu-kendali')
         </div>
     </x-ui.card>
 

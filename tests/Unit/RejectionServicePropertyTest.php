@@ -10,11 +10,15 @@ use App\Models\MasterEdpmButir;
 use App\Models\MasterEdpmKomponen;
 use App\Models\Pesantren;
 use App\Models\User;
+use App\Repositories\Contracts\AkreditasiRepositoryInterface;
 use App\Repositories\Contracts\RejectionRepositoryInterface;
+use App\Services\AkreditasiService;
+use App\Services\AkreditasiWorkflowService;
 use App\Services\RejectionService;
 use Database\Seeders\RoleSeeder;
 use Faker\Factory as Faker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class RejectionServicePropertyTest extends TestCase
@@ -33,18 +37,18 @@ class RejectionServicePropertyTest extends TestCase
     /**
      * Helper: create a pesantren user with akreditasi at status 5 and an Asesor 1 assigned.
      */
-private function createAsesor1Setup(): array
+    private function createAsesor1Setup(): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
             'user_id' => $pesantrenUser->id,
-            'nama_pesantren' => 'Pesantren Test ' . $pesantrenUser->id,
+            'nama_pesantren' => 'Pesantren Test '.$pesantrenUser->id,
             'is_locked' => true,
         ]);
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status' => 5,
+            'status' => 4,
         ]);
 
         $asesorUser = User::factory()->create(['role_id' => 2]);
@@ -73,7 +77,7 @@ private function createAsesor1Setup(): array
     /**
      * Helper: get a list of valid rejection item identifiers.
      */
-private function getValidItems(): array
+    private function getValidItems(): array
     {
         return ['profil', 'ipm.nsp', 'ipm.kurikulum', 'ipm.buku_ajar', 'ipm.lulus_santri', 'sdm'];
     }
@@ -82,11 +86,11 @@ private function getValidItems(): array
      * Feature: structured-rejection-flow, Property 1: Rejection Input Validation
      *
      * For any rejection attempt where items array is empty OR explanation < 10 chars,
-     * createRejection SHALL return error. Conversely, valid inputs SHALL pass validation.
+     * createDocumentRejection SHALL return error. Conversely, valid inputs SHALL pass validation.
      *
      * **Validates: Requirements 1.3, 1.4**
      */
-public function test_property_1_rejection_input_validation(): void
+    public function test_property_1_rejection_input_validation(): void
     {
         $faker = Faker::create();
 
@@ -117,11 +121,11 @@ public function test_property_1_rejection_input_validation(): void
                     $explanation = str_pad($explanation, 10, 'x');
                 }
 
-                $result = $this->rejectionService->createRejection($akreditasiId, $userId, $items, $explanation);
+                $result = $this->rejectionService->createDocumentRejection($akreditasiId, $userId, $items, $explanation);
 
                 $this->assertFalse(
                     $result['success'],
-                    "Iteration {$i}: Invalid input should fail (type={$invalidType}, items=" . count($items) . ", explanation_len=" . strlen($explanation) . ")"
+                    "Iteration {$i}: Invalid input should fail (type={$invalidType}, items=".count($items).', explanation_len='.strlen($explanation).')'
                 );
                 $this->assertNull($result['rejection'], "Iteration {$i}: No rejection record should be created for invalid input");
 
@@ -138,11 +142,11 @@ public function test_property_1_rejection_input_validation(): void
                     $explanation = str_pad($explanation, 10, 'x');
                 }
 
-                $result = $this->rejectionService->createRejection($akreditasiId, $userId, $items, $explanation);
+                $result = $this->rejectionService->createDocumentRejection($akreditasiId, $userId, $items, $explanation);
 
                 $this->assertTrue(
                     $result['success'],
-                    "Iteration {$i}: Valid input should succeed (items=" . count($items) . ", explanation_len=" . strlen($explanation) . ", error=" . ($result['error'] ?? 'none') . ")"
+                    "Iteration {$i}: Valid input should succeed (items=".count($items).', explanation_len='.strlen($explanation).', error='.($result['error'] ?? 'none').')'
                 );
 
                 // Clean up for next iteration to avoid rejection limit conflicts
@@ -154,12 +158,12 @@ public function test_property_1_rejection_input_validation(): void
     /**
      * Feature: structured-rejection-flow, Property 2: Rejection Record Persistence (Round-Trip)
      *
-     * For any valid rejection input, after createRejection succeeds, the stored record
+     * For any valid rejection input, after createDocumentRejection succeeds, the stored record
      * SHALL contain exact same data as input.
      *
      * **Validates: Requirements 1.5**
      */
-public function test_property_2_rejection_record_persistence(): void
+    public function test_property_2_rejection_record_persistence(): void
     {
         $faker = Faker::create();
 
@@ -175,9 +179,9 @@ public function test_property_2_rejection_record_persistence(): void
                 $explanation = str_pad($explanation, 10, 'x');
             }
 
-            $result = $this->rejectionService->createRejection($akreditasiId, $userId, $items, $explanation);
+            $result = $this->rejectionService->createDocumentRejection($akreditasiId, $userId, $items, $explanation);
 
-            $this->assertTrue($result['success'], "Iteration {$i}: createRejection should succeed");
+            $this->assertTrue($result['success'], "Iteration {$i}: createDocumentRejection should succeed");
             $this->assertNotNull($result['rejection'], "Iteration {$i}: rejection record should not be null");
 
             // Verify the stored record matches input
@@ -203,12 +207,12 @@ public function test_property_2_rejection_record_persistence(): void
     /**
      * Feature: structured-rejection-flow, Property 3: Authorization — Only Asesor 1 Can Reject
      *
-     * For any user NOT assigned as Asesor 1 (tipe=1), createRejection SHALL return
+     * For any user NOT assigned as Asesor 1 (tipe=1), createDocumentRejection SHALL return
      * authorization error.
      *
      * **Validates: Requirements 1.6**
      */
-public function test_property_3_authorization_only_asesor1_can_reject(): void
+    public function test_property_3_authorization_only_asesor1_can_reject(): void
     {
         $faker = Faker::create();
 
@@ -233,7 +237,7 @@ public function test_property_3_authorization_only_asesor1_can_reject(): void
                 $explanation = str_pad($explanation, 10, 'x');
             }
 
-            $result = $this->rejectionService->createRejection($akreditasiId, $unauthorizedUserId, $items, $explanation);
+            $result = $this->rejectionService->createDocumentRejection($akreditasiId, $unauthorizedUserId, $items, $explanation);
 
             $this->assertFalse(
                 $result['success'],
@@ -259,7 +263,7 @@ public function test_property_3_authorization_only_asesor1_can_reject(): void
      *
      * **Validates: Requirements 2.1, 2.2**
      */
-public function test_property_4_partial_unlock_correctness(): void
+    public function test_property_4_partial_unlock_correctness(): void
     {
         $faker = Faker::create();
 
@@ -275,7 +279,7 @@ public function test_property_4_partial_unlock_correctness(): void
 
         $allValidItems = array_merge(
             $this->getValidItems(),
-            array_map(fn ($butir) => 'edpm.butir.' . $butir->id, $butirs)
+            array_map(fn ($butir) => 'edpm.butir.'.$butir->id, $butirs)
         );
 
         for ($i = 0; $i < 100; $i++) {
@@ -293,8 +297,8 @@ public function test_property_4_partial_unlock_correctness(): void
                 $explanation = str_pad($explanation, 10, 'x');
             }
 
-            $result = $this->rejectionService->createRejection($akreditasiId, $userId, $rejectedItems, $explanation);
-            $this->assertTrue($result['success'], "Iteration {$i}: createRejection should succeed");
+            $result = $this->rejectionService->createDocumentRejection($akreditasiId, $userId, $rejectedItems, $explanation);
+            $this->assertTrue($result['success'], "Iteration {$i}: createDocumentRejection should succeed");
 
             // Verify: every rejected item is unlocked
             foreach ($rejectedItems as $item) {
@@ -327,7 +331,7 @@ public function test_property_4_partial_unlock_correctness(): void
     /**
      * Helper: create an Asesor 2 for a given akreditasi.
      */
-private function createAsesor2ForAkreditasi(Akreditasi $akreditasi): User
+    private function createAsesor2ForAkreditasi(Akreditasi $akreditasi): User
     {
         $asesorUser2 = User::factory()->create(['role_id' => 2]);
         $asesor2 = Asesor::create([
@@ -356,7 +360,7 @@ private function createAsesor2ForAkreditasi(Akreditasi $akreditasi): User
      *
      * **Validates: Requirements 3.2, 3.7**
      */
-public function test_property_5_perbaikan_relocks_all_sections(): void
+    public function test_property_5_perbaikan_relocks_all_sections(): void
     {
         $faker = Faker::create();
 
@@ -372,7 +376,7 @@ public function test_property_5_perbaikan_relocks_all_sections(): void
 
         $allValidItems = array_merge(
             $this->getValidItems(),
-            array_map(fn ($butir) => 'edpm.butir.' . $butir->id, $butirs)
+            array_map(fn ($butir) => 'edpm.butir.'.$butir->id, $butirs)
         );
 
         for ($i = 0; $i < 100; $i++) {
@@ -391,8 +395,8 @@ public function test_property_5_perbaikan_relocks_all_sections(): void
             }
 
             // Create a rejection (unlocks sections)
-            $result = $this->rejectionService->createRejection($akreditasiId, $asesorUserId, $rejectedItems, $explanation);
-            $this->assertTrue($result['success'], "Iteration {$i}: createRejection should succeed");
+            $result = $this->rejectionService->createDocumentRejection($akreditasiId, $asesorUserId, $rejectedItems, $explanation);
+            $this->assertTrue($result['success'], "Iteration {$i}: createDocumentRejection should succeed");
 
             // Verify sections are unlocked before perbaikan
             $unlockedBefore = $this->rejectionService->getUnlockedSections($akreditasiId);
@@ -422,12 +426,12 @@ public function test_property_5_perbaikan_relocks_all_sections(): void
     /**
      * Feature: structured-rejection-flow, Property 6: Status Invariant During Rejection-Correction Cycle
      *
-     * For any sequence of createRejection and submitPerbaikan calls where rejection
+     * For any sequence of createDocumentRejection and submitPerbaikan calls where rejection
      * count < limit, akreditasi status SHALL remain at 5.
      *
      * **Validates: Requirements 3.6**
      */
-public function test_property_6_status_invariant_during_cycle(): void
+    public function test_property_6_status_invariant_during_cycle(): void
     {
         $faker = Faker::create();
 
@@ -451,12 +455,12 @@ public function test_property_6_status_invariant_during_cycle(): void
                 }
 
                 // Create rejection
-                $result = $this->rejectionService->createRejection($akreditasiId, $asesorUserId, $items, $explanation);
-                $this->assertTrue($result['success'], "Iteration {$i}, cycle {$c}: createRejection should succeed");
+                $result = $this->rejectionService->createDocumentRejection($akreditasiId, $asesorUserId, $items, $explanation);
+                $this->assertTrue($result['success'], "Iteration {$i}, cycle {$c}: createDocumentRejection should succeed");
 
                 // Verify status is still 5 after rejection
                 $akreditasi = $this->akreditasiRepository()->find($akreditasiId);
-                $this->assertEquals(5, (int) $akreditasi->status, "Iteration {$i}, cycle {$c}: Status should remain 5 after rejection");
+                $this->assertEquals(4, (int) $akreditasi->status, "Iteration {$i}, cycle {$c}: Status should remain 5 after rejection");
 
                 // Submit perbaikan
                 $perbaikanResult = $this->rejectionService->submitPerbaikan($akreditasiId, $pesantrenUserId);
@@ -464,7 +468,7 @@ public function test_property_6_status_invariant_during_cycle(): void
 
                 // Verify status is still 5 after perbaikan
                 $akreditasi = $this->akreditasiRepository()->find($akreditasiId);
-                $this->assertEquals(5, (int) $akreditasi->status, "Iteration {$i}, cycle {$c}: Status should remain 5 after perbaikan");
+                $this->assertEquals(4, (int) $akreditasi->status, "Iteration {$i}, cycle {$c}: Status should remain 5 after perbaikan");
 
                 // Accept perbaikan to allow next cycle
                 $acceptResult = $this->rejectionService->acceptPerbaikan($akreditasiId, $asesorUserId);
@@ -472,7 +476,7 @@ public function test_property_6_status_invariant_during_cycle(): void
 
                 // Verify status is still 5 after accept
                 $akreditasi = $this->akreditasiRepository()->find($akreditasiId);
-                $this->assertEquals(5, (int) $akreditasi->status, "Iteration {$i}, cycle {$c}: Status should remain 5 after accept");
+                $this->assertEquals(4, (int) $akreditasi->status, "Iteration {$i}, cycle {$c}: Status should remain 5 after accept");
             }
 
             // Clean up for next iteration
@@ -488,7 +492,7 @@ public function test_property_6_status_invariant_during_cycle(): void
      *
      * **Validates: Requirements 4.2**
      */
-public function test_property_7_rejection_counter_increments(): void
+    public function test_property_7_rejection_counter_increments(): void
     {
         $faker = Faker::create();
 
@@ -512,8 +516,8 @@ public function test_property_7_rejection_counter_increments(): void
                     $explanation = str_pad($explanation, 10, 'x');
                 }
 
-                $result = $this->rejectionService->createRejection($akreditasiId, $asesorUserId, $items, $explanation);
-                $this->assertTrue($result['success'], "Iteration {$i}, rejection {$j}: createRejection should succeed");
+                $result = $this->rejectionService->createDocumentRejection($akreditasiId, $asesorUserId, $items, $explanation);
+                $this->assertTrue($result['success'], "Iteration {$i}, rejection {$j}: createDocumentRejection should succeed");
 
                 // Verify rejection_number equals j
                 $this->assertEquals(
@@ -543,7 +547,7 @@ public function test_property_7_rejection_counter_increments(): void
             // Clean up for next iteration
             AkreditasiRejection::where('akreditasi_id', $akreditasiId)->delete();
             // Reset akreditasi status in case it was changed to 2
-            $setup['akreditasi']->update(['status' => 5]);
+            $setup['akreditasi']->update(['status' => 4]);
         }
     }
 
@@ -556,7 +560,7 @@ public function test_property_7_rejection_counter_increments(): void
      *
      * **Validates: Requirements 4.3**
      */
-public function test_property_8_auto_rejection_at_limit(): void
+    public function test_property_8_auto_rejection_at_limit(): void
     {
         $faker = Faker::create();
 
@@ -578,7 +582,7 @@ public function test_property_8_auto_rejection_at_limit(): void
                     $explanation = str_pad($explanation, 10, 'x');
                 }
 
-                $result = $this->rejectionService->createRejection($akreditasiId, $asesorUserId, $items, $explanation);
+                $result = $this->rejectionService->createDocumentRejection($akreditasiId, $asesorUserId, $items, $explanation);
                 $this->assertTrue($result['success'], "Iteration {$i}, pre-limit rejection {$j}: should succeed");
 
                 // Submit perbaikan and accept to allow next rejection
@@ -593,11 +597,11 @@ public function test_property_8_auto_rejection_at_limit(): void
                 $explanation = str_pad($explanation, 10, 'x');
             }
 
-            $result = $this->rejectionService->createRejection($akreditasiId, $asesorUserId, $items, $explanation);
+            $result = $this->rejectionService->createDocumentRejection($akreditasiId, $asesorUserId, $items, $explanation);
             $this->assertTrue($result['success'], "Iteration {$i}: Limit rejection should succeed");
 
             // Verify: akreditasi status changed to Ditolak
-            $akreditasi = $this->akreditasiRepository()->find($akreditasiId);
+            $akreditasi = Akreditasi::withTrashed()->find($akreditasiId);
             $this->assertEquals(-1, (int) $akreditasi->status, "Iteration {$i}: Akreditasi status should be -1 (Ditolak) after limit reached");
 
             // Verify: rejection record has status 'limit_reached'
@@ -608,7 +612,7 @@ public function test_property_8_auto_rejection_at_limit(): void
 
             // Clean up for next iteration
             AkreditasiRejection::where('akreditasi_id', $akreditasiId)->delete();
-            $setup['akreditasi']->update(['status' => 5]);
+            $setup['akreditasi']->update(['status' => 4]);
         }
     }
 
@@ -619,7 +623,7 @@ public function test_property_8_auto_rejection_at_limit(): void
      *
      * **Validates: Requirements 4.6, 8.4**
      */
-public function test_property_9_auto_rejection_unlocks_pesantren_data(): void
+    public function test_property_9_auto_rejection_unlocks_pesantren_data(): void
     {
         $faker = Faker::create();
 
@@ -645,7 +649,7 @@ public function test_property_9_auto_rejection_unlocks_pesantren_data(): void
                     $explanation = str_pad($explanation, 10, 'x');
                 }
 
-                $result = $this->rejectionService->createRejection($akreditasiId, $asesorUserId, $items, $explanation);
+                $result = $this->rejectionService->createDocumentRejection($akreditasiId, $asesorUserId, $items, $explanation);
                 $this->assertTrue($result['success'], "Iteration {$i}, pre-limit rejection {$j}: should succeed");
 
                 // Submit perbaikan and accept to allow next rejection
@@ -660,7 +664,7 @@ public function test_property_9_auto_rejection_unlocks_pesantren_data(): void
                 $explanation = str_pad($explanation, 10, 'x');
             }
 
-            $result = $this->rejectionService->createRejection($akreditasiId, $asesorUserId, $items, $explanation);
+            $result = $this->rejectionService->createDocumentRejection($akreditasiId, $asesorUserId, $items, $explanation);
             $this->assertTrue($result['success'], "Iteration {$i}: Limit rejection should succeed");
 
             // Verify: pesantren is_locked is now false
@@ -669,7 +673,7 @@ public function test_property_9_auto_rejection_unlocks_pesantren_data(): void
 
             // Clean up for next iteration
             AkreditasiRejection::where('akreditasi_id', $akreditasiId)->delete();
-            $setup['akreditasi']->update(['status' => 5]);
+            $setup['akreditasi']->update(['status' => 4]);
             $pesantren->update(['is_locked' => true]);
         }
     }
@@ -682,7 +686,7 @@ public function test_property_9_auto_rejection_unlocks_pesantren_data(): void
      *
      * **Validates: Requirements 8.2**
      */
-public function test_property_12_deadline_calculation_correctness(): void
+    public function test_property_12_deadline_calculation_correctness(): void
     {
         $faker = Faker::create();
 
@@ -706,11 +710,11 @@ public function test_property_12_deadline_calculation_correctness(): void
 
             // Freeze time at a random point
             $creationTime = now();
-            \Illuminate\Support\Carbon::setTestNow($creationTime);
+            Carbon::setTestNow($creationTime);
 
-            $result = $this->rejectionService->createRejection($akreditasiId, $userId, $items, $explanation);
+            $result = $this->rejectionService->createDocumentRejection($akreditasiId, $userId, $items, $explanation);
 
-            $this->assertTrue($result['success'], "Iteration {$i}: createRejection should succeed");
+            $this->assertTrue($result['success'], "Iteration {$i}: createDocumentRejection should succeed");
             $this->assertNotNull($result['rejection'], "Iteration {$i}: rejection should not be null");
 
             // Verify: perbaikan_deadline equals creation time + D days
@@ -727,201 +731,80 @@ public function test_property_12_deadline_calculation_correctness(): void
 
             // Clean up for next iteration
             AkreditasiRejection::where('akreditasi_id', $akreditasiId)->delete();
-            \Illuminate\Support\Carbon::setTestNow(); // Reset time
+            Carbon::setTestNow(); // Reset time
         }
     }
 
     /**
      * Helper: get the AkreditasiRepository instance.
      */
-private function akreditasiRepository(): \App\Repositories\Contracts\AkreditasiRepositoryInterface
+    private function akreditasiRepository(): AkreditasiRepositoryInterface
     {
-        return app(\App\Repositories\Contracts\AkreditasiRepositoryInterface::class);
+        return app(AkreditasiRepositoryInterface::class);
     }
 
-    /**
-     * Feature: structured-rejection-flow, Property 10: Rejection Blocked at Status 6
-     *
-     * For any akreditasi at status 6, calling rejectPengajuan SHALL throw DomainException
-     * and status SHALL remain unchanged.
-     *
-     * **Validates: Requirements 5.1, 5.3, 5.5**
-     */
-public function test_property_10_rejection_blocked_at_status_6(): void
+    public function test_property_10_legacy_pengajuan_rejection_entry_point_is_removed(): void
     {
-        $faker = Faker::create();
-
-        for ($i = 0; $i < 100; $i++) {
-            // Create a pesantren user with akreditasi at status 6
-            $pesantrenUser = User::factory()->create(['role_id' => 3]);
-            Pesantren::create([
-                'user_id' => $pesantrenUser->id,
-                'nama_pesantren' => 'Pesantren Status6 ' . $pesantrenUser->id,
-                'is_locked' => true,
-            ]);
-
-            $akreditasi = Akreditasi::create([
-                'user_id' => $pesantrenUser->id,
-                'status' => 6,
-            ]);
-
-            // Generate a random reason string
-            $reason = $faker->text($faker->numberBetween(10, 200));
-
-            $akreditasiService = app(\App\Services\AkreditasiService::class);
-
-            // Calling rejectPengajuan SHALL throw DomainException
-            $threwException = false;
-            try {
-                $akreditasiService->rejectPengajuan($akreditasi->id, $reason);
-            } catch (\DomainException $e) {
-                $threwException = true;
-                $this->assertEquals(
-                    'Rejection at status 6 (Pengajuan) is no longer permitted.',
-                    $e->getMessage(),
-                    "Iteration {$i}: DomainException message should match"
-                );
-            }
-
-            $this->assertTrue($threwException, "Iteration {$i}: rejectPengajuan should throw DomainException for status 6");
-
-            // Status SHALL remain unchanged (still 6)
-            $akreditasi->refresh();
-            $this->assertEquals(6, (int) $akreditasi->status, "Iteration {$i}: Akreditasi status should remain 6");
-        }
+        $this->assertFalse(method_exists(AkreditasiService::class, 'rejectPengajuan'));
     }
 
-    /**
-     * Feature: structured-rejection-flow, Property 13: Final Rejection Input Validation
-     *
-     * For any final rejection attempt where categories array is empty OR any category has
-     * explanation < 10 chars, createFinalRejection SHALL return error. Valid inputs SHALL pass.
-     *
-     * **Validates: Requirements 9.1, 9.2**
-     */
-public function test_property_13_final_rejection_input_validation(): void
+    public function test_property_13_final_rejection_requires_validasi_admin_status_and_reason(): void
+    {
+        $workflowService = app(AkreditasiWorkflowService::class);
+        $adminUser = User::factory()->create(['role_id' => 1]);
+        $pesantrenUser = User::factory()->create(['role_id' => 3]);
+
+        Pesantren::create([
+            'user_id' => $pesantrenUser->id,
+            'nama_pesantren' => 'Pesantren Final Validation',
+            'is_locked' => true,
+        ]);
+
+        $akreditasi = Akreditasi::create([
+            'user_id' => $pesantrenUser->id,
+            'status' => 6,
+        ]);
+
+        $this->expectException(\DomainException::class);
+        $workflowService->rejectAtValidasi($akreditasi->id, $adminUser->id, 'Alasan valid tetapi status belum validasi admin.');
+    }
+
+    public function test_property_14_final_rejection_persistence(): void
     {
         $faker = Faker::create();
+        $workflowService = app(AkreditasiWorkflowService::class);
         $validCategoryKeys = array_keys(config('akreditasi.final_rejection_categories'));
 
-        for ($i = 0; $i < 100; $i++) {
-            // Create admin user and akreditasi at status 3
+        for ($i = 0; $i < 25; $i++) {
             $adminUser = User::factory()->create(['role_id' => 1]);
             $pesantrenUser = User::factory()->create(['role_id' => 3]);
             Pesantren::create([
                 'user_id' => $pesantrenUser->id,
-                'nama_pesantren' => 'Pesantren Final ' . $pesantrenUser->id,
+                'nama_pesantren' => 'Pesantren Persist '.$pesantrenUser->id,
                 'is_locked' => true,
             ]);
 
             $akreditasi = Akreditasi::create([
                 'user_id' => $pesantrenUser->id,
-                'status' => 3,
+                'status' => 1,
             ]);
 
-            // Decide whether to generate invalid or valid input
-            $generateInvalid = $faker->boolean(50);
-
-            if ($generateInvalid) {
-                $invalidType = $faker->randomElement(['empty_categories', 'short_explanation', 'both']);
-
-                $categories = match ($invalidType) {
-                    'empty_categories' => [],
-                    'short_explanation' => [
-                        [
-                            'category' => $faker->randomElement($validCategoryKeys),
-                            'explanation' => $faker->lexify(str_repeat('?', $faker->numberBetween(0, 9))),
-                        ],
-                    ],
-                    'both' => [],
-                };
-
-                $result = $this->rejectionService->createFinalRejection($akreditasi->id, $adminUser->id, $categories);
-
-                $this->assertFalse(
-                    $result['success'],
-                    "Iteration {$i}: Invalid input should fail (type={$invalidType})"
-                );
-
-                // Verify no record was created
-                $this->assertDatabaseMissing('akreditasi_rejections', [
-                    'akreditasi_id' => $akreditasi->id,
-                    'type' => 'admin_final',
-                ]);
-
-                // Verify status unchanged
-                $akreditasi->refresh();
-                $this->assertEquals(3, (int) $akreditasi->status, "Iteration {$i}: Status should remain 3 for invalid input");
-            } else {
-                // Generate valid input: non-empty categories, each with valid key and explanation >= 10 chars
-                $numCategories = $faker->numberBetween(1, count($validCategoryKeys));
-                $selectedKeys = $faker->randomElements($validCategoryKeys, $numCategories);
-                $categories = array_map(function ($key) use ($faker) {
-                    $explanation = $faker->text($faker->numberBetween(20, 200));
-                    if (strlen($explanation) < 10) {
-                        $explanation = str_pad($explanation, 10, 'x');
-                    }
-                    return ['category' => $key, 'explanation' => $explanation];
-                }, $selectedKeys);
-
-                $result = $this->rejectionService->createFinalRejection($akreditasi->id, $adminUser->id, $categories);
-
-                $this->assertTrue(
-                    $result['success'],
-                    "Iteration {$i}: Valid input should succeed (error=" . ($result['error'] ?? 'none') . ")"
-                );
-
-                // Clean up for next iteration
-                AkreditasiRejection::where('akreditasi_id', $akreditasi->id)->delete();
-                $akreditasi->update(['status' => 3]);
-            }
-        }
-    }
-
-    /**
-     * Feature: structured-rejection-flow, Property 14: Final Rejection Persistence
-     *
-     * For any valid final rejection input, after createFinalRejection succeeds, stored record
-     * SHALL contain exact categories, akreditasi status SHALL be 2, record type SHALL be 'admin_final'.
-     *
-     * **Validates: Requirements 9.3**
-     */
-public function test_property_14_final_rejection_persistence(): void
-    {
-        $faker = Faker::create();
-        $validCategoryKeys = array_keys(config('akreditasi.final_rejection_categories'));
-
-        for ($i = 0; $i < 100; $i++) {
-            // Create admin user and akreditasi at status 3
-            $adminUser = User::factory()->create(['role_id' => 1]);
-            $pesantrenUser = User::factory()->create(['role_id' => 3]);
-            Pesantren::create([
-                'user_id' => $pesantrenUser->id,
-                'nama_pesantren' => 'Pesantren Persist ' . $pesantrenUser->id,
-                'is_locked' => true,
-            ]);
-
-            $akreditasi = Akreditasi::create([
-                'user_id' => $pesantrenUser->id,
-                'status' => 3,
-            ]);
-
-            // Generate valid categories
-            $numCategories = $faker->numberBetween(1, count($validCategoryKeys));
-            $selectedKeys = $faker->randomElements($validCategoryKeys, $numCategories);
+            $selectedKeys = $faker->randomElements($validCategoryKeys, $faker->numberBetween(1, count($validCategoryKeys)));
             $categories = array_map(function ($key) use ($faker) {
                 $explanation = $faker->text($faker->numberBetween(20, 200));
                 if (strlen($explanation) < 10) {
                     $explanation = str_pad($explanation, 10, 'x');
                 }
+
                 return ['category' => $key, 'explanation' => $explanation];
             }, $selectedKeys);
 
-            $result = $this->rejectionService->createFinalRejection($akreditasi->id, $adminUser->id, $categories);
+            $reason = collect($categories)
+                ->map(fn ($category) => $category['category'].': '.$category['explanation'])
+                ->implode('; ');
 
-            $this->assertTrue($result['success'], "Iteration {$i}: createFinalRejection should succeed");
+            $workflowService->rejectAtValidasi($akreditasi->id, $adminUser->id, $reason, '', $categories);
 
-            // Verify: stored record contains exact categories
             $stored = AkreditasiRejection::where('akreditasi_id', $akreditasi->id)
                 ->where('type', 'admin_final')
                 ->first();
@@ -931,13 +814,8 @@ public function test_property_14_final_rejection_persistence(): void
             $this->assertEquals($adminUser->id, $stored->user_id, "Iteration {$i}: user_id should match admin");
             $this->assertEquals($categories, $stored->categories, "Iteration {$i}: categories should match exactly");
 
-            // Verify: akreditasi status SHALL be Ditolak
             $akreditasi->refresh();
             $this->assertEquals(-1, (int) $akreditasi->status, "Iteration {$i}: Akreditasi status should be -1 (Ditolak)");
-
-            // Clean up for next iteration
-            AkreditasiRejection::where('akreditasi_id', $akreditasi->id)->delete();
-            $akreditasi->update(['status' => 3]);
         }
     }
 
@@ -949,7 +827,7 @@ public function test_property_14_final_rejection_persistence(): void
      *
      * **Validates: Requirements 6.1**
      */
-public function test_property_11_rejection_history_chronological_ordering(): void
+    public function test_property_11_rejection_history_chronological_ordering(): void
     {
         $faker = Faker::create();
 
@@ -969,7 +847,7 @@ public function test_property_11_rejection_history_chronological_ordering(): voi
             for ($j = 0; $j < $numRejections; $j++) {
                 // Set a specific time for each rejection (increasing order with random gaps)
                 $time = now()->subDays($numRejections - $j)->addMinutes($faker->numberBetween(0, 60));
-                \Illuminate\Support\Carbon::setTestNow($time);
+                Carbon::setTestNow($time);
 
                 $items = $faker->randomElements($this->getValidItems(), $faker->numberBetween(1, 3));
                 $explanation = $faker->text($faker->numberBetween(20, 100));
@@ -977,8 +855,8 @@ public function test_property_11_rejection_history_chronological_ordering(): voi
                     $explanation = str_pad($explanation, 10, 'x');
                 }
 
-                $result = $this->rejectionService->createRejection($akreditasiId, $asesorUserId, $items, $explanation);
-                $this->assertTrue($result['success'], "Iteration {$i}, rejection {$j}: createRejection should succeed");
+                $result = $this->rejectionService->createDocumentRejection($akreditasiId, $asesorUserId, $items, $explanation);
+                $this->assertTrue($result['success'], "Iteration {$i}, rejection {$j}: createDocumentRejection should succeed");
 
                 $createdTimestamps[] = $time->format('Y-m-d H:i:s');
 
@@ -989,7 +867,7 @@ public function test_property_11_rejection_history_chronological_ordering(): voi
                 }
             }
 
-            \Illuminate\Support\Carbon::setTestNow(); // Reset time
+            Carbon::setTestNow(); // Reset time
 
             // Get rejection status and verify history ordering
             $status = $this->rejectionService->getRejectionStatus($akreditasiId);

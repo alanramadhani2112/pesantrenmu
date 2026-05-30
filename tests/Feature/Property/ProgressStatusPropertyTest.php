@@ -9,8 +9,8 @@ use App\Models\User;
 use App\Services\SidebarProgressService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\TestCase;
 
 /**
  * Property 1: Progress status calculation is consistent with data presence
@@ -78,7 +78,7 @@ class ProgressStatusPropertyTest extends TestCase
             // Generate random SDM presence (true/false)
             $sdmPresent = (bool) mt_rand(0, 1);
 
-            $cases["iteration_{$i}_profil_{$profilBitmask}_ipm_{$ipmBitmask}_sdm_" . ($sdmPresent ? '1' : '0')] = [
+            $cases["iteration_{$i}_profil_{$profilBitmask}_ipm_{$ipmBitmask}_sdm_".($sdmPresent ? '1' : '0')] = [
                 $profilBitmask,
                 $ipmBitmask,
                 $sdmPresent,
@@ -92,10 +92,9 @@ class ProgressStatusPropertyTest extends TestCase
      * Property 1: Progress status calculation is consistent with data presence
      *
      * **Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5**
-     *
      */
-#[DataProvider('randomProgressCombinationsProvider')]
-public function test_property_1_progress_status_consistent_with_data_presence(
+    #[DataProvider('randomProgressCombinationsProvider')]
+    public function test_property_1_progress_status_consistent_with_data_presence(
         int $profilBitmask,
         int $ipmBitmask,
         bool $sdmPresent
@@ -119,7 +118,7 @@ public function test_property_1_progress_status_consistent_with_data_presence(
             if ($profilBitmask & (1 << $index)) {
                 $profilData[$field] = $field === 'layanan_satuan_pendidikan'
                     ? ['spm']
-                    : 'test_value_' . $field;
+                    : 'test_value_'.$field;
             } else {
                 // Use empty string for unfilled fields (satisfies NOT NULL constraint
                 // while still being treated as "empty" by the service)
@@ -142,7 +141,7 @@ public function test_property_1_progress_status_consistent_with_data_presence(
         $ipmData = ['user_id' => $user->id];
         foreach (self::IPM_FIELDS as $index => $field) {
             if ($ipmBitmask & (1 << $index)) {
-                $ipmData[$field] = 'uploads/' . $field . '_test.pdf';
+                $ipmData[$field] = 'uploads/'.$field.'_test.pdf';
             } else {
                 $ipmData[$field] = null;
             }
@@ -165,7 +164,7 @@ public function test_property_1_progress_status_consistent_with_data_presence(
         $this->assertEquals(
             $expectedProfilStatus,
             $profilResult['status'],
-            "Profil: Expected '{$expectedProfilStatus}' for {$profilFilledCount}/" . count(self::PROFIL_FIELDS) . " fields filled (bitmask: {$profilBitmask})"
+            "Profil: Expected '{$expectedProfilStatus}' for {$profilFilledCount}/".count(self::PROFIL_FIELDS)." fields filled (bitmask: {$profilBitmask})"
         );
         $this->assertEquals($profilFilledCount, $profilResult['filled']);
         $this->assertEquals(count(self::PROFIL_FIELDS), $profilResult['total']);
@@ -177,7 +176,7 @@ public function test_property_1_progress_status_consistent_with_data_presence(
         $this->assertEquals(
             $expectedIpmStatus,
             $ipmResult['status'],
-            "IPM: Expected '{$expectedIpmStatus}' for {$ipmFilledCount}/" . count(self::IPM_FIELDS) . " fields filled (bitmask: {$ipmBitmask})"
+            "IPM: Expected '{$expectedIpmStatus}' for {$ipmFilledCount}/".count(self::IPM_FIELDS)." fields filled (bitmask: {$ipmBitmask})"
         );
         $this->assertEquals($ipmFilledCount, $ipmResult['filled']);
         $this->assertEquals(count(self::IPM_FIELDS), $ipmResult['total']);
@@ -189,7 +188,7 @@ public function test_property_1_progress_status_consistent_with_data_presence(
         $this->assertEquals(
             $expectedSdmStatus,
             $sdmResult['status'],
-            "SDM: Expected '{$expectedSdmStatus}' for sdmPresent=" . ($sdmPresent ? 'true' : 'false')
+            "SDM: Expected '{$expectedSdmStatus}' for sdmPresent=".($sdmPresent ? 'true' : 'false')
         );
         $this->assertEquals($sdmPresent ? 1 : 0, $sdmResult['filled']);
         $this->assertEquals(1, $sdmResult['total']);
@@ -198,7 +197,7 @@ public function test_property_1_progress_status_consistent_with_data_presence(
     /**
      * Determine expected status based on filled count vs total.
      */
-private function expectedStatus(int $filled, int $total): string
+    private function expectedStatus(int $filled, int $total): string
     {
         if ($filled === 0) {
             return 'not_started';

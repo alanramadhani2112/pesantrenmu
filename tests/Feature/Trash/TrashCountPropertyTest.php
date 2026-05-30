@@ -7,9 +7,10 @@ use App\Models\Pesantren;
 use App\Models\User;
 use App\Services\TrashService;
 use Database\Seeders\RoleSeeder;
+use Faker\Factory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\TestCase;
 
 /**
  * Feature: soft-delete-restore-flow
@@ -38,6 +39,7 @@ class TrashCountPropertyTest extends TestCase
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create(['user_id' => $user->id, 'nama_pesantren' => 'Pesantren Count Test']);
+
         return Akreditasi::create(['user_id' => $user->id, 'status' => 6]);
     }
 
@@ -50,7 +52,7 @@ class TrashCountPropertyTest extends TestCase
 
     public static function operationSequenceProvider(): array
     {
-        $faker = \Faker\Factory::create();
+        $faker = Factory::create();
         $cases = [];
         for ($i = 0; $i < 100; $i++) {
             // Random sequence: how many to create, delete, restore, force-delete
@@ -60,12 +62,12 @@ class TrashCountPropertyTest extends TestCase
             $toForceDelete = $faker->numberBetween(0, $toDelete - $toRestore);
             $cases[] = [$total, $toDelete, $toRestore, $toForceDelete];
         }
+
         return $cases;
     }
 
-    /**     */
-#[DataProvider('operationSequenceProvider')]
-public function test_property_6_trash_count_reflects_actual_state(
+    #[DataProvider('operationSequenceProvider')]
+    public function test_property_6_trash_count_reflects_actual_state(
         int $total,
         int $toDelete,
         int $toRestore,

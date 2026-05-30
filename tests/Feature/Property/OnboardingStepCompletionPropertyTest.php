@@ -13,8 +13,8 @@ use App\Models\User;
 use App\Services\OnboardingService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\TestCase;
 
 /**
  * Property 3: Pesantren onboarding step completion reflects data state
@@ -104,10 +104,9 @@ class OnboardingStepCompletionPropertyTest extends TestCase
      * Property 3: Pesantren onboarding step completion reflects data state
      *
      * **Validates: Requirements 5.4, 5.5**
-     *
      */
-#[DataProvider('randomOnboardingStatesProvider')]
-public function test_property_3_onboarding_step_completion_reflects_data_state(
+    #[DataProvider('randomOnboardingStatesProvider')]
+    public function test_property_3_onboarding_step_completion_reflects_data_state(
         int $profilBitmask,
         int $ipmBitmask,
         bool $sdmPresent,
@@ -123,7 +122,7 @@ public function test_property_3_onboarding_step_completion_reflects_data_state(
             if ($profilBitmask & (1 << $index)) {
                 $profilData[$field] = $field === 'layanan_satuan_pendidikan'
                     ? ['spm']
-                    : 'test_value_' . $field;
+                    : 'test_value_'.$field;
                 $profilFilledCount++;
             } else {
                 $profilData[$field] = $field === 'layanan_satuan_pendidikan' ? [] : '';
@@ -136,7 +135,7 @@ public function test_property_3_onboarding_step_completion_reflects_data_state(
         $ipmFilledCount = 0;
         foreach (self::IPM_FIELDS as $index => $field) {
             if ($ipmBitmask & (1 << $index)) {
-                $ipmData[$field] = 'uploads/' . $field . '_test.pdf';
+                $ipmData[$field] = 'uploads/'.$field.'_test.pdf';
                 $ipmFilledCount++;
             } else {
                 $ipmData[$field] = null;
@@ -196,8 +195,8 @@ public function test_property_3_onboarding_step_completion_reflects_data_state(
         $this->assertEquals(
             $expectedProfilComplete,
             $completionStatus['profil'],
-            "Profil step: expected " . ($expectedProfilComplete ? 'true' : 'false')
-            . " for {$profilFilledCount}/" . count(self::PROFIL_FIELDS) . " fields filled (bitmask: {$profilBitmask})"
+            'Profil step: expected '.($expectedProfilComplete ? 'true' : 'false')
+            ." for {$profilFilledCount}/".count(self::PROFIL_FIELDS)." fields filled (bitmask: {$profilBitmask})"
         );
 
         // --- Verify 'ipm' step ---
@@ -205,22 +204,22 @@ public function test_property_3_onboarding_step_completion_reflects_data_state(
         $this->assertEquals(
             $expectedIpmComplete,
             $completionStatus['ipm'],
-            "IPM step: expected " . ($expectedIpmComplete ? 'true' : 'false')
-            . " for {$ipmFilledCount}/" . count(self::IPM_FIELDS) . " fields filled (bitmask: {$ipmBitmask})"
+            'IPM step: expected '.($expectedIpmComplete ? 'true' : 'false')
+            ." for {$ipmFilledCount}/".count(self::IPM_FIELDS)." fields filled (bitmask: {$ipmBitmask})"
         );
 
         // --- Verify 'sdm' step ---
         $this->assertEquals(
             $sdmPresent,
             $completionStatus['sdm'],
-            "SDM step: expected " . ($sdmPresent ? 'true' : 'false')
+            'SDM step: expected '.($sdmPresent ? 'true' : 'false')
         );
 
         // --- Verify 'edpm' step ---
         $this->assertEquals(
             $edpmPresent,
             $completionStatus['edpm'],
-            "EDPM step: expected " . ($edpmPresent ? 'true' : 'false')
+            'EDPM step: expected '.($edpmPresent ? 'true' : 'false')
         );
 
         // --- Verify 'akreditasi' step ---
@@ -229,8 +228,8 @@ public function test_property_3_onboarding_step_completion_reflects_data_state(
         $this->assertEquals(
             $expectedAkreditasiComplete,
             $completionStatus['akreditasi'],
-            "Akreditasi step: expected " . ($expectedAkreditasiComplete ? 'true' : 'false')
-            . " for status={$akreditasiStatus}"
+            'Akreditasi step: expected '.($expectedAkreditasiComplete ? 'true' : 'false')
+            ." for status={$akreditasiStatus}"
         );
     }
 }

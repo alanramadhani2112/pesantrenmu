@@ -4,13 +4,12 @@ namespace Tests\Feature\ConcurrentAccess;
 
 use App\Models\Akreditasi;
 use Faker\Factory as Faker;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 /**
  * Property-Based Tests for Button Disable Logic.
- *
  */
 #[Group('Feature:concurrent-access-handling')]
 #[Group('Property4')]
@@ -23,7 +22,7 @@ class ButtonDisablePropertyTest extends TestCase
     {
         return [
             'status_1_berhasil' => [1, true],
-            'status_2_ditolak'  => [2, true],
+            'status_2_ditolak' => [2, true],
         ];
     }
 
@@ -33,10 +32,10 @@ class ButtonDisablePropertyTest extends TestCase
     public static function nonTerminalStatusProvider(): array
     {
         return [
-            'status_3_validasi'   => [3, false],
-            'status_4_visitasi'   => [4, false],
+            'status_3_validasi' => [3, false],
+            'status_4_visitasi' => [4, false],
             'status_5_assessment' => [5, false],
-            'status_6_pengajuan'  => [6, false],
+            'status_6_pengajuan' => [6, false],
         ];
     }
 
@@ -64,17 +63,16 @@ class ButtonDisablePropertyTest extends TestCase
      * the UI component SHALL report those buttons as disabled.
      *
      * **Validates: Requirements 3.5, 4.1**
-     *
      */
-#[DataProvider('terminalStatusProvider')]
-public function test_terminal_status_disables_action_buttons(int $status, bool $expectedDisabled): void
+    #[DataProvider('terminalStatusProvider')]
+    public function test_terminal_status_disables_action_buttons(int $status, bool $expectedDisabled): void
     {
         $isDisabled = in_array($status, [1, 2]);
 
         $this->assertEquals(
             $expectedDisabled,
             $isDisabled,
-            "Status {$status} should " . ($expectedDisabled ? '' : 'NOT ') . "disable action buttons"
+            "Status {$status} should ".($expectedDisabled ? '' : 'NOT ').'disable action buttons'
         );
     }
 
@@ -82,10 +80,9 @@ public function test_terminal_status_disables_action_buttons(int $status, bool $
      * Property 4: Non-terminal statuses should NOT disable action buttons.
      *
      * **Validates: Requirements 3.5, 4.1**
-     *
      */
-#[DataProvider('nonTerminalStatusProvider')]
-public function test_non_terminal_status_does_not_disable_action_buttons(int $status, bool $expectedDisabled): void
+    #[DataProvider('nonTerminalStatusProvider')]
+    public function test_non_terminal_status_does_not_disable_action_buttons(int $status, bool $expectedDisabled): void
     {
         $isDisabled = in_array($status, [1, 2]);
 
@@ -103,17 +100,16 @@ public function test_non_terminal_status_does_not_disable_action_buttons(int $st
      * only statuses 1 and 2 are terminal.
      *
      * **Validates: Requirements 3.5, 4.1**
-     *
      */
-#[DataProvider('randomStatusProvider')]
-public function test_random_status_combinations_correct_disable_logic(int $status, bool $expectedDisabled): void
+    #[DataProvider('randomStatusProvider')]
+    public function test_random_status_combinations_correct_disable_logic(int $status, bool $expectedDisabled): void
     {
         $isDisabled = in_array($status, [1, 2]);
 
         $this->assertEquals(
             $expectedDisabled,
             $isDisabled,
-            "Status {$status} disable logic should be " . ($expectedDisabled ? 'true' : 'false')
+            "Status {$status} disable logic should be ".($expectedDisabled ? 'true' : 'false')
         );
     }
 
@@ -122,7 +118,7 @@ public function test_random_status_combinations_correct_disable_logic(int $statu
      *
      * **Validates: Requirements 4.1**
      */
-public function test_admin_finalize_only_available_for_status_3(): void
+    public function test_admin_finalize_only_available_for_status_3(): void
     {
         $allStatuses = [1, 2, 3, 4, 5, 6];
 
@@ -137,7 +133,7 @@ public function test_admin_finalize_only_available_for_status_3(): void
 
             if ($status === 3) {
                 $this->assertTrue($canFinalize,
-                    "Status 3 (Validasi) — finalize should be available");
+                    'Status 3 (Validasi) — finalize should be available');
             }
         }
     }
@@ -147,7 +143,7 @@ public function test_admin_finalize_only_available_for_status_3(): void
      *
      * **Validates: Requirements 4.1**
      */
-public function test_asesor_finalize_only_available_for_status_4(): void
+    public function test_asesor_finalize_only_available_for_status_4(): void
     {
         $allStatuses = [1, 2, 3, 4, 5, 6];
 
@@ -162,7 +158,7 @@ public function test_asesor_finalize_only_available_for_status_4(): void
 
             if ($status === 4) {
                 $this->assertTrue($canFinalize,
-                    "Status 4 (Visitasi) — asesor finalize should be available");
+                    'Status 4 (Visitasi) — asesor finalize should be available');
             }
         }
     }

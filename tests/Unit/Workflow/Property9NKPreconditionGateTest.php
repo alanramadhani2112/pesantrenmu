@@ -13,8 +13,8 @@ use App\Services\AssessorScoringService;
 use App\StateMachine\AkreditasiStateMachine;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Group;
+use Tests\TestCase;
 
 /**
  * Property-Based Test: Property 9 — NK Precondition Gate
@@ -23,7 +23,6 @@ use PHPUnit\Framework\Attributes\Group;
  * Nilai Ketua and all Nilai Anggota have been submitted as Final.
  *
  * **Validates: Requirements 7.8, 7.9**
- *
  */
 #[Group('akreditasi-workflow-redesign')]
 class Property9NKPreconditionGateTest extends TestCase
@@ -46,7 +45,7 @@ class Property9NKPreconditionGateTest extends TestCase
     /**
      * Create 62 master butir records to satisfy the FK constraint on akreditasi_edpms.butir_id.
      */
-private function createMasterButirs(): void
+    private function createMasterButirs(): void
     {
         $komponen = MasterEdpmKomponen::firstOrCreate(['nama' => 'TEST KOMPONEN'], ['ipr' => false]);
 
@@ -54,8 +53,8 @@ private function createMasterButirs(): void
             $butir = MasterEdpmButir::firstOrCreate(
                 ['nomor_butir' => "T.{$i}"],
                 [
-                    'komponen_id'      => $komponen->id,
-                    'no_sk'            => (string) $i,
+                    'komponen_id' => $komponen->id,
+                    'no_sk' => (string) $i,
                     'butir_pernyataan' => "Butir pernyataan {$i}",
                 ]
             );
@@ -66,7 +65,7 @@ private function createMasterButirs(): void
     /**
      * Get the master_edpm_butirs.id for a given butir index (1-62).
      */
-private function getButirId(int $index): int
+    private function getButirId(int $index): int
     {
         return $this->butirIds[$index];
     }
@@ -78,51 +77,51 @@ private function getButirId(int $index): int
     /**
      * Create a scenario with akreditasi at status 2, two assessors.
      */
-private function createScoringScenario(): array
+    private function createScoringScenario(): array
     {
         $pesantrenUser = User::factory()->create(['role_id' => 3]);
-        $asesor1User   = User::factory()->create(['role_id' => 2]);
-        $asesor2User   = User::factory()->create(['role_id' => 2]);
+        $asesor1User = User::factory()->create(['role_id' => 2]);
+        $asesor2User = User::factory()->create(['role_id' => 2]);
 
         $asesor1 = Asesor::create([
-            'user_id'           => $asesor1User->id,
+            'user_id' => $asesor1User->id,
             'nama_dengan_gelar' => 'Dr. Asesor Satu',
-            'nama_tanpa_gelar'  => 'Asesor Satu',
+            'nama_tanpa_gelar' => 'Asesor Satu',
         ]);
 
         $asesor2 = Asesor::create([
-            'user_id'           => $asesor2User->id,
+            'user_id' => $asesor2User->id,
             'nama_dengan_gelar' => 'Dr. Asesor Dua',
-            'nama_tanpa_gelar'  => 'Asesor Dua',
+            'nama_tanpa_gelar' => 'Asesor Dua',
         ]);
 
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
-            'status'  => AkreditasiStateMachine::STATUS_PASCA_VISITASI, // 2
+            'status' => AkreditasiStateMachine::STATUS_PASCA_VISITASI, // 2
         ]);
 
         Assessment::create([
-            'akreditasi_id'   => $akreditasi->id,
-            'asesor_id'       => $asesor1->id,
-            'tipe'            => 1,
-            'tanggal_mulai'   => now(),
+            'akreditasi_id' => $akreditasi->id,
+            'asesor_id' => $asesor1->id,
+            'tipe' => 1,
+            'tanggal_mulai' => now(),
             'tanggal_berakhir' => now()->addDays(30),
         ]);
 
         Assessment::create([
-            'akreditasi_id'   => $akreditasi->id,
-            'asesor_id'       => $asesor2->id,
-            'tipe'            => 2,
-            'tanggal_mulai'   => now(),
+            'akreditasi_id' => $akreditasi->id,
+            'asesor_id' => $asesor2->id,
+            'tipe' => 2,
+            'tanggal_mulai' => now(),
             'tanggal_berakhir' => now()->addDays(30),
         ]);
 
         return [
-            'akreditasi'     => $akreditasi,
-            'asesor1UserId'  => $asesor1User->id,   // users.id (for service calls)
-            'asesor2UserId'  => $asesor2User->id,   // users.id (for service calls)
-            'asesor1Id'      => $asesor1->id,       // asesors.id (for DB queries)
-            'asesor2Id'      => $asesor2->id,       // asesors.id (for DB queries)
+            'akreditasi' => $akreditasi,
+            'asesor1UserId' => $asesor1User->id,   // users.id (for service calls)
+            'asesor2UserId' => $asesor2User->id,   // users.id (for service calls)
+            'asesor1Id' => $asesor1->id,       // asesors.id (for DB queries)
+            'asesor2Id' => $asesor2->id,       // asesors.id (for DB queries)
         ];
     }
 
@@ -164,21 +163,21 @@ private function createScoringScenario(): array
      *
      * **Validates: Requirements 7.8**
      */
-public function test_property9_nk_accepted_when_both_na_are_final(): void
+    public function test_property9_nk_accepted_when_both_na_are_final(): void
     {
         $iterations = 10;
 
         for ($i = 0; $i < $iterations; $i++) {
             $scenario = $this->createScoringScenario();
-            $akreditasiId  = $scenario['akreditasi']->id;
+            $akreditasiId = $scenario['akreditasi']->id;
             $asesor1UserId = $scenario['asesor1UserId'];
             $asesor2UserId = $scenario['asesor2UserId'];
 
             $butirIndex = random_int(1, 62);
-            $butirId    = $this->getButirId($butirIndex);
-            $na1Value   = random_int(1, 4);
-            $na2Value   = random_int(1, 4);
-            $nkValue    = random_int(1, 4);
+            $butirId = $this->getButirId($butirIndex);
+            $na1Value = random_int(1, 4);
+            $na2Value = random_int(1, 4);
+            $nkValue = random_int(1, 4);
 
             $this->fillAllNaFinal($akreditasiId, $asesor1UserId, $asesor2UserId);
 
@@ -194,7 +193,7 @@ public function test_property9_nk_accepted_when_both_na_are_final(): void
 
             $this->assertNull(
                 $exception,
-                "Iteration {$i}: NK should be accepted when all Nilai Ketua and Nilai Anggota are Final, but threw: " .
+                "Iteration {$i}: NK should be accepted when all Nilai Ketua and Nilai Anggota are Final, but threw: ".
                 ($exception ? $exception->getMessage() : 'no exception')
             );
 
@@ -220,21 +219,21 @@ public function test_property9_nk_accepted_when_both_na_are_final(): void
      *
      * **Validates: Requirements 7.9**
      */
-public function test_property9_nk_rejected_when_na1_not_final(): void
+    public function test_property9_nk_rejected_when_na1_not_final(): void
     {
         $iterations = 10;
 
         for ($i = 0; $i < $iterations; $i++) {
             $scenario = $this->createScoringScenario();
-            $akreditasiId  = $scenario['akreditasi']->id;
+            $akreditasiId = $scenario['akreditasi']->id;
             $asesor1UserId = $scenario['asesor1UserId'];
             $asesor2UserId = $scenario['asesor2UserId'];
 
             $butirIndex = random_int(1, 62);
-            $butirId    = $this->getButirId($butirIndex);
-            $na1Value   = random_int(1, 4);
-            $na2Value   = random_int(1, 4);
-            $nkValue    = random_int(1, 4);
+            $butirId = $this->getButirId($butirIndex);
+            $na1Value = random_int(1, 4);
+            $na2Value = random_int(1, 4);
+            $nkValue = random_int(1, 4);
 
             $this->fillAllNaFinal($akreditasiId, $asesor1UserId, $asesor2UserId, draftKetuaIndex: $butirIndex);
 
@@ -275,21 +274,21 @@ public function test_property9_nk_rejected_when_na1_not_final(): void
      *
      * **Validates: Requirements 7.9**
      */
-public function test_property9_nk_rejected_when_na2_not_final(): void
+    public function test_property9_nk_rejected_when_na2_not_final(): void
     {
         $iterations = 10;
 
         for ($i = 0; $i < $iterations; $i++) {
             $scenario = $this->createScoringScenario();
-            $akreditasiId  = $scenario['akreditasi']->id;
+            $akreditasiId = $scenario['akreditasi']->id;
             $asesor1UserId = $scenario['asesor1UserId'];
             $asesor2UserId = $scenario['asesor2UserId'];
 
             $butirIndex = random_int(1, 62);
-            $butirId    = $this->getButirId($butirIndex);
-            $na1Value   = random_int(1, 4);
-            $na2Value   = random_int(1, 4);
-            $nkValue    = random_int(1, 4);
+            $butirId = $this->getButirId($butirIndex);
+            $na1Value = random_int(1, 4);
+            $na2Value = random_int(1, 4);
+            $nkValue = random_int(1, 4);
 
             $this->fillAllNaFinal($akreditasiId, $asesor1UserId, $asesor2UserId, draftAnggotaIndex: $butirIndex);
 
@@ -353,19 +352,19 @@ public function test_property9_nk_rejected_when_na2_not_final(): void
      *
      * **Validates: Requirements 7.8, 7.9**
      */
-public function test_property9_nk_rejected_when_no_na_values(): void
+    public function test_property9_nk_rejected_when_no_na_values(): void
     {
         $iterations = 100;
 
         for ($i = 0; $i < $iterations; $i++) {
             $scenario = $this->createScoringScenario();
-            $akreditasiId  = $scenario['akreditasi']->id;
+            $akreditasiId = $scenario['akreditasi']->id;
             $asesor1UserId = $scenario['asesor1UserId'];
             $asesor2UserId = $scenario['asesor2UserId'];
 
             $butirIndex = random_int(1, 62);
-            $butirId    = $this->getButirId($butirIndex);
-            $nkValue    = random_int(1, 4);
+            $butirId = $this->getButirId($butirIndex);
+            $nkValue = random_int(1, 4);
 
             // No NA values saved at all — attempt NK directly
             $exception = null;
@@ -396,7 +395,7 @@ public function test_property9_nk_rejected_when_no_na_values(): void
      *
      * **Validates: Requirements 7.8, 7.9**
      */
-public function test_property9_biconditional_nk_accepted_iff_both_na_final(): void
+    public function test_property9_biconditional_nk_accepted_iff_both_na_final(): void
     {
         $combinations = [
             [true, true],
@@ -407,13 +406,13 @@ public function test_property9_biconditional_nk_accepted_iff_both_na_final(): vo
 
         foreach ($combinations as $i => [$ketuaComplete, $anggotaComplete]) {
             $scenario = $this->createScoringScenario();
-            $akreditasiId  = $scenario['akreditasi']->id;
+            $akreditasiId = $scenario['akreditasi']->id;
             $asesor1UserId = $scenario['asesor1UserId'];
             $asesor2UserId = $scenario['asesor2UserId'];
 
             $butirIndex = random_int(1, 62);
-            $butirId    = $this->getButirId($butirIndex);
-            $nkValue    = random_int(1, 4);
+            $butirId = $this->getButirId($butirIndex);
+            $nkValue = random_int(1, 4);
 
             $this->fillAllNaFinal(
                 $akreditasiId,
@@ -437,8 +436,8 @@ public function test_property9_biconditional_nk_accepted_iff_both_na_final(): vo
             if ($expectedAccepted) {
                 $this->assertNull(
                     $exception,
-                    "Iteration {$i}: NK should be accepted when both roles are globally Final, " .
-                    "but threw: " . ($exception ? $exception->getMessage() : 'no exception')
+                    "Iteration {$i}: NK should be accepted when both roles are globally Final, ".
+                    'but threw: '.($exception ? $exception->getMessage() : 'no exception')
                 );
             } else {
                 $this->assertNotNull(

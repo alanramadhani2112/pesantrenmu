@@ -3,8 +3,8 @@
 namespace Tests\Unit;
 
 use App\StateMachine\AkreditasiStateMachine;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\TestCase;
 
 /**
  * Unit tests for AkreditasiStateMachine::canTransition.
@@ -18,12 +18,11 @@ class AkreditasiStateMachineTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->sm = new AkreditasiStateMachine();
+        $this->sm = new AkreditasiStateMachine;
     }
 
-    /**     */
-#[DataProvider('permittedTransitionsProvider')]
-public function test_can_transition_returns_true_for_permitted_transitions(int $from, int $to): void
+    #[DataProvider('permittedTransitionsProvider')]
+    public function test_can_transition_returns_true_for_permitted_transitions(int $from, int $to): void
     {
         $this->assertTrue(
             $this->sm->canTransition($from, $to),
@@ -34,24 +33,23 @@ public function test_can_transition_returns_true_for_permitted_transitions(int $
     public static function permittedTransitionsProvider(): array
     {
         return [
-            'Pengajuan -> Verifikasi Berkas'         => [6, 5],
-            'Verifikasi Berkas -> Assessment'        => [5, 4],
-            'Verifikasi Berkas -> Ditolak'           => [5, -1],
-            'Assessment -> Visitasi'                 => [4, 3],
-            'Assessment -> Ditolak'                  => [4, -1],
-            'Visitasi -> Pasca Visitasi'             => [3, 2],
-            'Pasca Visitasi -> Validasi Admin'       => [2, 1],
-            'Validasi Admin -> Selesai'              => [1, 0],
-            'Validasi Admin -> Ditolak'              => [1, -1],
-            'Ditolak -> Banding'                     => [-1, -2],
-            'Banding -> Validasi Admin'              => [-2, 1],
-            'Banding -> Ditolak'                     => [-2, -1],
+            'Pengajuan -> Verifikasi Berkas' => [6, 5],
+            'Verifikasi Berkas -> Assessment' => [5, 4],
+            'Verifikasi Berkas -> Ditolak' => [5, -1],
+            'Assessment -> Visitasi' => [4, 3],
+            'Assessment -> Ditolak' => [4, -1],
+            'Visitasi -> Pasca Visitasi' => [3, 2],
+            'Pasca Visitasi -> Validasi Admin' => [2, 1],
+            'Validasi Admin -> Selesai' => [1, 0],
+            'Validasi Admin -> Ditolak' => [1, -1],
+            'Ditolak -> Banding' => [-1, -2],
+            'Banding -> Validasi Admin' => [-2, 1],
+            'Banding -> Ditolak' => [-2, -1],
         ];
     }
 
-    /**     */
-#[DataProvider('unpermittedTransitionsProvider')]
-public function test_can_transition_returns_false_for_unpermitted_transitions(int $from, int $to): void
+    #[DataProvider('unpermittedTransitionsProvider')]
+    public function test_can_transition_returns_false_for_unpermitted_transitions(int $from, int $to): void
     {
         $this->assertFalse(
             $this->sm->canTransition($from, $to),
@@ -62,18 +60,18 @@ public function test_can_transition_returns_false_for_unpermitted_transitions(in
     public static function unpermittedTransitionsProvider(): array
     {
         return [
-            'Skip ahead 6 -> 4'                      => [6, 4],
-            'Backwards 5 -> 6'                       => [5, 6],
-            'Selesai is terminal 0 -> 1'             => [0, 1],
-            'Selesai is terminal 0 -> -1'            => [0, -1],
-            'Selesai is terminal 0 -> 0'             => [0, 0],
-            'Pengajuan -> Ditolak (not permitted)'   => [6, -1],
-            'Visitasi -> Ditolak (not permitted)'    => [3, -1],
-            'Pasca Visitasi -> Ditolak'              => [2, -1],
-            'Validasi Admin -> Banding'              => [1, -2],
-            'Self transition 4 -> 4'                 => [4, 4],
-            'Banding -> Visitasi'                    => [-2, 3],
-            'Banding -> Pasca Visitasi'              => [-2, 2],
+            'Skip ahead 6 -> 4' => [6, 4],
+            'Backwards 5 -> 6' => [5, 6],
+            'Selesai is terminal 0 -> 1' => [0, 1],
+            'Selesai is terminal 0 -> -1' => [0, -1],
+            'Selesai is terminal 0 -> 0' => [0, 0],
+            'Pengajuan -> Ditolak (not permitted)' => [6, -1],
+            'Visitasi -> Ditolak (not permitted)' => [3, -1],
+            'Pasca Visitasi -> Ditolak' => [2, -1],
+            'Validasi Admin -> Banding' => [1, -2],
+            'Self transition 4 -> 4' => [4, 4],
+            'Banding -> Visitasi' => [-2, 3],
+            'Banding -> Pasca Visitasi' => [-2, 2],
         ];
     }
 
@@ -100,9 +98,8 @@ public function test_can_transition_returns_false_for_unpermitted_transitions(in
     // getPermittedTransitions tests
     // -------------------------------------------------------------------------
 
-    /**     */
-#[DataProvider('permittedTransitionListProvider')]
-public function test_get_permitted_transitions_returns_correct_targets(int $status, array $expected): void
+    #[DataProvider('permittedTransitionListProvider')]
+    public function test_get_permitted_transitions_returns_correct_targets(int $status, array $expected): void
     {
         $this->assertSame(
             $expected,
@@ -114,14 +111,14 @@ public function test_get_permitted_transitions_returns_correct_targets(int $stat
     public static function permittedTransitionListProvider(): array
     {
         return [
-            'Pengajuan (6) -> [5]'                   => [6,  [5]],
-            'Verifikasi Berkas (5) -> [4, -1]'       => [5,  [4, -1]],
-            'Assessment (4) -> [3, -1]'              => [4,  [3, -1]],
-            'Visitasi (3) -> [2]'                    => [3,  [2]],
-            'Pasca Visitasi (2) -> [1]'              => [2,  [1]],
-            'Validasi Admin (1) -> [0, -1]'          => [1,  [0, -1]],
-            'Ditolak (-1) -> [-2]'                   => [-1, [-2]],
-            'Banding (-2) -> [1, -1]'                => [-2, [1, -1]],
+            'Pengajuan (6) -> [5]' => [6,  [5]],
+            'Verifikasi Berkas (5) -> [4, -1]' => [5,  [4, -1]],
+            'Assessment (4) -> [3, -1]' => [4,  [3, -1]],
+            'Visitasi (3) -> [2]' => [3,  [2]],
+            'Pasca Visitasi (2) -> [1]' => [2,  [1]],
+            'Validasi Admin (1) -> [0, -1]' => [1,  [0, -1]],
+            'Ditolak (-1) -> [-2]' => [-1, [-2]],
+            'Banding (-2) -> [1, -1]' => [-2, [1, -1]],
         ];
     }
 

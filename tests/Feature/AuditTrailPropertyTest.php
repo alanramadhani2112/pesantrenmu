@@ -12,7 +12,6 @@ use Database\Seeders\RoleSeeder;
 use Faker\Factory as Faker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -33,7 +32,7 @@ class AuditTrailPropertyTest extends TestCase
     /**
      * Helper: create an admin user.
      */
-private function createAdminUser(): User
+    private function createAdminUser(): User
     {
         return User::factory()->create(['role_id' => 1]);
     }
@@ -41,20 +40,21 @@ private function createAdminUser(): User
     /**
      * Helper: create a pesantren user with pesantren record.
      */
-private function createPesantrenUser(): User
+    private function createPesantrenUser(): User
     {
         $user = User::factory()->create(['role_id' => 3]);
         Pesantren::create([
             'user_id' => $user->id,
-            'nama_pesantren' => 'Pesantren Test ' . $user->id,
+            'nama_pesantren' => 'Pesantren Test '.$user->id,
         ]);
+
         return $user;
     }
 
     /**
      * Helper: create an akreditasi for a given user.
      */
-private function createAkreditasi(int $userId, int $status = 6): Akreditasi
+    private function createAkreditasi(int $userId, int $status = 6): Akreditasi
     {
         return Akreditasi::create([
             'user_id' => $userId,
@@ -77,7 +77,7 @@ private function createAkreditasi(int $userId, int $status = 6): Akreditasi
                 $faker->optional(0.7)->sentence(),
                 $faker->optional(0.7)->sentence(),
                 $faker->optional(0.6)->passthrough([
-                    'key_' . $faker->word() => $faker->word(),
+                    'key_'.$faker->word() => $faker->word(),
                     'number' => $faker->numberBetween(1, 100),
                     'nested' => ['inner' => $faker->word()],
                 ]),
@@ -361,7 +361,7 @@ private function createAkreditasi(int $userId, int $status = 6): Akreditasi
         for ($i = 1; $i < count($items); $i++) {
             $this->assertTrue(
                 $items[$i - 1]->created_at->greaterThanOrEqualTo($items[$i]->created_at),
-                "Item at index " . ($i - 1) . " (created_at={$items[$i-1]->created_at}) should be >= item at index {$i} (created_at={$items[$i]->created_at})"
+                'Item at index '.($i - 1)." (created_at={$items[$i - 1]->created_at}) should be >= item at index {$i} (created_at={$items[$i]->created_at})"
             );
         }
     }
@@ -460,6 +460,24 @@ private function createAkreditasi(int $userId, int $status = 6): Akreditasi
 
         // Query with filters
         $results = $this->auditTrailService->getTimeline($akreditasi->id, $filters, 100);
+        $resultIds = collect($results->items())->pluck('id')->all();
+
+        $expectedQuery = AkreditasiAuditLog::where('akreditasi_id', $akreditasi->id);
+        if ($filterActionType !== null) {
+            $expectedQuery->where('action_type', $filterActionType);
+        }
+        if ($filterUserId !== null) {
+            $expectedQuery->where('user_id', $filterUserId);
+        }
+        if ($filterDateFrom !== null) {
+            $expectedQuery->where('created_at', '>=', $filterDateFrom);
+        }
+        if ($filterDateTo !== null) {
+            $expectedQuery->where('created_at', '<=', $filterDateTo.' 23:59:59');
+        }
+        $expectedIds = $expectedQuery->orderBy('created_at', 'desc')->pluck('id')->all();
+
+        $this->assertSame($expectedIds, $resultIds);
 
         // Assert all returned records satisfy ALL filter criteria
         foreach ($results->items() as $item) {
@@ -484,7 +502,7 @@ private function createAkreditasi(int $userId, int $status = 6): Akreditasi
 
             if ($filterDateTo !== null) {
                 $this->assertTrue(
-                    $item->created_at->lessThanOrEqualTo(Carbon::parse($filterDateTo . ' 23:59:59')),
+                    $item->created_at->lessThanOrEqualTo(Carbon::parse($filterDateTo.' 23:59:59')),
                     "Record created_at '{$item->created_at}' should be <= date_to '{$filterDateTo} 23:59:59'"
                 );
             }
@@ -555,12 +573,13 @@ private function createAkreditasi(int $userId, int $status = 6): Akreditasi
             $this->assertEquals($ipAddress, $retrieved->ip_address,
                 "IP address should match request IP '{$ipAddress}'");
             $this->assertEquals($userAgent, $retrieved->user_agent,
-                "User agent should match request user agent");
+                'User agent should match request user agent');
         } else {
             // Simulate no HTTP context by using a partial mock on the service
             // that overrides resolveIpAddress and resolveUserAgent to simulate
             // the Throwable catch path returning 'system'
-            $service = new class extends AuditTrailService {
+            $service = new class extends AuditTrailService
+            {
                 protected function resolveIpAddress(): string
                 {
                     // Simulate no HTTP context - throws internally, returns 'system'

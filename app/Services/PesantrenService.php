@@ -2,14 +2,32 @@
 
 namespace App\Services;
 
+use App\Models\Akreditasi;
+use App\Models\AkreditasiEdpm;
+use App\Models\AkreditasiEdpmCatatan;
+use App\Models\Document;
+use App\Models\Edpm;
+use App\Models\EdpmCatatan;
+use App\Models\Ipm;
+use App\Models\MasterEdpmButir;
+use App\Models\MasterEdpmKomponen;
 use App\Models\Pesantren;
+use App\Models\SdmPesantren;
 use App\Models\User;
+use App\Notifications\AkreditasiNotification;
+use App\Repositories\Contracts\AkreditasiRepositoryInterface;
+use App\Repositories\Contracts\EdpmRepositoryInterface;
+use App\Repositories\Contracts\IpmRepositoryInterface;
 use App\Repositories\Contracts\PesantrenRepositoryInterface;
-use App\Services\AuditTrailService;
+use App\Repositories\Contracts\SdmRepositoryInterface;
+use App\StateMachine\AkreditasiStateMachine;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 
 class PesantrenService
 {
@@ -38,10 +56,10 @@ class PesantrenService
 
     public function __construct(
         PesantrenRepositoryInterface $pesantrenRepository,
-        \App\Repositories\Contracts\AkreditasiRepositoryInterface $akreditasiRepository,
-        \App\Repositories\Contracts\EdpmRepositoryInterface $edpmRepository,
-        \App\Repositories\Contracts\IpmRepositoryInterface $ipmRepository,
-        \App\Repositories\Contracts\SdmRepositoryInterface $sdmRepository,
+        AkreditasiRepositoryInterface $akreditasiRepository,
+        EdpmRepositoryInterface $edpmRepository,
+        IpmRepositoryInterface $ipmRepository,
+        SdmRepositoryInterface $sdmRepository,
         AuditTrailService $auditTrailService
     ) {
         $this->pesantrenRepository = $pesantrenRepository;
@@ -79,7 +97,7 @@ class PesantrenService
                 // Notify user hanya saat dibuka kunci
                 $user = User::find($pesantren->user_id);
                 if ($user) {
-                    $user->notify(new \App\Notifications\AkreditasiNotification(
+                    $user->notify(new AkreditasiNotification(
                         'buka_kunci',
                         'Akses Data Dibuka',
                         'Administrator telah membuka kunci data Anda. Anda sekarang dapat memperbarui profil dan dokumen.',
@@ -97,12 +115,17 @@ class PesantrenService
         return $this->akreditasiRepository->getPaginatedByUserId($userId, $search, $periodeFilter, $statusFilter, $perPage, $sortField, $sortAsc);
     }
 
+    public function getLatestAkreditasi(int $userId): ?Akreditasi
+    {
+        return $this->akreditasiRepository->latestForUser($userId);
+    }
+
     public function checkDataCompleteness(int $userId): array
     {
         $missingData = [];
 
         // 1. Check Profil
-        $pesantren = \App\Models\Pesantren::where('user_id', $userId)->first();
+        $pesantren = Pesantren::where('user_id', $userId)->first();
         if (! $pesantren) {
             $missingData[] = 'Profil Pesantren belum diisi';
         } else {
@@ -119,7 +142,7 @@ class PesantrenService
         }
 
         // 2. Check IPM
-        $ipm = \App\Models\Ipm::where('user_id', $userId)->first();
+        $ipm = Ipm::where('user_id', $userId)->first();
         if (! $ipm) {
             $missingData[] = 'Data IPM belum diisi';
         } else {
@@ -138,7 +161,7 @@ class PesantrenService
         }
 
         // 3. Check SDM — PM-12 fix: minimal 1 row SDM dengan setidaknya 1 nilai non-zero
-        $sdmRows = \App\Models\SdmPesantren::where('user_id', $userId)->get();
+        $sdmRows = SdmPesantren::where('user_id', $userId)->get();
         if ($sdmRows->isEmpty()) {
             $missingData[] = 'Data SDM belum diisi';
         } else {
@@ -156,6 +179,7 @@ class PesantrenService
                         return true;
                     }
                 }
+
                 return false;
             });
             if (! $hasNonZero) {
@@ -165,11 +189,11 @@ class PesantrenService
 
         // 4. Check EDPM
         // P-9 fix: cache master butir count — it changes only when admin edits master data.
-        $totalButirs = \Illuminate\Support\Facades\Cache::rememberForever(
+        $totalButirs = Cache::rememberForever(
             'master_edpm_butir_count',
-            fn () => \App\Models\MasterEdpmButir::count()
+            fn () => MasterEdpmButir::count()
         );
-        $evaluatedButirs = \App\Models\Edpm::where('user_id', $userId)->count();
+        $evaluatedButirs = Edpm::where('user_id', $userId)->count();
         if ($evaluatedButirs < $totalButirs) {
             $missingData[] = "Evaluasi Diri (EDPM) belum lengkap ($evaluatedButirs/$totalButirs butir terisi)";
         }
@@ -195,41 +219,19 @@ class PesantrenService
         return $missing;
     }
 
-    public function createSubmission(int $userId, ?int $parentId = null): ?\App\Models\Akreditasi
+    public function createSubmission(int $userId): ?Akreditasi
     {
         if (! empty($this->checkDataCompleteness($userId))) {
             return null;
         }
 
-        if (\App\Models\Akreditasi::where('user_id', $userId)->whereIn('status', [3, 4, 5, 6])->exists()) {
+        if (Akreditasi::where('user_id', $userId)->whereIn('status', Akreditasi::activeStatuses())->exists()) {
             return null;
         }
 
-        if ($parentId && \App\Models\Akreditasi::where('parent', $parentId)->exists()) {
-            return null;
-        }
-
-        if ($parentId) {
-            $resubmissionService = app(ResubmissionService::class);
-            $eligibility = $resubmissionService->checkResubmissionEligibility($parentId);
-
-            if (! $eligibility['allowed']) {
-                Log::info('Resubmission blocked', [
-                    'user_id' => $userId,
-                    'akreditasi_id' => $parentId,
-                    'reason' => $eligibility['error_code'],
-                    'chain_count' => $eligibility['error_data']['count'] ?? null,
-                    'limit' => $eligibility['error_data']['limit'] ?? config('akreditasi.resubmission_limit'),
-                ]);
-
-                return null;
-            }
-        }
-
-        $akreditasi = \App\Models\Akreditasi::create([
+        $akreditasi = Akreditasi::create([
             'user_id' => $userId,
             'status' => 6, // Pengajuan
-            'parent' => $parentId,
         ]);
 
         // Lock Data
@@ -239,7 +241,7 @@ class PesantrenService
 
             // Notify Admin
             $admins = User::whereHas('role', fn ($q) => $q->where('id', 1))->get();
-            \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\AkreditasiNotification(
+            Notification::send($admins, new AkreditasiNotification(
                 'pengajuan',
                 'Pengajuan Akreditasi Baru',
                 'Pesantren '.($user->pesantren->nama_pesantren ?? $user->name).' telah membuat pengajuan akreditasi baru.',
@@ -252,7 +254,7 @@ class PesantrenService
 
     public function deleteSubmission(int $id, int $userId): bool
     {
-        $akreditasi = \App\Models\Akreditasi::find($id);
+        $akreditasi = Akreditasi::find($id);
         if (! $akreditasi) {
             return false;
         }
@@ -271,16 +273,11 @@ class PesantrenService
             return false;
         }
 
-        // Reject if a child resubmission already references this akreditasi.
-        if (\App\Models\Akreditasi::where('parent', $id)->exists()) {
-            return false;
-        }
-
         return DB::transaction(function () use ($akreditasi, $userId) {
             $akreditasi->delete();
 
             // Unlock pesantren data only when no other active akreditasi remains.
-            $hasOtherActive = \App\Models\Akreditasi::where('user_id', $userId)
+            $hasOtherActive = Akreditasi::where('user_id', $userId)
                 ->whereIn('status', [3, 4, 5, 6])
                 ->exists();
 
@@ -298,7 +295,7 @@ class PesantrenService
         // PM-7 fix: gunakan find + ownership check (bukan findOrFail yang throw 404
         // pada double-click), dan bungkus dalam DB::transaction agar delete +
         // unlock pesantren jadi atomic.
-        $akreditasi = \App\Models\Akreditasi::where('user_id', $userId)
+        $akreditasi = Akreditasi::where('user_id', $userId)
             ->where('status', 6)
             ->find($id);
 
@@ -310,7 +307,7 @@ class PesantrenService
             $akreditasi->delete();
 
             // Unlock pesantren data only when no other active akreditasi remains.
-            $hasActive = \App\Models\Akreditasi::where('user_id', $userId)
+            $hasActive = Akreditasi::where('user_id', $userId)
                 ->whereIn('status', [3, 4, 5, 6])
                 ->exists();
 
@@ -332,7 +329,7 @@ class PesantrenService
             return false;
         }
 
-        $akreditasi = \App\Models\Akreditasi::withTrashed()->where('user_id', $userId)->find($id);
+        $akreditasi = Akreditasi::withTrashed()->where('user_id', $userId)->find($id);
         if (! $akreditasi) {
             Log::warning('submitAppeals ownership mismatch or not found', [
                 'user_id' => $userId,
@@ -386,8 +383,8 @@ class PesantrenService
         $pesantren = $this->getProfile($userId);
         if ($pesantren->is_locked) {
             // Check if 'profil' section is unlocked via rejection
-            $rejectionService = app(\App\Services\RejectionService::class);
-            $akreditasi = \App\Models\Akreditasi::where('user_id', $userId)->where('status', 5)->latest()->first();
+            $rejectionService = app(RejectionService::class);
+            $akreditasi = Akreditasi::where('user_id', $userId)->where('status', 5)->latest()->first();
             if (! $akreditasi || ! $rejectionService->isSectionUnlocked($akreditasi->id, 'profil')) {
                 return false;
             }
@@ -439,8 +436,8 @@ class PesantrenService
         $pesantren = $this->getProfile($userId);
         if ($pesantren->is_locked) {
             // Check if any EDPM butir is unlocked via rejection
-            $rejectionService = app(\App\Services\RejectionService::class);
-            $akreditasi = \App\Models\Akreditasi::where('user_id', $userId)->where('status', 5)->latest()->first();
+            $rejectionService = app(RejectionService::class);
+            $akreditasi = Akreditasi::where('user_id', $userId)->where('status', 5)->latest()->first();
             if (! $akreditasi) {
                 return false;
             }
@@ -506,8 +503,8 @@ class PesantrenService
         $pesantren = $this->getProfile($userId);
         if ($pesantren->is_locked) {
             // Check if any EDPM butir is unlocked via rejection
-            $rejectionService = app(\App\Services\RejectionService::class);
-            $akreditasi = \App\Models\Akreditasi::where('user_id', $userId)->where('status', 5)->latest()->first();
+            $rejectionService = app(RejectionService::class);
+            $akreditasi = Akreditasi::where('user_id', $userId)->where('status', 5)->latest()->first();
             if (! $akreditasi) {
                 return false;
             }
@@ -571,9 +568,9 @@ class PesantrenService
         });
     }
 
-    public function getIpm(int $userId): \App\Models\Ipm
+    public function getIpm(int $userId): Ipm
     {
-        return $this->ipmRepository->findByUserId($userId) ?? \App\Models\Ipm::create(['user_id' => $userId]);
+        return $this->ipmRepository->findByUserId($userId) ?? Ipm::create(['user_id' => $userId]);
     }
 
     public function updateIpm(int $userId, array $data): bool
@@ -581,8 +578,8 @@ class PesantrenService
         $pesantren = $this->getProfile($userId);
         if ($pesantren->is_locked) {
             // Check if any IPM sub-item is unlocked via rejection
-            $rejectionService = app(\App\Services\RejectionService::class);
-            $akreditasi = \App\Models\Akreditasi::where('user_id', $userId)->where('status', 5)->latest()->first();
+            $rejectionService = app(RejectionService::class);
+            $akreditasi = Akreditasi::where('user_id', $userId)->where('status', 5)->latest()->first();
             if (! $akreditasi) {
                 return false;
             }
@@ -623,8 +620,8 @@ class PesantrenService
         $pesantren = $this->getProfile($userId);
         if ($pesantren->is_locked) {
             // Check if 'sdm' section is unlocked via rejection
-            $rejectionService = app(\App\Services\RejectionService::class);
-            $akreditasi = \App\Models\Akreditasi::where('user_id', $userId)->where('status', 5)->latest()->first();
+            $rejectionService = app(RejectionService::class);
+            $akreditasi = Akreditasi::where('user_id', $userId)->where('status', 5)->latest()->first();
             if (! $akreditasi || ! $rejectionService->isSectionUnlocked($akreditasi->id, 'sdm')) {
                 return false;
             }
@@ -637,37 +634,38 @@ class PesantrenService
 
     public function getAkreditasiDetail(string $uuid, int $userId): array
     {
-        $akreditasi = \App\Models\Akreditasi::with(['assessments.asesor.user', 'assessment1', 'assessment2'])
+        $akreditasi = Akreditasi::with(['assessments.asesor.user', 'assessment1', 'assessment2'])
             ->where('uuid', $uuid)
             ->where('user_id', $userId)
             ->firstOrFail();
 
-        $pesantren = \App\Models\Pesantren::with('units')->where('user_id', $userId)->first();
-        $ipm = \App\Models\Ipm::where('user_id', $userId)->first();
-        $sdm = \App\Models\SdmPesantren::where('user_id', $userId)->get()->keyBy('tingkat');
-        $komponens = \App\Models\MasterEdpmKomponen::with('butirs')->orderByRaw('COALESCE(ipr, 0) ASC')->orderBy('id', 'ASC')->get();
-        $visitasiTemplate = \App\Models\Document::where('type', 'visitasi')->where('status', 1)->first();
+        $pesantren = Pesantren::with('units')->where('user_id', $userId)->first();
+        $ipm = Ipm::where('user_id', $userId)->first();
+        $sdm = SdmPesantren::where('user_id', $userId)->get()->keyBy('tingkat');
+        $komponens = MasterEdpmKomponen::with('butirs')->orderByRaw('COALESCE(ipr, 0) ASC')->orderBy('id', 'ASC')->get();
+        $visitasiTemplate = Document::where('type', 'visitasi')->where('status', 1)->first();
 
         // Pesantren EDPM
-        $pEdpms = \App\Models\Edpm::where('user_id', $userId)->get();
+        $pEdpms = Edpm::where('user_id', $userId)->get();
         $pEvaluasis = $pEdpms->pluck('isian', 'butir_id');
         $pLinks = $pEdpms->pluck('link', 'butir_id');
-        $pCatatans = \App\Models\EdpmCatatan::where('user_id', $userId)->get()->pluck('catatan', 'komponen_id');
+        $pCatatans = EdpmCatatan::where('user_id', $userId)->get()->pluck('catatan', 'komponen_id');
 
         // Assessor 1 Data
         $asesor1Data = [];
         $asesor1Id = $akreditasi->assessment1->asesor_id ?? null;
         if ($asesor1Id) {
-            $a1Edpms = \App\Models\AkreditasiEdpm::where('akreditasi_id', $akreditasi->id)->where('asesor_id', $asesor1Id)->get();
+            $a1Edpms = AkreditasiEdpm::where('akreditasi_id', $akreditasi->id)->where('asesor_id', $asesor1Id)->get();
+            $a1Catatans = AkreditasiEdpmCatatan::where('akreditasi_id', $akreditasi->id)
+                ->where('asesor_id', $asesor1Id)
+                ->get();
             $asesor1Data = [
                 'evaluasis' => $a1Edpms->pluck('isian', 'butir_id'),
                 'nks' => $a1Edpms->pluck('nk', 'butir_id'),
                 'nvs' => $a1Edpms->pluck('nv', 'butir_id'),
                 'butir_catatans' => $a1Edpms->pluck('catatan', 'butir_id'),
-                'catatans' => \App\Models\AkreditasiEdpmCatatan::where('akreditasi_id', $akreditasi->id)
-                    ->where('asesor_id', $asesor1Id)
-                    ->get()
-                    ->pluck('catatan', 'komponen_id'),
+                'catatans' => $a1Catatans->pluck('catatan', 'komponen_id'),
+                'rekomendasis' => $a1Catatans->pluck('rekomendasi', 'komponen_id'),
             ];
         }
 
@@ -675,7 +673,7 @@ class PesantrenService
         $asesor2Data = [];
         $asesor2Id = $akreditasi->assessment2->asesor_id ?? null;
         if ($asesor2Id) {
-            $asesor2Data['evaluasis'] = \App\Models\AkreditasiEdpm::where('akreditasi_id', $akreditasi->id)
+            $asesor2Data['evaluasis'] = AkreditasiEdpm::where('akreditasi_id', $akreditasi->id)
                 ->where('asesor_id', $asesor2Id)
                 ->get()
                 ->pluck('isian', 'butir_id');
@@ -700,7 +698,7 @@ class PesantrenService
 
     public function uploadKartuKendali(int $akreditasiId, int $userId, string $filePath): bool
     {
-        $akreditasi = \App\Models\Akreditasi::find($akreditasiId);
+        $akreditasi = Akreditasi::find($akreditasiId);
         if (! $akreditasi) {
             return false;
         }
@@ -715,7 +713,7 @@ class PesantrenService
             return false;
         }
 
-        if ((int) $akreditasi->status !== \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
+        if ((int) $akreditasi->status !== AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
             return false;
         }
 
@@ -733,13 +731,13 @@ class PesantrenService
 
         // Hapus file lama setelah transaction commit (non-blocking, best-effort)
         if ($result['old_path'] && $result['old_path'] !== $filePath) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($result['old_path']);
+            Storage::disk('public')->delete($result['old_path']);
         }
 
         // Dispatch notifications AFTER transaction commits (non-blocking)
         if ($result['success']) {
-            $admins = \App\Models\User::whereHas('role', fn ($q) => $q->where('id', 1))->get();
-            \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\AkreditasiNotification(
+            $admins = User::whereHas('role', fn ($q) => $q->where('id', 1))->get();
+            Notification::send($admins, new AkreditasiNotification(
                 'kartu_kendali_diunggah',
                 'Kartu Kendali Diunggah',
                 'Pesantren '.($akreditasi->user->pesantren->nama_pesantren ?? $akreditasi->user->name).' telah mengunggah kembali Kartu Kendali.',

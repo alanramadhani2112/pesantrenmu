@@ -45,16 +45,16 @@ class FailedNotificationDashboardTest extends TestCase
     {
         return FailedNotification::create([
             'notification_type' => 'assessment',
-            'notifiable_id'     => $user->id,
-            'payload'           => [
-                'type'    => 'assessment',
-                'title'   => 'Update Status: Verifikasi Berkas',
+            'notifiable_id' => $user->id,
+            'payload' => [
+                'type' => 'assessment',
+                'title' => 'Update Status: Verifikasi Berkas',
                 'message' => 'Pengajuan akreditasi Anda telah diverifikasi.',
-                'url'     => 'https://example.com/akreditasi',
+                'url' => 'https://example.com/akreditasi',
             ],
             'failure_reason' => 'WebPush provider timeout',
-            'failed_at'      => now()->subHour(),
-            'status'         => $status,
+            'failed_at' => now()->subHour(),
+            'status' => $status,
         ]);
     }
 
@@ -63,7 +63,7 @@ class FailedNotificationDashboardTest extends TestCase
      *
      * Validates: Requirement 5.1
      */
-public function test_dashboard_renders_paginated_failed_notifications(): void
+    public function test_dashboard_renders_paginated_failed_notifications(): void
     {
         $admin = $this->createAdminUser();
         $pesantrenUser = $this->createPesantrenUser();
@@ -83,7 +83,7 @@ public function test_dashboard_renders_paginated_failed_notifications(): void
      *
      * Validates: Requirement 5.2
      */
-public function test_retry_dispatches_notification_and_updates_status(): void
+    public function test_retry_dispatches_notification_and_updates_status(): void
     {
         Notification::fake();
 
@@ -111,7 +111,7 @@ public function test_retry_dispatches_notification_and_updates_status(): void
      *
      * Validates: Requirement 5.3
      */
-public function test_dismiss_marks_record_as_dismissed(): void
+    public function test_dismiss_marks_record_as_dismissed(): void
     {
         $admin = $this->createAdminUser();
         $pesantrenUser = $this->createPesantrenUser();
@@ -132,7 +132,7 @@ public function test_dismiss_marks_record_as_dismissed(): void
      *
      * Validates: Requirement 5.4
      */
-public function test_non_admin_cannot_access_dashboard(): void
+    public function test_non_admin_cannot_access_dashboard(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $this->actingAs($pesantrenUser);
@@ -147,7 +147,7 @@ public function test_non_admin_cannot_access_dashboard(): void
      *
      * Validates: Requirement 5.5
      */
-public function test_dashboard_shows_pending_count(): void
+    public function test_dashboard_shows_pending_count(): void
     {
         $admin = $this->createAdminUser();
         $pesantrenUser = $this->createPesantrenUser();
@@ -170,7 +170,7 @@ public function test_dashboard_shows_pending_count(): void
      *
      * Validates: Requirement 5.1
      */
-public function test_status_filter_shows_only_matching_records(): void
+    public function test_status_filter_shows_only_matching_records(): void
     {
         $admin = $this->createAdminUser();
         $pesantrenUser = $this->createPesantrenUser();
@@ -194,7 +194,7 @@ public function test_status_filter_shows_only_matching_records(): void
      *
      * Validates: Requirement 5.4
      */
-public function test_route_is_protected_by_admin_middleware(): void
+    public function test_route_is_protected_by_admin_middleware(): void
     {
         $pesantrenUser = $this->createPesantrenUser();
         $this->actingAs($pesantrenUser);
@@ -209,7 +209,7 @@ public function test_route_is_protected_by_admin_middleware(): void
      *
      * Validates: Requirement 5.4
      */
-public function test_admin_can_access_dashboard_component(): void
+    public function test_admin_can_access_dashboard_component(): void
     {
         $admin = $this->createAdminUser();
         $this->actingAs($admin);
@@ -224,7 +224,7 @@ public function test_admin_can_access_dashboard_component(): void
      *
      * Validates: Requirement 5.5
      */
-public function test_sidebar_badge_count_includes_failed_notifications(): void
+    public function test_sidebar_badge_count_includes_failed_notifications(): void
     {
         $admin = $this->createAdminUser();
         $pesantrenUser = $this->createPesantrenUser();

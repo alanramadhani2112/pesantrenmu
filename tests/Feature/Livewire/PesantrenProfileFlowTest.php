@@ -4,6 +4,7 @@ namespace Tests\Feature\Livewire;
 
 use App\Models\Pesantren;
 use App\Models\User;
+use App\Services\PesantrenService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Volt\Volt;
@@ -105,7 +106,7 @@ class PesantrenProfileFlowTest extends TestCase
             'layanan_satuan_pendidikan' => [],
         ]);
 
-        $missing = app(\App\Services\PesantrenService::class)->checkDataCompleteness($user->id);
+        $missing = app(PesantrenService::class)->checkDataCompleteness($user->id);
 
         $this->assertContains('Profil Pesantren belum lengkap: Layanan Satuan Pendidikan', $missing);
     }
