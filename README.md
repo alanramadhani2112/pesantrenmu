@@ -1,37 +1,44 @@
-# SPM Fix — Sistem Penjaminan Mutu Pesantren
+# PesantrenMu — Sistem Penjaminan Mutu Pesantren
 
-Aplikasi akreditasi pesantren Muhammadiyah berbasis web. Mengelola alur pengajuan akreditasi dari pesantren, penilaian oleh asesor, hingga validasi dan penerbitan SK oleh admin.
+Aplikasi akreditasi pesantren Muhammadiyah berbasis web yang dikembangkan oleh LabMu untuk LP2M. Mengelola alur pengajuan akreditasi dari pesantren, penilaian oleh asesor, hingga validasi dan penerbitan SK oleh admin.
 
 ## Stack
 
 - **Backend**: Laravel 12 + PHP 8.2
-- **Frontend**: Livewire Volt + Blade + Metronic UI
+- **Frontend**: Livewire Volt + Blade + Metronic 8 UI
 - **Database**: MySQL 8+
-- **Queue**: Laravel Queue (database driver)
+- **Queue**: Laravel Queue (database driver, async notifications)
 - **Cache**: Redis (production) / file (local)
+- **Auth**: Laravel built-in + SSO bridge LP2M
+
+## Alur Akreditasi
+
+```
+Pengajuan (6) → Verifikasi Berkas (5) → Review Asesor (4) → Visitasi (3)
+→ Penilaian Pasca Visitasi (2) → Validasi Admin (1) → Hasil Akhir (0/-1)
+→ Banding (-2, jika ditolak final)
+```
+
+| Status | Label | Aktor |
+|--------|-------|-------|
+| 6 | Pengajuan | Pesantren submit |
+| 5 | Verifikasi Berkas | Admin review kelengkapan, assign asesor |
+| 4 | Review Asesor | Asesor review substansi |
+| 3 | Visitasi | Ketua Kelompok jadwalkan & konfirmasi |
+| 2 | Penilaian Pasca Visitasi | Asesor input NA1/NA2/NK, upload laporan |
+| 1 | Validasi Admin | Admin input NV, terbitkan SK |
+| 0 | Terakreditasi | Hasil akhir (Peringkat A/B/C) |
+| -1 | Ditolak Final | Pesantren bisa ajukan banding |
+| -2 | Banding | Admin review ulang |
 
 ## Role
 
 | role_id | Nama | Akses |
 |---------|------|-------|
-| 1 | Admin | Semua fitur admin, approve/reject akreditasi |
-| 2 | Asesor | Penilaian NA, NK, visitasi |
-| 3 | Pesantren | Pengajuan akreditasi, upload dokumen |
-| 4 | Super Admin | God mode, semua permission |
-
-## Status Akreditasi
-
-| Status | Label |
-|--------|-------|
-| 6 | Pengajuan |
-| 5 | Verifikasi Berkas |
-| 4 | Review Asesor |
-| 3 | Visitasi |
-| 2 | Penilaian Pasca Visitasi |
-| 1 | Validasi Admin |
-| 0 | Selesai |
-| -1 | Ditolak |
-| -2 | Banding |
+| 1 | Admin | Verifikasi berkas, assign asesor, validasi akhir, terbitkan SK |
+| 2 | Asesor | Review substansi, visitasi, input nilai (NA1/NA2/NK), upload laporan |
+| 3 | Pesantren | Pengajuan akreditasi, upload dokumen, lihat hasil |
+| 4 | Super Admin | Semua permission |
 
 ## Setup Lokal
 
@@ -68,22 +75,27 @@ npm run build
 npm run dev
 ```
 
-### Akun Demo (local only)
+### Akun Demo (local/testing only)
 
 | Email | Password | Role |
 |-------|----------|------|
+| superadmin@spm.test | password | Super Admin |
 | admin@spm.test | password | Admin |
 | pesantren@spm.test | password | Pesantren |
 | asesor@spm.test | password | Asesor |
 
-> ⚠️ Akun demo **tidak** di-seed di environment production/staging.
+> Akun demo hanya di-seed di environment `local` dan `testing`.
 
 ## Menjalankan Test
 
 ```bash
+# Semua test
 php artisan test
-# atau spesifik:
-php artisan test tests/Feature/Pesantren/
+
+# Per module
+php artisan test --filter=AkreditasiWorkflow
+php artisan test --filter=Notification
+php artisan test --filter=Auth
 ```
 
 Test menggunakan SQLite in-memory (konfigurasi di `phpunit.xml`).
@@ -96,6 +108,8 @@ Notifikasi berjalan async via queue. Jalankan worker:
 php artisan queue:work --queue=notifications,default --tries=3
 ```
 
+Notifikasi yang gagal tercatat di Failed Notification Dashboard (`/admin/failed-notifications`).
+
 ## Scheduler
 
 ```bash
@@ -103,7 +117,40 @@ php artisan queue:work --queue=notifications,default --tries=3
 * * * * * cd /path/to/app && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-Scheduled commands: `trash:purge`, `akreditasi:check-deadlines`, `banding:check-deadlines`, `perbaikan:check-deadlines`, `reminders:asesor2`.
+Scheduled commands:
+
+| Command | Fungsi |
+|---------|--------|
+| `banding:check-deadlines` | Auto-reject banding yang melewati batas waktu |
+| `perbaikan:check-deadlines` | Auto-reject perbaikan yang expired |
+| `reminders:asesor2` | Reminder untuk Anggota Kelompok |
+| `akreditasi:check-deadlines` | Cek deadline akreditasi |
+| `trash:purge` | Hapus permanen data di trash |
+| `akreditasi:check-perbaikan-deadlines` | Enforcement deadline perbaikan |
+| `akreditasi:send-perbaikan-reminders` | Kirim reminder perbaikan |
+
+## Notifikasi
+
+Sistem notifikasi mencakup seluruh alur akreditasi:
+
+- Pesantren submit pengajuan → Admin
+- Admin assign asesor → Ketua Kelompok + Anggota Kelompok
+- Visitasi dijadwalkan → Pesantren + Anggota Kelompok + Admin
+- Scoring selesai → Admin
+- Paket asesor final submitted → Admin
+- SK diterbitkan → Pesantren
+- Penolakan (berkas/asesor/validasi) → Pesantren
+- Banding submitted → Admin
+- Banding diputuskan → Pesantren
+- Deadline perbaikan mendekat → Pesantren
+
+## Keamanan
+
+- Multi-tenant: 7 Policy files, explicit `$fillable`, `Gate::authorize()`
+- SSO: token encrypted di session, `sso_sync_role` flag per user
+- Security headers: HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy
+- Race condition protection: `lockForUpdate`, `DB::transaction`, unique indexes
+- NV audit trail: perubahan NV dari default NK tercatat dengan alasan wajib
 
 ## Deploy Production
 
@@ -111,10 +158,15 @@ Lihat [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) untuk panduan lengkap.
 
 ## Dokumentasi
 
-- [`docs/business-spec-flow-lp2m-v1.md`](docs/business-spec-flow-lp2m-v1.md) — Business spec flow akreditasi LP2M
-- [`docs/post-visitasi-documents-implementation.md`](docs/post-visitasi-documents-implementation.md) — Implementasi dokumen wajib pasca visitasi
-- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — Production deploy runbook
-- [`docs/local-setup.md`](docs/local-setup.md) — Setup lokal detail
-- [`docs/architecture.md`](docs/architecture.md) — Arsitektur sistem
-- [`docs/project-work-report.md`](docs/project-work-report.md) — Kronologi pengerjaan project
-- [`.kiro/specs/`](.kiro/specs/) — Spec fitur (requirements, design, tasks)
+| Dokumen | Deskripsi |
+|---------|-----------|
+| [`docs/business-spec-flow-lp2m-v1.md`](docs/business-spec-flow-lp2m-v1.md) | Business spec flow akreditasi LP2M |
+| [`docs/architecture.md`](docs/architecture.md) | Arsitektur sistem |
+| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Production deploy runbook |
+| [`docs/local-setup.md`](docs/local-setup.md) | Setup lokal detail |
+| [`docs/production-readiness-plan.md`](docs/production-readiness-plan.md) | Rencana production readiness |
+| [`docs/post-visitasi-documents-implementation.md`](docs/post-visitasi-documents-implementation.md) | Implementasi dokumen pasca visitasi |
+| [`docs/performance-optimization.md`](docs/performance-optimization.md) | Optimasi performa |
+| [`docs/auth.md`](docs/auth.md) | Autentikasi dan SSO |
+| [`docs/project-work-report.md`](docs/project-work-report.md) | Kronologi pengerjaan project |
+| [`.kiro/specs/`](.kiro/specs/) | Spec fitur (requirements, design, tasks) |
