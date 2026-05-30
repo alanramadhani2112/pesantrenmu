@@ -6,7 +6,9 @@
     white-space: nowrap;
 }
 
-.spm-btn > .ki-duotone {
+.spm-btn > .ki-duotone,
+.spm-btn > .ki-solid,
+.spm-btn > .ki-outline {
     flex: 0 0 auto;
     line-height: 1;
 }

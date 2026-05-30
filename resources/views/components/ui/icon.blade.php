@@ -14,6 +14,10 @@
 
     $iconName = $aliases[$name] ?? $name;
 
+    // Icons with 0 duotone paths use ki-solid (single-glyph icons)
+    $solidIcons = ['down', 'left', 'right', 'up', 'home', 'plus', 'minus', 'check'];
+    $useSolid = in_array($iconName, $solidIcons);
+
     $paths ??= [
         'abstract-26' => 2,
         'arrow-right' => 2,
@@ -37,9 +41,6 @@
         'arrow-down' => 2,
         'arrow-up-down' => 2,
         'arrow-left' => 2,
-        'down' => 0,
-        'left' => 0,
-        'right' => 0,
         'eye' => 3,
         'eye-slash' => 4,
         'trash' => 5,
@@ -53,11 +54,7 @@
         'menu' => 4,
         'setting-2' => 2,
         'data' => 5,
-        'home' => 0,
         'home-2' => 2,
-        'plus' => 0,
-        'minus' => 0,
-        'check' => 0,
         'pencil' => 2,
         'burger-menu' => 4,
         'exit-right' => 2,
@@ -78,16 +75,19 @@
         'rocket' => 2,
         'cross' => 2,
         'disconnect' => 5,
-        'information-5' => 3,
         'lock' => 3,
         'lock-2' => 5,
         'sms' => 2,
         'time' => 2,
-    ][$iconName] ?? 6;
+    ][$iconName] ?? ($useSolid ? 0 : 6);
 @endphp
 
+@if($useSolid)
+<i {{ $attributes->merge(['class' => "ki-solid ki-{$iconName}"]) }}></i>
+@else
 <i {{ $attributes->merge(['class' => "ki-duotone ki-{$iconName}"]) }}>
     @for($index = 1; $index <= $paths; $index++)
         <span class="path{{ $index }}"></span>
     @endfor
 </i>
+@endif
