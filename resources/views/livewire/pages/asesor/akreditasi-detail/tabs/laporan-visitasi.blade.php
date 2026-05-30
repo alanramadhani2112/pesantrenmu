@@ -16,8 +16,10 @@
                                 <div class="d-flex align-items-center gap-4 mb-4">
                                     <x-ui.icon name="document" class="fs-2 text-success" />
                                     <div>
-                                        <div class="fw-semibold text-success">Laporan sudah diunggah</div>
-                                        <a href="{{ Storage::url($laporanIndividuPath) }}" target="_blank" class="text-primary fs-7">Lihat Laporan</a>
+                                        <div class="fw-semibold text-success mb-1">Laporan sudah diunggah</div>
+                                        <x-ui.button :href="Storage::url($laporanIndividuPath)" target="_blank" variant="light" size="sm" class="btn-active-light-primary" icon="eye">
+                                            Lihat Laporan
+                                        </x-ui.button>
                                     </div>
                                 </div>
                             @endif
@@ -59,8 +61,10 @@
                                     <div class="d-flex align-items-center gap-4 mb-4">
                                         <x-ui.icon name="document" class="fs-2 text-success" />
                                         <div>
-                                            <div class="fw-semibold text-success">Laporan kelompok sudah diunggah</div>
-                                            <a href="{{ Storage::url($akreditasi->laporan_visitasi_kelompok) }}" target="_blank" class="text-primary fs-7">Lihat Laporan</a>
+                                            <div class="fw-semibold text-success mb-1">Laporan kelompok sudah diunggah</div>
+                                            <x-ui.button :href="Storage::url($akreditasi->laporan_visitasi_kelompok)" target="_blank" variant="light" size="sm" class="btn-active-light-primary" icon="eye">
+                                                Lihat Laporan
+                                            </x-ui.button>
                                         </div>
                                     </div>
                                 @endif

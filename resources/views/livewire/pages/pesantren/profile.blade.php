@@ -850,7 +850,7 @@ new #[Layout('layouts.app')] class extends Component {
 
                                 @if (!empty($existing_files[$dbField]))
                                     <a href="{{ Storage::url($existing_files[$dbField]) }}" target="_blank" class="d-inline-flex align-items-center text-primary fw-semibold fs-8 mt-2">
-                                        <i class="ki-outline ki-eye fs-7 me-1"></i>
+                                        <x-ui.icon name="eye" class="fs-7 me-1" />
                                         LIHAT FILE SAAT INI
                                     </a>
                                 @endif
@@ -902,7 +902,7 @@ new #[Layout('layouts.app')] class extends Component {
 
                                 @if (!empty($existing_files[$dbField]))
                                     <a href="{{ Storage::url($existing_files[$dbField]) }}" target="_blank" class="d-inline-flex align-items-center text-primary fw-semibold fs-8 mt-2">
-                                        <i class="ki-outline ki-eye fs-7 me-1"></i>
+                                        <x-ui.icon name="eye" class="fs-7 me-1" />
                                         LIHAT FILE SAAT INI
                                     </a>
                                 @endif
@@ -1086,7 +1086,7 @@ new #[Layout('layouts.app')] class extends Component {
                                 @if(!empty($existing_files[$dbField]))
                                     <div class="col-md-6 col-lg-4">
                                         <a href="{{ Storage::url($existing_files[$dbField]) }}" target="_blank" class="d-flex align-items-center border border-gray-300 rounded p-4 text-decoration-none text-gray-800 hover-bg-light h-100">
-                                            <i class="ki-outline ki-file fs-2hx text-primary me-3"></i>
+                                            <x-ui.icon name="file" class="fs-2hx text-primary me-3" />
                                             <div class="d-flex flex-column">
                                                 <span class="fw-semibold fs-7 text-gray-800">{{ $label }}</span>
                                                 <span class="text-muted fs-8">Klik untuk lihat dokumen</span>
