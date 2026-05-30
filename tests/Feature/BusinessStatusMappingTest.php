@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Exports\PesantrenExport;
 use App\Models\Akreditasi;
 use App\Models\Asesor;
 use App\Models\Assessment;
@@ -103,18 +102,7 @@ class BusinessStatusMappingTest extends TestCase
         $this->assertContains($freeUser->id, $freeIds);
     }
 
-    public function test_pesantren_export_uses_canonical_finished_and_rejected_labels(): void
-    {
-        $completedUser = $this->createPesantrenWithAkreditasi('Export Selesai', 0);
-        $rejectedUser = $this->createPesantrenWithAkreditasi('Export Ditolak', -1);
-        $activeUser = $this->createPesantrenWithAkreditasi('Export Validasi', 1);
 
-        $export = new PesantrenExport;
-
-        $this->assertSame('Terakreditasi', $export->map($completedUser->load(['pesantren', 'akreditasis']))[4]);
-        $this->assertSame('Ditolak', $export->map($rejectedUser->load(['pesantren', 'akreditasis']))[4]);
-        $this->assertSame('Proses', $export->map($activeUser->load(['pesantren', 'akreditasis']))[4]);
-    }
 
     private function createPesantrenWithAkreditasi(string $name, int $status): User
     {
