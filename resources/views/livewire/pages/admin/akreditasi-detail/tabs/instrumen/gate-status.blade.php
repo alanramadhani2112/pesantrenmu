@@ -5,7 +5,7 @@
                         <x-ui.section-card title="Posisi Proses Saat Ini" subtitle="Admin dapat memantau berkas, tim asesor, dan jadwal visitasi pada tahap ini.">
                             <div class="p-6">
                                 <div class="row g-5">
-                                    <x-ui.detail-item label="Status Saat Ini" value="{{ Akreditasi::getStatusLabel($akreditasi->status) }}" />
+                                    <x-ui.detail-item label="Status Saat Ini" value="{{ \App\Models\Akreditasi::getStatusLabel($akreditasi->status) }}" />
                                     <x-ui.detail-item label="Jadwal Visitasi" value="{{ $akreditasi->tgl_visitasi ? \Carbon\Carbon::parse($akreditasi->tgl_visitasi)->format('d M Y') : 'Belum dijadwalkan' }}" />
                                     <x-ui.detail-item label="Tahap Nilai Berikutnya" value="Penilaian Pasca Visitasi" />
                                     <x-ui.detail-item label="Nilai Verifikasi" value="Terbuka setelah Nilai Kelompok final" />
