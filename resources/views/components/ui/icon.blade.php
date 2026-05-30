@@ -10,6 +10,10 @@
         'cloud-upload' => 'file-up',
         'layers' => 'data',
         'warning-2' => 'information-5',
+        'home-2' => 'home',
+        'verify' => 'shield-tick',
+        'award' => 'medal-star',
+        'profile-circle' => 'profile-user',
     ];
 
     $iconName = $aliases[$name] ?? $name;

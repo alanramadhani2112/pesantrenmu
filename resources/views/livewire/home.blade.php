@@ -59,19 +59,19 @@
 
     $quickActions = match (true) {
         $isAdmin => [
-            ['label' => 'Kelola Akreditasi', 'icon' => 'verify', 'route' => route('admin.akreditasi'), 'variant' => 'primary'],
-            ['label' => 'Data Pesantren', 'icon' => 'home-2', 'route' => route('admin.pesantren.index'), 'variant' => 'info'],
+            ['label' => 'Kelola Akreditasi', 'icon' => 'shield-tick', 'route' => route('admin.akreditasi'), 'variant' => 'primary'],
+            ['label' => 'Data Pesantren', 'icon' => 'category', 'route' => route('admin.pesantren.index'), 'variant' => 'info'],
             ['label' => 'Data Asesor', 'icon' => 'profile-user', 'route' => route('admin.asesor.index'), 'variant' => 'success'],
             ['label' => 'Master EDPM', 'icon' => 'document', 'route' => route('admin.master-edpm'), 'variant' => 'warning'],
         ],
         $isPesantren => [
-            ['label' => 'Profil Pesantren', 'icon' => 'home-2', 'route' => route('pesantren.profile'), 'variant' => 'primary'],
+            ['label' => 'Profil Pesantren', 'icon' => 'profile-user', 'route' => route('pesantren.profile'), 'variant' => 'primary'],
             ['label' => 'Data IPM', 'icon' => 'check-circle', 'route' => route('pesantren.ipm'), 'variant' => 'info'],
             ['label' => 'Data SDM', 'icon' => 'profile-user', 'route' => route('pesantren.sdm'), 'variant' => 'success'],
             ['label' => 'EDPM', 'icon' => 'document', 'route' => route('pesantren.edpm'), 'variant' => 'warning'],
         ],
         $isAsesor => [
-            ['label' => 'Tugas Akreditasi', 'icon' => 'verify', 'route' => route('asesor.akreditasi'), 'variant' => 'primary'],
+            ['label' => 'Tugas Akreditasi', 'icon' => 'shield-tick', 'route' => route('asesor.akreditasi'), 'variant' => 'primary'],
             ['label' => 'Profil Asesor', 'icon' => 'profile-user', 'route' => route('asesor.profile'), 'variant' => 'info'],
         ],
         default => [],
