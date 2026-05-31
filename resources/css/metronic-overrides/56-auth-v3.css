@@ -4,7 +4,7 @@
    ============================================================ */
 
 .spm-auth-body {
-    background: #ffffff;
+    background: #f8fafc;
 }
 
 .spm-auth-shell {
@@ -18,7 +18,11 @@
 }
 
 .spm-auth-card {
-    background: transparent;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 /* Aside */
@@ -104,9 +108,9 @@
 
 /* Login form enhancements */
 .spm-auth-form-pane .form-control-lg {
-    min-height: 48px;
+    min-height: 44px;
     border-radius: 8px;
-    border: 1px solid #edf1f6;
+    border: 2px solid #e2e8f0;
     font-size: 15px;
 }
 

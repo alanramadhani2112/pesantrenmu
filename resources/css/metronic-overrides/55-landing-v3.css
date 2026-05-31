@@ -291,6 +291,7 @@
 .spm-problem {
     padding: 80px 0;
     background: var(--spm-canvas);
+    border-top: 1px solid var(--spm-hairline);
 }
 
 .spm-problem-content {
@@ -341,14 +342,13 @@
 .spm-bento-card {
     background: var(--spm-canvas);
     border: 1px solid var(--spm-hairline);
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 32px;
-    transition: box-shadow 200ms ease, transform 200ms ease;
+    transition: border-color 200ms ease;
 }
 
 .spm-bento-card:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-    transform: translateY(-2px);
+    border-color: var(--spm-primary);
 }
 
 .spm-bento-large {
@@ -416,6 +416,7 @@
 .spm-why {
     padding: 80px 0;
     background: var(--spm-canvas);
+    border-top: 1px solid var(--spm-hairline);
 }
 
 .spm-why .spm-section-title {
