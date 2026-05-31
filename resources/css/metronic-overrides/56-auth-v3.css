@@ -1,8 +1,10 @@
-/* ===== Auth Pages V3 - Clean Split Layout ===== */
+/* ============================================================
+   PesantrenMu Auth Pages v3
+   Split layout: form left, green aside right
+   ============================================================ */
 
 .spm-auth-body {
     background: #ffffff;
-    font-family: "Inter", var(--bs-font-sans-serif);
 }
 
 .spm-auth-shell {
@@ -12,57 +14,60 @@
 /* Form Pane */
 .spm-auth-form-pane {
     background: #ffffff;
+    position: relative;
 }
 
 .spm-auth-card {
-    padding: 0;
+    background: transparent;
 }
 
-/* Aside - Visual Panel */
+/* Aside */
 .spm-auth-aside {
-    background: #005533;
+    background: linear-gradient(160deg, #005533 0%, #003d24 100%);
     position: relative;
     overflow: hidden;
+    min-width: 480px;
+    max-width: 560px;
     align-items: center;
     justify-content: center;
-    padding: 60px;
+    padding: 64px;
 }
 
 .spm-auth-aside::before {
-    content: "";
+    content: '';
     position: absolute;
     inset: 0;
-    background:
-        radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.04) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 40%);
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='none' stroke='%23ffffff' stroke-width='0.5'/%3E%3C/svg%3E");
+    background-size: 60px 60px;
     pointer-events: none;
 }
 
 .spm-auth-aside-content {
     position: relative;
-    z-index: 2;
-    max-width: 440px;
+    z-index: 1;
+    max-width: 380px;
 }
 
 .spm-auth-aside-badge {
     display: inline-block;
     padding: 6px 14px;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 6px;
+    border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.85);
-    letter-spacing: 0.02em;
-    margin-bottom: 28px;
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .spm-auth-aside-content h1 {
     font-size: 32px;
-    font-weight: 600;
-    line-height: 1.3;
+    font-weight: 700;
     color: #ffffff;
+    line-height: 1.3;
     margin-bottom: 16px;
+    letter-spacing: -0.01em;
 }
 
 .spm-auth-aside-content p {
@@ -86,7 +91,7 @@
 
 .spm-auth-stat strong {
     font-size: 28px;
-    font-weight: 600;
+    font-weight: 700;
     color: #ffffff;
     line-height: 1;
 }
@@ -97,39 +102,40 @@
     font-weight: 500;
 }
 
-/* Form Styling Overrides */
-.spm-auth-body .form-control-lg {
+/* Login form enhancements */
+.spm-auth-form-pane .form-control-lg {
     min-height: 48px;
     border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    font-size: 14px;
+    border: 1px solid #edf1f6;
+    font-size: 15px;
 }
 
-.spm-auth-body .form-control-lg:focus {
+.spm-auth-form-pane .form-control-lg:focus {
     border-color: #005533;
     box-shadow: 0 0 0 3px rgba(0, 85, 51, 0.08);
 }
 
-.spm-auth-body .form-label {
-    font-size: 14px;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin-bottom: 6px;
-}
-
-.spm-auth-body .btn-primary {
+.spm-auth-form-pane .btn-primary {
     background: #005533;
     border-color: #005533;
+    min-height: 48px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
 }
 
-.spm-auth-body .btn-primary:hover {
-    background: #003d24;
-    border-color: #003d24;
+.spm-auth-form-pane .btn-primary:hover {
+    background: #006b40;
+    border-color: #006b40;
 }
 
 /* Responsive */
 @media (max-width: 991px) {
+    .spm-auth-aside {
+        display: none !important;
+    }
+
     .spm-auth-form-pane {
-        padding: 40px 24px;
+        min-height: 100vh;
     }
 }

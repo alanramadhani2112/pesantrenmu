@@ -39,9 +39,9 @@
             {{-- Visual Side --}}
             <div class="d-none d-lg-flex flex-lg-row-fluid spm-auth-aside">
                 <div class="spm-auth-aside-content">
-                    <div class="spm-auth-aside-badge">Sistem Akreditasi</div>
-                    <h1>Kelola akreditasi pesantren dalam satu platform.</h1>
-                    <p>Dari pengajuan data hingga penerbitan hasil — pesantren, asesor, dan admin bekerja di tempat yang sama.</p>
+                    <div class="spm-auth-aside-badge">PesantrenMu</div>
+                    <h1>Semua proses akreditasi, cukup di sini.</h1>
+                    <p>Pengajuan, penilaian, sampai penerbitan hasil. Satu alur, satu sistem.</p>
 
                     <div class="spm-auth-stats">
                         <div class="spm-auth-stat">
