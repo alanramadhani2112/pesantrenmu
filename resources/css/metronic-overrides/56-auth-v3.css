@@ -31,8 +31,6 @@
     align-items: center;
     justify-content: center;
     padding: 64px;
-    margin: 20px;
-    border-radius: 12px;
 }
 
 .spm-auth-aside::before {
@@ -106,10 +104,10 @@
 
 /* Login form enhancements */
 .spm-auth-form-pane .form-control-lg {
-    min-height: 42px;
+    min-height: 48px;
     border-radius: 8px;
     border: 1px solid #edf1f6;
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .spm-auth-form-pane .form-control-lg:focus {
@@ -120,9 +118,9 @@
 .spm-auth-form-pane .btn-primary {
     background: #005533;
     border-color: #005533;
-    min-height: 42px;
+    min-height: 48px;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
 }
 
