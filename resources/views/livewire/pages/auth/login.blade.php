@@ -25,16 +25,9 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
-    <div class="text-center mb-10">
-        <x-ui.badge variant="primary" class="mb-4">Akses Sistem</x-ui.badge>
-        <h1 class="text-gray-900 fw-semibold fs-2x mb-3">Masuk ke PesantrenMu</h1>
-        <div class="text-gray-500 fw-semibold fs-6">Gunakan akun LP2M, asesor, atau pesantren yang sudah terdaftar.</div>
-    </div>
-
-    <div class="spm-auth-role-strip mb-8" aria-label="Role yang didukung">
-        <span>Admin</span>
-        <span>Asesor</span>
-        <span>Pesantren</span>
+    <div class="text-center mb-8">
+        <h1 class="text-gray-900 fw-semibold fs-2x mb-3">Masuk</h1>
+        <div class="text-gray-500 fw-semibold fs-6">Gunakan akun yang sudah terdaftar di sistem.</div>
     </div>
 
     <x-auth-session-status :status="session('status')" />
