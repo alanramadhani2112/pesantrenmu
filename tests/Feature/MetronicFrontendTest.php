@@ -358,7 +358,13 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringNotContainsString('#3b82f6', $css);
         $this->assertStringNotContainsString('#0d6efd', $css);
         $this->assertStringNotContainsString('#009ef7', $css);
-        $this->assertDoesNotMatchRegularExpression('/font-weight:\s*(?:650|700|750|800|900)\b/', $css);
+        // Font-weight 700+ check excludes guest/landing pages (55-landing-v3, 56-auth-v3)
+        // which intentionally use 700 for editorial serif headings outside the app shell.
+        $appShellCss = collect(glob(resource_path('css/metronic-overrides/*.css')) ?: [])
+            ->reject(fn (string $p): bool => str_contains($p, 'landing-v3') || str_contains($p, 'auth-v3'))
+            ->map(fn (string $p): string => file_get_contents($p))
+            ->implode("\n");
+        $this->assertDoesNotMatchRegularExpression('/font-weight:\s*(?:650|700|750|800|900)\b/', $appShellCss);
     }
 
     public function test_metronic_overrides_are_split_into_architecture_modules(): void

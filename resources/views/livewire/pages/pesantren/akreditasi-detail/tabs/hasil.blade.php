@@ -30,7 +30,7 @@
                                         @foreach($komponens as $komponen)
                                             @if(!empty($asesorRekomendasis[$komponen->id]))
                                                 <div class="border border-gray-300 rounded p-4">
-                                                    <div class="fw-bold text-gray-800 mb-2">{{ $komponen->nama }}</div>
+                                                    <div class="fw-semibold text-gray-800 mb-2">{{ $komponen->nama }}</div>
                                                     <div class="text-gray-700">{{ $asesorRekomendasis[$komponen->id] }}</div>
                                                 </div>
                                             @endif
