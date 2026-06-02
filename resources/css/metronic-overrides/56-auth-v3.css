@@ -1,145 +1,160 @@
 /* ============================================================
    PesantrenMu Auth Pages v3
-   Split layout: form left, green aside right
+   Simple centered Metronic login form.
    ============================================================ */
 
 .spm-auth-body {
-    background: #f8fafc;
+    background: #f6f8fb;
 }
 
 .spm-auth-shell {
     min-height: 100vh;
+    background:
+        linear-gradient(90deg, rgba(var(--spm-primary-rgb), 0.035) 1px, transparent 1px) 0 0 / 76px 76px,
+        linear-gradient(180deg, #ffffff 0%, #f6f8fb 100%);
 }
 
-/* Form Pane */
 .spm-auth-form-pane {
-    background: #ffffff;
-    position: relative;
+    min-height: 100vh;
+}
+
+.spm-auth-panel {
+    width: min(100%, 460px);
+}
+
+.spm-auth-brand {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 26px;
 }
 
 .spm-auth-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 32px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-}
-
-/* Aside */
-.spm-auth-aside {
-    background: linear-gradient(160deg, #005533 0%, #003d24 100%);
     position: relative;
     overflow: hidden;
-    min-width: 480px;
-    max-width: 560px;
-    align-items: center;
-    justify-content: center;
-    padding: 64px;
+    padding: 32px;
+    background: #ffffff;
+    border: 1px solid #dde5ee !important;
+    border-radius: 8px;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.1);
 }
 
-.spm-auth-aside::before {
-    content: '';
+.spm-auth-card::before {
+    content: "";
     position: absolute;
-    inset: 0;
-    opacity: 0.04;
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='none' stroke='%23ffffff' stroke-width='0.5'/%3E%3C/svg%3E");
-    background-size: 60px 60px;
-    pointer-events: none;
+    inset: 0 0 auto;
+    height: 4px;
+    background: linear-gradient(90deg, var(--spm-primary), var(--spm-secondary));
 }
 
-.spm-auth-aside-content {
-    position: relative;
-    z-index: 1;
-    max-width: 380px;
-}
-
-.spm-auth-aside-badge {
-    display: inline-block;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    background: rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 0.9);
+.spm-login-heading {
     margin-bottom: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
 }
 
-.spm-auth-aside-content h1 {
-    font-size: 32px;
-    font-weight: 700;
-    color: #ffffff;
-    line-height: 1.3;
-    margin-bottom: 16px;
-    letter-spacing: -0.01em;
-}
-
-.spm-auth-aside-content p {
-    font-size: 16px;
-    line-height: 1.7;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 40px;
-}
-
-/* Stats */
-.spm-auth-stats {
-    display: flex;
-    gap: 32px;
-}
-
-.spm-auth-stat {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.spm-auth-stat strong {
+.spm-login-heading h1 {
+    margin: 0 0 8px;
+    color: #101828;
     font-size: 28px;
     font-weight: 700;
-    color: #ffffff;
-    line-height: 1;
+    line-height: 1.25;
 }
 
-.spm-auth-stat span {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.6);
-    font-weight: 500;
+.spm-login-heading p {
+    max-width: 330px;
+    margin: 0 auto;
+    color: #667085;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.6;
 }
 
-/* Login form enhancements */
-.spm-auth-form-pane .form-control-lg {
-    min-height: 44px;
+.spm-auth-card .spm-form-field {
+    margin-bottom: 18px;
+}
+
+.spm-auth-card .form-label {
+    margin-bottom: 8px;
+    color: #344054 !important;
+}
+
+.spm-auth-card .form-control,
+.spm-auth-card .form-control.form-control-solid {
+    min-height: 48px;
+    background-color: #f8fafc !important;
+    border: 1px solid #dfe7f1 !important;
     border-radius: 8px;
-    border: 2px solid #e2e8f0;
+    box-shadow: inset 0 1px 0 rgba(16, 24, 40, 0.02);
     font-size: 15px;
 }
 
-.spm-auth-form-pane .form-control-lg:focus {
-    border-color: #005533;
-    box-shadow: 0 0 0 3px rgba(0, 85, 51, 0.08);
+.spm-auth-card .form-control:focus {
+    background-color: #ffffff !important;
+    border-color: rgba(var(--spm-primary-rgb), 0.45) !important;
+    box-shadow: 0 0 0 3px rgba(var(--spm-primary-rgb), 0.1);
+}
+
+.spm-auth-card .btn-icon {
+    width: 36px;
+    height: 36px;
+}
+
+.spm-login-links {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin: 2px 0 22px;
+    color: #667085;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.spm-login-links a {
+    flex: 0 0 auto;
+    color: var(--spm-primary);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.spm-login-links a:hover,
+.spm-login-links a:focus {
+    color: var(--spm-primary-hover);
+    text-decoration: underline;
 }
 
 .spm-auth-form-pane .btn-primary {
-    background: #005533;
-    border-color: #005533;
-    min-height: 48px;
+    min-height: 50px;
+    background: var(--spm-primary);
+    border-color: var(--spm-primary);
     border-radius: 8px;
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 700;
+    box-shadow: 0 12px 24px rgba(var(--spm-primary-rgb), 0.18);
 }
 
-.spm-auth-form-pane .btn-primary:hover {
-    background: #006b40;
-    border-color: #006b40;
+.spm-auth-form-pane .btn-primary:hover,
+.spm-auth-form-pane .btn-primary:focus {
+    background: var(--spm-primary-hover);
+    border-color: var(--spm-primary-hover);
 }
 
-/* Responsive */
-@media (max-width: 991px) {
-    .spm-auth-aside {
-        display: none !important;
+@media (max-width: 575.98px) {
+    .spm-auth-form-pane {
+        padding: 24px 18px !important;
     }
 
-    .spm-auth-form-pane {
-        min-height: 100vh;
+    .spm-auth-card {
+        padding: 28px 20px;
+    }
+
+    .spm-login-heading h1 {
+        font-size: 24px;
+    }
+
+    .spm-login-links {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
     }
 }

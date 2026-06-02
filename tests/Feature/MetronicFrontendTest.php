@@ -59,17 +59,20 @@ class MetronicFrontendTest extends TestCase
         return $source;
     }
 
-    public function test_public_landing_page_uses_lp2m_positioning_without_legacy_dikdasmen_copy(): void
+    public function test_public_landing_page_describes_pesantren_accreditation_without_legacy_copy(): void
     {
         $this->withoutVite();
 
         $response = $this->get('/');
 
         $response->assertOk()
-            ->assertSee('Dikembangkan oleh LabMu untuk LP2M')
-            ->assertSee('Platform Akreditasi LP2M')
-            ->assertSee('Akreditasi pesantren yang tertib, terukur, dan mudah ditindaklanjuti')
+            ->assertSee('Dikembangkan oleh')
+            ->assertSee('LabMu')
+            ->assertSee('Sistem Akreditasi Pesantren')
+            ->assertSee('Sistem akreditasi pesantren yang lebih tertata.')
+            ->assertSee('PesantrenMu membantu proses akreditasi berjalan lebih mudah, transparan, dan terpusat dalam satu sistem.')
             ->assertSee('spm-landing-container', false)
+            ->assertDontSee('untuk LP2M', false)
             ->assertDontSee('Dikdasmen', false)
             ->assertDontSee('didaksmen', false)
             ->assertDontSee('didaksemen', false);

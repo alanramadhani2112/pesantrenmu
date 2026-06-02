@@ -12,7 +12,7 @@
         'success' => 'text-success',
     ][$variant] ?? '';
 
-    $classes = trim('menu-link px-4 py-2 d-flex align-items-center gap-3 ' . $variantClass);
+    $classes = trim('menu-link spm-action-menu-item-link px-4 py-2 d-flex align-items-center gap-3 ' . $variantClass);
 @endphp
 
 <div class="menu-item">

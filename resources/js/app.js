@@ -505,10 +505,11 @@ window.akreditasiPesantren = () => ({
 
 window.spmActionMenu = (menuId) => ({
     isOpen: false,
-    placementStyle: '',
+    placementStyle: 'position: fixed; top: 0; left: 0; visibility: hidden; z-index: 1200;',
     menuId,
     close() {
         this.isOpen = false;
+        this.placementStyle = 'position: fixed; top: 0; left: 0; visibility: hidden; z-index: 1200;';
         this.cleanupOpenState();
     },
     markOpenState() {
@@ -528,19 +529,17 @@ window.spmActionMenu = (menuId) => ({
         if (!trigger || !menu) return;
 
         const rect = trigger.getBoundingClientRect();
-        const width = Math.min(menu.offsetWidth || 210, window.innerWidth - 32);
-        const height = Math.min(menu.scrollHeight || 240, window.innerHeight - 32);
+        const computedWidth = Number.parseFloat(window.getComputedStyle(menu).width);
+        const width = Math.min(Math.max(menu.offsetWidth || 0, computedWidth || 0, 210), window.innerWidth - 32);
+        const height = Math.min(menu.scrollHeight || menu.offsetHeight || 240, window.innerHeight - 32);
         const spaceBelow = window.innerHeight - rect.bottom - 16;
-        const openUp = spaceBelow < Math.min(height, 220) && rect.top > spaceBelow;
+        const openUp = height > spaceBelow && rect.top > spaceBelow;
         const top = openUp
             ? Math.max(16, rect.top - height - 8)
-            : Math.min(rect.bottom + 8, window.innerHeight - 16);
+            : Math.min(rect.bottom + 8, window.innerHeight - height - 16);
         const left = Math.max(16, Math.min(rect.right - width, window.innerWidth - width - 16));
-        const maxHeight = openUp
-            ? Math.max(160, rect.top - 24)
-            : Math.max(160, window.innerHeight - top - 16);
 
-        this.placementStyle = `position: fixed; top: ${top}px; left: ${left}px; max-height: ${maxHeight}px; z-index: 1200;`;
+        this.placementStyle = `position: fixed; top: ${top}px; left: ${left}px; width: ${width}px; visibility: visible; z-index: 1200;`;
     },
     toggle() {
         if (this.isOpen) {
@@ -549,9 +548,10 @@ window.spmActionMenu = (menuId) => ({
         }
 
         window.dispatchEvent(new CustomEvent('spm:action-menu-open', { detail: { id: this.menuId } }));
+        this.placementStyle = 'position: fixed; top: 0; left: 0; width: 210px; visibility: hidden; z-index: 1200;';
         this.isOpen = true;
         this.markOpenState();
-        this.$nextTick(() => this.updatePosition());
+        this.$nextTick(() => window.requestAnimationFrame(() => this.updatePosition()));
     },
 });
 

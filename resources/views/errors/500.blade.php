@@ -7,60 +7,40 @@
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand/favicon.svg') }}">
     <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}">
     @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css'])
-    <style>
-        :root { --spm-primary: #005533; }
-    </style>
 </head>
-<body data-bs-theme="light" class="d-flex flex-column min-vh-100 align-items-center justify-content-center bg-body p-6">
-
-    <div class="text-center mb-8">
-        <a href="{{ url('/') }}">
-            <img src="{{ asset('images/brand/logo-horizontal.svg') }}" alt="SPM" style="height: 36px;" loading="lazy">
+<body data-bs-theme="light" class="spm-error-page app-blank">
+    <main class="spm-error-shell d-flex flex-column align-items-center justify-content-center min-vh-100 px-6 py-10" aria-labelledby="error-title">
+        <a href="{{ url('/') }}" class="spm-error-brand" aria-label="PesantrenMu">
+            <img class="spm-error-brand-img" src="{{ asset('images/brand/logo-horizontal.svg') }}" alt="PesantrenMu" loading="lazy">
         </a>
-    </div>
 
-    <div class="card shadow-sm border-0 w-100 mw-450px">
-        <div class="card-body p-10 text-center">
+        <section class="card card-flush spm-error-card w-100" data-ui-card="metronic">
+            <div class="card-body text-center">
+                <div class="symbol symbol-60px spm-error-mark spm-error-mark-danger mx-auto">
+                    <div class="symbol-label">
+                        <span class="spm-error-mark-symbol spm-error-mark-symbol-danger">!</span>
+                    </div>
+                </div>
 
-            <div class="spm-error-icon-wrap spm-error-icon-wrap-danger">
-                <i class="ki-solid ki-warning-2 fs-2tx text-danger">
-                    <span class="path1"></span>
-                    <span class="path2"></span>
-                    <span class="path3"></span>
-                </i>
+                <div class="spm-error-code spm-error-code-danger">500</div>
+
+                <h1 id="error-title" class="spm-error-title">Terjadi Kesalahan</h1>
+                <p class="spm-error-message">
+                    Sistem sedang mengalami kendala. Silakan coba lagi beberapa saat.
+                </p>
+
+                <div class="spm-error-actions">
+                    <button type="button" onclick="window.location.reload()" class="btn btn-primary fw-semibold px-6">
+                        Coba Lagi
+                    </button>
+                    <a href="{{ url('/') }}" class="btn btn-light fw-semibold px-6">
+                        Ke Beranda
+                    </a>
+                </div>
             </div>
+        </section>
 
-            <div class="spm-error-code spm-error-code-danger mb-3">500</div>
-
-            <h1 class="fw-semibold text-gray-900 fs-2 mb-3">Kesalahan Server</h1>
-            <p class="text-gray-600 fw-semibold fs-6 mb-8">
-                Terjadi kesalahan pada server kami.<br>
-                Tim teknis sudah diberitahu. Silakan coba lagi beberapa saat.
-            </p>
-
-            <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-                <a href="{{ url('/dashboard') }}" class="btn btn-primary fw-semibold px-6">
-                    <i class="ki-solid ki-home fs-3 me-1">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                    </i>
-                    Ke Dashboard
-                </a>
-                <a href="javascript:location.reload()" class="btn btn-light fw-semibold px-6">
-                    <i class="ki-solid ki-arrows-circle fs-3 me-1">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                    </i>
-                    Coba Lagi
-                </a>
-            </div>
-
-        </div>
-    </div>
-
-    <div class="text-center mt-6 text-gray-500 fs-7">
-        &copy; {{ date('Y') }} Sistem Penjaminan Mutu &mdash; Muhammadiyah
-    </div>
-
+        <div class="spm-error-footer">&copy; {{ date('Y') }} PesantrenMu</div>
+    </main>
 </body>
 </html>

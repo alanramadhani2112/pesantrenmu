@@ -25,15 +25,15 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
-    <div class="text-center mb-8">
-        <h1 class="text-gray-900 fw-semibold fs-2x mb-3">Masuk</h1>
-        <div class="text-gray-500 fw-semibold fs-6">Gunakan akun yang sudah terdaftar di sistem.</div>
+    <div class="spm-login-heading">
+        <h1>Masuk ke PesantrenMu</h1>
+        <p>Gunakan akun PesantrenMu yang sudah terdaftar.</p>
     </div>
 
     <x-auth-session-status :status="session('status')" />
 
     <form wire:submit="login" class="form w-100">
-        <x-ui.form-field label="Email" :error="$errors->first('form.email')">
+        <x-ui.form-field label="Email" :error="$errors->first('form.email')" required>
             <div class="position-relative">
                 <i class="ki-duotone ki-sms fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4">
                     <span class="path1"></span>
@@ -52,7 +52,7 @@ new #[Layout('layouts.guest')] class extends Component
             </div>
         </x-ui.form-field>
 
-        <x-ui.form-field label="Password" :error="$errors->first('form.password')" class="mb-8">
+        <x-ui.form-field label="Password" :error="$errors->first('form.password')" class="mb-5" required>
             <div class="position-relative" x-data="{ show: false }">
                 <i class="ki-duotone ki-lock-2 fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4">
                     <span class="path1"></span>
@@ -94,10 +94,17 @@ new #[Layout('layouts.guest')] class extends Component
             </div>
         </x-ui.form-field>
 
+        <div class="spm-login-links">
+            <span>Hubungi admin jika butuh bantuan.</span>
+            @if (Route::has('password.request'))
+                <a href="{{ route('password.request') }}" wire:navigate>Lupa password?</a>
+            @endif
+        </div>
+
         <div class="d-grid">
             <x-ui.button type="submit" variant="primary" size="lg">
                 <span class="indicator-label d-flex align-items-center justify-content-center gap-2">
-                    Masuk Dashboard
+                    Masuk
                     <i class="ki-duotone ki-arrow-right fs-2 text-white">
                         <span class="path1"></span>
                         <span class="path2"></span>

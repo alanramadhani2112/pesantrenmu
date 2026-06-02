@@ -34,5 +34,6 @@ spm.sql
 .playwright-mcp/
 .sisyphus/run-continuation/
 *.png
+!public/images/landing/akreditasi-hero.png
+!public/images/brand/labmu-logo.png
 -w
-

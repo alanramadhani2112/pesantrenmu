@@ -142,6 +142,10 @@
     overflow-y: visible !important;
 }
 
+[data-ui-table="metronic"] .spm-table-body-wrap {
+    padding-top: 18px !important;
+}
+
 .spm-datatable {
     min-width: 860px;
 }
@@ -415,14 +419,75 @@
 
 [data-ui-action-menu="metronic"] {
     position: relative;
+    display: inline-block !important;
+    width: 116px;
+    min-width: 116px;
+    max-width: 116px;
+    flex: 0 0 116px;
+    line-height: 1;
+    text-align: right;
+    vertical-align: middle;
 }
 
 [data-ui-action-menu="metronic"] > [data-ui-button="metronic"] {
-    min-width: 92px;
+    width: 116px !important;
+    min-width: 116px !important;
+    max-width: 116px;
+}
+
+[data-ui-action-menu="metronic"] > [data-ui-button="metronic"].spm-action-menu-trigger {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 116px !important;
+    min-width: 116px !important;
+    min-height: 38px !important;
+    padding: 0 14px !important;
+    gap: 0 !important;
+    line-height: 1 !important;
+}
+
+.spm-action-menu-trigger-inner {
+    display: grid;
+    grid-template-columns: 16px minmax(0, 1fr) 12px;
+    align-items: center;
+    column-gap: 8px;
+    width: 100%;
+    min-width: 0;
+}
+
+.spm-action-menu-trigger-icon,
+.spm-action-menu-trigger-caret {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    min-width: 16px;
+    height: 16px;
+    margin: 0 !important;
+    line-height: 1 !important;
+}
+
+.spm-action-menu-trigger-caret {
+    width: 12px;
+    min-width: 12px;
+}
+
+.spm-action-menu-trigger-label {
+    display: inline-block;
+    min-width: 0;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
 }
 
 [data-ui-action-menu-dropdown="metronic"].spm-action-menu-dropdown {
-    padding: 6px !important;
+    width: min(210px, calc(100vw - 32px)) !important;
+    min-width: min(210px, calc(100vw - 32px)) !important;
+    flex: 0 0 min(210px, calc(100vw - 32px));
+    max-height: none !important;
+    padding: 8px !important;
+    overflow: visible !important;
     border-color: var(--spm-border, #e4e9f2) !important;
     border-radius: var(--spm-radius) !important;
 }
@@ -432,9 +497,46 @@
 }
 
 [data-ui-action-menu-dropdown="metronic"] .menu-link {
-    min-height: 38px;
-    padding: 0 10px !important;
+    min-height: 40px;
+    padding: 0 12px !important;
     border-radius: 6px !important;
+}
+
+[data-ui-action-menu-dropdown="metronic"] .spm-action-menu-item-link {
+    display: grid !important;
+    grid-template-columns: 18px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 10px;
+    width: 100%;
+    text-align: left !important;
+}
+
+[data-ui-action-menu-dropdown="metronic"] .spm-action-menu-item-link > i {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    min-width: 18px;
+    height: 18px;
+    margin: 0 !important;
+    line-height: 1 !important;
+}
+
+[data-ui-table="metronic"] .table tbody td:has([data-ui-action-menu="metronic"]) {
+    width: 158px !important;
+    min-width: 158px !important;
+    max-width: 158px;
+    overflow: visible !important;
+    text-align: right !important;
+    white-space: nowrap;
+}
+
+[data-ui-table="metronic"] .table thead th.text-end:last-child,
+.spm-action-col,
+.spm-action-cell {
+    width: 158px !important;
+    min-width: 158px !important;
+    max-width: 158px;
 }
 
 [data-ui-action-menu-dropdown="metronic"] .menu-link:hover {
@@ -648,4 +750,3 @@
         padding-left: 18px !important;
     }
 }
-

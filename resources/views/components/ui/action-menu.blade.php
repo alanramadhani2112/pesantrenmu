@@ -16,22 +16,24 @@
     x-on:scroll.window="if (isOpen) updatePosition()"
     x-on:livewire:navigating.window="close()"
     x-on:click.outside="close()"
-    class="d-inline-block position-relative"
+    class="spm-action-menu d-inline-block position-relative"
 >
     <x-ui.button
         type="button"
         variant="light"
         size="sm"
-        class="btn-active-light-primary"
+        class="btn-active-light-primary spm-action-menu-trigger"
         x-ref="trigger"
         x-on:click.stop="toggle()"
         x-bind:aria-expanded="isOpen.toString()"
         aria-controls="{{ $resolvedMenuId }}"
         aria-haspopup="true"
     >
-        <x-ui.icon name="setting-2" class="fs-5 me-1" />
-        {{ $label }}
-        <x-ui.icon name="down" class="fs-7 ms-1" />
+        <span class="spm-action-menu-trigger-inner">
+            <x-ui.icon name="setting-2" class="spm-action-menu-trigger-icon" />
+            <span class="spm-action-menu-trigger-label">{{ $label }}</span>
+            <x-ui.icon name="down" class="spm-action-menu-trigger-caret" />
+        </span>
     </x-ui.button>
 
     <div

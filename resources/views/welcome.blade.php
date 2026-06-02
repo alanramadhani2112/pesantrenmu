@@ -4,8 +4,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'PesantrenMu') }} - Sistem Akreditasi LP2M</title>
-    <meta name="description" content="Platform akreditasi pesantren Muhammadiyah oleh LP2M. Kelola pengajuan, penilaian, dan hasil akreditasi dalam satu sistem.">
+    <title>{{ config('app.name', 'PesantrenMu') }} - Sistem Akreditasi Pesantren</title>
+    <meta name="description" content="Sistem akreditasi pesantren yang membantu proses berjalan lebih tertata, transparan, dan terpusat.">
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand/favicon.svg') }}">
 
     <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}">
@@ -21,6 +21,12 @@
                     <a href="/" class="spm-landing-brand" aria-label="PesantrenMu">
                         <img src="{{ asset('images/brand/logo-horizontal.svg') }}" alt="PesantrenMu" loading="eager" fetchpriority="high">
                     </a>
+
+                    <div class="spm-landing-links" aria-label="Navigasi halaman">
+                        <a href="#masalah">Manfaat</a>
+                        <a href="#alur-kerja">Alur</a>
+                        <a href="#keunggulan">Keunggulan</a>
+                    </div>
 
                     <div class="spm-landing-actions">
                         @if (Route::has('login'))
@@ -46,57 +52,39 @@
                 <div class="spm-landing-container">
                     <div class="spm-hero-layout">
                         <div class="spm-hero-text">
-                            <h1 class="spm-hero-headline">Infrastruktur digital untuk akreditasi pesantren Muhammadiyah.</h1>
-                            <p class="spm-hero-sub">PesantrenMu menyatukan pesantren, asesor, dan LP2M dalam satu alur kerja. Dari pengajuan data sampai penerbitan SK, semuanya berjalan di satu tempat.</p>
+                            <div class="spm-hero-kicker">
+                                <span class="badge badge-light-success fw-semibold">Sistem Akreditasi Pesantren</span>
+                                <span>Terpusat &bull; Tertata &bull; Mudah Dipantau</span>
+                            </div>
+                            <h1 class="spm-hero-headline">Sistem akreditasi pesantren yang lebih tertata.</h1>
+                            <p class="spm-hero-sub">PesantrenMu membantu proses akreditasi berjalan lebih mudah, transparan, dan terpusat dalam satu sistem.</p>
 
                             <div class="spm-hero-cta">
                                 @if (Route::has('login'))
                                     @auth
-                                        <a href="{{ url('/dashboard') }}" class="btn btn-primary btn-lg fw-semibold">Masuk ke Sistem</a>
+                                        <x-ui.button :href="url('/dashboard')" size="lg" icon="arrow-right" icon-position="end">Buka Dashboard</x-ui.button>
                                     @else
-                                        <a href="{{ route('login') }}" class="btn btn-primary btn-lg fw-semibold">Masuk ke Sistem</a>
-                                        <a href="#alur-kerja" class="btn btn-light btn-lg fw-semibold">Lihat Alur Kerja</a>
+                                        <x-ui.button :href="route('login')" size="lg" icon="arrow-right" icon-position="end">Masuk ke Sistem</x-ui.button>
+                                        <a href="#masalah" class="btn btn-light btn-lg fw-semibold">Lihat Manfaat</a>
                                     @endauth
                                 @endif
+                            </div>
+
+                            <div class="spm-hero-proof">
+                                <span><i class="ki-duotone ki-check-circle fs-3"><span class="path1"></span><span class="path2"></span></i>Proses tertata</span>
+                                <span><i class="ki-duotone ki-shield-tick fs-3"><span class="path1"></span><span class="path2"></span></i>Mudah dipantau</span>
+                                <span><i class="ki-duotone ki-document fs-3"><span class="path1"></span><span class="path2"></span></i>Data terpusat</span>
                             </div>
                         </div>
 
                         <div class="spm-hero-visual">
-                            {{-- Dashboard mockup --}}
-                            <div class="spm-mockup">
-                                <div class="spm-mockup-header">
-                                    <div class="spm-mockup-dots">
-                                        <span></span><span></span><span></span>
-                                    </div>
-                                    <div class="spm-mockup-title">Dashboard PesantrenMu</div>
-                                </div>
-                                <div class="spm-mockup-body">
-                                    <div class="spm-mockup-sidebar">
-                                        <div class="spm-mockup-nav-item is-active"></div>
-                                        <div class="spm-mockup-nav-item"></div>
-                                        <div class="spm-mockup-nav-item"></div>
-                                        <div class="spm-mockup-nav-item"></div>
-                                    </div>
-                                    <div class="spm-mockup-content">
-                                        <div class="spm-mockup-stat-row">
-                                            <div class="spm-mockup-stat"></div>
-                                            <div class="spm-mockup-stat"></div>
-                                            <div class="spm-mockup-stat"></div>
-                                        </div>
-                                        <div class="spm-mockup-table">
-                                            <div class="spm-mockup-row"></div>
-                                            <div class="spm-mockup-row"></div>
-                                            <div class="spm-mockup-row"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Floating role badges --}}
-                            <div class="spm-hero-badges">
-                                <span class="spm-badge-float spm-badge-pesantren">Pesantren</span>
-                                <span class="spm-badge-float spm-badge-asesor">Asesor</span>
-                                <span class="spm-badge-float spm-badge-admin">Admin LP2M</span>
+                            <div class="spm-hero-image-card">
+                                <img
+                                    src="{{ asset('images/landing/akreditasi-hero.png') }}"
+                                    alt="Santri menggunakan laptop di ruang belajar pesantren"
+                                    loading="eager"
+                                    fetchpriority="high"
+                                >
                             </div>
                         </div>
                     </div>
@@ -104,12 +92,38 @@
             </section>
 
             {{-- Problem --}}
-            <section class="spm-problem">
+            <section class="spm-problem" id="masalah">
                 <div class="spm-landing-container">
-                    <div class="spm-problem-content">
-                        <h2 class="spm-section-title">Proses akreditasi yang masih berjalan terpisah-pisah.</h2>
-                        <p class="spm-problem-text">Dokumen dikirim lewat email, penilaian dicatat manual, hasil sulit ditelusuri. Pesantren, asesor, dan LP2M bekerja di tempat berbeda tanpa sistem yang menyatukan.</p>
-                        <p class="spm-problem-text spm-problem-solution">PesantrenMu hadir untuk menghubungkan semua pihak dalam satu proses yang jelas dan bisa dipertanggungjawabkan.</p>
+                    <div class="spm-problem-layout">
+                        <div>
+                            <span class="spm-section-eyebrow">Manfaat sistem</span>
+                            <h2 class="spm-section-title">Akreditasi pesantren menjadi lebih mudah dikelola.</h2>
+                            <p class="spm-problem-text">Dengan satu sistem, proses akreditasi dapat berjalan lebih rapi tanpa banyak koordinasi manual.</p>
+                        </div>
+
+                        <div class="spm-problem-list">
+                            <div class="spm-problem-item">
+                                <i class="ki-duotone ki-document fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                <div>
+                                    <h3>Lebih tertata</h3>
+                                    <p>Alur akreditasi disusun agar setiap tahapan lebih mudah diikuti.</p>
+                                </div>
+                            </div>
+                            <div class="spm-problem-item">
+                                <i class="ki-duotone ki-chart-line-up fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                <div>
+                                    <h3>Lebih transparan</h3>
+                                    <p>Perkembangan proses dapat dipantau oleh pihak yang berkepentingan.</p>
+                                </div>
+                            </div>
+                            <div class="spm-problem-item">
+                                <i class="ki-duotone ki-time fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                <div>
+                                    <h3>Lebih efisien</h3>
+                                    <p>Pengelolaan data dan komunikasi menjadi lebih ringkas.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -117,95 +131,93 @@
             {{-- Ecosystem / Bento Grid --}}
             <section class="spm-ecosystem" id="alur-kerja">
                 <div class="spm-landing-container">
-                    <h2 class="spm-section-title">Satu platform, seluruh proses akreditasi.</h2>
+                    <div class="spm-section-heading-center">
+                        <span class="spm-section-eyebrow">Fungsi utama</span>
+                        <h2 class="spm-section-title">Satu sistem untuk proses akreditasi pesantren.</h2>
+                        <p>PesantrenMu membantu pengajuan, pemantauan, penilaian, dan pengelolaan hasil akreditasi berjalan lebih sederhana.</p>
+                    </div>
 
                     <div class="spm-bento">
-                        {{-- Large card: Alur 7 Tahap --}}
                         <div class="spm-bento-card spm-bento-large">
                             <div class="spm-bento-icon">
                                 <i class="ki-duotone ki-arrows-circle fs-2x"><span class="path1"></span><span class="path2"></span></i>
                             </div>
-                            <h3>Alur 7 Tahap</h3>
-                            <p>Dari pengajuan, verifikasi berkas, review asesor, visitasi, penilaian, validasi admin, sampai penerbitan hasil. Setiap tahap terhubung otomatis.</p>
+                            <h3>Alur akreditasi dalam satu tempat</h3>
+                            <p>Membantu proses akreditasi berjalan dari pengajuan hingga hasil akhir secara lebih tertib.</p>
                             <div class="spm-bento-steps">
                                 <span class="spm-step-pill">Pengajuan</span>
-                                <span class="spm-step-pill">Verifikasi</span>
-                                <span class="spm-step-pill">Review</span>
-                                <span class="spm-step-pill">Visitasi</span>
+                                <span class="spm-step-pill">Pemeriksaan</span>
                                 <span class="spm-step-pill">Penilaian</span>
-                                <span class="spm-step-pill">Validasi</span>
                                 <span class="spm-step-pill spm-step-pill-active">Hasil</span>
                             </div>
                         </div>
 
-                        {{-- Medium card: Penilaian Transparan --}}
                         <div class="spm-bento-card spm-bento-medium">
                             <div class="spm-bento-icon">
                                 <i class="ki-duotone ki-chart-line-up fs-2x"><span class="path1"></span><span class="path2"></span></i>
                             </div>
-                            <h3>Penilaian Transparan</h3>
-                            <p>Nilai asesor (NA1, NA2), nilai kelompok (NK), dan nilai validasi (NV) tercatat lengkap. Setiap perubahan memiliki audit trail.</p>
+                            <h3>Pengajuan lebih mudah</h3>
+                            <p>Pesantren dapat memulai proses akreditasi melalui alur yang lebih jelas.</p>
                         </div>
 
-                        {{-- Medium card: Dokumen Terpusat --}}
                         <div class="spm-bento-card spm-bento-medium">
                             <div class="spm-bento-icon">
                                 <i class="ki-duotone ki-document fs-2x"><span class="path1"></span><span class="path2"></span></i>
                             </div>
-                            <h3>Dokumen Terpusat</h3>
-                            <p>EDPM, laporan visitasi, kartu kendali, SK, dan sertifikat tersimpan aman. Tidak ada lagi dokumen tercecer di email.</p>
+                            <h3>Data lebih terpusat</h3>
+                            <p>Informasi akreditasi tersimpan lebih rapi dalam satu sistem.</p>
                         </div>
 
-                        {{-- Small card: Notifikasi Otomatis --}}
                         <div class="spm-bento-card spm-bento-small">
                             <div class="spm-bento-icon">
                                 <i class="ki-duotone ki-notification-bing fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
                             </div>
-                            <h3>Notifikasi Otomatis</h3>
-                            <p>Setiap perubahan status langsung dikirim ke pihak terkait.</p>
+                            <h3>Mudah dipantau</h3>
+                            <p>Perkembangan proses dapat dilihat dengan lebih cepat.</p>
                         </div>
 
-                        {{-- Small card: Multi-Role --}}
                         <div class="spm-bento-card spm-bento-small">
                             <div class="spm-bento-icon">
                                 <i class="ki-duotone ki-people fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
                             </div>
-                            <h3>Multi-Role</h3>
-                            <p>Pesantren, asesor, dan admin punya ruang kerja masing-masing.</p>
+                            <h3>Kolaborasi lebih rapi</h3>
+                            <p>Pesantren, asesor, dan admin bekerja dalam alur yang sama.</p>
                         </div>
 
-                        {{-- Small card: Audit Trail --}}
                         <div class="spm-bento-card spm-bento-small">
                             <div class="spm-bento-icon">
                                 <i class="ki-duotone ki-shield-tick fs-1"><span class="path1"></span><span class="path2"></span></i>
                             </div>
-                            <h3>Audit Trail</h3>
-                            <p>Setiap aksi tercatat. Siapa, kapan, dan apa yang berubah.</p>
+                            <h3>Hasil lebih jelas</h3>
+                            <p>Keputusan akreditasi dapat dikelola dan disampaikan dengan lebih tertib.</p>
                         </div>
                     </div>
                 </div>
             </section>
 
             {{-- Why PesantrenMu --}}
-            <section class="spm-why">
+            <section class="spm-why" id="keunggulan">
                 <div class="spm-landing-container">
-                    <h2 class="spm-section-title">Dibangun khusus untuk kebutuhan LP2M.</h2>
+                    <div class="spm-section-heading-center">
+                        <span class="spm-section-eyebrow">Keunggulan</span>
+                        <h2 class="spm-section-title">Dibangun untuk proses akreditasi pesantren.</h2>
+                    </div>
 
                     <div class="spm-why-grid">
                         <div class="spm-why-item">
                             <div class="spm-why-number">01</div>
                             <h3>Terstruktur</h3>
-                            <p>Alur akreditasi mengikuti standar LP2M. Setiap tahap punya aturan, deadline, dan validasi yang jelas.</p>
+                            <p>Membantu proses akreditasi berjalan melalui tahapan yang lebih jelas.</p>
                         </div>
                         <div class="spm-why-item">
                             <div class="spm-why-number">02</div>
                             <h3>Transparan</h3>
-                            <p>Semua pihak bisa melihat progress sesuai perannya. Tidak ada proses yang tersembunyi atau sulit dilacak.</p>
+                            <p>Perkembangan proses lebih mudah diketahui oleh pihak terkait.</p>
                         </div>
                         <div class="spm-why-item">
                             <div class="spm-why-number">03</div>
                             <h3>Terhubung</h3>
-                            <p>Pesantren, asesor, dan admin bekerja di satu tempat. Notifikasi otomatis memastikan tidak ada yang terlewat.</p>
+                            <p>Semua pihak bekerja dalam sistem yang sama untuk tujuan akreditasi.</p>
                         </div>
                     </div>
                 </div>
@@ -215,8 +227,9 @@
             <section class="spm-cta">
                 <div class="spm-landing-container">
                     <div class="spm-cta-content">
-                        <h2>Siap memulai proses akreditasi yang lebih tertata?</h2>
-                        <p>Masuk ke sistem untuk mengajukan atau melanjutkan akreditasi pesantren.</p>
+                        <span class="spm-cta-kicker">PesantrenMu</span>
+                        <h2>Mulai proses akreditasi pesantren dengan lebih tertata.</h2>
+                        <p>Masuk ke sistem untuk mengelola proses akreditasi secara lebih mudah.</p>
                         @if (Route::has('login'))
                             @auth
                                 <a href="{{ url('/dashboard') }}" class="btn btn-light btn-lg fw-semibold">Buka Dashboard</a>
@@ -232,7 +245,10 @@
         <footer class="spm-landing-footer">
             <div class="spm-landing-container spm-landing-footer-inner">
                 <img src="{{ asset('images/brand/logo-horizontal.svg') }}" alt="PesantrenMu" loading="lazy">
-                <span>&copy; {{ date('Y') }} PesantrenMu &middot; Dikembangkan oleh LabMu untuk LP2M Muhammadiyah</span>
+                <div class="spm-footer-credit">
+                    <span>&copy; {{ date('Y') }} PesantrenMu &middot; Dikembangkan oleh</span>
+                    <img src="{{ asset('images/brand/labmu-logo.png') }}" alt="LabMu" loading="lazy">
+                </div>
             </div>
         </footer>
     </div>
