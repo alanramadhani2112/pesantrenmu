@@ -228,7 +228,6 @@
 
             <span class="d-flex flex-column min-w-0 flex-grow-1">
                 <span class="fw-semibold text-gray-800 fs-7 text-truncate">{{ $currentUser?->name }}</span>
-                <span class="badge badge-light-primary fw-semibold fs-9 mt-1 align-self-start text-capitalize">{{ $roleName }}</span>
             </span>
         </button>
 

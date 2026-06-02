@@ -69,6 +69,7 @@ class User extends Authenticatable
         'status',
         'sso_linked_at',
         'sso_sync_role',
+        'profile_photo_path',
     ];
 
     /**

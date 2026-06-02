@@ -3,27 +3,26 @@
     'id' => 'file',
     'accept' => null,
     'file' => null,
-    'placeholder' => 'Belum ada file',
+    'placeholder' => 'Drag & drop file di sini, atau klik untuk memilih',
     'hint' => null,
     'disabled' => false,
-    'labelClass' => 'd-flex align-items-center gap-3 p-4 rounded border border-dashed border-gray-300 bg-light cursor-pointer',
+    'labelClass' => '',
     'labelStyle' => null,
     'changeAction' => null,
 ])
 
 @php
-    // Auto-detect file from $model if $file not explicitly provided
     if (!$file && $model && isset($__data) && isset($__data[$model])) {
         $file = $__data[$model];
     }
-    $fileName = $file && is_object($file) && method_exists($file, 'getClientOriginalName')
-        ? $file->getClientOriginalName()
-        : $placeholder;
     $hasFile = $file && is_object($file) && method_exists($file, 'getClientOriginalName');
-    $hasCustomTrigger = trim((string) $slot) !== '';
+    $hasCustomSlot = trim((string) $slot) !== '';
 @endphp
 
-<div data-ui-file-upload="metronic" {{ $attributes->merge(['class' => 'spm-file-upload' . ($disabled ? ' opacity-50 pe-none' : '')]) }}>
+<div
+    {{ $attributes->merge(['class' => 'spm-file-upload' . ($disabled ? ' opacity-50 pe-none' : '')]) }}
+>
+    {{-- Hidden Livewire file input — Dropzone bridges files here via DataTransfer --}}
     <input
         type="file"
         id="{{ $id }}"
@@ -34,31 +33,52 @@
         class="d-none"
     >
 
-    <label for="{{ $id }}" class="{{ $labelClass }}" @if($labelStyle) style="{{ $labelStyle }}" @endif>
-        @if($hasCustomTrigger)
-            {{ $slot }}
-        @else
-            <span class="symbol symbol-40px">
-                <span class="symbol-label {{ $hasFile ? 'bg-light-success text-success' : 'bg-white text-primary' }}">
-                    <x-ui.icon :name="$hasFile ? 'check-circle' : 'arrow-up'" class="fs-2" />
+    {{-- Dropzone visual wrapper --}}
+    <div
+        x-data="fileDropzone({
+            inputId: '{{ $id }}',
+            maxMb: 5,
+            allowedTypes: '{{ $accept ?: '.pdf,.jpg,.jpeg,.png,.docx,.doc' }}',
+        })"
+        x-init="$nextTick(() => $data.init())"
+        class="dropzone dz-clickable {{ $labelClass }}"
+        @if($labelStyle) style="{{ $labelStyle }}" @endif
+    >
+        <div class="dz-message" data-dz-message>
+            <div class="d-flex flex-column align-items-center justify-content-center text-center px-4 py-8">
+                {{-- Upload icon — always visible --}}
+                <span class="symbol symbol-50px mb-4">
+                    <span class="symbol-label {{ $hasFile ? 'bg-light-success text-success' : 'bg-light-primary text-primary' }}">
+                        <x-ui.icon :name="$hasFile ? 'check-circle' : 'file-up'" class="fs-2x" />
+                    </span>
                 </span>
-            </span>
 
-            <span class="d-flex flex-column min-w-0 flex-grow-1">
-                <span class="fw-semibold text-gray-700 text-truncate">{{ $fileName }}</span>
+                {{-- Placeholder / file name --}}
+                <span class="fw-bold text-gray-800 fs-6">
+                    {{ $hasFile ? $file->getClientOriginalName() : $placeholder }}
+                </span>
+
+                {{-- File status or hint --}}
                 @if($hasFile)
-                    <span class="text-success fw-semibold fs-8">File siap diunggah</span>
+                    <span class="text-success fw-semibold fs-8 mt-1">File siap diunggah</span>
                 @elseif($hint)
-                    <span class="text-muted fw-semibold fs-8">{{ $hint }}</span>
+                    <span class="text-muted fw-semibold fs-8 mt-1">{{ $hint }}</span>
                 @endif
-            </span>
 
-            @if($hasFile)
-                <span class="fs-3 text-muted ms-2 cursor-pointer"
-                    onclick="event.preventDefault(); document.getElementById('{{ $id }}').value = '';{{ $model ? " Livewire.find(this.closest('[wire\\\\:id]').getAttribute('wire:id')).set('" . $model . "', null);" : '' }}">
-                    <x-ui.icon name="cross-circle" class="fs-3" />
-                </span>
-            @endif
-        @endif
-    </label>
+                {{-- Remove button when file selected --}}
+                @if($hasFile)
+                    <span class="btn btn-sm btn-light-danger mt-3 fw-semibold"
+                        onclick="event.preventDefault(); event.stopPropagation(); document.getElementById('{{ $id }}').value = '';{{ $model ? " Livewire.find(document.getElementById('" . $id . "').closest('[wire\\\\:id]').getAttribute('wire:id')).set('" . $model . "', null);" : '' }}">
+                        <x-ui.icon name="cross-circle" class="fs-5 me-1" />
+                        Hapus file
+                    </span>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    {{-- Slot content (progress bar, etc.) rendered below Dropzone area --}}
+    @if($hasCustomSlot)
+        {{ $slot }}
+    @endif
 </div>

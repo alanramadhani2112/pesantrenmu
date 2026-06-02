@@ -5,7 +5,23 @@
     'roleName' => auth()->user()?->role?->name ?? 'user',
 ])
 
-<div id="kt_app_header" class="app-header spm-app-header">
+@php
+    $photoPath = $currentUser?->profile_photo_path;
+    $photoUrl = $photoPath ? asset('storage/' . $photoPath) : '';
+    $userName = $currentUser?->name ?? 'User';
+    $parts = explode(' ', trim($userName));
+    $initials = count($parts) > 1
+        ? strtoupper(substr($parts[0], 0, 1) . substr($parts[1], 0, 1))
+        : strtoupper(substr($parts[0], 0, 2));
+@endphp
+
+<div id="kt_app_header" class="app-header spm-app-header"
+    x-data="{ avatarUrl: '{{ $photoUrl }}' }"
+    x-on:profile-photo-updated.window="
+        $nextTick(() => {
+            avatarUrl = '{{ asset('storage/' . ($currentUser?->profile_photo_path ?? '')) }}?t=' + Date.now();
+        });
+    ">
     <div class="app-container container-fluid d-flex align-items-stretch justify-content-between" id="kt_app_header_container">
         <div class="d-flex align-items-center flex-grow-1 min-w-0">
             <div class="d-flex align-items-center d-lg-none me-3" title="Buka menu">
@@ -37,6 +53,29 @@
         <div class="app-navbar d-flex align-items-stretch flex-shrink-0" id="kt_app_header_navbar">
             <div class="app-navbar-item d-flex align-items-center ms-1 ms-md-3">
                 <livewire:layout.notification-menu />
+            </div>
+
+            {{-- User Avatar + Dropdown --}}
+            <div class="app-navbar-item d-flex align-items-center ms-2 ms-md-4">
+                <div class="d-flex align-items-center cursor-pointer" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+                    <div class="symbol symbol-35px symbol-circle me-2">
+                        <template x-if="avatarUrl">
+                            <img :src="avatarUrl" alt="{{ $userName }}" class="w-100 h-100 object-fit-cover rounded-circle" />
+                        </template>
+                        <template x-if="!avatarUrl">
+                            <span class="symbol-label bg-light-primary text-primary fw-bold fs-6">
+                                {{ $initials }}
+                            </span>
+                        </template>
+                    </div>
+                    <div class="d-none d-lg-flex flex-column me-2">
+                        <span class="fw-semibold text-gray-900 fs-7 lh-1">{{ $userName }}</span>
+                        <span class="text-muted fs-8">{{ ucfirst($roleName) }}</span>
+                    </div>
+                    <i class="ki-duotone ki-down fs-8 text-gray-600 d-none d-lg-block">
+                        <span class="path1"></span><span class="path2"></span>
+                    </i>
+                </div>
             </div>
         </div>
     </div>

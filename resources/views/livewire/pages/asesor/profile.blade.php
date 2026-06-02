@@ -305,6 +305,8 @@ new #[Layout('layouts.app')] class extends Component {
         @endif
     </x-slot:toolbar>
 
+    <livewire:profile.update-profile-photo />
+
     @if($isEditing)
     {{-- ===== EDIT MODE ===== --}}
     <form x-on:submit.prevent="confirmSaveProfile($wire)" x-data="{ ...fileManagement(), ...asesorManagement() }">
@@ -325,44 +327,9 @@ new #[Layout('layouts.app')] class extends Component {
             <x-ui.section-card title="A. Identitas Asesor" subtitle="Data pribadi, kontak, dan informasi pekerjaan.">
                 <div class="p-6">
                     <div class="row g-6">
-                        {{-- Foto --}}
-                        <div class="col-lg-3 d-flex flex-column align-items-center">
-                            <div class="position-relative mb-3">
-                                <div class="rounded-circle overflow-hidden border border-3 border-light shadow"
-                                     style="width:120px;height:120px;background:#f5f5f5;">
-                                    @if($foto_upload)
-                                        <img src="{{ $foto_upload->temporaryUrl() }}" class="w-100 h-100 object-fit-cover" alt="Pratinjau foto asesor" loading="lazy">
-                                    @elseif($existing_files['foto'])
-                                        <img src="{{ Storage::url($existing_files['foto']) }}" class="w-100 h-100 object-fit-cover" alt="Foto asesor" loading="lazy">
-                                    @else
-                                        <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted fs-1 fw-semibold">
-                                            {{ substr($nama_dengan_gelar ?? 'A', 0, 1) }}
-                                        </div>
-                                    @endif
-                                </div>
-                                <x-ui.file-upload
-                                    model="foto_upload"
-                                    id="foto_upload"
-                                    accept="image/*"
-                                    :file="$foto_upload"
-                                    placeholder="Ganti Foto"
-                                    class="d-none"
-                                />
-                                <x-ui.icon-button
-                                    icon="camera"
-                                    label="Ganti Foto"
-                                    variant="primary"
-                                    size="sm"
-                                    class="position-absolute bottom-0 end-0 rounded-circle"
-                                    x-on:click="document.getElementById('foto_upload').click()"
-                                />
-                            </div>
-                            <div class="text-muted fs-8 text-center">JPG/PNG, maks 1MB</div>
-                            @error('foto_upload') <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
-                        </div>
-
+                        {{-- Foto profil kini dikelola di komponen terpadu di atas halaman. --}}
                         {{-- Fields --}}
-                        <div class="col-lg-9">
+                        <div class="col-lg-12">
                             <div class="row g-5">
                                 <div class="col-md-6">
                                     <x-ui.form-field label="Nama Lengkap (dengan Gelar)" required>
@@ -802,8 +769,9 @@ new #[Layout('layouts.app')] class extends Component {
                 <x-ui.card>
                     <div class="d-flex flex-column align-items-center text-center">
                         <div class="mb-5">
-                            @if($existing_files['foto'])
-                                <img src="{{ Storage::url($existing_files['foto']) }}"
+                            @php $photoPath = auth()->user()->profile_photo_path; @endphp
+                            @if($photoPath && Storage::disk('public')->exists($photoPath))
+                                <img src="{{ Storage::url($photoPath) }}"
                                      alt="Foto asesor"
                                      loading="lazy"
                                      class="rounded-circle object-fit-cover border border-3 border-light shadow-sm"

@@ -42,10 +42,14 @@ new class extends Component
 }; ?>
 
 <section>
-    <form wire:submit="updatePassword">
+    <form wire:submit="updatePassword"
+          x-data="formValidation"
+          @submit="validateAll()"
+          @focusout.debounce.50ms="onBlur($event)"
+          @input.debounce.150ms="onInput($event)">
         <div class="d-flex flex-column gap-5">
             <div>
-                <x-ui.form-field label="{{ __('Password Saat Ini') }}" for="current_password">
+                <x-ui.form-field label="{{ __('Password Saat Ini') }}" for="current_password" data-validate="required">
                     <x-ui.input wire:model="current_password" id="current_password" type="password" autocomplete="current-password" />
                     @error('current_password') <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
                 </x-ui.form-field>
@@ -63,14 +67,14 @@ new class extends Component
                     });
                 }
             }" x-init="initPwm()" wire:key="pw-meter-{{ $pwMeterKey }}">
-                <x-ui.form-field label="{{ __('Password Baru') }}" for="password">
+                <x-ui.form-field label="{{ __('Password Baru') }}" for="password" data-validate="required|min:8">
                     <div class="fv-row" data-kt-password-meter="true">
                         <div class="position-relative mb-3">
                             <x-ui.input wire:model="password" id="password" type="password" autocomplete="new-password" />
                             <span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2"
                                 data-kt-password-meter-control="visibility">
-                                <i class="bi bi-eye-slash fs-2"></i>
-                                <i class="bi bi-eye fs-2 d-none"></i>
+                                <i class="ki-duotone ki-eye-slash fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
+                                <i class="ki-duotone ki-eye fs-2 d-none"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
                             </span>
                         </div>
                         <div class="d-flex align-items-center mb-3" data-kt-password-meter-control="highlight">
@@ -87,7 +91,7 @@ new class extends Component
                 </x-ui.form-field>
             </div>
             <div>
-                <x-ui.form-field label="{{ __('Konfirmasi Password Baru') }}" for="password_confirmation">
+                <x-ui.form-field label="{{ __('Konfirmasi Password Baru') }}" for="password_confirmation" data-validate="required|same:password">
                     <x-ui.input wire:model="password_confirmation" id="password_confirmation" type="password" autocomplete="new-password" />
                     @error('password_confirmation') <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
                 </x-ui.form-field>

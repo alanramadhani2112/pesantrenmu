@@ -560,6 +560,7 @@ new #[Layout('layouts.app')] class extends Component {
         </x-ui.button>
     </x-slot:toolbar>
 
+    <livewire:profile.update-profile-photo />
 
         @if($pesantren->is_locked)
             <x-ui.alert variant="warning" icon="shield-tick" title="Profil Terkunci" class="mb-6">

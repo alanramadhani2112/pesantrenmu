@@ -6,6 +6,13 @@
             <div class="col-xl-8">
                 <div class="d-flex flex-column gap-6">
 
+                    {{-- Profile Photo --}}
+                    <x-ui.section-card title="Foto Profil" subtitle="Unggah foto profil Anda. Maksimal 2MB, format JPG/PNG.">
+                        <div class="p-6">
+                            <livewire:profile.update-profile-photo />
+                        </div>
+                    </x-ui.section-card>
+
                     {{-- Update Profile Info --}}
                     <x-ui.section-card title="Informasi Profil" subtitle="Perbarui nama dan alamat email akun Anda.">
                         <div class="p-6">

@@ -14,6 +14,7 @@
 
 <textarea
     data-ui-textarea="metronic"
+    data-kt-autosize="true"
     rows="{{ $rows }}"
     @if($id) id="{{ $id }}" @endif
     @if($model) wire:model{{ $modifier ? '.' . $modifier : '' }}="{{ $model }}" @endif

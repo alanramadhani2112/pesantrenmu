@@ -1,7 +1,14 @@
+import Dropzone from 'dropzone';
 import axios from 'axios';
+import autosize from 'autosize';
+import formValidation from './validation';
 import { Livewire, Alpine as LivewireAlpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
 
+window.Dropzone = Dropzone;
+window.autosize = autosize;
+
 const Alpine = LivewireAlpine;
+Alpine.data('formValidation', formValidation);
 
 window.axios = axios;
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
@@ -1028,5 +1035,79 @@ Alpine.data('ipmManagement', window.ipmManagement);
 Alpine.data('sdmManagement', window.sdmManagement);
 Alpine.data('fileManagement', window.fileManagement);
 Alpine.data('asesorManagement', window.asesorManagement);
+
+// ── Dropzone File Upload Bridge ──
+// Bridges Dropzone drag-drop to Livewire's wire:model on hidden <input type="file">.
+// Uses Dropzone as visual shell only; uploads handled by Livewire.
+Alpine.data('fileDropzone', function (config = {}) {
+    // Store element reference for Dropzone init
+    const el = this.$el;
+
+    const dropzoneConfig = {
+        url: '/dev/null',
+        autoProcessQueue: false,
+        autoQueue: true,
+        uploadMultiple: false,
+        parallelUploads: 1,
+        maxFiles: 1,
+        maxFilesize: config.maxMb ?? 5,
+        acceptedFiles: config.allowedTypes ?? '.pdf,.jpg,.jpeg,.png,.docx,.doc,.xlsx,.xls',
+        addRemoveLinks: config.showRemove ?? true,
+        createImageThumbnails: false,
+        previewsContainer: false,
+        clickable: true,
+        dictDefaultMessage: '',
+        dictFileTooBig: 'File terlalu besar (maks {{maxFilesize}}MB)',
+        dictInvalidFileType: 'Format file tidak didukung',
+        dictRemoveFile: config.removeText ?? 'Hapus',
+        dictMaxFilesExceeded: 'Maksimal 1 file',
+        init() {
+            this.on('addedfile', (file) => {
+                // Remove previous file (max 1)
+                if (this.files.length > 1) {
+                    this.removeFile(this.files[0]);
+                }
+
+                // Bridge to hidden input → Livewire wire:model
+                const input = document.getElementById(config.inputId);
+                if (input) {
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    input.files = dt.files;
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
+
+            this.on('removedfile', () => {
+                const input = document.getElementById(config.inputId);
+                if (input) {
+                    input.value = '';
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
+        },
+    };
+
+    return {
+        dropzone: null,
+
+        init() {
+            // Idempotent: Dropzone.instances auto-populated, check before creating
+            if (Dropzone.instances.some(dz => dz.element === el)) return;
+            this.dropzone = new Dropzone(el, dropzoneConfig);
+        },
+
+        destroy() {
+            this.dropzone?.destroy();
+            this.dropzone = null;
+        },
+    };
+});
+
+// Init Metronic components after initial load and each Livewire DOM morph
+document.addEventListener('DOMContentLoaded', () => initMetronic());
+Livewire.hook('morph.updated', ({ component }) => { initMetronic(); });
 
 Livewire.start();

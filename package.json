@@ -9,6 +9,7 @@
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",
         "autoprefixer": "^10.4.2",
+        "autosize": "^6.0.1",
         "axios": "^1.11.0",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^2.0.0",
@@ -18,6 +19,7 @@
     },
     "dependencies": {
         "@fontsource/inter": "^5.2.8",
+        "dropzone": "^6.0.0-beta.2",
         "sweetalert2": "^11.26.17"
     }
 }

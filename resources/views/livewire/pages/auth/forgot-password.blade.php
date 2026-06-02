@@ -47,8 +47,12 @@ new #[Layout('layouts.guest')] class extends Component
         <x-ui.alert variant="success" class="mb-6">{{ session('status') }}</x-ui.alert>
     @endif
 
-    <form wire:submit="sendPasswordResetLink" class="form w-100">
-        <x-ui.form-field class="mb-8" label="Email" for="email" :error="$errors->get('email')">
+    <form wire:submit="sendPasswordResetLink" class="form w-100"
+          x-data="formValidation"
+          @submit="validateAll()"
+          @focusout.debounce.50ms="onBlur($event)"
+          @input.debounce.150ms="onInput($event)">
+        <x-ui.form-field class="mb-8" label="Email" for="email" :error="$errors->get('email')" data-validate="required|email">
             <div class="position-relative">
                 <i class="ki-duotone ki-sms fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4"><span class="path1"></span><span class="path2"></span></i>
                 <x-ui.input model="email" id="email" type="email" name="email"

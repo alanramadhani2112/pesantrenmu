@@ -32,8 +32,12 @@ new #[Layout('layouts.guest')] class extends Component
 
     <x-auth-session-status :status="session('status')" />
 
-    <form wire:submit="login" class="form w-100">
-        <x-ui.form-field label="Email" :error="$errors->first('form.email')" required>
+    <form wire:submit="login" class="form w-100"
+          x-data="formValidation"
+          @submit="validateAll()"
+          @focusout.debounce.50ms="onBlur($event)"
+          @input.debounce.150ms="onInput($event)">
+        <x-ui.form-field label="Email" :error="$errors->first('form.email')" required data-validate="required|email">
             <div class="position-relative">
                 <i class="ki-duotone ki-sms fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4">
                     <span class="path1"></span>
@@ -52,7 +56,7 @@ new #[Layout('layouts.guest')] class extends Component
             </div>
         </x-ui.form-field>
 
-        <x-ui.form-field label="Password" :error="$errors->first('form.password')" class="mb-5" required>
+        <x-ui.form-field label="Password" :error="$errors->first('form.password')" class="mb-5" required data-validate="required">
             <div class="position-relative" x-data="{ show: false }">
                 <i class="ki-duotone ki-lock-2 fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4">
                     <span class="path1"></span>

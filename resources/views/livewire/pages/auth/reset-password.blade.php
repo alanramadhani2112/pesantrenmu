@@ -76,14 +76,18 @@ new #[Layout('layouts.guest')] class extends Component
         <div class="text-gray-500 fw-semibold fs-6">Masukkan password baru untuk akun Anda.</div>
     </div>
 
-    <form wire:submit="resetPassword" class="form w-100">
-        <x-ui.form-field class="mb-6" label="Email" for="email" :error="$errors->get('email')">
+    <form wire:submit="resetPassword" class="form w-100"
+          x-data="formValidation"
+          @submit="validateAll()"
+          @focusout.debounce.50ms="onBlur($event)"
+          @input.debounce.150ms="onInput($event)">
+        <x-ui.form-field class="mb-6" label="Email" for="email" :error="$errors->get('email')" data-validate="required|email">
             <x-ui.input model="email" id="email" type="email" name="email"
                    class="form-control-lg"
                    required autofocus autocomplete="username" />
         </x-ui.form-field>
 
-        <x-ui.form-field class="mb-6" label="Password Baru" for="password" :error="$errors->get('password')" x-data="{ show: false }">
+        <x-ui.form-field class="mb-6" label="Password Baru" for="password" :error="$errors->get('password')" x-data="{ show: false }" data-validate="required|min:8">
             <div class="position-relative">
                 <x-ui.input model="password" id="password" name="password"
                        class="form-control-lg pe-12"
@@ -97,7 +101,7 @@ new #[Layout('layouts.guest')] class extends Component
             </div>
         </x-ui.form-field>
 
-        <x-ui.form-field class="mb-8" label="Konfirmasi Password" for="password_confirmation" :error="$errors->get('password_confirmation')" x-data="{ show: false }">
+        <x-ui.form-field class="mb-8" label="Konfirmasi Password" for="password_confirmation" :error="$errors->get('password_confirmation')" x-data="{ show: false }" data-validate="required|same:password">
             <div class="position-relative">
                 <x-ui.input model="password_confirmation" id="password_confirmation" name="password_confirmation"
                        class="form-control-lg pe-12"

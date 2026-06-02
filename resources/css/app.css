@@ -2,6 +2,7 @@
 @import "@fontsource/inter/latin-500.css";
 @import "@fontsource/inter/latin-600.css";
 @import "./keenicons-lite.css";
+@import "dropzone/dist/dropzone.css";
 
 @tailwind base;
 @tailwind components;
@@ -9,4 +10,96 @@
 
 [x-cloak] {
     display: none !important;
+}
+
+/* Dropzone overrides to match Metronic styling */
+.dz-message {
+    padding: 2.5rem 2rem !important;
+    border: 2px dashed var(--bs-gray-300) !important;
+    border-radius: 0.475rem !important;
+    background: var(--bs-gray-100) !important;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.dz-message:hover {
+    border-color: var(--bs-primary) !important;
+    background: rgba(var(--bs-primary-rgb, 0, 158, 247), 0.03) !important;
+}
+
+.dz-message.dz-drag-hover {
+    border-color: var(--bs-primary) !important;
+    background: rgba(var(--bs-primary-rgb, 0, 158, 247), 0.06) !important;
+}
+
+.dz-message .dz-button {
+    color: var(--bs-gray-600) !important;
+    font-size: 0.925rem !important;
+}
+
+/* Ensure dropzone inner content fills the message area */
+.dz-message > div {
+    min-height: 120px;
+    display: flex !important;
+}
+
+/* Upload icon container */
+.dz-message .symbol-label {
+    transition: all 0.2s ease;
+}
+
+.dz-message:hover .symbol-label {
+    background: rgba(var(--bs-primary-rgb, 0, 158, 247), 0.12) !important;
+}
+
+.dz-preview {
+    position: relative;
+    padding: 0.75rem !important;
+    border-radius: 0.475rem !important;
+    background: var(--bs-gray-50) !important;
+    margin: 0.5rem 0 !important;
+}
+
+.dz-preview .dz-image img {
+    border-radius: 0.375rem;
+    max-height: 80px;
+    object-fit: cover;
+}
+
+.dz-preview .dz-details {
+    padding: 0.5rem 0 !important;
+}
+
+.dz-preview .dz-filename {
+    font-size: 0.85rem;
+    color: var(--bs-gray-700);
+}
+
+.dz-preview .dz-size {
+    font-size: 0.8rem;
+    color: var(--bs-gray-500);
+}
+
+.dz-preview .dz-success-mark,
+.dz-preview .dz-error-mark {
+    display: none;
+}
+
+.dz-preview .dz-error-message {
+    font-size: 0.8rem;
+    color: var(--bs-danger);
+}
+
+.dz-preview .dz-progress {
+    display: none;
+}
+
+.dz-preview .dz-remove {
+    font-size: 0.8rem;
+    color: var(--bs-gray-500);
+    cursor: pointer;
+}
+
+.dz-preview .dz-remove:hover {
+    color: var(--bs-danger);
 }
