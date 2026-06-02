@@ -248,6 +248,8 @@
         </div>
     </div>
 
+    {{-- Metronic JS bundle — provides KT components (password meter, menu, drawer, etc.) --}}
+    <script src="{{ asset('vendor/metronic/assets/js/scripts.bundle.js') }}"></script>
     {{-- Deferred app JS — loaded after content for faster first paint --}}
     @vite(['resources/js/app.js'])
 </body>

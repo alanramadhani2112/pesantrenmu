@@ -11,6 +11,7 @@ new class extends Component
     public string $current_password = '';
     public string $password = '';
     public string $password_confirmation = '';
+    public int $pwMeterKey = 0;
 
     /**
      * Update the password for the currently authenticated user.
@@ -23,6 +24,7 @@ new class extends Component
                 'password' => ['required', 'string', Password::defaults(), 'confirmed'],
             ]);
         } catch (ValidationException $e) {
+            $this->pwMeterKey++;
             $this->reset('current_password', 'password', 'password_confirmation');
 
             throw $e;
@@ -32,6 +34,7 @@ new class extends Component
             'password' => Hash::make($validated['password']),
         ]);
 
+        $this->pwMeterKey++;
         $this->reset('current_password', 'password', 'password_confirmation');
 
         $this->dispatch('password-updated');
@@ -47,9 +50,39 @@ new class extends Component
                     @error('current_password') <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
                 </x-ui.form-field>
             </div>
-            <div>
+            <div x-data="{
+                initPwm() {
+                    this.$nextTick(() => {
+                        const el = this.$el.querySelector('[data-kt-password-meter]');
+                        if (!el) return;
+                        const prev = KTPasswordMeter?.getInstance(el);
+                        if (prev) prev.destroy();
+                        const meter = new KTPasswordMeter(el, { minLength: 8 });
+                        // Force re-check if input has pre-filled value (e.g., after Livewire DOM morph)
+                        meter.check();
+                    });
+                }
+            }" x-init="initPwm()" wire:key="pw-meter-{{ $pwMeterKey }}">
                 <x-ui.form-field label="{{ __('Password Baru') }}" for="password">
-                    <x-ui.input wire:model="password" id="password" type="password" autocomplete="new-password" />
+                    <div class="fv-row" data-kt-password-meter="true">
+                        <div class="position-relative mb-3">
+                            <x-ui.input wire:model="password" id="password" type="password" autocomplete="new-password" />
+                            <span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2"
+                                data-kt-password-meter-control="visibility">
+                                <i class="bi bi-eye-slash fs-2"></i>
+                                <i class="bi bi-eye fs-2 d-none"></i>
+                            </span>
+                        </div>
+                        <div class="d-flex align-items-center mb-3" data-kt-password-meter-control="highlight">
+                            <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px me-2"></div>
+                            <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px me-2"></div>
+                            <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px me-2"></div>
+                            <div class="flex-grow-1 bg-secondary bg-active-success rounded h-5px"></div>
+                        </div>
+                        <div class="text-muted fs-8">
+                            Gunakan minimal 8 karakter dengan kombinasi huruf besar, huruf kecil, angka, dan simbol.
+                        </div>
+                    </div>
                     @error('password') <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
                 </x-ui.form-field>
             </div>
