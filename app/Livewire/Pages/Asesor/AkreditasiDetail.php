@@ -109,6 +109,13 @@ class AkreditasiDetail extends Component
 
     public $rejectionExplanation = '';
 
+    // Schedule visitasi form properties
+    public $tanggalMulai = '';
+
+    public $tanggalAkhir = '';
+
+    public $catatanVisitasi = '';
+
     public $selectableItems = [];
 
     public $rejectionStatus = [];
@@ -431,6 +438,45 @@ class AkreditasiDetail extends Component
         $this->reset(['rejectedItems', 'rejectionExplanation']);
         $this->activeTab = 'profil';
         $this->dispatch('notification-received', type: 'info', title: 'Info', message: 'Silakan isi form penolakan baru di bagian bawah halaman.');
+    }
+
+    public function scheduleVisitasi(): void
+    {
+        Gate::authorize('update', $this->akreditasi);
+
+        if ($this->asesorTipe != 1) {
+            abort(403);
+        }
+
+        $this->validate([
+            'tanggalMulai' => 'required|date|after_or_equal:today',
+            'tanggalAkhir' => 'required|date|after_or_equal:tanggalMulai',
+            'catatanVisitasi' => 'nullable|string|max:1000',
+        ], [
+            'tanggalMulai.required' => 'Tanggal mulai wajib diisi.',
+            'tanggalMulai.after_or_equal' => 'Tanggal mulai minimal hari ini.',
+            'tanggalAkhir.required' => 'Tanggal akhir wajib diisi.',
+            'tanggalAkhir.after_or_equal' => 'Tanggal akhir harus setelah atau sama dengan tanggal mulai.',
+            'catatanVisitasi.max' => 'Catatan visitasi tidak boleh melebihi 1000 karakter.',
+        ]);
+
+        try {
+            $workflowService = app(AkreditasiWorkflowService::class);
+            $workflowService->scheduleVisitasi(
+                $this->akreditasi->id,
+                Auth::id(),
+                [
+                    'tanggal_mulai' => $this->tanggalMulai,
+                    'tanggal_akhir' => $this->tanggalAkhir,
+                    'catatan_visitasi' => $this->catatanVisitasi ?: '',
+                ]
+            );
+            $this->akreditasi->refresh();
+            $this->dispatch('close-modal', 'asesor-schedule-visitasi-modal');
+            $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Visitasi berhasil dijadwalkan.');
+        } catch (\DomainException $e) {
+            $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: $e->getMessage());
+        }
     }
 
     public function confirmVisitasiSelesai(): void

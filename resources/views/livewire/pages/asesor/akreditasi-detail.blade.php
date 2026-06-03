@@ -46,6 +46,9 @@
         && ! empty($rejectionStatus)
         && (! $rejectionStatus['active'] || ! in_array($rejectionStatus['active']->status, ['pending', 'submitted'], true))
         && $rejectionStatus['count'] < $rejectionStatus['limit'];
+
+    $canScheduleVisitasi = (int) $asesorTipe === 1
+        && (int) $akreditasi->status === \App\StateMachine\AkreditasiStateMachine::STATUS_ASSESSMENT;
 @endphp
 
 <x-slot name="header">{{ __('Detail Akreditasi') }}</x-slot>
@@ -92,6 +95,18 @@
             >
                 <x-ui.icon name="cross-circle" class="fs-4 me-1" />
                 Tolak Dokumen
+            </x-ui.button>
+        @endif
+
+        @if($canScheduleVisitasi)
+            <x-ui.button
+                type="button"
+                variant="primary"
+                size="sm"
+                x-on:click="$dispatch('open-modal', 'asesor-schedule-visitasi-modal')"
+            >
+                <x-ui.icon name="calendar" class="fs-4 me-1" />
+                Jadwalkan Visitasi
             </x-ui.button>
         @endif
 
@@ -336,6 +351,64 @@
                             Kirim Penolakan
                         </span>
                         <span wire:loading wire:target="submitRejection">Memproses...</span>
+                    </x-ui.button>
+                </x-ui.modal-footer>
+            </form>
+        </x-ui.modal>
+    @endif
+
+    @if($canScheduleVisitasi)
+        <x-ui.modal name="asesor-schedule-visitasi-modal" maxWidth="lg" focusable>
+            <form wire:submit="scheduleVisitasi" data-ui-modal-form>
+                <x-ui.modal-header
+                    title="Jadwalkan Visitasi"
+                    subtitle="Tetapkan tanggal mulai dan akhir visitasi untuk pesantren ini."
+                    icon="calendar"
+                    variant="primary"
+                />
+
+                <x-ui.modal-body>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <x-ui.form-field label="Tanggal Mulai" required :error="$errors->get('tanggalMulai')" hint="Minimal 7 hari dari hari ini.">
+                                <x-ui.input
+                                    type="date"
+                                    model="tanggalMulai"
+                                    id="tanggalMulai"
+                                    required
+                                />
+                            </x-ui.form-field>
+                        </div>
+                        <div class="col-md-6">
+                            <x-ui.form-field label="Tanggal Akhir" required :error="$errors->get('tanggalAkhir')" hint="Harus setelah atau sama dengan tanggal mulai.">
+                                <x-ui.input
+                                    type="date"
+                                    model="tanggalAkhir"
+                                    id="tanggalAkhir"
+                                    required
+                                />
+                            </x-ui.form-field>
+                        </div>
+                    </div>
+
+                    <x-ui.form-field label="Catatan Visitasi" for="catatanVisitasi" :error="$errors->get('catatanVisitasi')" hint="Opsional. Maksimal 1000 karakter.">
+                        <x-ui.textarea
+                            model="catatanVisitasi"
+                            id="catatanVisitasi"
+                            rows="3"
+                            placeholder="Catatan tambahan untuk visitasi..."
+                        />
+                    </x-ui.form-field>
+                </x-ui.modal-body>
+
+                <x-ui.modal-footer>
+                    <x-ui.button type="button" variant="light" x-on:click="$dispatch('close-modal', 'asesor-schedule-visitasi-modal')">Batal</x-ui.button>
+                    <x-ui.button type="submit" variant="primary" wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="scheduleVisitasi">
+                            <x-ui.icon name="calendar-tick" class="fs-4 me-1" />
+                            Jadwalkan
+                        </span>
+                        <span wire:loading wire:target="scheduleVisitasi">Memproses...</span>
                     </x-ui.button>
                 </x-ui.modal-footer>
             </form>
