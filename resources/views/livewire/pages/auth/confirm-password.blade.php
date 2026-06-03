@@ -43,7 +43,7 @@ new #[Layout('layouts.guest')] class extends Component
     <form wire:submit="confirmPassword" class="form w-100">
         <x-ui.form-field class="mb-8" label="Password" for="password" :error="$errors->get('password')">
             <div class="position-relative">
-                <i class="ki-duotone ki-lock-2 fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
+                <i class="ki-solid ki-lock-2 fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4"></i>
                 <x-ui.input model="password" id="password" type="password" name="password"
                        class="form-control-lg ps-12"
                        required autocomplete="current-password" />

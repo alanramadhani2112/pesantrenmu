@@ -54,7 +54,7 @@ new #[Layout('layouts.guest')] class extends Component
           @input.debounce.150ms="onInput($event)">
         <x-ui.form-field class="mb-8" label="Email" for="email" :error="$errors->get('email')" data-validate="required|email">
             <div class="position-relative">
-                <i class="ki-duotone ki-sms fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4"><span class="path1"></span><span class="path2"></span></i>
+                <i class="ki-solid ki-sms fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4"></i>
                 <x-ui.input model="email" id="email" type="email" name="email"
                        class="form-control-lg ps-12"
                        required autofocus />
@@ -67,7 +67,7 @@ new #[Layout('layouts.guest')] class extends Component
 
         <div class="text-center">
             <a href="{{ route('login') }}" class="link-primary fw-semibold fs-6">
-                <i class="ki-duotone ki-arrow-left fs-4 me-1"><span class="path1"></span><span class="path2"></span></i>
+                <i class="ki-solid ki-arrow-left fs-4 me-1"></i>
                 Kembali ke Login
             </a>
         </div>

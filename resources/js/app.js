@@ -1,11 +1,13 @@
 import Dropzone from 'dropzone';
 import axios from 'axios';
 import autosize from 'autosize';
+import { createPopper } from '@popperjs/core';
 import formValidation from './validation';
 import { Livewire, Alpine as LivewireAlpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
 
 window.Dropzone = Dropzone;
 window.autosize = autosize;
+window.Popper = { createPopper };
 
 const Alpine = LivewireAlpine;
 Alpine.data('formValidation', formValidation);

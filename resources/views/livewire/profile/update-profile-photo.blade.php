@@ -75,70 +75,58 @@ new class extends Component
     </header>
 
     <div class="mt-4" wire:key="photo-{{ $photoKey }}"
-        x-data="{ preview: '{{ $this->photoUrl }}', changed: false }"
+        x-data="{
+            preview: '{{ $this->photoUrl }}',
+            changed: false,
+            get isEmpty() { return !this.preview; },
+        }"
         x-init="
             $watch('$wire.photoKey', () => {
                 $nextTick(() => { preview = ''; changed = false; });
             });
         ">
-        <div class="d-flex align-items-center gap-4">
-            {{-- Preview: photo or initials fallback --}}
-            <div class="flex-shrink-0">
-                <div class="symbol symbol-100px symbol-circle overflow-hidden">
-                    <template x-if="!changed && preview">
-                        <img :src="preview" alt="Foto profil" class="w-100 h-100 object-fit-cover" />
-                    </template>
-                    <template x-if="changed || !preview">
-                        <span class="symbol-label fs-2qx fw-bold"
-                            style="background-color: #e4e6ef; color: #5e6278;">
-                            {{ $this->initials }}
-                        </span>
-                    </template>
-                </div>
+        {{-- Metronic image-input — exact docs pattern --}}
+        <div class="image-input image-input-circle image-input-outline"
+            :class="{ 'image-input-empty': isEmpty, 'image-input-changed': changed }"
+            style="background-color: #f5f8fa;">
+
+            {{-- Preview wrapper — shows photo or empty --}}
+            <div class="image-input-wrapper w-125px h-125px"
+                :style="preview ? 'background-image:url(' + preview + ')' : ''">
             </div>
 
-            {{-- Upload controls --}}
-            <div class="d-flex flex-column gap-2">
-                <label class="btn btn-sm btn-light-primary" style="cursor: pointer;">
-                    <i class="ki-duotone ki-pencil fs-6 me-1">
-                        <span class="path1"></span><span class="path2"></span>
-                    </i>
-                    {{ $this->photoUrl ? 'Ganti Foto' : 'Unggah Foto' }}
-                    <input type="file"
-                        wire:model="photo"
-                        accept="image/*"
-                        class="d-none"
-                        x-on:change="
-                            const file = $event.target.files[0];
-                            if (file) {
-                                preview = URL.createObjectURL(file);
-                                changed = true;
-                            }
-                        " />
-                </label>
+            {{-- Change button (pencil, overlaps top-right) --}}
+            <label class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow"
+                data-kt-image-input-action="change"
+                title="Ganti foto">
+                <i class="ki-solid ki-pencil fs-6"></i>
+                <input type="file"
+                    wire:model="photo"
+                    accept=".png, .jpg, .jpeg"
+                    x-on:change="
+                        const file = $event.target.files[0];
+                        if (file) {
+                            preview = URL.createObjectURL(file);
+                            changed = true;
+                        }
+                    " />
+                <input type="hidden" name="avatar_remove" value="0" />
+            </label>
 
-                @if ($this->photoUrl)
-                <button type="button"
-                    class="btn btn-sm btn-light-danger"
-                    wire:click="removePhoto"
-                    wire:confirm="Hapus foto profil?">
-                    <i class="ki-duotone ki-cross fs-6 me-1">
-                        <span class="path1"></span><span class="path2"></span>
-                    </i>
-                    Hapus Foto
-                </button>
-                @endif
-            </div>
-        </div>
+            {{-- Cancel button (bottom-right, shown when file selected but not saved) --}}
+            <span class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow"
+                data-kt-image-input-action="cancel"
+                title="Batal"
+                x-on:click="changed = false; preview = '{{ $this->photoUrl }}'; $wire.photo = null;">
+                <i class="ki-solid ki-cross fs-3"></i>
+            </span>
 
-        @error('photo')
-        <div class="text-danger fs-8 mt-2">{{ $message }}</div>
-        @enderror
-
-        <div wire:loading wire:target="photo" class="mt-2">
-            <span class="text-muted fs-8">
-                <span class="spinner-border spinner-border-sm me-1"></span>
-                Mengunggah...
+            {{-- Remove button (bottom-right, shown when photo exists) --}}
+            <span class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow"
+                data-kt-image-input-action="remove"
+                title="Hapus foto"
+                x-on:click="$wire.removePhoto()">
+                <i class="ki-solid ki-cross fs-3"></i>
             </span>
         </div>
     </div>

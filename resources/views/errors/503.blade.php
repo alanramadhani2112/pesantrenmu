@@ -47,10 +47,7 @@
         <div class="card-body p-10 text-center">
 
             <div class="error-icon-wrap">
-                <i class="ki-solid ki-setting-2 fs-2tx text-primary pulse">
-                    <span class="path1"></span>
-                    <span class="path2"></span>
-                </i>
+                <i class="ki-solid ki-setting-2 fs-2tx text-primary pulse"></i>
             </div>
 
             <div class="error-code mb-3">503</div>
@@ -63,21 +60,14 @@
 
             @if(isset($exception) && $exception->getMessage())
                 <div class="alert alert-light-info d-flex align-items-center mb-8 text-start">
-                    <i class="ki-solid ki-information-5 fs-2hx text-info me-4">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                        <span class="path3"></span>
-                    </i>
+                    <i class="ki-solid ki-information-5 fs-2hx text-info me-4"></i>
                     <div class="text-gray-700 fw-semibold fs-7">{{ $exception->getMessage() }}</div>
                 </div>
             @endif
 
             <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
                 <a href="javascript:location.reload()" class="btn btn-primary fw-semibold px-6">
-                    <i class="ki-solid ki-arrows-circle fs-3 me-1">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                    </i>
+                    <i class="ki-solid ki-arrows-circle fs-3 me-1"></i>
                     Coba Lagi
                 </a>
             </div>

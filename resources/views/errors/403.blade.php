@@ -23,11 +23,7 @@
         <div class="card-body p-10 text-center">
 
             <div class="spm-error-icon-wrap spm-error-icon-wrap-warning">
-                <i class="ki-solid ki-shield-cross fs-2tx text-warning">
-                    <span class="path1"></span>
-                    <span class="path2"></span>
-                    <span class="path3"></span>
-                </i>
+                <i class="ki-solid ki-shield-cross fs-2tx text-warning"></i>
             </div>
 
             <div class="spm-error-code spm-error-code-warning mb-3">403</div>
@@ -40,17 +36,11 @@
 
             <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
                 <a href="{{ url('/dashboard') }}" class="btn btn-primary fw-semibold px-6">
-                    <i class="ki-solid ki-home fs-3 me-1">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                    </i>
+                    <i class="ki-solid ki-home fs-3 me-1"></i>
                     Ke Dashboard
                 </a>
                 <a href="javascript:history.back()" class="btn btn-light fw-semibold px-6">
-                    <i class="ki-solid ki-arrow-left fs-3 me-1">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                    </i>
+                    <i class="ki-solid ki-arrow-left fs-3 me-1"></i>
                     Kembali
                 </a>
             </div>

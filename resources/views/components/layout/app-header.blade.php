@@ -60,7 +60,7 @@
                 <div class="d-flex align-items-center cursor-pointer" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
                     <div class="symbol symbol-35px symbol-circle me-2">
                         <template x-if="avatarUrl">
-                            <img :src="avatarUrl" alt="{{ $userName }}" class="w-100 h-100 object-fit-cover rounded-circle" />
+                            <img :src="avatarUrl" alt="{{ $userName }}" class="w-35px h-35px object-fit-cover rounded-circle" />
                         </template>
                         <template x-if="!avatarUrl">
                             <span class="symbol-label bg-light-primary text-primary fw-bold fs-6">
@@ -72,9 +72,33 @@
                         <span class="fw-semibold text-gray-900 fs-7 lh-1">{{ $userName }}</span>
                         <span class="text-muted fs-8">{{ ucfirst($roleName) }}</span>
                     </div>
-                    <i class="ki-duotone ki-down fs-8 text-gray-600 d-none d-lg-block">
-                        <span class="path1"></span><span class="path2"></span>
-                    </i>
+                    <i class="ki-solid ki-down fs-8 text-gray-600 d-none d-lg-block"></i>
+                </div>
+
+                {{-- Dropdown Menu --}}
+                <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-semibold py-4 w-250px fs-6" data-kt-menu="true">
+                    <div class="menu-item px-3">
+                        <a href="{{ route('profile') }}" class="menu-link px-3">
+                            <span class="menu-icon">
+                                <i class="ki-solid ki-setting-2 fs-2"></i>
+                            </span>
+                            <span class="menu-title">Pengaturan Profil</span>
+                        </a>
+                    </div>
+
+                    <div class="separator my-2"></div>
+
+                    <div class="menu-item px-3">
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="menu-link px-3 border-0 bg-transparent w-100 text-start">
+                                <span class="menu-icon">
+                                    <i class="ki-solid ki-exit-right fs-2"></i>
+                                </span>
+                                <span class="menu-title">Keluar</span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

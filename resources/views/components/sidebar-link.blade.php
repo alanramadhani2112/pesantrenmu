@@ -38,7 +38,7 @@
         'pencil' => 'pencil',
     ];
 
-    $iconName = $iconMap[$icon] ?? 'menu';
+    $iconName = $iconMap[$icon] ?? $icon;
     $isChild = $icon === 'none';
     $classes = 'spm-sidebar-link' . ($active ? ' active' : '') . ($isChild ? ' spm-sidebar-link-child' : '') . ($disabled ? ' spm-sidebar-link-disabled' : '') . ' menu-link';
     $disabledAttrs = $disabled ? 'aria-disabled="true" tabindex="-1" style="opacity:.6;cursor:not-allowed;pointer-events:none;"' : '';

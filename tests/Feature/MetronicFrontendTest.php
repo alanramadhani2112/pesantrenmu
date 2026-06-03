@@ -263,26 +263,24 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('display: none !important;', $css);
     }
 
-    public function test_header_profile_badge_is_removed_and_sidebar_user_menu_owns_account_actions(): void
+    public function test_header_user_menu_owns_account_actions(): void
     {
         $header = file_get_contents(resource_path('views/components/layout/app-header.blade.php'));
         $sidebar = file_get_contents(resource_path('views/components/layout/app-sidebar.blade.php'));
-        $css = $this->metronicOverrideCss();
 
         $this->assertStringContainsString('<livewire:layout.notification-menu', $header);
-        $this->assertStringNotContainsString('kt_app_header_user_menu', $header);
         $this->assertStringNotContainsString('spm-header-user-menu', $header);
         $this->assertStringNotContainsString('aria-label="Menu pengguna"', $header);
+        $this->assertStringContainsString('data-kt-menu-trigger="click"', $header);
+        $this->assertStringContainsString('data-kt-menu-placement="bottom-end"', $header);
+        $this->assertStringContainsString('data-kt-menu="true"', $header);
+        $this->assertStringContainsString("route('profile')", $header);
+        $this->assertStringContainsString("route('logout')", $header);
+        $this->assertStringContainsString('Pengaturan Profil', $header);
+        $this->assertStringContainsString('Keluar', $header);
 
-        $this->assertStringContainsString('id="kt_app_sidebar_user_menu"', $sidebar);
-        $this->assertStringContainsString('x-on:mouseenter="open = true"', $sidebar);
-        $this->assertStringContainsString("route('profile')", $sidebar);
-        $this->assertStringContainsString("route('logout')", $sidebar);
-        $this->assertStringContainsString('Pengaturan Profil', $sidebar);
-        $this->assertStringContainsString('Keluar', $sidebar);
-
-        $this->assertStringContainsString('.spm-app-sidebar .spm-sidebar-user-popover', $css);
-        $this->assertStringContainsString('.spm-app-sidebar .spm-sidebar-user-link-danger', $css);
+        $this->assertStringNotContainsString('id="kt_app_sidebar_user_menu"', $sidebar);
+        $this->assertStringNotContainsString('x-on:mouseenter="open = true"', $sidebar);
     }
 
     public function test_metronic_overrides_apply_enterprise_typography_and_hide_navigation_progress(): void

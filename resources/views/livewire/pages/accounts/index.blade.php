@@ -266,9 +266,7 @@ new #[Layout('layouts.app')] class extends Component {
                                 <span class="text-gray-900 fw-semibold fs-6">{{ $user->name }}</span>
                                 @if ($user->sso_linked_at)
                                     <span class="badge badge-light-success fs-8 fw-semibold">
-                                        <i class="ki-duotone ki-shield-tick fs-7 me-1">
-                                            <span class="path1"></span><span class="path2"></span>
-                                        </i>
+                                        <i class="ki-solid ki-shield-tick fs-7 me-1"></i>
                                         Linked to Muhammadiyah ID
                                     </span>
                                 @endif

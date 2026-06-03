@@ -71,9 +71,9 @@
                             </div>
 
                             <div class="spm-hero-proof">
-                                <span><i class="ki-duotone ki-check-circle fs-3"><span class="path1"></span><span class="path2"></span></i>Proses tertata</span>
-                                <span><i class="ki-duotone ki-shield-tick fs-3"><span class="path1"></span><span class="path2"></span></i>Mudah dipantau</span>
-                                <span><i class="ki-duotone ki-document fs-3"><span class="path1"></span><span class="path2"></span></i>Data terpusat</span>
+                                <span><i class="ki-solid ki-check-circle fs-3"></i>Proses tertata</span>
+                                <span><i class="ki-solid ki-shield-tick fs-3"></i>Mudah dipantau</span>
+                                <span><i class="ki-solid ki-document fs-3"></i>Data terpusat</span>
                             </div>
                         </div>
 
@@ -103,21 +103,21 @@
 
                         <div class="spm-problem-list">
                             <div class="spm-problem-item">
-                                <i class="ki-duotone ki-document fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                <i class="ki-solid ki-document fs-2"></i>
                                 <div>
                                     <h3>Lebih tertata</h3>
                                     <p>Alur akreditasi disusun agar setiap tahapan lebih mudah diikuti.</p>
                                 </div>
                             </div>
                             <div class="spm-problem-item">
-                                <i class="ki-duotone ki-chart-line-up fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                <i class="ki-solid ki-chart-line-up fs-2"></i>
                                 <div>
                                     <h3>Lebih transparan</h3>
                                     <p>Perkembangan proses dapat dipantau oleh pihak yang berkepentingan.</p>
                                 </div>
                             </div>
                             <div class="spm-problem-item">
-                                <i class="ki-duotone ki-time fs-2"><span class="path1"></span><span class="path2"></span></i>
+                                <i class="ki-solid ki-time fs-2"></i>
                                 <div>
                                     <h3>Lebih efisien</h3>
                                     <p>Pengelolaan data dan komunikasi menjadi lebih ringkas.</p>
@@ -140,7 +140,7 @@
                     <div class="spm-bento">
                         <div class="spm-bento-card spm-bento-large">
                             <div class="spm-bento-icon">
-                                <i class="ki-duotone ki-arrows-circle fs-2x"><span class="path1"></span><span class="path2"></span></i>
+                                <i class="ki-solid ki-arrows-circle fs-2x"></i>
                             </div>
                             <h3>Alur akreditasi dalam satu tempat</h3>
                             <p>Membantu proses akreditasi berjalan dari pengajuan hingga hasil akhir secara lebih tertib.</p>
@@ -154,7 +154,7 @@
 
                         <div class="spm-bento-card spm-bento-medium">
                             <div class="spm-bento-icon">
-                                <i class="ki-duotone ki-chart-line-up fs-2x"><span class="path1"></span><span class="path2"></span></i>
+                                <i class="ki-solid ki-chart-line-up fs-2x"></i>
                             </div>
                             <h3>Pengajuan lebih mudah</h3>
                             <p>Pesantren dapat memulai proses akreditasi melalui alur yang lebih jelas.</p>
@@ -162,7 +162,7 @@
 
                         <div class="spm-bento-card spm-bento-medium">
                             <div class="spm-bento-icon">
-                                <i class="ki-duotone ki-document fs-2x"><span class="path1"></span><span class="path2"></span></i>
+                                <i class="ki-solid ki-document fs-2x"></i>
                             </div>
                             <h3>Data lebih terpusat</h3>
                             <p>Informasi akreditasi tersimpan lebih rapi dalam satu sistem.</p>
@@ -170,7 +170,7 @@
 
                         <div class="spm-bento-card spm-bento-small">
                             <div class="spm-bento-icon">
-                                <i class="ki-duotone ki-notification-bing fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                                <i class="ki-solid ki-notification-bing fs-1"></i>
                             </div>
                             <h3>Mudah dipantau</h3>
                             <p>Perkembangan proses dapat dilihat dengan lebih cepat.</p>
@@ -178,7 +178,7 @@
 
                         <div class="spm-bento-card spm-bento-small">
                             <div class="spm-bento-icon">
-                                <i class="ki-duotone ki-people fs-1"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span><span class="path5"></span></i>
+                                <i class="ki-solid ki-people fs-1"></i>
                             </div>
                             <h3>Kolaborasi lebih rapi</h3>
                             <p>Pesantren, asesor, dan admin bekerja dalam alur yang sama.</p>
@@ -186,7 +186,7 @@
 
                         <div class="spm-bento-card spm-bento-small">
                             <div class="spm-bento-icon">
-                                <i class="ki-duotone ki-shield-tick fs-1"><span class="path1"></span><span class="path2"></span></i>
+                                <i class="ki-solid ki-shield-tick fs-1"></i>
                             </div>
                             <h3>Hasil lebih jelas</h3>
                             <p>Keputusan akreditasi dapat dikelola dan disampaikan dengan lebih tertib.</p>

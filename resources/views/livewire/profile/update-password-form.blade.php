@@ -73,8 +73,8 @@ new class extends Component
                             <x-ui.input wire:model="password" id="password" type="password" autocomplete="new-password" />
                             <span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2"
                                 data-kt-password-meter-control="visibility">
-                                <i class="ki-duotone ki-eye-slash fs-2"><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
-                                <i class="ki-duotone ki-eye fs-2 d-none"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+                                <i class="ki-solid ki-eye-slash fs-2"></i>
+                                <i class="ki-solid ki-eye fs-2 d-none"></i>
                             </span>
                         </div>
                         <div class="d-flex align-items-center mb-3" data-kt-password-meter-control="highlight">

@@ -61,8 +61,8 @@ new #[Layout('layouts.guest')] class extends Component
                 <x-ui.input model="password" id="password" name="password" class="form-control-lg pe-12" type="password" x-bind:type="show ? 'text' : 'password'" required autocomplete="new-password" />
                 <x-ui.button type="button" variant="light" size="sm" @click="show = !show"
                         class="btn-icon btn-active-light-primary position-absolute top-50 end-0 translate-middle-y me-2">
-                    <i class="ki-duotone ki-eye fs-2 text-gray-500" x-show="!show"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
-                    <i class="ki-duotone ki-eye-slash fs-2 text-gray-500" x-show="show" x-cloak><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
+                    <i class="ki-solid ki-eye fs-2 text-gray-500" x-show="!show"></i>
+                    <i class="ki-solid ki-eye-slash fs-2 text-gray-500" x-show="show" x-cloak></i>
                 </x-ui.button>
             </div>
         </x-ui.form-field>
@@ -72,8 +72,8 @@ new #[Layout('layouts.guest')] class extends Component
                 <x-ui.input model="password_confirmation" id="password_confirmation" name="password_confirmation" class="form-control-lg pe-12" type="password" x-bind:type="show ? 'text' : 'password'" required autocomplete="new-password" />
                 <x-ui.button type="button" variant="light" size="sm" @click="show = !show"
                         class="btn-icon btn-active-light-primary position-absolute top-50 end-0 translate-middle-y me-2">
-                    <i class="ki-duotone ki-eye fs-2 text-gray-500" x-show="!show"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
-                    <i class="ki-duotone ki-eye-slash fs-2 text-gray-500" x-show="show" x-cloak><span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span></i>
+                    <i class="ki-solid ki-eye fs-2 text-gray-500" x-show="!show"></i>
+                    <i class="ki-solid ki-eye-slash fs-2 text-gray-500" x-show="show" x-cloak></i>
                 </x-ui.button>
             </div>
         </x-ui.form-field>

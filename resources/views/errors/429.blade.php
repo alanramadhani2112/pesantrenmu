@@ -40,10 +40,7 @@
         <div class="card-body p-10 text-center">
 
             <div class="error-icon-wrap">
-                <i class="ki-solid ki-abstract-26 fs-2tx text-danger">
-                    <span class="path1"></span>
-                    <span class="path2"></span>
-                </i>
+                <i class="ki-solid ki-arrows-circle fs-2tx text-danger"></i>
             </div>
 
             <div class="error-code mb-3">429</div>
@@ -56,17 +53,11 @@
 
             <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
                 <a href="javascript:history.back()" class="btn btn-primary fw-semibold px-6">
-                    <i class="ki-solid ki-arrow-left fs-3 me-1">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                    </i>
+                    <i class="ki-solid ki-arrow-left fs-3 me-1"></i>
                     Kembali
                 </a>
                 <a href="{{ url('/dashboard') }}" class="btn btn-light fw-semibold px-6">
-                    <i class="ki-solid ki-home fs-3 me-1">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                    </i>
+                    <i class="ki-solid ki-home fs-3 me-1"></i>
                     Ke Dashboard
                 </a>
             </div>

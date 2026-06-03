@@ -39,10 +39,7 @@ new #[Layout('layouts.guest')] class extends Component
           @input.debounce.150ms="onInput($event)">
         <x-ui.form-field label="Email" :error="$errors->first('form.email')" required data-validate="required|email">
             <div class="position-relative">
-                <i class="ki-duotone ki-sms fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4">
-                    <span class="path1"></span>
-                    <span class="path2"></span>
-                </i>
+                <i class="ki-solid ki-sms fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4"></i>
                 <x-ui.input
                     model="form.email"
                     id="email"
@@ -58,13 +55,7 @@ new #[Layout('layouts.guest')] class extends Component
 
         <x-ui.form-field label="Password" :error="$errors->first('form.password')" class="mb-5" required data-validate="required">
             <div class="position-relative" x-data="{ show: false }">
-                <i class="ki-duotone ki-lock-2 fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4">
-                    <span class="path1"></span>
-                    <span class="path2"></span>
-                    <span class="path3"></span>
-                    <span class="path4"></span>
-                    <span class="path5"></span>
-                </i>
+                <i class="ki-solid ki-lock-2 fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4"></i>
                 <x-ui.input
                     model="form.password"
                     id="password"
@@ -83,17 +74,8 @@ new #[Layout('layouts.guest')] class extends Component
                     @click="show = !show"
                     aria-label="Tampilkan password"
                 >
-                    <i class="ki-duotone ki-eye fs-2 text-gray-500" x-show="!show">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                        <span class="path3"></span>
-                    </i>
-                    <i class="ki-duotone ki-eye-slash fs-2 text-gray-500" x-show="show" x-cloak>
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                        <span class="path3"></span>
-                        <span class="path4"></span>
-                    </i>
+                    <i class="ki-solid ki-eye fs-2 text-gray-500" x-show="!show"></i>
+                    <i class="ki-solid ki-eye-slash fs-2 text-gray-500" x-show="show" x-cloak></i>
                 </x-ui.button>
             </div>
         </x-ui.form-field>
@@ -109,10 +91,7 @@ new #[Layout('layouts.guest')] class extends Component
             <x-ui.button type="submit" variant="primary" size="lg">
                 <span class="indicator-label d-flex align-items-center justify-content-center gap-2">
                     Masuk
-                    <i class="ki-duotone ki-arrow-right fs-2 text-white">
-                        <span class="path1"></span>
-                        <span class="path2"></span>
-                    </i>
+                    <i class="ki-solid ki-arrow-right fs-2 text-white"></i>
                 </span>
             </x-ui.button>
         </div>

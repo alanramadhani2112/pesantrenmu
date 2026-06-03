@@ -551,10 +551,10 @@ new #[Layout('layouts.app')] class extends Component {
             :variant="$isEditing ? 'light' : 'primary'"
         >
             @if($isEditing)
-                <i class="ki-outline ki-cross fs-4 me-1"></i>
+                <i class="ki-solid ki-cross fs-4 me-1"></i>
                 Batal Edit
             @else
-                <i class="ki-outline ki-pencil fs-4 me-1"></i>
+                <i class="ki-solid ki-pencil fs-4 me-1"></i>
                 Edit Profil
             @endif
         </x-ui.button>
@@ -765,7 +765,7 @@ new #[Layout('layouts.app')] class extends Component {
                     @else
                         <div class="separator separator-dashed my-5"></div>
                         <div class="notice d-flex bg-light-warning rounded border-warning border border-dashed p-6 align-items-start">
-                            <i class="ki-outline ki-information-5 fs-2tx text-warning me-4 mt-1"></i>
+                            <i class="ki-solid ki-information-5 fs-2tx text-warning me-4 mt-1"></i>
                             <div class="d-flex flex-stack flex-grow-1 flex-wrap flex-md-nowrap">
                                 <div class="mb-3 mb-md-0 fw-semibold">
                                     <h4 class="text-gray-900 fw-semibold mb-2">Belum ada layanan satuan pendidikan dipilih</h4>
@@ -815,7 +815,7 @@ new #[Layout('layouts.app')] class extends Component {
                                        class="text-primary fs-8 d-inline-flex align-items-center mb-2"
                                        target="_blank"
                                        title="Buka halaman dokumen template IAPM">
-                                        <i class="ki-outline ki-cloud-download fs-7 me-1"></i>Unduh Template IAPM
+                                        <i class="ki-solid ki-cloud-download fs-7 me-1"></i>Unduh Template IAPM
                                     </a>
                                 @endif
                                 <x-ui.file-upload
@@ -829,16 +829,16 @@ new #[Layout('layouts.app')] class extends Component {
                                             @if (str_contains($$prop->getMimeType(), 'image'))
                                                 <img src="{{ $$prop->temporaryUrl() }}" class="spm-document-dropzone-preview" alt="Pratinjau dokumen" loading="lazy" />
                                             @else
-                                                <i class="ki-outline ki-file-up fs-3hx text-success mb-2"></i>
+                                                <i class="ki-solid ki-file-up fs-3hx text-success mb-2"></i>
                                             @endif
                                             <div class="fw-semibold text-success fs-7 text-truncate w-100">{{ $$prop->getClientOriginalName() }}</div>
                                             <div class="text-muted fs-8 mt-1">Siap Diunggah</div>
                                         @elseif (!empty($existing_files[$dbField]))
-                                            <i class="ki-outline ki-file fs-3hx text-primary mb-2"></i>
+                                            <i class="ki-solid ki-file fs-3hx text-primary mb-2"></i>
                                             <div class="fw-semibold text-primary fs-7">FILE TERUNGGAH</div>
                                             <div class="text-muted fs-8 mt-1">Klik untuk Ganti</div>
                                         @else
-                                            <i class="ki-outline ki-cloud-add fs-3hx text-gray-500 mb-2"></i>
+                                            <i class="ki-solid ki-cloud-add fs-3hx text-gray-500 mb-2"></i>
                                             <div class="fw-semibold text-gray-700 fs-7">Unggah File</div>
                                             <div class="text-muted fs-8 mt-1">PDF/Gambar (Maks. 2MB)</div>
                                         @endif
@@ -881,16 +881,16 @@ new #[Layout('layouts.app')] class extends Component {
                                             @if (str_contains($$prop->getMimeType(), 'image'))
                                                 <img src="{{ $$prop->temporaryUrl() }}" class="spm-document-dropzone-preview" alt="Pratinjau dokumen" loading="lazy" />
                                             @else
-                                                <i class="ki-outline ki-file-up fs-3hx text-success mb-2"></i>
+                                                <i class="ki-solid ki-file-up fs-3hx text-success mb-2"></i>
                                             @endif
                                             <div class="fw-semibold text-success fs-7 text-truncate w-100">{{ $$prop->getClientOriginalName() }}</div>
                                             <div class="text-muted fs-8 mt-1">Siap Diunggah</div>
                                         @elseif (!empty($existing_files[$dbField]))
-                                            <i class="ki-outline ki-file fs-3hx text-primary mb-2"></i>
+                                            <i class="ki-solid ki-file fs-3hx text-primary mb-2"></i>
                                             <div class="fw-semibold text-primary fs-7">FILE TERUNGGAH</div>
                                             <div class="text-muted fs-8 mt-1">Klik untuk Ganti</div>
                                         @else
-                                            <i class="ki-outline ki-cloud-add fs-3hx text-gray-500 mb-2"></i>
+                                            <i class="ki-solid ki-cloud-add fs-3hx text-gray-500 mb-2"></i>
                                             <div class="fw-semibold text-gray-700 fs-7">Unggah File</div>
                                             <div class="text-muted fs-8 mt-1">PDF/Gambar (Maks. 2MB)</div>
                                         @endif
@@ -948,7 +948,7 @@ new #[Layout('layouts.app')] class extends Component {
                             wire:loading.attr="disabled"
                         >
                             <span wire:loading.remove wire:target="save">
-                                <i class="ki-outline ki-check fs-5 me-1"></i>
+                                <i class="ki-solid ki-check fs-5 me-1"></i>
                                 Submit
                             </span>
                             <span wire:loading wire:target="save">
