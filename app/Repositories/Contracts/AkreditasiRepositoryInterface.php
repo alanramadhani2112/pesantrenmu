@@ -38,7 +38,7 @@ interface AkreditasiRepositoryInterface
 
     public function saveEdpmCatatan(array $attributes, array $data): AkreditasiEdpmCatatan;
 
-    public function getPaginatedByUserId(int $userId, ?string $search = null, ?string $periodeFilter = null, ?string $statusFilter = null, int $perPage = 10, string $sortField = 'created_at', bool $sortAsc = false): LengthAwarePaginator;
+    public function getPaginatedByUserId(int $userId, ?string $search = null, ?string $periodeFilter = null, ?string $statusFilter = null, ?string $tahapanFilter = null, int $perPage = 10, string $sortField = 'created_at', bool $sortAsc = false): LengthAwarePaginator;
 
     public function latestForUser(int $userId): ?Akreditasi;
 

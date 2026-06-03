@@ -172,12 +172,16 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
         return AkreditasiEdpmCatatan::updateOrCreate($attributes, $data);
     }
 
-    public function getPaginatedByUserId(int $userId, ?string $search = null, ?string $periodeFilter = null, ?string $statusFilter = null, int $perPage = 10, string $sortField = 'created_at', bool $sortAsc = false): LengthAwarePaginator
+    public function getPaginatedByUserId(int $userId, ?string $search = null, ?string $periodeFilter = null, ?string $statusFilter = null, ?string $tahapanFilter = null, int $perPage = 10, string $sortField = 'created_at', bool $sortAsc = false): LengthAwarePaginator
     {
+        $tahapanStatusMap = [
+            'visitasi' => Akreditasi::STATUS_VISITASI,
+        ];
+
         return Akreditasi::with(['assessments', 'catatans', 'assessment1', 'bandings'])
             ->where('user_id', $userId)
             ->when($periodeFilter, fn ($q) => $q->whereYear('created_at', $periodeFilter))
-            ->when($statusFilter, function ($query) use ($statusFilter) {
+            ->when($statusFilter !== null && $statusFilter !== '', function ($query) use ($statusFilter) {
                 if ($statusFilter === 'hasil_akhir') {
                     $query->whereIn('status', [
                         Akreditasi::STATUS_SELESAI,
@@ -188,6 +192,9 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
                 }
 
                 $query->where('status', $statusFilter);
+            })
+            ->when($tahapanFilter !== null && $tahapanFilter !== '', function ($query) use ($tahapanFilter, $tahapanStatusMap) {
+                $query->where('status', $tahapanStatusMap[$tahapanFilter] ?? $tahapanFilter);
             })
             ->when($search, function ($query) use ($search) {
                 $query->where('nomor_sk', 'like', '%'.$search.'%')

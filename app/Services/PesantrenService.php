@@ -110,9 +110,9 @@ class PesantrenService
         });
     }
 
-    public function getAkreditasis(int $userId, ?string $search = null, ?string $periodeFilter = null, ?string $statusFilter = null, int $perPage = 10, string $sortField = 'created_at', bool $sortAsc = false): LengthAwarePaginator
+    public function getAkreditasis(int $userId, ?string $search = null, ?string $periodeFilter = null, ?string $statusFilter = null, ?string $tahapanFilter = null, int $perPage = 10, string $sortField = 'created_at', bool $sortAsc = false): LengthAwarePaginator
     {
-        return $this->akreditasiRepository->getPaginatedByUserId($userId, $search, $periodeFilter, $statusFilter, $perPage, $sortField, $sortAsc);
+        return $this->akreditasiRepository->getPaginatedByUserId($userId, $search, $periodeFilter, $statusFilter, $tahapanFilter, $perPage, $sortField, $sortAsc);
     }
 
     public function getLatestAkreditasi(int $userId): ?Akreditasi

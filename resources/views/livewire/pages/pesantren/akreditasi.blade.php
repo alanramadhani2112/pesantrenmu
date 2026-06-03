@@ -22,6 +22,7 @@ new #[Layout('layouts.app')] class extends Component {
     public $sortField = 'created_at';
     public $sortAsc = false;
     public $selectedAkreditasiNotes;
+    #[Url]
     public $periodeFilter = '';
     #[Url]
     public $statusFilter = '';
@@ -94,6 +95,7 @@ new #[Layout('layouts.app')] class extends Component {
             $this->search,
             $this->periodeFilter,
             $effectiveStatusFilter,
+            $this->tahapanFilter,
             $this->perPage,
             $this->sortField,
             $this->sortAsc
