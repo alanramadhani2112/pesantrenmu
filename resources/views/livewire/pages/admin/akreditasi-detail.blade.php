@@ -592,29 +592,35 @@ new #[Layout('layouts.app')] class extends Component
             return;
         }
 
+        if (empty($this->akreditasi->laporan_visitasi_asesor1)) {
+            $this->dispatch('notification-received', type: 'error', title: 'Data Belum Lengkap', message: 'NV belum dapat difinalisasi karena Laporan Visitasi Ketua Kelompok belum diunggah.');
+            return;
+        }
+
         try {
+            $this->validate(['adminNvs.*' => 'required|integer|between:1,4']);
+
             $scoringService = app(\App\Services\AssessorScoringService::class);
             $adminId = Auth::id();
             $finalizedCount = 0;
+
             foreach ($this->adminNvs as $butirId => $nvValue) {
-                if (!empty($nvValue)) {
-                    try {
-                        $scoringService->saveNV($this->akreditasi->id, $adminId, (int) $butirId, (int) $nvValue, true);
-                        $finalizedCount++;
-                    } catch (\App\Exceptions\ImmutableValueException $e) {
-                        // Already final, skip
-                        $finalizedCount++;
-                    } catch (\Throwable $e) {
-                        // Log but continue
-                    }
+                try {
+                    $scoringService->saveNV($this->akreditasi->id, $adminId, (int) $butirId, (int) $nvValue, true);
+                    $finalizedCount++;
+                } catch (\App\Exceptions\ImmutableValueException $e) {
+                    $finalizedCount++;
                 }
             }
 
-            // Set is_nv_final flag on akreditasi
             $this->akreditasi->update(['is_nv_final' => true]);
             $this->akreditasi->refresh();
+            $this->akreditasiUpdatedAt = $this->akreditasi->updated_at->toISOString();
 
             $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: "Semua NV ({$finalizedCount} butir) berhasil difinalisasi dan dikunci.");
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->dispatch('validation-failed', title: 'Nilai NV Belum Lengkap', html: 'Mohon lengkapi seluruh nilai verifikasi sebelum finalisasi.');
+            throw $e;
         } catch (\Throwable $e) {
             $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: $e->getMessage());
         }
