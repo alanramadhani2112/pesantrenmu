@@ -58,8 +58,12 @@ class SecurityHeaders
         // Content-Security-Policy: baseline proteksi XSS/data injection.
         // 'unsafe-eval' untuk Alpine.js + Livewire runtime. Upgrade ke strict nonce
         // CSP akan dikerjakan di follow-up PR setelah integrasi CSP middleware.
+        // 'unsafe-inline' pada script-src diperlukan untuk:
+        // - CloudFlare rocket-loader (inject inline script) — production
+        // - Livewire wire:init / x-init inline expressions
+        // static.cloudflareinsights.com untuk CloudFlare Web Analytics beacon.
         $csp = "default-src 'self'; ".
-               "script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval'; ".
+               "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://static.cloudflareinsights.com; ".
                "style-src 'self' 'unsafe-inline'; ".
                "img-src 'self' data: blob:; ".
                "font-src 'self'; ".
