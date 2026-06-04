@@ -198,6 +198,31 @@
                     @endforeach
                 @endforeach
 
+                {{-- Panduan link (role-specific) --}}
+                @php
+                    $panduanRoutes = [
+                        'super_admin' => 'panduan.superadmin',
+                        'admin' => 'panduan.admin',
+                        'asesor' => 'panduan.asesor',
+                        'pesantren' => 'panduan.pesantren',
+                    ];
+                    $panduanRoute = $panduanRoutes[$roleName] ?? null;
+                @endphp
+                @if($panduanRoute)
+                    <div class="menu-item pt-4 mt-4 border-top">
+                        <a href="{{ route($panduanRoute) }}"
+                           class="menu-link px-5 {{ request()->routeIs('panduan.*') ? 'active' : '' }}"
+                           wire:navigate>
+                            <span class="menu-icon">
+                                <i class="ki-duotone ki-book fs-2">
+                                    <span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span>
+                                </i>
+                            </span>
+                            <span class="menu-title">Panduan</span>
+                        </a>
+                    </div>
+                @endif
+
             </div>
         </div>
     </div>

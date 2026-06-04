@@ -178,15 +178,29 @@ Route::get('secure/asesor-docs/{asesorId}/{field}', function (int $asesorId, str
 
 /*
 |--------------------------------------------------------------------------
-| Panduan routes
+| Panduan routes (role-restricted)
 |--------------------------------------------------------------------------
-| User guide per role — accessible by authenticated users of any role.
+| Setiap panduan hanya bisa diakses oleh role yang bersangkutan.
+| Middleware EnsureUserHasRole meng-abort(403) bila role tidak cocok.
+| Super admin (role=4) bypass semua gate secara otomatis.
 */
-Route::middleware(['auth', 'verified'])
+Route::middleware(['auth', 'verified', 'role:super_admin'])
     ->group(function () {
         Route::view('panduan-superadmin', 'panduan.superadmin')->name('panduan.superadmin');
+    });
+
+Route::middleware(['auth', 'verified', 'role:admin'])
+    ->group(function () {
         Route::view('panduan-admin', 'panduan.admin')->name('panduan.admin');
+    });
+
+Route::middleware(['auth', 'verified', 'role:asesor'])
+    ->group(function () {
         Route::view('panduan-asesor', 'panduan.asesor')->name('panduan.asesor');
+    });
+
+Route::middleware(['auth', 'verified', 'role:pesantren'])
+    ->group(function () {
         Route::view('panduan-pesantren', 'panduan.pesantren')->name('panduan.pesantren');
     });
 
