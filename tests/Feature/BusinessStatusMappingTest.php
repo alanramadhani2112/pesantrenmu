@@ -102,8 +102,6 @@ class BusinessStatusMappingTest extends TestCase
         $this->assertContains($freeUser->id, $freeIds);
     }
 
-
-
     private function createPesantrenWithAkreditasi(string $name, int $status): User
     {
         $user = $this->createPesantrenUser($name);

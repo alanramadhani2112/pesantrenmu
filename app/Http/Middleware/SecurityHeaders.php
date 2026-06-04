@@ -58,15 +58,15 @@ class SecurityHeaders
         // Content-Security-Policy: baseline proteksi XSS/data injection.
         // 'unsafe-eval' untuk Alpine.js + Livewire runtime. Upgrade ke strict nonce
         // CSP akan dikerjakan di follow-up PR setelah integrasi CSP middleware.
-        $csp = "default-src 'self'; " .
-               "script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval'; " .
-               "style-src 'self' 'unsafe-inline'; " .
-               "img-src 'self' data: blob:; " .
-               "font-src 'self'; " .
-               "connect-src 'self' ws: wss:; " .
-               "object-src 'none'; " .
-               "frame-ancestors 'self'; " .
-               "form-action 'self'; " .
+        $csp = "default-src 'self'; ".
+               "script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval'; ".
+               "style-src 'self' 'unsafe-inline'; ".
+               "img-src 'self' data: blob:; ".
+               "font-src 'self'; ".
+               "connect-src 'self' ws: wss:; ".
+               "object-src 'none'; ".
+               "frame-ancestors 'self'; ".
+               "form-action 'self'; ".
                "base-uri 'self'";
         $response->headers->set('Content-Security-Policy', $csp);
 
