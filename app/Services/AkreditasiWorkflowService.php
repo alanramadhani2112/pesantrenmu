@@ -166,13 +166,14 @@ class AkreditasiWorkflowService
      *
      * @param  int  $asesor1Id  Asesor user_id for Asesor_1 (tipe=1)
      * @param  int  $asesor2Id  Asesor user_id for Asesor_2 (tipe=2)
+     * @param  string  $clientUpdatedAt  Optional ISO timestamp for optimistic locking
      *
      * @throws \DomainException When validation fails
      * @throws InvalidTransitionException When transition is not permitted
      *
      * Validates Requirements 3.2, 3.3, 3.4, 3.5
      */
-    public function approveBerkas(int $akreditasiId, int $adminId, int $asesor1Id, int $asesor2Id): void
+    public function approveBerkas(int $akreditasiId, int $adminId, int $asesor1Id, int $asesor2Id, string $clientUpdatedAt = ''): void
     {
         // Req 3.2: Asesor_1 ≠ Asesor_2
         if ($asesor1Id === $asesor2Id) {
@@ -205,7 +206,12 @@ class AkreditasiWorkflowService
 
         $adminUser = User::findOrFail($adminId);
 
-        DB::transaction(function () use ($akreditasi, $akreditasiId, $adminUser, $asesor1, $asesor2) {
+        DB::transaction(function () use ($akreditasi, $akreditasiId, $adminUser, $asesor1, $asesor2, $clientUpdatedAt) {
+            if ($clientUpdatedAt !== '') {
+                $this->assertNotStale($akreditasi->id, $clientUpdatedAt);
+                $akreditasi->refresh();
+            }
+
             // Remove any existing assessments for this akreditasi
             Assessment::where('akreditasi_id', $akreditasiId)->delete();
 
@@ -774,12 +780,13 @@ class AkreditasiWorkflowService
      *                         'sertifikat_path'          => string,
      *                         'catatan_rekomendasi_admin'=> string (optional),
      *                         ]
+     * @param  string  $clientUpdatedAt  Optional ISO timestamp for optimistic locking
      *
      * @throws \DomainException When any precondition or validation fails
      *
      * Validates Requirements 11.1-11.8
      */
-    public function issueSK(int $akreditasiId, int $adminId, array $skData): void
+    public function issueSK(int $akreditasiId, int $adminId, array $skData, string $clientUpdatedAt = ''): void
     {
         $akreditasi = $this->akreditasiRepository->find($akreditasiId);
         if (! $akreditasi) {
@@ -885,8 +892,13 @@ class AkreditasiWorkflowService
 
         DB::transaction(function () use (
             $akreditasi, $adminUser, $nomorSk, $masaBerlaku, $masaBerlakuAkhir,
-            $sertifikatPath, $catatanRekomendasiAdmin, $nilaiAkhir, $peringkat
+            $sertifikatPath, $catatanRekomendasiAdmin, $nilaiAkhir, $peringkat, $clientUpdatedAt
         ) {
+            if ($clientUpdatedAt !== '') {
+                $this->assertNotStale($akreditasi->id, $clientUpdatedAt);
+                $akreditasi->refresh();
+            }
+
             // Set is_nv_final=true and save SK data
             $akreditasi->update([
                 'is_nv_final' => true,
@@ -1040,9 +1052,9 @@ class AkreditasiWorkflowService
      * Decide banding result.
      * Delegates to BandingService::decideBanding().
      */
-    public function decideBanding(int $bandingId, int $adminId, string $result): void
+    public function decideBanding(int $bandingId, int $adminId, string $result, string $keputusan = ''): void
     {
-        $outcome = $this->bandingService->decideBanding($bandingId, $adminId, $result);
+        $outcome = $this->bandingService->decideBanding($bandingId, $adminId, $result, $keputusan);
         if (! $outcome['success']) {
             throw new \DomainException('Keputusan banding gagal: '.($outcome['error'] ?? 'unknown'));
         }

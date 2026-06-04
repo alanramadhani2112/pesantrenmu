@@ -435,10 +435,14 @@ new #[Layout('layouts.app')] class extends Component
                 'masa_berlaku_akhir' => $this->masa_berlaku_akhir,
                 'sertifikat_path' => $sertifikatPath,
                 'catatan_rekomendasi_admin' => $this->catatan_admin ?? '',
-            ]);
+            ], $this->akreditasiUpdatedAt);
 
             $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'SK Akreditasi berhasil diterbitkan.');
             return redirect()->route('admin.akreditasi');
+        } catch (\App\Exceptions\ConflictException $e) {
+            $this->akreditasi->refresh();
+            $this->akreditasiUpdatedAt = $this->akreditasi->updated_at->toISOString();
+            $this->dispatch('notification-received', type: 'error', title: 'Konflik Terdeteksi', message: 'Akreditasi telah dimodifikasi oleh pengguna lain. Silakan muat ulang halaman.');
         } catch (\DomainException $e) {
             $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: $e->getMessage());
         } catch (\App\Exceptions\StaleStateException $e) {
@@ -547,13 +551,17 @@ new #[Layout('layouts.app')] class extends Component
         ]);
         try {
             $workflowService = app(\App\Services\AkreditasiWorkflowService::class);
-            $workflowService->approveBerkas($this->akreditasi->id, Auth::id(), (int) $this->asesor1Id, (int) $this->asesor2Id);
+            $workflowService->approveBerkas($this->akreditasi->id, Auth::id(), (int) $this->asesor1Id, (int) $this->asesor2Id, $this->akreditasiUpdatedAt);
             $this->akreditasi->refresh();
             $this->akreditasiUpdatedAt = $this->akreditasi->updated_at->toISOString();
             $this->dispatch('close-modal', 'approve-berkas-modal');
             $this->dispatch('notification-received', type: 'success', title: 'Berhasil!', message: 'Berkas disetujui. Asesor telah ditugaskan.');
         } catch (\DomainException $e) {
             $this->dispatch('notification-received', type: 'error', title: 'Gagal', message: $e->getMessage());
+        } catch (\App\Exceptions\StaleStateException $e) {
+            $this->akreditasi->refresh();
+            $this->akreditasiUpdatedAt = $this->akreditasi->updated_at->toISOString();
+            $this->dispatch('notification-received', type: 'error', title: 'Konflik Terdeteksi', message: 'Akreditasi telah dimodifikasi oleh pengguna lain. Silakan muat ulang halaman.');
         }
     }
 

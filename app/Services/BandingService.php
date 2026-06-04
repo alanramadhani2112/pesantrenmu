@@ -183,7 +183,7 @@ class BandingService
      *
      * Validates Requirements 14.4, 14.5, 14.6, 14.9
      */
-    public function decideBanding(int $bandingId, int $adminId, string $result): array
+    public function decideBanding(int $bandingId, int $adminId, string $result, string $keputusan = ''): array
     {
         if (! in_array($result, ['diterima', 'ditolak'], true)) {
             return ['success' => false, 'error' => 'Hasil banding harus "diterima" atau "ditolak".'];
@@ -209,7 +209,7 @@ class BandingService
         }
 
         try {
-            DB::transaction(function () use ($banding, $akreditasi, $adminId, $adminUser, $result) {
+            DB::transaction(function () use ($banding, $akreditasi, $adminId, $adminUser, $result, $keputusan) {
                 if ($result === 'diterima') {
                     // Reassign same Asesor_1 and Asesor_2
                     // Restore soft-deleted assessment records for this akreditasi
@@ -228,7 +228,7 @@ class BandingService
                     $banding->update([
                         'status' => 'accepted',
                         'reviewer_id' => $adminId,
-                        'keputusan' => 'Diterima',
+                        'keputusan' => trim($keputusan) !== '' ? $keputusan : 'Diterima',
                         'decided_at' => now(),
                     ]);
 
@@ -238,7 +238,7 @@ class BandingService
                         $pesantrenUser->notify(new AkreditasiNotification(
                             'banding_accepted',
                             'Banding Diterima',
-                            'Pengajuan banding Anda telah diterima. Proses akreditasi kembali ke tahap Validasi Akhir Admin.',
+                            trim($keputusan) !== '' ? $keputusan : 'Pengajuan banding Anda telah diterima. Proses akreditasi akan kembali ke tahap Validasi Akhir Admin.',
                             '#'
                         ));
                     }
@@ -254,7 +254,7 @@ class BandingService
                     $banding->update([
                         'status' => 'rejected',
                         'reviewer_id' => $adminId,
-                        'keputusan' => 'Ditolak',
+                        'keputusan' => trim($keputusan) !== '' ? $keputusan : 'Ditolak',
                         'decided_at' => now(),
                     ]);
 
@@ -264,7 +264,7 @@ class BandingService
                         $pesantrenUser->notify(new AkreditasiNotification(
                             'banding_rejected',
                             'Banding Ditolak',
-                            'Pengajuan banding Anda telah ditolak.',
+                            trim($keputusan) !== '' ? $keputusan : 'Pengajuan banding Anda telah ditolak.',
                             '#'
                         ));
                     }
@@ -490,6 +490,8 @@ class BandingService
      *
      * The LP2M flow no longer creates a new submission when banding is
      * accepted. It returns the existing akreditasi to Validasi Akhir Admin.
+     *
+     * @deprecated Use BandingService::decideBanding() instead. This method will be removed.
      */
     public function acceptBanding(int $bandingId, string $keputusan): ?Akreditasi
     {
@@ -551,6 +553,8 @@ class BandingService
 
     /**
      * Reject a banding through the legacy service entry point.
+     *
+     * @deprecated Use BandingService::decideBanding() instead. This method will be removed.
      */
     public function rejectBanding(int $bandingId, string $keputusan): bool
     {

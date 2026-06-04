@@ -125,7 +125,7 @@ new #[Layout('layouts.app')] class extends Component
 
         try {
             $workflowService = app(\App\Services\AkreditasiWorkflowService::class);
-            $workflowService->decideBanding($this->banding->id, Auth::id(), 'diterima');
+            $workflowService->decideBanding($this->banding->id, Auth::id(), 'diterima', $this->keputusan);
             $this->banding->refresh();
             $this->showDecisionModal = false;
             $this->keputusan = '';
@@ -147,7 +147,7 @@ new #[Layout('layouts.app')] class extends Component
 
         try {
             $workflowService = app(\App\Services\AkreditasiWorkflowService::class);
-            $workflowService->decideBanding($this->banding->id, Auth::id(), 'ditolak');
+            $workflowService->decideBanding($this->banding->id, Auth::id(), 'ditolak', $this->keputusan);
             $this->banding->refresh();
             $this->showDecisionModal = false;
             $this->keputusan = '';
