@@ -67,6 +67,67 @@ class RejectionServiceTest extends TestCase
         ];
     }
 
+    private function createAdminReviewSetup(): array
+    {
+        $pesantrenUser = User::factory()->create(['role_id' => 3]);
+        $pesantren = Pesantren::create([
+            'user_id' => $pesantrenUser->id,
+            'nama_pesantren' => 'Pesantren Review '.$pesantrenUser->id,
+            'is_locked' => true,
+        ]);
+
+        $akreditasi = Akreditasi::create([
+            'user_id' => $pesantrenUser->id,
+            'status' => 5,
+        ]);
+
+        return [
+            'pesantrenUser' => $pesantrenUser,
+            'pesantren' => $pesantren,
+            'akreditasi' => $akreditasi,
+        ];
+    }
+
+    public function test_admin_berkas_revision_keeps_pengajuan_active_and_unlocks_pesantren(): void
+    {
+        $setup = $this->createAdminReviewSetup();
+        $admin = User::factory()->create(['role_id' => 1]);
+
+        $result = $this->rejectionService->rejectBerkas($setup['akreditasi']->id, $admin->id, [
+            'sections' => ['profil', 'ipm.nsp'],
+            'catatan' => 'Profil dan dokumen NSP perlu dilengkapi.',
+        ]);
+
+        $this->assertTrue($result['success']);
+
+        $akreditasi = Akreditasi::withTrashed()->find($setup['akreditasi']->id);
+        $this->assertSame(5, (int) $akreditasi->status);
+        $this->assertNull($akreditasi->deleted_at);
+        $this->assertFalse((bool) $setup['pesantren']->fresh()->is_locked);
+
+        $this->assertDatabaseHas('akreditasi_rejections', [
+            'akreditasi_id' => $setup['akreditasi']->id,
+            'user_id' => $admin->id,
+            'type' => 'admin_verifikasi',
+            'status' => 'pending',
+        ]);
+    }
+
+    public function test_super_admin_can_request_berkas_revision(): void
+    {
+        $setup = $this->createAdminReviewSetup();
+        $superAdmin = User::factory()->create(['role_id' => 4]);
+
+        $result = $this->rejectionService->rejectBerkas($setup['akreditasi']->id, $superAdmin->id, [
+            'sections' => ['profil'],
+            'catatan' => 'Super admin meminta perbaikan profil.',
+        ]);
+
+        $this->assertTrue($result['success']);
+        $this->assertSame(5, (int) $setup['akreditasi']->fresh()->status);
+        $this->assertFalse((bool) $setup['pesantren']->fresh()->is_locked);
+    }
+
     /**
      * Integration test: processDeadlines sends reminders for approaching deadlines.
      *

@@ -33,11 +33,12 @@ class RejectionService
     // =========================================================================
 
     /**
-     * Reject berkas by Admin at status 5.
+     * Request administrative berkas revision by Admin/Super Admin at status 5.
      *
-     * Validates: at least one checkbox selected from sections, catatan required (max 2000 chars).
-     * Creates AkreditasiRejection with type='admin_verifikasi'.
-     * Soft deletes the akreditasi and transitions status to -1.
+     * Review awal admin is not a final rejection. It records the problematic
+     * sections, keeps the akreditasi active at status 5, and unlocks the
+     * pesantren profile so the owner can correct and resubmit the data for
+     * the same review cycle.
      *
      * @param  array  $rejectionData  ['sections' => [...], 'catatan' => '...']
      * @return array{success: bool, error: ?string}
@@ -50,7 +51,7 @@ class RejectionService
         }
 
         $adminUser = User::find($adminId);
-        if (! $adminUser || (int) $adminUser->role_id !== 1) {
+        if (! $adminUser || ! $adminUser->canAccessAdminArea()) {
             return ['success' => false, 'error' => 'unauthorized'];
         }
 
@@ -67,7 +68,7 @@ class RejectionService
             return ['success' => false, 'error' => 'catatan_too_long'];
         }
 
-        return DB::transaction(function () use ($akreditasiId, $adminId, $sections, $catatan, $akreditasi, $adminUser) {
+        return DB::transaction(function () use ($akreditasiId, $adminId, $sections, $catatan, $akreditasi) {
             // Create rejection record
             $this->rejectionRepository->create([
                 'akreditasi_id' => $akreditasiId,
@@ -75,14 +76,10 @@ class RejectionService
                 'type' => 'admin_verifikasi',
                 'items' => $sections,
                 'explanation' => $catatan,
-                'status' => 'final',
+                'status' => 'pending',
             ]);
 
-            // Transition status to -1 via state machine
-            $this->stateMachine->transition($akreditasi, AkreditasiStateMachine::STATUS_DITOLAK, $adminUser);
-
-            // Soft delete the akreditasi
-            $akreditasi->delete();
+            $this->pesantrenRepository->updateByUserId($akreditasi->user_id, ['is_locked' => false]);
 
             // Notify pesantren
             $pesantrenUser = User::find($akreditasi->user_id);
@@ -90,8 +87,8 @@ class RejectionService
                 $sectionList = implode(', ', $sections);
                 $pesantrenUser->notify(new AkreditasiNotification(
                     'berkas_rejected',
-                    'Berkas Akreditasi Ditolak',
-                    'Berkas akreditasi Anda ditolak. Bagian bermasalah: '.$sectionList.'. Catatan: '.$catatan,
+                    'Revisi Berkas Akreditasi',
+                    'Berkas akreditasi perlu diperbaiki. Bagian bermasalah: '.$sectionList.'. Catatan: '.$catatan,
                     '#'
                 ));
             }
@@ -318,8 +315,13 @@ class RejectionService
                 ->with('asesor')
                 ->first();
 
-            // Use a system actor for the transition (no fallback bypass)
-            $systemUser = User::where('role_id', 1)->first();
+            // Scheduled jobs may run without an authenticated user. Prefer an
+            // admin-area actor, then fall back to the assessor who opened the
+            // expired correction request so the transition still has an audit
+            // actor and goes through the state machine.
+            $systemUser = User::where('role_id', 1)->first()
+                ?? User::where('role_id', 4)->first()
+                ?? User::find($expiredRejection->user_id);
             if ($systemUser && $this->stateMachine->canTransition((int) $akreditasi->status, AkreditasiStateMachine::STATUS_DITOLAK)) {
                 $this->stateMachine->transition($akreditasi, AkreditasiStateMachine::STATUS_DITOLAK, $systemUser);
             } elseif ((int) $akreditasi->status !== AkreditasiStateMachine::STATUS_DITOLAK) {
