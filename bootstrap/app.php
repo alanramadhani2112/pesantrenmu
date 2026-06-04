@@ -7,6 +7,7 @@ use App\Http\Middleware\TrustProxies;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 use Sentry\Laravel\Integration;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -23,6 +24,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
             'permission' => EnsureUserHasPermission::class,
+        ]);
+
+        // Production hardening: throttle all web routes (2026-06-04).
+        $middleware->web(append: [
+            ThrottleRequests::class.':web',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

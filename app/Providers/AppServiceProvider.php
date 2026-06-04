@@ -37,7 +37,10 @@ use App\Repositories\Eloquent\RejectionRepository;
 use App\Repositories\Eloquent\RoleRepository;
 use App\Repositories\Eloquent\SdmRepository;
 use App\Repositories\Eloquent\UserRepository;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -104,6 +107,34 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
         }
+
+        // =================================================================
+        // Production hardening: rate limiting (2026-06-04)
+        // =================================================================
+
+        // Livewire state updates — 120 req/min per user (cukup untuk
+        // interaksi normal, cukup rendah untuk mencegah brute-force).
+        RateLimiter::for('livewire', function (Request $request) {
+            return Limit::perMinute(120)->by(
+                $request->user()?->id ?: $request->ip()
+            );
+        });
+
+        // File upload via Livewire — 20 req/min per user.
+        RateLimiter::for('uploads', function (Request $request) {
+            return Limit::perMinute(20)->by(
+                $request->user()?->id ?: $request->ip()
+            );
+        });
+
+        // Global web — 200 req/min per IP for unauthenticated, 300/min for authenticated.
+        RateLimiter::for('web', function (Request $request) {
+            return Limit::perMinute(
+                $request->user() ? 300 : 200
+            )->by(
+                $request->user()?->id ?: $request->ip()
+            );
+        });
 
         Akreditasi::observe(AkreditasiObserver::class);
 
