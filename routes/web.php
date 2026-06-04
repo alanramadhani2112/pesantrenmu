@@ -176,5 +176,19 @@ Route::get('secure/asesor-docs/{asesorId}/{field}', function (int $asesorId, str
     return Storage::disk('local')->response($path);
 })->middleware(['auth', 'verified'])->name('secure.asesor-docs');
 
+/*
+|--------------------------------------------------------------------------
+| Panduan routes
+|--------------------------------------------------------------------------
+| User guide per role — accessible by authenticated users of any role.
+*/
+Route::middleware(['auth', 'verified'])
+    ->group(function () {
+        Route::view('panduan-superadmin', 'panduan.superadmin')->name('panduan.superadmin');
+        Route::view('panduan-admin', 'panduan.admin')->name('panduan.admin');
+        Route::view('panduan-asesor', 'panduan.asesor')->name('panduan.asesor');
+        Route::view('panduan-pesantren', 'panduan.pesantren')->name('panduan.pesantren');
+    });
+
 require __DIR__.'/auth.php';
 require __DIR__.'/sso/sso.php';

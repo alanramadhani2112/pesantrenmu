@@ -7,6 +7,7 @@ use App\Events\AsesorAssigned;
 use App\Events\AsesorPackageSubmitted;
 use App\Events\BandingDecided;
 use App\Events\BandingSubmitted;
+use Illuminate\Support\Facades\Blade;
 use App\Events\PerbaikanDeadlineApproaching;
 use App\Events\PerbaikanSubmitted;
 use App\Events\ScoringCompleted;
@@ -102,6 +103,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register panduan blade components
+        Blade::anonymousComponentPath(resource_path('views/components/panduan'), 'panduan');
+
         // PR-16 fix: paksa HTTPS di production untuk mencegah mixed-content
         // dan broken signed URLs saat di-deploy di belakang reverse proxy.
         if ($this->app->environment('production')) {

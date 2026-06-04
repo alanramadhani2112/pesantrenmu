@@ -77,6 +77,11 @@
             'pesantren.edpm' => ['title' => __('EDPM/IPR'), 'section' => __('Persiapan Akreditasi')],
             'pesantren.akreditasi' => ['title' => __('Pengajuan Akreditasi'), 'section' => __('Pengajuan')],
             'pesantren.akreditasi-detail' => ['title' => __('Detail Pengajuan Akreditasi'), 'section' => __('Pengajuan')],
+
+            'panduan.superadmin' => ['title' => __('Panduan Super Admin'), 'section' => __('Panduan')],
+            'panduan.admin' => ['title' => __('Panduan Admin'), 'section' => __('Panduan')],
+            'panduan.asesor' => ['title' => __('Panduan Asesor'), 'section' => __('Panduan')],
+            'panduan.pesantren' => ['title' => __('Panduan Pesantren'), 'section' => __('Panduan')],
         ];
 
         $routeTitle = $routeMeta[$routeName]['title'] ?? null;
