@@ -20,6 +20,7 @@
 @endphp
 
 <div
+    data-ui-file-upload="metronic"
     {{ $attributes->merge(['class' => 'spm-file-upload' . ($disabled ? ' opacity-50 pe-none' : '')]) }}
 >
     {{-- Hidden Livewire file input — Dropzone bridges files here via DataTransfer --}}
@@ -54,7 +55,7 @@
                 </span>
 
                 {{-- Placeholder / file name --}}
-                <span class="fw-bold text-gray-800 fs-6">
+                <span class="fw-semibold text-gray-800 fs-6">
                     {{ $hasFile ? $file->getClientOriginalName() : $placeholder }}
                 </span>
 

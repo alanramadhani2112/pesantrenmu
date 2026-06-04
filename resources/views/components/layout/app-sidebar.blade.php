@@ -97,7 +97,10 @@
             x-on:click="$store.sidebar.open = false"
             aria-label="Tutup menu"
         >
-            <i class="ki-solid ki-cross-circle fs-2"></i>
+            <i class="ki-duotone ki-cross-circle fs-2">
+                <span class="path1"></span>
+                <span class="path2"></span>
+            </i>
         </button>
     </div>
 

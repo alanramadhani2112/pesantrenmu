@@ -63,7 +63,7 @@
                             <img :src="avatarUrl" alt="{{ $userName }}" class="w-35px h-35px object-fit-cover rounded-circle" />
                         </template>
                         <template x-if="!avatarUrl">
-                            <span class="symbol-label bg-light-primary text-primary fw-bold fs-6">
+                            <span class="symbol-label bg-light-primary text-primary fw-semibold fs-6">
                                 {{ $initials }}
                             </span>
                         </template>
