@@ -7,22 +7,27 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Production hardening (audit fix PR-6, extended PR-7).
+ * Production hardening (audit fix PR-6, extended PR-7, CSP addition PR-8).
  *
  * Menambahkan security headers dasar ke setiap response HTML.
  * Headers di-skip untuk asset / file binary supaya download kartu kendali,
  * sertifikat PDF, dan upload Livewire tetap berjalan normal.
  *
- * Catatan: Content-Security-Policy SENGAJA tidak ditambahkan di sini.
- * CSP strict bentrok dengan inline scripts Livewire/Volt + Pusher dan
- * butuh konfigurasi nonce per-request. Itu akan ditangani follow-up
- * tersendiri (audit P0 berbeda — C-1 SSO inline script harus dipindah
- * dulu sebelum CSP bisa diaktifkan tanpa breakage).
+ * Content-Security-Policy:
+ * - default-src 'self': semua resource harus dari origin yang sama
+ * - script-src: 'unsafe-eval' + 'wasm-unsafe-eval' untuk Alpine.js/Livewire
+ *   runtime. Idealnya pakai nonce-based CSP tapi itu butuh integrasi
+ *   Laravel CSP middleware nonce generator + Livewire nonce capture,
+ *   yang akan dikerjakan di follow-up PR peningkatan ke strict CSP.
+ * - object-src 'none': blokir semua plugin (Flash, Java, ActiveX)
+ * - frame-ancestors 'self': clickjacking protection (lebih kuat dari X-Frame-Options)
+ * - form-action 'self': cegah form hijacking
  *
- * Headers:
+ * Headers diterapkan:
+ * - Content-Security-Policy
  * - Strict-Transport-Security      : paksa HTTPS (hanya untuk request HTTPS)
  * - X-Content-Type-Options         : cegah MIME sniffing
- * - X-Frame-Options                : cegah clickjacking via <iframe>
+ * - X-Frame-Options                : clickjacking fallback untuk browser lama
  * - X-XSS-Protection               : nonaktifkan XSS auditor lama (modern best practice)
  * - Referrer-Policy                : batasi info referrer ke cross-origin
  * - Permissions-Policy             : matikan API browser yang tidak dipakai
@@ -49,6 +54,21 @@ class SecurityHeaders
                 'max-age=31536000; includeSubDomains'
             );
         }
+
+        // Content-Security-Policy: baseline proteksi XSS/data injection.
+        // 'unsafe-eval' untuk Alpine.js + Livewire runtime. Upgrade ke strict nonce
+        // CSP akan dikerjakan di follow-up PR setelah integrasi CSP middleware.
+        $csp = "default-src 'self'; " .
+               "script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval'; " .
+               "style-src 'self' 'unsafe-inline'; " .
+               "img-src 'self' data: blob:; " .
+               "font-src 'self'; " .
+               "connect-src 'self' ws: wss:; " .
+               "object-src 'none'; " .
+               "frame-ancestors 'self'; " .
+               "form-action 'self'; " .
+               "base-uri 'self'";
+        $response->headers->set('Content-Security-Policy', $csp);
 
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
