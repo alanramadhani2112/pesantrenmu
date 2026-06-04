@@ -128,6 +128,61 @@ class AdminBandingDetailTest extends TestCase
         $component->assertSee('Dalam Peninjauan');
     }
 
+    public function test_detail_shows_assigned_assessor_names(): void
+    {
+        $admin = User::factory()->create(['role_id' => 1]);
+        $pesantrenUser = $this->createPesantrenUser('Pesantren With Assessors');
+
+        $akreditasi = Akreditasi::create([
+            'user_id' => $pesantrenUser->id,
+            'status' => -2,
+        ]);
+
+        $ketuaUser = User::factory()->create(['role_id' => 2]);
+        $ketua = Asesor::create([
+            'user_id' => $ketuaUser->id,
+            'nama_dengan_gelar' => 'Dr. Ketua Banding, M.Pd.',
+            'nama_tanpa_gelar' => 'Ketua Banding',
+        ]);
+
+        $anggotaUser = User::factory()->create(['role_id' => 2]);
+        $anggota = Asesor::create([
+            'user_id' => $anggotaUser->id,
+            'nama_dengan_gelar' => 'Dr. Anggota Banding, M.Pd.',
+            'nama_tanpa_gelar' => 'Anggota Banding',
+        ]);
+
+        Assessment::create([
+            'akreditasi_id' => $akreditasi->id,
+            'asesor_id' => $ketua->id,
+            'tipe' => 1,
+            'tanggal_mulai' => now(),
+            'tanggal_berakhir' => now()->addDays(30),
+        ]);
+
+        Assessment::create([
+            'akreditasi_id' => $akreditasi->id,
+            'asesor_id' => $anggota->id,
+            'tipe' => 2,
+            'tanggal_mulai' => now(),
+            'tanggal_berakhir' => now()->addDays(30),
+        ]);
+
+        $banding = Banding::create([
+            'akreditasi_id' => $akreditasi->id,
+            'user_id' => $pesantrenUser->id,
+            'status' => 'accepted',
+            'alasan' => 'Banding sudah diputuskan dan asesor harus terlihat.',
+        ]);
+
+        Volt::actingAs($admin);
+
+        Volt::test('pages.admin.banding-detail', ['id' => $banding->id])
+            ->assertOk()
+            ->assertSee('Dr. Ketua Banding, M.Pd.')
+            ->assertSee('Dr. Anggota Banding, M.Pd.');
+    }
+
     /**
      * Task 9.8: Accept decision returns akreditasi to final admin validation.
      */

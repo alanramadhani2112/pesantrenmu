@@ -31,7 +31,7 @@ new #[Layout('layouts.app')] class extends Component
         }
 
         $this->banding = Banding::with([
-            'akreditasi.assessments',
+            'akreditasi.assessments.asesor',
             'akreditasi.catatans',
             'akreditasi.user.pesantren',
             'reviewer',
@@ -288,7 +288,7 @@ new #[Layout('layouts.app')] class extends Component
                                     @foreach($banding->akreditasi->assessments as $assessment)
                                         <div class="d-flex justify-content-between py-2 border-bottom border-dashed">
                                             <span class="text-gray-600 fw-semibold">Tipe {{ $assessment->tipe }}</span>
-                                            <span class="fw-semibold">{{ $assessment->nilai ?? '-' }}</span>
+                                            <span class="fw-semibold">{{ $assessment->asesor?->nama_dengan_gelar ?? '-' }}</span>
                                         </div>
                                     @endforeach
                                 @endif
