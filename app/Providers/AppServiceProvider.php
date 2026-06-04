@@ -8,7 +8,6 @@ use App\Events\AsesorPackageSubmitted;
 use App\Events\BandingDecided;
 use App\Events\BandingSubmitted;
 use App\Events\PerbaikanDeadlineApproaching;
-use App\Events\PerbaikanRequested;
 use App\Events\PerbaikanSubmitted;
 use App\Events\ScoringCompleted;
 use App\Events\SKIssued;
@@ -122,7 +121,6 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(BandingDecided::class, [$listener, 'handleBandingDecided']);
         Event::listen(PerbaikanDeadlineApproaching::class, [$listener, 'handlePerbaikanDeadlineApproaching']);
         Event::listen(AsesorAssigned::class, [$listener, 'handleAsesorAssigned']);
-        Event::listen(PerbaikanRequested::class, [$listener, 'handlePerbaikanRequested']);
         Event::listen(AsesorPackageSubmitted::class, [$listener, 'handleAsesorPackageSubmitted']);
     }
 }

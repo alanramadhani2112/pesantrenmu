@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Events\AsesorAssigned;
 use App\Events\AsesorPackageSubmitted;
-use App\Events\PerbaikanRequested;
 use App\Events\ScoringCompleted;
 use App\Events\SKIssued;
 use App\Events\VisitasiScheduled;
@@ -294,7 +293,7 @@ class AkreditasiWorkflowService
         if (! $result['success']) {
             $errorMessages = [
                 'invalid_status' => 'Akreditasi tidak berada pada status Verifikasi Berkas.',
-                'unauthorized' => 'Hanya Admin yang dapat menolak berkas.',
+                'unauthorized' => 'Hanya Admin atau Super Admin yang dapat meminta revisi berkas.',
                 'sections_required' => 'Minimal satu bagian harus dipilih untuk penolakan.',
                 'catatan_required' => 'Catatan penolakan wajib diisi.',
                 'catatan_too_long' => 'Catatan penolakan tidak boleh melebihi 2000 karakter.',

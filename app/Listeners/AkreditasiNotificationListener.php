@@ -8,7 +8,6 @@ use App\Events\AsesorPackageSubmitted;
 use App\Events\BandingDecided;
 use App\Events\BandingSubmitted;
 use App\Events\PerbaikanDeadlineApproaching;
-use App\Events\PerbaikanRequested;
 use App\Events\PerbaikanSubmitted;
 use App\Events\ScoringCompleted;
 use App\Events\SKIssued;
@@ -367,38 +366,6 @@ class AkreditasiNotificationListener implements ShouldQueue
             ));
         } catch (\Throwable $e) {
             Log::error('AkreditasiNotificationListener: handleAsesorAssigned failed', [
-                'akreditasi_id' => $event->akreditasi->id,
-                'error' => $e->getMessage(),
-            ]);
-        }
-    }
-
-    /**
-     * Handle PerbaikanRequested events.
-     *
-     * Notifies Pesantren when admin returns application for administrative revision.
-     */
-    public function handlePerbaikanRequested(PerbaikanRequested $event): void
-    {
-        try {
-            $akreditasi = $event->akreditasi;
-            $pesantrenUser = User::find($akreditasi->user_id);
-
-            if ($pesantrenUser) {
-                $message = 'Akreditasi Anda dikembalikan untuk perbaikan administratif. Silakan perbaiki dan submit ulang.';
-                if ($event->catatan) {
-                    $message .= " Catatan: {$event->catatan}";
-                }
-
-                $pesantrenUser->notify(new AkreditasiNotification(
-                    'perbaikan_requested',
-                    'Perbaikan Diperlukan',
-                    $message,
-                    '#'
-                ));
-            }
-        } catch (\Throwable $e) {
-            Log::error('AkreditasiNotificationListener: handlePerbaikanRequested failed', [
                 'akreditasi_id' => $event->akreditasi->id,
                 'error' => $e->getMessage(),
             ]);
