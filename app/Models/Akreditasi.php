@@ -50,7 +50,6 @@ class Akreditasi extends Model
         'user_id',
         'uuid',
         'catatan',
-        'status',
         'kartu_kendali',
     ];
 

@@ -16,6 +16,7 @@ use App\Repositories\Contracts\RejectionRepositoryInterface;
 use App\StateMachine\AkreditasiStateMachine;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 
 class RejectionService
@@ -317,12 +318,19 @@ class RejectionService
                 ->with('asesor')
                 ->first();
 
-            // Use a system actor for the transition
+            // Use a system actor for the transition (no fallback bypass)
             $systemUser = User::where('role_id', 1)->first();
             if ($systemUser && $this->stateMachine->canTransition((int) $akreditasi->status, AkreditasiStateMachine::STATUS_DITOLAK)) {
                 $this->stateMachine->transition($akreditasi, AkreditasiStateMachine::STATUS_DITOLAK, $systemUser);
             } elseif ((int) $akreditasi->status !== AkreditasiStateMachine::STATUS_DITOLAK) {
-                $akreditasi->update(['status' => AkreditasiStateMachine::STATUS_DITOLAK]);
+                Log::warning('AutoRejectOnDeadlineExpiry: cannot transition akreditasi', [
+                    'akreditasi_id' => $akreditasiId,
+                    'current_status' => (int) $akreditasi->status,
+                    'target_status' => AkreditasiStateMachine::STATUS_DITOLAK,
+                    'has_system_user' => (bool) $systemUser,
+                ]);
+
+                throw new \RuntimeException('Cannot transition akreditasi to Ditolak: no valid system user or invalid state.');
             }
 
             // Soft delete
@@ -525,9 +533,16 @@ class RejectionService
             ->get();
 
         foreach ($expired as $rejection) {
-            $result = $this->autoRejectOnDeadlineExpiry($rejection->akreditasi_id);
-            if ($result['success']) {
-                $autoRejected++;
+            try {
+                $result = $this->autoRejectOnDeadlineExpiry($rejection->akreditasi_id);
+                if ($result['success']) {
+                    $autoRejected++;
+                }
+            } catch (\Throwable $e) {
+                Log::error('processDeadlines: auto-reject failed', [
+                    'akreditasi_id' => $rejection->akreditasi_id,
+                    'error' => $e->getMessage(),
+                ]);
             }
         }
 

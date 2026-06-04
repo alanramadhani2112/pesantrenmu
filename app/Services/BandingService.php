@@ -292,6 +292,10 @@ class BandingService
      * in the banding tables (akreditasi_banding_edpms) rather than the
      * original tables (akreditasi_edpms).
      *
+     * NOTE: This method and related banding-table methods are defined but
+     * not currently invoked from any caller. The AkreditasiBandingEdpm model
+     * and migration exist for future banding-scoring integration.
+     *
      * Returns true when:
      *   - akreditasi status is 2 (Penilaian Pasca Visitasi)
      *   - AND a banding record with status 'accepted' exists for this akreditasi

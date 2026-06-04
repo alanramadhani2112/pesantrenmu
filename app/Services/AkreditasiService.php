@@ -32,7 +32,7 @@ class AkreditasiService
     /**
      * Get count of akreditasi per status for dashboard widgets.
      *
-     * @return array{pengajuan: int, verifikasi: int, assessment: int, visitasi: int, validasi: int, overdue: int}
+     * @return array{pengajuan: int, verifikasi: int, assessment: int, visitasi: int, pasca_visitasi: int, validasi: int, overdue: int}
      */
     public function getStatusCounts(): array
     {
@@ -42,7 +42,8 @@ class AkreditasiService
             'pengajuan' => $this->akreditasiRepository->getCountByStatus(6),   // Pengajuan
             'verifikasi' => $this->akreditasiRepository->getCountByStatus(5),   // Verifikasi Berkas
             'assessment' => $this->akreditasiRepository->getCountByStatus(4),   // Review Asesor
-            'visitasi' => $this->akreditasiRepository->getCountByStatus([3, 2]), // Visitasi + Penilaian Pasca Visitasi
+            'visitasi' => $this->akreditasiRepository->getCountByStatus(3),    // Visitasi
+            'pasca_visitasi' => $this->akreditasiRepository->getCountByStatus(2), // Penilaian Pasca Visitasi
             'validasi' => $this->akreditasiRepository->getCountByStatus(1),   // Validasi Admin
             'overdue' => $deadlineService->getOverdueCount(),
         ];

@@ -190,7 +190,7 @@ new #[Layout('layouts.app')] class extends Component {
     >
         <x-slot name="toolbar">
             <x-ui.badge variant="primary">Admin</x-ui.badge>
-            <x-ui.badge variant="warning">Aktif: {{ ($this->statusCounts['pengajuan'] ?? 0) + ($this->statusCounts['verifikasi'] ?? 0) + ($this->statusCounts['assessment'] ?? 0) + ($this->statusCounts['visitasi'] ?? 0) + ($this->statusCounts['validasi'] ?? 0) }}</x-ui.badge>
+            <x-ui.badge variant="warning">Aktif: {{ ($this->statusCounts['pengajuan'] ?? 0) + ($this->statusCounts['verifikasi'] ?? 0) + ($this->statusCounts['assessment'] ?? 0) + ($this->statusCounts['visitasi'] ?? 0) + ($this->statusCounts['pasca_visitasi'] ?? 0) + ($this->statusCounts['validasi'] ?? 0) }}</x-ui.badge>
             @if(($this->statusCounts['overdue'] ?? 0) > 0)
                 <x-ui.badge variant="danger">Terlambat: {{ $this->statusCounts['overdue'] }}</x-ui.badge>
             @endif
@@ -236,7 +236,7 @@ new #[Layout('layouts.app')] class extends Component {
                         <div class="col-12 col-md-4">
                             <x-ui.metric-box
                                 label="Visitasi & Penilaian"
-                                :value="($this->statusCounts['visitasi'] ?? 0) + ($this->statusCounts['validasi'] ?? 0)"
+                                :value="($this->statusCounts['visitasi'] ?? 0) + ($this->statusCounts['pasca_visitasi'] ?? 0) + ($this->statusCounts['validasi'] ?? 0)"
                                 variant="info"
                                 description="Visitasi lapangan, penilaian pasca visitasi, dan Nilai Verifikasi admin."
                                 actionLabel="Lihat Jadwal"
@@ -292,7 +292,7 @@ new #[Layout('layouts.app')] class extends Component {
                     <option value="pengajuan">Pengajuan ({{ $this->statusCounts['pengajuan'] ?? 0 }})</option>
                     <option value="verifikasi">Verifikasi Berkas ({{ $this->statusCounts['verifikasi'] ?? 0 }})</option>
                     <option value="assessment">Review Asesor ({{ $this->statusCounts['assessment'] ?? 0 }})</option>
-                    <option value="visitasi">Visitasi & Penilaian Pasca Visitasi ({{ $this->statusCounts['visitasi'] ?? 0 }})</option>
+                    <option value="visitasi">Visitasi & Penilaian Pasca Visitasi ({{ ($this->statusCounts['visitasi'] ?? 0) + ($this->statusCounts['pasca_visitasi'] ?? 0) }})</option>
                     <option value="validasi">Validasi Admin ({{ $this->statusCounts['validasi'] ?? 0 }})</option>
                     <option value="overdue">Terlambat ({{ $this->statusCounts['overdue'] ?? 0 }})</option>
                     <option value="">Semua</option>

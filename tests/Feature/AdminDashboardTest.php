@@ -41,24 +41,27 @@ class AdminDashboardTest extends TestCase
     }
 
     /**
-     * Task 6.2: getStatusCounts()['visitasi'] only counts status 3 and 2,
-     * not status 1 (Validasi Admin) or 0 (Selesai).
+     * Task 6.2: getStatusCounts() visitasi/pasca_visitasi split.
      *
-     * Service counts 'visitasi' as status [3 (Visitasi), 2 (Pasca Visitasi)].
+     * 'visitasi' counts status 3 only.
+     * 'pasca_visitasi' counts status 2 only.
      *
      * Requirements: 2.25
      */
-    public function test_get_status_counts_visitasi_only_counts_status_3_and_2(): void
+    public function test_get_status_counts_visitasi_only_counts_status_3_and_2_separate(): void
     {
         $this->createAkreditasiWithStatus(1); // Validasi Admin — must NOT be counted
         $this->createAkreditasiWithStatus(0); // Selesai — must NOT be counted
-        $this->createAkreditasiWithStatus(3); // Visitasi — must be counted
-        $this->createAkreditasiWithStatus(2); // Pasca Visitasi — must be counted
+        $this->createAkreditasiWithStatus(3); // Visitasi — must be counted in visitasi, not pasca_visitasi
+        $this->createAkreditasiWithStatus(2); // Pasca Visitasi — must be counted in pasca_visitasi, not visitasi
 
         $counts = $this->akreditasiService->getStatusCounts();
 
-        $this->assertEquals(2, $counts['visitasi'],
-            'visitasi count should only include status 3 and 2, not 1 or 0'
+        $this->assertEquals(1, $counts['visitasi'],
+            'visitasi count should only include status 3'
+        );
+        $this->assertEquals(1, $counts['pasca_visitasi'],
+            'pasca_visitasi count should only include status 2'
         );
     }
 
@@ -74,6 +77,9 @@ class AdminDashboardTest extends TestCase
 
         $this->assertEquals(0, $counts['visitasi'],
             'visitasi count should be 0 when only status 1 and 0 exist'
+        );
+        $this->assertEquals(0, $counts['pasca_visitasi'],
+            'pasca_visitasi count should be 0 when only status 1 and 0 exist'
         );
     }
 }
