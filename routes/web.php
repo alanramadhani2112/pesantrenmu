@@ -190,5 +190,6 @@ Route::middleware(['auth', 'verified'])
         Route::view('panduan-pesantren', 'panduan.pesantren')->name('panduan.pesantren');
     });
 
+
 require __DIR__.'/auth.php';
 require __DIR__.'/sso/sso.php';

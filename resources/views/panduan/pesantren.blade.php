@@ -17,6 +17,21 @@ $sections = [
 
 <x-panduan::layout title="Panduan Pesantren" :sections="$sections" currentSection="dashboard">
 
+{{-- Screenshot tampilan penuh dashboard pesantren --}}
+<div class="card card-flush mb-8">
+    <div class="card-header border-0 pt-6 pb-0 px-6">
+        <h3 class="card-title fw-bold fs-3 text-gray-900">Tampilan Dashboard Pesantren</h3>
+    </div>
+    <div class="card-body pt-4 px-6 pb-6">
+        <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+            <img src="{{ asset('images/panduan/pesantren-full.png') }}"
+                 alt="Tampilan lengkap dashboard Pesantren"
+                 class="img-fluid w-100"
+                 loading="lazy" />
+        </div>
+    </div>
+</div>
+
 <x-panduan::section id="dashboard" title="Dashboard Pesantren" subtitle="Halaman utama pesantren menampilkan status akreditasi, progres persiapan, dan notifikasi.">
     <ol class="list-unstyled mb-0">
         <li class="d-flex align-items-start gap-3 mb-4">

@@ -25,6 +25,21 @@ $sections = [
 
 <x-panduan::layout title="Panduan Super Admin" :sections="$sections" currentSection="dashboard">
 
+{{-- Screenshot tampilan penuh dashboard super admin --}}
+<div class="card card-flush mb-8">
+    <div class="card-header border-0 pt-6 pb-0 px-6">
+        <h3 class="card-title fw-bold fs-3 text-gray-900">Tampilan Dashboard Super Admin</h3>
+    </div>
+    <div class="card-body pt-4 px-6 pb-6">
+        <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+            <img src="{{ asset('images/panduan/superadmin-full.png') }}"
+                 alt="Tampilan lengkap dashboard Super Admin"
+                 class="img-fluid w-100"
+                 loading="lazy" />
+        </div>
+    </div>
+</div>
+
 <x-panduan::section id="dashboard" title="Dashboard Super Admin" subtitle="Halaman utama dengan akses penuh ke semua fitur sistem.">
     <div class="alert alert-primary d-flex align-items-center mb-4" role="alert">
         <i class="ki-duotone ki-information-4 fs-2 me-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
