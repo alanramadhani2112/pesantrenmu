@@ -50,6 +50,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     // Existing file paths
     public $existing_files = [];
+    public $profilePhotoPath;
 
     // Mode Edit
     public $isEditing = false;
@@ -119,6 +120,7 @@ new #[Layout('layouts.app')] class extends Component {
             'ijazah_file' => $this->asesor->ijazah_file,
             'kartu_nbm_file' => $this->asesor->kartu_nbm_file,
         ];
+        $this->profilePhotoPath = auth()->user()->profile_photo_path;
     }
 
     public function addRow($field)
@@ -769,9 +771,8 @@ new #[Layout('layouts.app')] class extends Component {
                 <x-ui.card>
                     <div class="d-flex flex-column align-items-center text-center">
                         <div class="mb-5">
-                            @php $photoPath = auth()->user()->profile_photo_path; @endphp
-                            @if($photoPath && Storage::disk('public')->exists($photoPath))
-                                <img src="{{ Storage::url($photoPath) }}"
+                            @if($profilePhotoPath && Storage::disk('public')->exists($profilePhotoPath))
+                                <img src="{{ Storage::url($profilePhotoPath) }}"
                                      alt="Foto asesor"
                                      loading="lazy"
                                      class="rounded-circle object-fit-cover border border-3 border-light shadow-sm"
