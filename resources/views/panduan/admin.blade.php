@@ -54,6 +54,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+{{-- Screenshot Dashboard Admin --}}
+<div class="card card-flush mt-6">
+    <div class="card-body p-4">
+        <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+            <img src="{{ asset('images/panduan/admin-dashboard.png') }}"
+                 alt="Tampilan halaman Dashboard Admin"
+                 class="img-fluid w-100"
+                 loading="lazy" />
+        </div>
+        <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Dashboard Admin pada Sistem PesantrenMu</div>
+    </div>
+</div>
 </x-panduan::section>
 
 <x-panduan::section id="manajemen-pengguna" title="Manajemen Pengguna" subtitle="Admin dapat mengelola akun pengguna sistem melalui menu Akun Pengguna.">
@@ -87,6 +100,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+{{-- Screenshot Manajemen Pengguna --}}
+<div class="card card-flush mt-6">
+    <div class="card-body p-4">
+        <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+            <img src="{{ asset('images/panduan/admin-accounts.png') }}"
+                 alt="Tampilan halaman Manajemen Pengguna (Akun Pengguna)"
+                 class="img-fluid w-100"
+                 loading="lazy" />
+        </div>
+        <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Manajemen Pengguna (Akun Pengguna) pada Sistem PesantrenMu</div>
+    </div>
+</div>
 </x-panduan::section>
 
 <x-panduan::section id="manajemen-sistem" title="Manajemen Sistem" subtitle="Konfigurasi master data dan hak akses sistem.">
@@ -120,6 +146,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+{{-- Screenshot Manajemen Sistem --}}
+<div class="card card-flush mt-6">
+    <div class="card-body p-4">
+        <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+            <img src="{{ asset('images/panduan/admin-master-kategori.png') }}"
+                 alt="Tampilan halaman Manajemen Sistem (Master Kategori Dokumen)"
+                 class="img-fluid w-100"
+                 loading="lazy" />
+        </div>
+        <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Manajemen Sistem (Master Kategori Dokumen) pada Sistem PesantrenMu</div>
+    </div>
+</div>
 </x-panduan::section>
 
 <x-panduan::section id="verifikasi-berkas" title="Verifikasi Berkas" subtitle="Admin memverifikasi kelengkapan dokumen yang diunggah pesantren sebelum diteruskan ke asesor.">
@@ -160,6 +199,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+{{-- Screenshot Verifikasi Berkas --}}
+<div class="card card-flush mt-6">
+    <div class="card-body p-4">
+        <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+            <img src="{{ asset('images/panduan/admin-akreditasi.png') }}"
+                 alt="Tampilan halaman Verifikasi Berkas (Daftar Akreditasi)"
+                 class="img-fluid w-100"
+                 loading="lazy" />
+        </div>
+        <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Verifikasi Berkas (Daftar Akreditasi) pada Sistem PesantrenMu</div>
+    </div>
+</div>
 </x-panduan::section>
 
 <x-panduan::section id="assign-asesor" title="Assign Asesor" subtitle="Setelah berkas diverifikasi, admin menugaskan asesor untuk melakukan review.">
@@ -186,6 +238,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+{{-- Screenshot Assign Asesor --}}
+<div class="card card-flush mt-6">
+    <div class="card-body p-4">
+        <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+            <img src="{{ asset('images/panduan/sa-assign-asesor.png') }}"
+                 alt="Tampilan halaman Assign Asesor (Daftar Asesor)"
+                 class="img-fluid w-100"
+                 loading="lazy" />
+        </div>
+        <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Assign Asesor (Daftar Asesor) pada Sistem PesantrenMu</div>
+    </div>
+</div>
 </x-panduan::section>
 
 <x-panduan::section id="validasi-admin" title="Validasi & Penerbitan SK" subtitle="Tahap akhir sebelum hasil akreditasi diterbitkan.">
@@ -219,6 +284,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+{{-- Screenshot Validasi & Penerbitan SK --}}
+<div class="card card-flush mt-6">
+    <div class="card-body p-4">
+        <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+            <img src="{{ asset('images/panduan/sa-validasi-sk.png') }}"
+                 alt="Tampilan halaman Validasi & Penerbitan SK"
+                 class="img-fluid w-100"
+                 loading="lazy" />
+        </div>
+        <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Validasi & Penerbitan SK pada Sistem PesantrenMu</div>
+    </div>
+</div>
 </x-panduan::section>
 
 <x-panduan::section id="kelola-banding" title="Kelola Banding" subtitle="Admin menangani pengajuan banding dari pesantren yang ditolak final.">
@@ -245,6 +323,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+{{-- Screenshot Kelola Banding --}}
+<div class="card card-flush mt-6">
+    <div class="card-body p-4">
+        <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+            <img src="{{ asset('images/panduan/admin-banding.png') }}"
+                 alt="Tampilan halaman Kelola Banding"
+                 class="img-fluid w-100"
+                 loading="lazy" />
+        </div>
+        <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Kelola Banding pada Sistem PesantrenMu</div>
+    </div>
+</div>
 </x-panduan::section>
 
 <x-panduan::section id="arsip-trash" title="Arsip & Trash" subtitle="Mengelola akreditasi yang diarsipkan atau dihapus.">
@@ -264,6 +355,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+{{-- Screenshot Arsip & Trash --}}
+<div class="card card-flush mt-6">
+    <div class="card-body p-4">
+        <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+            <img src="{{ asset('images/panduan/admin-trash.png') }}"
+                 alt="Tampilan halaman Arsip & Trash"
+                 class="img-fluid w-100"
+                 loading="lazy" />
+        </div>
+        <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Arsip & Trash pada Sistem PesantrenMu</div>
+    </div>
+</div>
 </x-panduan::section>
 
 </x-panduan::layout>

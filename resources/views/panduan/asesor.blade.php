@@ -51,6 +51,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+{{-- Screenshot Dashboard Asesor --}}
+<div class="card card-flush mt-6">
+    <div class="card-body p-4">
+        <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+            <img src="{{ asset('images/panduan/asesor-dashboard.png') }}"
+                 alt="Tampilan halaman Dashboard Asesor"
+                 class="img-fluid w-100"
+                 loading="lazy" />
+        </div>
+        <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Dashboard Asesor pada Sistem PesantrenMu</div>
+    </div>
+</div>
 </x-panduan::section>
 
 <x-panduan::section id="review-substansi" title="Review Substansi" subtitle="Asesor melakukan review substansi terhadap pengajuan akreditasi yang telah ditugaskan.">
@@ -84,6 +97,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+{{-- Screenshot Review Substansi (Tugas Akreditasi) --}}
+<div class="card card-flush mt-6">
+    <div class="card-body p-4">
+        <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+            <img src="{{ asset('images/panduan/asesor-akreditasi.png') }}"
+                 alt="Tampilan halaman Review Substansi (Tugas Akreditasi)"
+                 class="img-fluid w-100"
+                 loading="lazy" />
+        </div>
+        <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Review Substansi (Tugas Akreditasi) pada Sistem PesantrenMu</div>
+    </div>
+</div>
 </x-panduan::section>
 
 <x-panduan::section id="visitasi" title="Visitasi" subtitle="Ketua Kelompok menjadwalkan dan mengelola kunjungan visitasi ke pesantren.">
@@ -117,6 +143,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+{{-- Screenshot Visitasi (Detail Akreditasi) --}}
+<div class="card card-flush mt-6">
+    <div class="card-body p-4">
+        <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+            <img src="{{ asset('images/panduan/asesor-visitasi.png') }}"
+                 alt="Tampilan halaman Visitasi (Detail Akreditasi)"
+                 class="img-fluid w-100"
+                 loading="lazy" />
+        </div>
+        <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Visitasi (Detail Akreditasi) pada Sistem PesantrenMu</div>
+    </div>
+</div>
 </x-panduan::section>
 
 <x-panduan::section id="penilaian-pasca-visitasi" title="Penilaian Pasca Visitasi" subtitle="Asesor menginput nilai final (NA1, NA2, NK) dan mengunggah laporan pasca visitasi.">
@@ -150,6 +189,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+{{-- Screenshot Penilaian Pasca Visitasi --}}
+<div class="card card-flush mt-6">
+    <div class="card-body p-4">
+        <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+            <img src="{{ asset('images/panduan/asesor-visitasi.png') }}"
+                 alt="Tampilan halaman Penilaian Pasca Visitasi"
+                 class="img-fluid w-100"
+                 loading="lazy" />
+        </div>
+        <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Penilaian Pasca Visitasi pada Sistem PesantrenMu</div>
+    </div>
+</div>
 </x-panduan::section>
 
 <x-panduan::section id="profil-asesor" title="Profil Asesor" subtitle="Asesor dapat mengelola data diri, foto profil, dan dokumen pribadi.">
@@ -176,6 +228,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+{{-- Screenshot Profil Asesor --}}
+<div class="card card-flush mt-6">
+    <div class="card-body p-4">
+        <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+            <img src="{{ asset('images/panduan/asesor-profile.png') }}"
+                 alt="Tampilan halaman Profil Asesor"
+                 class="img-fluid w-100"
+                 loading="lazy" />
+        </div>
+        <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Profil Asesor pada Sistem PesantrenMu</div>
+    </div>
+</div>
 </x-panduan::section>
 
 </x-panduan::layout>

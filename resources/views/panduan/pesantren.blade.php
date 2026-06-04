@@ -56,6 +56,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+    {{-- Screenshot Dashboard Pesantren --}}
+    <div class="card card-flush mt-6">
+        <div class="card-body p-4">
+            <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+                <img src="{{ asset('images/panduan/pesantren-dashboard.png') }}"
+                     alt="Tampilan halaman Dashboard Pesantren"
+                     class="img-fluid w-100"
+                     loading="lazy" />
+            </div>
+            <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Dashboard Pesantren pada Sistem PesantrenMu</div>
+        </div>
+    </div>
 </x-panduan::section>
 
 <x-panduan::section id="profil-pesantren" title="Profil Pesantren" subtitle="Melengkapi data identitas pesantren sebagai langkah pertama persiapan.">
@@ -82,6 +95,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+    {{-- Screenshot Profil Pesantren --}}
+    <div class="card card-flush mt-6">
+        <div class="card-body p-4">
+            <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+                <img src="{{ asset('images/panduan/pesantren-profil.png') }}"
+                     alt="Tampilan halaman Profil Pesantren"
+                     class="img-fluid w-100"
+                     loading="lazy" />
+            </div>
+            <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Profil Pesantren pada Sistem PesantrenMu</div>
+        </div>
+    </div>
 </x-panduan::section>
 
 <x-panduan::section id="input-ipm" title="Indikator Pemenuhan Mutlak (IPM)" subtitle="Mengisi data indikator pemenuhan mutlak sebagai syarat akreditasi.">
@@ -108,6 +134,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+    {{-- Screenshot Input IPM --}}
+    <div class="card card-flush mt-6">
+        <div class="card-body p-4">
+            <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+                <img src="{{ asset('images/panduan/pesantren-ipm.png') }}"
+                     alt="Tampilan halaman Input IPM"
+                     class="img-fluid w-100"
+                     loading="lazy" />
+            </div>
+            <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Input IPM pada Sistem PesantrenMu</div>
+        </div>
+    </div>
 </x-panduan::section>
 
 <x-panduan::section id="data-sdm" title="Data SDM" subtitle="Menginput data Sumber Daya Manusia pesantren (ustadz, tenaga kependidikan, santri).">
@@ -134,6 +173,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+    {{-- Screenshot Data SDM --}}
+    <div class="card card-flush mt-6">
+        <div class="card-body p-4">
+            <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+                <img src="{{ asset('images/panduan/pesantren-sdm.png') }}"
+                     alt="Tampilan halaman Data SDM"
+                     class="img-fluid w-100"
+                     loading="lazy" />
+            </div>
+            <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Data SDM pada Sistem PesantrenMu</div>
+        </div>
+    </div>
 </x-panduan::section>
 
 <x-panduan::section id="input-edpm" title="EDPM/IPR" subtitle="Mengisi evaluasi diri pesantren menggunakan instrumen EDPM/IPR.">
@@ -160,6 +212,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+    {{-- Screenshot Input EDPM/IPR --}}
+    <div class="card card-flush mt-6">
+        <div class="card-body p-4">
+            <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+                <img src="{{ asset('images/panduan/pesantren-edpm.png') }}"
+                     alt="Tampilan halaman Input EDPM/IPR"
+                     class="img-fluid w-100"
+                     loading="lazy" />
+            </div>
+            <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Input EDPM/IPR pada Sistem PesantrenMu</div>
+        </div>
+    </div>
 </x-panduan::section>
 
 <x-panduan::section id="submit-akreditasi" title="Submit Pengajuan Akreditasi" subtitle="Mengajukan akreditasi setelah semua data persiapan lengkap.">
@@ -193,6 +258,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+    {{-- Screenshot Submit Akreditasi --}}
+    <div class="card card-flush mt-6">
+        <div class="card-body p-4">
+            <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+                <img src="{{ asset('images/panduan/pesantren-akreditasi.png') }}"
+                     alt="Tampilan halaman Submit Akreditasi"
+                     class="img-fluid w-100"
+                     loading="lazy" />
+            </div>
+            <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Submit Akreditasi pada Sistem PesantrenMu</div>
+        </div>
+    </div>
 </x-panduan::section>
 
 <x-panduan::section id="pantau-status" title="Pantau Status Akreditasi" subtitle="Memantau perkembangan status pengajuan dari tahap ke tahap.">
@@ -226,6 +304,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+    {{-- Screenshot Pantau Status --}}
+    <div class="card card-flush mt-6">
+        <div class="card-body p-4">
+            <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+                <img src="{{ asset('images/panduan/pesantren-pantau-status.png') }}"
+                     alt="Tampilan halaman Pantau Status"
+                     class="img-fluid w-100"
+                     loading="lazy" />
+            </div>
+            <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Pantau Status pada Sistem PesantrenMu</div>
+        </div>
+    </div>
 </x-panduan::section>
 
 <x-panduan::section id="aksi-banding" title="Ajukan Banding" subtitle="Jika akreditasi ditolak final, pesantren dapat mengajukan banding.">
@@ -252,6 +343,19 @@ $sections = [
             </div>
         </li>
     </ol>
+
+    {{-- Screenshot Aksi Banding --}}
+    <div class="card card-flush mt-6">
+        <div class="card-body p-4">
+            <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
+                <img src="{{ asset('images/panduan/admin-banding.png') }}"
+                     alt="Tampilan halaman Aksi Banding"
+                     class="img-fluid w-100"
+                     loading="lazy" />
+            </div>
+            <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Aksi Banding pada Sistem PesantrenMu</div>
+        </div>
+    </div>
 </x-panduan::section>
 
 </x-panduan::layout>
