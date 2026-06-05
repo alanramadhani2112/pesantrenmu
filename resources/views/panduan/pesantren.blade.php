@@ -1,13 +1,13 @@
 @php
 $sections = [
     ['id' => 'dashboard', 'title' => 'Dashboard', 'icon' => 'ki-element-11'],
-    ['id' => 'persiapan-akreditasi', 'title' => 'Persiapan Akreditasi', 'children' => [
+    ['id' => 'persiapan-akreditasi', 'title' => 'Persiapan Akreditasi', 'icon' => 'ki-document', 'children' => [
         ['id' => 'profil-pesantren', 'title' => 'Profil Pesantren'],
         ['id' => 'input-ipm', 'title' => 'Indikator Pemenuhan Mutlak (IPM)'],
         ['id' => 'data-sdm', 'title' => 'Data SDM'],
         ['id' => 'input-edpm', 'title' => 'EDPM/IPR'],
     ]],
-    ['id' => 'pengajuan', 'title' => 'Pengajuan & Status', 'children' => [
+    ['id' => 'pengajuan', 'title' => 'Pengajuan & Status', 'icon' => 'ki-send', 'children' => [
         ['id' => 'submit-akreditasi', 'title' => 'Submit Pengajuan'],
         ['id' => 'pantau-status', 'title' => 'Pantau Status'],
         ['id' => 'aksi-banding', 'title' => 'Ajukan Banding'],

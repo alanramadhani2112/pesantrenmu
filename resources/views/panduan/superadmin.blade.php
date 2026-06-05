@@ -1,22 +1,22 @@
 @php
 $sections = [
     ['id' => 'dashboard', 'title' => 'Dashboard', 'icon' => 'ki-element-11'],
-    ['id' => 'kelola-pengguna', 'title' => 'Kelola Pengguna', 'children' => [
+    ['id' => 'kelola-pengguna', 'title' => 'Kelola Pengguna', 'icon' => 'ki-people', 'children' => [
         ['id' => 'role-permission', 'title' => 'Role & Permission'],
         ['id' => 'akun-pengguna', 'title' => 'Akun Pengguna'],
     ]],
-    ['id' => 'master-data', 'title' => 'Master Data', 'children' => [
+    ['id' => 'master-data', 'title' => 'Master Data', 'icon' => 'ki-data', 'children' => [
         ['id' => 'komponen-edpm', 'title' => 'Komponen EDPM/IPR'],
         ['id' => 'kategori-dokumen', 'title' => 'Kategori Dokumen'],
         ['id' => 'dokumen-wajib', 'title' => 'Dokumen Wajib'],
     ]],
-    ['id' => 'operasional-akreditasi', 'title' => 'Operasional Akreditasi', 'children' => [
+    ['id' => 'operasional-akreditasi', 'title' => 'Operasional Akreditasi', 'icon' => 'ki-verify', 'children' => [
         ['id' => 'verifikasi-berkas', 'title' => 'Verifikasi Berkas'],
         ['id' => 'assign-asesor', 'title' => 'Assign Asesor'],
         ['id' => 'validasi-sk', 'title' => 'Validasi & Penerbitan SK'],
         ['id' => 'kelola-banding', 'title' => 'Kelola Banding'],
     ]],
-    ['id' => 'notifikasi-arsip', 'title' => 'Notifikasi & Arsip', 'children' => [
+    ['id' => 'notifikasi-arsip', 'title' => 'Notifikasi & Arsip', 'icon' => 'ki-notification-status', 'children' => [
         ['id' => 'notifikasi-gagal', 'title' => 'Notifikasi Gagal'],
         ['id' => 'arsip-trash', 'title' => 'Arsip Akreditasi'],
     ]],

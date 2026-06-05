@@ -3,7 +3,7 @@ $sections = [
     ['id' => 'dashboard', 'title' => 'Dashboard', 'icon' => 'ki-element-11'],
     ['id' => 'manajemen-pengguna', 'title' => 'Manajemen Pengguna', 'icon' => 'ki-user'],
     ['id' => 'manajemen-sistem', 'title' => 'Manajemen Sistem', 'icon' => 'ki-setting-3'],
-    ['id' => 'operasional-akreditasi', 'title' => 'Operasional Akreditasi', 'children' => [
+    ['id' => 'operasional-akreditasi', 'title' => 'Operasional Akreditasi', 'icon' => 'ki-verify', 'children' => [
         ['id' => 'verifikasi-berkas', 'title' => 'Verifikasi Berkas'],
         ['id' => 'assign-asesor', 'title' => 'Assign Asesor'],
         ['id' => 'validasi-admin', 'title' => 'Validasi & Penerbitan SK'],

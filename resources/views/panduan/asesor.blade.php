@@ -1,7 +1,7 @@
 @php
 $sections = [
     ['id' => 'dashboard', 'title' => 'Dashboard', 'icon' => 'ki-element-11'],
-    ['id' => 'tugas-akreditasi', 'title' => 'Tugas Akreditasi', 'children' => [
+    ['id' => 'tugas-akreditasi', 'title' => 'Tugas Akreditasi', 'icon' => 'ki-check-circle', 'children' => [
         ['id' => 'review-substansi', 'title' => 'Review Substansi'],
         ['id' => 'visitasi', 'title' => 'Visitasi'],
         ['id' => 'penilaian-pasca-visitasi', 'title' => 'Penilaian Pasca Visitasi'],
