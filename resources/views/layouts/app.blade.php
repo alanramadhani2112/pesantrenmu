@@ -113,15 +113,6 @@
         }
     @endphp
 
-    <!--begin::Page loading-->
-    <div class="page-loader flex-column bg-dark bg-opacity-25 spm-page-loader" data-spm-page-loader aria-live="polite" aria-label="Memuat halaman">
-        <span class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </span>
-        <span class="text-white fs-6 fw-semibold mt-5">Memuat halaman...</span>
-    </div>
-    <!--end::Page loading-->
-
     <div class="d-flex flex-column flex-root app-root spm-app-shell" id="kt_app_root">
         <div class="app-page flex-column flex-column-fluid" id="kt_app_page">
             <x-layout.app-header
