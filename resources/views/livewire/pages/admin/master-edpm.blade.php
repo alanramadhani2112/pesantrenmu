@@ -386,7 +386,10 @@ new #[Layout('layouts.app')] class extends Component {
 
             <x-ui.modal-footer>
                 <x-ui.button type="button" variant="light" x-on:click="$dispatch('close')">Batal</x-ui.button>
-                <x-ui.button type="submit" variant="primary">Simpan</x-ui.button>
+                <x-ui.button type="submit" variant="primary" wire:loading.attr="disabled">
+                    <span wire:loading.remove>Simpan</span>
+                    <span wire:loading>Menyimpan...</span>
+                </x-ui.button>
             </x-ui.modal-footer>
         </form>
     </x-ui.modal>

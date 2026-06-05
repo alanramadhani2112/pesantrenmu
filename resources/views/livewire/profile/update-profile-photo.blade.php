@@ -75,7 +75,7 @@ new class extends Component
         <p class="mt-1 text-gray-600 fs-7">Unggah foto profil Anda. Maksimal 2MB (JPG/PNG).</p>
     </header>
 
-    <div class="mt-4" wire:key="photo-{{ $photoKey }}"
+    <div class="mt-4"
         x-data="{
             preview: '{{ $this->photoUrl }}',
             changed: false,
@@ -84,6 +84,7 @@ new class extends Component
         x-on:profile-photo-updated.window="
             preview = ($event.detail && $event.detail.photoUrl) ? $event.detail.photoUrl : preview;
             changed = false;
+            $refs.fileInput.value = '';
         ">
         {{-- Metronic image-input — exact docs pattern --}}
         <div class="image-input image-input-circle image-input-outline"

@@ -253,6 +253,13 @@
         </div>
     </div>
 
+    {{-- Global Livewire loading overlay --}}
+    <div wire:loading.delay.shortest class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+         style="z-index: 9999; background: rgba(255,255,255,0.4);">
+        <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span>
+        <span class="fw-semibold text-gray-700 fs-7">Memproses...</span>
+    </div>
+
     {{-- Metronic JS bundle — provides KT components (password meter, menu, drawer, etc.) --}}
     <script src="{{ asset('vendor/metronic/assets/js/scripts.bundle.js') }}"></script>
     {{-- Deferred app JS — loaded after content for faster first paint --}}

@@ -382,8 +382,9 @@ new #[Layout('layouts.app')] class extends Component {
                     {{ __('Batal') }}
                 </x-ui.button>
 
-                <x-ui.button type="submit" variant="primary">
-                    {{ $isEditing ? __('Perbarui') : __('Simpan') }}
+                <x-ui.button type="submit" variant="primary" wire:loading.attr="disabled">
+                    <span wire:loading.remove>{{ $isEditing ? __('Perbarui') : __('Simpan') }}</span>
+                    <span wire:loading>Menyimpan...</span>
                 </x-ui.button>
             </x-ui.modal-footer>
         </form>
