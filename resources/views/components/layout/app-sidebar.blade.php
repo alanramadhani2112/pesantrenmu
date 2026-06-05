@@ -213,7 +213,7 @@
                         <x-sidebar-link
                             :href="route($panduanRoute)"
                             :active="request()->routeIs('panduan.*')"
-                            icon="book"
+                            icon="document"
                         >Panduan</x-sidebar-link>
                     </div>
                 @endif
