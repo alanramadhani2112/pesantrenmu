@@ -1,0 +1,366 @@
+.panduan-shell {
+    --panduan-sidebar-width: 304px;
+    --panduan-border: #e8edf4;
+    --panduan-surface: #f6f8fb;
+    min-height: 100vh;
+    background:
+        linear-gradient(180deg, rgba(var(--spm-primary-rgb), 0.035), transparent 260px),
+        var(--panduan-surface);
+}
+
+.panduan-header.app-header {
+    position: sticky;
+    top: 0;
+    z-index: 96;
+    min-height: var(--bs-app-header-height);
+    background-color: rgba(255, 255, 255, 0.94);
+    border-bottom: 1px solid var(--panduan-border);
+    backdrop-filter: blur(10px);
+}
+
+.panduan-shell .app-wrapper {
+    display: flex;
+    flex-direction: row !important;
+    align-items: stretch;
+}
+
+.panduan-sidebar {
+    display: flex !important;
+    flex-direction: column;
+    position: sticky;
+    top: var(--bs-app-header-height, 72px);
+    z-index: 90;
+    width: var(--panduan-sidebar-width);
+    height: calc(100vh - var(--bs-app-header-height, 72px));
+    min-height: 0;
+    flex: 0 0 var(--panduan-sidebar-width);
+    overflow: hidden;
+    border-right: 1px solid var(--panduan-border);
+    box-shadow: 10px 0 28px rgba(15, 23, 42, 0.035);
+}
+
+.panduan-sidebar-logo {
+    flex: 0 0 auto;
+    min-height: 72px;
+    border-bottom: 1px solid var(--panduan-border);
+}
+
+.panduan-sidebar > .px-6 {
+    flex: 0 0 auto;
+}
+
+.panduan-sidebar-panel {
+    padding: 18px;
+    background:
+        linear-gradient(135deg, rgba(var(--spm-primary-rgb), 0.08), rgba(var(--spm-secondary-rgb), 0.08)),
+        #ffffff;
+    border: 1px solid var(--panduan-border);
+    border-radius: 8px;
+}
+
+.panduan-sidebar .app-sidebar-menu {
+    display: flex !important;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden !important;
+}
+
+.panduan-sidebar .app-sidebar-wrapper {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+}
+
+.panduan-sidebar .app-sidebar-wrapper::-webkit-scrollbar {
+    width: 6px;
+}
+
+.panduan-sidebar .app-sidebar-wrapper::-webkit-scrollbar-thumb {
+    background-color: rgba(75, 86, 117, 0.22);
+    border-radius: 999px;
+}
+
+.panduan-sidebar .app-sidebar-wrapper::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+.panduan-sidebar .menu {
+    gap: 4px;
+}
+
+.panduan-sidebar .menu-item {
+    margin-bottom: 2px;
+}
+
+.panduan-sidebar .menu-link {
+    gap: 12px;
+    min-height: 42px;
+    color: #4b5675;
+    border-radius: 8px;
+    transition: background-color 140ms ease, color 140ms ease;
+}
+
+.panduan-sidebar .menu-link:not(.active),
+.panduan-sidebar .menu-link:not(.active) .menu-title,
+.panduan-sidebar .menu-link:not(.active) .menu-icon,
+.panduan-sidebar .menu-link:not(.active) .menu-arrow {
+    color: #4b5675 !important;
+}
+
+.panduan-sidebar .menu-link:hover {
+    color: var(--spm-primary) !important;
+    background-color: var(--spm-primary-subtle);
+}
+
+.panduan-sidebar .menu-link:hover .menu-title,
+.panduan-sidebar .menu-link:hover .menu-icon,
+.panduan-sidebar .menu-link:hover .menu-arrow {
+    color: var(--spm-primary) !important;
+}
+
+.panduan-sidebar .menu-link.active {
+    color: #ffffff !important;
+    background-color: var(--spm-primary);
+    font-weight: 700;
+}
+
+.panduan-sidebar .menu-link.active .menu-title,
+.panduan-sidebar .menu-link.active .menu-icon,
+.panduan-sidebar .menu-link.active .menu-arrow {
+    color: #ffffff !important;
+}
+
+.panduan-sidebar .menu-icon {
+    width: 28px;
+    color: inherit;
+}
+
+.panduan-sidebar .menu-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    line-height: 1.25;
+}
+
+.panduan-sidebar .menu-sub {
+    padding: 4px 0 6px 38px;
+}
+
+.panduan-sidebar .menu-sub .menu-link {
+    min-height: 36px;
+    padding-left: 10px !important;
+    font-size: 13px;
+}
+
+.panduan-sidebar .menu-accordion:not(.show) .menu-sub {
+    display: none;
+}
+
+.panduan-main {
+    min-width: 0;
+    background: transparent;
+}
+
+.panduan-content-container {
+    max-width: 1180px;
+    padding-top: 32px;
+    padding-bottom: 36px;
+}
+
+.panduan-hero,
+.panduan-content > .card,
+.panduan-section {
+    border: 1px solid var(--panduan-border) !important;
+    border-radius: 8px;
+    box-shadow: 0 8px 26px rgba(15, 23, 42, 0.045);
+}
+
+.panduan-hero {
+    overflow: hidden;
+    background:
+        linear-gradient(135deg, rgba(var(--spm-primary-rgb), 0.08), transparent 42%),
+        linear-gradient(90deg, #ffffff, #fbfcfe);
+}
+
+.panduan-hero h2 {
+    font-size: clamp(24px, 2vw, 32px);
+    line-height: 1.15;
+}
+
+.panduan-hero-metric {
+    min-width: 118px;
+    padding: 14px 16px;
+    background-color: #ffffff;
+    border: 1px solid var(--panduan-border);
+    border-radius: 8px;
+}
+
+.panduan-hero-metric span,
+.panduan-hero-metric small {
+    display: block;
+}
+
+.panduan-hero-metric span {
+    color: var(--spm-primary);
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.panduan-hero-metric small {
+    margin-top: 5px;
+    color: #7e8299;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.panduan-section {
+    scroll-margin-top: calc(var(--bs-app-header-height, 72px) + 18px);
+}
+
+.panduan-section-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    color: var(--spm-primary);
+    background-color: var(--spm-primary-light);
+    border: 1px solid rgba(var(--spm-primary-rgb), 0.12);
+    border-radius: 8px;
+}
+
+.panduan-section-body {
+    color: #3f4254;
+    line-height: 1.7;
+}
+
+.panduan-section-body ol.list-unstyled {
+    display: grid;
+    gap: 14px;
+}
+
+.panduan-section-body ol.list-unstyled > li {
+    min-height: 64px;
+    padding: 16px;
+    margin-bottom: 0 !important;
+    background-color: #fbfcfe;
+    border: 1px solid var(--panduan-border);
+    border-radius: 8px;
+}
+
+.panduan-section-body ol.list-unstyled > li > .badge.rounded-circle {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px;
+    background-color: var(--spm-primary) !important;
+    box-shadow: 0 5px 12px rgba(var(--spm-primary-rgb), 0.2);
+}
+
+.panduan-section-body strong {
+    color: #181c32;
+    font-weight: 700;
+}
+
+.panduan-section-body code {
+    color: var(--spm-primary);
+    background-color: var(--spm-primary-light);
+    border: 1px solid rgba(var(--spm-primary-rgb), 0.12);
+    border-radius: 6px;
+    padding: 2px 6px;
+    white-space: normal;
+}
+
+.panduan-section-body .alert {
+    border-radius: 8px;
+    border: 1px solid rgba(var(--spm-primary-rgb), 0.14);
+}
+
+.panduan-content .rounded.border,
+.panduan-screenshot,
+.panduan-section-body .card.card-flush.mt-6 {
+    overflow: hidden;
+    background:
+        linear-gradient(180deg, #f8fafc, #ffffff);
+    border: 1px solid var(--panduan-border) !important;
+    border-radius: 8px !important;
+}
+
+.panduan-section-body .card.card-flush.mt-6 {
+    box-shadow: none;
+}
+
+.panduan-content img.img-fluid {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.panduan-content .small,
+.panduan-section-body .text-gray-500.small {
+    color: #7e8299 !important;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.panduan-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1040;
+    background-color: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(3px);
+}
+
+@media (max-width: 991.98px) {
+    .panduan-shell .app-wrapper {
+        display: block;
+    }
+
+    .panduan-sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1050;
+        width: min(304px, calc(100vw - 28px)) !important;
+        max-width: calc(100vw - 28px);
+        flex: 0 0 min(304px, calc(100vw - 28px)) !important;
+        height: 100vh;
+        transform: translateX(-106%);
+        transition: transform 180ms ease;
+    }
+
+    .panduan-sidebar.is-open {
+        transform: translateX(0);
+    }
+
+    .panduan-sidebar-logo {
+        min-height: 64px;
+    }
+
+    .panduan-content-container {
+        padding: 20px 14px 28px;
+    }
+
+    .panduan-hero .card-body,
+    .panduan-section .card-body,
+    .panduan-section .card-header {
+        padding-left: 18px !important;
+        padding-right: 18px !important;
+    }
+
+    .panduan-section-body ol.list-unstyled > li {
+        padding: 14px;
+        gap: 12px !important;
+    }
+
+    .panduan-hero-metric {
+        flex: 1 1 120px;
+    }
+}

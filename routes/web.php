@@ -184,6 +184,21 @@ Route::get('secure/asesor-docs/{asesorId}/{field}', function (int $asesorId, str
 | Middleware EnsureUserHasRole meng-abort(403) bila role tidak cocok.
 | Super admin (role=4) bypass semua gate secara otomatis.
 */
+Route::get('panduan', function () {
+    /** @var \App\Models\User $user */
+    $user = auth()->user();
+
+    $route = match (true) {
+        $user->isSuperAdmin() => 'panduan.superadmin',
+        $user->isAdmin() => 'panduan.admin',
+        $user->isAsesor() => 'panduan.asesor',
+        $user->isPesantren() => 'panduan.pesantren',
+        default => 'dashboard',
+    };
+
+    return redirect()->route($route);
+})->middleware(['auth', 'verified'])->name('panduan.index');
+
 Route::middleware(['auth', 'verified', 'role:super_admin'])
     ->group(function () {
         Route::view('panduan-superadmin', 'panduan.superadmin')->name('panduan.superadmin');
