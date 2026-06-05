@@ -78,39 +78,51 @@
             {{-- Wrapper: sidebar + main --}}
             <div class="app-wrapper flex-column flex-row-fluid" id="kt_app_wrapper">
 
-                {{-- Sidebar — Metronic style --}}
-                <aside id="kt_app_sidebar" class="app-sidebar bg-body d-flex flex-column panduan-sidebar">
-                    <div class="app-sidebar-logo panduan-sidebar-logo px-6 d-flex align-items-center justify-content-between">
-                        <a href="/" class="d-flex align-items-center gap-2 text-decoration-none">
-                            <img src="{{ asset('images/brand/logo-pesantrenmu.svg') }}" alt="PesantrenMu" style="height: 28px;" />
-                            <span class="fw-bold fs-5 text-gray-900 d-none d-sm-inline">PesantrenMu</span>
+                {{-- Sidebar — mirror main sidebar styling --}}
+                <aside id="kt_app_sidebar" class="app-sidebar flex-column spm-app-sidebar panduan-sidebar">
+                    <div class="app-sidebar-logo flex-shrink-0 d-flex align-items-center justify-content-between px-8" id="kt_app_sidebar_logo">
+                        <a href="{{ url('/') }}" class="app-sidebar-logo-link d-flex align-items-center gap-3 min-w-0">
+                            <span class="spm-sidebar-logo-mark d-flex align-items-center justify-content-center p-0 border-0 bg-transparent">
+                                <img src="{{ asset('images/brand/favicon.svg') }}" class="w-30px h-30px" alt="PesantrenMu" loading="eager" />
+                            </span>
+                            <span class="spm-sidebar-brand-title">PesantrenMu</span>
                         </a>
-                        <button class="btn btn-sm btn-icon btn-active-color-primary d-lg-none" id="kt_app_sidebar_close" aria-label="Tutup sidebar">
-                            <i class="ki-duotone ki-cross fs-1">
-                                <span class="path1"></span><span class="path2"></span>
+
+                        <button type="button" class="btn btn-icon btn-active-color-primary w-30px h-30px d-lg-none"
+                                id="kt_app_sidebar_close" aria-label="Tutup sidebar">
+                            <i class="ki-duotone ki-cross-circle fs-2">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
                             </i>
                         </button>
                     </div>
 
-                    <div class="px-6 pt-5 pb-4">
-                        <div class="panduan-sidebar-panel">
-                            <span class="badge badge-light-primary fw-semibold mb-3">Panduan Sistem</span>
-                            <div class="fw-bold text-gray-900 fs-5 lh-sm">{{ $title }}</div>
-                            <div class="text-gray-500 fs-8 mt-2">{{ count($sections) }} kelompok materi</div>
-                        </div>
-                    </div>
-
-                    <div class="app-sidebar-menu overflow-hidden flex-column-fluid pb-6">
-                        <div class="app-sidebar-wrapper hover-scroll-overlay-y">
+                    <div class="app-sidebar-menu overflow-hidden flex-column-fluid">
+                        <div id="kt_app_sidebar_menu_wrapper"
+                             class="app-sidebar-wrapper hover-scroll-overlay-y my-5"
+                             data-kt-scroll="true"
+                             data-kt-scroll-activate="true"
+                             data-kt-scroll-height="auto"
+                             data-kt-scroll-dependencies="#kt_app_sidebar_logo"
+                             data-kt-scroll-wrappers="#kt_panduan_menu"
+                             data-kt-scroll-offset="5px">
                             <div class="menu menu-column menu-rounded menu-sub-indention menu-state-title-primary fw-semibold px-3"
-                                 id="kt_panduan_menu">
+                                 id="kt_panduan_menu"
+                                 data-kt-menu="true"
+                                 data-kt-menu-expand="false">
+
+                                <div class="menu-item menu-section" data-ui-sidebar-section="metronic">
+                                    <div class="menu-content">
+                                        <span class="menu-heading fw-semibold text-uppercase fs-7 text-muted">Panduan</span>
+                                    </div>
+                                </div>
 
                                 @foreach ($sections as $section)
                                     @if (isset($section['children']))
                                         {{-- Accordion group --}}
                                         <div class="menu-item menu-accordion {{ in_array($currentSection, Arr::pluck($section['children'], 'id')) ? 'show' : '' }}"
                                              data-panduan-accordion="true">
-                                            <span class="menu-link px-4">
+                                            <span class="menu-link px-5">
                                                 <span class="menu-icon">
                                                     <i class="ki-duotone {{ $section['icon'] ?? 'ki-book' }} fs-2">
                                                         <span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span>
@@ -123,7 +135,7 @@
                                                 @foreach ($section['children'] as $child)
                                                     <div class="menu-item">
                                                         <a href="#{{ $child['id'] }}"
-                                                           class="menu-link px-4 panduan-nav-link {{ $currentSection === $child['id'] ? 'active' : '' }}"
+                                                           class="menu-link px-5 panduan-nav-link {{ $currentSection === $child['id'] ? 'active' : '' }}"
                                                            data-panduan-section="{{ $child['id'] }}">
                                                             <span class="menu-bullet">
                                                                 <span class="bullet bullet-dot"></span>
@@ -137,7 +149,7 @@
                                     @else
                                         <div class="menu-item">
                                             <a href="#{{ $section['id'] }}"
-                                               class="menu-link px-4 panduan-nav-link {{ $currentSection === $section['id'] ? 'active' : '' }}"
+                                               class="menu-link px-5 panduan-nav-link {{ $currentSection === $section['id'] ? 'active' : '' }}"
                                                data-panduan-section="{{ $section['id'] }}">
                                                 <span class="menu-icon">
                                                     <i class="ki-duotone {{ $section['icon'] ?? 'ki-book' }} fs-2">
