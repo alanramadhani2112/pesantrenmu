@@ -12,6 +12,7 @@ use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
@@ -160,5 +161,44 @@ class UserModelCascadeTest extends TestCase
             0,
             Akreditasi::withTrashed()->where('user_id', $user->id)->whereNull('deleted_at')->count()
         );
+    }
+
+    public function test_user_factory_auto_generates_uuid(): void
+    {
+        $user = User::factory()->create();
+
+        $this->assertNotNull($user->uuid, 'Factory-created user must have a UUID');
+        $this->assertIsString($user->uuid);
+        $this->assertTrue(Str::isUuid($user->uuid), 'Value must be a valid UUID v4');
+    }
+
+    public function test_user_created_via_new_auto_generates_uuid(): void
+    {
+        $user = new User([
+            'name' => 'Test User',
+            'email' => 'test-uuid@spm.test',
+            'password' => bcrypt('password'),
+            'role_id' => 3,
+        ]);
+        $user->save();
+
+        $this->assertNotNull($user->uuid, 'Eloquent-created user must have a UUID');
+        $this->assertTrue(Str::isUuid($user->uuid), 'Value must be a valid UUID');
+    }
+
+    public function test_user_created_with_explicit_uuid_preserves_it(): void
+    {
+        $uuid = '550e8400-e29b-41d4-a716-446655440000';
+
+        $user = new User([
+            'name' => 'Explicit UUID',
+            'email' => 'explicit-uuid@spm.test',
+            'password' => bcrypt('password'),
+            'role_id' => 3,
+            'uuid' => $uuid,
+        ]);
+        $user->save();
+
+        $this->assertSame($uuid, $user->uuid, 'Explicitly set UUID must be preserved');
     }
 }
