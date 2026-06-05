@@ -18,9 +18,9 @@
 <div id="kt_app_header" class="app-header spm-app-header"
     x-data="{ avatarUrl: '{{ $photoUrl }}' }"
     x-on:profile-photo-updated.window="
-        $nextTick(() => {
-            avatarUrl = '{{ asset('storage/' . ($currentUser?->profile_photo_path ?? '')) }}?t=' + Date.now();
-        });
+        if ($event.detail && $event.detail.photoUrl !== undefined) {
+            avatarUrl = $event.detail.photoUrl ? $event.detail.photoUrl + '?t=' + Date.now() : '';
+        }
     ">
     <div class="app-container container-fluid d-flex align-items-stretch justify-content-between" id="kt_app_header_container">
         <div class="d-flex align-items-center flex-grow-1 min-w-0">

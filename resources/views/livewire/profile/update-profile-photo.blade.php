@@ -50,8 +50,9 @@ new class extends Component
         $path = $this->photo->store('profile-photos', 'public');
         $user->update(['profile_photo_path' => $path]);
 
+        $this->photo = null;
         $this->photoKey++;
-        $this->dispatch('profile-photo-updated');
+        $this->dispatch('profile-photo-updated', photoUrl: $this->photoUrl);
     }
 
     public function removePhoto(): void
@@ -60,11 +61,11 @@ new class extends Component
 
         if ($user->profile_photo_path) {
             Storage::disk('public')->delete($user->profile_photo_path);
-            $user->update(['profile_photo_path' => null]);
-        }
+        $user->update(['profile_photo_path' => null]);
 
+        $this->photo = null;
         $this->photoKey++;
-        $this->dispatch('profile-photo-updated');
+        $this->dispatch('profile-photo-updated', photoUrl: '');
     }
 }; ?>
 
@@ -80,10 +81,9 @@ new class extends Component
             changed: false,
             get isEmpty() { return !this.preview; },
         }"
-        x-init="
-            $watch('$wire.photoKey', () => {
-                $nextTick(() => { preview = ''; changed = false; });
-            });
+        x-on:profile-photo-updated.window="
+            preview = ($event.detail && $event.detail.photoUrl) ? $event.detail.photoUrl : preview;
+            changed = false;
         ">
         {{-- Metronic image-input — exact docs pattern --}}
         <div class="image-input image-input-circle image-input-outline"
