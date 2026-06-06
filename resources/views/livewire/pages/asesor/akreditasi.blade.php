@@ -67,6 +67,24 @@ new #[Layout('layouts.app')] class extends Component {
         if (!auth()->user()->isAsesor()) {
             abort(403);
         }
+
+        $focusStatusMap = [
+            'review' => 'belum',
+            'jadwal' => 'belum',
+            'nilai' => 'penilaian',
+            'laporan_visitasi' => 'penilaian',
+        ];
+
+        $requestedFocus = request()->query('focus');
+        $expectedStatus = $focusStatusMap[$requestedFocus] ?? null;
+
+        if ($expectedStatus && request()->query('statusFilter') !== $expectedStatus) {
+            $this->redirect(route('asesor.akreditasi', [
+                'statusFilter' => $expectedStatus,
+                'focus' => $requestedFocus,
+            ]), navigate: true);
+            return;
+        }
     }
 
     public function getAssessmentsProperty()
@@ -75,11 +93,17 @@ new #[Layout('layouts.app')] class extends Component {
         if (!$asesor) return collect();
 
         $asesorService = app(\App\Services\AsesorService::class);
+        $effectiveStatusFilter = match ($this->focus) {
+            'review', 'jadwal' => 'belum',
+            'nilai', 'laporan_visitasi' => 'penilaian',
+            default => $this->statusFilter,
+        };
+
         return $asesorService->getPaginatedAssessments(
             $asesor->id,
             $this->search,
             $this->periodeFilter,
-            $this->statusFilter,
+            $effectiveStatusFilter,
             $this->perPage,
             $this->sortField,
             $this->sortAsc
@@ -214,11 +238,59 @@ new #[Layout('layouts.app')] class extends Component {
 }; ?>
 
 <div x-data="deleteConfirmation" data-module-page="asesor-akreditasi">
-    <x-slot name="header">{{ __('Akreditasi') }}</x-slot>
+    @php
+        $activeFocus = in_array($focus, ['review', 'jadwal', 'nilai', 'laporan_visitasi'], true)
+            ? $focus
+            : 'tugas';
+
+        $context = match ($activeFocus) {
+            'review' => [
+                'title' => 'Review Berkas',
+                'subtitle' => 'Fokus pada pengajuan yang perlu dicek sebelum visitasi dijadwalkan.',
+                'tableTitle' => 'Daftar Review Berkas',
+                'tableSubtitle' => 'Buka detail untuk meninjau profil, IPM, SDM, EDPM/IPR, dan catatan berkas pesantren.',
+            ],
+            'jadwal' => [
+                'title' => 'Atur Jadwal Visitasi',
+                'subtitle' => 'Fokus pada pengajuan yang belum memiliki jadwal visitasi.',
+                'tableTitle' => 'Daftar Penjadwalan Visitasi',
+                'tableSubtitle' => 'Gunakan aksi baris untuk menetapkan atau menolak jadwal visitasi sesuai hasil review.',
+            ],
+            'nilai' => [
+                'title' => 'Input Nilai Visitasi',
+                'subtitle' => 'Fokus pada pengajuan pasca visitasi yang perlu dilanjutkan ke pengisian nilai.',
+                'tableTitle' => 'Daftar Input Nilai',
+                'tableSubtitle' => 'Buka detail instrumen untuk mengisi atau meninjau nilai akreditasi.',
+            ],
+            'laporan_visitasi' => [
+                'title' => 'Laporan Visitasi',
+                'subtitle' => 'Fokus pada laporan individu dan kelompok setelah penilaian visitasi berjalan.',
+                'tableTitle' => 'Daftar Laporan Visitasi',
+                'tableSubtitle' => 'Buka detail laporan visitasi untuk mengunggah atau meninjau dokumen laporan.',
+            ],
+            default => [
+                'title' => 'Daftar Tugas',
+                'subtitle' => 'Kelola tugas penilaian, jadwal visitasi, catatan, dan laporan akreditasi pesantren.',
+                'tableTitle' => 'Pengajuan Akreditasi',
+                'tableSubtitle' => 'Daftar umum seluruh pengajuan akreditasi yang ditugaskan ke asesor.',
+            ],
+        };
+
+        $emptyTitle = match ($activeFocus) {
+            'review' => 'Belum ada berkas yang perlu direview',
+            'jadwal' => 'Belum ada visitasi yang perlu dijadwalkan',
+            'nilai' => 'Belum ada nilai visitasi yang perlu diinput',
+            'laporan_visitasi' => 'Belum ada laporan visitasi yang perlu ditindaklanjuti',
+            default => 'Belum ada tugas akreditasi ditugaskan',
+        };
+    @endphp
+
+    <x-slot name="header">{{ __($context['title']) }}</x-slot>
 
     <x-ui.page
-        title="Akreditasi"
-        subtitle="Kelola tugas penilaian, jadwal visitasi, catatan, dan laporan akreditasi pesantren."
+        :title="$context['title']"
+        :subtitle="$context['subtitle']"
+        data-akreditasi-context="{{ $activeFocus }}"
     >
         @php
             $assessmentRecords = $this->assessments;
@@ -303,7 +375,12 @@ new #[Layout('layouts.app')] class extends Component {
             </div>
         </div>
 
-        <x-datatable.layout title="Pengajuan Akreditasi" :records="$this->assessments">
+        <x-datatable.layout
+            :title="$context['tableTitle']"
+            :subtitle="$context['tableSubtitle']"
+            :records="$this->assessments"
+            class="spm-table-shell--asesor-akreditasi spm-table-shell--asesor-{{ $activeFocus }}"
+        >
             <x-slot name="filters">
                 <x-datatable.search placeholder="Cari Pesantren..." />
 
@@ -424,7 +501,7 @@ new #[Layout('layouts.app')] class extends Component {
                 @empty
                 <tr>
                     <td colspan="6">
-                        <x-ui.empty-state title="Belum ada tugas akreditasi ditugaskan" class="py-15" />
+                        <x-ui.empty-state :title="$emptyTitle" class="py-15" />
                     </td>
                 </tr>
                 @endforelse

@@ -33,19 +33,14 @@ let pageLoadingTimer = null;
 const showPageLoadingOverlay = () => {
     clearTimeout(pageLoadingTimer);
 
-    document.body?.setAttribute('data-kt-app-page-loading', 'on');
-    document.body?.classList.add('page-loading');
-
-    window.KTApp?.showPageLoading?.();
+    document.body?.classList.add('spm-is-navigating');
 };
 
 const hidePageLoadingOverlay = () => {
     clearTimeout(pageLoadingTimer);
 
     pageLoadingTimer = window.setTimeout(() => {
-        window.KTApp?.hidePageLoading?.();
-        document.body?.removeAttribute('data-kt-app-page-loading');
-        document.body?.classList.remove('page-loading');
+        document.body?.classList.remove('spm-is-navigating');
     }, 120);
 };
 

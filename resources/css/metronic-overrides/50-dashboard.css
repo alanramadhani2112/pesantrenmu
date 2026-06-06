@@ -1,5 +1,21 @@
 .spm-navigate-progress {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 2000;
+    height: 3px;
+    overflow: hidden;
     background: rgba(var(--spm-primary-rgb), 0.1);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-3px);
+    transition: opacity 120ms ease, transform 120ms ease;
+}
+
+body.spm-is-navigating .spm-navigate-progress {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .spm-navigate-progress-bar {
@@ -216,4 +232,3 @@
     flex: 1 1 auto;
     min-height: 0;
 }
-

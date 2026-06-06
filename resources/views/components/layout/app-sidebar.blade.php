@@ -7,6 +7,7 @@
     $isAdmin = $currentUser?->isAdmin() ?? false;
     $isPesantren = $currentUser?->isPesantren() ?? false;
     $isAsesor = $currentUser?->isAsesor() ?? false;
+    $canAccessAdminArea = $currentUser?->canAccessAdminArea() ?? false;
     $initial = strtoupper(substr($currentUser?->name ?? 'U', 0, 1));
 
     // Get menu configuration from SidebarMenuService
@@ -34,9 +35,9 @@
 
     // Compute badge counts for items with show_badge=true
     $badgeCounts = [];
-    if ($isAdmin || $isAsesor) {
+    if ($canAccessAdminArea || $isAsesor) {
         try {
-            if ($isAdmin) {
+            if ($canAccessAdminArea) {
                 $badgeCounts['akreditasi_admin'] = \Illuminate\Support\Facades\Cache::remember('badge:admin:pending_akreditasi', 30, fn () => \App\Models\Akreditasi::where('status', 6)->count());
                 $badgeCounts['banding'] = \Illuminate\Support\Facades\Cache::remember('badge:admin:pending_banding', 30, fn () => \App\Models\Banding::where('status', 'pending')->count());
                 $badgeCounts['failed_notifications'] = \Illuminate\Support\Facades\Cache::remember('badge:admin:failed_notifications', 30, fn () => \App\Models\FailedNotification::where('status', 'pending')->count());

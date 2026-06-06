@@ -97,6 +97,17 @@
             };
         }
 
+        if ($routeName === 'asesor.akreditasi') {
+            $asesorFocus = request()->query('focus');
+            $routeTitle = match ($asesorFocus) {
+                'review' => __('Review Berkas'),
+                'jadwal' => __('Atur Jadwal Visitasi'),
+                'nilai' => __('Input Nilai Visitasi'),
+                'laporan_visitasi' => __('Laporan Visitasi'),
+                default => $routeTitle,
+            };
+        }
+
         $slotHeaderTitle = isset($header) ? trim(strip_tags((string) $header)) : '';
         $pageTitle = $routeTitle ?: ($slotHeaderTitle !== '' ? $slotHeaderTitle : __('Dashboard'));
 
@@ -112,6 +123,10 @@
             $breadcrumbItems[] = ['label' => $pageTitle];
         }
     @endphp
+
+    <div class="spm-navigate-progress" aria-hidden="true">
+        <div class="spm-navigate-progress-bar"></div>
+    </div>
 
     <div class="d-flex flex-column flex-root app-root spm-app-shell" id="kt_app_root">
         <div class="app-page flex-column flex-column-fluid" id="kt_app_page">

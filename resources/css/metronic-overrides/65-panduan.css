@@ -126,7 +126,7 @@
 .panduan-sidebar .menu-link.active {
     color: #ffffff !important;
     background-color: var(--spm-primary);
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .panduan-sidebar .menu-link.active .menu-title,
@@ -208,7 +208,7 @@
 .panduan-hero-metric span {
     color: var(--spm-primary);
     font-size: 24px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1;
 }
 
@@ -265,7 +265,7 @@
 
 .panduan-section-body strong {
     color: #181c32;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .panduan-section-body code {
