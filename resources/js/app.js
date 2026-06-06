@@ -155,6 +155,10 @@ const getSwal = () => {
 
 window.getSpmSwal = getSwal;
 
+const closeOpenActionMenus = () => {
+    window.dispatchEvent(new CustomEvent('spm:action-menu-close-all'));
+};
+
 const buildMetronicSwalOptions = (options = {}) => {
     const confirmVariant = options.confirmVariant ?? 'primary';
     const cancelVariant = options.cancelVariant ?? 'light';
@@ -190,20 +194,24 @@ const fireMetronicSwal = async (options = {}) => {
     return Swal.fire(buildMetronicSwalOptions(options));
 };
 
-const ask = (options = {}) => fireMetronicSwal({
-    text: 'Lanjutkan proses ini?',
-    ...options,
-    showCancelButton: true,
-    confirmButtonText: options.confirmButtonText ?? 'Ya, lanjutkan',
-}).then((result) => {
-    if (!result.isConfirmed) releaseAllSubmitLockGuards();
+const ask = (options = {}) => {
+    closeOpenActionMenus();
 
-    return result;
-}).catch((error) => {
-    releaseAllSubmitLockGuards();
+    return fireMetronicSwal({
+        text: 'Lanjutkan proses ini?',
+        ...options,
+        showCancelButton: true,
+        confirmButtonText: options.confirmButtonText ?? 'Ya, lanjutkan',
+    }).then((result) => {
+        if (!result.isConfirmed) releaseAllSubmitLockGuards();
 
-    throw error;
-});
+        return result;
+    }).catch((error) => {
+        releaseAllSubmitLockGuards();
+
+        throw error;
+    });
+};
 
 window.SpmSwal = {
     fire: fireMetronicSwal,
@@ -584,6 +592,15 @@ window.spmActionMenu = (menuId) => ({
     isOpen: false,
     placementStyle: 'position: fixed; top: 0; left: 0; visibility: hidden; z-index: 1200;',
     menuId,
+    init() {
+        this.menuId = menuId || this.$id('spm-action-menu');
+    },
+    get resolvedMenuId() {
+        return this.menuId;
+    },
+    destroy() {
+        this.cleanupOpenState();
+    },
     close() {
         this.isOpen = false;
         this.placementStyle = 'position: fixed; top: 0; left: 0; visibility: hidden; z-index: 1200;';
@@ -601,7 +618,7 @@ window.spmActionMenu = (menuId) => ({
     },
     updatePosition() {
         const trigger = this.$refs.trigger;
-        const menu = document.getElementById(this.menuId);
+        const menu = this.$refs.menu;
 
         if (!trigger || !menu) return;
 
@@ -1063,6 +1080,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document.addEventListener('livewire:initialized', () => {
     Livewire.hook?.('commit', ({ succeed, fail }) => {
+        closeOpenActionMenus();
         succeed?.(() => releaseAllSubmitLockGuards());
         fail?.(() => releaseAllSubmitLockGuards());
     });

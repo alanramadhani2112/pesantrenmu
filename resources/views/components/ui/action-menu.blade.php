@@ -3,14 +3,12 @@
     'menuId' => null,
 ])
 
-@php
-    $resolvedMenuId = $menuId ?: 'menu-' . md5((string) $label . spl_object_id($attributes));
-@endphp
-
 <div
     data-ui-action-menu="metronic"
-    x-data="spmActionMenu(@js($resolvedMenuId))"
+    x-data="spmActionMenu(@js($menuId))"
+    x-id="['spm-action-menu']"
     x-on:spm:action-menu-open.window="if ($event.detail?.id !== menuId) close()"
+    x-on:spm:action-menu-close-all.window="close()"
     x-on:keydown.escape.window="close()"
     x-on:resize.window="if (isOpen) updatePosition()"
     x-on:scroll.window="if (isOpen) updatePosition()"
@@ -26,7 +24,7 @@
         x-ref="trigger"
         x-on:click.stop="toggle()"
         x-bind:aria-expanded="isOpen.toString()"
-        aria-controls="{{ $resolvedMenuId }}"
+        x-bind:aria-controls="resolvedMenuId"
         aria-haspopup="true"
     >
         <span class="spm-action-menu-trigger-inner">
@@ -37,7 +35,7 @@
     </x-ui.button>
 
     <div
-        id="{{ $resolvedMenuId }}"
+        x-bind:id="resolvedMenuId"
         x-cloak
         x-ref="menu"
         x-show="isOpen"
