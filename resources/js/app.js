@@ -587,11 +587,9 @@ window.spmActionMenu = (menuId) => ({
     isOpen: false,
     placementStyle: 'position: fixed; top: 0; left: 0; visibility: hidden; z-index: 1200;',
     menuId,
+    resolvedMenuId: null,
     init() {
-        this.menuId = menuId || this.$id('spm-action-menu');
-    },
-    get resolvedMenuId() {
-        return this.menuId;
+        this.resolvedMenuId = menuId || this.$id('spm-action-menu');
     },
     destroy() {
         this.cleanupOpenState();

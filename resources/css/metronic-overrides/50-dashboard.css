@@ -1,15 +1,28 @@
+.spm-navigate-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    pointer-events: none;
+    opacity: 0;
+    background: rgba(255, 255, 255, 0.85);
+    transition: opacity 150ms ease;
+}
+
+body.spm-is-navigating .spm-navigate-overlay {
+    opacity: 1;
+}
+
 .spm-navigate-progress {
     position: fixed;
     top: 0;
     right: 0;
     left: 0;
     z-index: 2000;
-    height: 3px;
+    height: 4px;
     overflow: hidden;
-    background: rgba(var(--spm-primary-rgb), 0.1);
+    background: rgba(var(--spm-primary-rgb), 0.08);
     opacity: 0;
-    pointer-events: none;
-    transform: translateY(-3px);
+    transform: translateY(-4px);
     transition: opacity 120ms ease, transform 120ms ease;
 }
 
