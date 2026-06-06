@@ -61,7 +61,8 @@ new class extends Component
 
         if ($user->profile_photo_path) {
             Storage::disk('public')->delete($user->profile_photo_path);
-        $user->update(['profile_photo_path' => null]);
+            $user->update(['profile_photo_path' => null]);
+        }
 
         $this->photo = null;
         $this->photoKey++;
