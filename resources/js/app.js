@@ -138,6 +138,8 @@ const swalButtonClasses = {
     light: 'btn btn-light',
 };
 
+const swalSuccessTimer = 3000;
+
 let swalPromise = null;
 
 const getSwal = () => {
@@ -210,6 +212,9 @@ window.SpmSwal = {
         icon: 'success',
         title,
         text,
+        timer: options.timer ?? swalSuccessTimer,
+        timerProgressBar: options.timerProgressBar ?? true,
+        showConfirmButton: options.showConfirmButton ?? false,
         confirmVariant: 'success',
         ...options,
     }),
@@ -217,7 +222,30 @@ window.SpmSwal = {
         icon: 'error',
         title,
         text,
+        timer: options.timer,
+        timerProgressBar: options.timerProgressBar,
+        showConfirmButton: options.showConfirmButton ?? true,
         confirmVariant: 'danger',
+        ...options,
+    }),
+    warning: (title, text, options = {}) => fireMetronicSwal({
+        icon: 'warning',
+        title,
+        text,
+        timer: options.timer,
+        timerProgressBar: options.timerProgressBar,
+        showConfirmButton: options.showConfirmButton ?? true,
+        confirmVariant: 'warning',
+        ...options,
+    }),
+    info: (title, text, options = {}) => fireMetronicSwal({
+        icon: 'info',
+        title,
+        text,
+        timer: options.timer,
+        timerProgressBar: options.timerProgressBar,
+        showConfirmButton: options.showConfirmButton ?? true,
+        confirmVariant: 'primary',
         ...options,
     }),
 };
@@ -255,8 +283,9 @@ const fireNotificationAlert = (data = {}) => {
         title: payload.title ?? (icon === 'success' ? 'Berhasil' : 'Informasi'),
         text: payload.text ?? payload.message,
         html: payload.html,
-        timer: payload.timer ?? (icon === 'success' ? 3000 : undefined),
+        timer: payload.timer ?? (icon === 'success' ? swalSuccessTimer : undefined),
         timerProgressBar: payload.timerProgressBar ?? (icon === 'success'),
+        showConfirmButton: payload.showConfirmButton ?? (icon !== 'success'),
         confirmVariant: payload.confirmVariant ?? confirmVariantForAlert(icon),
     });
 };
@@ -994,24 +1023,24 @@ window.dashboardCharts = (chartData = [], stats = {}) => ({
 });
 
 window.addEventListener('show-validation-alert', (event) => {
-    window.SpmSwal.fire({
-        icon: 'warning',
+    fireNotificationAlert({
+        type: 'warning',
         title: event.detail.title ?? 'Validasi gagal',
         html: event.detail.html ?? event.detail.message ?? '',
     });
 });
 
 window.addEventListener('validation-failed', (event) => {
-    window.SpmSwal.fire({
-        icon: 'warning',
+    fireNotificationAlert({
+        type: 'warning',
         title: event.detail.title ?? 'Validasi gagal',
         html: event.detail.html ?? event.detail.message ?? '',
     });
 });
 
 window.addEventListener('show-validation-error', () => {
-    window.SpmSwal.fire({
-        icon: 'warning',
+    fireNotificationAlert({
+        type: 'warning',
         title: 'Data belum lengkap',
         html: 'Mohon periksa kembali isian yang ditandai pada formulir.',
     });
