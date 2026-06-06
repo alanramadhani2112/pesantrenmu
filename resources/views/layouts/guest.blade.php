@@ -16,7 +16,7 @@
     @livewireScriptConfig
 </head>
 
-<body class="font-sans text-gray-900 antialiased spm-auth-body" data-bs-theme="light">
+<body class="font-sans text-gray-900 antialiased spm-auth-body" style="background-color:#f5f7fa" data-bs-theme="light">
     <div class="d-flex flex-column flex-root min-vh-100 spm-auth-shell">
         <div class="d-flex flex-column flex-column-fluid justify-content-center align-items-center p-6 p-lg-10 spm-auth-form-pane">
             <div class="spm-auth-panel">
