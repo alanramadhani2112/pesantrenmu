@@ -24,6 +24,7 @@
 <body
     id="kt_app_body"
     class="app-default font-sans antialiased text-gray-900"
+    style="background-color:#f6f8fb"
     data-bs-theme="light"
     data-kt-app-header-fixed="true"
     data-kt-app-header-fixed-mobile="true"
@@ -123,12 +124,6 @@
             $breadcrumbItems[] = ['label' => $pageTitle];
         }
     @endphp
-
-    <div class="spm-navigate-overlay" aria-hidden="true">
-        <div class="spm-navigate-progress" role="progressbar">
-            <div class="spm-navigate-progress-bar"></div>
-        </div>
-    </div>
 
     <div class="d-flex flex-column flex-root app-root spm-app-shell" id="kt_app_root">
         <div class="app-page flex-column flex-column-fluid" id="kt_app_page">

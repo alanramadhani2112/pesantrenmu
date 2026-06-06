@@ -28,21 +28,35 @@ const initMetronic = () => {
 
 window.initMetronic = initMetronic;
 
-let pageLoadingTimer = null;
+// Tab Throbber — favicon spinner during navigation
+const tabThrobber = (() => {
+    const spinnerSvg = 'data:image/svg+xml,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">' +
+        '<circle cx="8" cy="8" r="6" fill="none" stroke="#999" stroke-width="2" ' +
+        'stroke-dasharray="28" stroke-dashoffset="8" stroke-linecap="round">' +
+        '<animateTransform attributeName="transform" type="rotate" ' +
+        'from="0 8 8" to="360 8 8" dur="0.75s" repeatCount="indefinite"/>' +
+        '</circle></svg>'
+    );
+    let originalHref = null;
 
-const showPageLoadingOverlay = () => {
-    clearTimeout(pageLoadingTimer);
+    return {
+        start() {
+            const el = document.querySelector('link[rel="icon"]');
+            if (!el) return;
+            if (!originalHref) originalHref = el.getAttribute('href');
+            el.setAttribute('href', spinnerSvg);
+        },
+        stop() {
+            const el = document.querySelector('link[rel="icon"]');
+            if (!el || !originalHref) return;
+            el.setAttribute('href', originalHref);
+        },
+    };
+})();
 
-    document.body?.classList.add('spm-is-navigating');
-};
-
-const hidePageLoadingOverlay = () => {
-    clearTimeout(pageLoadingTimer);
-
-    pageLoadingTimer = window.setTimeout(() => {
-        document.body?.classList.remove('spm-is-navigating');
-    }, 120);
-};
+const showPageLoadingOverlay = () => tabThrobber.start();
+const hidePageLoadingOverlay = () => tabThrobber.stop();
 
 window.showPageLoadingOverlay = showPageLoadingOverlay;
 window.hidePageLoadingOverlay = hidePageLoadingOverlay;
