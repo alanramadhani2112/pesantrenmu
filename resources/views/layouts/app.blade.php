@@ -146,16 +146,6 @@
         </div>
     </div>
 
-    {{-- Global Livewire loading overlay — visual feedback only, does NOT block clicks --}}
-    {{-- Outer wrapper handles wire:loading visibility toggle (display: none). Inner div uses Bootstrap classes freely. --}}
-    <div wire:loading.delay.shortest>
-        <div class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-             style="z-index: 9999; background: rgba(255,255,255,0.4); pointer-events: none;">
-            <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span>
-            <span class="fw-semibold text-gray-700 fs-7">Memproses...</span>
-        </div>
-    </div>
-
     @if(session('status') || session('success') || session('error'))
         <script>
             window.__spmFlashAlert = @js(session('error')

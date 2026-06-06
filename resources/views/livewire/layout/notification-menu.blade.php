@@ -4,27 +4,9 @@ use Livewire\Volt\Component;
 use Illuminate\Support\Facades\Auth;
 
 new class extends Component {
-    public $lastNotificationId;
-
-    public function mount()
-    {
-        $this->lastNotificationId = Auth::user()->notifications()->first()?->id;
-    }
-
     public function getNotificationsProperty()
     {
-        $notifications = Auth::user()->notifications()->take(10)->get();
-        
-        $latest = $notifications->first();
-        if ($latest && $latest->id !== $this->lastNotificationId) {
-            $this->lastNotificationId = $latest->id;
-            $this->dispatch('notification-received', 
-                title: $latest->data['title'],
-                message: $latest->data['message']
-            );
-        }
-
-        return $notifications;
+        return Auth::user()->notifications()->take(10)->get();
     }
 
     public function getUnreadCountProperty()
