@@ -336,76 +336,6 @@
     color: #14532d;
 }
 
-.spm-toast-wrapper {
-    position: fixed;
-    top: 24px;
-    right: 24px;
-    z-index: 100;
-    width: min(420px, calc(100vw - 32px));
-}
-
-.spm-toast-card {
-    position: relative;
-    overflow: hidden;
-    border: 1px solid #e8edf4 !important;
-    border-radius: 10px;
-    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
-}
-
-.spm-toast-card::before {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 4px;
-    content: "";
-    background-color: var(--spm-primary);
-}
-
-.spm-toast-success::before {
-    background-color: var(--spm-success);
-}
-
-.spm-toast-danger::before {
-    background-color: var(--spm-danger);
-}
-
-.spm-toast-warning::before {
-    background-color: var(--spm-warning);
-}
-
-.spm-toast-info::before {
-    background-color: var(--spm-info);
-}
-
-.spm-toast-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    background-color: #f8fafc;
-    border: 1px solid #e8edf4;
-    border-radius: 8px;
-}
-
-.spm-toast-title {
-    color: #111827;
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1.35;
-    letter-spacing: 0;
-}
-
-.spm-toast-message {
-    margin-top: 4px;
-    color: #64748b;
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1.5;
-    overflow-wrap: anywhere;
-}
-
 .spm-score-control {
     min-width: 76px;
 }
@@ -461,4 +391,3 @@
     flex-direction: column;
     gap: 10px;
 }
-

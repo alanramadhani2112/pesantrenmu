@@ -222,6 +222,45 @@ window.SpmSwal = {
     }),
 };
 
+const normalizeAlertPayload = (data = {}) => {
+    if (Array.isArray(data)) return data[0] ?? {};
+    if (data.detail) return data.detail;
+
+    return data ?? {};
+};
+
+const normalizeSwalIcon = (type) => {
+    const icon = type ?? 'info';
+
+    if (icon === 'danger') return 'error';
+    if (['success', 'error', 'warning', 'info', 'question'].includes(icon)) return icon;
+
+    return 'info';
+};
+
+const confirmVariantForAlert = (icon) => ({
+    success: 'success',
+    error: 'danger',
+    warning: 'warning',
+    info: 'primary',
+    question: 'primary',
+}[icon] ?? 'primary');
+
+const fireNotificationAlert = (data = {}) => {
+    const payload = normalizeAlertPayload(data);
+    const icon = normalizeSwalIcon(payload.type ?? payload.icon);
+
+    return window.SpmSwal.fire({
+        icon,
+        title: payload.title ?? (icon === 'success' ? 'Berhasil' : 'Informasi'),
+        text: payload.text ?? payload.message,
+        html: payload.html,
+        timer: payload.timer ?? (icon === 'success' ? 3000 : undefined),
+        timerProgressBar: payload.timerProgressBar ?? (icon === 'success'),
+        confirmVariant: payload.confirmVariant ?? confirmVariantForAlert(icon),
+    });
+};
+
 const callWire = (wire, method, ...args) => {
     if (!wire) return null;
     if (typeof wire[method] === 'function') return wire[method](...args);
@@ -979,13 +1018,18 @@ window.addEventListener('show-validation-error', () => {
 });
 
 window.addEventListener('show-metronic-alert', (event) => {
-    window.SpmSwal.fire({
-        icon: event.detail.type ?? event.detail.icon ?? 'info',
-        title: event.detail.title ?? 'Informasi',
-        text: event.detail.message ?? event.detail.text,
-        html: event.detail.html,
-        confirmVariant: event.detail.type === 'error' ? 'danger' : 'primary',
-    });
+    fireNotificationAlert(event);
+});
+
+window.addEventListener('notification-received', (event) => {
+    fireNotificationAlert(event);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (!window.__spmFlashAlert) return;
+
+    fireNotificationAlert(window.__spmFlashAlert);
+    window.__spmFlashAlert = null;
 });
 
 document.addEventListener('livewire:initialized', () => {
@@ -995,18 +1039,11 @@ document.addEventListener('livewire:initialized', () => {
     });
 
     Livewire.on('swal:success', (data) => {
-        const payload = Array.isArray(data) ? data[0] : data;
-
-        window.SpmSwal.success(payload?.title ?? 'Berhasil', payload?.text ?? payload?.message ?? '', {
-            timer: 3000,
-            timerProgressBar: true,
-        });
+        fireNotificationAlert({ ...normalizeAlertPayload(data), type: 'success' });
     });
 
     Livewire.on('swal:error', (data) => {
-        const payload = Array.isArray(data) ? data[0] : data;
-
-        window.SpmSwal.error(payload?.title ?? 'Gagal', payload?.text ?? payload?.message ?? '');
+        fireNotificationAlert({ ...normalizeAlertPayload(data), type: 'error' });
     });
 });
 

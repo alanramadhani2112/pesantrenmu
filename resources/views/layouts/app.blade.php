@@ -146,104 +146,6 @@
         </div>
     </div>
 
-    <!-- Notification Toast -->
-    <div
-        x-data="{
-                show: false, 
-                type: 'success',
-                title: '', 
-                message: '',
-                timeout: null,
-                init() {
-                    window.addEventListener('notification-received', (event) => {
-                        this.type = event.detail.type || 'success';
-                        this.title = event.detail.title;
-                        this.message = event.detail.message;
-                        this.show = true;
-                        
-                        if (this.timeout) clearTimeout(this.timeout);
-                        this.timeout = setTimeout(() => { this.show = false }, 5000);
-                    });
-
-                    // Handle session flash
-                    @if(session('status') || session('success'))
-                        setTimeout(() => {
-                            this.type = 'success';
-                            this.title = 'Berhasil!';
-                            this.message = @js(session('status') ?? session('success'));
-                            this.show = true;
-                            this.timeout = setTimeout(() => { this.show = false }, 5000);
-                        }, 500);
-                    @endif
-
-                    @if(session('error'))
-                        setTimeout(() => {
-                            this.type = 'error';
-                            this.title = 'Terjadi Kesalahan!';
-                            this.message = @js(session('error'));
-                            this.show = true;
-                            this.timeout = setTimeout(() => { this.show = false }, 5000);
-                        }, 500);
-                    @endif
-                }
-            }"
-        x-show="show"
-        x-transition:enter="transition ease-out duration-500"
-        x-transition:enter-start="translate-x-full opacity-0"
-        x-transition:enter-end="translate-x-0 opacity-100"
-        x-transition:leave="transition ease-in duration-300"
-        x-transition:leave-start="translate-x-0 opacity-100"
-        x-transition:leave-end="translate-x-full opacity-0"
-        class="spm-toast-wrapper"
-        style="display: none;"
-    >
-        <div
-            class="card border-0 spm-toast-card"
-            :class="{
-                'spm-toast-success': type === 'success',
-                'spm-toast-danger': type === 'error',
-                'spm-toast-warning': type === 'warning',
-                'spm-toast-info': type === 'info'
-            }"
-        >
-            <div class="card-body d-flex align-items-start gap-4 p-5">
-                <div class="spm-toast-icon flex-shrink-0">
-                    <template x-if="type === 'success'">
-                        <x-ui.icon name="check-circle" class="fs-2 text-success" />
-                    </template>
-                    <template x-if="type === 'error'">
-                        <x-ui.icon name="cross-circle" class="fs-2 text-danger" />
-                    </template>
-                    <template x-if="type === 'warning'">
-                        <x-ui.icon name="information-5" class="fs-2 text-warning" />
-                    </template>
-                    <template x-if="type === 'info' || !type">
-                        <x-ui.icon name="information-2" class="fs-2 text-primary" />
-                    </template>
-                </div>
-
-                <div class="flex-grow-1 min-w-0">
-                    <div class="d-flex align-items-start justify-content-between gap-3">
-                        <div class="min-w-0">
-                            <div class="spm-toast-title" x-text="title"></div>
-                            <div class="spm-toast-message" x-text="message"></div>
-                        </div>
-
-                        <x-ui.button
-                            type="button"
-                            variant="light"
-                            @click="show = false"
-                            class="btn-sm btn-icon btn-active-light-primary flex-shrink-0"
-                            aria-label="Tutup notifikasi"
-                        >
-                            <x-ui.icon name="cross-circle" class="fs-3 text-gray-500" />
-                        </x-ui.button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     {{-- Global Livewire loading overlay — visual feedback only, does NOT block clicks --}}
     {{-- Outer wrapper handles wire:loading visibility toggle (display: none). Inner div uses Bootstrap classes freely. --}}
     <div wire:loading.delay.shortest>
@@ -253,6 +155,14 @@
             <span class="fw-semibold text-gray-700 fs-7">Memproses...</span>
         </div>
     </div>
+
+    @if(session('status') || session('success') || session('error'))
+        <script>
+            window.__spmFlashAlert = @js(session('error')
+                ? ['type' => 'error', 'title' => 'Terjadi Kesalahan!', 'message' => session('error')]
+                : ['type' => 'success', 'title' => 'Berhasil!', 'message' => session('status') ?? session('success')]);
+        </script>
+    @endif
 
     {{-- Metronic JS bundle — provides KT components (password meter, menu, drawer, etc.) --}}
     <script src="{{ asset('vendor/metronic/assets/js/scripts.bundle.js') }}"></script>
