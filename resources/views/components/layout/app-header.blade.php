@@ -78,7 +78,7 @@
                 {{-- Dropdown Menu --}}
                 <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-semibold py-4 w-250px fs-6" data-kt-menu="true">
                     <div class="menu-item px-3">
-                        <a href="{{ route('profile') }}" class="menu-link px-3">
+                        <a href="{{ route('profile.edit') }}" class="menu-link px-3">
                             <span class="menu-icon">
                                 <i class="ki-solid ki-setting-2 fs-2"></i>
                             </span>

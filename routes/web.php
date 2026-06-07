@@ -15,9 +15,13 @@ Route::get('dashboard', Home::class)
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-Route::view('profile', 'profile')
-    ->middleware(['auth'])
-    ->name('profile');
+Route::middleware('auth')->prefix('profile')->name('profile.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('edit');
+    Route::put('/info', [\App\Http\Controllers\ProfileController::class, 'updateInfo'])->name('info');
+    Route::put('/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('password');
+    Route::put('/photo', [\App\Http\Controllers\ProfileController::class, 'updatePhoto'])->name('photo');
+    Route::delete('/photo', [\App\Http\Controllers\ProfileController::class, 'removePhoto'])->name('photo.remove');
+});
 
 Volt::route('roles', 'pages.roles.index')
     ->middleware(['auth', 'verified', 'permission:master.role'])
