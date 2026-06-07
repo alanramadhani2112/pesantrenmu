@@ -197,13 +197,11 @@
                 const title = `${nextAction.charAt(0).toUpperCase()}${nextAction.slice(1)} ${label}?`;
                 const text = `${label} ${name} akan di${nextAction}.`;
 
-                Swal.fire({
+                window.SpmSwal.fire({
                     title,
                     text,
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
                     confirmButtonText: `Ya, ${nextAction}`,
                 }).then((result) => {
                     if (result.isConfirmed) {

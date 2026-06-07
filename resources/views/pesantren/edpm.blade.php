@@ -321,7 +321,7 @@ document.addEventListener('alpine:init', () => {
 // SweetAlert confirmations
 document.getElementById('btnSaveEdpm')?.addEventListener('click', function(e) {
     e.preventDefault();
-    Swal.fire({
+    window.SpmSwal.fire({
         title: 'Simpan Data EDPM?',
         text: 'Pastikan semua nilai evaluasi dan tautan bukti sudah diisi dengan benar.',
         icon: 'question',
@@ -336,7 +336,7 @@ document.getElementById('btnSaveEdpm')?.addEventListener('click', function(e) {
 });
 
 document.getElementById('btnSaveDraft')?.addEventListener('click', function() {
-    Swal.fire({
+    window.SpmSwal.fire({
         title: 'Simpan Draft EDPM?',
         text: 'Draft dapat dilanjutkan kapan saja.',
         icon: 'question',

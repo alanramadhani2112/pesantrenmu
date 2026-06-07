@@ -147,7 +147,7 @@
     <div x-show="showModal" x-cloak class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <form :action="isEditing ? '{{ route('accounts.update', '') }}/' + formData.id : '{{ route('accounts.store') }}'" method="POST">
+                <form :action="isEditing ? '{{ route('accounts.update', '__ID__') }}'.replace('__ID__', formData.id) : '{{ route('accounts.store') }}'" method="POST">
                     @csrf
                     <template x-if="isEditing">
                         <input type="hidden" name="_method" value="PUT">
@@ -273,7 +273,7 @@ function accountsPage() {
 
         confirmToggleStatus(userId, currentStatus, name) {
             const action = currentStatus ? 'menonaktifkan' : 'mengaktifkan';
-            Swal.fire({
+            window.SpmSwal.fire({
                 title: 'Konfirmasi',
                 text: `Apakah Anda yakin ingin ${action} akun "${name}"?`,
                 icon: 'warning',
@@ -289,7 +289,7 @@ function accountsPage() {
         },
 
         confirmDeleteUser(userId, name) {
-            Swal.fire({
+            window.SpmSwal.fire({
                 title: 'Hapus Akun?',
                 text: `Akun "${name}" akan dihapus secara permanen.`,
                 icon: 'warning',
@@ -300,14 +300,14 @@ function accountsPage() {
             }).then((result) => {
                 if (result.isConfirmed) {
                     const form = document.getElementById('delete-user-form');
-                    form.action = '{{ route('accounts.destroy', '') }}/' + userId;
+                    form.action = '{{ route('accounts.destroy', '__ID__') }}'.replace('__ID__', userId);
                     form.submit();
                 }
             });
         },
 
         confirmUnlinkSso(userId, name) {
-            Swal.fire({
+            window.SpmSwal.fire({
                 title: 'Unlink SSO?',
                 text: `SSO akan di-unlink dari akun "${name}". Akun tetap aktif tetapi tidak terhubung dengan Muhammadiyah ID.`,
                 icon: 'warning',

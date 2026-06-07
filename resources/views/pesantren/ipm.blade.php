@@ -161,7 +161,7 @@
 <script>
 document.getElementById('btnSaveIpm')?.addEventListener('click', function(e) {
     e.preventDefault();
-    Swal.fire({
+    window.SpmSwal.fire({
         title: 'Simpan Data IPM?',
         text: 'Pastikan dokumen yang diunggah sudah benar.',
         icon: 'question',

@@ -177,7 +177,7 @@
 
             confirmDelete(e) {
                 if (typeof Swal !== 'undefined') {
-                    Swal.fire({
+                    window.SpmSwal.fire({
                         title: 'Hapus role ini?',
                         text: 'Tindakan ini tidak dapat dibatalkan.',
                         icon: 'warning',

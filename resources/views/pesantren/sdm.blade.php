@@ -170,7 +170,7 @@
 <script>
 document.getElementById('btnSaveSdm')?.addEventListener('click', function(e) {
     e.preventDefault();
-    Swal.fire({
+    window.SpmSwal.fire({
         title: 'Simpan Data SDM?',
         text: 'Pastikan semua data sudah benar.',
         icon: 'question',

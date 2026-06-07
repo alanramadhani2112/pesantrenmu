@@ -249,7 +249,7 @@
 
             confirmDelete(e) {
                 if (typeof Swal !== 'undefined') {
-                    Swal.fire({
+                    window.SpmSwal.fire({
                         title: 'Hapus dokumen ini?',
                         text: 'File terkait juga akan dihapus.',
                         icon: 'warning',

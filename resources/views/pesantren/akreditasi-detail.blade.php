@@ -351,7 +351,7 @@
 <script>
 document.getElementById('btnUploadKartuKendali')?.addEventListener('click', function(e) {
     e.preventDefault();
-    Swal.fire({
+    window.SpmSwal.fire({
         title: 'Upload Kartu Kendali?',
         text: 'Pastikan file sudah sesuai.',
         icon: 'question',

@@ -348,7 +348,7 @@
 
             confirmDelete(e, message) {
                 if (typeof Swal !== 'undefined') {
-                    Swal.fire({
+                    window.SpmSwal.fire({
                         title: 'Konfirmasi',
                         text: message,
                         icon: 'warning',

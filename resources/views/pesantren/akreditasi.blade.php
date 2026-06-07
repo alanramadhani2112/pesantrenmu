@@ -276,7 +276,7 @@
 // Create akreditasi confirmation
 document.getElementById('btnCreateAkreditasi')?.addEventListener('click', function(e) {
     e.preventDefault();
-    Swal.fire({
+    window.SpmSwal.fire({
         title: 'Ajukan Akreditasi Baru?',
         text: 'Setelah diajukan, data profil, IPM, SDM, dan EDPM akan terkunci dan tidak dapat diubah.',
         icon: 'question',
@@ -296,7 +296,7 @@ document.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', function(e) {
         e.preventDefault();
         const form = this.closest('form');
-        Swal.fire({
+        window.SpmSwal.fire({
             title: 'Hapus Pengajuan?',
             text: 'Data pengajuan akan dihapus permanen.',
             icon: 'warning',
@@ -317,7 +317,7 @@ document.querySelectorAll('.btn-cancel').forEach(btn => {
     btn.addEventListener('click', function(e) {
         e.preventDefault();
         const form = this.closest('form');
-        Swal.fire({
+        window.SpmSwal.fire({
             title: 'Batalkan Pengajuan?',
             text: 'Pengajuan yang dibatalkan tidak dapat dikembalikan.',
             icon: 'warning',

@@ -174,6 +174,7 @@
     <script src="{{ asset('vendor/metronic/assets/js/scripts.bundle.js') }}"></script>
     {{-- Deferred app JS — loaded after content for faster first paint --}}
     @vite(['resources/js/app.js'])
+    @stack('scripts')
 </body>
 
 </html>

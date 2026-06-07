@@ -268,7 +268,7 @@
 
             confirmDelete(e) {
                 if (typeof Swal !== 'undefined') {
-                    Swal.fire({
+                    window.SpmSwal.fire({
                         title: 'Hapus kategori ini?',
                         text: 'Kategori yang masih memiliki dokumen tidak bisa dihapus.',
                         icon: 'warning',

@@ -451,7 +451,7 @@ function asesorProfileEdit() {
         },
 
         confirmSaveProfile(event) {
-            Swal.fire({
+            window.SpmSwal.fire({
                 title: 'Simpan Profil?',
                 text: 'Pastikan data yang Anda isi sudah benar.',
                 icon: 'question',
