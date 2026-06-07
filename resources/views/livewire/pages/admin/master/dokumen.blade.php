@@ -259,7 +259,7 @@ new #[Layout('layouts.app')] class extends Component {
                     <small class="text-muted fs-8 d-block mt-1">
                         Kategori menentukan siapa yang dapat melihat dokumen ini.
                         Atur kategori di
-                        <a href="{{ route('admin.master-kategori-dokumen') }}" class="text-primary">Master Kategori Dokumen</a>.
+                        <a href="{{ route('admin.master-kategori-dokumen.index') }}" class="text-primary">Master Kategori Dokumen</a>.
                     </small>
                 </x-ui.form-field>
 

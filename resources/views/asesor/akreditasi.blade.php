@@ -247,7 +247,7 @@
     <div x-show="showJadwalModal" x-cloak class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
-                <form method="POST" action="{{ route('asesor.schedule-visitasi') }}">
+                <form method="POST" action="{{ route('asesor.akreditasi.schedule-visitasi') }}">
                     @csrf
                     <input type="hidden" name="akreditasi_id" x-model="jadwalForm.akreditasi_id">
 
@@ -307,7 +307,7 @@
     <div x-show="showTolakModal" x-cloak class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
-                <form method="POST" action="{{ route('asesor.reject-document') }}">
+                <form method="POST" action="{{ route('asesor.akreditasi.reject-document') }}">
                     @csrf
                     <input type="hidden" name="akreditasi_id" x-model="tolakForm.akreditasi_id">
 

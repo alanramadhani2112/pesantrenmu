@@ -3,12 +3,6 @@
 @section('content')
 <x-ui.page-header title="Profil Asesor" subtitle="Kelola data profil, pengalaman, dan dokumen pendukung Anda.">
     <x-slot:toolbar>
-        <template x-if="isEditing" x-data>
-            <a href="{{ route('asesor.profile') }}" class="btn btn-light">
-                <x-ui.icon name="arrow-left" class="fs-4 me-1" />
-                Batal Edit
-            </a>
-        </template>
         @if(!request('edit'))
             <a href="{{ route('asesor.profile', ['edit' => 1]) }}" class="btn btn-primary">
                 <x-ui.icon name="pencil" class="fs-4 me-1" />
