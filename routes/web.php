@@ -6,8 +6,6 @@ use App\Http\Controllers\Admin\MasterKategoriDokumenController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\DashboardController;
-use App\Livewire\Pages\Admin\FailedNotificationDashboard;
-use App\Livewire\Pages\Asesor\AkreditasiDetail;
 use App\Models\Asesor;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -199,9 +197,15 @@ Route::middleware(['auth', 'verified', 'role:admin'])
             ->middleware('permission:pesantren.view')
             ->name('pesantren.export');
 
-        Route::get('failed-notifications', FailedNotificationDashboard::class)
+        Route::get('failed-notifications', [App\Http\Controllers\Admin\FailedNotificationController::class, 'index'])
             ->middleware('permission:notification.view')
             ->name('failed-notifications');
+        Route::post('failed-notifications/{id}/retry', [App\Http\Controllers\Admin\FailedNotificationController::class, 'retry'])
+            ->middleware('permission:notification.view')
+            ->name('failed-notifications.retry');
+        Route::post('failed-notifications/{id}/dismiss', [App\Http\Controllers\Admin\FailedNotificationController::class, 'dismiss'])
+            ->middleware('permission:notification.view')
+            ->name('failed-notifications.dismiss');
 
         Route::get('trash', [App\Http\Controllers\Admin\TrashController::class, 'index'])
             ->middleware('permission:trash.view')
@@ -240,8 +244,26 @@ Route::middleware(['auth', 'verified', 'role:asesor'])
         Route::post('akreditasi/reject-document', [App\Http\Controllers\Asesor\AkreditasiController::class, 'rejectDocument'])
             ->name('akreditasi.reject-document');
 
-        Route::get('akreditasi/{uuid}', AkreditasiDetail::class)
+        Route::get('akreditasi/{uuid}', [App\Http\Controllers\Asesor\AkreditasiController::class, 'show'])
             ->name('akreditasi-detail');
+
+        // Akreditasi Detail actions
+        Route::post('akreditasi/save-edpm', [App\Http\Controllers\Asesor\AkreditasiController::class, 'saveEdpm'])
+            ->name('akreditasi.save-edpm');
+        Route::post('akreditasi/accept-perbaikan', [App\Http\Controllers\Asesor\AkreditasiController::class, 'acceptPerbaikan'])
+            ->name('akreditasi.accept-perbaikan');
+        Route::post('akreditasi/confirm-visitasi-selesai', [App\Http\Controllers\Asesor\AkreditasiController::class, 'confirmVisitasiSelesai'])
+            ->name('akreditasi.confirm-visitasi-selesai');
+        Route::post('akreditasi/finalize-scoring', [App\Http\Controllers\Asesor\AkreditasiController::class, 'finalizeScoring'])
+            ->name('akreditasi.finalize-scoring');
+        Route::post('akreditasi/save-na', [App\Http\Controllers\Asesor\AkreditasiController::class, 'saveNaValue'])
+            ->name('akreditasi.save-na');
+        Route::post('akreditasi/save-nk', [App\Http\Controllers\Asesor\AkreditasiController::class, 'saveNkValue'])
+            ->name('akreditasi.save-nk');
+        Route::post('akreditasi/upload-laporan-individu', [App\Http\Controllers\Asesor\AkreditasiController::class, 'uploadLaporanIndividu'])
+            ->name('akreditasi.upload-laporan-individu');
+        Route::post('akreditasi/upload-laporan-kelompok', [App\Http\Controllers\Asesor\AkreditasiController::class, 'uploadLaporanKelompok'])
+            ->name('akreditasi.upload-laporan-kelompok');
     });
 
 /*
