@@ -1,5 +1,5 @@
 @props([
-    'title',
+    'title' => '',
     'subtitle' => null,
     'icon' => null,
     'variant' => 'primary',
