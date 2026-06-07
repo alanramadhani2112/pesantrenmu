@@ -14,8 +14,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class PermissionAuditLog extends Model
 {
-    /** No updated_at column — this table only has created_at. */
-    public $timestamps = false;
+    /** No updated_at column — this table only has created_at (auto-filled). */
+    const UPDATED_AT = null;
 
     protected $guarded = ['id'];
 
