@@ -1,5 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\MasterDokumenController;
+use App\Http\Controllers\Admin\MasterEdpmController;
+use App\Http\Controllers\Admin\MasterKategoriDokumenController;
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\DashboardController;
 use App\Livewire\Pages\Admin\FailedNotificationDashboard;
 use App\Livewire\Pages\Asesor\AkreditasiDetail;
@@ -23,9 +28,15 @@ Route::middleware('auth')->prefix('profile')->name('profile.')->group(function (
     Route::delete('/photo', [\App\Http\Controllers\ProfileController::class, 'removePhoto'])->name('photo.remove');
 });
 
-Volt::route('roles', 'pages.roles.index')
-    ->middleware(['auth', 'verified', 'permission:master.role'])
-    ->name('roles.index');
+Route::middleware(['auth', 'verified', 'permission:master.role'])
+    ->prefix('admin/roles')
+    ->name('admin.roles.')
+    ->group(function () {
+        Route::get('/', [RoleController::class, 'index'])->name('index');
+        Route::post('/', [RoleController::class, 'store'])->name('store');
+        Route::put('/{id}', [RoleController::class, 'update'])->name('update');
+        Route::delete('/{id}', [RoleController::class, 'destroy'])->name('destroy');
+    });
 
 Volt::route('accounts', 'pages.accounts.index')
     ->middleware(['auth', 'verified', 'permission:account.view'])
@@ -48,57 +59,154 @@ Route::middleware(['auth', 'verified', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Volt::route('master-edpm', 'pages.admin.master-edpm')
+        // Master EDPM
+        Route::get('master-edpm', [MasterEdpmController::class, 'index'])
             ->middleware('permission:master.edpm')
             ->name('master-edpm');
+        Route::post('master-edpm/komponen', [MasterEdpmController::class, 'storeKomponen'])
+            ->middleware('permission:master.edpm')
+            ->name('master-edpm.komponen.store');
+        Route::put('master-edpm/komponen/{id}', [MasterEdpmController::class, 'updateKomponen'])
+            ->middleware('permission:master.edpm')
+            ->name('master-edpm.komponen.update');
+        Route::delete('master-edpm/komponen/{id}', [MasterEdpmController::class, 'destroyKomponen'])
+            ->middleware('permission:master.edpm')
+            ->name('master-edpm.komponen.destroy');
+        Route::post('master-edpm/butir', [MasterEdpmController::class, 'storeButir'])
+            ->middleware('permission:master.edpm')
+            ->name('master-edpm.butir.store');
+        Route::put('master-edpm/butir/{id}', [MasterEdpmController::class, 'updateButir'])
+            ->middleware('permission:master.edpm')
+            ->name('master-edpm.butir.update');
+        Route::delete('master-edpm/butir/{id}', [MasterEdpmController::class, 'destroyButir'])
+            ->middleware('permission:master.edpm')
+            ->name('master-edpm.butir.destroy');
 
-        Volt::route('master-kategori-dokumen', 'pages.admin.master.kategori-dokumen')
+        // Master Kategori Dokumen
+        Route::get('master-kategori-dokumen', [MasterKategoriDokumenController::class, 'index'])
             ->middleware('permission:master.kategori')
-            ->name('master-kategori-dokumen');
+            ->name('master-kategori-dokumen.index');
+        Route::post('master-kategori-dokumen', [MasterKategoriDokumenController::class, 'store'])
+            ->middleware('permission:master.kategori')
+            ->name('master-kategori-dokumen.store');
+        Route::put('master-kategori-dokumen/{category}', [MasterKategoriDokumenController::class, 'update'])
+            ->middleware('permission:master.kategori')
+            ->name('master-kategori-dokumen.update');
+        Route::delete('master-kategori-dokumen/{category}', [MasterKategoriDokumenController::class, 'destroy'])
+            ->middleware('permission:master.kategori')
+            ->name('master-kategori-dokumen.destroy');
 
-        Volt::route('master-document', 'pages.admin.master.dokumen')
+        // Master Dokumen
+        Route::get('master-dokumen', [MasterDokumenController::class, 'index'])
             ->middleware('permission:master.dokumen')
-            ->name('master-dokumen');
+            ->name('master-dokumen.index');
+        Route::post('master-dokumen', [MasterDokumenController::class, 'store'])
+            ->middleware('permission:master.dokumen')
+            ->name('master-dokumen.store');
+        Route::put('master-dokumen/{id}', [MasterDokumenController::class, 'update'])
+            ->middleware('permission:master.dokumen')
+            ->name('master-dokumen.update');
+        Route::delete('master-dokumen/{id}', [MasterDokumenController::class, 'destroy'])
+            ->middleware('permission:master.dokumen')
+            ->name('master-dokumen.destroy');
 
-        Volt::route('master-role-permission', 'pages.admin.master.role-permission')
+        // Role Permission Matrix
+        Route::get('master-role-permission', [RolePermissionController::class, 'index'])
             ->middleware('permission:master.role')
-            ->name('master-role-permission');
+            ->name('role-permission.index');
+        Route::post('master-role-permission', [RolePermissionController::class, 'save'])
+            ->middleware('permission:master.role')
+            ->name('role-permission.save');
 
-        Volt::route('akreditasi', 'pages.admin.akreditasi')
+        // Akreditasi
+        Route::get('akreditasi', [App\Http\Controllers\Admin\AkreditasiController::class, 'index'])
             ->name('akreditasi');
+        Route::post('akreditasi/catatan-modal', [App\Http\Controllers\Admin\AkreditasiController::class, 'catatanModal'])
+            ->name('akreditasi.catatan-modal');
+        Route::delete('akreditasi', [App\Http\Controllers\Admin\AkreditasiController::class, 'delete'])
+            ->name('akreditasi.delete');
+        Route::post('akreditasi/export', [App\Http\Controllers\Admin\AkreditasiController::class, 'export'])
+            ->name('akreditasi.export');
 
-        Volt::route('akreditasi/{uuid}', 'pages.admin.akreditasi-detail')
+        Route::get('akreditasi/{uuid}', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'show'])
             ->name('akreditasi-detail');
+        Route::post('akreditasi/{uuid}/reschedule-visitasi', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'rescheduleVisitasi'])
+            ->name('akreditasi-detail.reschedule-visitasi');
+        Route::post('akreditasi/{uuid}/reassign-asesor', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'reassignAsesor'])
+            ->name('akreditasi-detail.reassign-asesor');
+        Route::post('akreditasi/{uuid}/save-nv', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'saveAdminNv'])
+            ->name('akreditasi-detail.save-nv');
+        Route::post('akreditasi/{uuid}/finalize-nv', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'finalizeAllNv'])
+            ->name('akreditasi-detail.finalize-nv');
+        Route::post('akreditasi/{uuid}/toggle-lock', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'toggleLock'])
+            ->name('akreditasi-detail.toggle-lock');
+        Route::post('akreditasi/{uuid}/approve-berkas', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'approveBerkas'])
+            ->name('akreditasi-detail.approve-berkas');
+        Route::post('akreditasi/{uuid}/reject-berkas', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'rejectBerkas'])
+            ->name('akreditasi-detail.reject-berkas');
+        Route::post('akreditasi/{uuid}/approve', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'approve'])
+            ->name('akreditasi-detail.approve');
+        Route::post('akreditasi/{uuid}/reject', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'reject'])
+            ->name('akreditasi-detail.reject');
+        Route::post('akreditasi/{uuid}/open-for-review', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'openForReview'])
+            ->name('akreditasi-detail.open-for-review');
 
-        Volt::route('asesor', 'pages.admin.asesor.index')
+        Route::get('asesor', [App\Http\Controllers\Admin\AsesorController::class, 'index'])
             ->name('asesor.index');
-
-        Volt::route('asesor/{uuid}', 'pages.admin.asesor.detail')
+        Route::get('asesor/{uuid}', [App\Http\Controllers\Admin\AsesorController::class, 'show'])
             ->name('asesor.detail');
+        Route::post('asesor/toggle-status', [App\Http\Controllers\Admin\AsesorController::class, 'toggleStatus'])
+            ->name('asesor.toggle-status');
+        Route::post('asesor/export', [App\Http\Controllers\Admin\AsesorController::class, 'export'])
+            ->name('asesor.export');
 
-        Volt::route('banding', 'pages.admin.banding')
+        // Banding
+        Route::get('banding', [App\Http\Controllers\Admin\BandingController::class, 'index'])
             ->middleware('permission:banding.view')
             ->name('banding');
 
-        Volt::route('banding/{id}', 'pages.admin.banding-detail')
+        Route::get('banding/{id}', [App\Http\Controllers\Admin\BandingDetailController::class, 'show'])
             ->middleware('permission:banding.view')
             ->name('banding-detail');
+        Route::post('banding/{id}/assign-reviewer', [App\Http\Controllers\Admin\BandingDetailController::class, 'assignReviewer'])
+            ->middleware('permission:banding.view')
+            ->name('banding.assign-reviewer');
+        Route::post('banding/{id}/reassign-reviewer', [App\Http\Controllers\Admin\BandingDetailController::class, 'reassignReviewer'])
+            ->middleware('permission:banding.view')
+            ->name('banding.reassign-reviewer');
+        Route::post('banding/{id}/submit-decision', [App\Http\Controllers\Admin\BandingDetailController::class, 'submitDecision'])
+            ->middleware('permission:banding.view')
+            ->name('banding.submit-decision');
 
-        Volt::route('pesantren', 'pages.admin.pesantren.index')
+        Route::get('pesantren', [App\Http\Controllers\Admin\PesantrenController::class, 'index'])
             ->middleware('permission:pesantren.view')
             ->name('pesantren.index');
-
-        Volt::route('pesantren/{uuid}', 'pages.admin.pesantren.detail')
+        Route::get('pesantren/{uuid}', [App\Http\Controllers\Admin\PesantrenController::class, 'show'])
             ->middleware('permission:pesantren.view')
             ->name('pesantren.detail');
+        Route::post('pesantren/toggle-lock', [App\Http\Controllers\Admin\PesantrenController::class, 'toggleLock'])
+            ->middleware('permission:pesantren.lock')
+            ->name('pesantren.toggle-lock');
+        Route::post('pesantren/export', [App\Http\Controllers\Admin\PesantrenController::class, 'export'])
+            ->middleware('permission:pesantren.view')
+            ->name('pesantren.export');
 
         Route::get('failed-notifications', FailedNotificationDashboard::class)
             ->middleware('permission:notification.view')
             ->name('failed-notifications');
 
-        Volt::route('trash', 'pages.admin.trash')
+        Route::get('trash', [App\Http\Controllers\Admin\TrashController::class, 'index'])
             ->middleware('permission:trash.view')
             ->name('trash');
+        Route::get('trash/preview/{id}', [App\Http\Controllers\Admin\TrashController::class, 'restorePreview'])
+            ->middleware('permission:trash.view')
+            ->name('trash.preview');
+        Route::post('trash/restore', [App\Http\Controllers\Admin\TrashController::class, 'restore'])
+            ->middleware('permission:trash.view')
+            ->name('trash.restore');
+        Route::post('trash/force-delete', [App\Http\Controllers\Admin\TrashController::class, 'forceDelete'])
+            ->middleware('permission:trash.view')
+            ->name('trash.force-delete');
     });
 
 /*
