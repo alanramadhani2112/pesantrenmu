@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\Home;
+use App\Http\Controllers\DashboardController;
 use App\Livewire\Pages\Admin\FailedNotificationDashboard;
 use App\Livewire\Pages\Asesor\AkreditasiDetail;
 use App\Models\Asesor;
@@ -11,7 +11,7 @@ use Livewire\Volt\Volt;
 
 Route::view('/', 'welcome');
 
-Route::get('dashboard', Home::class)
+Route::get('dashboard', DashboardController::class)
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
@@ -223,6 +223,22 @@ Route::middleware(['auth', 'verified', 'role:pesantren'])
         Route::view('panduan-pesantren', 'panduan.pesantren')->name('panduan.pesantren');
     });
 
+/*
+|--------------------------------------------------------------------------
+| Internal API (session-auth, JSON responses)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->prefix('_api')->name('api.')->group(function () {
+    Route::get('/sidebar-badges', [\App\Http\Controllers\Api\LayoutDataController::class, 'sidebarBadges'])->name('sidebar-badges');
+    Route::get('/notifications', [\App\Http\Controllers\Api\LayoutDataController::class, 'notifications'])->name('notifications');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\LayoutDataController::class, 'markNotificationRead'])->name('notifications.read');
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\Api\LayoutDataController::class, 'markAllNotificationsRead'])->name('notifications.mark-all-read');
+
+    Route::get('/onboarding/status', [\App\Http\Controllers\Api\OnboardingController::class, 'status'])->name('onboarding.status');
+    Route::post('/onboarding/navigate', [\App\Http\Controllers\Api\OnboardingController::class, 'navigateToStep'])->name('onboarding.navigate');
+    Route::post('/onboarding/skip', [\App\Http\Controllers\Api\OnboardingController::class, 'skip'])->name('onboarding.skip');
+    Route::post('/onboarding/complete', [\App\Http\Controllers\Api\OnboardingController::class, 'complete'])->name('onboarding.complete');
+});
 
 require __DIR__.'/auth.php';
 require __DIR__.'/sso/sso.php';

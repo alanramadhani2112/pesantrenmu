@@ -224,7 +224,4 @@
     </div>
 
     </div>
-
-    {{-- SidebarBadges Livewire component for dynamic badge count updates --}}
-    <livewire:layout.sidebar-badges />
 </div>

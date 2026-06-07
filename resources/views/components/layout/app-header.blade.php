@@ -52,7 +52,7 @@
 
         <div class="app-navbar d-flex align-items-stretch flex-shrink-0" id="kt_app_header_navbar">
             <div class="app-navbar-item d-flex align-items-center ms-1 ms-md-3">
-                <livewire:layout.notification-menu />
+                @include('components.layout.notification-menu')
             </div>
 
             {{-- User Avatar + Dropdown --}}

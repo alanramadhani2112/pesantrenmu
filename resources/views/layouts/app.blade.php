@@ -135,13 +135,17 @@
             />
 
             <div class="app-wrapper flex-column flex-row-fluid" id="kt_app_wrapper">
-                <livewire:layout.navigation />
+                <x-layout.app-sidebar :current-user="auth()->user()" :role-name="auth()->user()?->role?->name ?? 'user'" />
 
                 <div class="app-main flex-column flex-row-fluid" id="kt_app_main">
                     <div class="d-flex flex-column flex-column-fluid">
                         <main id="kt_app_content" class="app-content flex-column-fluid spm-main-content">
                             <div id="kt_app_content_container" class="app-container container-fluid">
-                                {{ $slot }}
+                                @hasSection('content')
+                                    @yield('content')
+                                @else
+                                    {{ $slot }}
+                                @endif
                             </div>
                         </main>
                     </div>
