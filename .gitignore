@@ -32,7 +32,7 @@ spm.sql
 .kiro/
 .audit-findings/
 .playwright-mcp/
-.sisyphus/run-continuation/
+.sisyphus/
 *.png
 !public/images/landing/akreditasi-hero.png
 !public/images/brand/labmu-logo.png
