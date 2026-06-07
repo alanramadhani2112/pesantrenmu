@@ -25,7 +25,11 @@
                 </a>
 
                 <div class="spm-auth-card">
-                    {{ $slot }}
+                    @hasSection('content')
+                        @yield('content')
+                    @else
+                        {{ $slot ?? '' }}
+                    @endif
                 </div>
 
                 <div class="text-center mt-7">
