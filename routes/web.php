@@ -38,11 +38,19 @@ Route::middleware(['auth', 'verified', 'permission:master.role'])
         Route::delete('/{id}', [RoleController::class, 'destroy'])->name('destroy');
     });
 
-Volt::route('accounts', 'pages.accounts.index')
-    ->middleware(['auth', 'verified', 'permission:account.view'])
-    ->name('accounts.index');
+Route::middleware(['auth', 'verified', 'permission:account.view'])
+    ->prefix('accounts')
+    ->name('accounts.')
+    ->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\AccountController::class, 'index'])->name('index');
+        Route::post('/', [App\Http\Controllers\Admin\AccountController::class, 'store'])->name('store');
+        Route::put('/{id}', [App\Http\Controllers\Admin\AccountController::class, 'update'])->name('update');
+        Route::delete('/{id}', [App\Http\Controllers\Admin\AccountController::class, 'destroy'])->name('destroy');
+        Route::post('/toggle-status', [App\Http\Controllers\Admin\AccountController::class, 'toggleStatus'])->name('toggle-status');
+        Route::post('/unlink-sso', [App\Http\Controllers\Admin\AccountController::class, 'unlinkSso'])->name('unlink-sso');
+    });
 
-Volt::route('documents/{doc?}', 'pages.dokumen.index')
+Route::get('documents/{doc?}', [App\Http\Controllers\DocumentController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('documents.index');
 
@@ -218,11 +226,19 @@ Route::middleware(['auth', 'verified', 'role:asesor'])
     ->prefix('asesor')
     ->name('asesor.')
     ->group(function () {
-        Volt::route('profile', 'pages.asesor.profile')
+        Route::get('profile', [App\Http\Controllers\Asesor\ProfileController::class, 'show'])
             ->name('profile');
+        Route::post('profile', [App\Http\Controllers\Asesor\ProfileController::class, 'update'])
+            ->name('profile.update');
 
-        Volt::route('akreditasi', 'pages.asesor.akreditasi')
+        Route::get('akreditasi', [App\Http\Controllers\Asesor\AkreditasiController::class, 'index'])
             ->name('akreditasi');
+        Route::get('akreditasi/catatan/{id}', [App\Http\Controllers\Asesor\AkreditasiController::class, 'showCatatan'])
+            ->name('akreditasi.catatan');
+        Route::post('akreditasi/schedule-visitasi', [App\Http\Controllers\Asesor\AkreditasiController::class, 'scheduleVisitasi'])
+            ->name('akreditasi.schedule-visitasi');
+        Route::post('akreditasi/reject-document', [App\Http\Controllers\Asesor\AkreditasiController::class, 'rejectDocument'])
+            ->name('akreditasi.reject-document');
 
         Route::get('akreditasi/{uuid}', AkreditasiDetail::class)
             ->name('akreditasi-detail');
@@ -237,23 +253,47 @@ Route::middleware(['auth', 'verified', 'role:pesantren'])
     ->prefix('pesantren')
     ->name('pesantren.')
     ->group(function () {
-        Volt::route('profile', 'pages.pesantren.profile')
+        Route::get('profile', [App\Http\Controllers\Pesantren\ProfileController::class, 'show'])
             ->name('profile');
+        Route::post('profile/draft', [App\Http\Controllers\Pesantren\ProfileController::class, 'saveDraft'])
+            ->name('profile.save-draft');
+        Route::post('profile', [App\Http\Controllers\Pesantren\ProfileController::class, 'save'])
+            ->name('profile.save');
 
-        Volt::route('ipm', 'pages.pesantren.ipm')
+        Route::get('ipm', [App\Http\Controllers\Pesantren\IpmController::class, 'show'])
             ->name('ipm');
+        Route::post('ipm', [App\Http\Controllers\Pesantren\IpmController::class, 'update'])
+            ->name('ipm.update');
 
-        Volt::route('sdm', 'pages.pesantren.sdm')
+        Route::get('sdm', [App\Http\Controllers\Pesantren\SdmController::class, 'show'])
             ->name('sdm');
+        Route::post('sdm', [App\Http\Controllers\Pesantren\SdmController::class, 'save'])
+            ->name('sdm.save');
 
-        Volt::route('edpm', 'pages.pesantren.edpm')
+        Route::get('edpm', [App\Http\Controllers\Pesantren\EdpmController::class, 'show'])
             ->name('edpm');
+        Route::post('edpm', [App\Http\Controllers\Pesantren\EdpmController::class, 'save'])
+            ->name('edpm.save');
+        Route::post('edpm/draft', [App\Http\Controllers\Pesantren\EdpmController::class, 'saveDraft'])
+            ->name('edpm.save-draft');
 
-        Volt::route('akreditasi', 'pages.pesantren.akreditasi')
+        Route::get('akreditasi', [App\Http\Controllers\Pesantren\AkreditasiController::class, 'index'])
             ->name('akreditasi');
+        Route::post('akreditasi/create', [App\Http\Controllers\Pesantren\AkreditasiController::class, 'create'])
+            ->name('akreditasi.create');
+        Route::post('akreditasi/delete', [App\Http\Controllers\Pesantren\AkreditasiController::class, 'delete'])
+            ->name('akreditasi.delete');
+        Route::post('akreditasi/cancel', [App\Http\Controllers\Pesantren\AkreditasiController::class, 'cancel'])
+            ->name('akreditasi.cancel');
+        Route::post('akreditasi/banding', [App\Http\Controllers\Pesantren\AkreditasiController::class, 'banding'])
+            ->name('akreditasi.banding');
+        Route::get('akreditasi/catatan/{id}', [App\Http\Controllers\Pesantren\AkreditasiController::class, 'showCatatan'])
+            ->name('akreditasi.catatan');
 
-        Volt::route('akreditasi/{uuid}', 'pages.pesantren.akreditasi-detail')
+        Route::get('akreditasi/{uuid}', [App\Http\Controllers\Pesantren\AkreditasiDetailController::class, 'show'])
             ->name('akreditasi-detail');
+        Route::post('akreditasi/upload-kartu-kendali', [App\Http\Controllers\Pesantren\AkreditasiDetailController::class, 'uploadKartuKendali'])
+            ->name('akreditasi.upload-kartu-kendali');
     });
 
 /*
