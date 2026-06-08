@@ -17,7 +17,7 @@
     </x-slot:toolbar>
 </x-ui.page-header>
 
-{{-- Profile Photo Upload (inline, no Livewire) --}}
+{{-- Profile Photo Upload (inline Blade form) --}}
 <x-ui.section-card title="Foto Profil" subtitle="Unggah foto profil akun Anda. Maksimal 2MB, format JPG/PNG." class="mb-6">
     <div class="p-6">
         <form method="POST" action="{{ route('profile.photo') }}" enctype="multipart/form-data"

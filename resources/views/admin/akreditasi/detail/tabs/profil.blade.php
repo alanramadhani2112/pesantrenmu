@@ -1,3 +1,7 @@
+@php
+    use App\StateMachine\AkreditasiStateMachine;
+@endphp
+
 @if ($activeTab === 'profil')
     <div class="d-flex flex-column gap-6">
         <x-ui.section-card title="Profil Pesantren" subtitle="Identitas pesantren dan status akses data.">

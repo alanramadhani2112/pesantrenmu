@@ -6,7 +6,7 @@ use App\Models\Akreditasi;
 use App\Services\RejectionService;
 
 /**
- * Trait for Livewire/Volt components to check section lock status
+ * Trait for Blade-backed controllers/components to check section lock status
  * with partial unlock support from the structured rejection flow.
  *
  * A section is editable if EITHER:

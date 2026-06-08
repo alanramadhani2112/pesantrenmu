@@ -1,3 +1,7 @@
+@php
+    use App\StateMachine\AkreditasiStateMachine;
+@endphp
+
 @if($activeTab === 'laporan_visitasi')
     <div class="d-flex flex-column gap-6">
         {{-- Post-Visitasi Document Checklist --}}

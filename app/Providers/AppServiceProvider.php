@@ -116,15 +116,15 @@ class AppServiceProvider extends ServiceProvider
         // Production hardening: rate limiting (2026-06-04)
         // =================================================================
 
-        // Livewire state updates — 120 req/min per user (cukup untuk
+        // UI state update requests — 120 req/min per user (cukup untuk
         // interaksi normal, cukup rendah untuk mencegah brute-force).
-        RateLimiter::for('livewire', function (Request $request) {
+        RateLimiter::for('ui-state', function (Request $request) {
             return Limit::perMinute(120)->by(
                 $request->user()?->id ?: $request->ip()
             );
         });
 
-        // File upload via Livewire — 20 req/min per user.
+        // File upload requests — 20 req/min per user.
         RateLimiter::for('uploads', function (Request $request) {
             return Limit::perMinute(20)->by(
                 $request->user()?->id ?: $request->ip()

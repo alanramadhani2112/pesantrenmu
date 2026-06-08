@@ -18,16 +18,16 @@ return [
     /*
      * Production hardening (CMS-2026-06-04).
      *
-     * Tidak ada REST API di aplikasi ini. CORS dikonfigurasi untuk Livewire
-     * asset + CSRF cookie saja. allowed_origins diambil dari APP_URL di .env
-     * supaya tidak hardcode domain dan tetap berfungsi di environment berbeda
-     * (local, staging, production).
+     * Tidak ada REST API publik di aplikasi ini. CORS dipertahankan minimal
+     * untuk endpoint framework terkait CSRF/session. allowed_origins diambil
+     * dari APP_URL di .env supaya tidak hardcode domain dan tetap berfungsi
+     * di environment berbeda (local, staging, production).
      *
-     * supports_credentials = true diperlukan untuk Livewire CSRF + session
-     * cookie agar dikirim oleh browser di cross-origin redirect flow (SSO).
+     * supports_credentials = true diperlukan agar CSRF + session cookie tetap
+     * dapat dikirim browser pada flow redirect lintas-origin (mis. SSO).
      */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie', 'livewire/*'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
     'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 
@@ -35,7 +35,7 @@ return [
 
     'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['Content-Type', 'X-Requested-With', 'X-CSRF-TOKEN', 'X-Livewire', 'Authorization', 'Accept'],
+    'allowed_headers' => ['Content-Type', 'X-Requested-With', 'X-CSRF-TOKEN', 'Authorization', 'Accept'],
 
     'exposed_headers' => [],
 

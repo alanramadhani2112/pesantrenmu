@@ -1,10 +1,10 @@
 /**
- * Alpine.js client-side form validation — supplements Livewire server-side validation.
+ * Alpine.js client-side form validation — supplements Laravel server-side validation.
  *
  * Usage:
- *   <form x-data="formValidation" wire:submit="login">
+ *   <form x-data="formValidation" method="POST">
  *     <div class="fv-row" data-validate="required|email">
- *       <input type="email" wire:model="form.email" ...>
+ *       <input type="email" name="email" ...>
  *     </div>
  *   </form>
  *

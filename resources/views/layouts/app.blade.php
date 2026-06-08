@@ -13,12 +13,10 @@
     <link rel="preconnect" href="{{ url('/') }}" crossorigin>
 
     <!-- Styles -->
-    @livewireStyles
     {{-- Defer non-critical Metronic shell CSS to prevent render blocking. --}}
     <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}" media="print" onload="this.media='all'">
     {{-- Critical app CSS loaded normally --}}
-    @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css'])
-    @livewireScriptConfig
+    @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css', 'resources/js/app.js'])
 </head>
 
 <body

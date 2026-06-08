@@ -239,7 +239,7 @@
 <script>
 function accountsPage() {
     return {
-        showModal: {{ $errors->any() ? 'true' : 'false' }},
+        showModal: {{ old('_token') !== null ? 'true' : 'false' }},
         isEditing: {{ old('_method') === 'PUT' ? 'true' : 'false' }},
         formData: {
             id: '{{ old('id', '') }}',

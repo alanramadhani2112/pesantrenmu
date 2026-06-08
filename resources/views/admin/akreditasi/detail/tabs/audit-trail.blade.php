@@ -32,7 +32,7 @@
         </div>
     </div>
 
-    {{-- Filter Controls (GET form replaces Livewire wire:model.live) --}}
+    {{-- Filter Controls (GET form) --}}
     <x-ui.section-card title="Filter Riwayat" subtitle="Saring berdasarkan tipe aksi, aktor, atau rentang tanggal." class="spm-audit-filter-card">
         <div class="p-5">
             <form method="GET" action="{{ request()->url() }}">

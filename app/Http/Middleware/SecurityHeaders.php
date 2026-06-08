@@ -11,14 +11,14 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * Menambahkan security headers dasar ke setiap response HTML.
  * Headers di-skip untuk asset / file binary supaya download kartu kendali,
- * sertifikat PDF, dan upload Livewire tetap berjalan normal.
+ * sertifikat PDF, dan upload file/form tetap berjalan normal.
  *
  * Content-Security-Policy:
  * - default-src 'self': semua resource harus dari origin yang sama
- * - script-src: 'unsafe-eval' + 'wasm-unsafe-eval' untuk Alpine.js/Livewire
- *   runtime. Idealnya pakai nonce-based CSP tapi itu butuh integrasi
- *   Laravel CSP middleware nonce generator + Livewire nonce capture,
- *   yang akan dikerjakan di follow-up PR peningkatan ke strict CSP.
+ * - script-src: 'unsafe-eval' + 'wasm-unsafe-eval' untuk runtime Alpine.js
+ *   dan library frontend lain yang masih memerlukannya. Idealnya pakai
+ *   nonce-based CSP, yang akan dikerjakan di follow-up PR peningkatan
+ *   ke strict CSP.
  * - object-src 'none': blokir semua plugin (Flash, Java, ActiveX)
  * - frame-ancestors 'self': clickjacking protection (lebih kuat dari X-Frame-Options)
  * - form-action 'self': cegah form hijacking
@@ -56,11 +56,11 @@ class SecurityHeaders
         }
 
         // Content-Security-Policy: baseline proteksi XSS/data injection.
-        // 'unsafe-eval' untuk Alpine.js + Livewire runtime. Upgrade ke strict nonce
-        // CSP akan dikerjakan di follow-up PR setelah integrasi CSP middleware.
+        // 'unsafe-eval' masih dipakai oleh runtime Alpine.js / vendor frontend tertentu.
+        // Upgrade ke strict nonce CSP akan dikerjakan di follow-up PR.
         // 'unsafe-inline' pada script-src diperlukan untuk:
         // - CloudFlare rocket-loader (inject inline script) — production
-        // - Livewire wire:init / x-init inline expressions
+        // - Alpine x-init / x-data inline expressions
         // static.cloudflareinsights.com untuk CloudFlare Web Analytics beacon.
         $csp = "default-src 'self'; ".
                "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://static.cloudflareinsights.com; ".

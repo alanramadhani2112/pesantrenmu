@@ -1,4 +1,4 @@
-{{-- Notification menu - Alpine + fetch replacement for Livewire component --}}
+{{-- Notification menu - Alpine + fetch implementation --}}
 <div class="position-relative"
      x-data="notificationMenu()"
      @click.away="open = false"

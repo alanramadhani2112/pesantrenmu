@@ -146,7 +146,7 @@ class AkreditasiDetailController extends Controller
             'musyrif_l', 'musyrif_p', 'tendik_l', 'tendik_p',
         ];
 
-        // Compute SDM totals (replaces Volt's getTotal())
+        // Compute SDM totals
         $sdmTotals = [];
         foreach ($fields as $field) {
             $sdmTotals[$field] = 0;

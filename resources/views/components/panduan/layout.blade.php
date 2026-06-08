@@ -16,10 +16,8 @@
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand/favicon.svg') }}">
     <link rel="preload" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}" as="style">
 
-    @livewireStyles
     <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}" media="print" onload="this.media='all'">
     @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css', 'resources/js/app.js'])
-    @livewireScriptConfig
 </head>
 
 <body class="app-default font-sans antialiased text-gray-900" data-bs-theme="light">
