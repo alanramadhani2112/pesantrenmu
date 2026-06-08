@@ -10,7 +10,6 @@ use App\Models\Asesor;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
-use Livewire\Volt\Volt;
 
 Route::view('/', 'welcome');
 
@@ -58,8 +57,8 @@ Route::get('documents/{doc?}', [App\Http\Controllers\DocumentController::class, 
 |--------------------------------------------------------------------------
 | Group khusus untuk role `admin`. Middleware `role:admin` (alias didaftar
 | di bootstrap/app.php) memberikan defense-in-depth lapis pertama, sehingga
-| user dengan role lain langsung di-abort 403 sebelum masuk komponen
-| Livewire (lihat design.md Stream 3.1).
+ | user dengan role lain langsung di-abort 403 sebelum masuk controller
+ | (lihat design.md Stream 3.1).
 */
 Route::middleware(['auth', 'verified', 'role:admin'])
     ->prefix('admin')
