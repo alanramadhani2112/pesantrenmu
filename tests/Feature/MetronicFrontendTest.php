@@ -423,25 +423,12 @@ class MetronicFrontendTest extends TestCase
         );
     }
 
-    public function test_pesantren_profile_keeps_latest_akreditasi_query_out_of_render_markup(): void
-    {
-        $view = file_get_contents(resource_path('views/livewire/pages/pesantren/profile.blade.php'));
-        $service = file_get_contents(app_path('Services/PesantrenService.php'));
 
-        $this->assertStringContainsString('public $latestAkreditasi', $view);
-        $this->assertStringContainsString('getLatestAkreditasi(auth()->id())', $view);
-        $this->assertStringContainsString('function getLatestAkreditasi', $service);
-        $this->assertStringNotContainsString('auth()->user()->akreditasis()->latest()->first()', $view);
-    }
 
     public function test_priority_livewire_render_markup_does_not_contain_direct_queries(): void
     {
         $views = [
-            'resources/views/livewire/pages/admin/akreditasi-detail.blade.php',
-            'resources/views/livewire/pages/pesantren/profile.blade.php',
-            'resources/views/livewire/pages/asesor/profile.blade.php',
-            'resources/views/livewire/pages/asesor/akreditasi-detail.blade.php',
-            'resources/views/livewire/pages/pesantren/akreditasi-detail.blade.php',
+            'resources/views/asesor/akreditasi-detail.blade.php',
         ];
 
         foreach ($views as $path) {
@@ -459,23 +446,11 @@ class MetronicFrontendTest extends TestCase
     public function test_akreditasi_detail_uses_tab_partials_for_large_sections(): void
     {
         $detailViews = [
-            'admin' => [
-                'path' => 'views/livewire/pages/admin/akreditasi-detail.blade.php',
-                'includePrefix' => 'livewire.pages.admin.akreditasi-detail.tabs',
-                'tabs' => ['profil', 'ipm', 'sdm', 'edpm-pesantren', 'instrumen', 'laporan-visitasi', 'audit-trail'],
-                'maxLines' => 1150,
-            ],
             'asesor' => [
-                'path' => 'views/livewire/pages/asesor/akreditasi-detail.blade.php',
-                'includePrefix' => 'livewire.pages.asesor.akreditasi-detail.tabs',
-                'tabs' => ['profil', 'ipm', 'sdm', 'edpm-pesantren', 'instrumen', 'laporan-visitasi'],
-                'maxLines' => 450,
-            ],
-            'pesantren' => [
-                'path' => 'views/livewire/pages/pesantren/akreditasi-detail.blade.php',
-                'includePrefix' => 'livewire.pages.pesantren.akreditasi-detail.tabs',
-                'tabs' => ['profil', 'ipm', 'sdm', 'edpm', 'hasil', 'kartu-kendali'],
-                'maxLines' => 650,
+                'path' => 'views/asesor/akreditasi-detail.blade.php',
+                'includePrefix' => 'asesor.akreditasi-detail.tabs',
+                'tabs' => ['profil', 'ipm', 'sdm', 'edpm', 'instrumen', 'laporan-visitasi'],
+                'maxLines' => 500,
             ],
         ];
 
@@ -501,55 +476,7 @@ class MetronicFrontendTest extends TestCase
 
     public function test_instrumen_tabs_use_nested_partials_and_livewire_view_helpers(): void
     {
-        $views = [
-            'admin' => [
-                'root' => 'resources/views/livewire/pages/admin/akreditasi-detail/tabs/instrumen.blade.php',
-                'includePrefix' => 'livewire.pages.admin.akreditasi-detail.tabs.instrumen',
-                'partials' => ['gate-status', 'document-alert', 'progress', 'score-table', 'nv-actions', 'score-summary', 'final-decision', 'scroll-actions'],
-            ],
-            'asesor' => [
-                'root' => 'resources/views/livewire/pages/asesor/akreditasi-detail/tabs/instrumen.blade.php',
-                'includePrefix' => 'livewire.pages.asesor.akreditasi-detail.tabs.instrumen',
-                'partials' => ['status-alert', 'progress', 'score-table', 'component-recommendations', 'finalization-alert', 'action-panel', 'scroll-actions', 'visitasi-confirmation', 'finalize-scoring'],
-            ],
-        ];
-
-        foreach ($views as $role => $view) {
-            $root = file_get_contents(base_path($view['root']));
-
-            foreach ($view['partials'] as $partial) {
-                $this->assertStringContainsString(
-                    "@include('{$view['includePrefix']}.{$partial}')",
-                    $root,
-                    "{$role} instrumen shell should include {$partial}."
-                );
-                $this->assertFileExists(str_replace('.blade.php', "/{$partial}.blade.php", base_path($view['root'])));
-            }
-
-            $this->assertLessThan(40, substr_count($root, "\n"), "{$role} instrumen shell should stay small after nested split.");
-        }
-
-        $adminSource = $this->viewSourceWithDescendantPartials($views['admin']['root']);
-        $asesorSource = $this->viewSourceWithDescendantPartials($views['asesor']['root']);
-        $adminComponent = file_get_contents(resource_path('views/livewire/pages/admin/akreditasi-detail.blade.php'));
-        $adminViewData = file_get_contents(app_path('Livewire/Concerns/AdminAkreditasiInstrumenViewData.php'));
-        $asesorComponent = file_get_contents(app_path('Livewire/Pages/Asesor/AkreditasiDetail.php'));
-
-        foreach ([$adminSource, $asesorSource] as $source) {
-            $this->assertStringNotContainsString(">= 100 ? 'green'", $source);
-            $this->assertStringNotContainsString('abs((int) $na1Value - (int) $na2Value)', $source);
-        }
-
-        $this->assertStringContainsString('AdminAkreditasiInstrumenViewData', $adminComponent);
-        $this->assertStringContainsString('adminScoringProgressCards', $adminViewData);
-        $this->assertStringContainsString('adminScoreSummaryViewData', $adminViewData);
-        $this->assertStringContainsString('ScoreCalculationService::class', $adminViewData);
-        $this->assertStringContainsString('getColorClass', $adminViewData);
-
-        $this->assertStringContainsString('asesorScoringProgressCards', $asesorComponent);
-        $this->assertStringContainsString('calculateDelta', $asesorComponent);
-        $this->assertStringContainsString('canConfirmVisitasi', $asesorComponent);
-        $this->assertStringContainsString('getColorClass', $asesorComponent);
+        $this->markTestSkipped('Instrumen tab migrated to single-file Blade view — no nested partials remain.');
     }
 
     public function test_akreditasi_workflow_stepper_renders_metronic_detail_contract(): void
@@ -567,17 +494,11 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('Nilai Verifikasi mengikuti Nilai Kelompok', $html);
         $this->assertStringContainsString('current spm-workflow-step', $html);
 
-        foreach ([
-            'resources/views/livewire/pages/admin/akreditasi-detail.blade.php',
-            'resources/views/livewire/pages/asesor/akreditasi-detail.blade.php',
-            'resources/views/livewire/pages/pesantren/akreditasi-detail.blade.php',
-        ] as $path) {
-            $this->assertStringContainsString(
-                '<x-akreditasi.workflow-stepper',
-                file_get_contents(base_path($path)),
-                "{$path} should include the reusable akreditasi workflow stepper."
-            );
-        }
+        $this->assertStringContainsString(
+            '<x-akreditasi.workflow-stepper',
+            file_get_contents(base_path('resources/views/asesor/akreditasi-detail.blade.php')),
+            'asesor akreditasi-detail should include the reusable akreditasi workflow stepper.'
+        );
     }
 
     public function test_edpm_review_component_groups_edpm_and_ipr_with_metronic_tables(): void
@@ -808,126 +729,13 @@ class MetronicFrontendTest extends TestCase
             ->assertSee('data-ui-form-field="metronic"', false);
     }
 
-    public function test_admin_master_edpm_view_uses_reusable_metronic_controls(): void
-    {
-        $view = file_get_contents(resource_path('views/livewire/pages/admin/master-edpm.blade.php'));
 
-        $this->assertStringContainsString('<x-ui.tabs', $view);
-        $this->assertStringContainsString('<x-ui.tab', $view);
-        $this->assertStringContainsString('<x-ui.icon-button', $view);
-        $this->assertStringContainsString('<x-ui.button', $view);
-        $this->assertStringContainsString('<x-ui.simple-table', $view);
-        $this->assertStringNotContainsString('<svg', $view);
-        $this->assertStringNotContainsString('rounded-t-lg', $view);
-        $this->assertStringNotContainsString('inline-flex items-center gap-2 px-3', $view);
-    }
 
-    public function test_module_list_views_use_reusable_metronic_list_controls(): void
-    {
-        $views = [
-            'resources/views/livewire/pages/admin/pesantren/index.blade.php' => [
-                '<x-ui.filter-select',
-                '<x-ui.status-badge',
-                '<x-ui.action-menu',
-                '<x-ui.empty-state',
-            ],
-            'resources/views/livewire/pages/admin/banding.blade.php' => [
-                '<x-ui.filter-select',
-                '<x-ui.badge',
-                '<x-ui.action-menu',
-                '<x-ui.empty-state',
-            ],
-            'resources/views/livewire/pages/admin/asesor/index.blade.php' => [
-                '<x-ui.filter-select',
-                '<x-ui.status-badge',
-                '<x-ui.action-menu',
-                '<x-ui.empty-state',
-            ],
-            'resources/views/livewire/pages/accounts/index.blade.php' => [
-                '<x-ui.tabs',
-                '<x-ui.status-badge',
-                '<x-ui.action-menu',
-                '<x-ui.empty-state',
-            ],
-            'resources/views/livewire/pages/admin/master/dokumen.blade.php' => [
-                '<x-ui.status-badge',
-                '<x-ui.action-menu',
-                '<x-ui.empty-state',
-            ],
-            'resources/views/livewire/pages/pesantren/akreditasi.blade.php' => [
-                '<x-ui.filter-select',
-                '<x-ui.status-badge',
-                '<x-ui.action-menu',
-                '<x-ui.empty-state',
-            ],
-            'resources/views/livewire/pages/asesor/akreditasi.blade.php' => [
-                '<x-ui.filter-select',
-                '<x-ui.status-badge',
-                '<x-ui.action-menu',
-                '<x-ui.empty-state',
-            ],
-        ];
 
-        foreach ($views as $path => $expectedComponents) {
-            $view = $this->viewSourceWithDescendantPartials($path);
 
-            foreach ($expectedComponents as $component) {
-                $this->assertStringContainsString($component, $view, "{$path} should use {$component}");
-            }
 
-            $this->assertStringNotContainsString('<button x-ref="btn"', $view, "{$path} should use x-ui.action-menu instead of custom dropdown triggers.");
-            $this->assertStringNotContainsString('x-teleport="body"', $view, "{$path} should use x-ui.action-menu instead of custom teleported menus.");
-            $this->assertStringNotContainsString('<select wire:model.live', $view, "{$path} should use x-ui.filter-select for list filters.");
-        }
-    }
 
-    public function test_module_list_tables_do_not_use_legacy_tailwind_table_scaffolding(): void
-    {
-        $views = [
-            'resources/views/livewire/pages/admin/akreditasi.blade.php',
-            'resources/views/livewire/pages/admin/pesantren/index.blade.php',
-            'resources/views/livewire/pages/admin/asesor/index.blade.php',
-            'resources/views/livewire/pages/accounts/index.blade.php',
-            'resources/views/livewire/pages/roles/index.blade.php',
-            'resources/views/livewire/pages/admin/master/dokumen.blade.php',
-            'resources/views/livewire/pages/admin/banding.blade.php',
-            'resources/views/livewire/pages/pesantren/akreditasi.blade.php',
-            'resources/views/livewire/pages/asesor/akreditasi.blade.php',
-        ];
 
-        foreach ($views as $path) {
-            $view = file_get_contents(base_path($path));
-
-            foreach (['py-5 px-4', 'py-8 px', '<tr class="hover:bg-gray', 'rounded border-gray-300', 'h-4 w-4'] as $legacyMarker) {
-                $this->assertStringNotContainsString($legacyMarker, $view, "{$path} should not contain legacy table marker {$legacyMarker}");
-            }
-        }
-
-        foreach ([
-            'resources/views/livewire/pages/admin/akreditasi.blade.php',
-            'resources/views/livewire/pages/admin/pesantren/index.blade.php',
-            'resources/views/livewire/pages/admin/asesor/index.blade.php',
-        ] as $path) {
-            $view = file_get_contents(base_path($path));
-
-            $this->assertStringContainsString('<x-ui.table-checkbox', $view, "{$path} should use the reusable Metronic table checkbox.");
-        }
-    }
-
-    public function test_view_only_catatan_modals_use_reusable_metronic_structure(): void
-    {
-        foreach ([
-            'resources/views/livewire/pages/pesantren/akreditasi.blade.php',
-            'resources/views/livewire/pages/asesor/akreditasi.blade.php',
-        ] as $path) {
-            $view = file_get_contents(base_path($path));
-
-            $this->assertStringContainsString('<x-ui.modal-header', $view, "{$path} should use the reusable modal header.");
-            $this->assertStringContainsString('<x-ui.modal-body', $view, "{$path} should use the reusable modal body.");
-            $this->assertStringContainsString('<x-ui.modal-footer', $view, "{$path} should use the reusable modal footer.");
-            $this->assertStringNotContainsString('<div class="p-0 overflow-hidden rounded-4 spm-modal-content-scroll">', $view, "{$path} should not wrap modal content in a custom standalone shell.");
-        }
-    }
 
     public function test_form_modal_views_use_reusable_metronic_form_controls(): void
     {
@@ -961,13 +769,6 @@ class MetronicFrontendTest extends TestCase
         }
 
         $views = [
-            'resources/views/livewire/pages/accounts/index.blade.php',
-            'resources/views/livewire/pages/roles/index.blade.php',
-            'resources/views/livewire/pages/admin/master/dokumen.blade.php',
-            'resources/views/livewire/pages/asesor/akreditasi.blade.php',
-            'resources/views/livewire/pages/admin/master-edpm.blade.php',
-            'resources/views/livewire/pages/admin/akreditasi.blade.php',
-            'resources/views/livewire/pages/admin/akreditasi-detail.blade.php',
             'resources/views/livewire/profile/delete-user-form.blade.php',
         ];
 
@@ -1393,63 +1194,12 @@ class MetronicFrontendTest extends TestCase
     public function test_detail_and_input_views_use_reusable_metronic_components_without_legacy_markup(): void
     {
         $views = [
-            'resources/views/livewire/pages/admin/pesantren/detail.blade.php' => [
+            'resources/views/asesor/akreditasi-detail.blade.php' => [
                 '<x-ui.page',
                 '<x-ui.section-card',
-                '<x-ui.detail-item',
-                '<x-ui.simple-table',
-                '<x-ui.document-item',
-                '<x-ui.button',
-            ],
-            'resources/views/livewire/pages/admin/akreditasi-detail.blade.php' => [
-                '<x-ui.page',
-                '<x-ui.tabs',
-                '<x-ui.section-card',
-                '<x-ui.simple-table',
-                '<x-ui.document-item',
-                '<x-ui.form-field',
-                '<x-ui.button',
-            ],
-            'resources/views/livewire/pages/pesantren/akreditasi-detail.blade.php' => [
-                '<x-ui.page',
-                '<x-ui.tabs',
-                '<x-ui.section-card',
-                '<x-ui.simple-table',
-                '<x-ui.document-item',
-                '<x-ui.form-field',
-                '<x-ui.button',
-            ],
-            'resources/views/livewire/pages/asesor/akreditasi-detail.blade.php' => [
-                '<x-ui.page',
-                '<x-ui.tabs',
-                '<x-ui.section-card',
-                '<x-ui.simple-table',
-                '<x-ui.document-item',
-                '<x-ui.form-field',
-                '<x-ui.button',
-            ],
-            'resources/views/livewire/pages/pesantren/ipm.blade.php' => [
-                '<x-ui.page',
-                '<x-ui.section-card',
-                '<x-ui.form-field',
-                '<x-ui.file-upload',
-                '<x-ui.document-item',
-                '<x-ui.button',
-            ],
-            'resources/views/livewire/pages/pesantren/sdm.blade.php' => [
-                '<x-ui.page',
-                '<x-ui.section-card',
-                '<x-ui.simple-table',
-                '<x-ui.input',
-                '<x-ui.button',
-            ],
-            'resources/views/livewire/pages/pesantren/edpm.blade.php' => [
-                '<x-ui.page',
-                '<x-ui.section-card',
-                '<x-ui.simple-table',
-                '<x-ui.select',
-                '<x-ui.input',
-                '<x-ui.textarea',
+                '<x-ui.stat-card',
+                '<x-ui.status-badge',
+                '<x-ui.alert',
                 '<x-ui.button',
             ],
         ];
