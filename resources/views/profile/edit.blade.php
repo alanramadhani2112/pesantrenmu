@@ -78,7 +78,7 @@
                         <div class="p-6">
                             <form method="POST" action="{{ route('profile.info') }}"
                                   x-data="formValidation"
-                                  @submit="validateAll()"
+                                  @submit="if(!validateAll()) $event.preventDefault()"
                                   @focusout.debounce.50ms="onBlur($event)"
                                   @input.debounce.150ms="onInput($event)">
                                 @csrf
@@ -127,13 +127,15 @@
                         <div class="p-6">
                             <form method="POST" action="{{ route('profile.password') }}"
                                   x-data="formValidation"
-                                  @submit="validateAll()"
+                                  @submit="if(!validateAll()) $event.preventDefault()"
                                   @focusout.debounce.50ms="onBlur($event)"
                                   @input.debounce.150ms="onInput($event)">
                                 @csrf
                                 @method('PUT')
 
                                 <div class="d-flex flex-column gap-5">
+
+                                    <!-- Current Password -->
                                     <div>
                                         <x-ui.form-field label="{{ __('Password Saat Ini') }}" for="current_password" data-validate="required">
                                             <input data-ui-input="metronic" type="password" id="current_password" name="current_password"

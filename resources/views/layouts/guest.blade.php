@@ -10,10 +10,8 @@
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand/favicon.svg') }}">
 
     <!-- Styles -->
-    @livewireStyles
     <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}">
     @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css', 'resources/js/app.js'])
-    @livewireScriptConfig
 </head>
 
 <body class="font-sans text-gray-900 antialiased spm-auth-body" style="background-color:#f5f7fa" data-bs-theme="light">

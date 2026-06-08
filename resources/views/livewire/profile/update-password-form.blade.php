@@ -44,7 +44,7 @@ new class extends Component
 <section>
     <form wire:submit="updatePassword"
           x-data="formValidation"
-          @submit="validateAll()"
+          @submit="if(!validateAll()) $event.preventDefault()"
           @focusout.debounce.50ms="onBlur($event)"
           @input.debounce.150ms="onInput($event)">
         <div class="d-flex flex-column gap-5">

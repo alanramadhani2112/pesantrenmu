@@ -17,7 +17,72 @@
     </x-slot:toolbar>
 </x-ui.page-header>
 
-<livewire:profile.update-profile-photo />
+{{-- Profile Photo Upload (inline, no Livewire) --}}
+<x-ui.section-card title="Foto Profil" subtitle="Unggah foto profil akun Anda. Maksimal 2MB, format JPG/PNG." class="mb-6">
+    <div class="p-6">
+        <form method="POST" action="{{ route('profile.photo') }}" enctype="multipart/form-data"
+            x-data="{
+                preview: '{{ auth()->user()->profile_photo_path ? asset('storage/' . auth()->user()->profile_photo_path) : '' }}',
+                changed: false,
+                get isEmpty() { return !this.preview; },
+            }">
+            @csrf
+            @method('PUT')
+
+            <div class="image-input image-input-circle image-input-outline"
+                :class="{ 'image-input-empty': isEmpty, 'image-input-changed': changed }"
+                style="background-color: #f5f8fa;">
+
+                <div class="image-input-wrapper w-125px h-125px"
+                    :style="preview ? 'background-image:url(' + preview + ')' : ''">
+                </div>
+
+                <label class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow"
+                    data-kt-image-input-action="change"
+                    title="Ganti foto">
+                    <i class="ki-solid ki-pencil fs-6"></i>
+                    <input type="file" name="photo" accept=".png,.jpg,.jpeg"
+                        @change="
+                            const file = $event.target.files[0];
+                            if (file) {
+                                preview = URL.createObjectURL(file);
+                                changed = true;
+                            }
+                        " />
+                </label>
+
+                <span class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow"
+                    data-kt-image-input-action="cancel"
+                    title="Batal"
+                    @click="changed = false; preview = '{{ auth()->user()->profile_photo_path ? asset('storage/' . auth()->user()->profile_photo_path) : '' }}'; $el.closest('form').querySelector('input[type=file]').value = '';">
+                    <i class="ki-solid ki-cross fs-3"></i>
+                </span>
+            </div>
+
+            @error('photo')
+                <div class="text-danger fs-8 mt-3">{{ $message }}</div>
+            @enderror
+
+            <div class="mt-4 d-flex gap-3" x-show="changed" x-cloak>
+                <button type="submit" class="btn btn-sm btn-primary">Simpan Foto</button>
+            </div>
+        </form>
+
+        @if(auth()->user()->profile_photo_path)
+        <form method="POST" action="{{ route('profile.photo.remove') }}" class="mt-3">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-sm btn-light-danger">Hapus Foto</button>
+        </form>
+        @endif
+
+        @if(session('status') === 'photo-updated')
+            <div class="text-success fs-8 fw-semibold mt-3">Foto berhasil diperbarui.</div>
+        @elseif(session('status') === 'photo-removed')
+            <div class="text-success fs-8 fw-semibold mt-3">Foto berhasil dihapus.</div>
+        @endif
+    </div>
+</x-ui.section-card>
 
 @if(request('edit'))
 {{-- ===== EDIT MODE ===== --}}

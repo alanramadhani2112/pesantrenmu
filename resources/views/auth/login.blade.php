@@ -15,7 +15,7 @@
 
     <form method="POST" action="{{ route('login') }}" class="form w-100"
           x-data="formValidation"
-          @submit="validateAll()"
+          @submit="if(!validateAll()) $event.preventDefault()"
           @focusout.debounce.50ms="onBlur($event)"
           @input.debounce.150ms="onInput($event)">
         @csrf
