@@ -3,13 +3,12 @@ import axios from 'axios';
 import autosize from 'autosize';
 import { createPopper } from '@popperjs/core';
 import formValidation from './validation';
-import { Livewire, Alpine as LivewireAlpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
+import Alpine from 'alpinejs';
 
 window.Dropzone = Dropzone;
 window.autosize = autosize;
 window.Popper = { createPopper };
 
-const Alpine = LivewireAlpine;
 Alpine.data('formValidation', formValidation);
 
 window.axios = axios;
@@ -1085,34 +1084,18 @@ document.addEventListener('DOMContentLoaded', () => {
     window.__spmFlashAlert = null;
 });
 
-document.addEventListener('livewire:initialized', () => {
-    Livewire.hook?.('commit', ({ succeed, fail }) => {
-        closeOpenActionMenus();
-        succeed?.(() => releaseAllSubmitLockGuards());
-        fail?.(() => releaseAllSubmitLockGuards());
-    });
+window.addEventListener('spm:success', (event) => {
+    fireNotificationAlert({ ...normalizeAlertPayload(event.detail), type: 'success' });
+});
 
-    Livewire.on('swal:success', (data) => {
-        fireNotificationAlert({ ...normalizeAlertPayload(data), type: 'success' });
-    });
-
-    Livewire.on('swal:error', (data) => {
-        fireNotificationAlert({ ...normalizeAlertPayload(data), type: 'error' });
-    });
+window.addEventListener('spm:error', (event) => {
+    fireNotificationAlert({ ...normalizeAlertPayload(event.detail), type: 'error' });
 });
 
 initSubmitLockGuard();
 document.addEventListener('DOMContentLoaded', initMetronic);
 document.addEventListener('DOMContentLoaded', hidePageLoadingOverlay);
 document.addEventListener('DOMContentLoaded', releaseAllSubmitLockGuards);
-document.addEventListener('livewire:initialized', initMetronic);
-document.addEventListener('livewire:navigate', showPageLoadingOverlay);
-document.addEventListener('livewire:navigating', showPageLoadingOverlay);
-document.addEventListener('livewire:navigated', () => {
-    initMetronic();
-    releaseAllSubmitLockGuards();
-    hidePageLoadingOverlay();
-});
 window.addEventListener('pageshow', () => {
     releaseAllSubmitLockGuards();
     hidePageLoadingOverlay();
@@ -1130,8 +1113,8 @@ Alpine.data('fileManagement', window.fileManagement);
 Alpine.data('asesorManagement', window.asesorManagement);
 
 // ── Dropzone File Upload Bridge ──
-// Bridges Dropzone drag-drop to Livewire's wire:model on hidden <input type="file">.
-// Uses Dropzone as visual shell only; uploads handled by Livewire.
+// Bridges Dropzone drag-drop to a hidden <input type="file">.
+// Uses Dropzone as the visual shell; uploads are handled by standard form submission.
 Alpine.data('fileDropzone', function (config = {}) {
     // Store element reference for Dropzone init
     const el = this.$el;
@@ -1161,7 +1144,7 @@ Alpine.data('fileDropzone', function (config = {}) {
                     this.removeFile(this.files[0]);
                 }
 
-                // Bridge to hidden input → Livewire wire:model
+                // Bridge to hidden input for standard form submission
                 const input = document.getElementById(config.inputId);
                 if (input) {
                     const dt = new DataTransfer();
@@ -1199,8 +1182,7 @@ Alpine.data('fileDropzone', function (config = {}) {
     };
 });
 
-// Init Metronic components after initial load and each Livewire DOM morph
+// Init Metronic components after initial load
 document.addEventListener('DOMContentLoaded', () => initMetronic());
-Livewire.hook('morph.updated', ({ component }) => { initMetronic(); });
 
-Livewire.start();
+Alpine.start();
