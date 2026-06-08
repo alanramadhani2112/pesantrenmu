@@ -77,7 +77,7 @@
                                     icon="pencil"
                                     label="Edit"
                                     variant="primary"
-                                    x-on:click="openEditModal(@js($cat))"
+                                    x-on:click="openEditModal({{ \Illuminate\Support\Js::from($cat) }})"
                                 />
                                 <form method="POST" action="{{ route('admin.master-kategori-dokumen.destroy', $cat) }}" class="d-inline"
                                       x-on:submit.prevent="confirmDelete($event)">

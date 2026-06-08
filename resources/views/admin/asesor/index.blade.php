@@ -192,6 +192,8 @@
 <script>
     function asesorIndex() {
         return {
+            selectAll: false,
+            selectedIds: [],
             confirmToggle(event, id, currentStatus, name, label) {
                 const nextAction = Number(currentStatus) === 1 ? 'nonaktifkan' : 'aktifkan';
                 const title = `${nextAction.charAt(0).toUpperCase()}${nextAction.slice(1)} ${label}?`;

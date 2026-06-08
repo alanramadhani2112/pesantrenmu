@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div data-module-page="admin-pesantren" x-data="{ ...adminManagement(), sortAsc: {{ $sortAsc ? 'true' : 'false' }}, sortField: '{{ $sortField }}' }">
+<div data-module-page="admin-pesantren" x-data="{ ...adminManagement(), sortAsc: {{ $sortAsc ? 'true' : 'false' }}, sortField: '{{ $sortField }}', selectAll: false, selectedIds: [] }">
     <x-slot name="header">{{ __('Pesantren') }}</x-slot>
 
     <x-ui.index-layout
