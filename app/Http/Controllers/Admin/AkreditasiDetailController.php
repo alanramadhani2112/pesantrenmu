@@ -7,6 +7,7 @@ use App\Models\Akreditasi;
 use App\Models\Asesor;
 use App\Services\AkreditasiService;
 use App\Services\AkreditasiWorkflowService;
+use App\Services\AuditTrailService;
 use App\Services\AssessorScoringService;
 use App\Services\DeadlineService;
 use App\Services\PesantrenService;
@@ -15,6 +16,7 @@ use App\Services\RejectionService;
 use App\Services\ScoreCalculationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class AkreditasiDetailController extends Controller
@@ -168,6 +170,41 @@ class AkreditasiDetailController extends Controller
         // Compute score summary (replaces adminScoreSummaryViewData())
         $scoreSummary = $this->buildScoreSummary($komponens, $adminNvs);
 
+        // Audit Trail data — loaded only when tab is active
+        $auditLogs = collect();
+        $auditActors = collect();
+        $auditActionTypes = AuditTrailService::ALLOWED_ACTION_TYPES;
+        $auditFilterActionType = request()->query('audit_action_type', '');
+        $auditFilterUserId = request()->query('audit_user_id', '');
+        $auditFilterDateFrom = request()->query('audit_date_from', '');
+        $auditFilterDateTo = request()->query('audit_date_to', '');
+
+        if (request()->query('tab') === 'audit_trail') {
+            $auditService = app(AuditTrailService::class);
+            $auditFilters = [];
+            if ($auditFilterActionType !== '') {
+                $auditFilters['action_type'] = $auditFilterActionType;
+            }
+            if ($auditFilterUserId !== '') {
+                $auditFilters['user_id'] = (int) $auditFilterUserId;
+            }
+            if ($auditFilterDateFrom !== '') {
+                $auditFilters['date_from'] = $auditFilterDateFrom;
+            }
+            if ($auditFilterDateTo !== '') {
+                $auditFilters['date_to'] = $auditFilterDateTo;
+            }
+            $auditLogs = $auditService->getTimeline($akreditasi->id, $auditFilters, 15);
+
+            $auditActors = DB::table('akreditasi_audit_logs')
+                ->join('users', 'akreditasi_audit_logs.user_id', '=', 'users.id')
+                ->where('akreditasi_audit_logs.akreditasi_id', $akreditasi->id)
+                ->select('users.id', 'users.name')
+                ->distinct()
+                ->orderBy('users.name')
+                ->get();
+        }
+
         // Build activeTab from query string (optional override)
         $activeTab = request()->query('tab', 'profil');
 
@@ -182,6 +219,8 @@ class AkreditasiDetailController extends Controller
             'isOverdue', 'availableAsesorsForReassignment', 'asesorsForAssignment',
             'fields', 'sdmTotals',
             'scoringProgressCards', 'scoringBlockers', 'scoreSummary',
+            'auditLogs', 'auditActors', 'auditActionTypes',
+            'auditFilterActionType', 'auditFilterUserId', 'auditFilterDateFrom', 'auditFilterDateTo',
             'activeTab'
         ));
     }
