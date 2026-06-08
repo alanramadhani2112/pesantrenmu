@@ -1,11 +1,14 @@
 @props([
-    'model' => null,
+    'name' => null,
+    'value' => null,
     'placeholder' => null,
     'options' => [],
     'size' => 'md',
+    'form' => null,
 ])
 
 @php
+    $value ??= $name ? request($name, '') : '';
     $sizes = [
         'sm' => 'form-select-sm',
         'md' => '',
@@ -17,15 +20,17 @@
 
 <select
     data-ui-filter-select="metronic"
-    @if($model) wire:model.live="{{ $model }}" @endif
+    @if($name) name="{{ $name }}" @endif
+    @if($form) form="{{ $form }}" @endif
+    onchange="this.form ? this.form.submit() : this.closest('form')?.submit()"
     {{ $attributes->merge(['class' => $classes]) }}
 >
     @if($placeholder)
         <option value="">{{ $placeholder }}</option>
     @endif
 
-    @foreach($options as $value => $label)
-        <option value="{{ $value }}">{{ $label }}</option>
+    @foreach($options as $optValue => $label)
+        <option value="{{ $optValue }}" @selected((string) $value === (string) $optValue)>{{ $label }}</option>
     @endforeach
 
     {{ $slot }}

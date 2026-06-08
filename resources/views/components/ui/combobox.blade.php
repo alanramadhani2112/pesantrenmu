@@ -8,8 +8,8 @@
 
 @php
     $messages = array_filter((array) $error);
-    $inputAttributes = $attributes->whereStartsWith(['wire:', 'x-', '@', ':']);
-    $wrapperAttributes = $attributes->whereDoesntStartWith(['wire:', 'x-', '@', ':']);
+    $inputAttributes = $attributes->whereStartsWith(['x-', '@', ':']);
+    $wrapperAttributes = $attributes->whereDoesntStartWith(['x-', '@', ':']);
 @endphp
 
 <div data-ui-combobox="metronic" {{ $wrapperAttributes->merge(['class' => 'fv-row spm-form-field spm-combobox position-relative']) }}>

@@ -4,7 +4,7 @@
     'variant' => 'primary',
     'description' => null,
     'actionLabel' => null,
-    'actionWireClick' => null,
+    'actionHref' => null,
 ])
 
 @php
@@ -22,10 +22,9 @@
         <div class="text-muted fw-semibold fs-7 mb-4">{{ $description }}</div>
     @endif
 
-    @if($actionLabel && $actionWireClick)
+    @if($actionLabel && $actionHref)
         <x-ui.button
-            type="button"
-            :wire:click="$actionWireClick"
+            :href="$actionHref"
             variant="light-{{ $variant }}"
             size="sm"
             class="w-100"

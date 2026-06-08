@@ -25,7 +25,7 @@
 <select
     data-ui-select="metronic"
     @if($id) id="{{ $id }}" @endif
-    @if($model) wire:model{{ $modifier ? '.' . $modifier : '' }}="{{ $model }}" @endif
+    @if($model) x-model="{{ $model }}" @endif
     @disabled($disabled)
     {{ $attributes->merge(['class' => $classes]) }}
 >

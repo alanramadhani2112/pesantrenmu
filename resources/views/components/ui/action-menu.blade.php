@@ -12,7 +12,7 @@
     x-on:keydown.escape.window="close()"
     x-on:resize.window="if (isOpen) updatePosition()"
     x-on:scroll.window="if (isOpen) updatePosition()"
-    x-on:livewire:navigating.window="close()"
+    x-on:popstate.window="close()"
     x-on:click.outside="close()"
     class="spm-action-menu d-inline-block position-relative"
 >

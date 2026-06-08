@@ -1,10 +1,13 @@
 @props([
-    'model' => 'perPage',
+    'name' => 'perPage',
+    'value' => null,
     'options' => [10, 25, 50, 100],
     'variant' => 'labeled',
+    'form' => null,
 ])
 
 @php
+    $value ??= request($name, $options[0] ?? 10);
     $isCompact = $variant === 'compact';
     $containerClass = $isCompact
         ? 'd-flex align-items-center spm-table-per-page--compact'
@@ -19,9 +22,15 @@
         <span class="spm-table-per-page-label">Tampilkan</span>
     @endunless
 
-    <select wire:model.live="{{ $model }}" aria-label="Jumlah entri per halaman" {{ $attributes->merge(['class' => $selectClass]) }}>
+    <select
+        name="{{ $name }}"
+        aria-label="Jumlah entri per halaman"
+        @if($form) form="{{ $form }}" @endif
+        onchange="this.form ? this.form.submit() : this.closest('form')?.submit()"
+        {{ $attributes->merge(['class' => $selectClass]) }}
+    >
         @foreach($options as $option)
-            <option value="{{ $option }}">{{ $option }}</option>
+            <option value="{{ $option }}" @selected((int) $value === (int) $option)>{{ $option }}</option>
         @endforeach
     </select>
 

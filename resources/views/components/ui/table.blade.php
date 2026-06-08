@@ -90,7 +90,7 @@
                 </div>
 
                 <div class="spm-table-footer-end pagination-indonesia">
-                    {{ $records->links('livewire.datatable-pagination') }}
+                    <x-ui.pagination :paginator="$records" :show-info="false" />
                 </div>
             </div>
         @endif

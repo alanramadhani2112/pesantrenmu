@@ -3,11 +3,9 @@
 <div
     x-data="quillEditor()"
     x-modelable="content"
-    {{ $attributes->whereStartsWith('wire:model') }}
     data-placeholder="{{ $placeholder }}"
     data-read-only="{{ $disabled ? 'true' : 'false' }}"
     x-on:quill-input.window="if($event.detail.id === '{{ $attributes->get('id') }}') quill.root.innerHTML = $event.detail.value"
-    wire:ignore
     {{ $attributes->merge(['class' => 'quill-editor-container']) }}
 >
     <div x-ref="quillEditor" class="bg-white rounded-b-md min-h-[150px]"></div>

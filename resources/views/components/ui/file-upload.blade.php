@@ -1,5 +1,5 @@
 @props([
-    'model' => null,
+    'name' => null,
     'id' => 'file',
     'accept' => null,
     'file' => null,
@@ -12,9 +12,6 @@
 ])
 
 @php
-    if (!$file && $model && isset($__data) && isset($__data[$model])) {
-        $file = $__data[$model];
-    }
     $hasFile = $file && is_object($file) && method_exists($file, 'getClientOriginalName');
     $hasCustomSlot = trim((string) $slot) !== '';
 @endphp
@@ -23,12 +20,12 @@
     data-ui-file-upload="metronic"
     {{ $attributes->merge(['class' => 'spm-file-upload' . ($disabled ? ' opacity-50 pe-none' : '')]) }}
 >
-    {{-- Hidden Livewire file input — Dropzone bridges files here via DataTransfer --}}
+    {{-- Hidden file input — Dropzone bridges files here via DataTransfer --}}
     <input
         type="file"
         id="{{ $id }}"
+        name="{{ $name ?? $id }}"
         @if($accept) accept="{{ $accept }}" @endif
-        @if($model) wire:model="{{ $model }}" @endif
         @if($changeAction) x-on:change="{{ $changeAction }}" @endif
         @disabled($disabled)
         class="d-none"
@@ -69,7 +66,7 @@
                 {{-- Remove button when file selected --}}
                 @if($hasFile)
                     <span class="btn btn-sm btn-light-danger mt-3 fw-semibold"
-                        onclick="event.preventDefault(); event.stopPropagation(); document.getElementById('{{ $id }}').value = '';{{ $model ? " Livewire.find(document.getElementById('" . $id . "').closest('[wire\\\\:id]').getAttribute('wire:id')).set('" . $model . "', null);" : '' }}">
+                        onclick="event.preventDefault(); event.stopPropagation(); document.getElementById('{{ $id }}').value = '';">
                         <x-ui.icon name="cross-circle" class="fs-5 me-1" />
                         Hapus file
                     </span>

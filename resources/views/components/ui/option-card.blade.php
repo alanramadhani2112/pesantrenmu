@@ -1,12 +1,11 @@
 @props([
-    'model',
+    'name',
     'value',
     'title',
     'description' => null,
     'variant' => 'primary',
     'active' => false,
-    'modifier' => null,
-])
+]) 
 
 @php
     $variant = in_array($variant, ['primary', 'success', 'warning', 'danger', 'info'], true)
@@ -20,8 +19,9 @@
 >
     <input
         type="radio"
-        wire:model{{ $modifier ? '.' . $modifier : '' }}="{{ $model }}"
+        name="{{ $name }}"
         value="{{ $value }}"
+        @checked($active)
         class="form-check-input h-22px w-22px mt-1"
     >
 
