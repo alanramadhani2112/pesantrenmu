@@ -51,6 +51,6 @@ class BusinessFlowLegacyCleanupTest extends TestCase
 
     public function test_asesor_detail_uses_canonical_post_visitasi_document_handlers(): void
     {
-        $this->markTestSkipped('Asesor AkreditasiDetail migrated from Livewire to plain Blade controller.');
+        $this->markTestSkipped('Asesor AkreditasiDetail migrated to plain Blade controller.');
     }
 }

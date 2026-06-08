@@ -78,7 +78,7 @@ class TimestampFormatPropertyTest extends TestCase
     /**
      * Property 6: akreditasiUpdatedAt stored in component is valid ISO 8601.
      *
-     * For any akreditasi record loaded into a Livewire component, the stored
+     * For any akreditasi record loaded into the UI layer, the stored
      * akreditasiUpdatedAt property SHALL be a valid ISO 8601 datetime string.
      *
      * **Validates: Requirements 6.4**
@@ -115,7 +115,7 @@ class TimestampFormatPropertyTest extends TestCase
             'status' => 6,
         ]);
 
-        // Simulate what the Livewire component does on mount
+        // Simulate what the detail page does on mount
         $storedTimestamp = $akreditasi->updated_at->toISOString();
 
         // Verify it's a valid ISO 8601 string

@@ -29,10 +29,10 @@ class AsesorAkreditasiMenuContextTest extends TestCase
         $this->actingAs($asesor->user)
             ->get('/asesor/akreditasi')
             ->assertOk()
+            ->assertSee('Tugas Akreditasi')
             ->assertSee('Daftar Tugas')
-            ->assertSee('Pengajuan Akreditasi')
-            ->assertSee('spm-table-shell--asesor-tugas', false)
-            ->assertSee('data-ui-table="metronic"', false);
+            ->assertSee('Prioritas Tugas Asesor')
+            ->assertSee('data-akreditasi-context="tugas"', false);
     }
 
     public function test_review_menu_context_redirects_to_review_filter(): void
@@ -51,8 +51,8 @@ class AsesorAkreditasiMenuContextTest extends TestCase
             ->assertOk()
             ->assertSee('Review Berkas')
             ->assertSee('Daftar Review Berkas')
-            ->assertSee('spm-table-shell--asesor-review', false)
-            ->assertDontSee('Daftar umum seluruh pengajuan');
+            ->assertSee('data-akreditasi-context="review"', false)
+            ->assertSee('Lihat Detail');
     }
 
     public function test_input_nilai_menu_context_targets_post_visitasi_filter(): void
@@ -69,10 +69,10 @@ class AsesorAkreditasiMenuContextTest extends TestCase
         $this->actingAs($asesor->user)
             ->get('/asesor/akreditasi?statusFilter=penilaian&focus=nilai')
             ->assertOk()
-            ->assertSee('Input Nilai Visitasi')
-            ->assertSee('Daftar Input Nilai')
-            ->assertSee('spm-table-shell--asesor-nilai', false)
-            ->assertSee('Buka detail instrumen');
+            ->assertSee('Penilaian Visitasi')
+            ->assertSee('Daftar Penilaian')
+            ->assertSee('data-akreditasi-context="nilai"', false)
+            ->assertSee('Lihat Detail');
     }
 
     private function createAssignedAssessment(int $status): Asesor

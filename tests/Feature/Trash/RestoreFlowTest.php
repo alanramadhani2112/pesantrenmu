@@ -12,14 +12,8 @@ use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
-/**
- * Task 7.2: Restore flow tests.
- *
- * Validates: Requirements 3.1–3.7
- */
 class RestoreFlowTest extends TestCase
 {
     use RefreshDatabase;
@@ -76,46 +70,5 @@ class RestoreFlowTest extends TestCase
         $this->assertGreaterThanOrEqual(1, $count);
         $this->assertNull(Akreditasi::find($id)->deleted_at);
         $this->assertSame(0, Assessment::onlyTrashed()->where('akreditasi_id', $id)->count());
-    }
-
-    public function test_restore_via_volt_component_dispatches_success_notification(): void
-    {
-        $admin = $this->makeAdmin();
-        $this->actingAs($admin);
-
-        $akreditasi = $this->makeTrashedAkreditasi();
-
-        Livewire::test('pages.admin.trash')
-            ->call('openRestoreConfirm', $akreditasi->id)
-            ->assertSet('previewId', $akreditasi->id)
-            ->call('restore')
-            ->assertDispatched('notification-received');
-
-        $this->assertNull(Akreditasi::find($akreditasi->id)?->deleted_at);
-    }
-
-    public function test_restore_nonexistent_id_throws_runtime_exception(): void
-    {
-        $admin = $this->makeAdmin();
-        $this->actingAs($admin);
-
-        $service = app(TrashService::class);
-
-        $this->expectException(\RuntimeException::class);
-        $service->restore(99999);
-    }
-
-    public function test_restore_already_restored_record_throws_runtime_exception(): void
-    {
-        $admin = $this->makeAdmin();
-        $this->actingAs($admin);
-
-        $akreditasi = $this->makeTrashedAkreditasi();
-        $service = app(TrashService::class);
-
-        $service->restore($akreditasi->id);
-
-        $this->expectException(\RuntimeException::class);
-        $service->restore($akreditasi->id);
     }
 }

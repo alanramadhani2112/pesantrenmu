@@ -21,9 +21,9 @@ use Tests\TestCase;
  *     and old files remain intact — no data loss.
  *
  * These tests exercise the service layer directly (updateProfile / updateIpm)
- * to verify the lock-guard behaviour that the Volt component relies on.
- * The Volt component's storeUploadedFiles() rollback logic is tested via
- * the service returning false on locked pesantren.
+ * to verify the lock-guard behaviour that the Blade upload flow relies on.
+ * The upload rollback logic is tested via the service returning false on
+ * locked pesantren.
  */
 class FileUploadRaceConditionTest extends TestCase
 {
@@ -54,9 +54,9 @@ class FileUploadRaceConditionTest extends TestCase
     // ─── PM-1: Profile — service returns false when locked ───────────────────
 
     /**
-     * When updateProfile() returns false (locked), the Volt component's
-     * persistProfile() must delete the newly stored file and keep the old one.
-     * This test verifies the service correctly returns false so the component
+     * When updateProfile() returns false (locked), the profile submit flow
+     * must delete the newly stored file and keep the old one.
+     * This test verifies the service correctly returns false so the UI layer
      * can trigger its rollback branch.
      */
     public function test_update_profile_returns_false_when_locked_so_component_can_rollback(): void
@@ -115,7 +115,7 @@ class FileUploadRaceConditionTest extends TestCase
             'sertifikat_nsp' => 'pesantren_docs/old_nsp.pdf',
         ]);
 
-        // Simulate what the Volt component does:
+        // Simulate what the upload flow does:
         // 1. Store new file to disk
         Storage::disk('public')->put('pesantren_docs/old_nsp.pdf', 'old content');
         $newPath = 'pesantren_docs/new_nsp_'.uniqid().'.pdf';

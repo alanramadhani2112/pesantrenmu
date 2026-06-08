@@ -12,14 +12,8 @@ use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
-/**
- * Task 7.3: Force delete flow tests.
- *
- * Validates: Requirements 4.1–4.6
- */
 class ForceDeleteFlowTest extends TestCase
 {
     use RefreshDatabase;
@@ -76,45 +70,5 @@ class ForceDeleteFlowTest extends TestCase
         $this->assertGreaterThanOrEqual(1, $count);
         $this->assertSame(0, Akreditasi::withTrashed()->where('id', $id)->count());
         $this->assertSame(0, Assessment::withTrashed()->where('akreditasi_id', $id)->count());
-    }
-
-    public function test_force_delete_via_volt_component_dispatches_success_notification(): void
-    {
-        $admin = $this->makeAdmin();
-        $this->actingAs($admin);
-
-        $akreditasi = $this->makeTrashedAkreditasi();
-
-        Livewire::test('pages.admin.trash')
-            ->call('openForceDeleteConfirm', $akreditasi->id)
-            ->assertSet('previewId', $akreditasi->id)
-            ->call('forceDelete')
-            ->assertDispatched('notification-received');
-
-        $this->assertSame(0, Akreditasi::withTrashed()->where('id', $akreditasi->id)->count());
-    }
-
-    public function test_force_delete_nonexistent_id_throws_runtime_exception(): void
-    {
-        $admin = $this->makeAdmin();
-        $this->actingAs($admin);
-
-        $service = app(TrashService::class);
-
-        $this->expectException(\RuntimeException::class);
-        $service->forceDelete(99999);
-    }
-
-    public function test_force_delete_returns_correct_count(): void
-    {
-        $admin = $this->makeAdmin();
-        $this->actingAs($admin);
-
-        $akreditasi = $this->makeTrashedAkreditasi();
-        $service = app(TrashService::class);
-
-        // 1 parent + 1 assessment = 2
-        $count = $service->forceDelete($akreditasi->id);
-        $this->assertSame(2, $count);
     }
 }

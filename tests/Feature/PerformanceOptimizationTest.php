@@ -58,7 +58,7 @@ class PerformanceOptimizationTest extends TestCase
 
     public function test_detail_page_polling_is_visible_and_throttled(): void
     {
-        $this->markTestSkipped('Detail pages migrated from Livewire to Blade — no wire:poll on views.');
+        $this->markTestSkipped('Detail pages migrated to Blade — no polling contract remains.');
     }
 
     public function test_asesor_dashboard_uses_single_aggregate_status_query(): void

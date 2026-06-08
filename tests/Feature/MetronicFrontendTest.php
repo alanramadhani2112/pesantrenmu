@@ -169,7 +169,7 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('form-check form-check-custom form-check-solid', $html);
         $this->assertStringContainsString('form-check-input h-22px w-22px', $html);
         $this->assertStringContainsString('data-ui-table-checkbox="metronic"', $html);
-        $this->assertStringContainsString('wire:model.live="selectedIds"', $html);
+        $this->assertStringContainsString('x-model="selectedIds"', $html);
         $this->assertStringContainsString('data-ui-file-upload="metronic"', $html);
     }
 
@@ -268,7 +268,7 @@ class MetronicFrontendTest extends TestCase
         $header = file_get_contents(resource_path('views/components/layout/app-header.blade.php'));
         $sidebar = file_get_contents(resource_path('views/components/layout/app-sidebar.blade.php'));
 
-        $this->assertStringContainsString('<livewire:layout.notification-menu', $header);
+        $this->assertStringContainsString('@include(\'components.layout.notification-menu\')', $header);
         $this->assertStringNotContainsString('spm-header-user-menu', $header);
         $this->assertStringNotContainsString('aria-label="Menu pengguna"', $header);
         $this->assertStringContainsString('data-kt-menu-trigger="click"', $header);
@@ -326,7 +326,6 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('.spm-navigate-progress', $css);
         $this->assertStringContainsString('body.spm-is-navigating .spm-navigate-progress', $css);
         $this->assertStringContainsString('.spm-navigate-progress-bar', $css);
-        $this->assertStringContainsString('livewire:navigate', $appJs);
         $this->assertStringContainsString('showPageLoadingOverlay', $appJs);
         $this->assertStringContainsString('hidePageLoadingOverlay', $appJs);
         $this->assertStringContainsString('spm-is-navigating', $appJs);
@@ -425,7 +424,7 @@ class MetronicFrontendTest extends TestCase
 
 
 
-    public function test_priority_livewire_render_markup_does_not_contain_direct_queries(): void
+    public function test_render_markup_does_not_contain_direct_queries(): void
     {
         $views = [
             'resources/views/asesor/akreditasi-detail.blade.php',
@@ -438,7 +437,7 @@ class MetronicFrontendTest extends TestCase
                 : $contents;
 
             foreach (['::query(', 'DB::', 'auth()->user()->', '->latest()->first(', '->paginate('] as $forbidden) {
-                $this->assertStringNotContainsString($forbidden, $renderMarkup, "{$path} should keep data access in the Livewire/service layer, not render markup.");
+                $this->assertStringNotContainsString($forbidden, $renderMarkup, "{$path} should keep data access in the service layer, not render markup.");
             }
         }
     }
@@ -474,7 +473,7 @@ class MetronicFrontendTest extends TestCase
         }
     }
 
-    public function test_instrumen_tabs_use_nested_partials_and_livewire_view_helpers(): void
+    public function test_instrumen_tabs_use_nested_partials_and_view_helpers(): void
     {
         $this->markTestSkipped('Instrumen tab migrated to single-file Blade view — no nested partials remain.');
     }
@@ -594,8 +593,8 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('spm-table-search-input', $html);
         $this->assertStringContainsString('entri', $html);
         $this->assertStringContainsString('Ekspor Data', $html);
-        $this->assertStringContainsString('wire:model.live.debounce.300ms="search"', $html);
-        $this->assertStringContainsString("wire:click=\"sortBy('created_at')\"", $html);
+        $this->assertStringContainsString('name="search"', $html);
+        $this->assertStringContainsString('method="GET"', $html);
     }
 
     public function test_legacy_datatable_components_render_through_metronic_table_adapter(): void
@@ -629,7 +628,7 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('data-ui-table-per-page="metronic"', $html);
         $this->assertStringContainsString('spm-table-dom-row', $html);
         $this->assertStringNotContainsString('spm-table-dom-end', $html);
-        $this->assertStringContainsString("wire:click=\"sortBy('name')\"", $html);
+        $this->assertStringContainsString('sortField="name"', $html);
     }
 
     public function test_datatable_can_render_metronic_footer_length_menu(): void
@@ -768,20 +767,18 @@ class MetronicFrontendTest extends TestCase
             }
         }
 
+        // Legacy profile views removed; testing profile.edit.blade.php instead
         $views = [
-            'resources/views/livewire/profile/delete-user-form.blade.php',
+            'resources/views/profile/edit.blade.php',
         ];
 
         foreach ($views as $path) {
             $view = file_get_contents(base_path($path));
 
-            $this->assertStringContainsString('<x-ui.modal-header', $view, "{$path} should use the reusable modal header.");
-            $this->assertStringContainsString('<x-ui.modal-body', $view, "{$path} should use the reusable modal body.");
-            $this->assertStringContainsString('<x-ui.modal-footer', $view, "{$path} should use the reusable modal footer.");
+            $this->assertStringContainsString('<x-app-layout', $view, "{$path} should use the app layout.");
             $this->assertStringContainsString('<x-ui.form-field', $view, "{$path} should use reusable form fields.");
-            $this->assertStringNotContainsString('<x-input-label', $view, "{$path} should not use legacy Breeze input labels inside standardized modals.");
-            $this->assertStringNotContainsString('<x-text-input', $view, "{$path} should not use legacy Breeze text inputs inside standardized modals.");
-            $this->assertStringNotContainsString('<textarea wire:model', $view, "{$path} should use x-ui.textarea.");
+            $this->assertStringNotContainsString('<x-input-label', $view, "{$path} should not use legacy Breeze input labels.");
+            $this->assertStringNotContainsString('<x-text-input', $view, "{$path} should not use legacy Breeze text inputs.");
         }
     }
 
@@ -832,9 +829,8 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('btn btn-danger', $script);
         $this->assertStringNotContainsString('confirmButtonColor', $script);
 
-        $paths = collect(glob(resource_path('views/livewire/pages/**/*.blade.php')))
-            ->merge(glob(resource_path('views/livewire/pages/*.blade.php')))
-            ->merge(glob(resource_path('views/livewire/profile/*.blade.php')))
+        $paths = collect(glob(resource_path('views/**/*.blade.php')) ?: [])
+            ->merge(glob(resource_path('views/*.blade.php')) ?: [])
             ->unique();
 
         foreach ($paths as $path) {

@@ -19,7 +19,7 @@ class AuditTimelineUiTest extends TestCase
 
     public function test_audit_timeline_uses_metronic_enterprise_stepper_contract(): void
     {
-        $view = file_get_contents(resource_path('views/livewire/pages/admin/audit-timeline.blade.php'));
+        $view = file_get_contents(resource_path('views/admin/akreditasi/detail/tabs/audit-trail.blade.php'));
         $css = $this->metronicOverrideCss();
 
         $this->assertStringContainsString('data-ui-audit-timeline="metronic"', $view);
