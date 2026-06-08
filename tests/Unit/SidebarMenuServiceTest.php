@@ -124,7 +124,7 @@ class SidebarMenuServiceTest extends TestCase
         $kategoriItem = collect($items)->firstWhere('key', 'master_kategori_dokumen');
 
         $this->assertNotNull($kategoriItem);
-        $this->assertSame('admin.master-kategori-dokumen', $kategoriItem['route']);
+        $this->assertSame('admin.master-kategori-dokumen.index', $kategoriItem['route']);
         $this->assertSame('Kategori Dokumen', $kategoriItem['label']);
     }
 
@@ -341,9 +341,9 @@ class SidebarMenuServiceTest extends TestCase
         $roleItem = collect($system['items'])->firstWhere('key', 'role_sistem');
         $rolePermItem = collect($system['items'])->firstWhere('key', 'hak_akses');
 
-        $this->assertSame('roles.index', $roleItem['route']);
+        $this->assertSame('admin.roles.index', $roleItem['route']);
         $this->assertSame('Role Sistem', $roleItem['label']);
-        $this->assertSame('admin.master-role-permission', $rolePermItem['route']);
+        $this->assertSame('admin.role-permission.index', $rolePermItem['route']);
         $this->assertSame('Hak Akses', $rolePermItem['label']);
     }
 
