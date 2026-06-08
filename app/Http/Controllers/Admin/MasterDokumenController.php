@@ -20,8 +20,8 @@ class MasterDokumenController extends Controller
 
         $search = $request->input('search', '');
         $perPage = $request->integer('perPage', 10);
-        $sortField = $request->input('sort', 'created_at');
-        $sortAsc = $request->input('direction', 'asc') === 'asc';
+        $sortField = $request->input('sortField', 'created_at');
+        $sortAsc = $request->input('sortAsc', 'false') === 'true';
 
         $documents = $this->service->getPaginatedDocuments($search, $perPage, $sortField, $sortAsc);
         $categories = DocumentCategory::active()->ordered()->get();

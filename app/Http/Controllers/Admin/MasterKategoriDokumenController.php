@@ -16,8 +16,8 @@ class MasterKategoriDokumenController extends Controller
 
         $search = $request->input('search', '');
         $perPage = $request->integer('perPage', 10);
-        $sortField = $request->input('sort', 'sort_order');
-        $sortAsc = $request->input('direction', 'asc') === 'asc';
+        $sortField = $request->input('sortField', 'sort_order');
+        $sortAsc = $request->input('sortAsc', 'true') === 'true';
 
         $categories = DocumentCategory::query()
             ->when($search, fn ($q) => $q->where(function ($qq) use ($search) {
