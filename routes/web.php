@@ -313,6 +313,7 @@ Route::middleware(['auth', 'verified', 'role:pesantren'])
 
         Route::get('akreditasi/{uuid}', [App\Http\Controllers\Pesantren\AkreditasiDetailController::class, 'show'])
             ->name('akreditasi-detail');
+        Route::post('akreditasi/submit-perbaikan', [App\Http\Controllers\Pesantren\AkreditasiDetailController::class, 'submitPerbaikan'])->name('akreditasi.submit-perbaikan');
         Route::post('akreditasi/upload-kartu-kendali', [App\Http\Controllers\Pesantren\AkreditasiDetailController::class, 'uploadKartuKendali'])
             ->name('akreditasi.upload-kartu-kendali');
     });
@@ -411,3 +412,4 @@ Route::middleware('auth')->prefix('_api')->name('api.')->group(function () {
 
 require __DIR__.'/auth.php';
 require __DIR__.'/sso/sso.php';
+

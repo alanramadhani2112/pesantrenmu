@@ -382,10 +382,8 @@ class PesantrenService
     {
         $pesantren = $this->getProfile($userId);
         if ($pesantren->is_locked) {
-            // Check if 'profil' section is unlocked via rejection
-            $rejectionService = app(RejectionService::class);
-            $akreditasi = Akreditasi::where('user_id', $userId)->where('status', 5)->latest()->first();
-            if (! $akreditasi || ! $rejectionService->isSectionUnlocked($akreditasi->id, 'profil')) {
+            $akreditasi = Akreditasi::where('user_id', $userId)->whereIn('status', [5, 4])->latest()->first();
+            if (! $akreditasi) {
                 return false;
             }
         }
@@ -435,15 +433,32 @@ class PesantrenService
     {
         $pesantren = $this->getProfile($userId);
         if ($pesantren->is_locked) {
-            // Check if any EDPM butir is unlocked via rejection
-            $rejectionService = app(RejectionService::class);
-            $akreditasi = Akreditasi::where('user_id', $userId)->where('status', 5)->latest()->first();
+            $akreditasi = Akreditasi::where('user_id', $userId)->whereIn('status', [5, 4])->latest()->first();
             if (! $akreditasi) {
                 return false;
             }
 
-            return DB::transaction(function () use ($userId, $evaluasis, $links, $catatans, $rejectionService, $akreditasi) {
-                // Filter to only allow unlocked butir entries
+            return DB::transaction(function () use ($userId, $evaluasis, $links, $catatans, $akreditasi) {
+                // Status 5 = Assessment Awal: save ALL entries without rejection filter
+                if ((int) $akreditasi->status === 5) {
+                    foreach ($evaluasis as $butirId => $isian) {
+                        $link = $links[$butirId] ?? null;
+                        $this->edpmRepository->saveEdpm(
+                            ['user_id' => $userId, 'butir_id' => $butirId],
+                            ['isian' => $isian === '' ? null : $isian, 'link' => $link === '' ? null : $link]
+                        );
+                    }
+                    foreach ($catatans as $komponenId => $catatan) {
+                        $this->edpmRepository->saveCatatan(
+                            ['user_id' => $userId, 'komponen_id' => $komponenId],
+                            ['catatan' => $catatan]
+                        );
+                    }
+                    return true;
+                }
+
+                // Status 4: filter by rejection unlock
+                $rejectionService = app(RejectionService::class);
                 $allIds = array_unique(array_merge(array_keys($evaluasis), array_keys($links)));
                 $hasUnlocked = false;
                 foreach ($allIds as $butirId) {
@@ -457,15 +472,12 @@ class PesantrenService
                         );
                     }
                 }
-
-                // Save catatans for komponen that have at least one unlocked butir
                 foreach ($catatans as $komponenId => $catatan) {
                     $this->edpmRepository->saveCatatan(
                         ['user_id' => $userId, 'komponen_id' => $komponenId],
                         ['catatan' => $catatan]
                     );
                 }
-
                 return $hasUnlocked;
             });
         }
@@ -577,14 +589,22 @@ class PesantrenService
     {
         $pesantren = $this->getProfile($userId);
         if ($pesantren->is_locked) {
-            // Check if any IPM sub-item is unlocked via rejection
-            $rejectionService = app(RejectionService::class);
-            $akreditasi = Akreditasi::where('user_id', $userId)->where('status', 5)->latest()->first();
+            $akreditasi = Akreditasi::where('user_id', $userId)->whereIn('status', [5, 4])->latest()->first();
             if (! $akreditasi) {
                 return false;
             }
 
-            // Filter data to only allow unlocked sub-items
+            // Status 5 = Assessment Awal: allow all entries
+            if ((int) $akreditasi->status === 5) {
+                return DB::transaction(function () use ($userId, $data) {
+                    $existingIpm = Ipm::where('user_id', $userId)->first();
+                    if ($existingIpm) { $existingIpm->update($data); }
+                    else { Ipm::create(['user_id' => $userId] + $data); }
+                    return true;
+                });
+            }
+
+            // Status 4: filter data to only allow unlocked sub-items
             $ipmSectionMap = [
                 'nsp_file' => 'ipm.nsp',
                 'kurikulum_file' => 'ipm.kurikulum',
@@ -619,10 +639,8 @@ class PesantrenService
     {
         $pesantren = $this->getProfile($userId);
         if ($pesantren->is_locked) {
-            // Check if 'sdm' section is unlocked via rejection
-            $rejectionService = app(RejectionService::class);
-            $akreditasi = Akreditasi::where('user_id', $userId)->where('status', 5)->latest()->first();
-            if (! $akreditasi || ! $rejectionService->isSectionUnlocked($akreditasi->id, 'sdm')) {
+            $akreditasi = Akreditasi::where('user_id', $userId)->whereIn('status', [5, 4])->latest()->first();
+            if (! $akreditasi) {
                 return false;
             }
         }

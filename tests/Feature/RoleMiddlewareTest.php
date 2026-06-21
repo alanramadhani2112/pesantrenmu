@@ -68,7 +68,7 @@ class RoleMiddlewareTest extends TestCase
         $user = User::factory()->create(['role_id' => 1]);
 
         $this->actingAs($user)
-            ->get('/roles')
+            ->get('/admin/roles')
             ->assertForbidden();
     }
 
@@ -77,7 +77,7 @@ class RoleMiddlewareTest extends TestCase
         $user = User::factory()->create(['role_id' => 4]);
 
         $this->actingAs($user)
-            ->get('/roles')
+            ->get('/admin/roles')
             ->assertOk();
     }
 }

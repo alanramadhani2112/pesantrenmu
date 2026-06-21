@@ -30,7 +30,7 @@
         + ($statusCounts['validasi'] ?? 0);
 @endphp
 
-<div data-admin-akreditasi-page="metronic" x-data="{ ...deleteConfirmation(), ...adminManagement() }">
+<div data-admin-akreditasi-page="metronic" x-data="{}">
     <x-slot name="header">{{ __('Akreditasi') }}</x-slot>
 
     <x-ui.index-layout
@@ -290,7 +290,7 @@
 
                             <x-ui.action-menu-item
                                 variant="danger"
-                                x-on:click="confirmDelete({{ $item->id }}, 'delete', 'Pengajuan akreditasi yang dihapus tidak dapat dikembalikan!')"
+                                x-on:click="Swal.fire({ title: 'Hapus data?', text: 'Pengajuan akreditasi yang dihapus tidak dapat dikembalikan!', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, hapus', cancelButtonText: 'Batal', }).then((result) => { if (result.isConfirmed) { document.getElementById('deleteForm').querySelector('input[name=id]').value = {{ $item->id }}; document.getElementById('deleteForm').submit(); } })"
                             >
                                 <x-ui.icon name="trash" class="fs-4" />
                                 Hapus

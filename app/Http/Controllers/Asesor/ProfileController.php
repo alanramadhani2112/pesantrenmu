@@ -34,6 +34,7 @@ class ProfileController extends Controller
             'ijazah_file_upload' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
             'kartu_nbm_file_upload' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
             'password' => 'nullable|min:8',
+            'current_password' => 'required_with:password|current_password',
         ], [
             'required' => ':attribute wajib diisi.',
             'mimes' => ':attribute harus berformat PDF, JPG, JPEG, atau PNG.',
@@ -123,3 +124,4 @@ class ProfileController extends Controller
         return back()->with('error', 'Gagal memperbarui profil asesor.');
     }
 }
+

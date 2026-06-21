@@ -18,7 +18,7 @@
     };
 @endphp
 
-<div x-data="{ ...adminManagement() }">
+<div x-data="{ showAssignModal: false, showDecisionModal: false, decisionType: '', assignAction: '' }">
     <x-slot name="header">{{ __('Detail Banding') }}</x-slot>
 
     <x-ui.page
@@ -61,7 +61,7 @@
                     <x-ui.section-card title="Tindakan">
                         <div class="p-6">
                             @if($banding->status === 'pending')
-                                <x-ui.button type="button" @click="confirmAssignReviewer($wire)" variant="primary" class="w-100 justify-content-center mb-3">
+                                <x-ui.button type="button" @click="assignAction = 'assign'; showAssignModal = true" variant="primary" class="w-100 justify-content-center mb-3">
                                     <x-ui.icon name="profile-user" class="fs-4 me-2" />
                                     Assign Reviewer
                                 </x-ui.button>
@@ -69,16 +69,16 @@
 
                             @if($banding->status === 'under_review')
                                 @if(Auth::id() === $banding->reviewer_id)
-                                    <x-ui.button type="button" @click="confirmBandingDecision($wire, 'accept')" variant="success" class="w-100 justify-content-center mb-3">
+                                    <x-ui.button type="button" @click="decisionType = 'accept'; showDecisionModal = true" variant="success" class="w-100 justify-content-center mb-3">
                                         <x-ui.icon name="check-circle" class="fs-4 me-2" />
                                         Terima Banding
                                     </x-ui.button>
-                                    <x-ui.button type="button" @click="confirmBandingDecision($wire, 'reject')" variant="danger" class="w-100 justify-content-center mb-3">
+                                    <x-ui.button type="button" @click="decisionType = 'reject'; showDecisionModal = true" variant="danger" class="w-100 justify-content-center mb-3">
                                         <x-ui.icon name="cross-circle" class="fs-4 me-2" />
                                         Tolak Banding
                                     </x-ui.button>
                                 @endif
-                                <x-ui.button type="button" @click="confirmReassignReviewer($wire)" variant="warning" class="w-100 justify-content-center">
+                                <x-ui.button type="button" @click="assignAction = 'reassign'; showAssignModal = true" variant="warning" class="w-100 justify-content-center">
                                     <x-ui.icon name="arrows-circle" class="fs-4 me-2" />
                                     Ganti Reviewer
                                 </x-ui.button>
@@ -89,6 +89,50 @@
                             @endif
                         </div>
                     </x-ui.section-card>
+
+                    {{-- Assign/Reassign Reviewer Modal --}}
+                    <div x-show="showAssignModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+                        <div class="min-h-screen flex items-center justify-center p-4">
+                            <div class="fixed inset-0 bg-black/50" @click="showAssignModal = false"></div>
+                            <div class="modal-content bg-white rounded p-6 position-relative w-100 mw-450px">
+                                <h3 class="mb-4" x-text="assignAction === 'assign' ? 'Pilih Reviewer' : 'Pilih Reviewer Baru'"></h3>
+                                <form method="POST" :action="assignAction === 'assign' ? '{{ route('banding.assign-reviewer', $banding->id) }}' : '{{ route('banding.reassign-reviewer', $banding->id) }}'">
+                                    @csrf
+                                    <select name="selectedReviewerId" class="form-select mb-4" required>
+                                        <option value="">-- Pilih Reviewer --</option>
+                                        @foreach($adminUsers as $admin)
+                                            <option value="{{ $admin->id }}">{{ $admin->name }} ({{ $admin->email }})</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <button type="button" class="btn btn-light" @click="showAssignModal = false">Batal</button>
+                                        <button type="submit" class="btn btn-primary" x-text="assignAction === 'assign' ? 'Assign' : 'Ganti'"></button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Decision Modal --}}
+                    <div x-show="showDecisionModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+                        <div class="min-h-screen flex items-center justify-center p-4">
+                            <div class="fixed inset-0 bg-black/50" @click="showDecisionModal = false"></div>
+                            <div class="modal-content bg-white rounded p-6 position-relative w-100 mw-450px">
+                                <h3 class="mb-4" x-text="decisionType === 'accept' ? 'Terima Banding' : 'Tolak Banding'"></h3>
+                                <form method="POST" action="{{ route('banding.submit-decision', $banding->id) }}">
+                                    @csrf
+                                    <input type="hidden" name="decisionType" x-bind:value="decisionType">
+                                    <textarea name="keputusan" class="form-control mb-4" rows="4" required minlength="10"
+                                        placeholder="Tulis alasan keputusan..."></textarea>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <button type="button" class="btn btn-light" @click="showDecisionModal = false">Batal</button>
+                                        <button type="submit" class="btn" :class="decisionType === 'accept' ? 'btn-success' : 'btn-danger'"
+                                            x-text="decisionType === 'accept' ? 'Terima' : 'Tolak'"></button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
 
                     {{-- Reviewer info --}}
                     @if($banding->reviewer)

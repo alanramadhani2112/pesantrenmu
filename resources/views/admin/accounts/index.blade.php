@@ -251,6 +251,13 @@ function accountsPage() {
             sso_sync_role: {{ old('sso_sync_role', '1') == '1' ? 'true' : 'false' }},
         },
 
+        init() {
+            this.showModal = this.showModal === 'true';
+            this.isEditing = this.isEditing === 'true';
+            if (this.formData.status !== undefined) this.formData.status = this.formData.status === 'true';
+            if (this.formData.sso_sync_role !== undefined) this.formData.sso_sync_role = this.formData.sso_sync_role === 'true';
+        },
+
         openCreateModal() {
             this.isEditing = false;
             this.formData = { id: '', name: '', email: '', role_id: '', password: '', status: true, sso_sync_role: true };

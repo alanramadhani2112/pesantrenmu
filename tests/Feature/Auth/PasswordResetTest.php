@@ -17,7 +17,7 @@ class PasswordResetTest extends TestCase
         $response = $this->get('/forgot-password');
 
         $response
-            ->assertSee('Reset Password')
+            ->assertSee('Lupa Password')
             ->assertStatus(200);
     }
 

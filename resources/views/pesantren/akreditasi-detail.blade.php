@@ -33,6 +33,27 @@
         <x-ui.alert variant="danger" title="Gagal" class="mb-4">{{ session('error') }}</x-ui.alert>
     @endif
 
+    
+    @php $activeRejection = $rejectionStatus['active'] ?? null; @endphp
+    @if($activeRejection && $activeRejection->status === 'pending')
+        <div class="alert alert-dismissible bg-light-warning border border-warning border-dashed d-flex flex-wrap align-items-center justify-content-between gap-3 p-5 mb-6">
+            <div class="d-flex align-items-center gap-3">
+                <i class="ki-outline ki-information-2 fs-2 text-warning"></i>
+                <div>
+                    <div class="fw-bold text-gray-900">Perbaikan Diperlukan</div>
+                    <div class="fs-7 text-muted">
+                        Batas perbaikan: {{ $activeRejection->perbaikan_deadline?->format('d M Y') ?? 'Segera' }}.
+                        Silakan perbaiki bagian yang ditolak, lalu klik <strong>Kirim Perbaikan</strong>.
+                    </div>
+                </div>
+            </div>
+            <form method="POST" action="{{ route('pesantren.akreditasi.submit-perbaikan') }}" data-swal-confirm="true" data-swal-title="Kirim perbaikan?" data-swal-text="Pastikan semua bagian yang ditolak sudah diperbaiki." data-swal-icon="question" data-swal-confirm-button="Ya, kirim">
+                @csrf
+                <input type="hidden" name="akreditasi_id" value="{{ $akreditasi->id }}">
+                <button type="submit" class="btn btn-warning">Kirim Perbaikan</button>
+            </form>
+        </div>
+    @endif
     {{-- Info Bar --}}
     <div class="row g-5 mb-6">
         <div class="col-lg-4">
@@ -367,3 +388,4 @@ document.getElementById('btnUploadKartuKendali')?.addEventListener('click', func
 </script>
 @endpush
 @endsection
+

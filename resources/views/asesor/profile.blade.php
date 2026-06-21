@@ -445,9 +445,15 @@
             </x-ui.section-card>
 
             {{-- D. Ganti Password --}}
-            <x-ui.section-card title="D. Ganti Password" subtitle="Kosongkan jika tidak ingin mengubah password.">
+            <x-ui.section-card title="D. Ganti Password" subtitle="Isi password saat ini untuk mengubah ke password baru.">
                 <div class="p-6">
                     <div class="row g-5">
+                        <div class="col-md-6">
+                            <x-ui.form-field label="Password Saat Ini">
+                                <x-ui.input type="password" name="current_password" placeholder="Masukkan password saat ini" />
+                                @error('current_password') <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
+                            </x-ui.form-field>
+                        </div>
                         <div class="col-md-6">
                             <x-ui.form-field label="Password Baru">
                                 <x-ui.input type="password" name="password" placeholder="Minimal 8 karakter" />
@@ -738,3 +744,4 @@ function asesorProfileEdit() {
 @endif
 
 @endsection
+

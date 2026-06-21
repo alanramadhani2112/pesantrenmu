@@ -153,18 +153,19 @@ class RejectionServiceUnitTest extends TestCase
     }
 
     #[Test]
-    public function profile_update_service_blocks_when_profil_not_unlocked(): void
+    public function profile_update_service_allows_during_assessment_phase(): void
     {
+        // During status 5 (Assessment Awal), all sections are editable regardless of rejection
         $setup = $this->createLockedPesantrenSetup(['ipm.nsp']);
 
         $result = $this->pesantrenService->updateProfile(
             $setup['pesantrenUser']->id,
-            ['nama_pesantren' => 'Should Not Update']
+            ['nama_pesantren' => 'Updated During Assessment']
         );
 
-        $this->assertFalse($result);
+        $this->assertTrue($result);
         $setup['pesantren']->refresh();
-        $this->assertNotEquals('Should Not Update', $setup['pesantren']->nama_pesantren);
+        $this->assertEquals('Updated During Assessment', $setup['pesantren']->nama_pesantren);
     }
 
     #[Test]
@@ -211,14 +212,14 @@ class RejectionServiceUnitTest extends TestCase
     }
 
     #[Test]
-    public function ipm_update_service_allows_only_unlocked_sub_items(): void
+    public function ipm_update_service_saves_all_during_assessment(): void
     {
+        // During status 5 (Assessment Awal), ALL IPM items are saved regardless of rejection filter
         $setup = $this->createLockedPesantrenSetup(['ipm.nsp', 'ipm.kurikulum']);
 
         // Create IPM record for the user
         Ipm::create(['user_id' => $setup['pesantrenUser']->id]);
 
-        // Try to update all sub-items — only nsp and kurikulum should be allowed
         $result = $this->pesantrenService->updateIpm(
             $setup['pesantrenUser']->id,
             [
@@ -231,17 +232,18 @@ class RejectionServiceUnitTest extends TestCase
 
         $this->assertTrue($result);
 
-        // Verify only unlocked items were updated
+        // During Assessment, ALL items are saved
         $ipm = Ipm::where('user_id', $setup['pesantrenUser']->id)->first();
         $this->assertEquals('ipm_docs/new_nsp.pdf', $ipm->nsp_file);
         $this->assertEquals('ipm_docs/new_kurikulum.pdf', $ipm->kurikulum_file);
-        $this->assertNull($ipm->buku_ajar_file); // Should not be updated
-        $this->assertNull($ipm->lulus_santri_file); // Should not be updated
+        $this->assertEquals('ipm_docs/new_buku_ajar.pdf', $ipm->buku_ajar_file);
+        $this->assertEquals('ipm_docs/new_lulus_santri.pdf', $ipm->lulus_santri_file);
     }
 
     #[Test]
-    public function ipm_update_service_blocks_all_when_no_ipm_items_unlocked(): void
+    public function ipm_update_service_allows_all_during_assessment_regardless_of_rejection(): void
     {
+        // During status 5 (Assessment Awal), ALL sections are editable regardless of which sections were rejected
         $setup = $this->createLockedPesantrenSetup(['profil', 'sdm']);
 
         // Create IPM record
@@ -249,10 +251,10 @@ class RejectionServiceUnitTest extends TestCase
 
         $result = $this->pesantrenService->updateIpm(
             $setup['pesantrenUser']->id,
-            ['nsp_file' => 'ipm_docs/should_not_update.pdf']
+            ['nsp_file' => 'ipm_docs/updated_during_assessment.pdf']
         );
 
-        $this->assertFalse($result);
+        $this->assertTrue($result);
     }
 
     #[Test]

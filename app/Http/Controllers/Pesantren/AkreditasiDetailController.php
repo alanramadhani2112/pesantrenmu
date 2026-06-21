@@ -15,7 +15,8 @@ class AkreditasiDetailController extends Controller
     public function __construct(
         private PesantrenService $pesantrenService,
         private BandingService $bandingService,
-        private RejectionService $rejectionService
+        private RejectionService $rejectionService,
+        private AkreditasiWorkflowService $workflowService
     ) {}
 
     public function show(string $uuid, Request $request)
@@ -24,10 +25,15 @@ class AkreditasiDetailController extends Controller
 
         $data = $this->pesantrenService->getAkreditasiDetail($uuid, Auth::id());
 
+        // Get rejection status for the akreditasi
+        $akreditasi = \App\Models\Akreditasi::where('uuid', $uuid)->firstOrFail();
+        $rejectionStatus = $this->rejectionService->getRejectionStatus($akreditasi->id);
+
         $activeTab = $request->input('tab', 'profil');
 
         return view('pesantren.akreditasi-detail', array_merge($data, [
             'activeTab' => $activeTab,
+            'rejectionStatus' => $rejectionStatus,
         ]));
     }
 
@@ -62,5 +68,25 @@ class AkreditasiDetailController extends Controller
 
         Storage::disk('public')->delete($filePath);
         return back()->with('error', 'Gagal menyimpan kartu kendali.');
+    }
+
+
+    public function submitPerbaikan(Request $request)
+    {
+        abort_unless(auth()->user()->isPesantren(), 403);
+
+        $validated = $request->validate([
+            'akreditasi_id' => 'required|integer',
+        ]);
+
+        try {
+            $this->workflowService->submitPerbaikan(
+                $validated['akreditasi_id'],
+                Auth::id()
+            );
+            return back()->with('success', 'Perbaikan berhasil dikirim. Asesor akan meninjau ulang.');
+        } catch (\DomainException $e) {
+            return back()->with('error', $e->getMessage());
+        }
     }
 }

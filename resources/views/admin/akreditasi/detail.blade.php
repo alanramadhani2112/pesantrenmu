@@ -60,7 +60,7 @@
     title="Detail Akreditasi"
     subtitle="{{ $pesantren?->nama_pesantren ?? $akreditasi->user->name }}"
     class="spm-detail-page"
-    x-data="{ activeTab: '{{ $activeTab }}', ...adminManagement() }"
+    x-data="{ activeTab: '{{ $activeTab }}' }"
 >
     <x-akreditasi.presence-indicator :akreditasi-id="$akreditasi->id" />
     <x-slot:toolbar>

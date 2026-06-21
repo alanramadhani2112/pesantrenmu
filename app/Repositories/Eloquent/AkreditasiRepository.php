@@ -92,10 +92,12 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
             ->where('asesor_id', $asesorId);
 
         if ($search) {
-            $query->whereHas('akreditasi.user.pesantren', function ($q) use ($search) {
-                $q->where('nama_pesantren', 'like', '%'.$search.'%');
-            })->orWhereHas('akreditasi.user', function ($q) use ($search) {
-                $q->where('name', 'like', '%'.$search.'%');
+            $query->where(function ($query) use ($search) {
+                $query->whereHas('akreditasi.user.pesantren', function ($q) use ($search) {
+                    $q->where('nama_pesantren', 'like', '%'.$search.'%');
+                })->orWhereHas('akreditasi.user', function ($q) use ($search) {
+                    $q->where('name', 'like', '%'.$search.'%');
+                });
             });
         }
 

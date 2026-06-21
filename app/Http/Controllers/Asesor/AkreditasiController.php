@@ -128,6 +128,8 @@ class AkreditasiController extends Controller
             return response()->json(['error' => 'Data tidak ditemukan'], 404);
         }
 
+        Gate::authorize('view', $akreditasi);
+
         return response()->json([
             'pesantren' => $akreditasi->pesantren->nama ?? $akreditasi->pesantren->user->name ?? '-',
             'catatans' => $akreditasi->catatans->map(fn ($c) => [

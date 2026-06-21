@@ -175,7 +175,7 @@ function failedNotificationPage() {
                 if (result.isConfirmed) {
                     const form = document.createElement('form');
                     form.method = 'POST';
-                    form.action = route('admin.failed-notifications.retry', '__ID__').replace('__ID__', id);
+                    form.action = route('admin.failed-notifications.retry', { id: id });
                     form.innerHTML = `@csrf`;
                     document.body.appendChild(form);
                     form.submit();
@@ -194,7 +194,7 @@ function failedNotificationPage() {
                 if (result.isConfirmed) {
                     const form = document.createElement('form');
                     form.method = 'POST';
-                    form.action = route('admin.failed-notifications.dismiss', '__ID__').replace('__ID__', id);
+                    form.action = route('admin.failed-notifications.dismiss', { id: id });
                     form.innerHTML = `@csrf`;
                     document.body.appendChild(form);
                     form.submit();

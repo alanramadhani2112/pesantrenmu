@@ -7,6 +7,8 @@ use App\Models\Asesor;
 use App\Models\Assessment;
 use App\Models\Role;
 use App\Models\User;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -20,6 +22,8 @@ class AsesorAkreditasiMenuContextTest extends TestCase
         parent::setUp();
         $this->withoutVite();
         $this->seed(RoleSeeder::class);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RolePermissionSeeder::class);
     }
 
     public function test_default_page_uses_general_task_context(): void
@@ -75,7 +79,29 @@ class AsesorAkreditasiMenuContextTest extends TestCase
             ->assertSee('Lihat Detail');
     }
 
-    private function createAssignedAssessment(int $status): Asesor
+    public function test_search_results_stay_scoped_to_assigned_asesor(): void
+    {
+        $asesor = $this->createAssignedAssessment(Akreditasi::STATUS_ASSESSMENT, 'Pesantren Yang Ditugaskan');
+        $this->createAssignedAssessment(Akreditasi::STATUS_ASSESSMENT, 'Pesantren Bocor Dari Asesor Lain');
+
+        $this->actingAs($asesor->user)
+            ->get('/asesor/akreditasi?search=Bocor')
+            ->assertOk()
+            ->assertDontSee('Pesantren Bocor Dari Asesor Lain');
+    }
+
+    public function test_asesor_catatan_endpoint_requires_assignment(): void
+    {
+        $asesor = $this->createAssignedAssessment(Akreditasi::STATUS_ASSESSMENT, 'Pesantren Yang Ditugaskan');
+        $otherAsesor = $this->createAssignedAssessment(Akreditasi::STATUS_ASSESSMENT, 'Pesantren Asesor Lain');
+        $otherAkreditasi = $otherAsesor->assessments()->first()->akreditasi;
+
+        $this->actingAs($asesor->user)
+            ->getJson('/asesor/akreditasi/catatan/'.$otherAkreditasi->id)
+            ->assertForbidden();
+    }
+
+    private function createAssignedAssessment(int $status, string $pesantrenName = 'Pesantren Test'): Asesor
     {
         $asesorUser = User::factory()->create(['role_id' => Role::ID_ASESOR]);
         $asesor = Asesor::create([
@@ -84,7 +110,10 @@ class AsesorAkreditasiMenuContextTest extends TestCase
             'nama_tanpa_gelar' => 'Asesor Test',
         ]);
 
-        $pesantrenUser = User::factory()->create(['role_id' => Role::ID_PESANTREN]);
+        $pesantrenUser = User::factory()->create([
+            'name' => $pesantrenName,
+            'role_id' => Role::ID_PESANTREN,
+        ]);
         $akreditasi = Akreditasi::create([
             'user_id' => $pesantrenUser->id,
             'status' => $status,
@@ -98,6 +127,6 @@ class AsesorAkreditasiMenuContextTest extends TestCase
             'tanggal_berakhir' => now()->addDays(7)->toDateString(),
         ]);
 
-        return $asesor->load('user');
+        return $asesor->load('user', 'assessments.akreditasi');
     }
 }

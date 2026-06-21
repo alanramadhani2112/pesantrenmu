@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -9,13 +10,20 @@ class RegistrationTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->seed(RoleSeeder::class);
+    }
+
     public function test_registration_screen_can_be_rendered(): void
     {
         $response = $this->get('/register');
 
         $response
             ->assertOk()
-            ->assertSee('Buat Akun Baru');
+            ->assertSee('Pendaftaran Akun');
     }
 
     public function test_new_users_can_register(): void
@@ -23,8 +31,8 @@ class RegistrationTest extends TestCase
         $response = $this->post('/register', [
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
         ]);
 
         $this->assertAuthenticated();
