@@ -1,0 +1,113 @@
+# Business Flow Audit Matrix - 29 Juni 2026
+
+## Status Dokumen
+
+Dokumen ini **semi-final untuk baseline audit backend**.
+
+Sudah diisi dengan evidence awal dari source code dan test inti.
+
+Masih perlu finalisasi lanjutan untuk:
+
+- audit view detail per halaman,
+- audit browser nyata per role,
+- verifikasi apakah seluruh gap audit lama masih 100% reproduktif.
+
+## Yang Perlu Difinalisasi
+
+- [x] Isi kolom `Actual` dari code terbaru.
+- [x] Isi `Status` baseline: `Pass`, `Fail`, `Unknown`, atau `Needs Fix`.
+- [x] Isi `Evidence` awal dengan file atau test nyata.
+- [ ] Verifikasi mismatch lewat audit browser nyata.
+- [ ] Tandai flow mana yang jadi batch execute pertama.
+
+## Tujuan
+
+Dokumen ini memetakan **aturan bisnis yang diharapkan** vs **implementasi yang ada** untuk seluruh status akreditasi.
+
+## Cara Pakai
+
+- `Pass` = rule utama sudah terlihat benar dari code/test.
+- `Needs Fix` = ada gap nyata atau audit lama kuat dan masih relevan.
+- `Unknown` = belum cukup bukti dari code/test yang dibaca.
+
+## Matrix Per Status
+
+| Status | Nama Status | Role Utama | Expected Business Rule | Actual | Status | Evidence | Fix |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 6 | Pengajuan | Pesantren | Pesantren hanya bisa submit jika data minimum lengkap | `submitPengajuan()` cek kelengkapan data dan menolak jika masih ada akreditasi aktif status `6..1` | Pass | `app/Services/AkreditasiWorkflowService.php:75`, `app/Http/Controllers/Pesantren/AkreditasiController.php:52` | Tambah/cek HTTP regression submit bila perlu |
+| 5 | Verifikasi Berkas | Admin | Admin review berkas, approve/reject/open review, assign asesor | Action admin tersedia, pakai `Gate::authorize('akreditasi.approve')`, approve minta 2 asesor berbeda, reject minta section + catatan | Pass | `app/Http/Controllers/Admin/AkreditasiDetailController.php:412`, `app/Http/Controllers/Admin/AkreditasiDetailController.php:437`, `app/Services/AkreditasiWorkflowService.php:131`, `app/Services/AkreditasiWorkflowService.php:175`, `app/Services/AkreditasiWorkflowService.php:289` | Tambah regression HTTP penuh per action |
+| 4 | Review Asesor | Asesor | Asesor review substansi dan hanya akses penugasan sendiri | Controller punya action scoring/reject/save/finalize, tapi audit lama menandai flag jadwal visitasi dan action HTTP masih perlu diselaraskan | Needs Fix | `app/Http/Controllers/Asesor/AkreditasiController.php:143`, `app/Http/Controllers/Asesor/AkreditasiController.php:456`, `docs/backend-role-module-audit-plan-2026-06-08.md:804` | Audit dan sinkronkan action flags + regression |
+| 3 | Visitasi | Asesor/Admin | Visitasi hanya bisa dijadwalkan pada state valid | `scheduleVisitasi()` dan `confirmVisitasiSelesai()` ada di workflow service, tapi audit lama menandai kontrak jadwal visitasi masih rawan mismatch | Needs Fix | `app/Services/AkreditasiWorkflowService.php:363`, `app/Services/AkreditasiWorkflowService.php:541`, `docs/backend-role-module-audit-plan-2026-06-08.md:804` | Validasi ulang precondition status + HTTP/view contract |
+| 2 | Penilaian Pasca Visitasi | Asesor | Input nilai dan upload laporan wajib lengkap sebelum finalisasi | Finalisasi asesor ada dan happy path test lulus; test juga membuktikan finalisasi gagal bila dokumen belum lengkap | Pass | `app/Services/AkreditasiWorkflowService.php:626`, `tests/Feature/AkreditasiWorkflow/FullHappyPathTest.php:246`, `tests/Feature/AkreditasiWorkflow/PostVisitasiDocumentsTest.php:1` | Audit UX upload/finalize bila perlu |
+| 1 | Validasi Admin | Admin | Admin input NV, validasi akhir, lalu issue SK jika syarat lengkap | Flow ada, tapi `finalizeAllNv()` set `is_nv_final = true` setelah loop dan kontrak `NV != NK` belum rapat | Needs Fix | `app/Http/Controllers/Admin/AkreditasiDetailController.php:345`, `app/Services/AssessorScoringService.php:1`, `docs/backend-role-module-audit-plan-2026-06-08.md:810`, `docs/backend-role-module-audit-plan-2026-06-08.md:811` | Tutup kontrak reason NV + guard final global |
+| 0 | Terakreditasi | Pesantren/Admin | Pesantren melihat hasil akhir yang diizinkan | README/plan menegaskan pesantren hanya lihat hasil akhir; implementasi UI belum diaudit penuh pada halaman nyata | Unknown | `docs/production-readiness-plan.md:77`, `app/Http/Controllers/Pesantren/AkreditasiController.php:23` | Audit detail page hasil akhir + exposure fields |
+| -1 | Ditolak Final | Pesantren/Admin | Penolakan final tampil benar dan bisa membuka banding bila valid | Jalur reject final ada; pesantren punya action banding dengan validasi alasan minimal 50 karakter | Pass | `app/Http/Controllers/Pesantren/AkreditasiController.php:85`, `app/Services/AkreditasiWorkflowService.php:956` | Audit UI jalur banding dari hasil akhir |
+| -2 | Banding | Pesantren/Admin | Banding hanya pada window valid dan kembali ke state sah | Banding service ada, test banding banyak, dan keputusan kembali ke `1` atau `-1` | Pass | `app/Services/BandingService.php:1`, `tests/Feature/AkreditasiWorkflow/BandingPathTest.php:1`, `tests/Unit/Banding/Property14BandingUniquenessTest.php:1` | Tambah audit HTTP reviewer/decision bila perlu |
+
+## Audit Per Role
+
+### Pesantren
+
+| Flow | Expected | Status | Evidence | Fix |
+| --- | --- | --- | --- | --- |
+| Lengkapi profil/IPM/SDM/EDPM | Semua data minimum terisi sebelum submit | Pass | `app/Services/AkreditasiWorkflowService.php:75` | Pertahankan regression submit |
+| Submit pengajuan | Tidak bisa lintas tenant / bypass | Pass | `app/Http/Controllers/Pesantren/AkreditasiController.php:52` | Audit browser ringan |
+| Perbaikan setelah reject | Hanya section yang valid dibuka | Needs Fix | `docs/backend-role-module-audit-plan-2026-06-08.md:802` | Audit ulang partial unlock dan submit perbaikan |
+| Lihat hasil akhir | Hanya data akhir yang boleh terlihat | Unknown | `docs/production-readiness-plan.md:77` | Audit detail page hasil akhir |
+| Ajukan banding | Hanya pada jendela valid | Pass | `app/Http/Controllers/Pesantren/AkreditasiController.php:85`, `tests/Unit/Banding/Property14BandingUniquenessTest.php:1` | Audit tombol/entry point UI |
+
+### Asesor
+
+| Flow | Expected | Status | Evidence | Fix |
+| --- | --- | --- | --- | --- |
+| Lihat penugasan | Hanya data penugasan sendiri | Pass | policy tests ada di `tests/Unit/Policies/TenantPolicyTest.php:167` | Audit browser ringan |
+| Review substansi | Action sesuai state | Needs Fix | `app/Http/Controllers/Asesor/AkreditasiController.php:143`, `docs/backend-role-module-audit-plan-2026-06-08.md:806` | Tambah regression HTTP inti asesor |
+| Jadwal visitasi | Hanya pada status yang benar | Needs Fix | `docs/backend-role-module-audit-plan-2026-06-08.md:804`, `app/Services/AkreditasiWorkflowService.php:363` | Sinkronkan flag + state gate |
+| Input nilai | Simpan/final konsisten | Pass | `app/Http/Controllers/Asesor/AkreditasiController.php:456`, `tests/Feature/AkreditasiWorkflow/FullHappyPathTest.php:246` | Audit UX/save-final contract |
+| Upload laporan | Wajib lengkap sebelum finalisasi | Pass | `tests/Feature/AkreditasiWorkflow/PostVisitasiDocumentsTest.php:1` | Audit feedback UI |
+
+### Admin
+
+| Flow | Expected | Status | Evidence | Fix |
+| --- | --- | --- | --- | --- |
+| Review berkas | Approve/reject/open review valid | Pass | `app/Http/Controllers/Admin/AkreditasiDetailController.php:412`, `app/Http/Controllers/Admin/AkreditasiDetailController.php:437` | Tambah regression HTTP penuh |
+| Assign/reassign asesor | Valid dan terlacak | Pass | `app/Services/AkreditasiWorkflowService.php:175`, `routes/web.php:138` | Audit stale-state path |
+| Validasi NV | `NV != NK` wajib punya reason | Needs Fix | `docs/backend-role-module-audit-plan-2026-06-08.md:810` | Tambah contract reason dan test |
+| Finalisasi admin | Tidak set final global prematur | Needs Fix | `app/Http/Controllers/Admin/AkreditasiDetailController.php:345` | Validasi semua butir sebelum `is_nv_final=true` |
+| Issue SK | Tidak orphan file jika gagal | Needs Fix | `docs/backend-role-module-audit-plan-2026-06-08.md:812` | Tambah rollback file |
+| Trash ops | Permission mutasi eksplisit | Needs Fix | `docs/backend-role-module-audit-plan-2026-06-08.md:813` | Split permission + gate |
+| Failed notifications | Retry/dismiss tidak terlalu longgar | Needs Fix | `docs/backend-role-module-audit-plan-2026-06-08.md:814` | Split permission + regression |
+
+### Super Admin
+
+| Flow | Expected | Status | Evidence | Fix |
+| --- | --- | --- | --- | --- |
+| Role management | Hanya super admin yang bisa mutasi | Needs Fix | `docs/backend-role-module-audit-plan-2026-06-08.md:817` | Kunci mutation policy |
+| Role inti | Role `1..4` tidak bisa rusak | Needs Fix | `docs/backend-role-module-audit-plan-2026-06-08.md:819` | Tambah guard delete/rename |
+| Permission matrix | Tidak mengaburkan god-mode | Pass | `docs/backend-role-module-audit-plan-2026-06-08.md:96` | Audit browser nanti |
+| Notifikasi operasional | Kebijakan penerima jelas | Needs Fix | `docs/backend-role-module-audit-plan-2026-06-08.md:104` | Putuskan policy admin-area recipients |
+
+## Batch Execute Pertama yang Disarankan
+
+### Batch 1 - P0 Flow Integrity
+
+- [ ] `NV != NK` reason contract
+- [ ] `is_nv_final` premature final guard
+- [x] asesor visitasi state/flag contract
+- [ ] asesor/admin HTTP regression untuk action inti
+- [x] audit hasil akhir pesantren
+
+### Batch 2 - P1 Governance
+
+- [ ] role mutation super-admin-only
+- [ ] role inti protection
+- [ ] trash mutate permission split
+- [ ] failed notification mutate permission split
+- [ ] SK/master document rollback cleanup
+
+### Batch 3 - UI dan Contract Sync
+
+- [ ] route contract frontend-backend
+- [ ] hasil akhir pesantren UI
+- [ ] dashboard polish per role
+

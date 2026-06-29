@@ -327,15 +327,17 @@
         {{-- Hasil Tab --}}
         <x-ui.section-card title="Hasil Akreditasi" class="mb-6">
             <div class="p-6">
-                @if(!empty($hasil))
+                @if(in_array((int) $akreditasi->status, [0, -1, -2, 1], true))
                     <div class="row g-4">
-                        <div class="col-md-6"><strong>Nilai:</strong> {{ $hasil->nilai ?? '-' }}</div>
-                        <div class="col-md-6"><strong>Grade:</strong> {{ $hasil->grade ?? '-' }}</div>
-                        <div class="col-md-6"><strong>Status:</strong> {{ $hasil->status ?? '-' }}</div>
+                        <div class="col-md-6"><strong>Nilai Akhir:</strong> {{ $akreditasi->nilai ?? '-' }}</div>
+                        <div class="col-md-6"><strong>Peringkat:</strong> {{ $akreditasi->peringkat ?? '-' }}</div>
+                        <div class="col-md-6"><strong>Nomor SK:</strong> {{ $akreditasi->nomor_sk ?? '-' }}</div>
+                        <div class="col-md-6"><strong>Masa Berlaku:</strong> {{ $akreditasi->masa_berlaku_akhir ? \Illuminate\Support\Carbon::parse($akreditasi->masa_berlaku_akhir)->format('d M Y') : '-' }}</div>
+                        <div class="col-12"><strong>Rekomendasi:</strong><br>{{ $akreditasi->catatan_rekomendasi_admin ?: '-' }}</div>
                         <div class="col-md-6">
                             <strong>Sertifikat:</strong>
-                            @if(!empty($hasil->sertifikat))
-                                <a href="{{ Storage::url($hasil->sertifikat) }}" target="_blank" class="text-primary">Unduh</a>
+                            @if(!empty($akreditasi->sertifikat_path))
+                                <a href="{{ Storage::url($akreditasi->sertifikat_path) }}" target="_blank" class="text-primary">Unduh Sertifikat</a>
                             @else
                                 -
                             @endif
@@ -349,15 +351,18 @@
 
     @elseif($activeTab === 'banding')
         {{-- Banding Tab --}}
+        @php
+            $banding = $akreditasi->activeBanding ?? $akreditasi->bandings()->latest()->first();
+        @endphp
         <x-ui.section-card title="Informasi Banding" class="mb-6">
             <div class="p-6">
-                @if(!empty($akreditasi->banding))
+                @if(!empty($banding))
                     <div class="row g-4">
-                        <div class="col-12"><strong>Alasan:</strong><br>{{ $akreditasi->banding->alasan ?? '-' }}</div>
-                        <div class="col-md-6"><strong>Status:</strong> {{ $akreditasi->banding->status ?? '-' }}</div>
-                        <div class="col-md-6"><strong>Tanggal:</strong> {{ $akreditasi->banding->created_at ? $akreditasi->banding->created_at->format('d M Y H:i') : '-' }}</div>
-                        @if(!empty($akreditasi->banding->hasil))
-                            <div class="col-12"><strong>Hasil:</strong><br>{{ $akreditasi->banding->hasil }}</div>
+                        <div class="col-12"><strong>Alasan:</strong><br>{{ $banding->alasan ?? '-' }}</div>
+                        <div class="col-md-6"><strong>Status:</strong> {{ $banding->status ?? '-' }}</div>
+                        <div class="col-md-6"><strong>Tanggal:</strong> {{ $banding->created_at ? $banding->created_at->format('d M Y H:i') : '-' }}</div>
+                        @if(!empty($banding->keputusan))
+                            <div class="col-12"><strong>Hasil:</strong><br>{{ $banding->keputusan }}</div>
                         @endif
                     </div>
                 @else
@@ -388,4 +393,5 @@ document.getElementById('btnUploadKartuKendali')?.addEventListener('click', func
 </script>
 @endpush
 @endsection
+
 

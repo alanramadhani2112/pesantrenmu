@@ -376,7 +376,10 @@ class AkreditasiDetailController extends Controller
             return back()->with('error', 'Nilai NV belum dapat disimpan karena Laporan Visitasi Ketua Kelompok belum diunggah.');
         }
 
-        $request->validate(['adminNvs' => 'required|array']);
+        $request->validate([
+            'adminNvs' => 'required|array',
+            'nvReason' => 'nullable|string|max:2000',
+        ]);
 
         $adminId = Auth::id();
         $errors = [];
@@ -414,20 +417,43 @@ class AkreditasiDetailController extends Controller
             return back()->with('error', 'NV belum dapat difinalisasi karena Laporan Visitasi Ketua Kelompok belum diunggah.');
         }
 
-        $request->validate(['adminNvs' => 'required|array']);
+        $request->validate([
+            'adminNvs' => 'required|array',
+            'nvReason' => 'nullable|string|max:2000',
+        ]);
 
         $adminId = Auth::id();
         $finalizedCount = 0;
+        $reason = is_string($request->input('nvReason')) ? trim((string) $request->input('nvReason')) : null;
 
         foreach ($request->input('adminNvs', []) as $butirId => $nvValue) {
             if (is_numeric($nvValue) && $nvValue >= 1 && $nvValue <= 4) {
                 try {
-                    $this->scoringService->saveNV($akreditasi->id, $adminId, (int) $butirId, (int) $nvValue, true);
+                    $this->scoringService->saveNV($akreditasi->id, $adminId, (int) $butirId, (int) $nvValue, true, $reason);
                     $finalizedCount++;
                 } catch (\App\Exceptions\ImmutableValueException $e) {
                     $finalizedCount++;
+                } catch (\DomainException $e) {
+                    return back()->with('error', $e->getMessage());
                 }
             }
+        }
+
+        if ($finalizedCount === 0) {
+            return back()->with('error', 'Tidak ada NV valid yang dikirim untuk difinalisasi.');
+        }
+
+        $expectedFinalCount = \App\Models\AkreditasiEdpm::where('akreditasi_id', $akreditasi->id)
+            ->whereNotNull('nk')
+            ->count();
+
+        $actualFinalCount = \App\Models\AkreditasiEdpm::where('akreditasi_id', $akreditasi->id)
+            ->whereNotNull('nv')
+            ->where('is_final', true)
+            ->count();
+
+        if ($actualFinalCount < $expectedFinalCount) {
+            return back()->with('error', "Finalisasi NV belum lengkap ({$actualFinalCount}/{$expectedFinalCount} butir). Lengkapi alasan perubahan NV dan semua nilai final terlebih dahulu.");
         }
 
         $akreditasi->update(['is_nv_final' => true]);
@@ -664,3 +690,4 @@ class AkreditasiDetailController extends Controller
         }
     }
 }
+

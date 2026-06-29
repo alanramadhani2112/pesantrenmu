@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\BandingService;
 use App\Services\PesantrenService;
 use App\Services\RejectionService;
+use App\Services\AkreditasiWorkflowService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -90,3 +91,4 @@ class AkreditasiDetailController extends Controller
         }
     }
 }
+
