@@ -21,7 +21,7 @@ Dokumen ini belum final penuh karena audit UI dashboard role masih belum diisi d
 
 ## Keputusan Baseline
 
-- Baseline awal 78% direvisi menjadi **81%** setelah penutupan baseline pada visitasi dan hasil akhir pesantren.
+- Baseline awal 78% direvisi menjadi **82%** setelah penutupan baseline visitasi, hasil akhir pesantren, dan tambahan HTTP regression inti admin/asesor.
 - Setelah dua audit terakhir, baseline ini masih masuk akal:
   - flow inti memang sudah cukup kuat,
   - beberapa area governance dan HTTP contract memang masih besar gap-nya,
@@ -47,14 +47,14 @@ MVP dianggap hampir selesai bila:
 | Area | Bobot | Nilai Saat Ini | Skor Bobot | Catatan |
 | --- | ---: | ---: | ---: | --- |
 | Workflow inti akreditasi | 25 | 90 | 22.5 | Status `6`, `5`, `2`, `-1`, `-2` baseline pass |
-| Pesantren flow | 10 | 72 | 7.2 | Hasil akhir masih `Unknown`, perbaikan masih perlu audit ulang |
-| Asesor flow | 12 | 74 | 8.88 | Status `3` dan `4` masih butuh fix |
+| Pesantren flow | 10 | 80 | 8 | Hasil akhir baseline pass; perbaikan masih perlu audit ulang |
+| Asesor flow | 12 | 82 | 9.84 | Visitasi baseline pass; beberapa regression kecil masih tersisa |
 | Admin flow | 18 | 68 | 12.24 | `NV`, final flag, SK rollback, action POST masih kritis |
 | Super Admin governance | 10 | 65 | 6.5 | Role mutation dan role inti belum rapat |
 | Auth + security baseline | 10 | 85 | 8.5 | Test inti lolos |
 | Frontend dashboard role | 10 | 70 | 7 | Belum diaudit nyata per halaman |
 | Livewire removal cleanliness | 5 | 90 | 4.5 | Runtime bersih, residue tinggal dokumentasi |
-| **Total** | **100** |  | **80.84** | Dibulatkan jadi baseline baru **81%** |
+| **Total** | **100** |  | **82.10** | Dibulatkan jadi baseline baru **82%** |
 
 ## Target Skor 98%
 
@@ -76,9 +76,9 @@ MVP dianggap hampir selesai bila:
 | Item | Status | Catatan |
 | --- | --- | --- |
 | Kontrak `NV != NK` + reason | Needs Fix | Gap nyata di Validasi Admin |
-| HTTP regression action inti per role | Needs Fix | Khusus admin/asesor masih kurang |
+| HTTP regression action inti per role | In Progress | Banyak action inti admin/asesor sudah punya HTTP regression, tersisa beberapa action kecil |
 | Audit flow per status vs implementasi | Baseline Done | Matrix baseline sudah terisi dan P0 hasil akhir + visitasi sudah punya bukti test |
-| Jadwal visitasi dan action asesor sinkron | Needs Fix | Status `3` dan `4` masih bermasalah |
+| Jadwal visitasi dan action asesor sinkron | Baseline Done | Schedule/confirm/reject/accept baseline sudah tertutup |
 | Hasil akhir pesantren sesuai policy | Baseline Done | Tab hasil baseline sudah pakai field final tanpa promosi raw score |
 
 ### P1
@@ -142,7 +142,7 @@ MVP dianggap hampir selesai bila:
 ### Gate 1 - Stabilkan Flow Bisnis
 
 - [x] Semua status punya audit matrix baseline expected vs actual.
-- [ ] Semua gap P0 dipastikan tertutup. (Tersisa HTTP regression action inti admin/asesor)
+- [ ] Semua gap P0 dipastikan tertutup. (Tersisa save `NA/NK`, finalize scoring happy path, dan beberapa negative path kecil)
 - [ ] Semua fix P0 punya test atau check yang bisa diulang.
 
 ### Gate 2 - Kunci Governance
@@ -172,4 +172,5 @@ Setelah audit UI dan batch execute awal selesai, skor final akan diputuskan berd
 3. hasil audit UI dashboard role,
 4. hasil sinkronisasi dokumentasi Livewire,
 5. residual issue yang tersisa.
+
 
