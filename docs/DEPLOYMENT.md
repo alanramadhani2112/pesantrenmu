@@ -66,7 +66,7 @@ VAPID_SUBJECT=mailto:admin@spm.example.com
 ### Opsional
 
 ```env
-AKREDITASI_POLLING_INTERVAL=10  # detik, polling presence Livewire
+AKREDITASI_POLLING_INTERVAL=10  # detik, polling presence legacy reactive layer
 AKREDITASI_PRESENCE_ENABLED=false
 TRASH_RETENTION_DAYS=90         # hari sebelum soft-deleted records dihapus permanen
 BCRYPT_ROUNDS=12                # naikkan ke 13-14 untuk server kencang
@@ -315,3 +315,4 @@ tar -czf /backups/spm_storage_$(date +%Y%m%d).tar.gz /var/www/spm/storage/app
 ```
 
 Retensi backup minimal: **30 hari**.
+

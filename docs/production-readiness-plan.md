@@ -15,7 +15,7 @@ Menjadikan sistem layak production, bukan hanya berjalan di lokal. Fokus utamany
 - Setiap fitur harus mengikuti business flow LP2M yang sudah disepakati.
 - Validasi penting wajib ada di server-side, bukan hanya di UI.
 - UI memakai reusable Blade component dan gaya Metronic yang konsisten.
-- Performa harus diukur dengan data: query, render Livewire, asset, dan cache.
+- Performa harus diukur dengan data: query, render Blade/view, asset, dan cache.
 - Production tidak boleh bergantung pada seed demo, debug mode, atau konfigurasi lokal.
 - Setiap fase selesai hanya jika test, build, dan QA checklist terkait sudah hijau.
 
@@ -94,7 +94,7 @@ Checklist:
 | Area | Task | Acceptance |
 | --- | --- | --- |
 | Route protection | Audit semua route admin, asesor, pesantren, super admin | Semua route punya middleware/gate/policy yang sesuai |
-| Server-side authorization | Audit semua action Livewire/service | Tombol disembunyikan bukan satu-satunya pengaman |
+| Server-side authorization | Audit semua action route/controller/service | Tombol disembunyikan bukan satu-satunya pengaman |
 | Tenant isolation | Pesantren tidak bisa akses data pesantren lain | Test akses silang menghasilkan 403/not found |
 | File upload | Validasi MIME, ukuran, path, ownership | Tidak ada upload file executable atau akses file milik user lain |
 | Production env | `APP_DEBUG=false`, session secure, env secret aman | Tidak ada stack trace atau secret bocor |
@@ -139,7 +139,7 @@ Checklist:
 | --- | --- | --- |
 | Query N+1 | Profiling halaman detail dan list utama | Tidak ada query berulang yang jelas bisa eager load |
 | Pagination | Semua table besar memakai pagination server-side | Halaman list tidak load seluruh dataset |
-| Livewire render | Audit component yang re-render berlebihan | Action kecil tidak memicu render penuh yang tidak perlu |
+| View render | Audit refresh/render yang berlebihan | Action kecil tidak memicu refresh penuh yang tidak perlu |
 | Asset | Trim asset Metronic yang tidak dipakai | Bundle JS/CSS tetap terkendali setelah build |
 | Cache | Config, route, event, view cache production | `php artisan optimize` aman dijalankan |
 | Queue | Notifikasi dan proses berat masuk queue | Request user tidak menunggu kerja background |
@@ -291,3 +291,4 @@ Sistem boleh naik production jika semua poin berikut terpenuhi:
 - `docs/DEPLOYMENT.md`
 - `docs/lp2m-workflow-stepper-update.md`
 - `docs/post-visitasi-documents-implementation.md`
+

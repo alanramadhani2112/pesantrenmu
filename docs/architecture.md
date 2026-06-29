@@ -25,7 +25,7 @@ Halaman runtime aktif sekarang memakai Blade views berbasis route/controller di 
 - `pesantren/` — halaman pesantren (profil, IPM, SDM, EDPM, akreditasi)
 - `components/` + `layouts/` — komponen layout dan UI reusable
 
-Catatan: Livewire/Volt sudah tidak dipakai di runtime aktif. Residunya tinggal di dokumen audit/historis.
+Catatan: legacy reactive layer sudah tidak dipakai di runtime aktif. Residunya tinggal di dokumen audit/historis.
 
 ### Service Layer
 
@@ -152,3 +152,4 @@ Upload utama memakai disk `public`. Cleanup file dilakukan saat record dihapus, 
 | `banding:check-deadlines` | Daily | Reminder deadline review banding |
 | `perbaikan:check-deadlines` | Daily | Cek deadline perbaikan |
 | `reminders:asesor2` | Daily | Reminder asesor 2 yang belum selesai |
+

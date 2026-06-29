@@ -159,7 +159,7 @@ Data ini disimpan di tabel `profiles.data` (JSON) untuk referensi.
 ### Phase 2: Enhance Permission Enforcement
 - [ ] Buat seeder default permission per role
 - [ ] Tambah middleware `permission:xxx` atau gunakan Gate/Policy
-- [ ] Enforce permission di setiap Livewire action (bukan hanya route level)
+- [ ] Enforce permission di setiap legacy reactive action (bukan hanya route level)
 - [ ] Update UI matrix di `/admin/master-role-permission`
 
 ### Phase 3: Enhance Account Management
@@ -213,3 +213,4 @@ TRASH_RETENTION_DAYS=90
 ---
 
 *Dokumen ini dibuat sebagai referensi untuk pengembangan selanjutnya.*
+

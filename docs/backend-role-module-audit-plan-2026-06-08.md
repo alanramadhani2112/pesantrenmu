@@ -1,16 +1,16 @@
 # Backend Role-Module Audit Plan — 8 Juni 2026
 
 Status: living document  
-Cakupan: backend Laravel setelah migrasi Livewire ke full Blade/controller  
+Cakupan: backend Laravel setelah migrasi legacy reactive layer ke full Blade/controller  
 Koordinasi: disinkronkan dengan `docs/audit-frontend-2025-06-08.md`
 
-Dokumen ini menjadi rencana kerja backend sebelum masuk perbaikan frontend penuh. Fokusnya adalah memastikan setiap role, modul, route, controller, policy, service, dan test backend aman setelah Livewire dihapus.
+Dokumen ini menjadi rencana kerja backend sebelum masuk perbaikan frontend penuh. Fokusnya adalah memastikan setiap role, modul, route, controller, policy, service, dan test backend aman setelah legacy reactive layer dihapus.
 
 ---
 
 ## 1. Tujuan
 
-1. Memastikan proses bisnis akreditasi tidak berubah setelah migrasi Livewire ke Blade/controller.
+1. Memastikan proses bisnis akreditasi tidak berubah setelah migrasi legacy reactive layer ke Blade/controller.
 2. Memastikan semua role hanya bisa mengakses data dan aksi yang sesuai.
 3. Menutup gap backend per role dan per modul sebelum perbaikan frontend difinalkan.
 4. Menyediakan status sinkronisasi agar agent backend dan agent frontend tidak mengerjakan area yang saling bertabrakan.
@@ -24,7 +24,7 @@ Dokumen ini menjadi rencana kerja backend sebelum masuk perbaikan frontend penuh
 | P0 | Critical | Data bocor, aksi lintas role, workflow bisnis berhenti, atau state transition salah | Asesor bisa melihat akreditasi asesor lain, admin tidak bisa proses banding, pesantren bisa upload ke akreditasi orang lain |
 | P1 | High | Backend action valid tapi guard/test kurang kuat, atau modul penting belum punya regression HTTP coverage | Controller POST belum dites setelah Blade migration, super admin tidak menerima notifikasi operasional |
 | P2 | Medium | Inkonsistensi operasional, edge case, atau coverage kurang di modul non-kritis | Badge/count tidak sinkron, redirect context tidak eksplisit |
-| P3 | Low | Dokumentasi, hygiene, naming, atau cleanup test yang tidak mempengaruhi flow | Komentar lama Livewire di docs, test frontend contract yang belum dipilah |
+| P3 | Low | Dokumentasi, hygiene, naming, atau cleanup test yang tidak mempengaruhi flow | Komentar lama legacy reactive layer di docs, test frontend contract yang belum dipilah |
 
 ---
 
@@ -62,7 +62,7 @@ Batch yang sudah mencakup: role/permission, tenant policy, dashboard, state mach
 | Role Management | `RoleController`, `RolePermissionController` | Hak akses sistem salah | P1 | Perlu regression HTTP CRUD |
 | Account Management | `AccountController`, user service | User role/status salah | P1 | Perlu regression HTTP CRUD/toggle |
 | Akreditasi Admin | `Admin\AkreditasiController`, `Admin\AkreditasiDetailController` | State transition salah | P0 | Service test kuat, perlu tambah HTTP POST coverage |
-| Banding | `BandingController`, `BandingDetailController`, `BandingService` | Keputusan banding salah | P0 | Service test kuat, perlu HTTP POST coverage dan sinkron dengan frontend `$wire` fix |
+| Banding | `BandingController`, `BandingDetailController`, `BandingService` | Keputusan banding salah | P0 | Service test kuat, perlu HTTP POST coverage dan sinkron dengan frontend `legacy client binding` fix |
 | Pesantren Management | `PesantrenController`, `PesantrenService` | Manual lock mengganggu flow | P1 | Rekomendasi revisi lock policy, lihat Section 6 |
 | Asesor Management | `AsesorController`, `AsesorService` | Toggle/status/export salah | P1 | Perlu HTTP coverage |
 | Master EDPM/Dokumen/Kategori | Master controllers/services | Master data rusak | P1 | Perlu CRUD regression |
@@ -728,7 +728,7 @@ Checklist:
 
 Target:
 - Backend support untuk UI Blade stabil.
-- Tidak ada leftover Livewire action dependency di backend.
+- Tidak ada leftover legacy reactive action dependency di backend.
 
 ### Fase 5 — Handoff ke Frontend
 
@@ -866,3 +866,4 @@ Catatan khusus Super Admin:
 | 8 Jun 2026 | Menambahkan hasil audit backend scope Asesor: assignment boundary aman, tetapi ditemukan gap P0 pada flag Jadwal Visitasi, P1 pada reject dokumen/HTTP coverage/profile upload rollback, dan P2 pada sort/password policy. |
 | 8 Jun 2026 | Menambahkan hasil audit backend scope Admin: service inti hijau 961 test, tetapi ditemukan gap P0 pada kontrak reason NV, P1 pada permission mutasi trash/failed notification/role, storage rollback, HTTP coverage, dan sinkron route trash frontend. |
 | 8 Jun 2026 | Menambahkan hasil audit backend scope Super Admin: akses/bypass/menu/policy aman dan 294 test hijau, tetapi ditemukan gap P1 pada penerima notifikasi Super Admin, proteksi role inti, HTTP coverage role management, dan permission governance. |
+

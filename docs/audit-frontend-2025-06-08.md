@@ -29,7 +29,7 @@
 ### A3. Komponen UI (81 komponen)
 | Item | Detail | Status |
 |---|---|---|
-| `ui/` | button, card, badge, icon, table, modal, stepper, tabs, pagination, search, select, input | ✅ semua Blade component, tidak ada Livewire |
+| `ui/` | button, card, badge, icon, table, modal, stepper, tabs, pagination, search, select, input | ✅ semua Blade component, tidak ada legacy reactive layer |
 | `layout/` | app-header, app-sidebar, sidebar-group, notification-menu | ✅ |
 | `akreditasi/` | workflow-stepper, edpm-review | ✅ |
 | `datatable/` | per-page, search | ✅ |
@@ -75,32 +75,32 @@
 
 ### 🔴 P0 — Critical (Fitur Broken)
 
-#### B1. $wire di admin/banding/detail.blade.php ✅ FIXED
+#### B1. legacy client binding di admin/banding/detail.blade.php ✅ FIXED
 **Status:** ✅ Selesai — diganti Alpine modal + form POST ke controller route  
 **Dampak:** Admin **tidak bisa memproses banding** — workflow banding sepenuhnya broken.
 
 | Baris | Kode | Tombol yang Broken |
 |---|---|---|
-| 64 | `@click="confirmAssignReviewer($wire)"` | Assign Reviewer |
-| 72 | `@click="confirmBandingDecision($wire, 'accept')"` | Terima Banding |
-| 76 | `@click="confirmBandingDecision($wire, 'reject')"` | Tolak Banding |
-| 81 | `@click="confirmReassignReviewer($wire)"` | Ganti Reviewer |
+| 64 | `@click="confirmAssignReviewer(legacy client binding)"` | Assign Reviewer |
+| 72 | `@click="confirmBandingDecision(legacy client binding, 'accept')"` | Terima Banding |
+| 76 | `@click="confirmBandingDecision(legacy client binding, 'reject')"` | Tolak Banding |
+| 81 | `@click="confirmReassignReviewer(legacy client binding)"` | Ganti Reviewer |
 
-**Akar:** `$wire` adalah Livewire magic variable. Pasca Livewire removal, `$wire = undefined`. Semua fungsi gagal `ReferenceError`.
+**Akar:** `legacy client binding` adalah legacy reactive layer magic variable. Pasca removal reactive layer lama, `legacy client binding = undefined`. Semua fungsi gagal `ReferenceError`.
 
-**Fix plan:** Ganti `$wire` argumen dengan call API endpoint via Axios/fetch, atau refactor jadi form POST dengan controller route.
+**Fix plan:** Ganti `legacy client binding` argumen dengan call API endpoint via Axios/fetch, atau refactor jadi form POST dengan controller route.
 
 ---
 
-#### B2. @this.on() di components/action-message.blade.php ✅ FIXED
-**Status:** ✅ Selesai — ganti `@this.on()` → `window.addEventListener()`  
+#### B2. legacy server binding.on() di components/action-message.blade.php ✅ FIXED
+**Status:** ✅ Selesai — ganti `legacy server binding.on()` → `window.addEventListener()`  
 **Dampak:** Pesan "Saved" tidak muncul di halaman profile dan form lain.
 
 | Baris | Kode | Yang Broken |
 |---|---|---|
-| 4 | `x-init="@this.on('...', () => { ... })"` | Komponen action-message |
+| 4 | `x-init="legacy server binding.on('...', () => { ... })"` | Komponen action-message |
 
-**Akar:** `@this` adalah Blade directive Livewire. Tanpa Livewire, undefined.
+**Akar:** `legacy server binding` adalah Blade directive legacy reactive layer. Tanpa legacy reactive layer, undefined.
 
 **Fix plan:** Ganti dengan Alpine event dispatch/listen (`$dispatch`/`x-on`), atau gunakan session flash + timeout.
 
@@ -110,14 +110,14 @@
 **Status:** ✅ Selesai — `callWire` dihapus dari 5 view, diganti inline Swal + form submit  
 **Dampak:** Semua operasi CRUD yang menggunakan Swal konfirmasi → `callWire()` **tidak menghasilkan aksi apa pun** (no crash, tapi no action). Mempengaruhi setiap halaman yang menggunakan `adminManagement()` atau `deleteConfirmation()`.
 
-**Akar:** `callWire()` di `app.js:309` return null ketika `$wire` undefined:
+**Akar:** `callWire()` di `app.js:309` return null ketika `legacy client binding` undefined:
 ```js
 function callWire(wire, method, ...params) {
     if (typeof wire === 'undefined' || wire === null) return null;
     // ...
 }
 ```
-Tidak ada error yang muncul karena return null, tapi **38 pemanggilan** (line 393-830) semua tidak melakukan apa-apa. `this.$wire` dan `wire` argumen yang dikirim undefined pasca Livewire removal.
+Tidak ada error yang muncul karena return null, tapi **38 pemanggilan** (line 393-830) semua tidak melakukan apa-apa. `this.legacy client binding` dan `wire` argumen yang dikirim undefined pasca removal reactive layer lama.
 
 **Dampak bisnis:** Delete confirmation, status update, role change, dan semua aksi yang menggunakan Swal → callWire pattern pada halaman admin/manajemen **tidak berfungsi**. Ini termasuk sebagian besar action di halaman akreditasi dan pesantren.
 
@@ -146,7 +146,7 @@ showModal: {{ old('_token') !== null ? 'true' : 'false' }},
 showModal: @json(old('_token') !== null),
 ```
 
-Catatan: Fungsi JS inline di `accounts/index.blade.php` bersih dari `$wire` — hanya menggunakan `document.getElementById` dan form submit. Masalahnya murni string boolean.
+Catatan: Fungsi JS inline di `accounts/index.blade.php` bersih dari `legacy client binding` — hanya menggunakan `document.getElementById` dan form submit. Masalahnya murni string boolean.
 
 ---
 
@@ -183,7 +183,7 @@ Catatan: Fungsi JS inline di `accounts/index.blade.php` bersih dari `$wire` — 
 
 | Test | Error | Perlu Investigasi |
 |---|---|---|
-| `test_legacy_datatable_page_renders_metronic_table_adapter` | 404 | Route test tidak match pasca Livewire migration |
+| `test_legacy_datatable_page_renders_metronic_table_adapter` | 404 | Route test tidak match pasca migration lama ke Blade/controller |
 | `test_admin_master_edpm_uses_simple_table_component` | Full HTML page | Assertion tidak match response type |
 | `test_admin_akreditasi_page_uses_metronic_datatable_foundation` | Full HTML page | Sama |
 | `test_admin_module_list_pages_use_page_heading_and_reusable_tables` | Full HTML page | Sama |
@@ -243,7 +243,7 @@ admin/akreditasi/detail/tabs/instrumen/score-summary.blade.php
 
 ### D1. Super Admin (super_admin / role_id=4)
 
-**Akses:** Semua fitur admin + Manajemen Sistem. **12 halaman index diaudit penuh** (JS, x-data, inline functions, string boolean, $wire artifacts).
+**Akses:** Semua fitur admin + Manajemen Sistem. **12 halaman index diaudit penuh** (JS, x-data, inline functions, string boolean, legacy client binding artifacts).
 
 #### Audit per Halaman
 
@@ -251,14 +251,14 @@ admin/akreditasi/detail/tabs/instrumen/score-summary.blade.php
 |---|---|---|---|---|---|---|
 | 1 | Akreditasi Index | `{...deleteConfirmation(), ...adminManagement()}` | Global (app.js) | ✅ Step 3: `callWire` diganti inline Swal + form submit | ✅ Fixed |
 | 2 | Banding Index | No x-data | Pure form submits | ✅ Bersih | ✅ |
-| 3 | Banding Detail | `{showAssignModal, showDecisionModal, decisionType, assignAction}` | Alpine modal + form POST | ✅ Step 4: 4 `$wire` diganti Alpine modal + POST ke route controller | ✅ Fixed |
+| 3 | Banding Detail | `{showAssignModal, showDecisionModal, decisionType, assignAction}` | Alpine modal + form POST | ✅ Step 4: 4 `legacy client binding` diganti Alpine modal + POST ke route controller | ✅ Fixed |
 | 4 | Pesantren Index | Tidak ada x-data | Inline `pesantrenIndex()` | ✅ Step 2: `json_encode($sortAsc)` ganti string boolean | ✅ Fixed |
-| 5 | Asesor Index | `asesorIndex()` | Inline L193 | ✅ No `$wire` | ✅ |
-| 6 | Master Dokumen | `masterDokumen()` | Inline L210 | ✅ No `$wire` | ✅ |
-| 7 | Master EDPM | `masterEdpm()` | Inline L299 | ✅ No `$wire` | ✅ |
-| 8 | Kategori Dokumen | `kategoriDokumen()` | Inline L218 | ✅ No `$wire` | ✅ |
-| 9 | Roles | `roleManager()` | Inline def | ✅ No `$wire`, `isEditing: false` boolean proper | ✅ |
-| 10 | Role Permission | `rolePermissionMatrix()` | Inline def | ✅ No `$wire`, 4x `fw-bold` kosmetik | ✅ |
+| 5 | Asesor Index | `asesorIndex()` | Inline L193 | ✅ No `legacy client binding` | ✅ |
+| 6 | Master Dokumen | `masterDokumen()` | Inline L210 | ✅ No `legacy client binding` | ✅ |
+| 7 | Master EDPM | `masterEdpm()` | Inline L299 | ✅ No `legacy client binding` | ✅ |
+| 8 | Kategori Dokumen | `kategoriDokumen()` | Inline L218 | ✅ No `legacy client binding` | ✅ |
+| 9 | Roles | `roleManager()` | Inline def | ✅ No `legacy client binding`, `isEditing: false` boolean proper | ✅ |
+| 10 | Role Permission | `rolePermissionMatrix()` | Inline def | ✅ No `legacy client binding`, 4x `fw-bold` kosmetik | ✅ |
 | 11 | Accounts | `accountManager()` | Inline def | ✅ Step 1: `init()` konversi string boolean → boolean proper | ✅ Fixed |
 | 12 | Trash | `adminTrashPage()` | Inline def | ✅ Store `modal.open()` verified, fetch pattern aman | ✅ |
 | 13 | Failed Notifications | `failedNotificationPage()` | Inline def | ✅ Step 2: route param `{ id: id }` ganti `.replace()` pattern | ✅ Fixed |
@@ -268,7 +268,7 @@ admin/akreditasi/detail/tabs/instrumen/score-summary.blade.php
 | Kategori | Detail | Status |
 |---|---|---|
 | Dashboard | Chart + statistik (sama dengan admin) | ✅ |
-| Banding (detail page) | ✅ FIXED: 4 tombol `$wire` → Alpine modal + form POST | ✅ |
+| Banding (detail page) | ✅ FIXED: 4 tombol `legacy client binding` → Alpine modal + form POST | ✅ |
 | Akun Pengguna (accounts) | ✅ FIXED: `init()` konversi string boolean | ✅ |
 | Akreditasi (list page) | ✅ FIXED: `callWire()` diganti inline Swal + form submit | ✅ |
 | Data Pesantren | ✅ FIXED: `json_encode($sortAsc)` | ✅ |
@@ -290,7 +290,7 @@ admin/akreditasi/detail/tabs/instrumen/score-summary.blade.php
 |---|---|---|
 | Dashboard | Statistik global + chart | ✅ |
 | Akreditasi | List, detail, tabs (instrumen, visitasi, SDM, profil, dokumen) | ✅ |
-| Banding | Detail banding — **⚠️ BROKEN: 4 tombol $wire** | ❌ |
+| Banding | Detail banding — **⚠️ BROKEN: 4 tombol legacy client binding** | ❌ |
 | Data Pesantren | List, create, edit, detail | ✅ |
 | Data Asesor | List, create, edit, assign | ✅ |
 | Dokumen | Master dokumen, kategori | ✅ |
@@ -336,7 +336,7 @@ admin/akreditasi/detail/tabs/instrumen/score-summary.blade.php
 - Seluruh workflow akreditasi (list, detail, tabs)
 - Profil edit (kecuali action-message)
 - Dashboard
-- Tidak ada Livewire artifact di views asesor
+- Tidak ada legacy reactive layer artifact di views asesor
 
 ---
 
@@ -364,10 +364,10 @@ admin/akreditasi/detail/tabs/instrumen/score-summary.blade.php
 - IPM, SDM, EDPM input
 - Profil edit
 - Dashboard + sidebar progress bar
-- Tidak ada Livewire artifact di views pesantren
+- Tidak ada legacy reactive layer artifact di views pesantren
 
 **Catatan sinkron backend — 8 Juni 2026:**
-- Status frontend Pesantren di atas berarti tidak ditemukan artifact Livewire atau JS broken yang spesifik di view Pesantren.
+- Status frontend Pesantren di atas berarti tidak ditemukan artifact legacy reactive layer atau JS broken yang spesifik di view Pesantren.
 - Backend audit menemukan flow perbaikan Pesantren belum aman penuh: partial unlock belum tembus controller HTTP, belum ada route submit perbaikan, dan tab Status Perbaikan masih perlu filter active rejection.
 - Frontend agent jangan finalisasi UI Status Perbaikan atau tombol "Kirim Perbaikan" sebelum backend menutup `PES-001`, `PES-002`, dan `PES-003` di `docs/backend-role-module-audit-plan-2026-06-08.md`.
 - Kontrak backend yang akan disediakan: `POST pesantren.akreditasi.submit-perbaikan` dengan field `akreditasi_id`, flash `success/error`, dan `?focus=perbaikan` tetap menjadi URL tab Status Perbaikan.
@@ -381,7 +381,7 @@ admin/akreditasi/detail/tabs/instrumen/score-summary.blade.php
 | `components/layout/app-sidebar.blade.php` | Sidebar shell | ✅ |
 | `components/layout/app-header.blade.php` | Header | ✅ |
 | `components/layout/notification-menu.blade.php` | Notifikasi | ✅ |
-| `components/action-message.blade.php` | Pesan "Saved" | ❌ BROKEN: `@this.on()` |
+| `components/action-message.blade.php` | Pesan "Saved" | ❌ BROKEN: `legacy server binding.on()` |
 | `components/modal.blade.php` | Modal | ✅ |
 | `components/quill-editor.blade.php` | Rich text editor | ✅ |
 | `components/panduan/layout.blade.php` | Layout panduan | ✅ (fw-bold kosmetik) |
@@ -407,10 +407,10 @@ admin/akreditasi/detail/tabs/instrumen/score-summary.blade.php
 
 | Step | Deskripsi | File | Status |
 |---|---|---|---|
-| 1 | `@this.on()` → `window.addEventListener()` + accounts string boolean `init()` | action-message.blade.php, accounts/index.blade.php | ✅ Done |
+| 1 | `legacy server binding.on()` → `window.addEventListener()` + accounts string boolean `init()` | action-message.blade.php, accounts/index.blade.php | ✅ Done |
 | 2 | `json_encode($sortAsc)` + route `{id:id}` | pesantren/index.blade.php, failed-notifications/index.blade.php | ✅ Done |
 | 3 | Hapus `adminManagement` dead code + ganti `callWire` → inline Swal + form submit | akreditasi/index, pesantren/detail, pesantren/index, akreditasi/detail, banding/detail | ✅ Done |
-| 4 | 4x `$wire` → Alpine modal + form POST ke controller route | banding/detail.blade.php | ✅ Done |
+| 4 | 4x `legacy client binding` → Alpine modal + form POST ke controller route | banding/detail.blade.php | ✅ Done |
 
 ### Detail Teknis
 
@@ -418,7 +418,7 @@ admin/akreditasi/detail/tabs/instrumen/score-summary.blade.php
 <summary>Step 1: action-message + accounts (expand)</summary>
 
 **action-message.blade.php:**
-- Before: `x-init="@this.on('{{ $on }}', ...)`
+- Before: `x-init="legacy server binding.on('{{ $on }}', ...)`
 - After: `x-init="$nextTick(() => { window.addEventListener('{{ $on }}', ...) })"`
 
 **accounts/index.blade.php:**
@@ -444,14 +444,14 @@ admin/akreditasi/detail/tabs/instrumen/score-summary.blade.php
 <details>
 <summary>Step 3: callWire cleanup (5 files) (expand)</summary>
 
-- `akreditasi/index`: Ganti `callWire(this.$wire, 'delete', id)` → inline Swal + submit `#deleteForm`
+- `akreditasi/index`: Ganti `callWire(this.legacy client binding, 'delete', id)` → inline Swal + submit `#deleteForm`
 - `pesantren/detail`: Ganti `adminManagement()` → inline `confirmToggleLock(e)` + form submit
 - `pesantren/index`, `akreditasi/detail`, `banding/detail`: Hapus `...adminManagement()` dead code
 
 </details>
 
 <details>
-<summary>Step 4: banding detail $wire (expand)</summary>
+<summary>Step 4: banding detail legacy client binding (expand)</summary>
 
 4 tombol diganti Alpine modal + form POST:
 - Assign → `POST banding/{id}/assign-reviewer` (select reviewer + submit)
@@ -500,11 +500,11 @@ Catatan dari audit backend role Super Admin:
 | # | Prioritas | Item | Estimasi | Status |
 |---|---|---|---|---|
 | SA-1 | 🔴 P0 | Fix string boolean `admin/accounts/index.blade.php` | 15 menit | ✅ Done |
-| SA-2 | 🔴 P0 | Fix `@this` di `components/action-message.blade.php` | 15 menit | ✅ Done |
+| SA-2 | 🔴 P0 | Fix `legacy server binding` di `components/action-message.blade.php` | 15 menit | ✅ Done |
 | SA-3 | 🟡 P1 | Fix string boolean `admin/pesantren/index.blade.php` | 5 menit | ✅ Done |
 | SA-4 | 🟡 P1 | Fix route fragility `admin/failed-notifications/index.blade.php` | 10 menit | ✅ Done |
 | SA-5 | 🔴 P0 | Fix `callWire()` di 5 view super admin | 1 jam | ✅ Done |
-| SA-6 | 🔴 P0 | Fix `$wire` di `admin/banding/detail.blade.php` | 1-2 jam | ✅ Done |
+| SA-6 | 🔴 P0 | Fix `legacy client binding` di `admin/banding/detail.blade.php` | 1-2 jam | ✅ Done |
 
 ### Global (setelah super admin)
 
@@ -523,10 +523,11 @@ Catatan dari audit backend role Super Admin:
 
 | Tanggal | Perubahan |
 |---|---|
-| 8 Jun 2025 | Audit awal — identifikasi semua masalah dan non-masalah. Dokumentasi struktur dashboard, sidebar, komponen, Alpine.js, asset pipeline. Ditemukan 2 artifact Livewire critical, 16 test gagal, 16 file fw-bold kosmetik. |
+| 8 Jun 2025 | Audit awal — identifikasi semua masalah dan non-masalah. Dokumentasi struktur dashboard, sidebar, komponen, Alpine.js, asset pipeline. Ditemukan 2 artifact legacy reactive layer critical, 16 test gagal, 16 file fw-bold kosmetik. |
 | 8 Jun 2025 | Tambah Section D: Breakdown per Role — detail views, masalah, dan status untuk super_admin, admin, asesor, pesantren, dan komponen shared. Ringkasan status per role. |
 | 8 Jun 2025 | Audit super admin menu-by-menu: 12 halaman index + shared JS diaudit penuh. Ditemukan 2 critical baru: string boolean `accounts/index.blade.php` (modal auto-open) + 38 `callWire()` gagal di `app.js`. Ditemukan 1 medium: string boolean `pesantren/index.blade.php`. Ditemukan 1 fragility: route retry `failed-notifications`. Verifikasi Alpine Store ✅. 8 halaman super admin verified bersih. Update Section A6, A7, B, D1, E. |
-| 8 Jun 2026 | Sinkron dengan audit backend Pesantren: frontend Pesantren tetap bersih dari artifact Livewire, tetapi UI Status Perbaikan dan tombol submit perbaikan harus menunggu route/kontrak backend partial unlock. |
+| 8 Jun 2026 | Sinkron dengan audit backend Pesantren: frontend Pesantren tetap bersih dari artifact legacy reactive layer, tetapi UI Status Perbaikan dan tombol submit perbaikan harus menunggu route/kontrak backend partial unlock. |
 | 8 Jun 2026 | Sinkron dengan audit backend Admin: UI Validasi Admin NV menunggu kontrak reason, Trash harus mengikuti route POST dengan body `id`, Failed Notifications memakai route name backend, dan filter Asesor menunggu perbaikan key backend. |
 | 8 Jun 2026 | Sinkron dengan audit backend Super Admin: permission matrix tidak mengelola role id `4`, role inti sebaiknya disabled dari delete/edit berbahaya, dan notifikasi Super Admin menunggu keputusan recipient backend. |
-| 8 Jun 2025 | ✅ **Super Admin role COMPLETE — 8 file fixed dalam 4 step.** Step 1: `action-message` (`@this.on` → `window.addEventListener`) + `accounts/index` (`init()` string→boolean). Step 2: `pesantren/index` (`json_encode($sortAsc)`) + `failed-notifications` (`route({id})`). Step 3: 5 view `callWire` cleanup (ganti inline Swal + form submit, hapus `adminManagement` dead code). Step 4: `banding/detail` (4x `$wire` → Alpine modal + form POST). Semua perubahan hanya di Blade view, 0 production code. |
+| 8 Jun 2025 | ✅ **Super Admin role COMPLETE — 8 file fixed dalam 4 step.** Step 1: `action-message` (`legacy server binding.on` → `window.addEventListener`) + `accounts/index` (`init()` string→boolean). Step 2: `pesantren/index` (`json_encode($sortAsc)`) + `failed-notifications` (`route({id})`). Step 3: 5 view `callWire` cleanup (ganti inline Swal + form submit, hapus `adminManagement` dead code). Step 4: `banding/detail` (4x `legacy client binding` → Alpine modal + form POST). Semua perubahan hanya di Blade view, 0 production code. |
+

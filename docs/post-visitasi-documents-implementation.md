@@ -88,8 +88,8 @@ Jalur lama tetap dipertahankan untuk kompatibilitas, tetapi diselaraskan:
 - `AsesorService::uploadLaporanVisitasi()` memakai field baru:
   - `laporan_visitasi_asesor1`
   - `laporan_visitasi_asesor2`
-- Handler Livewire asesor diarahkan ke `AkreditasiDocumentService`.
-- Handler Livewire pesantren untuk kartu kendali diarahkan ke
+- Handler upload asesor sekarang diarahkan ke `AkreditasiDocumentService`.
+- Handler upload pesantren untuk kartu kendali diarahkan ke
   `AkreditasiDocumentService`.
 
 ### 6. Konsistensi `asesor_id`
@@ -109,7 +109,7 @@ Pada finalisasi penilaian asesor, query scoring diselaraskan agar memakai
 
 ### UI handler
 
-- `app/Livewire/Pages/Asesor/AkreditasiDetail.php`
+- legacy migration note: handler lama berbasis komponen sudah diganti ke route/controller aktif
 - `resources/views/livewire/pages/pesantren/akreditasi-detail.blade.php`
 
 ### Test
@@ -192,3 +192,4 @@ Pekerjaan berikutnya yang logis:
 - Tambahkan notifikasi khusus ketika semua dokumen pasca visitasi lengkap.
 - Lanjut hardening nilai verifikasi `NV`, termasuk alasan jika admin mengubah
   `NV` dari default `NK`.
+

@@ -70,15 +70,15 @@ Catatan trim terbaru:
 
 - `layouts.app`, `layouts.guest`, dan `welcome.blade.php` tidak lagi memuat `plugins.bundle.js` dan `scripts.bundle.js`; halaman tersebut cukup memakai CSS Metronic + Vite.
 - Dropdown/action menu memakai Blade + Alpine dengan class Metronic, sehingga tidak bergantung pada `data-kt-menu` atau inisialisasi `KTMenu`.
-- Notifikasi tidak lagi melakukan polling Livewire setiap 15 detik; daftar notifikasi di-refresh saat tombol notifikasi dibuka.
+- Notifikasi tidak lagi melakukan polling legacy reactive layer setiap 15 detik; daftar notifikasi di-refresh saat tombol notifikasi dibuka.
 - Jangan mengembalikan `public/assets`; gunakan `public/vendor/metronic/assets` sebagai satu-satunya lokasi asset Metronic runtime.
 
-## Livewire Compatibility Rules
+## Legacy Reactive Compatibility Rules
 
-- Jangan start Alpine atau Livewire dua kali.
+- Jangan start Alpine atau legacy reactive layer dua kali.
 - Metronic init di `resources/js/app.js` bersifat defensif/opsional. Jangan menambah dependency baru ke `plugins.bundle.js` atau `scripts.bundle.js` tanpa alasan fitur yang jelas.
-- Komponen yang bisa dibuat dengan Blade/Livewire native tidak perlu memaksa plugin Metronic JS.
-- Modal, dropdown, tooltip, drawer, dan menu harus diuji setelah Livewire update.
+- Komponen yang bisa dibuat dengan Blade/legacy reactive layer native tidak perlu memaksa plugin Metronic JS.
+- Modal, dropdown, tooltip, drawer, dan menu harus diuji setelah reactive update lama.
 
 ## Plugin Addition Rules
 
@@ -87,11 +87,11 @@ Tambahkan plugin Metronic custom hanya jika:
 - Ada halaman yang benar-benar membutuhkan fitur tersebut.
 - Tidak ada implementasi ringan yang sudah tersedia di project.
 - Plugin bisa diload per halaman atau per layout tertentu.
-- Sudah diuji tidak bentrok dengan Livewire.
+- Sudah diuji tidak bentrok dengan legacy reactive layer.
 
 Contoh kebutuhan:
 
-- Datatables: hanya jika tabel client-side Metronic dipakai. Saat ini Livewire pagination lebih sesuai.
+- Datatables: hanya jika tabel client-side Metronic dipakai. Saat ini server-side pagination saat ini lebih sesuai.
 - FullCalendar: hanya jika ada kalender visitasi.
 - Formrepeater: hanya jika form unit/SDM butuh repeater JS yang kompleks.
 - Tinymce/CKEditor: hanya jika Quill yang ada tidak cukup.
@@ -124,8 +124,9 @@ File ini sudah didaftarkan sebagai Vite entry terpisah. Layout lama belum memuat
 
 ## Do Not Do
 
-- Jangan copy HTML Metronic mentah ke tiap halaman Livewire.
+- Jangan copy HTML Metronic mentah ke tiap halaman legacy reactive layer.
 - Jangan load semua custom plugin sekaligus.
 - Jangan mengganti layout lama secara total sebelum shell baru diuji.
 - Jangan mengubah business logic ketika sedang migrasi UI.
 - Jangan menulis CSS override spesifik halaman jika bisa dijadikan token atau component variant.
+

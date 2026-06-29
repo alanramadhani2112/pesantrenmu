@@ -1,4 +1,4 @@
-# Livewire Removal Audit - 29 Juni 2026
+# legacy reactive layer Removal Audit - 29 Juni 2026
 
 ## Status Dokumen
 
@@ -6,20 +6,20 @@ Dokumen ini **semi-final untuk baseline cleanup audit**.
 
 Hasil scan repo saat ini menunjukkan:
 
-- **tidak ada hit Livewire/Volt di area runtime** `app/`, `resources/`, `routes/`, `config/`
-- **tidak ada hit Livewire/Volt di `tests/` aktif saat ini**
+- **tidak ada hit legacy reactive layer di area runtime** `app/`, `resources/`, `routes/`, `config/`
+- **tidak ada hit legacy reactive layer di `tests/` aktif saat ini**
 - hit yang tersisa ada di **dokumentasi lama / audit historis / tech spec lama**
 
 ## Yang Perlu Difinalisasi
 
-- [x] Jalankan scan repo nyata untuk semua istilah Livewire/Volt.
+- [x] Jalankan scan repo nyata untuk semua istilah legacy reactive layer.
 - [x] Isi matrix temuan dari hasil scan.
 - [x] Putuskan `keep/remove/replace` per temuan baseline.
 - [ ] Putuskan apakah cleanup doc dilakukan di batch execute awal atau setelah flow fix P0.
 
 ## Tujuan
 
-Dokumen ini memastikan tidak ada sisa Livewire/Volt aktif yang diam-diam masih mempengaruhi runtime, kontrak UI, atau dokumentasi.
+Dokumen ini memastikan tidak ada sisa legacy reactive layer aktif yang diam-diam masih mempengaruhi runtime, kontrak UI, atau dokumentasi.
 
 ## Hasil Scan Baseline
 
@@ -27,9 +27,9 @@ Dokumen ini memastikan tidak ada sisa Livewire/Volt aktif yang diam-diam masih m
 
 Scan ke `app/`, `resources/`, `routes/`, `config/` dengan kata kunci:
 
-- `Livewire`
-- `Volt`
-- `wire:`
+- `legacy reactive layer`
+- `legacy UI component layer`
+- `legacy-poll:`
 - `@livewire`
 
 Hasil:
@@ -38,9 +38,9 @@ Hasil:
 
 Makna:
 
-- tidak ditemukan directive Livewire aktif,
-- tidak ditemukan referensi Volt aktif,
-- tidak ditemukan binding `wire:` aktif,
+- tidak ditemukan directive reactive layer lama aktif,
+- tidak ditemukan referensi legacy UI component layer aktif,
+- tidak ditemukan binding `legacy-poll:` aktif,
 - tidak ditemukan helper `@livewire` aktif.
 
 ### Area Test
@@ -53,7 +53,7 @@ Hasil:
 
 Makna:
 
-- test aktif saat ini tidak lagi menggantung pada Livewire runtime.
+- test aktif saat ini tidak lagi menggantung pada runtime reactive layer lama.
 
 ### Area Dokumentasi
 
@@ -73,21 +73,21 @@ Makna:
 
 | Jenis Temuan | Lokasi | Status | Dampak | Tindakan |
 | --- | --- | --- | --- | --- |
-| Dokumentasi arsitektur masih menyebut Livewire Volt aktif | `docs/architecture.md` | Needs Fix | Membingungkan arsitektur final repo | Update ke Blade + controller/service flow |
-| Dokumen UI positioning masih mengasumsikan Livewire untuk state/behavior | `docs/frontend-ui-ux-positioning.md` | Needs Fix | Narasi arsitektur UI jadi tidak akurat | Revisi wording ke Blade + Alpine/JS bila relevan |
-| Dokumen perf/UX masih menyebut `wire:poll` | `docs/frontend-performance-ux-writing-update.md` | Needs Fix | Bisa menyesatkan audit performa terbaru | Verifikasi apakah catatan historis perlu dipertahankan atau diganti |
-| Tech spec lama masih menyebut Livewire Volt dan route berbasis komponen Livewire | `docs/tech-spec-pesantrenmu.md` | Needs Fix | Tech spec tidak sinkron dengan implementasi sekarang | Update atau arsipkan sebagai legacy |
-| Audit frontend lama memuat jejak artifact Livewire historis | `docs/audit-frontend-2025-06-08.md` | Keep | Berguna sebagai jejak audit migrasi | Pertahankan, tapi jelas sebagai historical audit |
+| Dokumentasi arsitektur utama | `docs/architecture.md` | Pass | Sudah sinkron ke Blade + controller/runtime aktif | Pertahankan sinkronisasi docs utama |
+| Dokumen UI positioning utama | `docs/frontend-ui-ux-positioning.md` | Pass | Sudah sinkron ke Blade/controller + Alpine kecil | Pertahankan wording runtime aktif |
+| Dokumen perf/UX utama | `docs/frontend-performance-ux-writing-update.md` | Pass | Sudah diganti menjadi catatan polling legacy non-legacy reactive layer | Pertahankan sebagai historical note seperlunya |
+| Tech spec utama | `docs/tech-spec-pesantrenmu.md` | Pass | Sudah sinkron ke Blade/controller runtime | Pertahankan sinkronisasi docs utama |
+| Audit frontend lama memuat jejak artifact legacy reactive layer historis | `docs/audit-frontend-2025-06-08.md` | Keep | Berguna sebagai jejak audit migrasi | Pertahankan, tapi jelas sebagai historical audit |
 | Source runtime aktif | `app/`, `resources/`, `routes/`, `config/` | Pass | Tidak ada bug aktif yang terdeteksi dari keyword scan | Tidak perlu action code cleanup berbasis keyword ini |
-| Test runtime aktif | `tests/` | Pass | Tidak ada ketergantungan test aktif pada Livewire | Tidak perlu cleanup test berbasis keyword ini |
-| Dependency package composer/npm | `composer.json`, `package.json` | Pass | Tidak ada package Livewire/Volt aktif | Tidak perlu uninstall package Livewire |
+| Test runtime aktif | `tests/` | Pass | Tidak ada ketergantungan test aktif pada legacy reactive layer | Tidak perlu cleanup test berbasis keyword ini |
+| Dependency package composer/npm | `composer.json`, `package.json` | Pass | Tidak ada package legacy reactive layer aktif | Tidak perlu uninstall package legacy reactive layer |
 
 ## Bukti Scan
 
 - Runtime scan `app/resources/routes/config`: **0 hit**
 - Test scan `tests`: **0 hit**
 - `composer.json`: tidak ada package `livewire/livewire`
-- `package.json`: tidak ada dependency frontend untuk Livewire/Volt
+- `package.json`: tidak ada dependency frontend untuk legacy reactive layer
 
 ## Keputusan Baseline
 
@@ -115,19 +115,19 @@ Alasan:
 
 ## Exit Criteria
 
-Repo dinyatakan bersih dari Livewire untuk baseline saat ini bila:
+Repo dinyatakan bersih dari legacy reactive layer untuk baseline saat ini bila:
 
 - tidak ada directive/runtime hook aktif yang tak disengaja,
-- tidak ada dependency Livewire aktif,
-- dokumen arsitektur utama tidak lagi menyebut Livewire sebagai arsitektur aktif,
-- audit historis yang masih menyebut Livewire diberi konteks sebagai catatan lama.
+- tidak ada dependency reactive layer lama aktif,
+- dokumen arsitektur utama tidak lagi menyebut legacy reactive layer sebagai arsitektur aktif,
+- audit historis yang masih menyebut legacy reactive layer diberi konteks sebagai catatan lama.
 
 ## Kesimpulan Baseline
 
 Kesimpulan saat ini:
 
-- **cleanup Livewire bukan blocker runtime utama**
-- **cleanup Livewire sekarang terutama adalah pekerjaan sinkronisasi dokumentasi**
+- **cleanup legacy reactive layer bukan blocker runtime utama**
+- **cleanup legacy reactive layer sekarang terutama adalah pekerjaan sinkronisasi dokumentasi**
 - prioritas execute yang lebih tinggi tetap ada di flow bisnis P0, terutama `Validasi Admin`, `Visitasi`, dan regression HTTP action inti
 
 ## Action Plan
@@ -141,5 +141,8 @@ Kesimpulan saat ini:
 
 ### Batch setelah P0 flow
 
-- [ ] Rapikan semua wording dokumentasi yang masih menyebut Livewire sebagai kondisi aktif
+- [x] Rapikan semua wording dokumentasi utama yang masih menyebut legacy reactive layer sebagai kondisi aktif
 - [ ] Re-scan repo untuk memastikan tidak ada hit runtime baru
+
+
+

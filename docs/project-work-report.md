@@ -1,3 +1,5 @@
+[Historical note] Dokumen ini merekam fase migrasi lama. Sebagian penyebutan legacy reactive layer di bawah adalah konteks historis, bukan runtime aktif saat ini.
+
 # Report Pengerjaan Project SPM
 
 Periode: awal pengerjaan sampai `12 Mei 2026` (update terakhir: 12 Mei 2026)
@@ -11,7 +13,7 @@ Project ini dimulai dari audit sistem yang sudah berjalan, lalu diarahkan ke mig
 ### 1. Discovery dan pemahaman sistem
 
 - Saya mulai dengan memetakan struktur project Laravel yang sudah jadi.
-- Saya identifikasi bahwa aplikasi memakai kombinasi Blade, Livewire, dan beberapa pola UI lama yang masih bercampur.
+- Saya identifikasi bahwa aplikasi memakai kombinasi Blade, legacy reactive layer, dan beberapa pola UI lama yang masih bercampur.
 - Saya cek alur role utama: `admin`, `pesantren`, dan `asesor`.
 - Saya juga mulai membaca pola halaman list, detail, form, dan modal yang paling sering dipakai.
 
@@ -27,11 +29,11 @@ Project ini dimulai dari audit sistem yang sudah berjalan, lalu diarahkan ke mig
 
 ### 3. Keputusan stack frontend
 
-- Saya bandingkan Blade-only vs Livewire.
+- Saya bandingkan Blade-only vs legacy reactive layer.
 - Arah yang dipakai akhirnya adalah hybrid yang praktis:
   - Blade untuk komponen dan markup reusable,
-  - Livewire Volt untuk state dan interaksi halaman yang memang dinamis.
-- Tujuannya adalah menjaga project tetap ringan, mudah dirawat, dan tidak memaksa semua hal menjadi komponen Livewire.
+  - legacy reactive UI layer untuk state dan interaksi halaman yang memang dinamis.
+- Tujuannya adalah menjaga project tetap ringan, mudah dirawat, dan tidak memaksa semua hal menjadi komponen legacy reactive layer.
 
 ### 4. Setup Metronic
 
@@ -306,9 +308,9 @@ Audit menyeluruh dilakukan terhadap 25 temuan yang dikelompokkan dalam 3 stream 
 
 - **Transaction wrapping** — `approvePengajuan`, `rejectPengajuan`, `deleteSubmission`, `banding`, `finalizeVerification` dibungkus `DB::transaction`.
 - **Precondition checks** — status == 6 untuk approve/reject, status == 2 untuk banding, asesor 1 ownership untuk finalizeVerification.
-- **`PesantrenService::deleteSubmission`** — method baru menggantikan raw `delete()` di Livewire dengan null-safety dan cek `hasActiveAkreditasi`.
+- **`PesantrenService::deleteSubmission`** — method baru menggantikan raw `delete()` di legacy reactive layer dengan null-safety dan cek `hasActiveAkreditasi`.
 - **Soft-delete cascade** — migration `softDeletes()` pada 3 tabel child, trait `SoftDeletes` pada 3 model, hook `deleting` di `Akreditasi` dibungkus transaksi.
-- **Validasi banding** — `required|string|min:10|max:1000` di Livewire + defense-in-depth di service.
+- **Validasi banding** — `required|string|min:10|max:1000` di legacy reactive layer + defense-in-depth di service.
 
 ### Wave 3 — Tabel & Button Standardisasi (Medium)
 
@@ -355,7 +357,7 @@ Hasil utama:
 
 Validasi terakhir:
 
-- `php artisan test tests\Feature\Livewire\PesantrenProfileFlowTest.php tests\Feature\Livewire\PesantrenIpmFlowTest.php tests\Feature\Livewire\PesantrenSdmFlowTest.php tests\Feature\SidebarProgressServiceTest.php tests\Feature\MetronicFrontendTest.php --no-ansi`
+- `php artisan test tests\Feature\legacy reactive layer\PesantrenProfileFlowTest.php tests\Feature\legacy reactive layer\PesantrenIpmFlowTest.php tests\Feature\legacy reactive layer\PesantrenSdmFlowTest.php tests\Feature\SidebarProgressServiceTest.php tests\Feature\MetronicFrontendTest.php --no-ansi`
 - `php artisan view:cache --no-ansi`
 - `npm run build`
 
@@ -367,3 +369,5 @@ Hasil:
 - Vite build lulus.
 
 Dokumen detail: `docs/pesantren-role-production-readiness.md`.
+
+

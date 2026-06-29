@@ -19,7 +19,7 @@ Backend kritis dan governance besar sudah distabilkan. Sisa plan sekarang berpus
 | Audit browser nyata per role | Tinggi | P1 | validasi flow operasional end-to-end |
 | Finalize scoring happy path penuh | Sedang | P1 | regression/test atau bukti verifikasi penuh |
 | Negative-path kecil workflow | Sedang | P2 | regression hardening tambahan |
-| Cleanup docs historis Livewire | Rendah | P2 | docs lama tidak membingungkan runtime aktif |
+| Cleanup docs historis legacy reactive layer | Rendah | P2 | docs lama tidak membingungkan runtime aktif |
 | Audit kontrak frontend-backend sisa | Sedang | P2 | daftar mismatch tombol/form/route bila ada |
 
 ## Urutan Kerja Disarankan
@@ -32,7 +32,7 @@ Backend kritis dan governance besar sudah distabilkan. Sisa plan sekarang berpus
 6. Kerjakan patch UI polish prioritas tinggi
 7. Jalankan audit browser nyata ulang
 8. Tutup hardening backend kecil yang masih tersisa
-9. Rapikan docs historis Livewire bila masih perlu
+9. Rapikan docs historis legacy reactive layer bila masih perlu
 
 ## Checklist Eksekusi
 
@@ -61,7 +61,7 @@ Backend kritis dan governance besar sudah distabilkan. Sisa plan sekarang berpus
 - [ ] audit kontrak frontend-backend dari temuan UI
 
 ### Hygiene
-- [ ] cleanup docs historis Livewire bila dibutuhkan
+- [ ] cleanup docs historis legacy reactive layer bila dibutuhkan
 - [ ] update scorecard setelah audit UI selesai
 
 ## Definisi Selesai Batch Berikutnya
@@ -73,3 +73,4 @@ Batch ini dianggap selesai bila:
 - flow utama per role lolos smoke test browser,
 - scorecard bisa dinaikkan dari baseline backend-heavy saat ini,
 - tidak ada gap UX besar yang menghalangi operasi harian.
+

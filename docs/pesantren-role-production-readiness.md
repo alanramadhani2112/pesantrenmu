@@ -34,7 +34,7 @@ Yang dikunci:
 - Error final submit menampilkan alert danger `Data profil belum lengkap`.
 - Field invalid memakai class Metronic `is-invalid`.
 - Checkbox layanan memakai reusable `x-ui.checkbox`.
-- Wilayah selector memakai entangle Livewire yang benar untuk kode dan nama provinsi/kabupaten.
+- Wilayah selector memakai entangle legacy reactive layer yang benar untuk kode dan nama provinsi/kabupaten.
 
 ### IPM
 
@@ -81,9 +81,9 @@ Yang dikunci:
 
 Test baru/terkait:
 
-- `tests/Feature/Livewire/PesantrenProfileFlowTest.php`
-- `tests/Feature/Livewire/PesantrenIpmFlowTest.php`
-- `tests/Feature/Livewire/PesantrenSdmFlowTest.php`
+- `tests/Feature/legacy reactive layer/PesantrenProfileFlowTest.php`
+- `tests/Feature/legacy reactive layer/PesantrenIpmFlowTest.php`
+- `tests/Feature/legacy reactive layer/PesantrenSdmFlowTest.php`
 - `tests/Feature/SidebarProgressServiceTest.php`
 - `tests/Feature/MetronicFrontendTest.php`
 
@@ -102,7 +102,7 @@ Coverage perilaku:
 Perintah yang sudah dijalankan:
 
 ```bash
-php artisan test tests\Feature\Livewire\PesantrenProfileFlowTest.php tests\Feature\Livewire\PesantrenIpmFlowTest.php tests\Feature\Livewire\PesantrenSdmFlowTest.php tests\Feature\SidebarProgressServiceTest.php tests\Feature\MetronicFrontendTest.php --no-ansi
+php artisan test tests\Feature\legacy reactive layer\PesantrenProfileFlowTest.php tests\Feature\legacy reactive layer\PesantrenIpmFlowTest.php tests\Feature\legacy reactive layer\PesantrenSdmFlowTest.php tests\Feature\SidebarProgressServiceTest.php tests\Feature\MetronicFrontendTest.php --no-ansi
 php artisan view:cache --no-ansi
 npm run build
 ```
@@ -163,9 +163,9 @@ Implementation:
 
 Test:
 
-- `tests/Feature/Livewire/PesantrenProfileFlowTest.php`
-- `tests/Feature/Livewire/PesantrenIpmFlowTest.php`
-- `tests/Feature/Livewire/PesantrenSdmFlowTest.php`
+- `tests/Feature/legacy reactive layer/PesantrenProfileFlowTest.php`
+- `tests/Feature/legacy reactive layer/PesantrenIpmFlowTest.php`
+- `tests/Feature/legacy reactive layer/PesantrenSdmFlowTest.php`
 - `tests/Feature/SidebarProgressServiceTest.php`
 - `tests/Feature/MetronicFrontendTest.php`
 
@@ -205,3 +205,4 @@ Hal yang tetap perlu dicek sebelum deployment penuh:
 2. Lakukan browser QA manual untuk flow submit akreditasi setelah Profil, IPM, dan SDM lengkap.
 3. Tambahkan test untuk kondisi locked/correction pada SDM jika rejection flow akan sering dipakai.
 4. Jalankan full `php artisan test --no-ansi` sebelum milestone release.
+

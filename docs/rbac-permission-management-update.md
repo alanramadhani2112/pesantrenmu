@@ -1,3 +1,5 @@
+[Historical note] Dokumen ini merekam implementasi sebelum runtime akhir distandarkan ke Blade/controller. Penyebutan legacy reactive layer di bawah bersifat historis.
+
 # Update Modul Manajemen Hak Akses
 
 Tanggal: 24 Mei 2026
@@ -24,7 +26,7 @@ Scope ini juga mencakup perbaikan kecil pada security header lokal agar browser 
 | --- | --- |
 | `resources/views/livewire/pages/admin/master/role-permission.blade.php` | Menambah search, group filter, bulk action, change summary, audit history, dan markup reusable Metronic. |
 | `app/Http/Middleware/SecurityHeaders.php` | Membatasi pengiriman `Cross-Origin-Opener-Policy` hanya untuk HTTPS atau loopback host. |
-| `tests/Feature/Livewire/RolePermissionMatrixTest.php` | Menambah coverage untuk search/filter, bulk visible action, audit history, dan sinkronisasi event notifikasi. |
+| `tests/Feature/legacy reactive layer/RolePermissionMatrixTest.php` | Menambah coverage untuk search/filter, bulk visible action, audit history, dan sinkronisasi event notifikasi. |
 | `tests/Feature/SecurityHeadersTest.php` | Menambah coverage untuk perilaku COOP pada domain `.test` dan HTTPS. |
 
 ## Detail Implementasi
@@ -123,7 +125,7 @@ Perubahan:
 Command yang sudah dijalankan:
 
 ```bash
-php artisan test tests/Feature/Livewire/RolePermissionMatrixTest.php tests/Unit/PermissionSystemTest.php tests/Unit/SidebarMenuServiceTest.php tests/Feature/SecurityHeadersTest.php --stop-on-failure
+php artisan test tests/Feature/legacy reactive layer/RolePermissionMatrixTest.php tests/Unit/PermissionSystemTest.php tests/Unit/SidebarMenuServiceTest.php tests/Feature/SecurityHeadersTest.php --stop-on-failure
 ```
 
 Hasil:
@@ -154,7 +156,7 @@ QA browser:
 ## Catatan Teknis
 
 - `npm run build` tidak dijalankan karena perubahan scope ini tidak menyentuh CSS atau JS asset.
-- Modul masih menggunakan Livewire Volt karena halaman ini membutuhkan state interaktif.
+- Runtime aktif saat ini sudah Blade/controller; catatan legacy reactive layer di dokumen ini bersifat historis dari fase implementasi lama.
 - Bulk action belum langsung menyimpan ke database. Super admin tetap harus menekan **Simpan Perubahan**, sesuai pola aman untuk perubahan permission.
 
 ## Status
@@ -166,3 +168,5 @@ Potential follow-up:
 - Menambah pagination atau virtual grouping jika jumlah permission bertambah sangat besar.
 - Menambah label kategori permission yang lebih user-friendly jika permission catalog makin kompleks.
 - Menambah audit filter berdasarkan role, aktor, atau tanggal jika volume audit log sudah tinggi.
+
+

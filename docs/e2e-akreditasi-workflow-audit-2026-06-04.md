@@ -73,7 +73,7 @@ php artisan test tests/Feature/AkreditasiWorkflow tests/Feature/AkreditasiStateM
 Result: `66 passed`, `239 assertions`.
 
 ```powershell
-php artisan test tests/Feature/Livewire/PesantrenProfileFlowTest.php tests/Feature/Livewire/PesantrenIpmFlowTest.php tests/Feature/Livewire/PesantrenSdmFlowTest.php tests/Feature/Livewire/PesantrenEdpmUiTest.php tests/Feature/Livewire/PesantrenRejectionUiTest.php tests/Feature/Livewire/AsesorRejectionUiTest.php tests/Feature/Livewire/AdminRejectionUiTest.php tests/Feature/Livewire/AdminReassignAsesorUiTest.php tests/Feature/Livewire/RolePermissionMatrixTest.php tests/Feature/AdminBandingDetailTest.php
+php artisan test tests/Feature/legacy reactive layer/PesantrenProfileFlowTest.php tests/Feature/legacy reactive layer/PesantrenIpmFlowTest.php tests/Feature/legacy reactive layer/PesantrenSdmFlowTest.php tests/Feature/legacy reactive layer/PesantrenEdpmUiTest.php tests/Feature/legacy reactive layer/PesantrenRejectionUiTest.php tests/Feature/legacy reactive layer/AsesorRejectionUiTest.php tests/Feature/legacy reactive layer/AdminRejectionUiTest.php tests/Feature/legacy reactive layer/AdminReassignAsesorUiTest.php tests/Feature/legacy reactive layer/RolePermissionMatrixTest.php tests/Feature/AdminBandingDetailTest.php
 ```
 
 Result setelah follow-up fix: `64 passed`, `257 assertions`.
@@ -81,7 +81,7 @@ Result setelah follow-up fix: `64 passed`, `257 assertions`.
 Additional focused regression:
 
 ```powershell
-php artisan test tests/Feature/RejectionServiceTest.php tests/Feature/Livewire/PesantrenIpmFlowTest.php tests/Feature/AdminBandingDetailTest.php tests/Feature/AkreditasiWorkflow/FullHappyPathTest.php tests/Feature/AkreditasiWorkflow/BandingPathTest.php --stop-on-failure
+php artisan test tests/Feature/RejectionServiceTest.php tests/Feature/legacy reactive layer/PesantrenIpmFlowTest.php tests/Feature/AdminBandingDetailTest.php tests/Feature/AkreditasiWorkflow/FullHappyPathTest.php tests/Feature/AkreditasiWorkflow/BandingPathTest.php --stop-on-failure
 ```
 
 Result: `37 passed`, `189 assertions`.
@@ -123,7 +123,7 @@ Result: `12 passed`, `59 assertions`.
 ### P2 - IPM file upload component kehilangan marker reusable Metronic
 
 - File: `resources/views/components/ui/file-upload.blade.php`
-- Failing test: `tests/Feature/Livewire/PesantrenIpmFlowTest.php`
+- Failing test: `tests/Feature/legacy reactive layer/PesantrenIpmFlowTest.php`
 - Actual: markup wrapper hanya memuat `class="spm-file-upload"`.
 - Expected: markup mengandung `data-ui-file-upload="metronic"`.
 - Impact: kontrak UI/test untuk reusable component pecah, walaupun upload PDF IPM masih berhasil.
@@ -144,3 +144,4 @@ Result: `12 passed`, `59 assertions`.
 - Role UI dan authorization utama lulus, kecuali gap super admin pada service action `rejectBerkas`.
 - Browser verification dilakukan pada hasil data E2E yang dibuat lewat service layer, bukan dengan mengklik setiap transisi satu per satu di UI.
 - Data audit dibiarkan di DB lokal dengan prefix `E2E-20260604-154424` agar dapat direview ulang.
+

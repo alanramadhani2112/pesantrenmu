@@ -568,7 +568,7 @@ Rebuild harus menyediakan domain record yang eksplisit untuk workflow, bukan han
 - Role menu hanya menampilkan aksi yang tersedia untuk role dan status saat itu.
 - UI boleh memperjelas grouping atau instruksi, tetapi tidak boleh mengubah input bisnis existing.
 - Tombol aksi destruktif atau final harus memakai konfirmasi dan tetap divalidasi backend.
-- Tidak boleh ada ketergantungan Livewire, `$wire`, atau action client-side yang tidak punya route/controller.
+- Tidak boleh ada ketergantungan legacy reactive layer, `legacy client binding`, atau action client-side yang tidak punya route/controller.
 - Komponen frontend harus mendukung locked state, partial unlock state, dan read-only state per section.
 
 ### Rework Environment and Migration Strategy
@@ -771,7 +771,7 @@ QA matrix harus menutup minimal scenario berikut:
 | Final rejection | Pesantren menerima alasan dan bisa banding jika eligible |
 | Super Admin settings | Perubahan setting memengaruhi workflow dan diaudit |
 | Role boundary | User salah role/owner/assignment selalu ditolak |
-| Frontend contract | Semua tombol/form memakai route backend nyata, tidak `$wire` |
+| Frontend contract | Semua tombol/form memakai route backend nyata, tidak `legacy client binding` |
 
 ## Acceptance Criteria
 
@@ -1030,7 +1030,7 @@ QA matrix harus menutup minimal scenario berikut:
 
 - End-to-end MVP tests should prove a full accreditation cycle can reach SK/certificate publication and Pesantren can access the final result.
 
-- Frontend contract tests should assert that workflow buttons/forms post to real backend routes and do not depend on Livewire `$wire` or client-only business decisions.
+- Frontend contract tests should assert that workflow buttons/forms post to real backend routes and do not depend on legacy reactive layer `legacy client binding` or client-only business decisions.
 
 - Migration/inventory tests should verify that required master data, input baseline, and formula baseline are present before the new environment is declared ready.
 
@@ -1105,3 +1105,4 @@ QA matrix harus menutup minimal scenario berikut:
 - The current canonical state path in the existing system is simpler than the proposed flow. The new flow needs a careful state-machine mapping before implementation.
 
 - This PRD should remain synchronized with the new flow document, backend role-module audit plan, backend fix issue plan, and frontend audit document.
+

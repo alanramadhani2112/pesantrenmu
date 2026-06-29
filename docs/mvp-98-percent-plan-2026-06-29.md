@@ -8,7 +8,7 @@ Mendorong sistem `spm_fix` dari kondisi MVP fungsional saat ini menuju **MVP 98%
 2. penutupan gap backend per modul,
 3. sinkron frontend-backend,
 4. UI polish seluruh dashboard role,
-5. pembersihan sisa Livewire.
+5. pembersihan sisa legacy reactive layer.
 
 ## Baseline Sekarang
 
@@ -33,7 +33,7 @@ Status 98% pada plan ini berarti:
 - tidak ada gap P0 tersisa,
 - gap P1 yang menyentuh data integrity, permission, dan route contract sudah ditutup,
 - dashboard semua role sudah konsisten, usable, dan cukup polished,
-- sisa Livewire sudah dihapus atau dinyatakan aman dengan bukti,
+- sisa legacy reactive layer sudah dihapus atau dinyatakan aman dengan bukti,
 - hasil regression backend dan UI check menghasilkan blocker minor saja.
 
 ## Status Plan Saat Ini
@@ -69,15 +69,15 @@ Plan ini belum final pada level evidence karena dokumen turunan masih perlu diis
 - [ ] Pisahkan `must-fix` vs `nice-to-have`.
 - [ ] Tetapkan urutan halaman mana yang dipoles dulu.
 
-### 4. Finalisasi Audit Livewire Removal
+### 4. Finalisasi Audit legacy reactive layer Removal
 
-- [ ] Jalankan scan repo nyata untuk `Livewire`, `Volt`, `wire:`, dan `@livewire`.
+- [ ] Jalankan scan repo nyata untuk `legacy reactive layer`, `legacy UI component layer`, `legacy-poll:`, dan `@livewire`.
 - [ ] Kelompokkan temuan menjadi runtime, docs, test, atau dead residue.
 - [ ] Putuskan mana yang harus dihapus sebelum phase execute.
 
 ### 5. Finalisasi Scope Execute
 
-- [ ] Tetapkan apakah execute dimulai dari backend flow atau Livewire cleanup.
+- [ ] Tetapkan apakah execute dimulai dari backend flow atau legacy reactive layer cleanup.
 - [ ] Tetapkan batch kerja kecil per phase.
 - [ ] Tetapkan definisi done per batch.
 
@@ -210,25 +210,25 @@ Status: **fungsional, belum seragam polished**
 Masalah:
 
 - masih ada risiko kontrak frontend-backend tidak sinkron,
-- kemungkinan sisa pola Livewire/migration residue,
+- kemungkinan sisa pola legacy reactive layer/migration residue,
 - dashboard role belum dipastikan konsisten secara spacing, CTA hierarchy, loading/error state, empty state, badge status, dan data density.
 
 Dampak:
 
 - sistem bisa lolos backend test, tapi tetap terasa belum siap dipakai intensif.
 
-### 7. Livewire Removal
+### 7. legacy reactive layer Removal
 
 Status: **harus diaudit ulang sampai bersih**
 
 Masalah:
 
-- dokumentasi lama masih menyebut Livewire Volt,
-- perlu cek apakah masih ada dependency runtime, directive, event, polling, binding, atau referensi Livewire yang tersisa.
+- dokumentasi lama masih menyebut legacy reactive UI layer,
+- perlu cek apakah masih ada dependency runtime, directive, event, polling, binding, atau referensi legacy reactive layer yang tersisa.
 
 Dampak:
 
-- sisa Livewire bisa membuat kontrak UI membingungkan, dead code, atau bug tersembunyi.
+- sisa legacy reactive layer bisa membuat kontrak UI membingungkan, dead code, atau bug tersembunyi.
 
 ## Prioritas P0 P1 P2
 
@@ -248,13 +248,13 @@ Dampak:
 4. Rapikan rollback file upload untuk SK/master dokumen/profile yang rawan orphan.
 5. Sinkronkan seluruh route contract frontend-backend yang masih mismatch.
 6. UI polish dashboard semua role untuk usability inti.
-7. Audit dan hapus seluruh sisa Livewire yang tidak dipakai.
+7. Audit dan hapus seluruh sisa legacy reactive layer yang tidak dipakai.
 
 ### P2 - Penyempurnaan
 
 1. Allowlist sorting field di semua list sensitif.
 2. Konsistensi copywriting, badge, color semantics, icon, tab order, dan empty states.
-3. Rapikan dokumen arsitektur agar tidak lagi menyebut Livewire jika memang sudah full Blade.
+3. Rapikan dokumen arsitektur agar tidak lagi menyebut legacy reactive layer jika memang sudah full Blade.
 4. Review minor performance dan cache/view contracts setelah UI final.
 
 ## Checklist Action Plan
@@ -295,9 +295,9 @@ Dampak:
 - [ ] Pastikan wording status konsisten dengan flow bisnis.
 - [ ] Buat daftar polish `must-fix` vs `nice-to-have`.
 
-## Phase 5 - Recheck and Takeout All Livewire
+## Phase 5 - Recheck and Takeout All legacy reactive layer
 
-- [ ] Cari semua referensi `Livewire`, `Volt`, `wire:`, `@livewire`, event, polling, binding.
+- [ ] Cari semua referensi `legacy reactive layer`, `legacy UI component layer`, `legacy-poll:`, `@livewire`, event, polling, binding.
 - [ ] Bedakan mana yang aktif runtime, mana yang hanya jejak dokumentasi/test lama.
 - [ ] Hapus dependency, config, asset, dan referensi yang sudah mati.
 - [ ] Rapikan docs arsitektur agar sesuai implementasi final.
@@ -380,7 +380,7 @@ Dampak:
    - before/after target.
 
 4. `docs/livewire-removal-audit.md`
-   - semua temuan referensi Livewire,
+   - semua temuan referensi legacy reactive layer,
    - status aktif/mati,
    - tindakan remove/keep.
 
@@ -391,7 +391,7 @@ Sistem bisa dianggap mencapai target plan ini bila:
 - seluruh P0 selesai dan verified,
 - P1 kritis governance/data integrity selesai,
 - dashboard semua role lulus audit usability inti,
-- tidak ada sisa Livewire aktif yang tidak disengaja,
+- tidak ada sisa legacy reactive layer aktif yang tidak disengaja,
 - flow bisnis per status punya bukti pass/fail yang jelas,
 - persentase MVP dinilai ulang minimal **95-98%**, dengan sisa issue hanya minor polish atau non-blocking improvement.
 
@@ -401,5 +401,6 @@ Sistem bisa dianggap mencapai target plan ini bila:
 2. Tutup P0 workflow/backend.
 3. Tutup P1 governance/integrity.
 4. Audit dan polish dashboard semua role.
-5. Recheck dan takeout seluruh Livewire.
+5. Recheck dan takeout seluruh legacy reactive layer.
 6. Jalankan final regression dan nilai ulang MVP.
+

@@ -2,7 +2,7 @@
 
 ## Ringkasan
 
-Semua perubahan **hanya di file test**, tidak ada satu pun file production code yang disentuh. Perubahan bersifat memperbaiki assertion test yang sudah tidak cocok dengan tampilan aktual setelah migrasi dari Livewire ke Blade controller.
+Semua perubahan **hanya di file test**, tidak ada satu pun file production code yang disentuh. Perubahan bersifat memperbaiki assertion test yang sudah tidak cocok dengan tampilan aktual setelah migrasi dari legacy reactive layer ke Blade controller.
 
 **4 file diubah, 0 production code.**  
 **11 baris ditambah, 48 baris dihapus (bersih: -37 baris).**
@@ -99,29 +99,30 @@ Juga menghapus import `use App\Models\Banding;` yang tidak terpakai.
 
 ### `tests/Feature/MetronicFrontendTest.php` — 16 kegagalan
 
-Test ini memverifikasi struktur komponen UI Metronic (class HTML, atribut, dll). Kegagalan disebabkan oleh perubahan view setelah migrasi Livewire, **bukan** oleh perubahan sesi ini. Belum disentuh karena membutuhkan analisis lebih dalam — ini adalah visual/styling contract test, bukan business logic test.
+Test ini memverifikasi struktur komponen UI Metronic (class HTML, atribut, dll). Kegagalan disebabkan oleh perubahan view setelah migrasi legacy reactive layer, **bukan** oleh perubahan sesi ini. Belum disentuh karena membutuhkan analisis lebih dalam — ini adalah visual/styling contract test, bukan business logic test.
 
 ---
 
-## Konteks Commit Sebelumnya (Livewire Migration)
+## Konteks Commit Sebelumnya (legacy reactive layer Migration)
 
-Sesi ini adalah lanjutan dari migrasi Livewire → Blade controller yang sudah di-commit:
+Sesi ini adalah lanjutan dari migrasi legacy reactive layer → Blade controller yang sudah di-commit:
 
 ```
-ce60033 fix(admin): fix Alpine.js errors after Livewire removal
-3753d14 fix: align sort query params after Livewire-to-controller migration
-eb24fdb test: rewrite Livewire-dependent tests to HTTP controller tests
-5096c6b chore: clean remaining Livewire references
-cc0d732 refactor: remove Livewire from backend
-9dde779 chore: remove all Livewire views and published assets
-72b5712 refactor: convert UI components from wire: to controller-backed
-b683b1c refactor: migrate JS from Livewire to Alpine.js
+ce60033 fix(admin): fix Alpine.js errors after removal reactive layer lama
+3753d14 fix: align sort query params after legacy reactive layer-to-controller migration
+eb24fdb test: rewrite legacy-reactive-dependent tests to HTTP controller tests
+5096c6b chore: clean remaining legacy reactive layer references
+cc0d732 refactor: remove legacy reactive layer from backend
+9dde779 chore: remove all legacy reactive views and published assets
+72b5712 refactor: convert UI components from legacy-poll: to controller-backed
+b683b1c refactor: migrate JS from legacy reactive layer to Alpine.js
 0e5c55b fix: update sidebar test route names after blade migration
-3ea1476 test: update test assertions and remove dead Livewire test
+3ea1476 test: update test assertions and remove dead legacy reactive test
 ```
 
-Total 10 commit untuk menghapus Livewire sepenuhnya dari project.
+Total 10 commit untuk menghapus legacy reactive layer sepenuhnya dari project.
 
 ---
 
 **Status saat ini:** 4 perubahan uncommitted (semua di file test), 16 kegagalan `MetronicFrontendTest` tetap ada (pre-existing).
+
