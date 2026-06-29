@@ -72,18 +72,19 @@ Dokumen ini memetakan **aturan bisnis yang diharapkan** vs **implementasi yang a
 | --- | --- | --- | --- | --- |
 | Review berkas | Approve/reject/open review valid | Baseline Done | `tests/Feature/AdminOpenForReviewHttpTest.php:1`, `tests/Feature/AdminApproveBerkasHttpTest.php:1`, `tests/Feature/AdminRejectBerkasHttpTest.php:1` | Tambah edge-case regression bila perlu |
 | Assign/reassign asesor | Valid dan terlacak | Pass | `app/Services/AkreditasiWorkflowService.php:175`, `routes/web.php:138` | Audit stale-state path |
-| Validasi NV | `NV != NK` wajib punya reason | Needs Fix | `docs/backend-role-module-audit-plan-2026-06-08.md:810` | Tambah contract reason dan test |
-| Finalisasi admin | Tidak set final global prematur | Needs Fix | `app/Http/Controllers/Admin/AkreditasiDetailController.php:345` | Validasi semua butir sebelum `is_nv_final=true` |
-| Issue SK | Tidak orphan file jika gagal | Needs Fix | `docs/backend-role-module-audit-plan-2026-06-08.md:812` | Tambah rollback file |
-| Trash ops | Permission mutasi eksplisit | Needs Fix | `docs/backend-role-module-audit-plan-2026-06-08.md:813` | Split permission + gate |
-| Failed notifications | Retry/dismiss tidak terlalu longgar | Needs Fix | `docs/backend-role-module-audit-plan-2026-06-08.md:814` | Split permission + regression |
+| Validasi NV | `NV != NK` wajib punya reason | Pass | `app/Http/Controllers/Admin/AkreditasiDetailController.php:345`, `tests/Feature/AdminFinalizeNvHttpTest.php:1` | Pertahankan regression |
+| Finalisasi admin | Tidak set final global prematur | Pass | `app/Http/Controllers/Admin/AkreditasiDetailController.php:345`, `tests/Feature/AdminFinalizeNvHttpTest.php:1` | Pertahankan regression |
+| Issue SK | Tidak orphan file jika gagal | Pass | `app/Http/Controllers/Admin/AkreditasiDetailController.php:552`, `tests/Feature/AdminIssueSkFileCleanupTest.php:1` | Pertahankan regression |
+| Trash ops | Permission mutasi eksplisit | Pass | `routes/web.php:215`, `routes/web.php:218`, `tests/Feature/Trash/TrashAuthorizationTest.php:1` | Pertahankan regression |
+| Failed notifications | Retry/dismiss tidak terlalu longgar | Pass | outes/web.php:202, outes/web.php:205, 	ests/Feature/FailedNotificationAuthorizationTest.php:1 | Pertahankan regression |
+| Master dokumen | Tidak orphan file saat write gagal | Pass | pp/Services/DocumentService.php:1, 	ests/Feature/DocumentServiceTest.php:1 | Pertahankan regression |
 
 ### Super Admin
 
 | Flow | Expected | Status | Evidence | Fix |
 | --- | --- | --- | --- | --- |
-| Role management | Hanya super admin yang bisa mutasi | Needs Fix | `docs/backend-role-module-audit-plan-2026-06-08.md:817` | Kunci mutation policy |
-| Role inti | Role `1..4` tidak bisa rusak | Needs Fix | `docs/backend-role-module-audit-plan-2026-06-08.md:819` | Tambah guard delete/rename |
+| Role management | Hanya super admin yang bisa mutasi | Pass | `app/Http/Controllers/Admin/RoleController.php:30`, `tests/Feature/RoleMutationAuthorizationTest.php:1` | Pertahankan regression |
+| Role inti | Role `1..4` tidak bisa rusak | Pass | `app/Http/Controllers/Admin/RoleController.php:68`, `tests/Feature/RoleMutationAuthorizationTest.php:1` | Pertahankan regression |
 | Permission matrix | Tidak mengaburkan god-mode | Pass | `docs/backend-role-module-audit-plan-2026-06-08.md:96` | Audit browser nanti |
 | Notifikasi operasional | Kebijakan penerima jelas | Needs Fix | `docs/backend-role-module-audit-plan-2026-06-08.md:104` | Putuskan policy admin-area recipients |
 
@@ -99,10 +100,10 @@ Dokumen ini memetakan **aturan bisnis yang diharapkan** vs **implementasi yang a
 
 ### Batch 2 - P1 Governance
 
-- [ ] role mutation super-admin-only
-- [ ] role inti protection
-- [ ] trash mutate permission split
-- [ ] failed notification mutate permission split
+- [x] role mutation super-admin-only
+- [x] role inti protection
+- [x] trash mutate permission split
+- [x] failed notification mutate permission split
 - [ ] SK/master document rollback cleanup
 
 ### Batch 3 - UI dan Contract Sync
@@ -110,6 +111,10 @@ Dokumen ini memetakan **aturan bisnis yang diharapkan** vs **implementasi yang a
 - [ ] route contract frontend-backend
 - [ ] hasil akhir pesantren UI
 - [ ] dashboard polish per role
+
+
+
+
 
 
 

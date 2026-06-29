@@ -152,7 +152,7 @@ Minimal requirement:
 
 ## Component Direction
 
-Komponen Blade menjadi design system. Livewire mengatur state dan behavior.
+Komponen Blade menjadi design system. State dan behavior runtime ditangani form HTTP, Alpine kecil, dan route/controller.
 
 Komponen prioritas:
 
@@ -210,4 +210,5 @@ Satu halaman dianggap selesai jika:
 - Aksi utama terlihat tanpa mencari terlalu lama.
 - Status workflow jelas.
 - Komponen yang dibuat reusable, bukan hanya copy-paste Metronic.
-- Tidak ada script Metronic yang bentrok dengan Livewire navigation.
+- Tidak ada script Metronic yang bentrok dengan runtime Blade/controller saat ini.
+

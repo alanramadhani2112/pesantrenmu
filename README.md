@@ -5,7 +5,7 @@ Aplikasi akreditasi pesantren Muhammadiyah berbasis web yang dikembangkan oleh L
 ## Stack
 
 - **Backend**: Laravel 12 + PHP 8.2
-- **Frontend**: Livewire Volt + Blade + Metronic 8 UI
+- **Frontend**: Blade + controller + Alpine ringan + Metronic 8 UI
 - **Database**: MySQL 8+
 - **Queue**: Laravel Queue (database driver, async notifications)
 - **Cache**: Redis (production) / file (local)
@@ -170,3 +170,4 @@ Lihat [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) untuk panduan lengkap.
 | [`docs/auth.md`](docs/auth.md) | Autentikasi dan SSO |
 | [`docs/project-work-report.md`](docs/project-work-report.md) | Kronologi pengerjaan project |
 | [`.kiro/specs/`](.kiro/specs/) | Spec fitur (requirements, design, tasks) |
+

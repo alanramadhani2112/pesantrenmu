@@ -200,10 +200,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])
             ->middleware('permission:notification.view')
             ->name('failed-notifications');
         Route::post('failed-notifications/{id}/retry', [App\Http\Controllers\Admin\FailedNotificationController::class, 'retry'])
-            ->middleware('permission:notification.view')
+            ->middleware('permission:notification.retry')
             ->name('failed-notifications.retry');
         Route::post('failed-notifications/{id}/dismiss', [App\Http\Controllers\Admin\FailedNotificationController::class, 'dismiss'])
-            ->middleware('permission:notification.view')
+            ->middleware('permission:notification.dismiss')
             ->name('failed-notifications.dismiss');
 
         Route::get('trash', [App\Http\Controllers\Admin\TrashController::class, 'index'])
@@ -213,10 +213,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])
             ->middleware('permission:trash.view')
             ->name('trash.preview');
         Route::post('trash/restore', [App\Http\Controllers\Admin\TrashController::class, 'restore'])
-            ->middleware('permission:trash.view')
+            ->middleware('permission:trash.restore')
             ->name('trash.restore');
         Route::post('trash/force-delete', [App\Http\Controllers\Admin\TrashController::class, 'forceDelete'])
-            ->middleware('permission:trash.view')
+            ->middleware('permission:trash.purge')
             ->name('trash.force-delete');
     });
 
@@ -412,4 +412,6 @@ Route::middleware('auth')->prefix('_api')->name('api.')->group(function () {
 
 require __DIR__.'/auth.php';
 require __DIR__.'/sso/sso.php';
+
+
 

@@ -5,11 +5,13 @@ namespace Tests\Feature;
 use App\Models\Document;
 use App\Models\DocumentCategory;
 use App\Models\User;
+use App\Repositories\Contracts\DocumentRepositoryInterface;
 use App\Services\DocumentService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Mockery;
 use Tests\TestCase;
 
 /**
@@ -136,6 +138,75 @@ class DocumentServiceTest extends TestCase
         Storage::disk('public')->assertExists($updated->file_path);
     }
 
+
+    public function test_save_document_deletes_new_file_when_repository_create_fails(): void
+    {
+        $repo = Mockery::mock(DocumentRepositoryInterface::class);
+        $repo->shouldReceive('getPaginatedDocuments')->zeroOrMoreTimes();
+        $repo->shouldReceive('find')->zeroOrMoreTimes();
+        $repo->shouldReceive('create')->once()->andThrow(new \RuntimeException('db fail'));
+        $repo->shouldReceive('update')->zeroOrMoreTimes();
+        $repo->shouldReceive('delete')->zeroOrMoreTimes();
+        $repo->shouldReceive('getActiveForRole')->zeroOrMoreTimes();
+        $this->app->instance(DocumentRepositoryInterface::class, $repo);
+
+        $service = app(DocumentService::class);
+        $file = UploadedFile::fake()->create('broken.pdf', 50, 'application/pdf');
+
+        try {
+            $service->saveDocument([
+                'title' => 'Broken Doc',
+                'status' => 1,
+                'category_id' => $this->category->id,
+            ], null, $file);
+            $this->fail('Expected RuntimeException was not thrown.');
+        } catch (\RuntimeException $e) {
+            $this->assertSame('db fail', $e->getMessage());
+        }
+
+        Storage::disk('public')->assertDirectoryEmpty('documents');
+        $this->assertDatabaseMissing('documents', ['title' => 'Broken Doc']);
+    }
+
+    public function test_save_document_keeps_old_file_when_repository_update_fails(): void
+    {
+        Storage::disk('public')->put('documents/old.pdf', 'old content');
+
+        $doc = Document::create([
+            'title' => 'Doc',
+            'status' => 1,
+            'category_id' => $this->category->id,
+            'file_path' => 'documents/old.pdf',
+        ]);
+
+        $repo = Mockery::mock(DocumentRepositoryInterface::class);
+        $repo->shouldReceive('getPaginatedDocuments')->zeroOrMoreTimes();
+        $repo->shouldReceive('find')->with($doc->id)->andReturn($doc);
+        $repo->shouldReceive('update')->once()->andThrow(new \RuntimeException('update fail'));
+        $repo->shouldReceive('create')->zeroOrMoreTimes();
+        $repo->shouldReceive('delete')->zeroOrMoreTimes();
+        $repo->shouldReceive('getActiveForRole')->zeroOrMoreTimes();
+        $this->app->instance(DocumentRepositoryInterface::class, $repo);
+
+        $service = app(DocumentService::class);
+        $file = UploadedFile::fake()->create('new.pdf', 50, 'application/pdf');
+
+        try {
+            $service->saveDocument([
+                'title' => 'Doc',
+                'status' => 1,
+                'category_id' => $this->category->id,
+            ], $doc->id, $file);
+            $this->fail('Expected RuntimeException was not thrown.');
+        } catch (\RuntimeException $e) {
+            $this->assertSame('update fail', $e->getMessage());
+        }
+
+        Storage::disk('public')->assertExists('documents/old.pdf');
+        $files = Storage::disk('public')->allFiles('documents');
+        $this->assertCount(1, $files);
+        $this->assertSame('documents/old.pdf', $files[0]);
+    }
     // ─── deleteDocument ───────────────────────────────────────────────────────
 
     public function test_delete_document_removes_record_and_file(): void
@@ -184,3 +255,4 @@ class DocumentServiceTest extends TestCase
         $this->assertNull($this->service->findDocument(99999));
     }
 }
+

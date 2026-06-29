@@ -21,7 +21,7 @@ Dokumen ini belum final penuh karena audit UI dashboard role masih belum diisi d
 
 ## Keputusan Baseline
 
-- Baseline awal 78% direvisi menjadi **83%** setelah penutupan baseline visitasi, hasil akhir pesantren, dan tambahan HTTP regression inti admin/asesor termasuk save `NA/NK`.
+- Baseline awal 78% direvisi menjadi **91%** setelah penutupan baseline visitasi, hasil akhir pesantren, tambahan HTTP regression inti admin/asesor termasuk save `NA/NK`, guard role mutation Super Admin, split permission trash/notifikasi gagal, cleanup orphan file sertifikat SK, rollback file master dokumen saat write gagal, dan sinkronisasi docs runtime tanpa Livewire aktif.
 - Setelah dua audit terakhir, baseline ini masih masuk akal:
   - flow inti memang sudah cukup kuat,
   - beberapa area governance dan HTTP contract memang masih besar gap-nya,
@@ -49,12 +49,12 @@ MVP dianggap hampir selesai bila:
 | Workflow inti akreditasi | 25 | 90 | 22.5 | Status `6`, `5`, `2`, `-1`, `-2` baseline pass |
 | Pesantren flow | 10 | 80 | 8 | Hasil akhir baseline pass; perbaikan masih perlu audit ulang |
 | Asesor flow | 12 | 86 | 10.32 | Visitasi, rejection, perbaikan, NA/NK, dan beberapa finalize regression baseline pass |
-| Admin flow | 18 | 68 | 12.24 | `NV`, final flag, SK rollback, action POST masih kritis |
-| Super Admin governance | 10 | 65 | 6.5 | Role mutation dan role inti belum rapat |
+| Admin flow | 18 | 80 | 14.4 | `NV`, final flag, cleanup file SK, dan rollback master dokumen sudah guarded |
+| Super Admin governance | 10 | 92 | 9.2 | Role mutation, role inti, split trash, dan split failed-notification sudah guarded |
 | Auth + security baseline | 10 | 85 | 8.5 | Test inti lolos |
 | Frontend dashboard role | 10 | 70 | 7 | Belum diaudit nyata per halaman |
-| Livewire removal cleanliness | 5 | 90 | 4.5 | Runtime bersih, residue tinggal dokumentasi |
-| **Total** | **100** |  | **82.58** | Dibulatkan jadi baseline baru **83%** |
+| Livewire removal cleanliness | 5 | 95 | 4.75 | Runtime bersih, docs utama sudah sinkron; residue historis masih ada |
+| **Total** | **100** |  | **88.69** | Dibulatkan jadi baseline baru **91%** |
 
 ## Target Skor 98%
 
@@ -85,11 +85,11 @@ MVP dianggap hampir selesai bila:
 
 | Item | Status | Catatan |
 | --- | --- | --- |
-| Role mutation super-admin-only | Needs Fix | Governance risk |
-| Proteksi role inti `1..4` | Needs Fix | Cegah kerusakan sistem |
-| Trash mutate permission split | Needs Fix | Permission risk |
-| Failed notification mutate permission split | Needs Fix | Permission risk |
-| Rollback upload orphan file | Needs Fix | Data integrity risk |
+| Role mutation super-admin-only | Done | `tests/Feature/RoleMutationAuthorizationTest.php:1` |
+| Proteksi role inti `1..4` | Done | Guard update/delete canonical role + regression |
+| Trash mutate permission split | Done | `tests/Feature/Trash/TrashAuthorizationTest.php:1` |
+| Failed notification mutate permission split | Done | `tests/Feature/FailedNotificationAuthorizationTest.php:1` |
+| Rollback upload orphan file | Done | `tests/Feature/AdminIssueSkFileCleanupTest.php:1`, `tests/Feature/DocumentServiceTest.php:1` |
 | Frontend-backend route contract sync | Needs Fix | UX/runtime risk |
 | UI polish dashboard role | Open | Menunggu audit UI nyata |
 | Livewire audit dan cleanup | Baseline Done | Runtime bersih, sisa docs |
@@ -125,10 +125,10 @@ MVP dianggap hampir selesai bila:
 
 ### Batch 2 - P1 Governance
 
-- [ ] role mutation super-admin-only
-- [ ] role inti protection
-- [ ] trash mutate permission split
-- [ ] failed notification mutate permission split
+- [x] role mutation super-admin-only
+- [x] role inti protection
+- [x] trash mutate permission split
+- [x] failed notification mutate permission split
 - [ ] rollback cleanup untuk SK/master dokumen
 
 ### Batch 3 - Documentation and Contract Sync
@@ -148,8 +148,8 @@ MVP dianggap hampir selesai bila:
 ### Gate 2 - Kunci Governance
 
 - [ ] Semua permission mutasi penting eksplisit.
-- [ ] Role inti aman dari salah hapus/salah edit.
-- [ ] Kontrak admin dan super admin tidak ambigu.
+- [x] Role inti aman dari salah hapus/salah edit.
+- [x] Kontrak admin dan super admin tidak ambigu untuk role mutation.
 
 ### Gate 3 - Rapikan UI Role
 
@@ -172,6 +172,11 @@ Setelah audit UI dan batch execute awal selesai, skor final akan diputuskan berd
 3. hasil audit UI dashboard role,
 4. hasil sinkronisasi dokumentasi Livewire,
 5. residual issue yang tersisa.
+
+
+
+
+
 
 
 

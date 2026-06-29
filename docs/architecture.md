@@ -2,27 +2,30 @@
 
 ## Overview
 
-SPM Fix adalah aplikasi akreditasi pesantren Muhammadiyah. Arsitektur menggunakan Laravel 12 dengan Livewire Volt sebagai layer UI, Repository pattern untuk data access, dan Service layer untuk business logic.
+SPM Fix adalah aplikasi akreditasi pesantren Muhammadiyah. Arsitektur menggunakan Laravel 12 dengan Blade + controller sebagai layer UI/runtime, Repository pattern untuk data access, dan Service layer untuk business logic.
 
 ## Layer Architecture
 
 ```
 Browser
-  └── Livewire Volt (Blade pages) / Livewire Components
-        └── Service Layer (PesantrenService, AkreditasiService, ...)
-              └── Repository Layer (Eloquent implementations)
-                    └── Eloquent Models
-                          └── MySQL Database
+  └── Blade Views + Alpine/Metronic interactions
+        └── Controller Layer
+              └── Service Layer (PesantrenService, AkreditasiService, ...)
+                    └── Repository Layer (Eloquent implementations)
+                          └── Eloquent Models
+                                └── MySQL Database
 ```
 
-### Livewire Volt Pages
+### UI Runtime
 
-Semua halaman menggunakan Volt single-file components di `resources/views/livewire/pages/`:
+Halaman runtime aktif sekarang memakai Blade views berbasis route/controller di `resources/views/`.
 
 - `admin/` — halaman admin (akreditasi, asesor, pesantren, master data)
 - `asesor/` — halaman asesor (penilaian, profil)
 - `pesantren/` — halaman pesantren (profil, IPM, SDM, EDPM, akreditasi)
-- `layout/` — komponen layout (sidebar, navbar, notification)
+- `components/` + `layouts/` — komponen layout dan UI reusable
+
+Catatan: Livewire/Volt sudah tidak dipakai di runtime aktif. Residunya tinggal di dokumen audit/historis.
 
 ### Service Layer
 
@@ -128,27 +131,17 @@ Dari `Akreditasi::boot()` deleting hook:
 
 ## Queue & Async
 
-Semua notifikasi (`AkreditasiNotification`) berjalan async via queue `notifications`. Konfigurasi di `config/queue.php` dengan `after_commit=true` agar notifikasi hanya dikirim setelah transaction DB commit.
+Semua notifikasi (`AkreditasiNotification`) dikirim async bila queue aktif. Fallback sync tetap bisa dipakai di local/testing.
 
-Failed notifications dicatat di tabel `failed_notifications` dan bisa di-retry via dashboard admin `/admin/failed-notifications`.
+Failed notifications dicatat di tabel `failed_notifications` dan bisa di-retry/dismiss via dashboard admin.
 
 ## SSO Integration
 
-SSO via Muhammadiyah ID menggunakan OAuth2 Authorization Code flow:
-
-```
-/sso/preflight → redirect ke IdP
-IdP callback → /sso/auth (exchange code → token, simpan di session)
-/sso/login (ambil token dari session, fetch user info, login)
-```
-
-Token disimpan encrypted di tabel `profiles.access_token` (Laravel `encrypted` cast).
+SSO Muhammadiyah ID memakai OAuth2 Authorization Code flow melalui route `/sso/*`. Token akses disimpan encrypted sesuai cast model terkait.
 
 ## File Storage
 
-Semua upload saat ini menggunakan disk `public` (symlink ke `public/storage`). Untuk production multi-node, set `FILESYSTEM_DISK=s3` dan konfigurasi `AWS_*` env vars.
-
-File cleanup otomatis saat record dihapus via `deleting` hooks di model.
+Upload utama memakai disk `public`. Cleanup file dilakukan saat record dihapus, dan failure-path penting sekarang juga membersihkan orphan file saat write workflow gagal.
 
 ## Scheduled Commands
 

@@ -25,7 +25,7 @@ Sistem Penjaminan Mutu Pesantren Muhammadiyah. Aplikasi akreditasi berbasis web 
 
 | Layer | Teknologi | Versi |
 |-------|-----------|-------|
-| Reactive framework | Livewire Volt | 3.x |
+| UI runtime | Blade + controller + Alpine kecil | Laravel native |
 | UI Kit | Metronic 8 | 8.x |
 | CSS | TailwindCSS | 3.x |
 | Bundler | Vite | 7.x |
@@ -251,7 +251,7 @@ POST /logout                    logout
 
 ### Authenticated (semua role)
 ```
-GET  /dashboard                 home (Livewire Home.php)
+GET  /dashboard                 home (controller/view runtime)
 GET  /profile                   edit profil
 GET  /roles                     master role (permission: master.role)
 GET  /accounts                  daftar akun (permission: account.view)
@@ -282,7 +282,7 @@ GET  /admin/trash                    trash / soft-deleted records (permission: t
 ```
 GET  /asesor/profile             profil asesor
 GET  /asesor/akreditasi          daftar akreditasi yang di-assign
-GET  /asesor/akreditasi/{uuid}   detail akreditasi (Livewire AkreditasiDetail)
+GET  /asesor/akreditasi/{uuid}   detail akreditasi (controller/view runtime)
 ```
 
 ### Pesantren Panel (`/pesantren/*`)
@@ -303,7 +303,7 @@ GET  /panduan-pesantren        panduan untuk pesantren
 GET  /panduan-superadmin       panduan untuk super admin
 ```
 
-### UI Components (Metronic 8 / Livewire Volt)
+### UI Components (Metronic 8 / Blade runtime)
 
 Layout menggunakan Metronic 8 dengan sidebar kustom. Struktur direktori:
 
@@ -453,3 +453,4 @@ tests/
 6. **Mass-assignment hardening**: Semua model pakai `$fillable` allowlist (bukan `$guarded`). Pesantren form hanya bisa tulis field di `PESANTREN_FILLABLE`.
 7. **Web Push via VAPID**: Notifikasi real-time ke browser tanpa polling.
 8. **Breeze + SSO bridge**: Auth built-in Laravel dengan jembatan ke SSO LP2M.
+

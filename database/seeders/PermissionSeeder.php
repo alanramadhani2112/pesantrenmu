@@ -60,6 +60,7 @@ class PermissionSeeder extends Seeder
             // Notification group
             ['notification.view', 'Lihat Notifikasi', 'notification', 'Melihat daftar notifikasi.'],
             ['notification.retry', 'Retry Notifikasi', 'notification', 'Mengirim ulang notifikasi yang gagal.'],
+            ['notification.dismiss', 'Dismiss Notifikasi', 'notification', 'Mengabaikan notifikasi gagal tanpa retry.'],
         ];
 
         foreach ($catalog as [$key, $label, $group, $description]) {
@@ -74,3 +75,4 @@ class PermissionSeeder extends Seeder
         }
     }
 }
+

@@ -2,6 +2,9 @@
 
 namespace Tests\Feature\Trash;
 
+use App\Models\Akreditasi;
+use App\Models\Permission;
+use App\Models\Role;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RolePermissionSeeder;
@@ -68,9 +71,46 @@ class TrashAuthorizationTest extends TestCase
         $response->assertStatus(403);
     }
 
+
+    public function test_admin_without_restore_permission_cannot_restore_trash(): void
+    {
+        $admin = $this->makeAdmin();
+        $permission = Permission::where('key', 'trash.restore')->firstOrFail();
+        Role::findOrFail(1)->revokePermission($permission->id);
+
+        $akreditasi = $this->makeTrashedAkreditasi();
+
+        $response = $this->actingAs($admin)->post(route('admin.trash.restore'), ['id' => $akreditasi->id]);
+
+        $response->assertForbidden();
+    }
+
+    public function test_admin_without_purge_permission_cannot_force_delete_trash(): void
+    {
+        $admin = $this->makeAdmin();
+        $permission = Permission::where('key', 'trash.purge')->firstOrFail();
+        Role::findOrFail(1)->revokePermission($permission->id);
+
+        $akreditasi = $this->makeTrashedAkreditasi();
+
+        $response = $this->actingAs($admin)->post(route('admin.trash.force-delete'), ['id' => $akreditasi->id]);
+
+        $response->assertForbidden();
+        $this->assertNotNull(Akreditasi::withTrashed()->find($akreditasi->id));
+    }
+
+    private function makeTrashedAkreditasi(): Akreditasi
+    {
+        $user = User::factory()->create(['role_id' => 3]);
+        $akreditasi = Akreditasi::create(['user_id' => $user->id, 'status' => 5]);
+        $akreditasi->delete();
+
+        return $akreditasi;
+    }
     public function test_unauthenticated_user_gets_redirected(): void
     {
         $response = $this->get(route('admin.trash'));
         $response->assertRedirect(route('login'));
     }
 }
+

@@ -47,7 +47,6 @@ class DocumentService
             'title' => $data['title'],
             'status' => (int) ($data['status'] ?? 0),
             'category_id' => $category?->id,
-            // Mirror legacy columns from the category for back-compat.
             'type' => $category?->slug,
             'is_pesantren' => $category?->visibility === DocumentCategory::VISIBILITY_PUBLIC
                 || $category?->visibility === DocumentCategory::VISIBILITY_PESANTREN_SECRET,
@@ -56,26 +55,33 @@ class DocumentService
             'description' => $data['description'] ?? null,
         ];
 
+        $existingPath = null;
+        $newPath = null;
+
         if ($newFile) {
-            // Store new file first; only delete old if store succeeds
+            $existingPath = $id ? $this->findDocument($id)?->file_path : null;
             $newPath = $newFile->store('documents', 'public');
-            if ($newPath) {
-                if ($id) {
-                    $existing = $this->findDocument($id);
-                    if ($existing && $existing->file_path && Storage::disk('public')->exists($existing->file_path)) {
-                        Storage::disk('public')->delete($existing->file_path);
-                    }
-                }
-                $payload['file_path'] = $newPath;
-                $payload['uploaded_by_user_id'] = Auth::id();
-                $payload['uploaded_by_role'] = Auth::user()?->role_id;
-            }
+            $payload['file_path'] = $newPath;
+            $payload['uploaded_by_user_id'] = Auth::id();
+            $payload['uploaded_by_role'] = Auth::user()?->role_id;
         }
 
-        if ($id) {
-            $this->documentRepository->update($id, $payload);
-        } else {
-            $this->documentRepository->create($payload);
+        try {
+            if ($id) {
+                $this->documentRepository->update($id, $payload);
+            } else {
+                $this->documentRepository->create($payload);
+            }
+        } catch (\Throwable $e) {
+            if ($newPath && Storage::disk('public')->exists($newPath)) {
+                Storage::disk('public')->delete($newPath);
+            }
+
+            throw $e;
+        }
+
+        if ($newPath && $existingPath && Storage::disk('public')->exists($existingPath)) {
+            Storage::disk('public')->delete($existingPath);
         }
     }
 
@@ -93,17 +99,6 @@ class DocumentService
         return $this->documentRepository->delete($id);
     }
 
-    /**
-     * Active documents visible to the current viewer.
-     *
-     * Visibility is derived ENTIRELY from the document's category.visibility,
-     * never from the legacy is_pesantren / is_asesor booleans. This makes
-     * "secret" categories impossible to leak through a misconfigured admin
-     * checkbox.
-     *
-     * @param  string|null  $role  'admin' | 'asesor' | 'pesantren' | null (guest)
-     * @param  string|null  $categorySlug  document_categories.slug, or 'all'/null
-     */
     public function getActiveDocuments(
         ?string $role = null,
         ?string $categorySlug = null,
@@ -113,9 +108,6 @@ class DocumentService
         return $this->documentRepository->getActiveForRole($role, $categorySlug, $search, $perPage);
     }
 
-    /**
-     * Convenience helper used by the asesor akreditasi-detail view.
-     */
     public function getVisitasiTemplate(): ?Document
     {
         return Document::query()

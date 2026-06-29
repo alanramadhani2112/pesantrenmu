@@ -29,7 +29,7 @@ class RoleController extends Controller
 
     public function store(Request $request)
     {
-        Gate::authorize('master.role');
+        $this->authorizeRoleMutation();
 
         $data = $request->validate([
             'name' => 'required|string|max:255|unique:roles,name',
@@ -43,7 +43,7 @@ class RoleController extends Controller
 
     public function update(Request $request, int $id)
     {
-        Gate::authorize('master.role');
+        $this->authorizeRoleMutation($id);
 
         $data = $request->validate([
             'name' => 'required|string|max:255|unique:roles,name,' . $id,
@@ -57,10 +57,20 @@ class RoleController extends Controller
 
     public function destroy(int $id)
     {
-        Gate::authorize('master.role');
+        $this->authorizeRoleMutation($id);
 
         $this->service->deleteRole($id);
 
         return back()->with('success', 'Role berhasil dihapus.');
+    }
+
+    private function authorizeRoleMutation(?int $id = null): void
+    {
+        Gate::authorize('master.role');
+        abort_unless(auth()->user()?->isSuperAdmin(), 403);
+
+        if ($id !== null) {
+            abort_if(in_array($id, [1, 2, 3, 4], true), 403);
+        }
     }
 }

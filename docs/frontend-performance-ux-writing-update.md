@@ -1,7 +1,7 @@
 # Frontend Performance and UX Writing Update
 
 Date: 2026-05-24
-Scope: Laravel Blade, Livewire Volt, reusable Metronic UI components
+Scope: Laravel Blade, controller-driven UI, reusable Metronic UI components
 
 ## Summary
 
@@ -112,3 +112,4 @@ Verification completed after the changes:
   documentation step. The latest focused frontend suite passed after
   the frontend changes.
 - Existing broad working-tree changes outside this frontend update were left untouched.
+

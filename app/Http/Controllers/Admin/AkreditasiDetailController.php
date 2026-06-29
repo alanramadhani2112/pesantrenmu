@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 
 class AkreditasiDetailController extends Controller
 {
@@ -562,6 +563,8 @@ class AkreditasiDetailController extends Controller
             'masa_berlaku_akhir' => 'required|date|after:masa_berlaku',
         ]);
 
+        $sertifikatPath = null;
+
         try {
             $sertifikatPath = $request->file('sertifikat_file')->store('akreditasi/sertifikat', 'public');
 
@@ -575,11 +578,21 @@ class AkreditasiDetailController extends Controller
 
             return redirect()->route('admin.akreditasi')->with('success', 'SK Akreditasi berhasil diterbitkan.');
         } catch (\App\Exceptions\ConflictException $e) {
+            $this->cleanupStoredCertificate($sertifikatPath);
             return back()->with('error', 'Akreditasi telah dimodifikasi oleh pengguna lain. Silakan muat ulang halaman.');
         } catch (\DomainException $e) {
+            $this->cleanupStoredCertificate($sertifikatPath);
             return back()->with('error', $e->getMessage());
         } catch (\App\Exceptions\StaleStateException $e) {
+            $this->cleanupStoredCertificate($sertifikatPath);
             return back()->with('error', 'Akreditasi telah dimodifikasi oleh pengguna lain. Silakan muat ulang halaman.');
+        }
+    }
+
+    private function cleanupStoredCertificate(?string $path): void
+    {
+        if ($path && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
         }
     }
 
@@ -690,4 +703,6 @@ class AkreditasiDetailController extends Controller
         }
     }
 }
+
+
 
