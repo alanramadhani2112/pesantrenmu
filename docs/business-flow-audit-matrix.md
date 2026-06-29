@@ -61,7 +61,7 @@ Dokumen ini memetakan **aturan bisnis yang diharapkan** vs **implementasi yang a
 | Flow | Expected | Status | Evidence | Fix |
 | --- | --- | --- | --- | --- |
 | Lihat penugasan | Hanya data penugasan sendiri | Pass | policy tests ada di `tests/Unit/Policies/TenantPolicyTest.php:167` | Audit browser ringan |
-| Review substansi | Action sesuai state | Baseline Done | `tests/Feature/AsesorRejectDocumentHttpTest.php:1`, `tests/Feature/AsesorAcceptPerbaikanHttpTest.php:1`, `tests/Feature/AsesorFinalizeScoringHttpTest.php:1` | Tambah happy-path finalize scoring + save NA/NK |
+| Review substansi | Action sesuai state | Baseline Done | `tests/Feature/AsesorRejectDocumentHttpTest.php:1`, `tests/Feature/AsesorAcceptPerbaikanHttpTest.php:1`, `tests/Feature/AsesorFinalizeScoringHttpTest.php:1`, `tests/Feature/AsesorSaveNaHttpTest.php:1`, `tests/Feature/AsesorSaveNkHttpTest.php:1` | Tambah happy-path finalize scoring penuh |
 | Jadwal visitasi | Hanya pada status yang benar | Pass | `app/Services/AkreditasiWorkflowService.php:363`, `tests/Feature/AsesorVisitasiVisibilityTest.php:1` | Tambah negative regression |
 | Input nilai | Simpan/final konsisten | Pass | `app/Http/Controllers/Asesor/AkreditasiController.php:456`, `tests/Feature/AkreditasiWorkflow/FullHappyPathTest.php:246` | Audit UX/save-final contract |
 | Upload laporan | Wajib lengkap sebelum finalisasi | Pass | `tests/Feature/AkreditasiWorkflow/PostVisitasiDocumentsTest.php:1` | Audit feedback UI |
@@ -110,5 +110,6 @@ Dokumen ini memetakan **aturan bisnis yang diharapkan** vs **implementasi yang a
 - [ ] route contract frontend-backend
 - [ ] hasil akhir pesantren UI
 - [ ] dashboard polish per role
+
 
 
