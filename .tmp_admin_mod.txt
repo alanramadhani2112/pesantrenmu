@@ -1,7 +1,0 @@
-
-   PASS  Tests\Feature\MetronicFrontendTest
-  ✓ admin module list pages use page heading and reusable tables                                                 2.19s  
-
-  Tests:    1 passed (28 assertions)
-  Duration: 2.63s
-
