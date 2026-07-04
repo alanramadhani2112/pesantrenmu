@@ -44,17 +44,17 @@
                 <table class="table table-bordered table-sm align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th class="ps-4 fw-bold" style="min-width: 200px;">Permission</th>
-                            <th class="fw-bold" style="min-width: 150px;">Label</th>
+                            <th class="ps-4 fw-semibold" style="min-width: 200px;">Permission</th>
+                            <th class="fw-semibold" style="min-width: 150px;">Label</th>
                             @foreach($roles as $role)
-                                <th class="text-center fw-bold" style="min-width: 100px;">{{ $role->name }}</th>
+                                <th class="text-center fw-semibold" style="min-width: 100px;">{{ $role->name }}</th>
                             @endforeach
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($groupedPermissions as $group => $perms)
                             <tr class="table-secondary">
-                                <td colspan="{{ 2 + $roles->count() }}" class="ps-4 fw-bold text-uppercase fs-8 text-muted py-2">
+                                <td colspan="{{ 2 + $roles->count() }}" class="ps-4 fw-semibold text-uppercase fs-8 text-muted py-2">
                                     {{ $group ?: 'Ungrouped' }}
                                 </td>
                             </tr>

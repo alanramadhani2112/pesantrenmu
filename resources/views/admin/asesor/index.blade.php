@@ -199,7 +199,7 @@
                 const title = `${nextAction.charAt(0).toUpperCase()}${nextAction.slice(1)} ${label}?`;
                 const text = `${label} ${name} akan di${nextAction}.`;
 
-                window.SpmSwal.fire({
+                window.SpmSwal.confirm({
                     title,
                     text,
                     icon: 'warning',

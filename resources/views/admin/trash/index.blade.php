@@ -238,14 +238,14 @@
             async openRestoreConfirm(id) {
                 this.previewId = id;
                 this.previewData = null;
-                Alpine.store('modal').open('restore-modal');
+                window.dispatchEvent(new CustomEvent('open-modal', { detail: 'restore-modal' }));
                 await this.fetchPreview(id);
             },
 
             async openForceDeleteConfirm(id) {
                 this.previewId = id;
                 this.previewData = null;
-                Alpine.store('modal').open('force-delete-modal');
+                window.dispatchEvent(new CustomEvent('open-modal', { detail: 'force-delete-modal' }));
                 await this.fetchPreview(id);
             },
 

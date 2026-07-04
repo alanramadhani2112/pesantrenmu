@@ -6,6 +6,7 @@ use App\Models\Akreditasi;
 use App\Models\Asesor;
 use App\Models\Assessment;
 use App\Models\Pesantren;
+use App\Models\User;
 use App\Services\SidebarProgressService;
 use App\StateMachine\AkreditasiStateMachine;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,9 @@ class DashboardController extends Controller
     public function __invoke(): View
     {
         $user = auth()->user();
-        $isAdmin = $user->canAccessAdminArea();
+        $isSuperAdmin = $user->isSuperAdmin();
+        $isAdmin = $user->isAdmin();
+        $isAdminArea = $user->canAccessAdminArea();
         $isPesantren = $user->isPesantren();
         $isAsesor = $user->isAsesor();
         $stats = [
@@ -28,7 +31,7 @@ class DashboardController extends Controller
             'ditolak' => 0,
         ];
 
-        if ($isAdmin) {
+        if ($isAdminArea) {
             $row = Akreditasi::selectRaw($this->statusStatsSelect())->first();
             $stats = $this->normalizeStats($row);
         } elseif ($isPesantren) {
@@ -81,9 +84,13 @@ class DashboardController extends Controller
         $totalTugasAktif = 0;
         $asesorTanpaTugas = 0;
         $avgBeban = 0;
+        $totalPesantren = 0;
+        $totalAkun = 0;
 
-        if ($isAdmin) {
+        if ($isAdminArea) {
             $totalAsesor = Asesor::count();
+            $totalPesantren = Pesantren::count();
+            $totalAkun = User::count();
 
             $monitoring = Assessment::query()
                 ->join('akreditasis', 'akreditasis.id', '=', 'assessments.akreditasi_id')
@@ -166,7 +173,9 @@ class DashboardController extends Controller
         }
 
         return view('dashboard.index', compact(
+            'isSuperAdmin',
             'isAdmin',
+            'isAdminArea',
             'isPesantren',
             'isAsesor',
             'stats',
@@ -175,6 +184,8 @@ class DashboardController extends Controller
             'totalTugasAktif',
             'asesorTanpaTugas',
             'avgBeban',
+            'totalPesantren',
+            'totalAkun',
             'greeting',
             'recentActivities',
             'readiness'

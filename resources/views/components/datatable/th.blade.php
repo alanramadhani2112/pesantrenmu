@@ -5,6 +5,7 @@
     'align' => 'start',
 ])
 
+<!-- datatable-sort sortField="{{ $field }}" -->
 <x-ui.table-th
     :field="$field"
     :sort-field="$sortField"

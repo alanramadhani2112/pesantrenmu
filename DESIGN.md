@@ -3,7 +3,7 @@ version: 1.0
 name: PesantrenMu
 description: |
   Sistem Penjaminan Mutu PesantrenMu (SPM) - platform akreditasi pesantren Muhammadiyah.
-  Multi-tenant Laravel 11 + Livewire Volt + Metronic 8 hybrid. Three roles: admin, asesor, pesantren.
+  Multi-tenant Laravel + Blade + Alpine + Metronic 8. Three roles: admin, asesor, pesantren.
   Visual identity built around the Muhammadiyah deep-green accent on a quiet enterprise canvas.
 brand:
   primary_logo: /images/brand/logo-horizontal.svg
@@ -195,7 +195,7 @@ Authenticated app uses [`resources/views/layouts/app.blade.php`](resources/views
 ```blade
 <x-ui.page title="Profil Pesantren" subtitle="Lengkapi data dasar pesantren Anda.">
     <x-slot name="toolbar">
-        <x-ui.button variant="primary" wire:click="save">Simpan</x-ui.button>
+        <x-ui.button type="submit" form="profile-form" variant="primary">Simpan</x-ui.button>
     </x-slot>
 
     <x-ui.section-card title="Identitas">
@@ -285,7 +285,7 @@ Akreditasi state machine maps to one badge variant only. Keep this consistent ac
 - Header row: `text-gray-500 fw-semibold gs-0` - 12px caption, all caps avoided (use sentence case).
 - Body row: 14px, ink-mute, vertical padding 16px, divider `border-row-dashed` for low chrome.
 - Empty state: `<x-ui.empty-state>` inside `<td colspan>` with icon, title, optional CTA.
-- Pagination: Indonesian-styled, `livewire.datatable-pagination` view, "Menampilkan N sampai M dari T data" caption.
+- Pagination: Indonesian-styled `x-ui.pagination`, "Menampilkan N sampai M dari T data" caption.
 - Per-page selector at top-left, toolbar at top-right.
 
 ## Modals
@@ -298,7 +298,7 @@ Akreditasi state machine maps to one badge variant only. Keep this consistent ac
 
 - Inbox bell in header dropdown (`spm-notification-item`). Unread row tint `canvas-tinted`. Read row 0.72 opacity.
 - Inline alert: use `notice bg-light-{variant} border-{variant} border-dashed` for empty-state warning blocks.
-- Toast: dispatch via Livewire `notify(...)`. Pass plain text, not raw HTML. (See security audit M-5.)
+- Toast: use `window.SpmSwal` or dispatch `show-metronic-alert`. Pass plain text, not raw HTML. (See security audit M-5.)
 
 ## Accessibility
 

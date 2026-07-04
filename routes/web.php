@@ -25,6 +25,9 @@ Route::middleware('auth')->prefix('profile')->name('profile.')->group(function (
     Route::delete('/photo', [\App\Http\Controllers\ProfileController::class, 'removePhoto'])->name('photo.remove');
 });
 
+
+Route::get('roles', [RoleController::class, 'index'])->middleware(['auth', 'verified', 'permission:master.role']);
+
 Route::middleware(['auth', 'verified', 'permission:master.role'])
     ->prefix('admin/roles')
     ->name('admin.roles.')
@@ -102,6 +105,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])
             ->name('master-kategori-dokumen.destroy');
 
         // Master Dokumen
+        Route::get('master-document', [MasterDokumenController::class, 'index'])
+            ->middleware('permission:master.dokumen');
         Route::get('master-dokumen', [MasterDokumenController::class, 'index'])
             ->middleware('permission:master.dokumen')
             ->name('master-dokumen.index');

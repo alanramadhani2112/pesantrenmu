@@ -108,16 +108,18 @@
                                         <i class="ki-solid ki-file text-success fs-2"></i>
                                         <div>
                                             <div class="fw-semibold text-success fs-7">Dokumen Terunggah</div>
-                                            <a href="{{ Storage::url($existingFiles[$item['field']]) }}" target="_blank" class="text-muted fs-8">Lihat Dokumen</a>
+                                            <a data-ui-document-item="metronic" href="{{ Storage::url($existingFiles[$item['field']]) }}" target="_blank" class="text-muted fs-8">Lihat Dokumen</a>
                                         </div>
                                     </div>
                                 @endif
 
                                 @if(!$isLocked)
+                                    <div data-ui-form-field="metronic">
                                     <label class="form-label fw-semibold text-gray-700 fs-7">
                                         {{ $hasFile ? 'Ganti Dokumen' : 'Unggah Dokumen' }}
                                     </label>
                                     <input
+                                        data-ui-file-upload="metronic"
                                         type="file"
                                         name="{{ $item['input'] }}"
                                         class="form-control form-control-sm @error($item['input']) is-invalid @enderror"
@@ -127,6 +129,7 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                     <div class="text-muted fs-8 mt-1">PDF/Gambar (Maks. 2MB)</div>
+                                    </div>
                                 @endif
                             </div>
                             <div class="col-md-4 text-end">
@@ -161,7 +164,7 @@
 <script>
 document.getElementById('btnSaveIpm')?.addEventListener('click', function(e) {
     e.preventDefault();
-    window.SpmSwal.fire({
+    window.SpmSwal.confirm({
         title: 'Simpan Data IPM?',
         text: 'Pastikan dokumen yang diunggah sudah benar.',
         icon: 'question',
@@ -170,7 +173,7 @@ document.getElementById('btnSaveIpm')?.addEventListener('click', function(e) {
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            document.getElementById('ipmForm').submit();
+            document.getElementById('ipmForm').requestSubmit();
         }
     });
 });

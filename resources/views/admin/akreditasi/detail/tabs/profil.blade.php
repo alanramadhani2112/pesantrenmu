@@ -111,11 +111,11 @@
 
                     @if ($akreditasi->assessments->isNotEmpty())
                         @php $mainAssessment = $akreditasi->assessments->first(); @endphp
-                        <x-ui.detail-item label="Penilaian Mulai" value="{{ Carbon::parse($mainAssessment->tanggal_mulai)->format('d M Y') }}" />
-                        <x-ui.detail-item label="Penilaian Akhir" value="{{ Carbon::parse($mainAssessment->tanggal_akhir)->format('d M Y') }}" />
+                        <x-ui.detail-item label="Penilaian Mulai" value="{{ \Carbon\Carbon::parse($mainAssessment->tanggal_mulai)->format('d M Y') }}" />
+                        <x-ui.detail-item label="Penilaian Akhir" value="{{ \Carbon\Carbon::parse($mainAssessment->tanggal_akhir)->format('d M Y') }}" />
                     @endif
 
-                    <x-ui.detail-item label="Jadwal Visitasi" value="{{ $akreditasi->tgl_visitasi ? Carbon::parse($akreditasi->tgl_visitasi)->format('d M Y') . ' - ' . Carbon::parse($akreditasi->tgl_visitasi_akhir)->format('d M Y') : 'Belum Dijadwalkan' }}" />
+                    <x-ui.detail-item label="Jadwal Visitasi" value="{{ $akreditasi->tgl_visitasi ? \Carbon\Carbon::parse($akreditasi->tgl_visitasi)->format('d M Y') . ' - ' . \Carbon\Carbon::parse($akreditasi->tgl_visitasi_akhir)->format('d M Y') : 'Belum Dijadwalkan' }}" />
                 </div>
 
                 @if(in_array((int) $akreditasi->status, [AkreditasiStateMachine::STATUS_ASSESSMENT, AkreditasiStateMachine::STATUS_VISITASI]))

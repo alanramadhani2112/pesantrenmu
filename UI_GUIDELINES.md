@@ -23,7 +23,7 @@ Panduan ini jadi baseline agar tampilan tetap konsisten Metronic sambil tetap am
 
 Native element tetap diizinkan untuk kasus berikut:
 
-- `input[type=file]` dengan flow upload khusus (`wire:model` atau `$wire.upload(...)`).
+- `input[type=file]` dengan flow upload khusus berbasis form standar atau bridge Alpine.
 - Kontrol interaktif Alpine yang butuh binding spesifik dan belum cocok dimasukkan ke komponen reusable.
 
 Syarat wajib untuk native yang dipertahankan:
@@ -51,16 +51,14 @@ data-ui-file-upload="metronic"
 ## Konvensi Implementasi
 
 - Gunakan `:error="$errors->get('field')"` pada `x-ui.form-field` untuk menampilkan error.
-- Untuk model Livewire dengan modifier:
-  - `x-ui.select model="foo" modifier="live"`
-  - `x-ui.textarea model="bar" modifier="live"`
+- Untuk state lokal ringan, gunakan Alpine `x-model`; untuk simpan data, gunakan form Blade/controller biasa.
 - Untuk tombol aksi kecil (mis. toggle password), pakai `x-ui.button` + class Metronic yang sesuai (`btn-icon`, dll).
 
 ## Checklist Review sebelum Merge
 
 - Tidak ada native form control baru selain exception hybrid.
 - Jika ada native exception, sudah diberi kontrak UI yang sesuai.
-- Binding `wire:model`, `wire:model.live`, `x-model`, dan event Alpine tetap berjalan.
+- Binding `x-model`, event Alpine, dan submit form standar tetap berjalan.
 - Jalankan regression UI:
 
 ```bash

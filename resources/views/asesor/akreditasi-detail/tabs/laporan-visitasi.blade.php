@@ -8,7 +8,7 @@
 
         {{-- Laporan Individu --}}
         <div class="mb-6">
-            <h6 class="fw-bold mb-3">Laporan Individu</h6>
+            <h6 class="fw-semibold mb-3">Laporan Individu</h6>
             <p class="text-muted fs-7 mb-3">Unggah laporan visitasi individu Anda (PDF/DOCX, maks 5MB).</p>
 
             @if(!empty($akreditasi->laporan_individu_asesor1) && $asesorTipe === 1)
@@ -34,7 +34,7 @@
                     @csrf
                     <div class="d-flex align-items-end gap-3">
                         <div class="flex-grow-1">
-                            <input type="file" class="form-control form-control-sm" name="laporan_individu" accept=".pdf,.doc,.docx" required>
+                            <input data-ui-file-upload="metronic" type="file" class="form-control form-control-sm" name="laporan_individu" accept=".pdf,.doc,.docx" required>
                         </div>
                         <x-ui.button type="submit" variant="primary" size="sm">
                             <i class="ki-solid ki-cloud-add fs-5 me-1"></i>
@@ -50,7 +50,7 @@
         @if($asesorTipe === 1)
             <hr class="my-6">
             <div>
-                <h6 class="fw-bold mb-3">Laporan Kelompok</h6>
+                <h6 class="fw-semibold mb-3">Laporan Kelompok</h6>
                 <p class="text-muted fs-7 mb-3">Unggah laporan visitasi kelompok (hanya Ketua Tim).</p>
 
                 @if(!empty($akreditasi->laporan_kelompok))
@@ -68,7 +68,7 @@
                         @csrf
                         <div class="d-flex align-items-end gap-3">
                             <div class="flex-grow-1">
-                                <input type="file" class="form-control form-control-sm" name="laporan_kelompok" accept=".pdf,.doc,.docx" required>
+                                <input data-ui-file-upload="metronic" type="file" class="form-control form-control-sm" name="laporan_kelompok" accept=".pdf,.doc,.docx" required>
                             </div>
                             <x-ui.button type="submit" variant="primary" size="sm">
                                 <i class="ki-solid ki-cloud-add fs-5 me-1"></i>

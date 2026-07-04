@@ -1,0 +1,7 @@
+
+   PASS  Tests\Feature\MetronicFrontendTest
+  ✓ user module list pages use page heading and reusable tables                                                  1.32s  
+
+  Tests:    1 passed (21 assertions)
+  Duration: 1.69s
+

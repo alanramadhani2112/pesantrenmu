@@ -37,7 +37,7 @@
 
 <x-slot name="header">{{ __('Detail Pesantren') }}</x-slot>
 
-<x-ui.page title="Detail Pesantren" subtitle="Ringkasan profil, layanan pendidikan, dan kelengkapan dokumen pesantren." class="spm-detail-page" x-data="{ confirmToggleLock(e) { const btn = e.currentTarget; const isLocked = btn.dataset.locked === 'true'; Swal.fire({ title: isLocked ? 'Buka kunci data pesantren?' : 'Kunci data pesantren?', text: isLocked ? 'Data pesantren akan dapat diedit kembali oleh pesantren.' : 'Data pesantren akan dikunci dan tidak dapat diedit.', icon: 'warning', showCancelButton: true, confirmButtonColor: isLocked ? '#198754' : '#ffc107', confirmButtonText: isLocked ? 'Ya, buka kunci' : 'Ya, kunci', cancelButtonText: 'Batal', }).then((result) => { if (result.isConfirmed) btn.closest('form').submit(); }); } }">
+<x-ui.page title="Detail Pesantren" subtitle="Ringkasan profil, layanan pendidikan, dan kelengkapan dokumen pesantren." class="spm-detail-page" x-data="{ confirmToggleLock(e) { const btn = e.currentTarget; const isLocked = btn.dataset.locked === 'true'; window.SpmSwal.confirm({ title: isLocked ? 'Buka kunci data pesantren?' : 'Kunci data pesantren?', text: isLocked ? 'Data pesantren akan dapat diedit kembali oleh pesantren.' : 'Data pesantren akan dikunci dan tidak dapat diedit.', icon: 'warning', showCancelButton: true, confirmButtonText: isLocked ? 'Ya, buka kunci' : 'Ya, kunci', cancelButtonText: 'Batal', }).then((result) => { if (result.isConfirmed) btn.closest('form').submit(); }); } }">
     <x-slot:toolbar>
         <x-ui.button :href="route('admin.pesantren.index')" variant="light">
             <x-ui.icon name="exit-right" class="fs-4 me-1" />

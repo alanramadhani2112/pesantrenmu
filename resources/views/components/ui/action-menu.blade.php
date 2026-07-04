@@ -3,11 +3,15 @@
     'menuId' => null,
 ])
 
+@php
+    $staticMenuId = $menuId ?: null;
+@endphp
+
 <div
     data-ui-action-menu="metronic"
     x-data="spmActionMenu(@js($menuId))"
     x-id="['spm-action-menu']"
-    x-on:spm:action-menu-open.window="if ($event.detail?.id !== menuId) close()"
+    x-on:spm:action-menu-open.window="if ($event.detail?.id !== resolvedMenuId) close()"
     x-on:spm:action-menu-close-all.window="close()"
     x-on:keydown.escape.window="close()"
     x-on:resize.window="if (isOpen) updatePosition()"
@@ -24,6 +28,7 @@
         x-ref="trigger"
         x-on:click.stop="toggle()"
         x-bind:aria-expanded="isOpen.toString()"
+        :aria-controls="$staticMenuId"
         x-bind:aria-controls="resolvedMenuId"
         aria-haspopup="true"
     >
@@ -35,6 +40,7 @@
     </x-ui.button>
 
     <div
+        @if($staticMenuId) id="{{ $staticMenuId }}" @endif
         x-bind:id="resolvedMenuId"
         x-cloak
         x-ref="menu"

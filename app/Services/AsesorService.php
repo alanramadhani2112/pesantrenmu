@@ -122,7 +122,7 @@ class AsesorService
         return $evaluationData;
     }
 
-    public function saveAsesorEdpm(int $akreditasiId, int $asesorId, int $asesorTipe, int $pesantrenId, array $data): bool
+    public function saveAsesorEdpm(int $akreditasiId, int $asesorId, int $asesorTipe, int $pesantrenId, array $data, bool $isFinal = false): bool
     {
         $akreditasi = $this->akreditasiRepository->find($akreditasiId);
         if (! $akreditasi) {
@@ -146,6 +146,7 @@ class AsesorService
                 'pesantren_id' => $pesantrenId,
                 'isian' => $isian,
                 'catatan' => $data['asesorButirCatatans'][$butirId] ?? null,
+                'is_final' => $isFinal,
             ];
             if ($asesorTipe == 1) {
                 $saveData['nk'] = ! empty($data['asesorNks'][$butirId]) ? $data['asesorNks'][$butirId] : null;

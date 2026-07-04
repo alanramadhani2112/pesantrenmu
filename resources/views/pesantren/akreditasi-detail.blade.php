@@ -40,7 +40,7 @@
             <div class="d-flex align-items-center gap-3">
                 <i class="ki-outline ki-information-2 fs-2 text-warning"></i>
                 <div>
-                    <div class="fw-bold text-gray-900">Perbaikan Diperlukan</div>
+                    <div class="fw-semibold text-gray-900">Perbaikan Diperlukan</div>
                     <div class="fs-7 text-muted">
                         Batas perbaikan: {{ $activeRejection->perbaikan_deadline?->format('d M Y') ?? 'Segera' }}.
                         Silakan perbaiki bagian yang ditolak, lalu klik <strong>Kirim Perbaikan</strong>.
@@ -67,6 +67,13 @@
         </div>
     </div>
 
+    <x-akreditasi.workflow-stepper
+        :status="$akreditasi->status"
+        title="Tahapan Akreditasi LP2M"
+        subtitle="Pantau posisi pengajuan dari review awal, review asesor, visitasi, penilaian pasca visitasi, validasi admin, sampai hasil akhir."
+        class="mb-6"
+    />
+
     {{-- Kartu Kendali Upload --}}
     <x-ui.section-card title="Kartu Kendali" subtitle="Unggah kartu kendali yang telah ditandatangani" class="mb-6">
         <div class="p-6">
@@ -75,7 +82,7 @@
                     <i class="ki-solid ki-file text-success fs-2"></i>
                     <div>
                         <div class="fw-semibold text-success">Dokumen Terunggah</div>
-                        <a href="{{ Storage::url($akreditasi->kartu_kendali) }}" target="_blank" class="text-muted fs-8">Lihat Dokumen</a>
+                        <a data-ui-document-item="metronic" href="{{ Storage::url($akreditasi->kartu_kendali) }}" target="_blank" class="text-muted fs-8">Lihat Dokumen</a>
                     </div>
                 </div>
             @endif
@@ -106,17 +113,20 @@
     </x-ui.section-card>
 
     {{-- Tabs --}}
+    <div class="spm-detail-tabs-shell">
     <x-ui.tabs class="mb-6">
         @foreach($tabs as $key => $label)
             @if($key !== 'banding' || !empty($akreditasi->banding))
-                <a href="{{ request()->fullUrlWithQuery(['tab' => $key]) }}" class="nav-link {{ $activeTab === $key ? 'active' : '' }}">
+                <a href="{{ request()->fullUrlWithQuery(['tab' => $key]) }}" class="nav-link spm-tab-link {{ $activeTab === $key ? 'active' : '' }}">
                     {{ $label }}
                 </a>
             @endif
         @endforeach
     </x-ui.tabs>
+    </div>
 
     {{-- Tab Content --}}
+    <div class="spm-detail-tab-content">
     @if($activeTab === 'profil')
         {{-- Profil Tab --}}
         <x-ui.section-card title="A. Identitas Pesantren" class="mb-6">
@@ -141,7 +151,7 @@
         <x-ui.section-card title="B. Layanan Satuan Pendidikan" class="mb-6">
             <div class="p-6">
                 @if(!empty($profil->units) && count($profil->units) > 0)
-                    <table class="table table-bordered table-row-dashed">
+                    <table data-ui-simple-table="metronic" class="table table-bordered table-row-dashed">
                         <thead><tr><th>Unit</th><th>Jumlah Rombel</th></tr></thead>
                         <tbody>
                             @foreach($profil->units as $unit)
@@ -175,7 +185,7 @@
                         'laporan_tahunan' => 'Laporan Tahunan',
                     ];
                 @endphp
-                <table class="table table-bordered table-row-dashed">
+                <table data-ui-simple-table="metronic" class="table table-bordered table-row-dashed">
                     <thead><tr><th>Dokumen</th><th>Status</th></tr></thead>
                     <tbody>
                         @foreach($mainDocs as $field => $label)
@@ -183,9 +193,9 @@
                                 <td>{{ $label }}</td>
                                 <td>
                                     @if(!empty($profil->$field))
-                                        <a href="{{ Storage::url($profil->$field) }}" target="_blank" class="text-success">Lihat Dokumen</a>
+                                        <a data-ui-document-item="metronic" href="{{ Storage::url($profil->$field) }}" target="_blank" class="text-success">Lihat Dokumen</a>
                                     @else
-                                        <span class="text-muted">Belum diunggah</span>
+                                        <span data-ui-document-item="metronic" class="text-muted">Belum diunggah</span>
                                     @endif
                                 </td>
                             </tr>
@@ -207,7 +217,7 @@
         @endphp
         <x-ui.section-card title="Kriteria IPM" class="mb-6">
             <div class="p-6">
-                <table class="table table-bordered table-row-dashed">
+                <table data-ui-simple-table="metronic" class="table table-bordered table-row-dashed">
                     <thead><tr><th>Kriteria</th><th>Status</th></tr></thead>
                     <tbody>
                         @foreach($ipmCriteria as $field => $label)
@@ -216,11 +226,11 @@
                                 <td>
                                     @if(!empty($ipm->$field))
                                         <div>
-                                            <a href="{{ Storage::url($ipm->$field) }}" target="_blank" class="text-success">Lihat Dokumen</a>
+                                            <a data-ui-document-item="metronic" href="{{ Storage::url($ipm->$field) }}" target="_blank" class="text-success">Lihat Dokumen</a>
                                             <span class="badge badge-light-success ms-2">Terpenuhi</span>
                                         </div>
                                     @else
-                                        <span class="badge badge-light-danger">Belum Terpenuhi</span>
+                                        <span data-ui-document-item="metronic" class="badge badge-light-danger">Belum Terpenuhi</span>
                                     @endif
                                 </td>
                             </tr>
@@ -236,7 +246,7 @@
             <div class="p-6">
                 @if(!empty($sdm) && count($sdm) > 0)
                     <div class="table-responsive">
-                        <table class="table table-bordered table-row-dashed">
+                        <table data-ui-simple-table="metronic" class="table table-bordered table-row-dashed">
                             <thead>
                                 <tr><th>Tingkat</th><th>Santri L</th><th>Santri P</th><th>Ust. Dirosah L</th><th>Ust. Dirosah P</th><th>Ust. Non Dirosah L</th><th>Ust. Non Dirosah P</th><th>Pamong L</th><th>Pamong P</th><th>Musyrif L</th><th>Musyrif P</th><th>Tendik L</th><th>Tendik P</th></tr>
                             </thead>
@@ -263,39 +273,14 @@
 
     @elseif($activeTab === 'edpm')
         {{-- EDPM Tab --}}
-        @if(!empty($edpm) && count($edpm) > 0)
-            @foreach($edpm as $komponen => $butirs)
-                <x-ui.section-card :title="$komponen" class="mb-6">
-                    <div class="p-6">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-row-dashed">
-                                <thead>
-                                    <tr><th style="width:50px">No</th><th>Butir</th><th>Nilai</th><th>Tautan</th></tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($butirs as $butir)
-                                        <tr>
-                                            <td>{{ $butir->nomor_butir }}</td>
-                                            <td>{{ $butir->indikator }}</td>
-                                            <td>{{ $butir->isian ?? '-' }}</td>
-                                            <td>
-                                                @if(!empty($butir->link))
-                                                    <a href="{{ $butir->link }}" target="_blank" class="text-primary">Lihat</a>
-                                                @else
-                                                    -
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </x-ui.section-card>
-            @endforeach
-        @else
-            <x-ui.alert variant="info" title="Tidak Ada Data">Belum ada data EDPM.</x-ui.alert>
-        @endif
+        <x-akreditasi.edpm-review
+            :komponens="$komponens"
+            :evaluasis="$pesantren_edpm['evaluasis'] ?? []"
+            :links="$pesantren_edpm['links'] ?? []"
+            :catatans="$pesantren_edpm['catatans'] ?? []"
+            title="EDPM/IPR Pesantren"
+            subtitle="Detail komponen EDPM dan IPR, isian evaluasi diri, tautan bukti, dan catatan pesantren."
+        />
 
     @elseif($activeTab === 'asesor')
         {{-- Asesor Tab --}}
@@ -332,12 +317,12 @@
                         <div class="col-md-6"><strong>Nilai Akhir:</strong> {{ $akreditasi->nilai ?? '-' }}</div>
                         <div class="col-md-6"><strong>Peringkat:</strong> {{ $akreditasi->peringkat ?? '-' }}</div>
                         <div class="col-md-6"><strong>Nomor SK:</strong> {{ $akreditasi->nomor_sk ?? '-' }}</div>
-                        <div class="col-md-6"><strong>Masa Berlaku:</strong> {{ $akreditasi->masa_berlaku_akhir ? \Illuminate\Support\Carbon::parse($akreditasi->masa_berlaku_akhir)->format('d M Y') : '-' }}</div>
+                        <div class="col-md-6"><strong>Masa Berlaku:</strong> {{ $akreditasi->masa_berlaku_akhir ? \Carbon\Carbon::parse($akreditasi->masa_berlaku_akhir)->format('d M Y') : '-' }}</div>
                         <div class="col-12"><strong>Rekomendasi:</strong><br>{{ $akreditasi->catatan_rekomendasi_admin ?: '-' }}</div>
                         <div class="col-md-6">
                             <strong>Sertifikat:</strong>
                             @if(!empty($akreditasi->sertifikat_path))
-                                <a href="{{ Storage::url($akreditasi->sertifikat_path) }}" target="_blank" class="text-primary">Unduh Sertifikat</a>
+                                <a data-ui-document-item="metronic" href="{{ Storage::url($akreditasi->sertifikat_path) }}" target="_blank" class="text-primary">Unduh Sertifikat</a>
                             @else
                                 -
                             @endif
@@ -371,13 +356,14 @@
             </div>
         </x-ui.section-card>
     @endif
+    </div>
 </x-ui.page>
 
 @push('scripts')
 <script>
 document.getElementById('btnUploadKartuKendali')?.addEventListener('click', function(e) {
     e.preventDefault();
-    window.SpmSwal.fire({
+    window.SpmSwal.confirm({
         title: 'Upload Kartu Kendali?',
         text: 'Pastikan file sudah sesuai.',
         icon: 'question',
@@ -393,5 +379,3 @@ document.getElementById('btnUploadKartuKendali')?.addEventListener('click', func
 </script>
 @endpush
 @endsection
-
-

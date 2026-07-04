@@ -2,7 +2,7 @@
     <div class="table-responsive p-6">
         <table class="table table-row-dashed table-hover align-middle g-0">
             <thead>
-                <tr class="fw-bolder text-muted bg-light">
+                <tr class="fw-semibold text-muted bg-light">
                     <th class="ps-6" width="5%">No</th>
                     <th class="min-w-250px">Butir Penilaian</th>
                     <th class="text-center" width="8%">NA</th>
@@ -15,7 +15,7 @@
                 @foreach($komponens as $komponen)
                     @if($komponen->butir->isEmpty()) @continue @endif
                     <tr>
-                        <td colspan="5" class="fw-bolder fs-4 py-3 ps-4 bg-light-primary">
+                        <td colspan="5" class="fw-semibold fs-4 py-3 ps-4 bg-light-primary">
                             {{ $komponen->nama }} @if($komponen->deskripsi) <span class="text-muted fs-6 ms-1">— {{ $komponen->deskripsi }}</span> @endif
                         </td>
                     </tr>

@@ -16,11 +16,12 @@
             <x-slot name="filters">
                 <x-ui.tabs>
                     @foreach ($roles as $role)
-                        <x-ui.tab :active="$activeTab == $role->id">
-                            <a href="{{ route('accounts.index', array_merge(request()->query(), ['activeTab' => $role->id])) }}" class="text-decoration-none text-inherit">
-                                {{ $role->name }}
-                                <x-ui.badge variant="primary" class="ms-2">{{ $roleCounts[$role->id] ?? 0 }}</x-ui.badge>
-                            </a>
+                        <x-ui.tab
+                            :active="$activeTab == $role->id"
+                            :href="route('accounts.index', array_merge(request()->query(), ['activeTab' => $role->id]))"
+                        >
+                            {{ $role->name }}
+                            <x-ui.badge variant="primary" class="ms-2">{{ $roleCounts[$role->id] ?? 0 }}</x-ui.badge>
                         </x-ui.tab>
                     @endforeach
                 </x-ui.tabs>
@@ -144,7 +145,7 @@
     </x-ui.index-layout>
 
     {{-- Create/Edit Modal --}}
-    <div x-show="showModal" x-cloak class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div x-show="showModal" x-cloak x-bind:class="{ 'show d-block': showModal }" class="modal fade" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <form :action="isEditing ? '{{ route('accounts.update', '__ID__') }}'.replace('__ID__', formData.id) : '{{ route('accounts.store') }}'" method="POST">
@@ -239,23 +240,16 @@
 <script>
 function accountsPage() {
     return {
-        showModal: {{ old('_token') !== null ? 'true' : 'false' }},
-        isEditing: {{ old('_method') === 'PUT' ? 'true' : 'false' }},
+        showModal: @js($errors->hasAny(['name', 'email', 'role_id', 'password', 'status', 'sso_sync_role'])),
+        isEditing: @js(old('_method') === 'PUT'),
         formData: {
-            id: '{{ old('id', '') }}',
-            name: '{{ old('name', '') }}',
-            email: '{{ old('email', '') }}',
-            role_id: '{{ old('role_id', '') }}',
+            id: @js(old('id', '')),
+            name: @js(old('name', '')),
+            email: @js(old('email', '')),
+            role_id: @js(old('role_id', '')),
             password: '',
-            status: {{ old('status', '1') == '1' ? 'true' : 'false' }},
-            sso_sync_role: {{ old('sso_sync_role', '1') == '1' ? 'true' : 'false' }},
-        },
-
-        init() {
-            this.showModal = this.showModal === 'true';
-            this.isEditing = this.isEditing === 'true';
-            if (this.formData.status !== undefined) this.formData.status = this.formData.status === 'true';
-            if (this.formData.sso_sync_role !== undefined) this.formData.sso_sync_role = this.formData.sso_sync_role === 'true';
+            status: @js(old('status', '1') == '1'),
+            sso_sync_role: @js(old('sso_sync_role', '1') == '1'),
         },
 
         openCreateModal() {
@@ -280,7 +274,7 @@ function accountsPage() {
 
         confirmToggleStatus(userId, currentStatus, name) {
             const action = currentStatus ? 'menonaktifkan' : 'mengaktifkan';
-            window.SpmSwal.fire({
+            window.SpmSwal.confirm({
                 title: 'Konfirmasi',
                 text: `Apakah Anda yakin ingin ${action} akun "${name}"?`,
                 icon: 'warning',
@@ -290,31 +284,30 @@ function accountsPage() {
             }).then((result) => {
                 if (result.isConfirmed) {
                     document.getElementById('toggle-user-id').value = userId;
-                    document.getElementById('toggle-status-form').submit();
+                    document.getElementById('toggle-status-form').requestSubmit();
                 }
             });
         },
 
         confirmDeleteUser(userId, name) {
-            window.SpmSwal.fire({
+            window.SpmSwal.confirm({
                 title: 'Hapus Akun?',
                 text: `Akun "${name}" akan dihapus secara permanen.`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
                 confirmButtonText: 'Hapus',
                 cancelButtonText: 'Batal',
             }).then((result) => {
                 if (result.isConfirmed) {
                     const form = document.getElementById('delete-user-form');
                     form.action = '{{ route('accounts.destroy', '__ID__') }}'.replace('__ID__', userId);
-                    form.submit();
+                    form.requestSubmit();
                 }
             });
         },
 
         confirmUnlinkSso(userId, name) {
-            window.SpmSwal.fire({
+            window.SpmSwal.confirm({
                 title: 'Unlink SSO?',
                 text: `SSO akan di-unlink dari akun "${name}". Akun tetap aktif tetapi tidak terhubung dengan Muhammadiyah ID.`,
                 icon: 'warning',
@@ -324,7 +317,7 @@ function accountsPage() {
             }).then((result) => {
                 if (result.isConfirmed) {
                     document.getElementById('unlink-user-id').value = userId;
-                    document.getElementById('unlink-sso-form').submit();
+                    document.getElementById('unlink-sso-form').requestSubmit();
                 }
             });
         },

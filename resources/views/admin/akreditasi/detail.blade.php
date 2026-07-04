@@ -5,7 +5,6 @@
     use App\Models\Akreditasi;
     use App\StateMachine\AkreditasiStateMachine;
     use Illuminate\Support\Facades\Storage;
-    use Illuminate\Support\Carbon;
 
     $statusVariant = match ((int) $akreditasi->status) {
         0 => 'success',
@@ -124,7 +123,7 @@
             <x-ui.stat-card label="Tim Penilai" value="{{ $akreditasi->assessments->count() }} Asesor" variant="info" icon="profile-user" />
         </div>
         <div class="col-lg-4">
-            <x-ui.stat-card label="Jadwal Visitasi" value="{{ $akreditasi->tgl_visitasi ? Carbon::parse($akreditasi->tgl_visitasi)->format('d M Y') : 'Belum Dijadwalkan' }}" variant="success" icon="calendar" />
+            <x-ui.stat-card label="Jadwal Visitasi" value="{{ $akreditasi->tgl_visitasi ? \Carbon\Carbon::parse($akreditasi->tgl_visitasi)->format('d M Y') : 'Belum Dijadwalkan' }}" variant="success" icon="calendar" />
         </div>
     </div>
 

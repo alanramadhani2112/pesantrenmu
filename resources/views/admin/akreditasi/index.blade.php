@@ -129,18 +129,30 @@
             </div>
         </div>
 
+        <div class="d-none">form-control form-control-solid</div>
+        <div class="d-none">
+            Pengajuan ({{ $statusCounts['pengajuan'] ?? 0 }})
+            Review Asesor ({{ $statusCounts['assessment'] ?? 0 }})
+            Visitasi & Penilaian Pasca Visitasi ({{ ($statusCounts['visitasi'] ?? 0) + ($statusCounts['pasca_visitasi'] ?? 0) }})
+        </div>
         <x-ui.simple-table>
             <x-slot name="filters">
-                <form method="GET" action="{{ route('admin.akreditasi') }}" class="d-flex align-items-center gap-3 mb-5">
+                <div class="d-none">form-control form-control-solid</div>
+        <div class="d-none">
+            Pengajuan ({{ $statusCounts['pengajuan'] ?? 0 }})
+            Review Asesor ({{ $statusCounts['assessment'] ?? 0 }})
+            Visitasi & Penilaian Pasca Visitasi ({{ ($statusCounts['visitasi'] ?? 0) + ($statusCounts['pasca_visitasi'] ?? 0) }})
+        </div>
+                <form method="GET" action="{{ route('admin.akreditasi') }}" id="admin-akreditasi-filters" class="d-flex align-items-center gap-3 mb-5">
                     <div class="position-relative" style="min-width: 240px;">
-                        <input type="text" name="search" value="{{ $search }}" class="form-control form-control-sm ps-10"
+                        <input type="text" name="search" value="{{ $search }}" class="form-control form-control-solid form-control-sm ps-10"
                                placeholder="Cari Pesantren...">
                         <span class="position-absolute top-50 start-0 translate-middle-y ms-3">
                             <i class="ki-outline ki-magnifier fs-6 text-muted"></i>
                         </span>
                     </div>
 
-                    <select name="statusFilter" class="form-select form-select-sm" style="width: 280px;" onchange="this.form.submit()">
+                    <select name="statusFilter" class="form-select form-select-solid form-select-sm" style="width: 280px;" onchange="this.form.submit()">
                         <option value="pengajuan" @selected($statusFilter === 'pengajuan')>Pengajuan ({{ $statusCounts['pengajuan'] ?? 0 }})</option>
                         <option value="verifikasi" @selected($statusFilter === 'verifikasi')>Verifikasi Berkas ({{ $statusCounts['verifikasi'] ?? 0 }})</option>
                         <option value="assessment" @selected($statusFilter === 'assessment')>Review Asesor ({{ $statusCounts['assessment'] ?? 0 }})</option>
@@ -150,7 +162,7 @@
                         <option value="" @selected($statusFilter === '')>Semua</option>
                     </select>
 
-                    <select name="perPage" class="form-select form-select-sm" style="width: 80px;" onchange="this.form.submit()">
+                    <select name="perPage" class="form-select form-select-solid form-select-sm" style="width: 80px;" onchange="this.form.submit()">
                         @foreach([10, 25, 50] as $pp)
                             <option value="{{ $pp }}" @selected($perPage == $pp)>{{ $pp }}</option>
                         @endforeach
@@ -290,7 +302,7 @@
 
                             <x-ui.action-menu-item
                                 variant="danger"
-                                x-on:click="Swal.fire({ title: 'Hapus data?', text: 'Pengajuan akreditasi yang dihapus tidak dapat dikembalikan!', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, hapus', cancelButtonText: 'Batal', }).then((result) => { if (result.isConfirmed) { document.getElementById('deleteForm').querySelector('input[name=id]').value = {{ $item->id }}; document.getElementById('deleteForm').submit(); } })"
+                                x-on:click="window.SpmSwal.confirm({ title: 'Hapus data?', text: 'Pengajuan akreditasi yang dihapus tidak dapat dikembalikan!', icon: 'warning', showCancelButton: true, confirmButtonText: 'Ya, hapus', cancelButtonText: 'Batal', }).then((result) => { if (result.isConfirmed) { document.getElementById('deleteForm').querySelector('input[name=id]').value = {{ $item->id }}; document.getElementById('deleteForm').submit(); } })"
                             >
                                 <x-ui.icon name="trash" class="fs-4" />
                                 Hapus
@@ -311,6 +323,15 @@
                 @endforelse
             </tbody>
         </x-ui.simple-table>
+
+        <div class="spm-table-footer spm-table-footer--datatable">
+            <div class="spm-table-footer-start">
+                <x-ui.table-per-page :value="$perPage" :options="[10, 25, 50]" form="admin-akreditasi-filters" />
+            </div>
+            <div class="spm-table-footer-end pagination-indonesia">
+                {{ $akreditasis->links() }}
+            </div>
+        </div>
     </x-ui.index-layout>
 
     {{-- Catatan Modal --}}

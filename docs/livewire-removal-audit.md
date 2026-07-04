@@ -6,9 +6,10 @@ Dokumen ini **semi-final untuk baseline cleanup audit**.
 
 Hasil scan repo saat ini menunjukkan:
 
-- **tidak ada hit legacy reactive layer di area runtime** `app/`, `resources/`, `routes/`, `config/`
-- **tidak ada hit legacy reactive layer di `tests/` aktif saat ini**
-- hit yang tersisa ada di **dokumentasi lama / audit historis / tech spec lama**
+- **tidak ada Livewire runtime frontend aktif** di `app/`, `resources/views/`, `routes/`, `config/`
+- **tidak ada package Livewire aktif** di `composer.json` / `package.json`
+- sisa Livewire-era JavaScript di `resources/js/app.js` sudah dihapus dari runtime
+- hit yang tersisa hanya boleh berada di **dokumentasi lama / audit historis / vendor optional stubs**
 
 ## Yang Perlu Difinalisasi
 

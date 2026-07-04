@@ -98,7 +98,7 @@ class AkreditasiDetailController extends Controller
         $adminNvs = [];
         foreach ($komponens as $komponen) {
             foreach ($komponen->butirs as $butir) {
-                $adminNvs[$butir->id] = $asesor1Nvs[$butir->id] ?? '';
+                $adminNvs[$butir->id] = ['nv' => $asesor1Nvs[$butir->id] ?? '', 'nk' => $asesor1Nks[$butir->id] ?? ''];
                 $asesor1ButirCatatans[$butir->id] = $asesor1ButirCatatans[$butir->id] ?? '';
                 $asesor2Evaluasis[$butir->id] = $asesor2Evaluasis[$butir->id] ?? '';
                 $asesor2ButirCatatans[$butir->id] = $asesor2ButirCatatans[$butir->id] ?? '';
@@ -207,7 +207,7 @@ class AkreditasiDetailController extends Controller
         }
 
         // Build activeTab from query string (optional override)
-        $activeTab = request()->query('tab', 'profil');
+        $activeTab = request()->query('tab', request()->query('activeTab', 'profil'));
 
         return view('admin.akreditasi.detail', compact(
             'akreditasi', 'pesantren', 'ipm', 'sdm', 'komponens', 'levels',
@@ -261,7 +261,8 @@ class AkreditasiDetailController extends Controller
             $ci = 0;
 
             foreach ($butirs as $butir) {
-                $ci += (int) ($adminNvs[$butir->id] ?? 0);
+                $raw = $adminNvs[$butir->id] ?? 0;
+                $ci += (int) (is_array($raw) ? ($raw['nv'] ?? 0) : $raw);
             }
 
             $bobot = $isIpr
@@ -420,24 +421,34 @@ class AkreditasiDetailController extends Controller
 
         $request->validate([
             'adminNvs' => 'required|array',
-            'nvReason' => 'nullable|string|max:2000',
+            'nvReasons' => 'nullable|array',
+            'nvReasons.*' => 'nullable|string|max:2000',
         ]);
 
         $adminId = Auth::id();
         $finalizedCount = 0;
-        $reason = is_string($request->input('nvReason')) ? trim((string) $request->input('nvReason')) : null;
+        $reasons = $request->input('nvReasons', []);
 
-        foreach ($request->input('adminNvs', []) as $butirId => $nvValue) {
-            if (is_numeric($nvValue) && $nvValue >= 1 && $nvValue <= 4) {
-                try {
-                    $this->scoringService->saveNV($akreditasi->id, $adminId, (int) $butirId, (int) $nvValue, true, $reason);
-                    $finalizedCount++;
-                } catch (\App\Exceptions\ImmutableValueException $e) {
-                    $finalizedCount++;
-                } catch (\DomainException $e) {
-                    return back()->with('error', $e->getMessage());
+        try {
+            DB::transaction(function () use ($request, $akreditasi, $adminId, $reasons, &$finalizedCount): void {
+                foreach ($request->input('adminNvs', []) as $butirId => $nvValue) {
+                    if (is_numeric($nvValue) && $nvValue >= 1 && $nvValue <= 4) {
+                        $reason = isset($reasons[$butirId]) && is_string($reasons[$butirId]) ? trim($reasons[$butirId]) : null;
+                        if ($reason === '') {
+                            $reason = null;
+                        }
+
+                        try {
+                            $this->scoringService->saveNV($akreditasi->id, $adminId, (int) $butirId, (int) $nvValue, true, $reason);
+                            $finalizedCount++;
+                        } catch (\App\Exceptions\ImmutableValueException $e) {
+                            $finalizedCount++;
+                        }
+                    }
                 }
-            }
+            });
+        } catch (\DomainException $e) {
+            return back()->with('error', $e->getMessage());
         }
 
         if ($finalizedCount === 0) {

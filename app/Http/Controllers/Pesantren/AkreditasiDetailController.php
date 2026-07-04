@@ -30,7 +30,10 @@ class AkreditasiDetailController extends Controller
         $akreditasi = \App\Models\Akreditasi::where('uuid', $uuid)->firstOrFail();
         $rejectionStatus = $this->rejectionService->getRejectionStatus($akreditasi->id);
 
-        $activeTab = $request->input('tab', 'profil');
+        $activeTab = $request->input('tab', $request->input('activeTab', 'profil'));
+        if ($activeTab === 'edpm_pesantren') {
+            $activeTab = 'edpm';
+        }
 
         return view('pesantren.akreditasi-detail', array_merge($data, [
             'activeTab' => $activeTab,

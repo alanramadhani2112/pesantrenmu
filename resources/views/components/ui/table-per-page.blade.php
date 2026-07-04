@@ -26,7 +26,7 @@
         name="{{ $name }}"
         aria-label="Jumlah entri per halaman"
         @if($form) form="{{ $form }}" @endif
-        onchange="this.form ? this.form.submit() : this.closest('form')?.submit()"
+        onchange="if (this.form) this.form.submit(); else { const url = new URL(location.href); url.searchParams.set(this.name, this.value); location.href = url; }"
         {{ $attributes->merge(['class' => $selectClass]) }}
     >
         @foreach($options as $option)

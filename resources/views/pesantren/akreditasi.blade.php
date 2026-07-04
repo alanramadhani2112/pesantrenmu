@@ -34,6 +34,7 @@
     $queryParams = array_filter(request()->except(['focus', 'page']));
 @endphp
 
+<div data-module-page="pesantren-akreditasi">
 <x-ui.page
     title="Pengajuan Akreditasi"
     subtitle="Kelola pengajuan, pantau status, dan ajukan banding akreditasi pesantren Anda."
@@ -135,7 +136,7 @@
 
     {{-- Table --}}
     @if($akreditasis->count() > 0)
-        <div class="table-responsive">
+        <div class="table-responsive" data-ui-table="metronic">
             <table class="table table-bordered table-row-dashed align-middle">
                 <thead>
                     <tr class="bg-light">
@@ -224,69 +225,52 @@
         </x-ui.alert>
     @endif
 </x-ui.page>
+</div>
 
 {{-- Banding Modal --}}
-<div class="modal fade" id="bandingModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="{{ route('pesantren.akreditasi.banding') }}" method="POST">
-                @csrf
-                <input type="hidden" name="id" id="bandingId">
-                <div class="modal-header">
-                    <h5 class="modal-title">Ajukan Banding</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <x-ui.form-field label="Alasan Banding" required>
-                        <textarea name="alasan" rows="4" class="form-control" placeholder="Jelaskan alasan banding Anda (minimal 50 karakter)..."></textarea>
-                    </x-ui.form-field>
-                </div>
-                <div class="modal-footer">
-                    <x-ui.button type="button" variant="light" data-bs-dismiss="modal">Batal</x-ui.button>
-                    <x-ui.button type="submit" variant="primary">Kirim Banding</x-ui.button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+<x-ui.modal name="banding-modal" maxWidth="md">
+    <form action="{{ route('pesantren.akreditasi.banding') }}" method="POST">
+        @csrf
+        <input type="hidden" name="id" id="bandingId">
+        <x-ui.modal-header title="Ajukan Banding" />
+        <x-ui.modal-body>
+            <x-ui.form-field label="Alasan Banding" required>
+                <textarea name="alasan" rows="4" class="form-control" placeholder="Jelaskan alasan banding Anda (minimal 50 karakter)..."></textarea>
+            </x-ui.form-field>
+        </x-ui.modal-body>
+        <x-ui.modal-footer>
+            <x-ui.button type="button" variant="light" x-on:click="$dispatch('close')">Batal</x-ui.button>
+            <x-ui.button type="submit" variant="primary">Kirim Banding</x-ui.button>
+        </x-ui.modal-footer>
+    </form>
+</x-ui.modal>
 
 {{-- Catatan Modal --}}
-<div class="modal fade" id="catatanModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Catatan</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="catatanContent">
-                <div class="text-center py-4">
-                    <span class="spinner-border spinner-border-sm text-primary"></span>
-                    <div class="text-muted mt-2">Memuat catatan...</div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <x-ui.button type="button" variant="light" data-bs-dismiss="modal">Tutup</x-ui.button>
-            </div>
-        </div>
-    </div>
-</div>
+<x-ui.modal name="catatan-modal" maxWidth="md">
+    <x-ui.modal-header title="Catatan" />
+    <x-ui.modal-body id="catatanContent">
+        <div class="text-center py-4 text-muted">Memuat catatan...</div>
+    </x-ui.modal-body>
+    <x-ui.modal-footer>
+        <x-ui.button type="button" variant="light" x-on:click="$dispatch('close')">Tutup</x-ui.button>
+    </x-ui.modal-footer>
+</x-ui.modal>
 
 @push('scripts')
 <script>
 // Create akreditasi confirmation
 document.getElementById('btnCreateAkreditasi')?.addEventListener('click', function(e) {
     e.preventDefault();
-    window.SpmSwal.fire({
+    window.SpmSwal.confirm({
         title: 'Ajukan Akreditasi Baru?',
         text: 'Setelah diajukan, data profil, IPM, SDM, dan EDPM akan terkunci dan tidak dapat diubah.',
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Ya, Ajukan',
         cancelButtonText: 'Batal',
-        confirmButtonColor: '#3085d6'
     }).then((result) => {
         if (result.isConfirmed) {
-            document.getElementById('createAkreditasiForm').submit();
+            document.getElementById('createAkreditasiForm').requestSubmit();
         }
     });
 });
@@ -296,17 +280,16 @@ document.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', function(e) {
         e.preventDefault();
         const form = this.closest('form');
-        window.SpmSwal.fire({
+        window.SpmSwal.confirm({
             title: 'Hapus Pengajuan?',
             text: 'Data pengajuan akan dihapus permanen.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Ya, Hapus',
             cancelButtonText: 'Batal',
-            confirmButtonColor: '#dc3545'
         }).then((result) => {
             if (result.isConfirmed) {
-                form.submit();
+                form.requestSubmit();
             }
         });
     });
@@ -317,17 +300,16 @@ document.querySelectorAll('.btn-cancel').forEach(btn => {
     btn.addEventListener('click', function(e) {
         e.preventDefault();
         const form = this.closest('form');
-        window.SpmSwal.fire({
+        window.SpmSwal.confirm({
             title: 'Batalkan Pengajuan?',
             text: 'Pengajuan yang dibatalkan tidak dapat dikembalikan.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Ya, Batalkan',
             cancelButtonText: 'Tidak',
-            confirmButtonColor: '#ffc107'
         }).then((result) => {
             if (result.isConfirmed) {
-                form.submit();
+                form.requestSubmit();
             }
         });
     });
@@ -336,40 +318,57 @@ document.querySelectorAll('.btn-cancel').forEach(btn => {
 // Banding modal
 function openBandingModal(id) {
     document.getElementById('bandingId').value = id;
-    new bootstrap.Modal(document.getElementById('bandingModal')).show();
+    window.dispatchEvent(new CustomEvent('open-modal', { detail: 'banding-modal' }));
 }
+
+const textNode = (tag, className, text) => {
+    const node = document.createElement(tag);
+    node.className = className;
+    node.textContent = text ?? '';
+    return node;
+};
 
 // Catatan modal (AJAX)
 function openCatatanModal(id) {
-    const modal = new bootstrap.Modal(document.getElementById('catatanModal'));
     const content = document.getElementById('catatanContent');
-    content.innerHTML = '<div class="text-center py-4"><span class="spinner-border spinner-border-sm text-primary"></span><div class="text-muted mt-2">Memuat catatan...</div></div>';
-    modal.show();
+    content.replaceChildren(textNode('div', 'text-center py-4 text-muted', 'Memuat catatan...'));
+    window.dispatchEvent(new CustomEvent('open-modal', { detail: 'catatan-modal' }));
 
     fetch(`{{ route('pesantren.akreditasi.catatan', '__ID__') }}`.replace('__ID__', id))
         .then(res => res.json())
         .then(data => {
-            if (data.catatans && data.catatans.length > 0) {
-                content.innerHTML = data.catatans.map(c => `
-                    <div class="d-flex gap-3 mb-3 pb-3 border-bottom">
-                        <div class="flex-shrink-0">
-                            <span class="symbol symbol-35px bg-light-primary rounded">
-                                <i class="ki-solid ki-user fs-5 text-primary"></i>
-                            </span>
-                        </div>
-                        <div>
-                            <div class="fw-semibold">${c.user_name}</div>
-                            <div class="text-muted fs-8">${c.created_at}</div>
-                            <div class="mt-2 text-gray-700">${c.catatan}</div>
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                content.innerHTML = '<div class="text-center text-muted py-4">Belum ada catatan.</div>';
+            if (!data.catatans?.length) {
+                content.replaceChildren(textNode('div', 'text-center text-muted py-4', 'Belum ada catatan.'));
+                return;
             }
+
+            const nodes = data.catatans.map(c => {
+                const item = document.createElement('div');
+                const iconWrap = document.createElement('div');
+                const icon = document.createElement('span');
+                const iconEl = document.createElement('i');
+                const body = document.createElement('div');
+                const note = textNode('div', 'mt-2 text-gray-700', c.catatan);
+
+                item.className = 'd-flex gap-3 mb-3 pb-3 border-bottom';
+                iconWrap.className = 'flex-shrink-0';
+                icon.className = 'symbol symbol-35px bg-light-primary rounded';
+                iconEl.className = 'ki-solid ki-user fs-5 text-primary';
+                note.style.whiteSpace = 'pre-line';
+
+                icon.appendChild(iconEl);
+                iconWrap.appendChild(icon);
+                body.appendChild(textNode('div', 'fw-semibold', c.user_name));
+                body.appendChild(textNode('div', 'text-muted fs-8', c.created_at));
+                body.appendChild(note);
+                item.append(iconWrap, body);
+                return item;
+            });
+
+            content.replaceChildren(...nodes);
         })
         .catch(() => {
-            content.innerHTML = '<div class="text-center text-danger py-4">Gagal memuat catatan.</div>';
+            content.replaceChildren(textNode('div', 'text-center text-danger py-4', 'Gagal memuat catatan.'));
         });
 }
 </script>

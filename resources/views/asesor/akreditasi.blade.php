@@ -388,7 +388,7 @@
                                             </div>
                                         </div>
                                         <div class="rounded-4 p-4 bg-light-primary">
-                                            <p class="fs-7 fw-medium text-gray-700 mb-0" x-html="catatan.catatan.replace(/\n/g, '<br>')"></p>
+                                            <p class="fs-7 fw-medium text-gray-700 mb-0" x-text="catatan.catatan" style="white-space: pre-line;"></p>
                                         </div>
                                     </div>
                                 </template>

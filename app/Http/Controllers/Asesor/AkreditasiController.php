@@ -226,7 +226,13 @@ class AkreditasiController extends Controller
         }
 
         // Active tab from URL
-        $activeTab = $request->input('tab', 'profil');
+        $activeTab = $request->input('tab', $request->input('activeTab', 'profil'));
+        if ($activeTab === 'edpm_pesantren') {
+            $activeTab = 'edpm';
+        }
+        if ($activeTab === 'laporan_visitasi') {
+            $activeTab = 'laporan';
+        }
 
         // Tab access restrictions based on status
         if (in_array((int) $akreditasi->status, [
@@ -270,6 +276,12 @@ class AkreditasiController extends Controller
         if ($asesorTipe == 1) {
             $rejectionService = app(RejectionService::class);
             $rejectionStatus = $rejectionService->getRejectionStatus($akreditasi->id);
+            $rejectionStatus += [
+                'status' => $rejectionStatus['active']?->status,
+                'rejectionCount' => $rejectionStatus['count'] ?? 0,
+                'rejectionLimit' => $rejectionStatus['limit'] ?? 3,
+                'updatedAt' => $rejectionStatus['active']?->updated_at,
+            ];
             $selectableItems = $rejectionService->getSelectableItems($akreditasi->id);
         }
 
@@ -362,6 +374,13 @@ class AkreditasiController extends Controller
         $canScheduleVisitasi = $asesorTipe == 1
             && (int) $akreditasi->status === AkreditasiStateMachine::STATUS_VERIFIKASI_BERKAS;
 
+        $fields = [
+            'santri_l', 'santri_p', 'ustadz_dirosah_l', 'ustadz_dirosah_p',
+            'ustadz_non_dirosah_l', 'ustadz_non_dirosah_p', 'pamong_l', 'pamong_p',
+            'musyrif_l', 'musyrif_p', 'tendik_l', 'tendik_p',
+        ];
+        $isLocked = (bool) ($data['isLocked'] ?? false);
+
         // IPM items for profil tab
         $ipmItems = [];
         if ($ipm) {
@@ -371,10 +390,6 @@ class AkreditasiController extends Controller
                 ['label' => 'Status Tanah', 'value' => $ipm->status_tanah ?? '-'],
             ];
         }
-
-        // Dokumen utama & sekunder
-        $dokumenUtama = $akreditasi->dokumens()->where('kategori', 'utama')->get();
-        $dokumenSekunder = $akreditasi->dokumens()->where('kategori', 'sekunder')->get();
 
         return view('asesor.akreditasi-detail', compact(
             'akreditasi', 'pesantren', 'ipm', 'sdm', 'levels', 'komponens',
@@ -386,8 +401,7 @@ class AkreditasiController extends Controller
             'asesor1NaProgress', 'asesor1NkProgress', 'asesor2NaProgress',
             'nilaiKetuaFinalComplete', 'nilaiAnggotaFinalComplete', 'nilaiKelompokUnlocked',
             'asesorFinalStatus', 'scoringProgressCards', 'canConfirmVisitasi',
-            'canSubmitDocumentRejection', 'canScheduleVisitasi',
-            'ipmItems', 'dokumenUtama', 'dokumenSekunder'
+            'canSubmitDocumentRejection', 'canScheduleVisitasi', 'fields', 'isLocked'
         ));
     }
 

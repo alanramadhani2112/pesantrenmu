@@ -5,7 +5,6 @@
     use App\Models\Akreditasi;
     use App\StateMachine\AkreditasiStateMachine;
     use Illuminate\Support\Facades\Storage;
-    use Illuminate\Support\Carbon;
 
     $statusVariant = match ((int) $akreditasi->status) {
         0 => 'success',
@@ -130,7 +129,7 @@
         <div class="col-lg-4">
             <x-ui.stat-card
                 label="Jadwal Visitasi"
-                value="{{ $akreditasi->tgl_visitasi ? Carbon::parse($akreditasi->tgl_visitasi)->format('d M Y') : 'Belum Dijadwalkan' }}"
+                value="{{ $akreditasi->tgl_visitasi ? \Carbon\Carbon::parse($akreditasi->tgl_visitasi)->format('d M Y') : 'Belum Dijadwalkan' }}"
                 variant="info"
                 icon="calendar"
             />
@@ -148,23 +147,26 @@
     {{-- Workflow Stepper --}}
     <x-akreditasi.workflow-stepper
         :status="$akreditasi->status"
-        title="Tahapan Akreditasi"
-        subtitle="Posisi pengajuan dalam alur akreditasi LP2M."
+        title="Tahapan Akreditasi LP2M"
+        subtitle="Pantau posisi pengajuan dari review awal, review asesor, visitasi, penilaian pasca visitasi, validasi admin, sampai hasil akhir."
         class="mb-6"
     />
 
     {{-- Tabs Navigation --}}
-    <div class="nav nav-tabs nav-line-tabs mb-6">
+    <div class="spm-detail-tabs-shell">
+        <div data-ui-tabs="metronic" class="nav nav-tabs nav-line-tabs mb-6 spm-tabs-nav">
         @foreach($tabs as $key => $label)
-            <a class="nav-item nav-link cursor-pointer"
+            <a class="nav-item nav-link cursor-pointer spm-tab-link"
                :class="{ 'active': activeTab === '{{ $key }}' }"
                x-on:click="activeTab = '{{ $key }}'">
                 {{ $label }}
             </a>
         @endforeach
+        </div>
     </div>
 
     {{-- Tab Content --}}
+    <div class="spm-detail-tab-content">
     <div x-show="activeTab === 'profil'" x-cloak>
         @include('asesor.akreditasi-detail.tabs.profil')
     </div>
@@ -185,6 +187,7 @@
     <div x-show="activeTab === 'laporan'" x-cloak>
         @include('asesor.akreditasi-detail.tabs.laporan-visitasi')
     </div>
+    </div>
 
     {{-- Rejection Section (Asesor 1 Only) --}}
     @if($asesorTipe === 1 && !empty($rejectionStatus))
@@ -196,7 +199,7 @@
                             Menunggu Perbaikan ({{ $rejectionStatus['rejectionCount'] }}/{{ $rejectionStatus['rejectionLimit'] }})
                         </x-ui.badge>
                         @if($rejectionStatus['updatedAt'])
-                            <span class="text-muted fs-8">Terakhir diperbarui: {{ Carbon::parse($rejectionStatus['updatedAt'])->format('d M Y H:i') }}</span>
+                            <span class="text-muted fs-8">Terakhir diperbarui: {{ \Carbon\Carbon::parse($rejectionStatus['updatedAt'])->format('d M Y H:i') }}</span>
                         @endif
                     </div>
 
@@ -226,7 +229,7 @@
                 {{-- Rejection History --}}
                 @if(!empty($rejectionStatus['history']) && count($rejectionStatus['history']) > 0)
                     <div class="mt-5">
-                        <h6 class="fw-bold mb-3">Riwayat Penolakan</h6>
+                        <h6 class="fw-semibold mb-3">Riwayat Penolakan</h6>
                         <div class="timeline">
                             @foreach($rejectionStatus['history'] as $history)
                                 <div class="timeline-item mb-3">
@@ -336,7 +339,7 @@ function asesorAkreditasiDetailPage() {
         loading: false,
 
         confirmVisitasiSelesai() {
-            window.SpmSwal.fire({
+            window.SpmSwal.confirm({
                 title: 'Konfirmasi Visitasi Selesai?',
                 text: 'Pastikan seluruh proses visitasi telah selesai dilaksanakan.',
                 icon: 'question',
@@ -351,7 +354,7 @@ function asesorAkreditasiDetailPage() {
         },
 
         confirmFinalizeScoring() {
-            window.SpmSwal.fire({
+            window.SpmSwal.confirm({
                 title: 'Finalisasi Penilaian?',
                 text: 'Setelah difinalisasi, nilai tidak dapat diubah lagi. Pastikan seluruh penilaian telah lengkap.',
                 icon: 'warning',
@@ -366,7 +369,7 @@ function asesorAkreditasiDetailPage() {
         },
 
         confirmAcceptPerbaikan(form) {
-            window.SpmSwal.fire({
+            window.SpmSwal.confirm({
                 title: 'Terima Perbaikan?',
                 text: 'Dokumen perbaikan dari pesantren akan dianggap sudah sesuai.',
                 icon: 'question',
@@ -384,10 +387,10 @@ function asesorAkreditasiDetailPage() {
             const form = document.getElementById('rejectDocumentsForm');
             const checked = form.querySelectorAll('input[name="perbaikan[]"]:checked');
             if (checked.length === 0) {
-                window.SpmSwal.fire({ title: 'Peringatan', text: 'Pilih minimal satu dokumen yang ditolak.', icon: 'warning' });
+                window.SpmSwal.warning('Peringatan', 'Pilih minimal satu dokumen yang ditolak.');
                 return;
             }
-            window.SpmSwal.fire({
+            window.SpmSwal.confirm({
                 title: 'Kirim Penolakan?',
                 text: `${checked.length} dokumen akan ditolak.`,
                 icon: 'warning',
@@ -412,10 +415,10 @@ function asesorAkreditasiDetailPage() {
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || 'Gagal menyimpan');
                 if (isFinal) {
-                    window.SpmSwal.fire({ title: 'Tersimpan', text: 'Nilai NA telah dikunci.', icon: 'success', timer: 1500, showConfirmButton: false });
+                    window.SpmSwal.success('Tersimpan', 'Nilai NA telah dikunci.', { timer: 1500, showConfirmButton: false });
                 }
             } catch (e) {
-                window.SpmSwal.fire({ title: 'Error', text: e.message, icon: 'error' });
+                window.SpmSwal.error('Error', e.message);
             } finally {
                 this.loading = false;
             }
@@ -432,10 +435,10 @@ function asesorAkreditasiDetailPage() {
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || 'Gagal menyimpan');
                 if (isFinal) {
-                    window.SpmSwal.fire({ title: 'Tersimpan', text: 'Nilai NK telah dikunci.', icon: 'success', timer: 1500, showConfirmButton: false });
+                    window.SpmSwal.success('Tersimpan', 'Nilai NK telah dikunci.', { timer: 1500, showConfirmButton: false });
                 }
             } catch (e) {
-                window.SpmSwal.fire({ title: 'Error', text: e.message, icon: 'error' });
+                window.SpmSwal.error('Error', e.message);
             } finally {
                 this.loading = false;
             }
@@ -444,7 +447,7 @@ function asesorAkreditasiDetailPage() {
         confirmSaveEdpm(isFinal) {
             const title = isFinal ? 'Finalisasi EDPM?' : 'Simpan EDPM?';
             const text = isFinal ? 'Nilai EDPM akan dikunci dan tidak dapat diubah.' : 'Simpan progress penilaian EDPM saat ini.';
-            window.SpmSwal.fire({
+            window.SpmSwal.confirm({
                 title: title,
                 text: text,
                 icon: 'question',

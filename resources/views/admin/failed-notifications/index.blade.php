@@ -162,9 +162,25 @@
 @push('scripts')
 <script>
 function failedNotificationPage() {
+    const csrfToken = @js(csrf_token());
+    const retryUrl = @js(route('admin.failed-notifications.retry', '__ID__'));
+    const dismissUrl = @js(route('admin.failed-notifications.dismiss', '__ID__'));
+    const submitPost = (urlTemplate, id) => {
+        const form = document.createElement('form');
+        const token = document.createElement('input');
+        form.method = 'POST';
+        form.action = urlTemplate.replace('__ID__', id);
+        token.type = 'hidden';
+        token.name = '_token';
+        token.value = csrfToken;
+        form.appendChild(token);
+        document.body.appendChild(form);
+        form.requestSubmit();
+    };
+
     return {
         confirmRetry(id) {
-            window.SpmSwal.fire({
+            window.SpmSwal.confirm({
                 title: 'Kirim ulang notifikasi?',
                 text: 'Notifikasi akan dikirim ulang ke penerima.',
                 icon: 'question',
@@ -172,18 +188,11 @@ function failedNotificationPage() {
                 confirmButtonText: 'Ya, kirim ulang',
                 cancelButtonText: 'Batal',
             }).then((result) => {
-                if (result.isConfirmed) {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = route('admin.failed-notifications.retry', { id: id });
-                    form.innerHTML = `@csrf`;
-                    document.body.appendChild(form);
-                    form.submit();
-                }
+                if (result.isConfirmed) submitPost(retryUrl, id);
             });
         },
         confirmDismiss(id) {
-            window.SpmSwal.fire({
+            window.SpmSwal.confirm({
                 title: 'Abaikan notifikasi?',
                 text: 'Notifikasi ini akan ditandai sebagai diabaikan.',
                 icon: 'warning',
@@ -191,14 +200,7 @@ function failedNotificationPage() {
                 confirmButtonText: 'Ya, abaikan',
                 cancelButtonText: 'Batal',
             }).then((result) => {
-                if (result.isConfirmed) {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = route('admin.failed-notifications.dismiss', { id: id });
-                    form.innerHTML = `@csrf`;
-                    document.body.appendChild(form);
-                    form.submit();
-                }
+                if (result.isConfirmed) submitPost(dismissUrl, id);
             });
         }
     };

@@ -59,7 +59,7 @@
 
     @if(empty($levels))
         <x-ui.alert variant="warning" title="Unit Tidak Tersedia" class="mb-4">
-            Pilih layanan satuan pendidikan di <a href="{{ route('pesantren.profile') }}" class="fw-bold text-decoration-underline">Profil Pesantren</a> sebelum mengisi Data SDM.
+            Pilih layanan satuan pendidikan di <a href="{{ route('pesantren.profile') }}" class="fw-semibold text-decoration-underline">Profil Pesantren</a> sebelum mengisi Data SDM.
         </x-ui.alert>
     @else
         <form action="{{ route('pesantren.sdm.save') }}" method="POST" id="sdmForm">
@@ -86,16 +86,16 @@
                 @endphp
                 <x-ui.section-card :title="$category['label']" subtitle="Input rekap per unit layanan" class="mb-6">
                     <div class="table-responsive p-4">
-                        <table class="table table-bordered table-row-dashed align-middle">
+                        <table data-ui-simple-table="metronic" class="table table-bordered table-row-dashed align-middle">
                             <thead>
                                 <tr class="bg-light">
-                                    <th class="fw-bold text-gray-800 text-center" style="min-width:120px;">Kategori</th>
+                                    <th class="fw-semibold text-gray-800 text-center" style="min-width:120px;">Kategori</th>
                                     @foreach($levels as $level)
-                                        <th class="fw-bold text-gray-800 text-center text-uppercase" style="min-width:90px;">
+                                        <th class="fw-semibold text-gray-800 text-center text-uppercase" style="min-width:90px;">
                                             {{ str_replace(['satuan_pesantren_muadalah_(SPM)'], ['SPM'], $level) }}
                                         </th>
                                     @endforeach
-                                    <th class="fw-bold text-gray-800 text-center bg-light-primary" style="min-width:80px;">Total</th>
+                                    <th class="fw-semibold text-gray-800 text-center bg-light-primary" style="min-width:80px;">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -106,6 +106,7 @@
                                         @php $val = (int) ($data[$level][$catKey . '_l'] ?? 0); $rowTotalL += $val; @endphp
                                         <td class="text-center">
                                             <input
+                                                data-ui-input="metronic"
                                                 type="number"
                                                 name="data[{{ $level }}][{{ $catKey }}_l]"
                                                 value="{{ $val }}"
@@ -116,7 +117,7 @@
                                             />
                                         </td>
                                     @endforeach
-                                    <td class="text-center fw-bold bg-light-primary text-primary">{{ $rowTotalL }}</td>
+                                    <td class="text-center fw-semibold bg-light-primary text-primary">{{ $rowTotalL }}</td>
                                 </tr>
                                 <tr>
                                     <td class="fw-semibold text-gray-800">Perempuan</td>
@@ -125,6 +126,7 @@
                                         @php $val = (int) ($data[$level][$catKey . '_p'] ?? 0); $rowTotalP += $val; @endphp
                                         <td class="text-center">
                                             <input
+                                                data-ui-input="metronic"
                                                 type="number"
                                                 name="data[{{ $level }}][{{ $catKey }}_p]"
                                                 value="{{ $val }}"
@@ -135,18 +137,18 @@
                                             />
                                         </td>
                                     @endforeach
-                                    <td class="text-center fw-bold bg-light-primary text-primary">{{ $rowTotalP }}</td>
+                                    <td class="text-center fw-semibold bg-light-primary text-primary">{{ $rowTotalP }}</td>
                                 </tr>
                             </tbody>
                             <tfoot>
                                 <tr class="bg-light-primary">
-                                    <td class="fw-bold text-primary">Total {{ $category['label'] }}</td>
+                                    <td class="fw-semibold text-primary">Total {{ $category['label'] }}</td>
                                     @foreach($levels as $level)
-                                        <td class="text-center fw-bold text-primary">
+                                        <td class="text-center fw-semibold text-primary">
                                             {{ ((int) ($data[$level][$catKey . '_l'] ?? 0)) + ((int) ($data[$level][$catKey . '_p'] ?? 0)) }}
                                         </td>
                                     @endforeach
-                                    <td class="text-center fw-bold text-primary">{{ $rowTotalL + $rowTotalP }}</td>
+                                    <td class="text-center fw-semibold text-primary">{{ $rowTotalL + $rowTotalP }}</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -170,7 +172,7 @@
 <script>
 document.getElementById('btnSaveSdm')?.addEventListener('click', function(e) {
     e.preventDefault();
-    window.SpmSwal.fire({
+    window.SpmSwal.confirm({
         title: 'Simpan Data SDM?',
         text: 'Pastikan semua data sudah benar.',
         icon: 'question',
@@ -179,7 +181,7 @@ document.getElementById('btnSaveSdm')?.addEventListener('click', function(e) {
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            document.getElementById('sdmForm').submit();
+            document.getElementById('sdmForm').requestSubmit();
         }
     });
 });

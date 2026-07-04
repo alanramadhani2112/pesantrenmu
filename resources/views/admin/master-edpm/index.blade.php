@@ -13,12 +13,17 @@
         </x-slot>
 
         {{-- Tabs --}}
-        <div class="nav nav-tabs nav-line-tabs mb-6">
-            <a class="nav-item nav-link" :class="{ 'active': activeTab === 'edpm' }"
-               href="#" x-on:click.prevent="activeTab = 'edpm'">Komponen EDPM</a>
-            <a class="nav-item nav-link" :class="{ 'active': activeTab === 'ipr' }"
-               href="#" x-on:click.prevent="activeTab = 'ipr'">Komponen IPR</a>
-        </div>
+        <x-ui.tabs class="mb-6">
+            <x-ui.tab
+                :active="true"
+                x-bind:class="{ 'active': activeTab === 'edpm' }"
+                x-on:click.prevent="activeTab = 'edpm'"
+            >Komponen EDPM</x-ui.tab>
+            <x-ui.tab
+                x-bind:class="{ 'active': activeTab === 'ipr' }"
+                x-on:click.prevent="activeTab = 'ipr'"
+            >Komponen IPR</x-ui.tab>
+        </x-ui.tabs>
 
         {{-- Guide Perhitungan --}}
         <div class="row g-5 mb-6">
@@ -246,11 +251,10 @@
 
             <x-ui.modal-body>
                 <div class="row g-5">
-                    <div class="col-md-6">
-                        <label class="form-label" for="butir_no_sk">No SK</label>
+                    <x-ui.form-field label="No SK" for="butir_no_sk" class="col-md-6">
                         <input type="text" name="no_sk" id="butir_no_sk" x-model="butirForm.no_sk"
                                class="form-control" placeholder="Opsional">
-                    </div>
+                    </x-ui.form-field>
                     <div class="col-md-6">
                         <label class="form-label required" for="butir_nomor_butir">Nomor Butir</label>
                         <input type="text" name="nomor_butir" id="butir_nomor_butir" x-model="butirForm.nomor_butir"
@@ -348,7 +352,7 @@
 
             confirmDelete(e, message) {
                 if (typeof Swal !== 'undefined') {
-                    window.SpmSwal.fire({
+                    window.SpmSwal.confirm({
                         title: 'Konfirmasi',
                         text: message,
                         icon: 'warning',

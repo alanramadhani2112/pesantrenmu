@@ -81,7 +81,7 @@
                     <div class="app-sidebar-logo panduan-sidebar-logo px-6 d-flex align-items-center justify-content-between">
                         <a href="/" class="d-flex align-items-center gap-2 text-decoration-none">
                             <img src="{{ asset('images/brand/logo-pesantrenmu.svg') }}" alt="PesantrenMu" style="height: 28px;" />
-                            <span class="fw-bold fs-5 text-gray-900 d-none d-sm-inline">PesantrenMu</span>
+                            <span class="fw-semibold fs-5 text-gray-900 d-none d-sm-inline">PesantrenMu</span>
                         </a>
                         <button class="btn btn-sm btn-icon btn-active-color-primary d-lg-none" id="kt_app_sidebar_close" aria-label="Tutup sidebar">
                             <i class="ki-duotone ki-cross fs-1">
@@ -93,7 +93,7 @@
                     <div class="px-6 pt-5 pb-4">
                         <div class="panduan-sidebar-panel">
                             <span class="badge badge-light-primary fw-semibold mb-3">Panduan Sistem</span>
-                            <div class="fw-bold text-gray-900 fs-5 lh-sm">{{ $title }}</div>
+                            <div class="fw-semibold text-gray-900 fs-5 lh-sm">{{ $title }}</div>
                             <div class="text-gray-500 fs-8 mt-2">{{ count($sections) }} kelompok materi</div>
                         </div>
                     </div>
@@ -163,7 +163,7 @@
                                         <div class="d-flex flex-column flex-xl-row align-items-xl-center justify-content-between gap-6">
                                             <div class="min-w-0">
                                                 <span class="badge badge-light-primary fw-semibold mb-4">Dokumentasi Pengguna</span>
-                                                <h2 class="fw-bold text-gray-900 mb-3">{{ $title }}</h2>
+                                                <h2 class="fw-semibold text-gray-900 mb-3">{{ $title }}</h2>
                                                 <p class="text-gray-600 fs-6 mb-0">Ikuti urutan materi dari menu kiri untuk memahami alur kerja sesuai peran pengguna.</p>
                                             </div>
                                             <div class="d-flex flex-wrap gap-3">

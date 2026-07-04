@@ -274,7 +274,7 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('data-kt-menu-trigger="click"', $header);
         $this->assertStringContainsString('data-kt-menu-placement="bottom-end"', $header);
         $this->assertStringContainsString('data-kt-menu="true"', $header);
-        $this->assertStringContainsString("route('profile')", $header);
+        $this->assertStringContainsString("route('profile.edit')", $header);
         $this->assertStringContainsString("route('logout')", $header);
         $this->assertStringContainsString('Pengaturan Profil', $header);
         $this->assertStringContainsString('Keluar', $header);
@@ -365,6 +365,29 @@ class MetronicFrontendTest extends TestCase
             ->map(fn (string $p): string => file_get_contents($p))
             ->implode("\n");
         $this->assertDoesNotMatchRegularExpression('/font-weight:\s*(?:650|700|750|800|900)\b/', $appShellCss);
+    }
+
+    public function test_frontend_runtime_uses_single_blade_alpine_boot_path(): void
+    {
+        $layout = file_get_contents(resource_path('views/layouts/app.blade.php'));
+        $appJs = file_get_contents(resource_path('js/app.js'));
+        $views = '';
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(resource_path('views')));
+
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getExtension() === 'php') {
+                $views .= "\n".file_get_contents($file->getPathname());
+            }
+        }
+
+        $failedNotifications = file_get_contents(resource_path('views/admin/failed-notifications/index.blade.php'));
+
+        $this->assertSame(1, substr_count($layout, 'resources/js/app.js'));
+        $this->assertSame(1, substr_count($appJs, "document.addEventListener('DOMContentLoaded', initMetronic)"));
+        $this->assertStringNotContainsString("Alpine.store('modal')", $views);
+        $this->assertStringNotContainsString('form.action = route(', $failedNotifications);
+        $this->assertStringNotContainsString("route('admin.failed-notifications.retry', {", $failedNotifications);
+        $this->assertStringNotContainsString('x-html="catatan.catatan', $views);
     }
 
     public function test_metronic_overrides_are_split_into_architecture_modules(): void
@@ -594,7 +617,8 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('entri', $html);
         $this->assertStringContainsString('Ekspor Data', $html);
         $this->assertStringContainsString('name="search"', $html);
-        $this->assertStringContainsString('method="GET"', $html);
+        $this->assertStringContainsString('url.searchParams.set(this.name, this.value)', $html);
+        $this->assertStringNotContainsString('<form method="GET" class="spm-table-controls">', $html);
     }
 
     public function test_legacy_datatable_components_render_through_metronic_table_adapter(): void
@@ -703,9 +727,9 @@ class MetronicFrontendTest extends TestCase
         $this->actingAs($admin)
             ->get('/roles')
             ->assertOk()
-            ->assertSee('data-ui-table="metronic"', false)
-            ->assertSee('data-ui-table-adapter="datatable"', false)
-            ->assertSee('data-ui-table-search="metronic"', false);
+            ->assertSee('data-module-page="roles"', false)
+            ->assertSee('Manajemen Role')
+            ->assertSee('role-modal', false);
     }
 
     public function test_admin_master_edpm_uses_simple_table_component(): void

@@ -516,7 +516,7 @@ function asesorProfileEdit() {
         },
 
         confirmSaveProfile(event) {
-            window.SpmSwal.fire({
+            window.SpmSwal.confirm({
                 title: 'Simpan Profil?',
                 text: 'Pastikan data yang Anda isi sudah benar.',
                 icon: 'question',

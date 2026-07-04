@@ -28,7 +28,7 @@ $sections = [
 {{-- Screenshot tampilan penuh dashboard super admin --}}
 <div class="card card-flush mb-8">
     <div class="card-header border-0 pt-6 pb-0 px-6">
-        <h3 class="card-title fw-bold fs-3 text-gray-900">Tampilan Dashboard Super Admin</h3>
+        <h3 class="card-title fw-semibold fs-3 text-gray-900">Tampilan Dashboard Super Admin</h3>
     </div>
     <div class="card-body pt-4 px-6 pb-6">
         <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
@@ -64,21 +64,21 @@ $sections = [
 <x-panduan::section id="role-permission" title="Role & Permission" subtitle="Mengelola role dan hak akses pengguna sistem.">
     <ol class="list-unstyled mb-0">
         <li class="d-flex align-items-start gap-3 mb-4">
-            <span class="badge badge-primary rounded-circle fw-bold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">1</span>
+            <span class="badge badge-primary rounded-circle fw-semibold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">1</span>
             <div>
                 <strong>Buka Role Sistem</strong><br/>
                 Klik <strong>Role Sistem</strong> di sidebar. Halaman menampilkan daftar role yang tersedia: Super Admin, Admin, Asesor, Pesantren.
             </div>
         </li>
         <li class="d-flex align-items-start gap-3 mb-4">
-            <span class="badge badge-primary rounded-circle fw-bold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">2</span>
+            <span class="badge badge-primary rounded-circle fw-semibold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">2</span>
             <div>
                 <strong>Konfigurasi Permission</strong><br/>
                 Buka <strong>Peran & Hak Akses</strong> untuk mengatur permission tiap role. Setiap permission mengontrol akses ke fitur spesifik. <strong>Peringatan:</strong> perubahan di sini langsung berdampak ke seluruh pengguna.
             </div>
         </li>
         <li class="d-flex align-items-start gap-3">
-            <span class="badge badge-primary rounded-circle fw-bold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">3</span>
+            <span class="badge badge-primary rounded-circle fw-semibold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">3</span>
             <div>
                 <strong>Best Practice</strong><br/>
                 Jangan mengubah permission default kecuali diperlukan. Selalu uji di lingkungan development terlebih dahulu sebelum mengubah permission di production.
@@ -103,21 +103,21 @@ $sections = [
 <x-panduan::section id="akun-pengguna" title="Akun Pengguna" subtitle="Mengelola seluruh akun pengguna di sistem.">
     <ol class="list-unstyled mb-0">
         <li class="d-flex align-items-start gap-3 mb-4">
-            <span class="badge badge-primary rounded-circle fw-bold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">1</span>
+            <span class="badge badge-primary rounded-circle fw-semibold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">1</span>
             <div>
                 <strong>Buka Akun Pengguna</strong><br/>
                 Klik <strong>Akun Pengguna</strong> di sidebar untuk melihat daftar semua pengguna.
             </div>
         </li>
         <li class="d-flex align-items-start gap-3 mb-4">
-            <span class="badge badge-primary rounded-circle fw-bold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">2</span>
+            <span class="badge badge-primary rounded-circle fw-semibold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">2</span>
             <div>
                 <strong>CRUD Akun</strong><br/>
                 Super Admin dapat <strong>membuat</strong>, <strong>mengedit</strong>, <strong>menonaktifkan</strong>, dan <strong>mereset password</strong> akun pengguna. Pilih role yang tepat saat membuat akun baru.
             </div>
         </li>
         <li class="d-flex align-items-start gap-3">
-            <span class="badge badge-primary rounded-circle fw-bold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">3</span>
+            <span class="badge badge-primary rounded-circle fw-semibold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">3</span>
             <div>
                 <strong>Filter & Search</strong><br/>
                 Gunakan filter role dan pencarian nama/email untuk menemukan pengguna dengan cepat.

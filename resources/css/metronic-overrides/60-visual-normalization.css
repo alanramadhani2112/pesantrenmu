@@ -1442,3 +1442,32 @@ code {
         justify-content: flex-start !important;
     }
 }
+
+.spm-navigate-progress {
+    position: fixed;
+    inset: 0 auto auto 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(var(--spm-primary-rgb), 0.12);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 2000;
+}
+
+body.spm-is-navigating .spm-navigate-progress {
+    opacity: 1;
+}
+
+.spm-navigate-progress-bar {
+    width: 40%;
+    height: 100%;
+    background: var(--spm-primary);
+    border-radius: 999px;
+    animation: spmNavigateProgress 1.2s ease-in-out infinite;
+}
+
+@keyframes spmNavigateProgress {
+    0% { transform: translateX(-100%); }
+    50% { transform: translateX(80%); }
+    100% { transform: translateX(220%); }
+}

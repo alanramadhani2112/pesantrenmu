@@ -37,9 +37,9 @@
 <x-ui.section-card title="Tabel Penilaian Instrumen" subtitle="Isi nilai NA dan NK per butir pernyataan">
     <div class="p-6">
         <div class="table-responsive">
-            <table class="table table-row-bordered table-row-gray-200 align-middle gs-0 gy-2 fs-7">
+            <table data-ui-simple-table="metronic" class="table table-row-bordered table-row-gray-200 align-middle gs-0 gy-2 fs-7">
                 <thead>
-                    <tr class="fw-bold text-muted bg-light">
+                    <tr class="fw-semibold text-muted bg-light">
                         <th class="min-w-80px">Komponen</th>
                         <th class="min-w-60px">No SK</th>
                         <th class="min-w-60px">No Butir</th>
@@ -105,11 +105,11 @@
                                                     <option value="{{ $i }}" {{ ($asesorEval->value ?? '') == $i ? 'selected' : '' }}>{{ $i }}</option>
                                                 @endfor
                                             </select>
-                                            <button type="button" class="btn btn-sm btn-icon btn-light-primary mt-1"
+                                            <x-ui.button type="button" variant="light-primary" size="sm" class="btn-icon mt-1"
                                                     x-on:click="saveNa({{ $butirId }}, '{{ $asesorEval->value ?? '' }}', true)"
                                                     title="Kunci Nilai">
                                                 <i class="ki-solid ki-lock fs-7"></i>
-                                            </button>
+                                            </x-ui.button>
                                         @endif
                                     </td>
                                     {{-- Nilai Anggota (read-only) --}}
@@ -162,11 +162,11 @@
                                                     <option value="{{ $i }}" {{ ($asesorEval->value ?? '') == $i ? 'selected' : '' }}>{{ $i }}</option>
                                                 @endfor
                                             </select>
-                                            <button type="button" class="btn btn-sm btn-icon btn-light-primary mt-1"
+                                            <x-ui.button type="button" variant="light-primary" size="sm" class="btn-icon mt-1"
                                                     x-on:click="saveNa({{ $butirId }}, '{{ $asesorEval->value ?? '' }}', true)"
                                                     title="Kunci Nilai">
                                                 <i class="ki-solid ki-lock fs-7"></i>
-                                            </button>
+                                            </x-ui.button>
                                         @endif
                                     </td>
                                 @endif
@@ -195,10 +195,10 @@
 
 {{-- Scroll Actions --}}
 <div class="position-fixed bottom-0 end-0 mb-6 me-6 d-flex flex-column gap-2" style="z-index: 100;">
-    <button type="button" class="btn btn-sm btn-icon btn-light-primary shadow" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Ke Atas">
+    <x-ui.button type="button" variant="light-primary" size="sm" class="btn-icon shadow" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Ke Atas">
         <i class="ki-solid ki-arrow-up fs-5"></i>
-    </button>
-    <button type="button" class="btn btn-sm btn-icon btn-light-primary shadow" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" title="Ke Bawah">
+    </x-ui.button>
+    <x-ui.button type="button" variant="light-primary" size="sm" class="btn-icon shadow" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" title="Ke Bawah">
         <i class="ki-solid ki-arrow-down fs-5"></i>
-    </button>
+    </x-ui.button>
 </div>

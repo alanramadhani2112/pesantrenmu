@@ -11,7 +11,7 @@
     $iprCount = $iprKomponens->count();
 @endphp
 
-<div x-data="edpmManagement({
+<div x-data="pesantrenEdpmPage({
     edpmCount: {{ $edpmCount }},
     iprCount: {{ $iprCount }}
 })">
@@ -118,7 +118,7 @@
                                         <template x-if="komponen">
                                             <div class="p-6">
                                                 <div class="table-responsive">
-                                                    <table class="table table-bordered table-row-dashed">
+                                                    <table data-ui-simple-table="metronic" class="table table-bordered table-row-dashed">
                                                         <thead>
                                                             <tr class="bg-light">
                                                                 <th style="width:50px">No</th>
@@ -133,7 +133,7 @@
                                                                     <td class="text-center" x-text="butir.nomor_butir"></td>
                                                                     <td x-text="butir.indikator"></td>
                                                                     <td>
-                                                                        <select class="form-select form-select-sm"
+                                                                        <select data-ui-select="metronic" class="form-select form-select-sm"
                                                                             :name="'evaluasis[' + butir.id + ']'"
                                                                             @if($isLocked) disabled @endif>
                                                                             <option value="">Pilih</option>
@@ -144,7 +144,7 @@
                                                                         </select>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="url" class="form-control form-control-sm"
+                                                                        <input data-ui-input="metronic" type="url" class="form-control form-control-sm"
                                                                             :name="'links[' + butir.id + ']'"
                                                                             placeholder="https://"
                                                                             @if($isLocked) disabled @endif />
@@ -177,7 +177,7 @@
                                         <template x-if="komponen">
                                             <div class="p-6">
                                                 <div class="table-responsive">
-                                                    <table class="table table-bordered table-row-dashed">
+                                                    <table data-ui-simple-table="metronic" class="table table-bordered table-row-dashed">
                                                         <thead>
                                                             <tr class="bg-light">
                                                                 <th style="width:50px">No</th>
@@ -192,7 +192,7 @@
                                                                     <td class="text-center" x-text="butir.nomor_butir"></td>
                                                                     <td x-text="butir.indikator"></td>
                                                                     <td>
-                                                                        <select class="form-select form-select-sm"
+                                                                        <select data-ui-select="metronic" class="form-select form-select-sm"
                                                                             :name="'evaluasis[' + butir.id + ']'"
                                                                             @if($isLocked) disabled @endif>
                                                                             <option value="">Pilih</option>
@@ -203,7 +203,7 @@
                                                                         </select>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="url" class="form-control form-control-sm"
+                                                                        <input data-ui-input="metronic" type="url" class="form-control form-control-sm"
                                                                             :name="'links[' + butir.id + ']'"
                                                                             placeholder="https://"
                                                                             @if($isLocked) disabled @endif />
@@ -273,7 +273,7 @@
 @push('scripts')
 <script>
 document.addEventListener('alpine:init', () => {
-    Alpine.data('edpmManagement', (config) => ({
+    Alpine.data('pesantrenEdpmPage', (config) => ({
         activeStep: 0,
         activeGroup: 'edpm',
         edpmCount: config.edpmCount,
@@ -321,7 +321,7 @@ document.addEventListener('alpine:init', () => {
 // SweetAlert confirmations
 document.getElementById('btnSaveEdpm')?.addEventListener('click', function(e) {
     e.preventDefault();
-    window.SpmSwal.fire({
+    window.SpmSwal.confirm({
         title: 'Simpan Data EDPM?',
         text: 'Pastikan semua nilai evaluasi dan tautan bukti sudah diisi dengan benar.',
         icon: 'question',
@@ -330,13 +330,13 @@ document.getElementById('btnSaveEdpm')?.addEventListener('click', function(e) {
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            document.getElementById('edpmSaveForm').submit();
+            document.getElementById('edpmSaveForm').requestSubmit();
         }
     });
 });
 
 document.getElementById('btnSaveDraft')?.addEventListener('click', function() {
-    window.SpmSwal.fire({
+    window.SpmSwal.confirm({
         title: 'Simpan Draft EDPM?',
         text: 'Draft dapat dilanjutkan kapan saja.',
         icon: 'question',
@@ -348,12 +348,13 @@ document.getElementById('btnSaveDraft')?.addEventListener('click', function() {
             // Clone all inputs from save form to draft form
             const saveForm = document.getElementById('edpmSaveForm');
             const draftForm = document.getElementById('edpmDraftForm');
-            const inputs = saveForm.querySelectorAll('select, input, textarea');
-            inputs.forEach(input => {
+            draftForm.querySelectorAll('[data-draft-clone]').forEach(input => input.remove());
+            saveForm.querySelectorAll('select, input, textarea').forEach(input => {
                 const clone = input.cloneNode(true);
+                clone.dataset.draftClone = 'true';
                 draftForm.appendChild(clone);
             });
-            draftForm.submit();
+            draftForm.requestSubmit();
         }
     });
 });

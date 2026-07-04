@@ -49,6 +49,42 @@ class BusinessFlowLegacyCleanupTest extends TestCase
         $this->assertStringNotContainsString('confirmResubmit', $jsContents);
     }
 
+    public function test_frontend_runtime_has_no_livewire_entry_points(): void
+    {
+        $markers = [
+            '@livewire',
+            '<livewire',
+            'wire:',
+            '@entangle',
+            '$wire',
+            'callWire',
+            'adminManagement',
+            'akreditasiPesantren',
+            'akreditasiManagement',
+            'asesorManagement',
+            'fileManagement',
+            'ipmManagement',
+            'sdmManagement',
+            'edpmManagement',
+        ];
+
+        foreach ([resource_path('js'), resource_path('views')] as $root) {
+            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($root));
+
+            foreach ($iterator as $file) {
+                if (! $file->isFile() || ! in_array($file->getExtension(), ['js', 'php'], true)) {
+                    continue;
+                }
+
+                $contents = file_get_contents($file->getPathname());
+
+                foreach ($markers as $marker) {
+                    $this->assertStringNotContainsString($marker, $contents, "{$marker} remains in {$file->getPathname()}");
+                }
+            }
+        }
+    }
+
     public function test_asesor_detail_uses_canonical_post_visitasi_document_handlers(): void
     {
         $this->markTestSkipped('Asesor AkreditasiDetail migrated to plain Blade controller.');

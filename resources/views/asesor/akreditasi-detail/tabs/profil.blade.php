@@ -35,7 +35,7 @@
                 </div>
                 <div class="mb-3">
                     <div class="spm-detail-label">Tanggal Visitasi</div>
-                    <div class="spm-detail-value">{{ $akreditasi->tgl_visitasi ? \Illuminate\Support\Carbon::parse($akreditasi->tgl_visitasi)->format('d F Y') : 'Belum Dijadwalkan' }}</div>
+                    <div class="spm-detail-value">{{ $akreditasi->tgl_visitasi ? \Carbon\Carbon::parse($akreditasi->tgl_visitasi)->format('d F Y') : 'Belum Dijadwalkan' }}</div>
                 </div>
             </div>
         </div>
@@ -47,9 +47,9 @@
 <x-ui.section-card title="Layanan Pendidikan" subtitle="Unit layanan pendidikan pesantren" class="mt-4">
     <div class="p-6">
         <div class="table-responsive">
-            <table class="table table-row-bordered table-row-gray-200 align-middle gs-0 gy-3">
+            <table data-ui-simple-table="metronic" class="table table-row-bordered table-row-gray-200 align-middle gs-0 gy-3">
                 <thead>
-                    <tr class="fw-bold text-muted">
+                    <tr class="fw-semibold text-muted">
                         <th>No</th>
                         <th>Nama Unit</th>
                         <th>Jenis</th>
@@ -79,10 +79,10 @@
                     <div class="d-flex align-items-center gap-2">
                         @if(!empty($pesantren->$field))
                             <i class="ki-solid ki-check-circle text-success fs-5"></i>
-                            <a href="{{ Storage::url($pesantren->$field) }}" target="_blank" class="text-primary fw-semibold fs-7">{{ $label }}</a>
+                            <a data-ui-document-item="metronic" href="{{ Storage::url($pesantren->$field) }}" target="_blank" class="text-primary fw-semibold fs-7">{{ $label }}</a>
                         @else
                             <i class="ki-solid ki-cross-circle text-muted fs-5"></i>
-                            <span class="text-muted fs-7">{{ $label }}</span>
+                            <span data-ui-document-item="metronic" class="text-muted fs-7">{{ $label }}</span>
                         @endif
                     </div>
                 </div>
@@ -100,10 +100,10 @@
                     <div class="d-flex align-items-center gap-2">
                         @if(!empty($pesantren->$field))
                             <i class="ki-solid ki-check-circle text-success fs-5"></i>
-                            <a href="{{ Storage::url($pesantren->$field) }}" target="_blank" class="text-primary fw-semibold fs-7">{{ $label }}</a>
+                            <a data-ui-document-item="metronic" href="{{ Storage::url($pesantren->$field) }}" target="_blank" class="text-primary fw-semibold fs-7">{{ $label }}</a>
                         @else
                             <i class="ki-solid ki-cross-circle text-muted fs-5"></i>
-                            <span class="text-muted fs-7">{{ $label }}</span>
+                            <span data-ui-document-item="metronic" class="text-muted fs-7">{{ $label }}</span>
                         @endif
                     </div>
                 </div>

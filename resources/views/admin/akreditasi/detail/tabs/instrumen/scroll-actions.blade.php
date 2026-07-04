@@ -16,9 +16,22 @@
                 <input type="hidden" name="adminNvs[{{ $butirId }}]" value="{{ is_array($item) ? ($item['nv'] ?? '') : $item }}">
             @endforeach
             <div class="mb-3">
-                <label for="nvReason" class="form-label fw-semibold">Alasan perubahan NV</label>
-                <textarea id="nvReason" name="nvReason" rows="3" class="form-control" placeholder="Wajib diisi jika ada NV final yang berbeda dari NK.">{{ old('nvReason') }}</textarea>
-                <div class="form-text">Boleh dikosongkan jika semua NV mengikuti NK.</div>
+                <label class="form-label fw-semibold mb-2">Alasan perubahan NV (per butir)</label>
+                <div class="form-text mb-2">Isi hanya untuk butir yang NV-nya berbeda dari NK. Kosongkan jika sama.</div>
+                @foreach($adminNvs as $butirId => $item)
+                    @php
+                        $nvVal = is_array($item) ? ($item['nv'] ?? '') : $item;
+                        $nkVal = is_array($item) ? ($item['nk'] ?? '') : '';
+                    @endphp
+                    @if($nvVal && $nkVal && (int)$nvVal !== (int)$nkVal)
+                        <div class="mb-2 p-2 bg-light rounded">
+                            <label for="nvReasons_{{ $butirId }}" class="form-label fw-semibold small mb-1">
+                                Butir #{{ $butirId }} (NK: {{ $nkVal }} → NV: {{ $nvVal }})
+                            </label>
+                            <textarea id="nvReasons_{{ $butirId }}" name="nvReasons[{{ $butirId }}]" rows="2" class="form-control form-control-sm" placeholder="Wajib diisi karena NV berbeda dari NK." required>{{ old("nvReasons.$butirId") }}</textarea>
+                        </div>
+                    @endif
+                @endforeach
             </div>
             <div class="d-flex justify-content-end">
                 <x-ui.button type="submit" variant="primary">

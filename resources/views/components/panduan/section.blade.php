@@ -15,7 +15,7 @@
                 </i>
             </span>
             <div class="min-w-0">
-                <h3 class="fw-bold fs-3 text-gray-900 mb-1">{{ $title }}</h3>
+                <h3 class="fw-semibold fs-3 text-gray-900 mb-1">{{ $title }}</h3>
                 @if ($subtitle)
                     <p class="text-gray-600 fs-6 lh-lg mb-0">{{ $subtitle }}</p>
                 @endif

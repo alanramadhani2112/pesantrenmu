@@ -54,8 +54,8 @@ const tabThrobber = (() => {
     };
 })();
 
-const showPageLoadingOverlay = () => tabThrobber.start();
-const hidePageLoadingOverlay = () => tabThrobber.stop();
+const showPageLoadingOverlay = () => { document.body.classList.add('spm-is-navigating'); tabThrobber.start(); };
+const hidePageLoadingOverlay = () => { document.body.classList.remove('spm-is-navigating'); tabThrobber.stop(); };
 
 window.showPageLoadingOverlay = showPageLoadingOverlay;
 window.hidePageLoadingOverlay = hidePageLoadingOverlay;
@@ -306,13 +306,6 @@ const fireNotificationAlert = (data = {}) => {
     });
 };
 
-const callWire = (wire, method, ...args) => {
-    if (!wire) return null;
-    if (typeof wire[method] === 'function') return wire[method](...args);
-    if (typeof wire.call === 'function') return wire.call(method, ...args);
-    return null;
-};
-
 const validateFile = (event, options = {}) => {
     const file = event?.target?.files?.[0];
     if (!file) return true;
@@ -381,221 +374,6 @@ const wilayahProvinsi = [
     { kode: '96', nama: 'Papua Pegunungan' },
 ];
 
-window.deleteConfirmation = () => ({
-    confirmDelete(id, method = 'delete', text = 'Data yang dihapus tidak dapat dikembalikan.') {
-        ask({
-            title: 'Hapus data?',
-            text,
-            icon: 'warning',
-            confirmVariant: 'danger',
-            confirmButtonText: 'Ya, hapus',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(this.$wire, method, id);
-        });
-    },
-    confirmAction(method, title = 'Simpan perubahan?', text = 'Data akan disimpan.', confirmButtonText = 'Ya, simpan', confirmVariant = 'primary') {
-        ask({
-            title,
-            text,
-            confirmButtonText,
-            confirmVariant,
-        }).then((result) => {
-            if (result.isConfirmed) callWire(this.$wire, method);
-        });
-    },
-});
-
-window.adminManagement = () => ({
-    confirmToggleStatus(wire, id, currentStatus, name = 'akun', label = 'Akun') {
-        const nextAction = Number(currentStatus) === 1 ? 'nonaktifkan' : 'aktifkan';
-        ask({
-            title: `${nextAction.charAt(0).toUpperCase()}${nextAction.slice(1)} ${label}?`,
-            text: `${label} ${name} akan di${nextAction}.`,
-            confirmButtonText: `Ya, ${nextAction}`,
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'toggleStatus', id);
-        });
-    },
-    confirmDeleteUser(wire, id, name = 'akun ini') {
-        ask({
-            title: 'Hapus akun?',
-            text: `Akun ${name} akan dihapus permanen.`,
-            icon: 'warning',
-            confirmVariant: 'danger',
-            confirmButtonText: 'Ya, hapus',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'deleteUser', id);
-        });
-    },
-    confirmUnlinkSso(wire, id, name = 'akun ini') {
-        ask({
-            title: 'Unlink SSO?',
-            text: `Akun ${name} akan di-unlink dari Muhammadiyah ID. Data profil SSO akan dihapus.`,
-            icon: 'warning',
-            confirmVariant: 'warning',
-            confirmButtonText: 'Ya, unlink',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'unlinkSso', id);
-        });
-    },
-    confirmSaveAccount(wire) {
-        ask({
-            title: 'Simpan akun?',
-            text: 'Data akun akan disimpan ke sistem.',
-            confirmButtonText: 'Ya, simpan',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'saveAccount');
-        });
-    },
-    confirmSaveNV(wire) {
-        ask({
-            title: 'Simpan nilai verifikasi?',
-            text: 'Nilai NV akan disimpan untuk proses validasi.',
-            confirmButtonText: 'Ya, simpan',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'saveAdminNv');
-        });
-    },
-    confirmApprove(wire) {
-        ask({
-            title: 'Setujui akreditasi?',
-            text: 'Pastikan nomor SK, masa berlaku, sertifikat, dan nilai sudah benar.',
-            icon: 'success',
-            confirmVariant: 'success',
-            confirmButtonText: 'Ya, setujui',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'approve');
-        });
-    },
-    confirmReject(wire) {
-        ask({
-            title: 'Tolak akreditasi?',
-            text: 'Catatan penolakan akan dikirim ke pesantren.',
-            icon: 'warning',
-            confirmVariant: 'danger',
-            confirmButtonText: 'Ya, tolak',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'reject');
-        });
-    },
-    confirmVerifikasiPengajuan(wire) {
-        const isReject = wire?.action_type === 'reject';
-
-        ask({
-            title: isReject ? 'Stop pengajuan?' : 'Lanjutkan pengajuan?',
-            text: isReject
-                ? 'Pengajuan akan dikembalikan dengan catatan penolakan.'
-                : 'Pengajuan akan masuk ke tahap Review Asesor sesuai tim penilai yang dipilih.',
-            icon: isReject ? 'warning' : 'success',
-            confirmVariant: isReject ? 'danger' : 'success',
-            confirmButtonText: isReject ? 'Ya, stop' : 'Ya, lanjutkan',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'verifikasi');
-        });
-    },
-    confirmToggleLock(wire, isLocked) {
-        const action = isLocked ? 'buka kunci' : 'kunci';
-        ask({
-            title: `${isLocked ? 'Buka kunci' : 'Kunci'} data pesantren?`,
-            text: isLocked
-                ? 'Data pesantren akan dapat diedit kembali oleh pesantren.'
-                : 'Data pesantren akan dikunci dan tidak dapat diedit.',
-            icon: 'warning',
-            confirmVariant: isLocked ? 'success' : 'warning',
-            confirmButtonText: `Ya, ${action}`,
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'toggleLock');
-        });
-    },
-    confirmReassignAsesor(wire) {
-        ask({
-            title: 'Ganti asesor?',
-            text: 'Asesor lama akan dilepas dari tugas ini dan digantikan asesor baru.',
-            icon: 'warning',
-            confirmVariant: 'danger',
-            confirmButtonText: 'Ya, ganti asesor',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'reassignAsesor');
-        });
-    },
-    confirmRejectFinal(wire) {
-        ask({
-            title: 'Tolak akreditasi secara final?',
-            text: 'Keputusan penolakan final tidak dapat dibatalkan. Pesantren akan menerima notifikasi.',
-            icon: 'warning',
-            confirmVariant: 'danger',
-            confirmButtonText: 'Ya, tolak final',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'reject');
-        });
-    },
-    confirmAssignReviewer(wire) {
-        ask({
-            title: 'Tugaskan reviewer?',
-            text: 'Pilih reviewer di modal yang akan muncul.',
-            confirmButtonText: 'Pilih Reviewer',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'openAssignModal');
-        });
-    },
-    confirmReassignReviewer(wire) {
-        ask({
-            title: 'Ganti reviewer?',
-            text: 'Pilih reviewer baru di modal yang akan muncul.',
-            icon: 'warning',
-            confirmVariant: 'warning',
-            confirmButtonText: 'Pilih Reviewer Baru',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'openAssignModal');
-        });
-    },
-    confirmBandingDecision(wire, type) {
-        const isAccept = type === 'accept';
-        ask({
-            title: isAccept ? 'Terima banding?' : 'Tolak banding?',
-            text: isAccept
-                ? 'Banding akan diterima dan proses akreditasi kembali ke tahap Validasi Admin.'
-                : 'Banding akan ditolak. Keputusan ini tidak dapat dibatalkan.',
-            icon: isAccept ? 'success' : 'warning',
-            confirmVariant: isAccept ? 'success' : 'danger',
-            confirmButtonText: isAccept ? 'Ya, terima' : 'Ya, tolak',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'openDecisionModal', type);
-        });
-    },
-});
-
-window.akreditasiPesantren = () => ({
-    confirmCreate() {
-        ask({
-            title: 'Buat pengajuan akreditasi?',
-            text: 'Data profil akan dikunci selama proses akreditasi berjalan.',
-            confirmButtonText: 'Ya, ajukan',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(this.$wire, 'create');
-        });
-    },
-    confirmCancel(id, year = '') {
-        ask({
-            title: 'Batalkan pengajuan?',
-            text: `Pengajuan ${year ? `periode ${year} ` : ''}akan dibatalkan dan data profil dibuka kembali.`,
-            confirmVariant: 'danger',
-            confirmButtonText: 'Ya, batalkan',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(this.$wire, 'cancelSubmission', id);
-        });
-    },
-    confirmSubmitPerbaikan(wire) {
-        ask({
-            title: 'Kirim perbaikan?',
-            text: 'Asesor akan menerima notifikasi bahwa perbaikan dokumen telah dikirim.',
-            confirmButtonText: 'Ya, kirim',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'submitPerbaikan');
-        });
-    },
-});
-
 window.spmActionMenu = (menuId) => ({
     isOpen: false,
     placementStyle: 'position: fixed; top: 0; left: 0; visibility: hidden; z-index: 1200;',
@@ -647,188 +425,11 @@ window.spmActionMenu = (menuId) => ({
             return;
         }
 
-        window.dispatchEvent(new CustomEvent('spm:action-menu-open', { detail: { id: this.menuId } }));
+        window.dispatchEvent(new CustomEvent('spm:action-menu-open', { detail: { id: this.resolvedMenuId } }));
         this.placementStyle = 'position: fixed; top: 0; left: 0; width: 210px; visibility: hidden; z-index: 1200;';
         this.isOpen = true;
         this.markOpenState();
         this.$nextTick(() => window.requestAnimationFrame(() => this.updatePosition()));
-    },
-});
-
-window.akreditasiManagement = () => ({
-    confirmUploadKartu(wire) {
-        ask({
-            title: 'Unggah kartu kendali?',
-            text: 'File akan disimpan dan dikirim ke admin untuk validasi.',
-            confirmButtonText: 'Ya, unggah',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'uploadKartuKendali');
-        });
-    },
-    confirmSaveDraft(wire) {
-        ask({
-            title: 'Simpan draf penilaian?',
-            text: 'Nilai yang sudah diisi akan disimpan sebagai draf.',
-            confirmButtonText: 'Ya, simpan',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'saveAsesorEdpm');
-        });
-    },
-    confirmVerification(wire) {
-        ask({
-            title: 'Finalisasi penilaian pasca visitasi?',
-            text: 'Pastikan Nilai Ketua, Nilai Anggota, Nilai Kelompok, laporan visitasi, dan kartu kendali sudah lengkap.',
-            icon: 'success',
-            confirmVariant: 'success',
-            confirmButtonText: 'Ya, finalisasi',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'finalizeScoring');
-        });
-    },
-    confirmAsesor2Final(wire) {
-        ask({
-            title: 'Finalkan penilaian?',
-            text: 'Nilai asesor 2 akan disimpan sebagai final.',
-            icon: 'success',
-            confirmVariant: 'success',
-            confirmButtonText: 'Ya, finalkan',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'saveAsesorEdpm', true);
-        });
-    },
-    confirmRescheduleVisitasi(wire) {
-        ask({
-            title: 'Simpan jadwal visitasi?',
-            text: 'Jadwal visitasi akan diperbarui.',
-            confirmButtonText: 'Ya, simpan',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'saveVisitasiReschedule');
-        });
-    },
-});
-
-window.asesorManagement = () => ({
-    confirmSaveProfile(wire) {
-        ask({
-            title: 'Simpan profil asesor?',
-            text: 'Perubahan data profil asesor akan disimpan.',
-            confirmButtonText: 'Ya, simpan',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'save');
-        });
-    },
-    confirmSaveInstrumen(wire) {
-        ask({
-            title: 'Simpan penilaian instrumen?',
-            text: 'Nilai Ketua, Nilai Anggota, atau Nilai Kelompok yang sudah terbuka akan disimpan.',
-            confirmButtonText: 'Ya, simpan',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'saveAsesorEdpm');
-        });
-    },
-    confirmTerimaPerbaikan(wire) {
-        ask({
-            title: 'Terima perbaikan?',
-            text: 'Perbaikan dokumen dari pesantren akan diterima dan proses visitasi dapat dilanjutkan.',
-            icon: 'success',
-            confirmVariant: 'success',
-            confirmButtonText: 'Ya, terima',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'acceptPerbaikan');
-        });
-    },
-    confirmKirimPenolakan(wire) {
-        ask({
-            title: 'Kirim penolakan dokumen?',
-            text: 'Pesantren akan menerima notifikasi dan diminta memperbaiki dokumen yang ditolak.',
-            icon: 'warning',
-            confirmVariant: 'danger',
-            confirmButtonText: 'Ya, kirim penolakan',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'submitRejection');
-        });
-    },
-});
-
-window.fileManagement = () => ({
-    validate: validateFile,
-    confirmSave(wire) {
-        ask({
-            title: 'Simpan perubahan?',
-            text: 'Data dan dokumen yang dipilih akan diperbarui.',
-            confirmButtonText: 'Ya, simpan',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'save');
-        });
-    },
-    confirmSaveDraft(wire) {
-        ask({
-            title: 'Submit draft profil?',
-            text: 'Data yang sudah diisi akan disimpan sebagai draft dan masih bisa dilengkapi nanti.',
-            confirmButtonText: 'Ya, simpan draft',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'saveDraft');
-        });
-    },
-    confirmSubmitProfile(wire) {
-        ask({
-            title: 'Submit profil pesantren?',
-            text: 'Pastikan data inti profil sudah lengkap dan benar.',
-            icon: 'warning',
-            confirmButtonText: 'Ya, submit',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'save');
-        });
-    },
-});
-
-window.ipmManagement = () => ({
-    validate: validateFile,
-    confirmSave(wire) {
-        ask({
-            title: 'Simpan data IPM?',
-            text: 'Dokumen IPM yang dipilih akan disimpan.',
-            confirmButtonText: 'Ya, simpan',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'save');
-        });
-    },
-});
-
-window.sdmManagement = () => ({
-    confirmSave(wire) {
-        ask({
-            title: 'Simpan data SDM?',
-            text: 'Rekap SDM pesantren akan diperbarui.',
-            confirmButtonText: 'Ya, simpan',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'save');
-        });
-    },
-});
-
-window.edpmManagement = () => ({
-    validateAndNext(wire) {
-        callWire(wire, 'nextStep');
-    },
-    confirmSaveDraft(wire) {
-        ask({
-            title: 'Simpan draf EDPM?',
-            text: 'Nilai dan tautan bukti yang sudah diisi akan disimpan sebagai draf.',
-            confirmButtonText: 'Ya, simpan draf',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'saveDraft');
-        });
-    },
-    confirmSimpan(wire) {
-        ask({
-            title: 'Simpan EDPM permanen?',
-            text: 'Pastikan seluruh nilai dan tautan bukti sudah benar.',
-            icon: 'warning',
-            confirmButtonText: 'Ya, simpan',
-        }).then((result) => {
-            if (result.isConfirmed) callWire(wire, 'save');
-        });
     },
 });
 
@@ -1102,15 +703,7 @@ window.addEventListener('pageshow', () => {
 });
 
 Alpine.store('sidebar', { open: false });
-Alpine.data('deleteConfirmation', window.deleteConfirmation);
-Alpine.data('adminManagement', window.adminManagement);
-Alpine.data('akreditasiPesantren', window.akreditasiPesantren);
 Alpine.data('spmActionMenu', window.spmActionMenu);
-Alpine.data('edpmManagement', window.edpmManagement);
-Alpine.data('ipmManagement', window.ipmManagement);
-Alpine.data('sdmManagement', window.sdmManagement);
-Alpine.data('fileManagement', window.fileManagement);
-Alpine.data('asesorManagement', window.asesorManagement);
 
 // ── Dropzone File Upload Bridge ──
 // Bridges Dropzone drag-drop to a hidden <input type="file">.
@@ -1181,8 +774,5 @@ Alpine.data('fileDropzone', function (config = {}) {
         },
     };
 });
-
-// Init Metronic components after initial load
-document.addEventListener('DOMContentLoaded', () => initMetronic());
 
 Alpine.start();
