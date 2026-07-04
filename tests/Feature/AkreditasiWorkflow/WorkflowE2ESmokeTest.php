@@ -4,6 +4,7 @@ namespace Tests\Feature\AkreditasiWorkflow;
 
 use App\Models\Akreditasi;
 use App\Models\AkreditasiEdpm;
+use App\Models\AkreditasiEdpmCatatan;
 use App\Models\Asesor;
 use App\Models\Assessment;
 use App\Models\Edpm;
@@ -61,6 +62,7 @@ class WorkflowE2ESmokeTest extends TestCase
         $this->saveAllNaAsFinal($akreditasi->id, $asesor1->id, 1, 4, $pesantren->id);
         $this->saveAllNaAsFinal($akreditasi->id, $asesor2->id, 2, 4, $pesantren->id);
         $this->saveAllNkAndNv($akreditasi->id, $pesantren->id, $asesor1->id, 4);
+        $this->saveAllCatatanRekomendasi($akreditasi->id, $pesantren->id, $asesor1->id);
 
         $akreditasi->update([
             'laporan_visitasi_asesor1' => 'laporan/asesor1.pdf',
@@ -84,7 +86,7 @@ class WorkflowE2ESmokeTest extends TestCase
         $this->assertSame(0, (int) $akreditasi->status);
         $this->assertTrue((bool) $akreditasi->is_nv_final);
         $this->assertSame('SK/E2E/001/2026', $akreditasi->nomor_sk);
-        $this->assertNotNull($primary->visitasi_at);
+        $this->assertNotNull($akreditasi->visitasi_confirmed_at);
     }
 
     public function test_e2e_negative_path_blocks_sk_when_post_visitasi_documents_missing(): void
@@ -211,8 +213,27 @@ class WorkflowE2ESmokeTest extends TestCase
                     'pesantren_id' => $pesantrenUserId,
                     'isian' => $naValue,
                     'catatan' => 'NA final',
-                    $tipe === 1 ? 'na1' : 'na2' => $naValue,
-                    $tipe === 1 ? 'is_na1_final' : 'is_na2_final' => true,
+                    'is_final' => true,
+                ]
+            );
+        }
+    }
+
+    private function saveAllCatatanRekomendasi(int $akreditasiId, int $pesantrenUserId, int $asesorUserId): void
+    {
+        $asesorId = Asesor::where('user_id', $asesorUserId)->value('id');
+
+        foreach (MasterEdpmKomponen::whereNull('ipr')->take(4)->get() as $komponen) {
+            AkreditasiEdpmCatatan::updateOrCreate(
+                [
+                    'akreditasi_id' => $akreditasiId,
+                    'komponen_id' => $komponen->id,
+                    'asesor_id' => $asesorId,
+                ],
+                [
+                    'pesantren_id' => $pesantrenUserId,
+                    'catatan' => 'Catatan rekomendasi final',
+                    'rekomendasi' => 'Rekomendasi final',
                 ]
             );
         }

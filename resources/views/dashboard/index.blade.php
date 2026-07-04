@@ -2,8 +2,9 @@
 
 @section('content')
 @php
-    $roleLabel = $isAdmin ? 'Admin' : ($isPesantren ? 'Pesantren' : 'Asesor');
+    $roleLabel = $isSuperAdmin ? 'Super Admin' : ($isAdmin ? 'Admin' : ($isPesantren ? 'Pesantren' : 'Asesor'));
     $pageSubtitle = match (true) {
+        $isSuperAdmin => 'Pantau kesehatan sistem, governance akses, dan operasi akreditasi.',
         $isAdmin => 'Kelola pengajuan akreditasi dan pantau kinerja asesor.',
         $isPesantren => 'Pantau kesiapan data dan status pengajuan akreditasi Anda.',
         $isAsesor => 'Selesaikan tugas penilaian dan visitasi yang ditugaskan.',
@@ -11,6 +12,7 @@
     };
 
     $primaryAction = match (true) {
+        $isSuperAdmin => ['label' => 'Kelola Hak Akses', 'route' => route('admin.role-permission.index')],
         $isAdmin => ['label' => 'Kelola Akreditasi', 'route' => route('admin.akreditasi')],
         $isPesantren => ['label' => 'Pengajuan Akreditasi', 'route' => route('pesantren.akreditasi')],
         $isAsesor => ['label' => 'Lihat Tugas', 'route' => route('asesor.akreditasi')],
@@ -50,6 +52,8 @@
     $today = \Carbon\Carbon::now()->translatedFormat('l, d F Y');
 
     $contextualMessage = match (true) {
+        $isSuperAdmin && $stats['verifikasi'] > 0 => "Ada {$stats['verifikasi']} pengajuan dan area governance yang perlu dipantau hari ini.",
+        $isSuperAdmin => 'Panel kendali sistem siap digunakan. Pantau akses, akun, dan operasi utama dari sini.',
         $isAdmin && $stats['verifikasi'] > 0 => "Ada {$stats['verifikasi']} pengajuan yang perlu Anda verifikasi hari ini.",
         $isAdmin => 'Semua pengajuan sudah ditindaklanjuti. Sistem berjalan normal.',
         $isPesantren && $stats['ditolak'] > 0 => "Ada {$stats['ditolak']} pengajuan yang perlu diperbaiki. Cek catatan dari asesor.",
@@ -61,6 +65,14 @@
     };
 
     $quickActions = match (true) {
+        $isSuperAdmin => [
+            ['label' => 'Hak Akses', 'icon' => 'security-user', 'route' => route('admin.role-permission.index'), 'variant' => 'primary'],
+            ['label' => 'Role Sistem', 'icon' => 'key', 'route' => route('admin.roles.index'), 'variant' => 'info'],
+            ['label' => 'Akun Pengguna', 'icon' => 'profile-user', 'route' => route('accounts.index'), 'variant' => 'success'],
+            ['label' => 'Notif Gagal', 'icon' => 'notification-bing', 'route' => route('admin.failed-notifications'), 'variant' => 'warning'],
+            ['label' => 'Kelola Akreditasi', 'icon' => 'shield-tick', 'route' => route('admin.akreditasi'), 'variant' => 'primary'],
+            ['label' => 'Trash', 'icon' => 'trash', 'route' => route('admin.trash'), 'variant' => 'danger'],
+        ],
         $isAdmin => [
             ['label' => 'Kelola Akreditasi', 'icon' => 'shield-tick', 'route' => route('admin.akreditasi'), 'variant' => 'primary'],
             ['label' => 'Data Pesantren', 'icon' => 'category', 'route' => route('admin.pesantren.index'), 'variant' => 'info'],
@@ -150,7 +162,7 @@
             </div>
         @endif
 
-        @if($isAdmin)
+        @if($isSuperAdmin || $isAdmin)
             <div class="row g-6">
                 <div class="col-12 col-lg-7 col-xl-8">
                     <x-ui.card title="Perlu Ditindaklanjuti" subtitle="Prioritas proses aktif yang membutuhkan perhatian admin." class="h-100">
@@ -485,7 +497,7 @@
                             <x-slot name="icon">
                                 <x-ui.icon name="time" class="fs-2x" />
                             </x-slot>
-                            @if($isAdmin)
+                            @if($isSuperAdmin || $isAdmin)
                                 <x-slot name="action">
                                     <x-ui.button :href="route('admin.pesantren.index')" variant="primary" size="sm">
                                         Kelola Data Pesantren

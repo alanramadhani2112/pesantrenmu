@@ -54,7 +54,7 @@
             'admin.master-edpm' => ['title' => __('Komponen EDPM/IPR'), 'section' => __('Master Data')],
             'admin.master-kategori-dokumen' => ['title' => __('Kategori Dokumen'), 'section' => __('Master Data')],
             'admin.master-dokumen' => ['title' => __('Dokumen Wajib'), 'section' => __('Master Data')],
-            'admin.master-role-permission' => ['title' => __('Peran & Hak Akses'), 'section' => __('Manajemen Sistem')],
+            'admin.role-permission.index' => ['title' => __('Peran & Hak Akses'), 'section' => __('Manajemen Sistem')],
             'admin.akreditasi' => ['title' => __('Akreditasi'), 'section' => __('Operasional Akreditasi')],
             'admin.akreditasi-detail' => ['title' => __('Detail Akreditasi'), 'section' => __('Operasional Akreditasi')],
             'admin.asesor.index' => ['title' => __('Asesor'), 'section' => __('Operasional Akreditasi')],
@@ -122,6 +122,8 @@
             $breadcrumbItems[] = ['label' => $pageTitle];
         }
     @endphp
+
+    <div class="spm-navigate-progress" aria-hidden="true"><div class="spm-navigate-progress-bar"></div></div>
 
     <div class="d-flex flex-column flex-root app-root spm-app-shell" id="kt_app_root">
         <div class="app-page flex-column flex-column-fluid" id="kt_app_page">
