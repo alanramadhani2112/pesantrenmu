@@ -32,6 +32,8 @@ spm.sql
 .kiro/
 .audit-findings/
 .playwright-mcp/
+.handoff.md
+.opencode/
 .sisyphus/
 *.png
 !public/images/landing/akreditasi-hero.png

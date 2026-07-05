@@ -605,6 +605,7 @@ class PesantrenService
             }
 
             // Status 4: filter data to only allow unlocked sub-items
+            $rejectionService = app(RejectionService::class);
             $ipmSectionMap = [
                 'nsp_file' => 'ipm.nsp',
                 'kurikulum_file' => 'ipm.kurikulum',

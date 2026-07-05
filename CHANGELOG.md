@@ -56,7 +56,7 @@ Format mengikuti [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Unique index `akreditasis.uuid`: migration `2026_05_21_000011`
 - Unique index `ipms.user_id`: migration `2026_05_21_000012`
 - `docs/architecture.md` — dokumentasi arsitektur sistem
-- `docs/deployment.md` — production deploy runbook
+- `docs/DEPLOYMENT.md` — production deploy runbook
 - `CHANGELOG.md` — file ini
 
 ### Changed

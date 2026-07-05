@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Pesantren;
 
+use App\Models\Akreditasi;
+use App\Models\AkreditasiRejection;
 use App\Models\Ipm;
 use App\Models\Pesantren;
 use App\Models\User;
@@ -133,6 +135,43 @@ class IpmServiceTest extends TestCase
         $this->assertDatabaseHas('ipms', [
             'user_id' => $this->user->id,
             'nsp_file' => 'original_nsp.pdf',
+        ]);
+    }
+
+    public function test_update_ipm_allows_only_unlocked_rejection_sections_when_locked_in_assessment(): void
+    {
+        $this->pesantren->update(['is_locked' => true]);
+        Ipm::create([
+            'user_id' => $this->user->id,
+            'nsp_file' => 'old_nsp.pdf',
+            'kurikulum_file' => 'old_kurikulum.pdf',
+        ]);
+        $akreditasi = Akreditasi::create([
+            'user_id' => $this->user->id,
+            'status' => Akreditasi::STATUS_ASSESSMENT,
+        ]);
+        $asesor = User::factory()->create(['role_id' => 2]);
+        AkreditasiRejection::create([
+            'akreditasi_id' => $akreditasi->id,
+            'user_id' => $asesor->id,
+            'type' => 'asesor',
+            'items' => ['ipm.nsp'],
+            'explanation' => 'NSP perlu diperbaiki',
+            'rejection_number' => 1,
+            'perbaikan_deadline' => now()->addDays(14),
+            'status' => 'pending',
+        ]);
+
+        $result = $this->service->updateIpm($this->user->id, [
+            'nsp_file' => 'new_nsp.pdf',
+            'kurikulum_file' => 'new_kurikulum.pdf',
+        ]);
+
+        $this->assertTrue($result);
+        $this->assertDatabaseHas('ipms', [
+            'user_id' => $this->user->id,
+            'nsp_file' => 'new_nsp.pdf',
+            'kurikulum_file' => 'old_kurikulum.pdf',
         ]);
     }
 

@@ -6,10 +6,9 @@ use App\Http\Controllers\Admin\MasterKategoriDokumenController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\DashboardController;
-use App\Models\Asesor;
-use App\Models\User;
+use App\Http\Controllers\PanduanRedirectController;
+use App\Http\Controllers\SecureAsesorDocumentController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
 
 Route::view('/', 'welcome');
 
@@ -330,30 +329,9 @@ Route::middleware(['auth', 'verified', 'role:pesantren'])
 | Serves KTP / ijazah / kartu_nbm from the local (non-public) disk.
 | Only the asesor themselves or admin/super-admin may download.
 */
-Route::get('secure/asesor-docs/{asesorId}/{field}', function (int $asesorId, string $field) {
-    $allowedFields = ['ktp_file', 'ijazah_file', 'kartu_nbm_file'];
-
-    if (! in_array($field, $allowedFields, true)) {
-        abort(404);
-    }
-
-    $asesor = Asesor::findOrFail($asesorId);
-
-    /** @var User $user */
-    $user = auth()->user();
-
-    if ($asesor->user_id !== $user->id && ! $user->canAccessAdminArea()) {
-        abort(403);
-    }
-
-    $path = $asesor->$field;
-
-    if (! $path || ! Storage::disk('local')->exists($path)) {
-        abort(404);
-    }
-
-    return Storage::disk('local')->response($path);
-})->middleware(['auth', 'verified'])->name('secure.asesor-docs');
+Route::get('secure/asesor-docs/{asesorId}/{field}', SecureAsesorDocumentController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('secure.asesor-docs');
 
 /*
 |--------------------------------------------------------------------------
@@ -363,20 +341,9 @@ Route::get('secure/asesor-docs/{asesorId}/{field}', function (int $asesorId, str
 | Middleware EnsureUserHasRole meng-abort(403) bila role tidak cocok.
 | Super admin (role=4) bypass semua gate secara otomatis.
 */
-Route::get('panduan', function () {
-    /** @var \App\Models\User $user */
-    $user = auth()->user();
-
-    $route = match (true) {
-        $user->isSuperAdmin() => 'panduan.superadmin',
-        $user->isAdmin() => 'panduan.admin',
-        $user->isAsesor() => 'panduan.asesor',
-        $user->isPesantren() => 'panduan.pesantren',
-        default => 'dashboard',
-    };
-
-    return redirect()->route($route);
-})->middleware(['auth', 'verified'])->name('panduan.index');
+Route::get('panduan', PanduanRedirectController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('panduan.index');
 
 Route::middleware(['auth', 'verified', 'role:super_admin'])
     ->group(function () {

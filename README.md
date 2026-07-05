@@ -126,8 +126,6 @@ Scheduled commands:
 | `reminders:asesor2` | Reminder untuk Anggota Kelompok |
 | `akreditasi:check-deadlines` | Cek deadline akreditasi |
 | `trash:purge` | Hapus permanen data di trash |
-| `akreditasi:check-perbaikan-deadlines` | Enforcement deadline perbaikan |
-| `akreditasi:send-perbaikan-reminders` | Kirim reminder perbaikan |
 
 ## Notifikasi
 
@@ -164,10 +162,7 @@ Lihat [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) untuk panduan lengkap.
 | [`docs/architecture.md`](docs/architecture.md) | Arsitektur sistem |
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Production deploy runbook |
 | [`docs/local-setup.md`](docs/local-setup.md) | Setup lokal detail |
-| [`docs/production-readiness-plan.md`](docs/production-readiness-plan.md) | Rencana production readiness |
-| [`docs/post-visitasi-documents-implementation.md`](docs/post-visitasi-documents-implementation.md) | Implementasi dokumen pasca visitasi |
 | [`docs/performance-optimization.md`](docs/performance-optimization.md) | Optimasi performa |
 | [`docs/auth.md`](docs/auth.md) | Autentikasi dan SSO |
-| [`docs/project-work-report.md`](docs/project-work-report.md) | Kronologi pengerjaan project |
-| [`.kiro/specs/`](.kiro/specs/) | Spec fitur (requirements, design, tasks) |
+| [`docs/README.md`](docs/README.md) | Indeks dokumen current dan historical |
 
