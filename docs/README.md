@@ -13,6 +13,7 @@ This directory contains current operating docs plus historical audit/planning no
 - [Brand tokens](brand-tokens.md)
 - [Performance optimization](performance-optimization.md)
 - [Production readiness audit](production-readiness-audit.md)
+- [UI role audit 2026-07-07](ui-role-audit-2026-07-07.md)
 - [User manual](user-manual.md)
 - [Repo hygiene cleanup plan](repo-hygiene-cleanup-plan.md)
 

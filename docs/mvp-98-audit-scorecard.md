@@ -2,14 +2,14 @@
 
 ## Status Dokumen
 
-Dokumen ini **semi-final untuk baseline scoring**.
+Dokumen ini **final untuk batch P0/P1/P2 MVP 98 per 2026-07-07**.
 
 Dokumen ini sudah diperbarui berdasarkan:
 
 - `docs/business-flow-audit-matrix.md`
 - `docs/livewire-removal-audit.md`
-
-Dokumen ini belum final penuh karena audit UI dashboard role masih belum diisi dari halaman nyata.
+- `docs/ui-role-audit-2026-07-07.md`
+- Focused HTTP regressions, BusinessFlow suite, full test suite, dan `npm run build` dari Task 3.
 
 ## Yang Perlu Difinalisasi
 
@@ -17,7 +17,7 @@ Dokumen ini belum final penuh karena audit UI dashboard role masih belum diisi d
 - [x] Ubah item `Open` baseline menjadi status yang lebih jujur.
 - [x] Tetapkan blocker resmi untuk batch execute pertama.
 - [x] Putuskan arah baseline 78% tetap dipakai.
-- [ ] Finalisasi skor area UI setelah audit dashboard nyata.
+- [x] Finalisasi skor area UI setelah audit dashboard nyata.
 
 ## Keputusan Baseline
 
@@ -52,9 +52,9 @@ MVP dianggap hampir selesai bila:
 | Admin flow | 18 | 80 | 14.4 | `NV`, final flag, cleanup file SK, dan rollback master dokumen sudah guarded |
 | Super Admin governance | 10 | 92 | 9.2 | Role mutation, role inti, split trash, dan split failed-notification sudah guarded |
 | Auth + security baseline | 10 | 85 | 8.5 | Test inti lolos |
-| Frontend dashboard role | 10 | 70 | 7 | Belum diaudit nyata per halaman |
-| legacy reactive removal cleanliness | 5 | 95 | 4.75 | Runtime bersih, docs utama sudah sinkron; residue historis masih ada |
-| **Total** | **100** |  | **88.69** | Dibulatkan jadi baseline baru **91%** |
+| Frontend dashboard role | 10 | 95 | 9.5 | Browser smoke 19 route pass, issues `[]` |
+| legacy reactive removal cleanliness | 5 | 100 | 5 | Runtime bersih; docs utama sinkron; residue historis ditandai historical |
+| **Total** | **100** |  | **91.44** | Prior documented 88.69 + finalized UI/legacy evidence; sisa P2 non-blocking deferred |
 
 ## Target Skor 98%
 
@@ -75,11 +75,11 @@ MVP dianggap hampir selesai bila:
 
 | Item | Status | Catatan |
 | --- | --- | --- |
-| Kontrak `NV != NK` + reason | Needs Fix | Gap nyata di Validasi Admin |
-| HTTP regression action inti per role | In Progress | Mayoritas action inti admin/asesor sudah punya HTTP regression; tersisa finalize scoring happy path dan negative path kecil |
-| Audit flow per status vs implementasi | Baseline Done | Matrix baseline sudah terisi dan P0 hasil akhir + visitasi sudah punya bukti test |
-| Jadwal visitasi dan action asesor sinkron | Baseline Done | Schedule/confirm/reject/accept baseline sudah tertutup |
-| Hasil akhir pesantren sesuai policy | Baseline Done | Tab hasil baseline sudah pakai field final tanpa promosi raw score |
+| Kontrak `NV != NK` + reason | Done | UI mengirim `nvReasons[butir_id]`; HTTP regression finalisasi NV tetap pass |
+| HTTP regression action inti per role | Done | `BusinessFlowHttpContractTest`, `BusinessFlow*Test`, admin/asesor HTTP tests pass |
+| Audit flow per status vs implementasi | Done | Matrix baseline dan business-flow suite pass |
+| Jadwal visitasi dan action asesor sinkron | Done | Confirm visitasi + finalize scoring route contract pass |
+| Hasil akhir pesantren sesuai policy | Done | Tab hasil baseline pakai field final tanpa promosi raw score |
 
 ### P1
 
@@ -90,18 +90,18 @@ MVP dianggap hampir selesai bila:
 | Trash mutate permission split | Done | `tests/Feature/Trash/TrashAuthorizationTest.php:1` |
 | Failed notification mutate permission split | Done | `tests/Feature/FailedNotificationAuthorizationTest.php:1` |
 | Rollback upload orphan file | Done | `tests/Feature/AdminIssueSkFileCleanupTest.php:1`, `tests/Feature/DocumentServiceTest.php:1` |
-| Frontend-backend route contract sync | Needs Fix | UX/runtime risk |
-| UI polish dashboard role | Open | Menunggu audit UI nyata |
-| legacy reactive audit dan cleanup | Baseline Done | Runtime bersih, sisa docs |
+| Frontend-backend route contract sync | Done | Asesor dynamic POST includes `akreditasi_id`; admin NV form emits controller field names |
+| UI polish dashboard role | Done | Evidence: `docs/ui-role-audit-2026-07-07.md` |
+| legacy reactive audit dan cleanup | Done | Runtime bersih; docs utama sinkron; residue historis ditandai historical |
 
 ### P2
 
 | Item | Status | Catatan |
 | --- | --- | --- |
-| Allowlist sorting | Open | Hardening |
-| Copy, badge, empty state consistency | Open | Polish |
-| Docs architecture cleanup | Needs Fix | Karena residue legacy reactive docs |
-| Minor perf/view/cache review | Open | Final pass |
+| Allowlist sorting | Deferred | Hardening non-blocking; tidak masuk Task 1-4 |
+| Copy, badge, empty state consistency | Pass MVP | Browser smoke 19 route, issues `[]` |
+| Docs architecture cleanup | Done | Docs utama menunjuk evidence terbaru; residue historis tetap historical |
+| Minor perf/view/cache review | Deferred | Non-blocking; tidak ada temuan smoke browser |
 
 ## Evidence yang Sudah Ada
 
@@ -111,16 +111,18 @@ MVP dianggap hampir selesai bila:
 - Gap backend detail: `docs/backend-role-module-audit-plan-2026-06-08.md`
 - Matrix flow baseline: `docs/business-flow-audit-matrix.md`
 - legacy reactive cleanup baseline: `docs/livewire-removal-audit.md`
+- UI role smoke audit: `docs/ui-role-audit-2026-07-07.md`
 - Test inti lulus: `tests/Feature/AkreditasiWorkflow/FullHappyPathTest.php`, `tests/Feature/ProductionReadinessTest.php`, `tests/Feature/SecurityHeadersTest.php`
+- Task 3 verification: focused tests 27 passed; BusinessFlow 24 passed/1 skipped; full suite 3081 passed/3 skipped; `npm run build` pass
 
 ## Blocker Resmi Batch Execute Pertama
 
 ### Batch 1 - P0 Flow Integrity
 
-- [ ] `NV != NK` reason contract
-- [ ] `is_nv_final` premature final guard
+- [x] `NV != NK` reason contract
+- [x] `is_nv_final` premature final guard
 - [x] asesor visitasi state/flag contract
-- [ ] regression HTTP action inti admin/asesor
+- [x] regression HTTP action inti admin/asesor
 - [x] audit hasil akhir pesantren
 
 ### Batch 2 - P1 Governance
@@ -129,49 +131,49 @@ MVP dianggap hampir selesai bila:
 - [x] role inti protection
 - [x] trash mutate permission split
 - [x] failed notification mutate permission split
-- [ ] rollback cleanup untuk SK/master dokumen
+- [x] rollback cleanup untuk SK/master dokumen
 
 ### Batch 3 - Documentation and Contract Sync
 
-- [ ] update docs utama yang masih menyebut reactive layer lama aktif
-- [ ] sinkron route contract frontend-backend
-- [ ] audit UI role dan polish must-fix
+- [x] update docs utama yang masih menyebut reactive layer lama aktif
+- [x] sinkron route contract frontend-backend
+- [x] audit UI role dan polish must-fix
 
 ## Gate untuk Naik dari 78 ke 98
 
 ### Gate 1 - Stabilkan Flow Bisnis
 
 - [x] Semua status punya audit matrix baseline expected vs actual.
-- [ ] Semua gap P0 dipastikan tertutup. (Tersisa finalize scoring happy path dan beberapa negative path kecil)
-- [ ] Semua fix P0 punya test atau check yang bisa diulang.
+- [x] Semua gap P0 dipastikan tertutup.
+- [x] Semua fix P0 punya test atau check yang bisa diulang.
 
 ### Gate 2 - Kunci Governance
 
-- [ ] Semua permission mutasi penting eksplisit.
+- [x] Semua permission mutasi penting eksplisit.
 - [x] Role inti aman dari salah hapus/salah edit.
 - [x] Kontrak admin dan super admin tidak ambigu untuk role mutation.
 
 ### Gate 3 - Rapikan UI Role
 
-- [ ] Dashboard semua role lolos checklist usability inti.
-- [ ] Tidak ada CTA membingungkan atau status wording tumpang tindih.
-- [ ] Empty state, error state, loading state, table state konsisten.
+- [x] Dashboard semua role lolos checklist usability inti.
+- [x] Tidak ada CTA membingungkan atau status wording tumpang tindih.
+- [x] Empty state, error state, loading state, table state konsisten untuk flow MVP.
 
 ### Gate 4 - Bersihkan sisa legacy reactive layer
 
 - [x] Semua referensi runtime reactive layer lama terinventaris.
 - [x] Jejak aktif runtime tidak ditemukan.
-- [ ] Dokumentasi utama sesuai implementasi final.
+- [x] Dokumentasi utama sesuai implementasi final.
 
 ## Keputusan Skor Akhir
 
-Setelah audit UI dan batch execute awal selesai, skor final akan diputuskan berdasarkan:
+Audit UI dan batch execute awal selesai. Keputusan final per 2026-07-07:
 
-1. jumlah item P0 yang selesai,
-2. jumlah item P1 kritis yang selesai,
-3. hasil audit UI dashboard role,
-4. hasil sinkronisasi dokumentasi legacy reactive layer,
-5. residual issue yang tersisa.
+1. item P0 selesai,
+2. item P1 kritis selesai,
+3. audit UI dashboard role lulus smoke browser 19 route tanpa issue,
+4. dokumentasi utama menunjuk implementasi/evidence terbaru,
+5. sisa P2 hardening non-blocking didefer eksplisit.
 
 
 

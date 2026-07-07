@@ -470,7 +470,10 @@ function asesorAkreditasiDetailPage() {
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = url;
-            form.innerHTML = `<input type="hidden" name="_token" value="{{ csrf_token() }}">`;
+            form.innerHTML = `
+                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="akreditasi_id" value="{{ $akreditasi->id }}">
+            `;
             document.body.appendChild(form);
             form.submit();
         }

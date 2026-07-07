@@ -49,6 +49,7 @@ class AkreditasiDetailController extends Controller
 
         $userId = $akreditasi->user_id;
         $pesantren = $this->pesantrenService->getProfile($userId);
+        $isLocked = (bool) ($pesantren?->is_locked ?? false);
         $ipm = $this->pesantrenService->getIpm($userId);
         $sdm = $this->pesantrenService->getSdm($userId)->keyBy('tingkat');
 
@@ -156,6 +157,9 @@ class AkreditasiDetailController extends Controller
             }
         }
 
+        $showFinalDecision = (int) $akreditasi->status === \App\StateMachine\AkreditasiStateMachine::STATUS_VALIDASI_ADMIN
+            && (bool) $akreditasi->is_nv_final;
+
         // Compute scoring progress cards (replaces adminScoringProgressCards())
         $scoringProgressCards = $this->buildScoringProgressCards(
             $asesor1NaProgress, $asesor1NkProgress, $asesor2NaProgress
@@ -218,8 +222,8 @@ class AkreditasiDetailController extends Controller
             'adminNvs', 'rejectionStatus',
             'asesor1NaProgress', 'asesor1NkProgress', 'asesor2NaProgress',
             'isOverdue', 'availableAsesorsForReassignment', 'asesorsForAssignment',
-            'fields', 'sdmTotals',
-            'scoringProgressCards', 'scoringBlockers', 'scoreSummary',
+            'isLocked', 'fields', 'sdmTotals',
+            'scoringProgressCards', 'scoringBlockers', 'scoreSummary', 'showFinalDecision',
             'auditLogs', 'auditActors', 'auditActionTypes',
             'auditFilterActionType', 'auditFilterUserId', 'auditFilterDateFrom', 'auditFilterDateTo',
             'activeTab'
@@ -249,78 +253,87 @@ class AkreditasiDetailController extends Controller
     private function buildScoreSummary($komponens, array $adminNvs): array
     {
         $rows = [];
-        $totalSkorIk = 0.0;
+        $ikScores = [];
         $totalSkorIpr = 0.0;
-        $ikRowCount = 0;
+        $pendingCount = 0;
         $iprRowCount = 0;
 
         foreach ($komponens ?? [] as $komponen) {
             $isIpr = ! is_null($komponen->ipr);
             $butirs = $komponen->butirs ?? collect();
-            $cmaks = count($butirs) * ScoreCalculationService::SCORE_MAX;
-            $ci = 0;
+            $nvValues = [];
+            $requiredCount = 0;
 
             foreach ($butirs as $butir) {
-                $raw = $adminNvs[$butir->id] ?? 0;
-                $ci += (int) (is_array($raw) ? ($raw['nv'] ?? 0) : $raw);
+                $raw = $adminNvs[$butir->id] ?? null;
+                $nkValue = is_array($raw) ? ($raw['nk'] ?? null) : null;
+                $nvValue = is_array($raw) ? ($raw['nv'] ?? null) : $raw;
+
+                if (blank($nkValue)) {
+                    continue;
+                }
+
+                $requiredCount++;
+                if (blank($nvValue)) {
+                    $pendingCount++;
+                    continue;
+                }
+
+                $nvValues[] = (int) $nvValue;
             }
 
-            $bobot = $isIpr
-                ? 97
-                : (ScoreCalculationService::KOMPONEN_CONFIG[$komponen->nama]['bobot'] ?? 0);
+            $complete = $requiredCount > 0 && count($nvValues) === $requiredCount;
+            $bobot = $isIpr ? 100 : (ScoreCalculationService::KOMPONEN_CONFIG[$komponen->nama]['bobot'] ?? 0);
             $factor = $isIpr ? 100 : $bobot;
-            $score = $cmaks > 0 ? round(($ci / $cmaks) * $factor) : 0;
+            $score = 0.0;
+
+            if ($complete) {
+                $score = $isIpr
+                    ? $this->scoreCalculationService->calculateSkorIPR($nvValues)
+                    : (array_key_exists($komponen->nama, ScoreCalculationService::KOMPONEN_CONFIG)
+                        ? $this->scoreCalculationService->calculateSkorKomponen($nvValues, $komponen->nama)
+                        : round((array_sum($nvValues) / (max(1, count($butirs)) * ScoreCalculationService::SCORE_MAX)) * $factor, 2));
+            }
 
             if ($isIpr) {
                 $totalSkorIpr += $score;
                 $iprRowCount++;
             } else {
-                $totalSkorIk += $score;
-                $ikRowCount++;
+                $ikScores[] = $score;
             }
 
             $rows[] = [
                 'name' => $komponen->nama,
-                'cmaks' => $cmaks,
-                'ci' => $ci,
+                'nama' => $komponen->nama,
+                'cmaks' => $isIpr ? ScoreCalculationService::IPR_CMAKS : ((ScoreCalculationService::KOMPONEN_CONFIG[$komponen->nama]['butir_count'] ?? count($butirs)) * ScoreCalculationService::SCORE_MAX),
+                'ci' => array_sum($nvValues),
                 'bk' => $bobot,
-                'score' => $score,
+                'factor' => $factor,
+                'score' => $complete ? $score : '-',
+                'complete' => $complete,
                 'is_ipr' => $isIpr,
                 'total_score' => null,
                 'total_rowspan' => null,
             ];
         }
 
-        // Annotate rowspan for total score display
-        $ikRow = null;
-        foreach ($rows as $i => &$row) {
-            if (! $row['is_ipr'] && $ikRow === null) {
-                $ikRow = &$rows[$i];
-                $ikRow['total_score'] = round($totalSkorIk, 1);
-                $ikRow['total_rowspan'] = $ikRowCount;
-            }
-        }
-
-        $totalIpr = round($totalSkorIpr, 1);
-        $finalScore = round($totalSkorIk + $totalSkorIpr, 1);
-
-        $nilaiAkreditasi = match (true) {
-            $finalScore >= 86 => 'A (Unggul)',
-            $finalScore >= 71 => 'B (Baik)',
-            $finalScore >= 56 => 'C (Cukup Baik)',
-            default => 'D (Kurang)',
-        };
-        $peringkat = match (true) {
-            $finalScore >= 86 => 'A - Unggul',
-            $finalScore >= 71 => 'B - Baik',
-            $finalScore >= 56 => 'C - Cukup',
-            default => 'D - Kurang',
-        };
+        $totalSkorIk = $this->scoreCalculationService->calculateTotalSkorIK($ikScores);
+        $totalIpr = round($totalSkorIpr, 2);
+        $isPending = $pendingCount > 0;
+        $finalScore = $isPending ? 0.0 : $this->scoreCalculationService->calculateNilaiAkhir($totalSkorIk, $totalIpr);
+        $peringkat = $isPending ? 'Pending' : $this->scoreCalculationService->determinePeringkat($finalScore);
 
         return [
+            'isIpr' => $iprRowCount > 0,
+            'isPending' => $isPending,
+            'pendingCount' => $pendingCount,
+            'iprScore' => $isPending ? '-' : $totalIpr,
+            'komponenDetails' => array_values(array_filter($rows, fn (array $row): bool => ! $row['is_ipr'])),
+            'finalScore' => $finalScore,
+            'predicate' => $peringkat,
             'rows' => $rows,
             'result' => [
-                'nilai_akreditasi' => $nilaiAkreditasi,
+                'nilai_akreditasi' => $peringkat,
                 'peringkat' => $peringkat,
                 'total_skor_ik' => $totalSkorIk,
                 'total_skor_ipr' => $totalIpr,
@@ -371,24 +384,32 @@ class AkreditasiDetailController extends Controller
         Gate::authorize('akreditasi.approve');
 
         if ((int) $akreditasi->status !== 1) {
-            return back()->with('error', 'Data tidak dapat diubah karena status bukan Validasi Admin.');
+            return back()->withInput()->with('error', 'Data tidak dapat diubah karena status bukan Validasi Admin.');
         }
 
         if (empty($akreditasi->laporan_visitasi_asesor1)) {
-            return back()->with('error', 'Nilai NV belum dapat disimpan karena Laporan Visitasi Ketua Kelompok belum diunggah.');
+            return back()->withInput()->with('error', 'Nilai NV belum dapat disimpan karena Laporan Visitasi Ketua Kelompok belum diunggah.');
         }
 
         $request->validate([
             'adminNvs' => 'required|array',
-            'nvReason' => 'nullable|string|max:2000',
+            'nvReasons' => 'nullable|array',
+            'nvReasons.*' => 'nullable|string|max:2000',
         ]);
 
         $adminId = Auth::id();
         $errors = [];
+        $reasons = $request->input('nvReasons', []);
+
         foreach ($request->input('adminNvs', []) as $butirId => $nvValue) {
             if (! empty($nvValue) && is_numeric($nvValue) && $nvValue >= 1 && $nvValue <= 4) {
+                $reason = isset($reasons[$butirId]) && is_string($reasons[$butirId]) ? trim($reasons[$butirId]) : null;
+                if ($reason === '') {
+                    $reason = null;
+                }
+
                 try {
-                    $this->scoringService->saveNV($akreditasi->id, $adminId, (int) $butirId, (int) $nvValue, false);
+                    $this->scoringService->saveNV($akreditasi->id, $adminId, (int) $butirId, (int) $nvValue, false, $reason);
                 } catch (\Throwable $e) {
                     $errors[] = "Butir #{$butirId}: " . $e->getMessage();
                 }
@@ -396,10 +417,10 @@ class AkreditasiDetailController extends Controller
         }
 
         if (! empty($errors)) {
-            return back()->with('warning', implode('; ', array_slice($errors, 0, 3)));
+            return back()->withInput()->with('warning', implode('; ', array_slice($errors, 0, 3)));
         }
 
-        return back()->with('success', 'Nilai Verifikasi berhasil disimpan.');
+        return back()->withInput()->with('success', 'Nilai Verifikasi berhasil disimpan.');
     }
 
     public function finalizeAllNv(Request $request, string $uuid)
@@ -412,11 +433,11 @@ class AkreditasiDetailController extends Controller
         Gate::authorize('akreditasi.approve');
 
         if ((int) $akreditasi->status !== 1) {
-            return back()->with('error', 'Finalisasi NV hanya dapat dilakukan saat status Validasi Admin.');
+            return back()->withInput()->with('error', 'Finalisasi NV hanya dapat dilakukan saat status Validasi Admin.');
         }
 
         if (empty($akreditasi->laporan_visitasi_asesor1)) {
-            return back()->with('error', 'NV belum dapat difinalisasi karena Laporan Visitasi Ketua Kelompok belum diunggah.');
+            return back()->withInput()->with('error', 'NV belum dapat difinalisasi karena Laporan Visitasi Ketua Kelompok belum diunggah.');
         }
 
         $request->validate([
@@ -448,24 +469,25 @@ class AkreditasiDetailController extends Controller
                 }
             });
         } catch (\DomainException $e) {
-            return back()->with('error', $e->getMessage());
+            return back()->withInput()->with('error', $e->getMessage());
         }
 
         if ($finalizedCount === 0) {
-            return back()->with('error', 'Tidak ada NV valid yang dikirim untuk difinalisasi.');
+            return back()->withInput()->with('error', 'Tidak ada NV valid yang dikirim untuk difinalisasi.');
         }
 
-        $expectedFinalCount = \App\Models\AkreditasiEdpm::where('akreditasi_id', $akreditasi->id)
-            ->whereNotNull('nk')
-            ->count();
+        $requiredNvQuery = \App\Models\AkreditasiEdpm::where('akreditasi_id', $akreditasi->id)
+            ->whereNotNull('nk');
 
-        $actualFinalCount = \App\Models\AkreditasiEdpm::where('akreditasi_id', $akreditasi->id)
+        $expectedFinalCount = (clone $requiredNvQuery)->count();
+
+        $actualFinalCount = (clone $requiredNvQuery)
             ->whereNotNull('nv')
             ->where('is_final', true)
             ->count();
 
         if ($actualFinalCount < $expectedFinalCount) {
-            return back()->with('error', "Finalisasi NV belum lengkap ({$actualFinalCount}/{$expectedFinalCount} butir). Lengkapi alasan perubahan NV dan semua nilai final terlebih dahulu.");
+            return back()->withInput()->with('error', "Finalisasi NV belum lengkap ({$actualFinalCount}/{$expectedFinalCount} butir). Lengkapi alasan perubahan NV dan semua nilai final terlebih dahulu.");
         }
 
         $akreditasi->update(['is_nv_final' => true]);
@@ -564,7 +586,7 @@ class AkreditasiDetailController extends Controller
         Gate::authorize('finalize', $akreditasi);
 
         if ((int) $akreditasi->status !== 1) {
-            return back()->with('warning', 'Akreditasi tidak berada pada status Validasi Admin.');
+            return back()->withInput($request->except('sertifikat_file'))->with('warning', 'Akreditasi tidak berada pada status Validasi Admin.');
         }
 
         $validated = $request->validate([
@@ -590,13 +612,13 @@ class AkreditasiDetailController extends Controller
             return redirect()->route('admin.akreditasi')->with('success', 'SK Akreditasi berhasil diterbitkan.');
         } catch (\App\Exceptions\ConflictException $e) {
             $this->cleanupStoredCertificate($sertifikatPath);
-            return back()->with('error', 'Akreditasi telah dimodifikasi oleh pengguna lain. Silakan muat ulang halaman.');
+            return back()->withInput($request->except('sertifikat_file'))->with('error', 'Akreditasi telah dimodifikasi oleh pengguna lain. Silakan muat ulang halaman.');
         } catch (\DomainException $e) {
             $this->cleanupStoredCertificate($sertifikatPath);
-            return back()->with('error', $e->getMessage());
+            return back()->withInput($request->except('sertifikat_file'))->with('error', $e->getMessage());
         } catch (\App\Exceptions\StaleStateException $e) {
             $this->cleanupStoredCertificate($sertifikatPath);
-            return back()->with('error', 'Akreditasi telah dimodifikasi oleh pengguna lain. Silakan muat ulang halaman.');
+            return back()->withInput($request->except('sertifikat_file'))->with('error', 'Akreditasi telah dimodifikasi oleh pengguna lain. Silakan muat ulang halaman.');
         }
     }
 
@@ -617,7 +639,7 @@ class AkreditasiDetailController extends Controller
         Gate::authorize('finalize', $akreditasi);
 
         if ((int) $akreditasi->status !== 1) {
-            return back()->with('warning', 'Akreditasi tidak berada pada status Validasi Admin.');
+            return back()->withInput()->with('warning', 'Akreditasi tidak berada pada status Validasi Admin.');
         }
 
         $validated = $request->validate([
@@ -645,9 +667,9 @@ class AkreditasiDetailController extends Controller
 
             return redirect()->route('admin.akreditasi')->with('success', 'Akreditasi telah ditolak.');
         } catch (\DomainException $e) {
-            return back()->with('error', $e->getMessage());
+            return back()->withInput()->with('error', $e->getMessage());
         } catch (\App\Exceptions\StaleStateException $e) {
-            return back()->with('error', 'Akreditasi telah dimodifikasi oleh pengguna lain. Silakan muat ulang halaman.');
+            return back()->withInput()->with('error', 'Akreditasi telah dimodifikasi oleh pengguna lain. Silakan muat ulang halaman.');
         }
     }
 

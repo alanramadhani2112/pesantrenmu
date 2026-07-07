@@ -25,12 +25,14 @@ class AdminFinalizeNvHttpTest extends TestCase
     {
         $setup = $this->createSetup();
 
-        $this->actingAs($setup['admin'])->post(route('admin.akreditasi-detail.finalize-nv', $setup['akreditasi']->uuid), [
+        $response = $this->actingAs($setup['admin'])->post(route('admin.akreditasi-detail.finalize-nv', $setup['akreditasi']->uuid), [
             'adminNvs' => [
                 $setup['butir']->id => 4,
             ],
             'nvReasons' => [],
         ]);
+
+        $response->assertSessionHasInput('adminNvs.'.$setup['butir']->id, 4);
 
         $this->assertDatabaseHas('akreditasi_edpms', [
             'akreditasi_id' => $setup['akreditasi']->id,
@@ -114,6 +116,40 @@ class AdminFinalizeNvHttpTest extends TestCase
                 'is_final' => false,
             ]);
         }
+        $this->assertFalse((bool) $setup['akreditasi']->fresh()->is_nv_final);
+    }
+
+    public function test_finalize_nv_completeness_ignores_final_rows_without_nk(): void
+    {
+        $setup = $this->createSetup();
+        $extraButir = MasterEdpmButir::create([
+            'komponen_id' => $setup['butir']->komponen_id,
+            'no_sk' => '2',
+            'nomor_butir' => '1.2',
+            'butir_pernyataan' => 'Butir tanpa NK',
+        ]);
+
+        AkreditasiEdpm::create([
+            'akreditasi_id' => $setup['akreditasi']->id,
+            'pesantren_id' => $setup['akreditasi']->user_id,
+            'asesor_id' => null,
+            'butir_id' => $extraButir->id,
+            'isian' => 3,
+            'nk' => null,
+            'is_final' => false,
+        ]);
+
+        $this->actingAs($setup['admin'])->post(route('admin.akreditasi-detail.finalize-nv', $setup['akreditasi']->uuid), [
+            'adminNvs' => [$extraButir->id => 4],
+            'nvReasons' => [],
+        ])->assertSessionHasInput('adminNvs.'.$extraButir->id, 4);
+
+        $this->assertDatabaseHas('akreditasi_edpms', [
+            'akreditasi_id' => $setup['akreditasi']->id,
+            'butir_id' => $setup['butir']->id,
+            'nv' => null,
+            'is_final' => false,
+        ]);
         $this->assertFalse((bool) $setup['akreditasi']->fresh()->is_nv_final);
     }
 

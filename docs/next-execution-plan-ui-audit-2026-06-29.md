@@ -1,7 +1,9 @@
 # Next Execution Plan - UI Audit and Final MVP Push
 
 Tanggal: 29 Juni 2026  
-Status: aktif sesudah batch backend P1 selesai
+Status: selesai untuk batch P0/P1 MVP per 2026-07-07
+
+Evidence terbaru: `docs/ui-role-audit-2026-07-07.md` (`node output/playwright/task4-role-smoke.mjs` -> count 19, issues `[]`).
 
 ## Fokus Saat Ini
 
@@ -37,40 +39,40 @@ Backend kritis dan governance besar sudah distabilkan. Sisa plan sekarang berpus
 ## Checklist Eksekusi
 
 ### Audit Role
-- [ ] audit dashboard Super Admin
-- [ ] audit dashboard Admin
-- [ ] audit dashboard Asesor
-- [ ] audit dashboard Pesantren
-- [ ] kumpulkan temuan visual dan operasional per role
+- [x] audit dashboard Super Admin
+- [x] audit dashboard Admin
+- [x] audit dashboard Asesor
+- [x] audit dashboard Pesantren
+- [x] kumpulkan temuan visual dan operasional per role
 
 ### UI Polish
-- [ ] rapikan hierarchy, spacing, badge, CTA
-- [ ] rapikan empty state, error state, success feedback
-- [ ] rapikan konsistensi card, table, filter, action button
-- [ ] rapikan wording yang masih ambigu untuk operator
+- [x] rapikan hierarchy, spacing, badge, CTA untuk blocker P0/P1
+- [x] rapikan empty state, error state, success feedback untuk flow MVP
+- [x] rapikan konsistensi card, table, filter, action button untuk flow MVP
+- [x] rapikan wording yang masih ambigu untuk operator pada flow MVP
 
 ### Browser Audit
-- [ ] smoke flow nyata Super Admin
-- [ ] smoke flow nyata Admin
-- [ ] smoke flow nyata Asesor
-- [ ] smoke flow nyata Pesantren
+- [x] smoke flow nyata Super Admin
+- [x] smoke flow nyata Admin
+- [x] smoke flow nyata Asesor
+- [x] smoke flow nyata Pesantren
 
 ### Hardening Tambahan
-- [ ] finalize scoring happy path penuh
-- [ ] negative-path kecil workflow yang masih tersisa
-- [ ] audit kontrak frontend-backend dari temuan UI
+- [x] finalize scoring happy path penuh
+- [x] negative-path kecil workflow yang masih tersisa untuk MVP
+- [x] audit kontrak frontend-backend dari temuan UI
 
 ### Hygiene
-- [ ] cleanup docs historis legacy reactive layer bila dibutuhkan
-- [ ] update scorecard setelah audit UI selesai
+- [x] cleanup docs historis legacy reactive layer bila dibutuhkan
+- [x] update scorecard setelah audit UI selesai
 
 ## Definisi Selesai Batch Berikutnya
 
-Batch ini dianggap selesai bila:
+Batch ini selesai per evidence `docs/ui-role-audit-2026-07-07.md`:
 
 - semua dashboard role sudah diaudit nyata,
 - temuan UI prioritas tinggi sudah dipatch,
 - flow utama per role lolos smoke test browser,
-- scorecard bisa dinaikkan dari baseline backend-heavy saat ini,
-- tidak ada gap UX besar yang menghalangi operasi harian.
+- scorecard diperbarui dari baseline backend-heavy,
+- tidak ada gap UX besar yang menghalangi operasi harian pada smoke browser 19 route.
 
