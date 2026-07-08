@@ -204,4 +204,136 @@ class HybridAccreditationFlowTest extends TestCase
                 ->count()
         );
     }
+
+    public function test_http_e2e_negative_path_blocks_invalid_actors_and_premature_transitions(): void
+    {
+        Storage::fake('public');
+        $this->seedBusinessFlowBase();
+
+        $pesantren = $this->createCompletePesantrenUser('hybrid.negative.pesantren@test.local');
+        $otherPesantren = $this->createCompletePesantrenUser('hybrid.negative.other@test.local');
+        $admin = $this->createUser('hybrid.negative.admin@test.local', 1, 'Hybrid Negative Admin');
+        $asesor1 = $this->createAsesorUser('hybrid.negative.asesor1@test.local', 'Hybrid Negative Asesor 1');
+        $asesor2 = $this->createAsesorUser('hybrid.negative.asesor2@test.local', 'Hybrid Negative Asesor 2');
+
+        $this->actingAs($pesantren)
+            ->post(route('pesantren.akreditasi.create'))
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $akreditasi = Akreditasi::where('user_id', $pesantren->id)->firstOrFail();
+        $this->assertSame(6, (int) $akreditasi->status);
+
+        $this->actingAs($asesor1)
+            ->post(route('admin.akreditasi-detail.open-for-review', $akreditasi->uuid))
+            ->assertForbidden();
+        $this->assertNoStatusChange($akreditasi, 6);
+        $this->assertNoTransitionAudit($akreditasi, 5);
+
+        $this->actingAs($admin)
+            ->post(route('admin.akreditasi-detail.approve-berkas', $akreditasi->uuid), [
+                'asesor1Id' => $asesor1->id,
+                'asesor2Id' => $asesor2->id,
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('error');
+        $this->assertNoStatusChange($akreditasi, 6);
+        $this->assertSame(0, Assessment::where('akreditasi_id', $akreditasi->id)->count());
+
+        $this->actingAs($admin)
+            ->post(route('admin.akreditasi-detail.open-for-review', $akreditasi->uuid))
+            ->assertRedirect()
+            ->assertSessionHas('success');
+        $this->assertSame(5, (int) $akreditasi->fresh()->status);
+
+        $this->actingAs($admin)
+            ->post(route('admin.akreditasi-detail.approve-berkas', $akreditasi->uuid), [
+                'asesor1Id' => $asesor1->id,
+                'asesor2Id' => $asesor1->id,
+            ])
+            ->assertRedirect()
+            ->assertSessionHasErrors('asesor2Id');
+        $this->assertNoStatusChange($akreditasi, 5);
+        $this->assertSame(0, Assessment::where('akreditasi_id', $akreditasi->id)->count());
+
+        $this->actingAs($admin)
+            ->post(route('admin.akreditasi-detail.approve-berkas', $akreditasi->uuid), [
+                'asesor1Id' => $asesor1->id,
+                'asesor2Id' => $asesor2->id,
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+        $this->assertSame(4, (int) $akreditasi->fresh()->status);
+
+        $visitasiStart = now()->addDays(8);
+        $schedulePayload = [
+            'akreditasi_id' => $akreditasi->id,
+            'tanggal_mulai' => $visitasiStart->toDateString(),
+            'tanggal_akhir' => $visitasiStart->copy()->addDay()->toDateString(),
+            'catatan' => '[HYBRID-NEGATIVE] Invalid actor schedule attempt.',
+        ];
+
+        $this->actingAs($asesor2)
+            ->post(route('asesor.akreditasi.schedule-visitasi'), $schedulePayload)
+            ->assertRedirect()
+            ->assertSessionHas('error');
+        $this->assertNoStatusChange($akreditasi, 4);
+        $this->assertNull($akreditasi->fresh()->tgl_visitasi);
+
+        $this->actingAs($asesor1)
+            ->post(route('asesor.akreditasi.schedule-visitasi'), $schedulePayload)
+            ->assertRedirect()
+            ->assertSessionHas('success');
+        $this->assertSame(3, (int) $akreditasi->fresh()->status);
+
+        $this->actingAs($asesor1)
+            ->post(route('asesor.akreditasi.confirm-visitasi-selesai'), [
+                'akreditasi_id' => $akreditasi->id,
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('error');
+        $this->assertNoStatusChange($akreditasi, 3);
+        $this->assertNull($akreditasi->fresh()->visitasi_confirmed_at);
+
+        $this->travelTo($visitasiStart);
+        $this->actingAs($asesor1)
+            ->post(route('asesor.akreditasi.confirm-visitasi-selesai'), [
+                'akreditasi_id' => $akreditasi->id,
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+        $this->travelBack();
+        $this->assertSame(2, (int) $akreditasi->fresh()->status);
+
+        $this->actingAs($otherPesantren)
+            ->post(route('pesantren.akreditasi.upload-kartu-kendali'), [
+                'akreditasi_id' => $akreditasi->id,
+                'kartu_kendali_file' => UploadedFile::fake()->create('wrong-owner-kartu-kendali.pdf', 10, 'application/pdf'),
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('error');
+        $this->assertNull($akreditasi->fresh()->kartu_kendali);
+        $this->assertSame([], Storage::disk('public')->allFiles('kartu_kendali'));
+
+        $this->actingAs($asesor1)
+            ->post(route('asesor.akreditasi.finalize-scoring'), [
+                'akreditasi_id' => $akreditasi->id,
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('error');
+        $this->assertNoStatusChange($akreditasi, 2);
+
+        $this->actingAs($admin)
+            ->post(route('admin.akreditasi-detail.approve', $akreditasi->uuid), [
+                'nomor_sk' => 'HYBRID/NEGATIVE/SK/001',
+                'masa_berlaku' => now()->toDateString(),
+                'masa_berlaku_akhir' => now()->addYears(5)->toDateString(),
+                'sertifikat_file' => UploadedFile::fake()->create('premature-sertifikat.pdf', 10, 'application/pdf'),
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('warning');
+        $this->assertNoStatusChange($akreditasi, 2);
+        $this->assertNull($akreditasi->fresh()->sertifikat_path);
+        $this->assertSame([], Storage::disk('public')->allFiles('akreditasi/sertifikat'));
+    }
 }

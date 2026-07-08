@@ -30,10 +30,10 @@ git diff --check
 
 | Check | Result |
 |---|---:|
-| HTTP hybrid E2E | PASS — 1 test, 66 assertions |
+| HTTP hybrid E2E | PASS — 2 tests, 113 assertions |
 | Browser smoke | PASS — 19 routes, issues `[]` |
-| Full PHPUnit suite | PASS — 3082 passed, 3 skipped, 58902 assertions |
-| Frontend build | PASS — Vite built in 3.85s |
+| Full PHPUnit suite | PASS — 3083 passed, 3 skipped, 59099 assertions |
+| Frontend build | PASS — Vite built in 3.76s |
 | Whitespace check | PASS — exit 0 |
 
 Non-blocking warning:
@@ -44,30 +44,40 @@ Browserslist: browsers data (caniuse-lite) is 7 months old.
 
 ## HTTP E2E Coverage
 
-`tests/Feature/E2E/HybridAccreditationFlowTest.php` validates the canonical accreditation path:
+`tests/Feature/E2E/HybridAccreditationFlowTest.php` validates the canonical accreditation path plus negative-path guardrails.
 
-1. Pesantren submits accreditation through `pesantren.akreditasi.create`.
-2. Admin opens review through `admin.akreditasi-detail.open-for-review`.
-3. Admin approves documents and assigns two assessors through `admin.akreditasi-detail.approve-berkas`.
-4. Ketua Kelompok schedules visitasi through `asesor.akreditasi.schedule-visitasi`.
-5. Ketua Kelompok confirms visitasi completion through `asesor.akreditasi.confirm-visitasi-selesai`.
-6. Asesor uploads individual report and group report through HTTP upload routes.
-7. Pesantren uploads kartu kendali through `pesantren.akreditasi.upload-kartu-kendali`.
-8. Asesor finalizes scoring through `asesor.akreditasi.finalize-scoring`.
-9. Admin saves draft NV through `admin.akreditasi-detail.save-nv`.
-10. Admin finalizes all NV through `admin.akreditasi-detail.finalize-nv`.
-11. Admin issues SK through `admin.akreditasi-detail.approve`.
-12. Pesantren can load the final detail/result page.
+### Happy Path Result Table
 
-Key assertions:
+| # | Step | Actor | Route/Action | Expected Result | Test Result |
+|---:|---|---|---|---|---|
+| 1 | Submit pengajuan | Pesantren | `pesantren.akreditasi.create` | Status `6 Pengajuan`; pesantren data locked | PASS |
+| 2 | Open review | Admin | `admin.akreditasi-detail.open-for-review` | Status `5 Verifikasi Berkas` | PASS |
+| 3 | Approve berkas + assign asesor | Admin | `admin.akreditasi-detail.approve-berkas` | Status `4 Review Asesor`; two assessments created | PASS |
+| 4 | Schedule visitasi | Ketua Kelompok | `asesor.akreditasi.schedule-visitasi` | Status `3 Visitasi`; visitasi dates saved | PASS |
+| 5 | Confirm visitasi selesai | Ketua Kelompok | `asesor.akreditasi.confirm-visitasi-selesai` | Status `2 Penilaian Pasca Visitasi` | PASS |
+| 6 | Upload laporan individu | Asesor 1 + Asesor 2 | `asesor.akreditasi.upload-laporan-individu` | Both individual report files stored | PASS |
+| 7 | Upload laporan kelompok | Ketua Kelompok | `asesor.akreditasi.upload-laporan-kelompok` | Group report file stored | PASS |
+| 8 | Upload kartu kendali | Pesantren | `pesantren.akreditasi.upload-kartu-kendali` | Kartu kendali file stored | PASS |
+| 9 | Seed complete scoring | Test fixture | DB scoring rows | NA/NK/catatan prerequisites complete | PASS |
+| 10 | Finalize scoring | Ketua Kelompok | `asesor.akreditasi.finalize-scoring` | Status `1 Validasi Admin` | PASS |
+| 11 | Save draft NV | Admin | `admin.akreditasi-detail.save-nv` | Draft NV saved; global final flag remains false | PASS |
+| 12 | Finalize NV | Admin | `admin.akreditasi-detail.finalize-nv` | All required NV final; `is_nv_final = true` | PASS |
+| 13 | Issue SK | Admin | `admin.akreditasi-detail.approve` | Status `0 Selesai`; SK/certificate/score/predicate persisted | PASS |
+| 14 | View final result | Pesantren | `pesantren.akreditasi-detail?tab=hasil` | Final result visible; raw `NV`/`NK` admin routes hidden | PASS |
+| 15 | Audit trail | System | `akreditasi_audit_logs` | Status-change audit logs exist | PASS |
 
-- Status transitions reach `0 Selesai`.
-- Pesantren data locks after submission.
-- Two assessments are created.
-- Upload routes store files and set DB fields.
-- NV final flag becomes true only after finalization.
-- SK fields, score, and predicate are persisted.
-- Status-change audit logs exist.
+### Negative Path Result Table
+
+| # | Scenario | Actor | Route/Action | Expected Guardrail | Test Result |
+|---:|---|---|---|---|---|
+| 1 | Non-admin opens admin review | Asesor | `admin.akreditasi-detail.open-for-review` | Request forbidden; status stays `6`; no transition audit | PASS |
+| 2 | Admin approves berkas too early | Admin | `admin.akreditasi-detail.approve-berkas` while status `6` | Error returned; status stays `6`; no assessments created | PASS |
+| 3 | Duplicate asesor assignment | Admin | `admin.akreditasi-detail.approve-berkas` with same asesor twice | Validation error on `asesor2Id`; status stays `5`; no assessments created | PASS |
+| 4 | Asesor 2 schedules visitasi | Asesor 2 | `asesor.akreditasi.schedule-visitasi` | Error returned; status stays `4`; visitasi date remains null | PASS |
+| 5 | Confirm visitasi before start date | Ketua Kelompok | `asesor.akreditasi.confirm-visitasi-selesai` | Error returned; status stays `3`; confirmation timestamp remains null | PASS |
+| 6 | Non-owner uploads kartu kendali | Other Pesantren | `pesantren.akreditasi.upload-kartu-kendali` | Error returned; DB field remains null; uploaded temp file deleted | PASS |
+| 7 | Finalize scoring before package complete | Ketua Kelompok | `asesor.akreditasi.finalize-scoring` | Error returned; status stays `2` | PASS |
+| 8 | Issue SK before Validasi Admin/NV completion | Admin | `admin.akreditasi-detail.approve` | Warning returned; status stays `2`; certificate file not stored | PASS |
 
 ## Browser Smoke Coverage
 
