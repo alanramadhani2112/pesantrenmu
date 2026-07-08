@@ -59,19 +59,33 @@ class RolePermissionController extends Controller
         $roles = Role::where('id', '!=', 4)->get();
         $permissionKeys = Permission::pluck('key', 'id');
 
-        DB::transaction(function () use ($roles, $matrixInput, $permissionKeys) {
+        $visiblePermissionIds = collect($request->input('visible_permission_ids', []))
+            ->map(fn ($id) => (int) $id)
+            ->all();
+        $hasVisibleScope = ! empty($visiblePermissionIds);
+
+        DB::transaction(function () use ($roles, $matrixInput, $permissionKeys, $visiblePermissionIds, $hasVisibleScope) {
             $actor = auth()->user();
 
             foreach ($roles as $role) {
                 $before = $role->permissions()->pluck('permissions.id')->all();
 
-                $newGranted = collect($matrixInput[$role->id] ?? [])
+                $checkedVisible = collect($matrixInput[$role->id] ?? [])
                     ->keys()
                     ->map(fn ($v) => (int) $v)
                     ->all();
 
-                // Only sync if changed
-                if (array_diff($before, $newGranted) || array_diff($newGranted, $before)) {
+                $newGranted = $hasVisibleScope
+                    ? array_values(array_unique(array_merge(
+                        array_diff($before, $visiblePermissionIds),
+                        $checkedVisible
+                    )))
+                    : $checkedVisible;
+
+                sort($before);
+                sort($newGranted);
+
+                if ($before !== $newGranted) {
                     $role->permissions()->sync($newGranted);
 
                     $added = array_diff($newGranted, $before);

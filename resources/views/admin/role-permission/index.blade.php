@@ -39,6 +39,9 @@
         {{-- Matrix Table --}}
         <form id="matrix-form" method="POST" action="{{ route('admin.role-permission.save') }}">
             @csrf
+            @foreach($permissions as $permission)
+                <input type="hidden" name="visible_permission_ids[]" value="{{ $permission->id }}">
+            @endforeach
 
             <div class="table-responsive">
                 <table class="table table-bordered table-sm align-middle">
