@@ -80,6 +80,26 @@ class DocumentDownloadAuthorizationTest extends TestCase
             ->assertOk();
     }
 
+    public function test_admin_and_super_admin_can_download_inactive_document_without_category(): void
+    {
+        Storage::fake('local');
+        $this->seedBasePermissions();
+        $document = Document::create([
+            'title' => 'Inactive Legacy Document',
+            'status' => 0,
+            'file_path' => 'documents/inactive-legacy.pdf',
+        ]);
+        Storage::disk('local')->put($document->file_path, 'legacy');
+
+        foreach ([1, 4] as $roleId) {
+            $user = User::factory()->create(['role_id' => $roleId, 'email_verified_at' => now()]);
+
+            $this->actingAs($user)
+                ->get(route('documents.download', $document))
+                ->assertOk();
+        }
+    }
+
     public function test_legacy_public_disk_file_downloads_through_authenticated_route(): void
     {
         Storage::fake('local');

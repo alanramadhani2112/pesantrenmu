@@ -61,24 +61,26 @@ class DocumentController extends Controller
         abort_unless($user, 403);
 
         $document->loadMissing('category');
-        abort_unless((int) $document->status === 1, 404);
-        abort_unless($document->category?->is_active, 404);
 
-        $visibility = $document->category->visibility;
-        $allowed = match (true) {
-            $user->canAccessAdminArea() => true,
-            $user->isAsesor() => in_array($visibility, [
-                DocumentCategory::VISIBILITY_PUBLIC,
-                DocumentCategory::VISIBILITY_ASESOR_SECRET,
-            ], true),
-            $user->isPesantren() => in_array($visibility, [
-                DocumentCategory::VISIBILITY_PUBLIC,
-                DocumentCategory::VISIBILITY_PESANTREN_SECRET,
-            ], true),
-            default => false,
-        };
+        if (! $user->canAccessAdminArea()) {
+            abort_unless((int) $document->status === 1, 404);
+            abort_unless($document->category?->is_active, 404);
 
-        abort_unless($allowed, 403);
+            $visibility = $document->category->visibility;
+            $allowed = match (true) {
+                $user->isAsesor() => in_array($visibility, [
+                    DocumentCategory::VISIBILITY_PUBLIC,
+                    DocumentCategory::VISIBILITY_ASESOR_SECRET,
+                ], true),
+                $user->isPesantren() => in_array($visibility, [
+                    DocumentCategory::VISIBILITY_PUBLIC,
+                    DocumentCategory::VISIBILITY_PESANTREN_SECRET,
+                ], true),
+                default => false,
+            };
+
+            abort_unless($allowed, 403);
+        }
 
         $disk = Storage::disk('local')->exists($document->file_path) ? 'local' : 'public';
         abort_unless(Storage::disk($disk)->exists($document->file_path), 404);

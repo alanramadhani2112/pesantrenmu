@@ -68,7 +68,9 @@ class DocumentService
 
         try {
             if ($id) {
-                $this->documentRepository->update($id, $payload);
+                if (! $this->documentRepository->update($id, $payload)) {
+                    throw new \RuntimeException('Document update failed.');
+                }
             } else {
                 $this->documentRepository->create($payload);
             }
@@ -96,6 +98,10 @@ class DocumentService
             return false;
         }
 
+        if (! $this->documentRepository->delete($id)) {
+            return false;
+        }
+
         if ($doc->file_path) {
             foreach (['local', 'public'] as $disk) {
                 if (Storage::disk($disk)->exists($doc->file_path)) {
@@ -104,7 +110,7 @@ class DocumentService
             }
         }
 
-        return $this->documentRepository->delete($id);
+        return true;
     }
 
     public function getActiveDocuments(

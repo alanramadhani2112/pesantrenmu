@@ -222,10 +222,49 @@ class DocumentServiceTest extends TestCase
             $this->assertSame('update fail', $e->getMessage());
         }
 
+        Storage::disk('local')->assertDirectoryEmpty('documents');
         Storage::disk('public')->assertExists('documents/old.pdf');
         $files = Storage::disk('public')->allFiles('documents');
         $this->assertCount(1, $files);
         $this->assertSame('documents/old.pdf', $files[0]);
+    }
+
+    public function test_save_document_deletes_new_local_file_when_repository_update_returns_false(): void
+    {
+        Storage::disk('public')->put('documents/old.pdf', 'old content');
+
+        $doc = Document::create([
+            'title' => 'Doc',
+            'status' => 1,
+            'category_id' => $this->category->id,
+            'file_path' => 'documents/old.pdf',
+        ]);
+
+        $repo = Mockery::mock(DocumentRepositoryInterface::class);
+        $repo->shouldReceive('getPaginatedDocuments')->zeroOrMoreTimes();
+        $repo->shouldReceive('find')->with($doc->id)->andReturn($doc);
+        $repo->shouldReceive('update')->once()->andReturn(false);
+        $repo->shouldReceive('create')->zeroOrMoreTimes();
+        $repo->shouldReceive('delete')->zeroOrMoreTimes();
+        $repo->shouldReceive('getActiveForRole')->zeroOrMoreTimes();
+        $this->app->instance(DocumentRepositoryInterface::class, $repo);
+
+        $service = app(DocumentService::class);
+        $file = UploadedFile::fake()->create('new.pdf', 50, 'application/pdf');
+
+        try {
+            $service->saveDocument([
+                'title' => 'Doc',
+                'status' => 1,
+                'category_id' => $this->category->id,
+            ], $doc->id, $file);
+            $this->fail('Expected RuntimeException was not thrown.');
+        } catch (\RuntimeException $e) {
+            $this->assertSame('Document update failed.', $e->getMessage());
+        }
+
+        Storage::disk('local')->assertDirectoryEmpty('documents');
+        Storage::disk('public')->assertExists('documents/old.pdf');
     }
     // ─── deleteDocument ───────────────────────────────────────────────────────
 
@@ -245,6 +284,30 @@ class DocumentServiceTest extends TestCase
         $this->assertTrue($result);
         $this->assertDatabaseMissing('documents', ['id' => $doc->id]);
         Storage::disk('public')->assertMissing('documents/todelete.pdf');
+    }
+
+    public function test_delete_document_keeps_file_when_repository_delete_fails(): void
+    {
+        Storage::disk('public')->put('documents/keep.pdf', 'content');
+
+        $doc = Document::create([
+            'title' => 'Keep File',
+            'status' => 1,
+            'category_id' => $this->category->id,
+            'file_path' => 'documents/keep.pdf',
+        ]);
+
+        $repo = Mockery::mock(DocumentRepositoryInterface::class);
+        $repo->shouldReceive('getPaginatedDocuments')->zeroOrMoreTimes();
+        $repo->shouldReceive('find')->with($doc->id)->andReturn($doc);
+        $repo->shouldReceive('delete')->once()->with($doc->id)->andReturn(false);
+        $repo->shouldReceive('create')->zeroOrMoreTimes();
+        $repo->shouldReceive('update')->zeroOrMoreTimes();
+        $repo->shouldReceive('getActiveForRole')->zeroOrMoreTimes();
+        $this->app->instance(DocumentRepositoryInterface::class, $repo);
+
+        $this->assertFalse(app(DocumentService::class)->deleteDocument($doc->id));
+        Storage::disk('public')->assertExists('documents/keep.pdf');
     }
 
     public function test_delete_document_returns_false_for_nonexistent(): void
