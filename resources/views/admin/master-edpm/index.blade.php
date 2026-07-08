@@ -105,7 +105,7 @@
                     <x-ui.section-card :title="$komponen->nama" class="spm-edpm-component-card">
                         <x-slot name="toolbar">
                             <x-ui.button variant="light" size="sm" icon="plus"
-                                         x-on:click="openButirModal({{ $komponen->id }})">
+                                         x-on:click="openButirModal({{ \Illuminate\Support\Js::from($komponen->id) }})">
                                 Tambah Butir
                             </x-ui.button>
 
@@ -152,7 +152,7 @@
                                                     icon="pencil"
                                                     label="Edit Butir"
                                                     variant="primary"
-                                                    x-on:click="openButirModal({{ $komponen->id }}, {{ $butir->id }}, '{{ addslashes($butir->no_sk ?? '') }}', '{{ addslashes($butir->nomor_butir) }}', `{{ addslashes($butir->butir_pernyataan) }}`)"
+                                                    x-on:click="openButirModal({{ \Illuminate\Support\Js::from($komponen->id) }}, {{ \Illuminate\Support\Js::from($butir->id) }}, {{ \Illuminate\Support\Js::from($butir->no_sk ?? '') }}, {{ \Illuminate\Support\Js::from($butir->nomor_butir) }}, {{ \Illuminate\Support\Js::from($butir->butir_pernyataan) }})"
                                                 />
 
                                                 <form method="POST" action="{{ route('admin.master-edpm.butir.destroy', $butir->id) }}" class="d-inline"
