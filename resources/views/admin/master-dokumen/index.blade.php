@@ -81,7 +81,7 @@
                         <td class="text-end">
                             <div class="d-flex align-items-center justify-content-end gap-2">
                                 @if($doc->file_path)
-                                    <a href="{{ Storage::url($doc->file_path) }}" target="_blank" class="btn btn-icon btn-sm btn-light-info" title="Download">
+                                    <a href="{{ route('documents.download', $doc) }}" target="_blank" class="btn btn-icon btn-sm btn-light-info" title="Download">
                                         <i class="ki-outline ki-cloud-download fs-6"></i>
                                     </a>
                                 @endif

@@ -31,6 +31,7 @@ class DocumentServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Storage::fake('local');
         Storage::fake('public');
         $this->seed(RoleSeeder::class);
         $this->admin = User::factory()->create(['role_id' => 1]);
@@ -74,7 +75,24 @@ class DocumentServiceTest extends TestCase
         $doc = Document::where('title', 'Template PDF')->first();
         $this->assertNotNull($doc);
         $this->assertNotNull($doc->file_path);
-        Storage::disk('public')->assertExists($doc->file_path);
+        Storage::disk('local')->assertExists($doc->file_path);
+        Storage::disk('public')->assertMissing($doc->file_path);
+    }
+
+    public function test_save_document_stores_new_uploads_on_private_local_disk(): void
+    {
+        $file = UploadedFile::fake()->create('private-template.pdf', 10, 'application/pdf');
+
+        $this->service->saveDocument([
+            'title' => 'Private Template',
+            'status' => 1,
+            'category_id' => $this->category->id,
+            'description' => 'Private',
+        ], null, $file);
+
+        $path = Document::where('title', 'Private Template')->firstOrFail()->file_path;
+        Storage::disk('local')->assertExists($path);
+        Storage::disk('public')->assertMissing($path);
     }
 
     public function test_save_document_sets_uploaded_by_user_id(): void
@@ -133,9 +151,10 @@ class DocumentServiceTest extends TestCase
 
         // Old file deleted
         Storage::disk('public')->assertMissing('documents/old.pdf');
-        // New file stored
+        // New file stored privately
         $updated = Document::find($doc->id);
-        Storage::disk('public')->assertExists($updated->file_path);
+        Storage::disk('local')->assertExists($updated->file_path);
+        Storage::disk('public')->assertMissing($updated->file_path);
     }
 
 
@@ -164,6 +183,7 @@ class DocumentServiceTest extends TestCase
             $this->assertSame('db fail', $e->getMessage());
         }
 
+        Storage::disk('local')->assertDirectoryEmpty('documents');
         Storage::disk('public')->assertDirectoryEmpty('documents');
         $this->assertDatabaseMissing('documents', ['title' => 'Broken Doc']);
     }

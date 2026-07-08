@@ -68,7 +68,7 @@
 
                         <td class="text-end spm-action-cell">
                             <x-ui.button
-                                :href="Storage::url($document->file_path)"
+                                :href="route('documents.download', $document)"
                                 target="_blank"
                                 variant="light-primary"
                                 size="sm"

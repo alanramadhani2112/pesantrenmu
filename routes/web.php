@@ -49,9 +49,14 @@ Route::middleware(['auth', 'verified', 'permission:account.view'])
         Route::post('/unlink-sso', [App\Http\Controllers\Admin\AccountController::class, 'unlinkSso'])->name('unlink-sso');
     });
 
-Route::get('documents/{doc?}', [App\Http\Controllers\DocumentController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('documents.index');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('documents/{document}/download', [App\Http\Controllers\DocumentController::class, 'download'])
+        ->whereNumber('document')
+        ->name('documents.download');
+
+    Route::get('documents/{doc?}', [App\Http\Controllers\DocumentController::class, 'index'])
+        ->name('documents.index');
+});
 
 /*
 |--------------------------------------------------------------------------

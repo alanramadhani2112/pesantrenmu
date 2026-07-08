@@ -60,7 +60,7 @@ class DocumentService
 
         if ($newFile) {
             $existingPath = $id ? $this->findDocument($id)?->file_path : null;
-            $newPath = $newFile->store('documents', 'public');
+            $newPath = $newFile->store('documents', 'local');
             $payload['file_path'] = $newPath;
             $payload['uploaded_by_user_id'] = Auth::id();
             $payload['uploaded_by_role'] = Auth::user()?->role_id;
@@ -73,15 +73,19 @@ class DocumentService
                 $this->documentRepository->create($payload);
             }
         } catch (\Throwable $e) {
-            if ($newPath && Storage::disk('public')->exists($newPath)) {
-                Storage::disk('public')->delete($newPath);
+            if ($newPath && Storage::disk('local')->exists($newPath)) {
+                Storage::disk('local')->delete($newPath);
             }
 
             throw $e;
         }
 
-        if ($newPath && $existingPath && Storage::disk('public')->exists($existingPath)) {
-            Storage::disk('public')->delete($existingPath);
+        if ($newPath && $existingPath) {
+            foreach (['local', 'public'] as $disk) {
+                if (Storage::disk($disk)->exists($existingPath)) {
+                    Storage::disk($disk)->delete($existingPath);
+                }
+            }
         }
     }
 
@@ -92,8 +96,12 @@ class DocumentService
             return false;
         }
 
-        if ($doc->file_path && Storage::disk('public')->exists($doc->file_path)) {
-            Storage::disk('public')->delete($doc->file_path);
+        if ($doc->file_path) {
+            foreach (['local', 'public'] as $disk) {
+                if (Storage::disk($disk)->exists($doc->file_path)) {
+                    Storage::disk($disk)->delete($doc->file_path);
+                }
+            }
         }
 
         return $this->documentRepository->delete($id);

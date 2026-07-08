@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Document;
+use App\Models\DocumentCategory;
 use App\Services\DocumentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class DocumentController extends Controller
 {
@@ -50,5 +53,36 @@ class DocumentController extends Controller
         }
 
         return view('documents.index', compact('documents', 'search', 'perPage', 'doc', 'pageTitle'));
+    }
+
+    public function download(Document $document)
+    {
+        $user = auth()->user();
+        abort_unless($user, 403);
+
+        $document->loadMissing('category');
+        abort_unless((int) $document->status === 1, 404);
+        abort_unless($document->category?->is_active, 404);
+
+        $visibility = $document->category->visibility;
+        $allowed = match (true) {
+            $user->canAccessAdminArea() => true,
+            $user->isAsesor() => in_array($visibility, [
+                DocumentCategory::VISIBILITY_PUBLIC,
+                DocumentCategory::VISIBILITY_ASESOR_SECRET,
+            ], true),
+            $user->isPesantren() => in_array($visibility, [
+                DocumentCategory::VISIBILITY_PUBLIC,
+                DocumentCategory::VISIBILITY_PESANTREN_SECRET,
+            ], true),
+            default => false,
+        };
+
+        abort_unless($allowed, 403);
+
+        $disk = Storage::disk('local')->exists($document->file_path) ? 'local' : 'public';
+        abort_unless(Storage::disk($disk)->exists($document->file_path), 404);
+
+        return Storage::disk($disk)->download($document->file_path, basename($document->file_path));
     }
 }
