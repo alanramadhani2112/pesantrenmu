@@ -113,7 +113,7 @@
                                 icon="pencil"
                                 label="Edit Komponen"
                                 variant="primary"
-                                x-on:click="openKomponenModal({{ $komponen->id }}, '{{ addslashes($komponen->nama) }}', {{ $komponen->ipr ? 'true' : 'false' }})"
+                                x-on:click="openKomponenModal({{ \Illuminate\Support\Js::from($komponen->id) }}, {{ \Illuminate\Support\Js::from($komponen->nama) }}, {{ \Illuminate\Support\Js::from((bool) $komponen->ipr) }})"
                             />
 
                             <form method="POST" action="{{ route('admin.master-edpm.komponen.destroy', $komponen->id) }}" class="d-inline"

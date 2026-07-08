@@ -45,4 +45,28 @@ class MasterEdpmSecurityTest extends TestCase
         $this->assertStringNotContainsString('`);window.__xss=1;//', $handler);
         $this->assertStringContainsString('\\u0027x\\u0027', $handler);
     }
+
+    public function test_master_edpm_component_edit_button_serializes_js_sensitive_name_safely(): void
+    {
+        $this->seed(RoleSeeder::class);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RolePermissionSeeder::class);
+
+        $admin = User::factory()->create(['role_id' => 1, 'email_verified_at' => now()]);
+        $payload = "Komponen ' quote\nnext ` \${alert('k')} \" double";
+        $komponen = MasterEdpmKomponen::create(['nama' => $payload, 'ipr' => false]);
+
+        $html = $this->actingAs($admin)
+            ->get(route('admin.master-edpm'))
+            ->assertOk()
+            ->getContent();
+
+        preg_match('/x-on:click="(openKomponenModal\(' . $komponen->id . ',.*?\))"/s', $html, $matches);
+        $this->assertNotEmpty($matches, 'Expected component edit-button handler to be present.');
+
+        $handler = html_entity_decode($matches[1], ENT_QUOTES);
+
+        $this->assertStringNotContainsString("\n", $handler);
+        $this->assertStringContainsString('\\u0027k\\u0027', $handler);
+    }
 }
