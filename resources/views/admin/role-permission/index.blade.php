@@ -39,6 +39,7 @@
         {{-- Matrix Table --}}
         <form id="matrix-form" method="POST" action="{{ route('admin.role-permission.save') }}">
             @csrf
+            <input type="hidden" name="visible_permission_scope" value="1">
             @foreach($permissions as $permission)
                 <input type="hidden" name="visible_permission_ids[]" value="{{ $permission->id }}">
             @endforeach
