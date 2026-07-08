@@ -57,23 +57,25 @@
                         <td><code>{{ $role->parameter }}</code></td>
                         <td class="text-end">
                             <div class="d-flex align-items-center justify-content-end gap-2">
-                                <x-ui.icon-button
-                                    icon="pencil"
-                                    label="Edit"
-                                    variant="primary"
-                                    x-on:click="openEditModal({{ $role->id }}, '{{ addslashes($role->name) }}', '{{ addslashes($role->parameter) }}')"
-                                />
-                                <form method="POST" action="{{ route('admin.roles.destroy', $role->id) }}" class="d-inline"
-                                      x-on:submit.prevent="confirmDelete($event)">
-                                    @csrf
-                                    @method('DELETE')
+                                @if(! in_array($role->id, [1, 2, 3, 4], true))
                                     <x-ui.icon-button
-                                        type="submit"
-                                        icon="trash"
-                                        label="Hapus"
-                                        variant="danger"
+                                        icon="pencil"
+                                        label="Edit"
+                                        variant="primary"
+                                        x-on:click="openEditModal({{ $role->id }}, '{{ addslashes($role->name) }}', '{{ addslashes($role->parameter) }}')"
                                     />
-                                </form>
+                                    <form method="POST" action="{{ route('admin.roles.destroy', $role->id) }}" class="d-inline"
+                                          x-on:submit.prevent="confirmDelete($event)">
+                                        @csrf
+                                        @method('DELETE')
+                                        <x-ui.icon-button
+                                            type="submit"
+                                            icon="trash"
+                                            label="Hapus"
+                                            variant="danger"
+                                        />
+                                    </form>
+                                @endif
                             </div>
                         </td>
                     </tr>

@@ -19,8 +19,10 @@ class RoleController extends Controller
 
         $search = $request->input('search', '');
         $perPage = $request->integer('perPage', 10);
-        $sortField = $request->input('sortField', 'id');
-        $sortAsc = $request->input('sortAsc', 'false') === 'true';
+        $sortField = $request->input('sort', $request->input('sortField', 'id'));
+        $sortField = in_array($sortField, ['id', 'name', 'parameter'], true) ? $sortField : 'id';
+        $direction = $request->input('direction');
+        $sortAsc = $direction ? $direction === 'asc' : ($request->input('sortAsc', 'false') === 'true');
 
         $roles = $this->service->getPaginatedRoles($search, $perPage, $sortField, $sortAsc);
 
