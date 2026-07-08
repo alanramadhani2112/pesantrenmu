@@ -62,7 +62,7 @@ class RolePermissionController extends Controller
         $visiblePermissionIds = collect($request->input('visible_permission_ids', []))
             ->map(fn ($id) => (int) $id)
             ->all();
-        $hasVisibleScope = $request->boolean('visible_permission_scope');
+        $hasVisibleScope = $request->boolean('visible_permission_scope') || $request->has('visible_permission_ids');
 
         DB::transaction(function () use ($roles, $matrixInput, $permissionKeys, $visiblePermissionIds, $hasVisibleScope) {
             $actor = auth()->user();

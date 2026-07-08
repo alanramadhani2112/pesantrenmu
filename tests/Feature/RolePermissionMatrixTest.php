@@ -25,7 +25,6 @@ class RolePermissionMatrixTest extends TestCase
         $adminRole->permissions()->sync([$visible->id, $hidden->id]);
 
         $this->actingAs($superAdmin)->post(route('admin.role-permission.save'), [
-            'visible_permission_scope' => '1',
             'visible_permission_ids' => [$visible->id],
             'matrix' => [
                 $adminRole->id => [$visible->id => 'on'],
