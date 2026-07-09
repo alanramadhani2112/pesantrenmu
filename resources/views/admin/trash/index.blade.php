@@ -123,7 +123,7 @@
                     <tr>
                         <td colspan="5">
                             <x-ui.empty-state
-                                title="Tidak ada akreditasi terhapus"
+                                title="Tidak ada akreditasi terhapus saat ini"
                                 description="Arsip kosong. Akreditasi yang dihapus akan tampil di sini selama masa retensi."
                                 icon="trash"
                                 class="py-15"
