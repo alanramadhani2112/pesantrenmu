@@ -1,0 +1,44 @@
+{
+  "project_name": "SPM Fix",
+  "created": "2026-07-09T17:17:36+00:00",
+  "updated": "2026-07-09T17:18:05+00:00",
+  "next_tc_number": 2,
+  "records": [
+    {
+      "tc_id": "TC-001-07-10-26-ui-polish-metronic",
+      "title": "Polish Metronic UI per role",
+      "status": "in_progress",
+      "scope": "refactor",
+      "priority": "high",
+      "created": "2026-07-09T17:17:36+00:00",
+      "updated": "2026-07-09T17:18:05+00:00",
+      "path": "records/TC-001-07-10-26-ui-polish-metronic/tc_record.json"
+    }
+  ],
+  "statistics": {
+    "total": 1,
+    "by_status": {
+      "planned": 0,
+      "in_progress": 1,
+      "blocked": 0,
+      "implemented": 0,
+      "tested": 0,
+      "deployed": 0
+    },
+    "by_scope": {
+      "feature": 0,
+      "bugfix": 0,
+      "refactor": 1,
+      "infrastructure": 0,
+      "documentation": 0,
+      "hotfix": 0,
+      "enhancement": 0
+    },
+    "by_priority": {
+      "critical": 0,
+      "high": 1,
+      "medium": 0,
+      "low": 0
+    }
+  }
+}

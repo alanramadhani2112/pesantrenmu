@@ -121,9 +121,13 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="text-center text-muted py-8">
-                            <x-ui.icon name="trash" class="fs-2x text-muted mb-2" />
-                            <div>Tidak ada akreditasi terhapus saat ini.</div>
+                        <td colspan="5">
+                            <x-ui.empty-state
+                                title="Tidak ada akreditasi terhapus"
+                                description="Arsip kosong. Akreditasi yang dihapus akan tampil di sini selama masa retensi."
+                                icon="trash"
+                                class="py-15"
+                            />
                         </td>
                     </tr>
                 @endforelse

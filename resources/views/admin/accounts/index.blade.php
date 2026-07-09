@@ -145,79 +145,73 @@
     </x-ui.index-layout>
 
     {{-- Create/Edit Modal --}}
-    <div x-show="showModal" x-cloak x-bind:class="{ 'show d-block': showModal }" class="modal fade" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <form :action="isEditing ? '{{ route('accounts.update', '__ID__') }}'.replace('__ID__', formData.id) : '{{ route('accounts.store') }}'" method="POST">
-                    @csrf
+    <x-ui.modal name="account-modal" :show="$errors->hasAny(['name', 'email', 'role_id', 'password', 'status', 'sso_sync_role'])" focusable>
+        <form :action="isEditing ? '{{ route('accounts.update', '__ID__') }}'.replace('__ID__', formData.id) : '{{ route('accounts.store') }}'" method="POST">
+            @csrf
+            <template x-if="isEditing">
+                <input type="hidden" name="_method" value="PUT">
+            </template>
+
+            <x-ui.modal-header
+                title="Kelola Akun"
+                subtitle="Atur data akun, role, status akses, dan opsi SSO."
+                icon="profile-user"
+            />
+
+            <x-ui.modal-body>
+                <div class="d-flex flex-column gap-4">
+                    <x-ui.form-field label="Nama" for="name" :error="$errors->get('name')" required>
+                        <x-ui.input name="name" id="name" x-model="formData.name" required autofocus />
+                    </x-ui.form-field>
+
+                    <x-ui.form-field label="Email" for="email" :error="$errors->get('email')" required>
+                        <x-ui.input type="email" name="email" id="email" x-model="formData.email" required />
+                    </x-ui.form-field>
+
+                    <x-ui.form-field label="Role" for="role_id" :error="$errors->get('role_id')" required>
+                        <x-ui.select name="role_id" id="role_id" x-model="formData.role_id" required>
+                            <option value="">Pilih Role</option>
+                            @foreach ($roles as $role)
+                                <option value="{{ $role->id }}">{{ $role->name }}</option>
+                            @endforeach
+                        </x-ui.select>
+                    </x-ui.form-field>
+
+                    <x-ui.form-field
+                        label="Password"
+                        for="password"
+                        :error="$errors->get('password')"
+                        hint="Kosongkan untuk membuat password otomatis saat tambah akun, atau bila password tidak diubah saat edit."
+                    >
+                        <x-ui.input type="password" name="password" id="password" x-model="formData.password" />
+                    </x-ui.form-field>
+
                     <template x-if="isEditing">
-                        <input type="hidden" name="_method" value="PUT">
+                        <x-ui.form-field hint="Jika aktif, role akan di-sync dari SSO saat login.">
+                            <div class="form-check form-switch form-check-custom form-check-solid">
+                                <input type="hidden" name="sso_sync_role" value="0">
+                                <input type="checkbox" name="sso_sync_role" id="sso_sync_role" class="form-check-input" value="1" x-model="formData.sso_sync_role">
+                                <label class="form-check-label fw-semibold text-gray-700" for="sso_sync_role">Sync role dari SSO</label>
+                            </div>
+                        </x-ui.form-field>
                     </template>
 
-                    <div class="modal-header">
-                        <h5 class="modal-title" x-text="isEditing ? 'Edit Akun' : 'Tambah Akun'"></h5>
-                        <button type="button" class="btn-close" x-on:click="showModal = false"></button>
-                    </div>
-
-                    <div class="modal-body">
-                        <div class="mb-4">
-                            <label class="form-label required" for="name">Nama</label>
-                            <input type="text" name="name" id="name" class="form-control" x-model="formData.name" required autofocus>
-                            @error('name') <div class="text-danger fs-7 mt-1">{{ $message }}</div> @enderror
+                    <x-ui.form-field>
+                        <div class="form-check form-switch form-check-custom form-check-solid">
+                            <input type="hidden" name="status" value="0">
+                            <input type="checkbox" name="status" id="status" class="form-check-input" value="1" x-model="formData.status">
+                            <label class="form-check-label fw-semibold text-gray-700" for="status">Status Aktif</label>
                         </div>
+                    </x-ui.form-field>
+                </div>
+            </x-ui.modal-body>
 
-                        <div class="mb-4">
-                            <label class="form-label required" for="email">Email</label>
-                            <input type="email" name="email" id="email" class="form-control" x-model="formData.email" required>
-                            @error('email') <div class="text-danger fs-7 mt-1">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label required" for="role_id">Role</label>
-                            <select name="role_id" id="role_id" class="form-select" x-model="formData.role_id" required>
-                                <option value="">Pilih Role</option>
-                                @foreach ($roles as $role)
-                                    <option value="{{ $role->id }}">{{ $role->name }}</option>
-                                @endforeach
-                            </select>
-                            @error('role_id') <div class="text-danger fs-7 mt-1">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label" for="password">Password</label>
-                            <input type="password" name="password" id="password" class="form-control" x-model="formData.password">
-                            <div class="form-text" x-text="isEditing ? 'Kosongkan bila password tidak diubah.' : 'Kosongkan untuk membuat password otomatis.'"></div>
-                            @error('password') <div class="text-danger fs-7 mt-1">{{ $message }}</div> @enderror
-                        </div>
-
-                        <template x-if="isEditing">
-                            <div class="mb-4">
-                                <div class="form-check">
-                                    <input type="hidden" name="sso_sync_role" value="0">
-                                    <input type="checkbox" name="sso_sync_role" id="sso_sync_role" class="form-check-input" value="1" x-model="formData.sso_sync_role">
-                                    <label class="form-check-label" for="sso_sync_role">Sync role dari SSO</label>
-                                </div>
-                                <div class="form-text">Jika aktif, role akan di-sync dari SSO saat login.</div>
-                            </div>
-                        </template>
-
-                        <div class="mb-4">
-                            <div class="form-check">
-                                <input type="hidden" name="status" value="0">
-                                <input type="checkbox" name="status" id="status" class="form-check-input" value="1" x-model="formData.status">
-                                <label class="form-check-label" for="status">Status Aktif</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" x-on:click="showModal = false">Batal</button>
-                        <button type="submit" class="btn btn-primary" x-text="isEditing ? 'Perbarui' : 'Simpan'"></button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+            <x-ui.modal-footer>
+                <x-ui.button type="button" variant="light" x-on:click="$dispatch('close')">Batal</x-ui.button>
+                <x-ui.button type="submit" variant="primary" x-text="isEditing ? 'Perbarui' : 'Simpan'"></x-ui.button>
+            </x-ui.modal-footer>
+        </form>
+    </x-ui.modal>
 
     {{-- Hidden forms for actions --}}
     <form id="toggle-status-form" method="POST" action="{{ route('accounts.toggle-status') }}" class="d-none">
@@ -255,7 +249,7 @@ function accountsPage() {
         openCreateModal() {
             this.isEditing = false;
             this.formData = { id: '', name: '', email: '', role_id: '', password: '', status: true, sso_sync_role: true };
-            this.showModal = true;
+            this.$dispatch('open-modal', 'account-modal');
         },
 
         openEditModal(user) {
@@ -269,7 +263,7 @@ function accountsPage() {
                 status: user.status == 1,
                 sso_sync_role: Boolean(user.sso_sync_role),
             };
-            this.showModal = true;
+            this.$dispatch('open-modal', 'account-modal');
         },
 
         confirmToggleStatus(userId, currentStatus, name) {

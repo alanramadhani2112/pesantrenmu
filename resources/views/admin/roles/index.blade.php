@@ -13,19 +13,13 @@
         </x-slot>
 
         {{-- Search --}}
-        <div class="d-flex align-items-center gap-3 mb-5">
-            <form method="GET" action="{{ route('admin.roles.index') }}" class="d-flex align-items-center gap-3 flex-grow-1">
-                <div class="position-relative flex-grow-1" style="max-width: 320px;">
-                    <input type="text" name="search" value="{{ $search }}" class="form-control form-control-sm ps-10"
-                           placeholder="Cari role..." x-on:input.debounce.400ms="$el.closest('form').submit()">
-                    <span class="position-absolute top-50 start-0 translate-middle-y ms-3">
-                        <i class="ki-outline ki-magnifier fs-6 text-muted"></i>
-                    </span>
-                </div>
+        <form method="GET" action="{{ route('admin.roles.index') }}" id="roles-filter-form" class="mb-5">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <x-datatable.search name="search" placeholder="Cari role..." :value="$search" form="roles-filter-form" />
                 <input type="hidden" name="sort" value="{{ $sortField }}">
                 <input type="hidden" name="direction" value="{{ $sortAsc ? 'asc' : 'desc' }}">
-            </form>
-        </div>
+            </div>
+        </form>
 
         {{-- Table --}}
         <x-ui.simple-table>
@@ -56,27 +50,28 @@
                         <td class="fw-semibold">{{ $role->name }}</td>
                         <td><code>{{ $role->parameter }}</code></td>
                         <td class="text-end">
-                            <div class="d-flex align-items-center justify-content-end gap-2">
-                                @if(! in_array($role->id, [1, 2, 3, 4], true))
-                                    <x-ui.icon-button
-                                        icon="pencil"
-                                        label="Edit"
+                            @if(! in_array($role->id, [1, 2, 3, 4], true))
+                                <x-ui.action-menu>
+                                    <x-ui.action-menu-item
                                         variant="primary"
                                         x-on:click="openEditModal({{ $role->id }}, '{{ addslashes($role->name) }}', '{{ addslashes($role->parameter) }}')"
-                                    />
-                                    <form method="POST" action="{{ route('admin.roles.destroy', $role->id) }}" class="d-inline"
-                                          x-on:submit.prevent="confirmDelete($event)">
-                                        @csrf
-                                        @method('DELETE')
-                                        <x-ui.icon-button
-                                            type="submit"
-                                            icon="trash"
-                                            label="Hapus"
-                                            variant="danger"
-                                        />
-                                    </form>
-                                @endif
-                            </div>
+                                    >
+                                        <x-ui.icon name="pencil" class="fs-5" />
+                                        Edit Role
+                                    </x-ui.action-menu-item>
+
+                                    <x-ui.action-menu-item
+                                        variant="danger"
+                                        data-delete-url="{{ route('admin.roles.destroy', $role->id) }}"
+                                        x-on:click="confirmDelete($el.dataset.deleteUrl)"
+                                    >
+                                        <x-ui.icon name="trash" class="fs-5" />
+                                        Hapus Role
+                                    </x-ui.action-menu-item>
+                                </x-ui.action-menu>
+                            @else
+                                <x-ui.badge variant="secondary">Role inti</x-ui.badge>
+                            @endif
                         </td>
                     </tr>
                 @empty
@@ -90,9 +85,14 @@
         </x-ui.simple-table>
 
         <div class="mt-5">
-            {{ $roles->links() }}
+            <x-ui.pagination :paginator="$roles" />
         </div>
     </x-ui.index-layout>
+
+    <form id="role-delete-form" method="POST" class="d-none">
+        @csrf
+        @method('DELETE')
+    </form>
 
     {{-- Modal Create/Edit --}}
     <x-ui.modal name="role-modal" focusable>
@@ -103,24 +103,20 @@
             </template>
 
             <x-ui.modal-header
-                x-bind:title="isEditing ? 'Edit Role' : 'Tambah Role'"
+                title="Kelola Role"
                 subtitle="Atur nama dan parameter role."
                 icon="security-user"
             />
 
             <x-ui.modal-body>
-                <div class="mb-5">
-                    <label class="form-label required" for="role_name">Nama Role</label>
-                    <input type="text" name="name" id="role_name" x-model="form.name"
-                           class="form-control" placeholder="Contoh: Admin" required>
-                    @error('name') <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
-                </div>
+                <div class="d-flex flex-column gap-4">
+                    <x-ui.form-field label="Nama Role" for="role_name" :error="$errors->get('name')" required>
+                        <x-ui.input name="name" id="role_name" x-model="form.name" placeholder="Contoh: Admin" required />
+                    </x-ui.form-field>
 
-                <div class="mb-0">
-                    <label class="form-label required" for="role_parameter">Parameter</label>
-                    <input type="text" name="parameter" id="role_parameter" x-model="form.parameter"
-                           class="form-control" placeholder="Contoh: admin" required>
-                    @error('parameter') <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
+                    <x-ui.form-field label="Parameter" for="role_parameter" :error="$errors->get('parameter')" required>
+                        <x-ui.input name="parameter" id="role_parameter" x-model="form.parameter" placeholder="Contoh: admin" required />
+                    </x-ui.form-field>
                 </div>
             </x-ui.modal-body>
 
@@ -177,21 +173,21 @@
                 e.target.submit();
             },
 
-            confirmDelete(e) {
-                if (typeof Swal !== 'undefined') {
-                    window.SpmSwal.confirm({
-                        title: 'Hapus role ini?',
-                        text: 'Tindakan ini tidak dapat dibatalkan.',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Ya, hapus',
-                        cancelButtonText: 'Batal',
-                    }).then((result) => {
-                        if (result.isConfirmed) e.target.submit();
-                    });
-                } else {
-                    if (confirm('Hapus role ini?')) e.target.submit();
-                }
+            confirmDelete(url) {
+                window.SpmSwal.confirm({
+                    title: 'Hapus role ini?',
+                    text: 'Tindakan ini tidak dapat dibatalkan.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, hapus',
+                    cancelButtonText: 'Batal',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const form = document.getElementById('role-delete-form');
+                        form.action = url;
+                        form.requestSubmit();
+                    }
+                });
             }
         };
     }

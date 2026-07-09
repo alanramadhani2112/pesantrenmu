@@ -13,28 +13,22 @@
         </x-slot>
 
         {{-- Filters --}}
-        <div class="d-flex align-items-center gap-3 mb-5 flex-wrap">
-            <form method="GET" action="{{ route('admin.role-permission.index') }}" class="d-flex align-items-center gap-3 flex-wrap">
-                <div class="position-relative" style="min-width: 240px;">
-                    <input type="text" name="search" value="{{ $search }}" class="form-control form-control-sm ps-10"
-                           placeholder="Cari permission..." x-on:input.debounce.400ms="$el.closest('form').submit()">
-                    <span class="position-absolute top-50 start-0 translate-middle-y ms-3">
-                        <i class="ki-outline ki-magnifier fs-6 text-muted"></i>
-                    </span>
-                </div>
+        <form method="GET" action="{{ route('admin.role-permission.index') }}" id="role-permission-filter-form" class="mb-5">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <x-datatable.search name="search" placeholder="Cari permission..." :value="$search" form="role-permission-filter-form" />
 
-                <select name="group" class="form-select form-select-sm" style="min-width: 180px;" onchange="this.form.submit()">
+                <x-ui.select name="group" size="sm" class="w-auto min-w-180px" onchange="this.form.submit()">
                     <option value="">Semua Group</option>
                     @foreach($groups as $group)
                         <option value="{{ $group }}" @selected($groupFilter === $group)>{{ ucfirst($group) }}</option>
                     @endforeach
-                </select>
-            </form>
+                </x-ui.select>
 
-            <div class="ms-auto text-muted fs-8">
-                {{ $permissions->count() }} permissions &middot; {{ $roles->count() }} roles
+                <div class="ms-auto text-muted fs-8">
+                    {{ $permissions->count() }} permissions &middot; {{ $roles->count() }} roles
+                </div>
             </div>
-        </div>
+        </form>
 
         {{-- Matrix Table --}}
         <form id="matrix-form" method="POST" action="{{ route('admin.role-permission.save') }}">
@@ -44,18 +38,17 @@
                 <input type="hidden" name="visible_permission_ids[]" value="{{ $permission->id }}">
             @endforeach
 
-            <div class="table-responsive">
-                <table class="table table-bordered table-sm align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-4 fw-semibold" style="min-width: 200px;">Permission</th>
-                            <th class="fw-semibold" style="min-width: 150px;">Label</th>
-                            @foreach($roles as $role)
-                                <th class="text-center fw-semibold" style="min-width: 100px;">{{ $role->name }}</th>
-                            @endforeach
-                        </tr>
-                    </thead>
-                    <tbody>
+            <x-ui.simple-table dense table-class="table-bordered table-sm">
+                <thead class="table-light">
+                    <tr>
+                        <x-ui.table-th class="ps-4" style="min-width: 200px;">Permission</x-ui.table-th>
+                        <x-ui.table-th style="min-width: 150px;">Label</x-ui.table-th>
+                        @foreach($roles as $role)
+                            <x-ui.table-th align="center" style="min-width: 100px;">{{ $role->name }}</x-ui.table-th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody>
                         @foreach($groupedPermissions as $group => $perms)
                             <tr class="table-secondary">
                                 <td colspan="{{ 2 + $roles->count() }}" class="ps-4 fw-semibold text-uppercase fs-8 text-muted py-2">
@@ -77,9 +70,8 @@
                                 </tr>
                             @endforeach
                         @endforeach
-                    </tbody>
-                </table>
-            </div>
+                </tbody>
+            </x-ui.simple-table>
         </form>
 
         @if($permissions->isEmpty())
