@@ -30,7 +30,7 @@
         + ($statusCounts['validasi'] ?? 0);
 @endphp
 
-<div data-admin-akreditasi-page="metronic" x-data="{}">
+<div data-admin-akreditasi-page="metronic" x-data="adminAkreditasiPage()">
     <x-slot name="header">{{ __('Akreditasi') }}</x-slot>
 
     <x-ui.index-layout
@@ -129,50 +129,32 @@
             </div>
         </div>
 
-        <div class="d-none">form-control form-control-solid</div>
-        <div class="d-none">
-            Pengajuan ({{ $statusCounts['pengajuan'] ?? 0 }})
-            Review Asesor ({{ $statusCounts['assessment'] ?? 0 }})
-            Visitasi & Penilaian Pasca Visitasi ({{ ($statusCounts['visitasi'] ?? 0) + ($statusCounts['pasca_visitasi'] ?? 0) }})
-        </div>
+        <form method="GET" action="{{ route('admin.akreditasi') }}" id="admin-akreditasi-filters" class="mb-5">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <x-datatable.search name="search" placeholder="Cari Pesantren..." :value="$search" form="admin-akreditasi-filters" />
+
+                <x-ui.select name="statusFilter" size="sm" class="w-auto min-w-280px" onchange="this.form.submit()">
+                    <option value="pengajuan" @selected($statusFilter === 'pengajuan')>Pengajuan ({{ $statusCounts['pengajuan'] ?? 0 }})</option>
+                    <option value="verifikasi" @selected($statusFilter === 'verifikasi')>Verifikasi Berkas ({{ $statusCounts['verifikasi'] ?? 0 }})</option>
+                    <option value="assessment" @selected($statusFilter === 'assessment')>Review Asesor ({{ $statusCounts['assessment'] ?? 0 }})</option>
+                    <option value="visitasi" @selected($statusFilter === 'visitasi')>Visitasi & Penilaian Pasca Visitasi ({{ ($statusCounts['visitasi'] ?? 0) + ($statusCounts['pasca_visitasi'] ?? 0) }})</option>
+                    <option value="validasi" @selected($statusFilter === 'validasi')>Validasi Admin ({{ $statusCounts['validasi'] ?? 0 }})</option>
+                    <option value="overdue" @selected($statusFilter === 'overdue')>Terlambat ({{ $statusCounts['overdue'] ?? 0 }})</option>
+                    <option value="" @selected($statusFilter === '')>Semua</option>
+                </x-ui.select>
+
+                <x-ui.select name="perPage" size="sm" class="w-auto" onchange="this.form.submit()">
+                    @foreach([10, 25, 50] as $pp)
+                        <option value="{{ $pp }}" @selected($perPage == $pp)>{{ $pp }}</option>
+                    @endforeach
+                </x-ui.select>
+
+                <input type="hidden" name="sortField" value="{{ $sortField }}">
+                <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
+            </div>
+        </form>
+
         <x-ui.simple-table>
-            <x-slot name="filters">
-                <div class="d-none">form-control form-control-solid</div>
-        <div class="d-none">
-            Pengajuan ({{ $statusCounts['pengajuan'] ?? 0 }})
-            Review Asesor ({{ $statusCounts['assessment'] ?? 0 }})
-            Visitasi & Penilaian Pasca Visitasi ({{ ($statusCounts['visitasi'] ?? 0) + ($statusCounts['pasca_visitasi'] ?? 0) }})
-        </div>
-                <form method="GET" action="{{ route('admin.akreditasi') }}" id="admin-akreditasi-filters" class="d-flex align-items-center gap-3 mb-5">
-                    <div class="position-relative" style="min-width: 240px;">
-                        <input type="text" name="search" value="{{ $search }}" class="form-control form-control-solid form-control-sm ps-10"
-                               placeholder="Cari Pesantren...">
-                        <span class="position-absolute top-50 start-0 translate-middle-y ms-3">
-                            <i class="ki-outline ki-magnifier fs-6 text-muted"></i>
-                        </span>
-                    </div>
-
-                    <select name="statusFilter" class="form-select form-select-solid form-select-sm" style="width: 280px;" onchange="this.form.submit()">
-                        <option value="pengajuan" @selected($statusFilter === 'pengajuan')>Pengajuan ({{ $statusCounts['pengajuan'] ?? 0 }})</option>
-                        <option value="verifikasi" @selected($statusFilter === 'verifikasi')>Verifikasi Berkas ({{ $statusCounts['verifikasi'] ?? 0 }})</option>
-                        <option value="assessment" @selected($statusFilter === 'assessment')>Review Asesor ({{ $statusCounts['assessment'] ?? 0 }})</option>
-                        <option value="visitasi" @selected($statusFilter === 'visitasi')>Visitasi & Penilaian Pasca Visitasi ({{ ($statusCounts['visitasi'] ?? 0) + ($statusCounts['pasca_visitasi'] ?? 0) }})</option>
-                        <option value="validasi" @selected($statusFilter === 'validasi')>Validasi Admin ({{ $statusCounts['validasi'] ?? 0 }})</option>
-                        <option value="overdue" @selected($statusFilter === 'overdue')>Terlambat ({{ $statusCounts['overdue'] ?? 0 }})</option>
-                        <option value="" @selected($statusFilter === '')>Semua</option>
-                    </select>
-
-                    <select name="perPage" class="form-select form-select-solid form-select-sm" style="width: 80px;" onchange="this.form.submit()">
-                        @foreach([10, 25, 50] as $pp)
-                            <option value="{{ $pp }}" @selected($perPage == $pp)>{{ $pp }}</option>
-                        @endforeach
-                    </select>
-
-                    <input type="hidden" name="sortField" value="{{ $sortField }}">
-                    <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
-                </form>
-            </x-slot>
-
             <thead>
                 <tr>
                     <x-ui.table-th :min-width="false" align="center" class="w-60px">
@@ -336,7 +318,7 @@
 
     {{-- Catatan Modal --}}
     <x-ui.modal name="catatan-modal" focusable>
-        <form method="POST" action="{{ route('admin.akreditasi.catatan-modal') }}" x-on:submit.prevent="loadCatatan($event)">
+        <form id="catatan-modal-form" method="POST" action="{{ route('admin.akreditasi.catatan-modal') }}" x-on:submit.prevent="loadCatatan($event)">
             @csrf
             <input type="hidden" name="id" id="catatanAkreditasiId" value="">
         </form>
@@ -350,4 +332,36 @@
         <input type="hidden" name="id" value="">
     </form>
 </div>
+
+<script>
+function adminAkreditasiPage() {
+    return {
+        selectedIds: [],
+        selectAllToggle(event) {
+            this.selectedIds = event.target.checked
+                ? Array.from(document.querySelectorAll('.row-checkbox')).map((checkbox) => checkbox.value)
+                : [];
+        },
+        openCatatanModal(id) {
+            document.getElementById('catatanAkreditasiId').value = id;
+            document.getElementById('catatan-modal-form').requestSubmit();
+            this.$dispatch('open-modal', 'catatan-modal');
+        },
+        async loadCatatan(event) {
+            const target = document.getElementById('catatan-modal-content');
+            target.innerHTML = '<div class="p-6 text-muted">Memuat catatan...</div>';
+
+            const response = await fetch(event.target.action, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: new FormData(event.target),
+            });
+
+            target.innerHTML = response.ok
+                ? await response.text()
+                : '<div class="p-6 text-danger">Gagal memuat catatan.</div>';
+        },
+    };
+}
+</script>
 @endsection

@@ -1,16 +1,15 @@
 <x-ui.section-card title="Tabel Penilaian Admin" subtitle="Nilai Akreditasi (NA), Nilai Koreksi (NK), dan Nilai Validasi (NV) per butir.">
-    <div class="table-responsive p-6">
-        <table class="table table-row-dashed table-hover align-middle g-0">
-            <thead>
-                <tr class="fw-semibold text-muted bg-light">
-                    <th class="ps-6" width="5%">No</th>
-                    <th class="min-w-250px">Butir Penilaian</th>
-                    <th class="text-center" width="8%">NA</th>
-                    <th class="text-center" width="8%">NK</th>
-                    <th class="text-center" width="12%">NV</th>
-                </tr>
-            </thead>
-            <tbody>
+    <x-ui.simple-table class="p-6" table-class="table-hover">
+        <thead>
+            <tr class="fw-semibold text-muted bg-light">
+                <x-ui.table-th :min-width="false" class="ps-6" style="width: 5%;">No</x-ui.table-th>
+                <x-ui.table-th class="min-w-250px">Butir Penilaian</x-ui.table-th>
+                <x-ui.table-th :min-width="false" align="center" style="width: 8%;">NA</x-ui.table-th>
+                <x-ui.table-th :min-width="false" align="center" style="width: 8%;">NK</x-ui.table-th>
+                <x-ui.table-th :min-width="false" align="center" style="width: 12%;">NV</x-ui.table-th>
+            </tr>
+        </thead>
+        <tbody>
                 @php $no = 0; @endphp
                 @foreach($komponens as $komponen)
                     @if($komponen->butirs->isEmpty()) @continue @endif
@@ -72,7 +71,6 @@
                         </tr>
                     @endforeach
                 @endforeach
-            </tbody>
-        </table>
-    </div>
+        </tbody>
+    </x-ui.simple-table>
 </x-ui.section-card>
