@@ -13,7 +13,7 @@
 
             @if(!empty($akreditasi->laporan_individu_asesor1) && $asesorTipe === 1)
                 <div class="d-flex align-items-center gap-3 mb-3">
-                    <i class="ki-solid ki-file text-success fs-2"></i>
+                    <x-ui.icon name="document" class="fs-2 text-success" />
                     <div>
                         <div class="fw-semibold text-success">Laporan Terunggah</div>
                         <a href="{{ Storage::url($akreditasi->laporan_individu_asesor1) }}" target="_blank" class="text-muted fs-8">Lihat Dokumen</a>
@@ -21,7 +21,7 @@
                 </div>
             @elseif(!empty($akreditasi->laporan_individu_asesor2) && $asesorTipe === 2)
                 <div class="d-flex align-items-center gap-3 mb-3">
-                    <i class="ki-solid ki-file text-success fs-2"></i>
+                    <x-ui.icon name="document" class="fs-2 text-success" />
                     <div>
                         <div class="fw-semibold text-success">Laporan Terunggah</div>
                         <a href="{{ Storage::url($akreditasi->laporan_individu_asesor2) }}" target="_blank" class="text-muted fs-8">Lihat Dokumen</a>
@@ -37,7 +37,7 @@
                             <input data-ui-file-upload="metronic" type="file" class="form-control form-control-sm" name="laporan_individu" accept=".pdf,.doc,.docx" required>
                         </div>
                         <x-ui.button type="submit" variant="primary" size="sm">
-                            <i class="ki-solid ki-cloud-add fs-5 me-1"></i>
+                            <x-ui.icon name="file-up" class="fs-5 me-1" />
                             Unggah
                         </x-ui.button>
                     </div>
@@ -55,7 +55,7 @@
 
                 @if(!empty($akreditasi->laporan_kelompok))
                     <div class="d-flex align-items-center gap-3 mb-3">
-                        <i class="ki-solid ki-file text-success fs-2"></i>
+                        <x-ui.icon name="document" class="fs-2 text-success" />
                         <div>
                             <div class="fw-semibold text-success">Laporan Terunggah</div>
                             <a href="{{ Storage::url($akreditasi->laporan_kelompok) }}" target="_blank" class="text-muted fs-8">Lihat Dokumen</a>
@@ -71,7 +71,7 @@
                                 <input data-ui-file-upload="metronic" type="file" class="form-control form-control-sm" name="laporan_kelompok" accept=".pdf,.doc,.docx" required>
                             </div>
                             <x-ui.button type="submit" variant="primary" size="sm">
-                                <i class="ki-solid ki-cloud-add fs-5 me-1"></i>
+                                <x-ui.icon name="file-up" class="fs-5 me-1" />
                                 Unggah
                             </x-ui.button>
                         </div>

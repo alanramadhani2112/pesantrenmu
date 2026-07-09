@@ -108,28 +108,29 @@
             class="spm-table-shell--asesor-akreditasi spm-table-shell--asesor-{{ $activeFocus }}"
         >
             <x-slot name="filters">
-                <form method="GET" action="{{ route('asesor.akreditasi') }}" class="d-flex align-items-center gap-2 flex-wrap">
+                <form method="GET" action="{{ route('asesor.akreditasi') }}" id="asesor-akreditasi-filter-form" class="d-flex align-items-center gap-3 flex-wrap">
                     <input type="hidden" name="focus" value="{{ $focus }}">
                     <input type="hidden" name="perPage" value="{{ $perPage }}">
                     <input type="hidden" name="sortField" value="{{ $sortField }}">
                     <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
-                    <input type="text" name="search" value="{{ $search }}" placeholder="Cari Pesantren..." class="form-control form-control-sm" style="max-width:200px;" onchange="this.form.submit()">
 
-                    <select name="periodeFilter" class="form-select form-select-sm" style="max-width:120px;" onchange="this.form.submit()">
+                    <x-datatable.search name="search" placeholder="Cari Pesantren..." :value="$search" form="asesor-akreditasi-filter-form" />
+
+                    <x-ui.select name="periodeFilter" size="sm" class="w-auto min-w-120px" onchange="this.form.submit()">
                         <option value="">Periode</option>
                         @for($i = date('Y'); $i >= 2024; $i--)
                             <option value="{{ $i }}" {{ $periodeFilter == $i ? 'selected' : '' }}>{{ $i }}</option>
                         @endfor
-                    </select>
+                    </x-ui.select>
 
-                    <select name="statusFilter" class="form-select form-select-sm" style="max-width:180px;" onchange="this.form.submit()">
+                    <x-ui.select name="statusFilter" size="sm" class="w-auto min-w-180px" onchange="this.form.submit()">
                         <option value="">Status</option>
                         <option value="belum" {{ $statusFilter === 'belum' ? 'selected' : '' }}>Review Berkas</option>
                         <option value="siap" {{ $statusFilter === 'siap' ? 'selected' : '' }}>Visitasi Terjadwal</option>
                         <option value="penilaian" {{ $statusFilter === 'penilaian' ? 'selected' : '' }}>Penilaian Pasca Visitasi</option>
                         <option value="revisi" {{ $statusFilter === 'revisi' ? 'selected' : '' }}>Perlu Revisi</option>
                         <option value="selesai" {{ $statusFilter === 'selesai' ? 'selected' : '' }}>Selesai</option>
-                    </select>
+                    </x-ui.select>
                 </form>
             </x-slot>
 
@@ -179,10 +180,10 @@
                         @endif
                     </td>
                     <td>
-                        <button type="button" class="btn btn-sm btn-light" x-on:click="openCatatanModal({{ $item->akreditasi->id }})">
+                        <x-ui.button type="button" variant="light" size="sm" x-on:click="openCatatanModal({{ $item->akreditasi->id }})">
                             <x-ui.icon name="document" class="fs-5 me-1" />
                             {{ $item->akreditasi->catatans->count() > 0 ? $item->akreditasi->catatans->count() . ' Catatan' : 'Catatan' }}
-                        </button>
+                        </x-ui.button>
                     </td>
                     <td class="text-end">
                         <x-ui.action-menu>

@@ -35,28 +35,26 @@
 
 {{-- Score Table --}}
 <x-ui.section-card title="Tabel Penilaian Instrumen" subtitle="Isi nilai NA dan NK per butir pernyataan">
-    <div class="p-6">
-        <div class="table-responsive">
-            <table data-ui-simple-table="metronic" class="table table-row-bordered table-row-gray-200 align-middle gs-0 gy-2 fs-7">
-                <thead>
-                    <tr class="fw-semibold text-muted bg-light">
-                        <th class="min-w-80px">Komponen</th>
-                        <th class="min-w-60px">No SK</th>
-                        <th class="min-w-60px">No Butir</th>
-                        <th class="min-w-200px">Butir Pernyataan</th>
-                        <th class="min-w-60px text-center">EDPM</th>
-                        @if($asesorTipe === 1)
-                            <th class="min-w-120px text-center">Nilai Ketua (NA)</th>
-                            <th class="min-w-100px text-center">Nilai Anggota</th>
-                            <th class="min-w-60px text-center">Delta</th>
-                            <th class="min-w-120px text-center">Nilai Kelompok (NK)</th>
-                            <th class="min-w-150px">Catatan Butir</th>
-                        @else
-                            <th class="min-w-120px text-center">Nilai Anggota (NA)</th>
-                        @endif
-                    </tr>
-                </thead>
-                <tbody>
+    <x-ui.simple-table class="p-6" table-class="table-row-gray-200 gy-2 fs-7">
+        <thead>
+            <tr class="fw-semibold text-muted bg-light">
+                <x-ui.table-th class="min-w-80px">Komponen</x-ui.table-th>
+                <x-ui.table-th class="min-w-60px">No SK</x-ui.table-th>
+                <x-ui.table-th class="min-w-60px">No Butir</x-ui.table-th>
+                <x-ui.table-th class="min-w-200px">Butir Pernyataan</x-ui.table-th>
+                <x-ui.table-th align="center" class="min-w-60px">EDPM</x-ui.table-th>
+                @if($asesorTipe === 1)
+                    <x-ui.table-th align="center" class="min-w-120px">Nilai Ketua (NA)</x-ui.table-th>
+                    <x-ui.table-th align="center" class="min-w-100px">Nilai Anggota</x-ui.table-th>
+                    <x-ui.table-th align="center" class="min-w-60px">Delta</x-ui.table-th>
+                    <x-ui.table-th align="center" class="min-w-120px">Nilai Kelompok (NK)</x-ui.table-th>
+                    <x-ui.table-th class="min-w-150px">Catatan Butir</x-ui.table-th>
+                @else
+                    <x-ui.table-th align="center" class="min-w-120px">Nilai Anggota (NA)</x-ui.table-th>
+                @endif
+            </tr>
+        </thead>
+        <tbody>
                     @foreach($komponens as $komponen)
                         @foreach($komponen->butirs ?? [] as $butir)
                             @php
@@ -173,10 +171,8 @@
                             </tr>
                         @endforeach
                     @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
+        </tbody>
+    </x-ui.simple-table>
 </x-ui.section-card>
 
 {{-- Catatan Rekomendasi per Komponen (Asesor 1 only) --}}
