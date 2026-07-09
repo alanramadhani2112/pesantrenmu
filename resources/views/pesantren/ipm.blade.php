@@ -105,7 +105,7 @@
                             <div class="col-md-8">
                                 @if($hasFile)
                                     <div class="d-flex align-items-center gap-3 mb-3">
-                                        <i class="ki-solid ki-file text-success fs-2"></i>
+                                        <x-ui.icon name="document" class="fs-2 text-success" />
                                         <div>
                                             <div class="fw-semibold text-success fs-7">Dokumen Terunggah</div>
                                             <a data-ui-document-item="metronic" href="{{ Storage::url($existingFiles[$item['field']]) }}" target="_blank" class="text-muted fs-8">Lihat Dokumen</a>
@@ -135,11 +135,11 @@
                             <div class="col-md-4 text-end">
                                 @if($hasFile)
                                     <span class="badge badge-light-success fs-8">
-                                        <i class="ki-solid ki-check-circle fs-7 me-1"></i> Terpenuhi
+                                        <x-ui.icon name="check-circle" class="fs-7 me-1" /> Terpenuhi
                                     </span>
                                 @else
                                     <span class="badge badge-light-warning fs-8">
-                                        <i class="ki-solid ki-information-3 fs-7 me-1"></i> Belum Lengkap
+                                        <x-ui.icon name="information-5" class="fs-7 me-1" /> Belum Lengkap
                                     </span>
                                 @endif
                             </div>
@@ -152,7 +152,7 @@
         @if(!$isLocked)
             <div class="d-flex justify-content-end gap-3 mt-6">
                 <x-ui.button type="submit" variant="primary" id="btnSaveIpm">
-                    <i class="ki-solid ki-check fs-4 me-1"></i>
+                    <x-ui.icon name="check-circle" class="fs-4 me-1" />
                     Simpan IPM
                 </x-ui.button>
             </div>

@@ -21,7 +21,7 @@
 >
     <x-slot:toolbar>
         <x-ui.button :href="route('pesantren.akreditasi')" variant="light">
-            <i class="ki-solid ki-arrow-left fs-4 me-1"></i>
+            <x-ui.icon name="arrow-left" class="fs-4 me-1" />
             Kembali
         </x-ui.button>
     </x-slot:toolbar>
@@ -38,7 +38,7 @@
     @if($activeRejection && $activeRejection->status === 'pending')
         <div class="alert alert-dismissible bg-light-warning border border-warning border-dashed d-flex flex-wrap align-items-center justify-content-between gap-3 p-5 mb-6">
             <div class="d-flex align-items-center gap-3">
-                <i class="ki-outline ki-information-2 fs-2 text-warning"></i>
+                <x-ui.icon name="information-5" class="fs-2 text-warning" />
                 <div>
                     <div class="fw-semibold text-gray-900">Perbaikan Diperlukan</div>
                     <div class="fs-7 text-muted">
@@ -50,7 +50,7 @@
             <form method="POST" action="{{ route('pesantren.akreditasi.submit-perbaikan') }}" data-swal-confirm="true" data-swal-title="Kirim perbaikan?" data-swal-text="Pastikan semua bagian yang ditolak sudah diperbaiki." data-swal-icon="question" data-swal-confirm-button="Ya, kirim">
                 @csrf
                 <input type="hidden" name="akreditasi_id" value="{{ $akreditasi->id }}">
-                <button type="submit" class="btn btn-warning">Kirim Perbaikan</button>
+                <x-ui.button type="submit" variant="warning">Kirim Perbaikan</x-ui.button>
             </form>
         </div>
     @endif
@@ -79,7 +79,7 @@
         <div class="p-6">
             @if(!empty($akreditasi->kartu_kendali))
                 <div class="d-flex align-items-center gap-3 mb-4">
-                    <i class="ki-solid ki-file text-success fs-2"></i>
+                    <x-ui.icon name="document" class="fs-2 text-success" />
                     <div>
                         <div class="fw-semibold text-success">Dokumen Terunggah</div>
                         <a data-ui-document-item="metronic" href="{{ Storage::url($akreditasi->kartu_kendali) }}" target="_blank" class="text-muted fs-8">Lihat Dokumen</a>
@@ -103,7 +103,7 @@
                         </div>
                         <div class="col-md-4">
                             <x-ui.button type="submit" variant="primary" size="sm" class="w-100 mb-3" id="btnUploadKartuKendali">
-                                <i class="ki-solid ki-cloud-add fs-4 me-1"></i> Upload
+                                <x-ui.icon name="file-up" class="fs-4 me-1" /> Upload
                             </x-ui.button>
                         </div>
                     </div>

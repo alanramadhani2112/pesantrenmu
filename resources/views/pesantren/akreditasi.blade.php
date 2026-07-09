@@ -92,64 +92,50 @@
     </x-ui.tabs>
 
     {{-- Filter Form --}}
-    <form method="GET" action="{{ route('pesantren.akreditasi') }}" class="mb-6">
+    <form method="GET" action="{{ route('pesantren.akreditasi') }}" id="pesantren-akreditasi-filter-form" class="mb-6">
         <input type="hidden" name="focus" value="{{ $focus }}">
         <input type="hidden" name="sortField" value="{{ $sortField }}">
         <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
-        <div class="row g-3 align-items-end">
-            <div class="col-md-4">
-                <x-ui.form-field label="Cari">
-                    <input type="search" name="search" value="{{ $search }}" class="form-control" placeholder="Cari periode atau ID...">
-                </x-ui.form-field>
-            </div>
-            <div class="col-md-2">
-                <x-ui.form-field label="Periode">
-                    <input type="text" name="periodeFilter" value="{{ $periodeFilter }}" class="form-control" placeholder="2025">
-                </x-ui.form-field>
-            </div>
-            <div class="col-md-2">
-                <x-ui.form-field label="Tahapan">
-                    <select name="tahapanFilter" class="form-select">
-                        <option value="">Semua</option>
-                        @foreach($tahapanLabels as $val => $label)
-                            <option value="{{ $val }}" {{ $tahapanFilter === $val ? 'selected' : '' }}>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </x-ui.form-field>
-            </div>
-            <div class="col-md-2">
-                <x-ui.form-field label="Per Halaman">
-                    <select name="perPage" class="form-select">
-                        @foreach([5, 10, 25, 50] as $pp)
-                            <option value="{{ $pp }}" {{ $perPage == $pp ? 'selected' : '' }}>{{ $pp }}</option>
-                        @endforeach
-                    </select>
-                </x-ui.form-field>
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <x-ui.button type="submit" variant="light" class="w-100">
-                    <i class="ki-solid ki-filter-search fs-4 me-1"></i> Filter
-                </x-ui.button>
-            </div>
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <x-datatable.search name="search" placeholder="Cari periode atau ID..." :value="$search" form="pesantren-akreditasi-filter-form" />
+
+            <x-ui.input name="periodeFilter" value="{{ $periodeFilter }}" class="w-auto min-w-120px" placeholder="2025" />
+
+            <x-ui.select name="tahapanFilter" size="sm" class="w-auto min-w-160px" onchange="this.form.submit()">
+                <option value="">Semua Tahapan</option>
+                @foreach($tahapanLabels as $val => $label)
+                    <option value="{{ $val }}" {{ $tahapanFilter === $val ? 'selected' : '' }}>{{ $label }}</option>
+                @endforeach
+            </x-ui.select>
+
+            <x-ui.select name="perPage" size="sm" class="w-auto" onchange="this.form.submit()">
+                @foreach([5, 10, 25, 50] as $pp)
+                    <option value="{{ $pp }}" {{ $perPage == $pp ? 'selected' : '' }}>{{ $pp }}</option>
+                @endforeach
+            </x-ui.select>
+
+            <x-ui.button type="submit" variant="light" size="sm">
+                <x-ui.icon name="setting-2" class="fs-4 me-1" />
+                Filter
+            </x-ui.button>
         </div>
     </form>
 
     {{-- Table --}}
     @if($akreditasis->count() > 0)
-        <div class="table-responsive" data-ui-table="metronic">
-            <table class="table table-bordered table-row-dashed align-middle">
-                <thead>
-                    <tr class="bg-light">
-                        <th>No</th>
-                        <th>ID</th>
-                        <th>Periode</th>
-                        <th>Status</th>
-                        <th>Tahapan</th>
-                        <th>Tanggal Pengajuan</th>
-                        <th class="text-end">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
+        <x-ui.simple-table table-class="table-bordered">
+            <thead>
+                <tr class="bg-light">
+                    <x-ui.table-th :min-width="false">No</x-ui.table-th>
+                    <x-ui.table-th :min-width="false">ID</x-ui.table-th>
+                    <x-ui.table-th>Periode</x-ui.table-th>
+                    <x-ui.table-th>Status</x-ui.table-th>
+                    <x-ui.table-th>Tahapan</x-ui.table-th>
+                    <x-ui.table-th>Tanggal Pengajuan</x-ui.table-th>
+                    <x-ui.table-th align="end">Aksi</x-ui.table-th>
+                </tr>
+            </thead>
+            <tbody>
                     @foreach($akreditasis as $akreditasi)
                         @php $statusLabel = $statusLabels[$akreditasi->status] ?? $akreditasi->status; @endphp
                         <tr>
@@ -164,60 +150,62 @@
                             <td>{{ $tahapanLabels[$akreditasi->tahapan] ?? ucfirst($akreditasi->tahapan) }}</td>
                             <td>{{ $akreditasi->created_at->format('d M Y') }}</td>
                             <td class="text-end">
-                                <div class="d-flex gap-2 justify-content-end">
+                                <x-ui.action-menu>
                                     @if($akreditasi->kartu_kendali)
-                                        <a href="{{ route('pesantren.akreditasi-detail', $akreditasi->uuid) }}" class="btn btn-sm btn-light">
-                                            <i class="ki-solid ki-eye fs-6"></i>
-                                        </a>
+                                        <x-ui.action-menu-item :href="route('pesantren.akreditasi-detail', $akreditasi->uuid)" variant="primary">
+                                            <x-ui.icon name="eye" class="fs-5" />
+                                            Lihat Detail
+                                        </x-ui.action-menu-item>
                                     @endif
 
                                     @if($akreditasi->status === '0')
-                                        <form action="{{ route('pesantren.akreditasi.delete') }}" method="POST" class="d-inline delete-form">
-                                            @csrf
-                                            <input type="hidden" name="id" value="{{ $akreditasi->id }}">
-                                            <x-ui.button type="submit" variant="light-danger" size="sm" class="btn-delete">
-                                                <i class="ki-solid ki-trash fs-6"></i>
-                                            </x-ui.button>
-                                        </form>
-                                        <form action="{{ route('pesantren.akreditasi.cancel') }}" method="POST" class="d-inline cancel-form">
-                                            @csrf
-                                            <input type="hidden" name="id" value="{{ $akreditasi->id }}">
-                                            <x-ui.button type="submit" variant="light-warning" size="sm" class="btn-cancel">
-                                                <i class="ki-solid ki-cross fs-6"></i>
-                                            </x-ui.button>
-                                        </form>
+                                        <x-ui.action-menu-item
+                                            variant="danger"
+                                            x-on:click="confirmDelete({{ $akreditasi->id }})"
+                                        >
+                                            <x-ui.icon name="trash" class="fs-5" />
+                                            Hapus Pengajuan
+                                        </x-ui.action-menu-item>
+
+                                        <x-ui.action-menu-item
+                                            variant="warning"
+                                            x-on:click="confirmCancel({{ $akreditasi->id }})"
+                                        >
+                                            <x-ui.icon name="cross-circle" class="fs-5" />
+                                            Batalkan Pengajuan
+                                        </x-ui.action-menu-item>
                                     @endif
 
                                     @if($akreditasi->status === '-1')
-                                        <form action="{{ route('pesantren.akreditasi.delete') }}" method="POST" class="d-inline delete-form">
-                                            @csrf
-                                            <input type="hidden" name="id" value="{{ $akreditasi->id }}">
-                                            <x-ui.button type="submit" variant="light-danger" size="sm" class="btn-delete">
-                                                <i class="ki-solid ki-trash fs-6"></i>
-                                            </x-ui.button>
-                                        </form>
-                                        <x-ui.button type="button" variant="light-primary" size="sm"
-                                            onclick="openBandingModal({{ $akreditasi->id }})">
-                                            <i class="ki-solid ki-message-text fs-6"></i> Banding
-                                        </x-ui.button>
+                                        <x-ui.action-menu-item
+                                            variant="danger"
+                                            x-on:click="confirmDelete({{ $akreditasi->id }})"
+                                        >
+                                            <x-ui.icon name="trash" class="fs-5" />
+                                            Hapus Pengajuan
+                                        </x-ui.action-menu-item>
+
+                                        <x-ui.action-menu-item variant="primary" x-on:click="openBandingModal({{ $akreditasi->id }})">
+                                            <x-ui.icon name="document" class="fs-5" />
+                                            Banding
+                                        </x-ui.action-menu-item>
                                     @endif
 
                                     @if(in_array($akreditasi->status, ['1', 'hasil_akhir']))
-                                        <x-ui.button type="button" variant="light-primary" size="sm"
-                                            onclick="openCatatanModal({{ $akreditasi->id }})">
-                                            <i class="ki-solid ki-message-text fs-6"></i> Catatan
-                                        </x-ui.button>
+                                        <x-ui.action-menu-item variant="primary" x-on:click="openCatatanModal({{ $akreditasi->id }})">
+                                            <x-ui.icon name="document" class="fs-5" />
+                                            Catatan
+                                        </x-ui.action-menu-item>
                                     @endif
-                                </div>
+                                </x-ui.action-menu>
                             </td>
                         </tr>
                     @endforeach
-                </tbody>
-            </table>
-        </div>
+            </tbody>
+        </x-ui.simple-table>
 
         <div class="mt-4">
-            {{ $akreditasis->appends(request()->query())->links() }}
+            <x-ui.pagination :paginator="$akreditasis->appends(request()->query())" />
         </div>
     @else
         <x-ui.alert variant="info" title="Tidak Ada Data" class="mb-0">
@@ -226,6 +214,16 @@
     @endif
 </x-ui.page>
 </div>
+
+<form id="delete-akreditasi-form" action="{{ route('pesantren.akreditasi.delete') }}" method="POST" class="d-none">
+    @csrf
+    <input type="hidden" name="id" value="">
+</form>
+
+<form id="cancel-akreditasi-form" action="{{ route('pesantren.akreditasi.cancel') }}" method="POST" class="d-none">
+    @csrf
+    <input type="hidden" name="id" value="">
+</form>
 
 {{-- Banding Modal --}}
 <x-ui.modal name="banding-modal" maxWidth="md">
@@ -275,45 +273,37 @@ document.getElementById('btnCreateAkreditasi')?.addEventListener('click', functi
     });
 });
 
-// Delete confirmation
-document.querySelectorAll('.btn-delete').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        const form = this.closest('form');
-        window.SpmSwal.confirm({
-            title: 'Hapus Pengajuan?',
-            text: 'Data pengajuan akan dihapus permanen.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, Hapus',
-            cancelButtonText: 'Batal',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                form.requestSubmit();
-            }
-        });
-    });
-});
+function submitAkreditasiAction(formId, id) {
+    const form = document.getElementById(formId);
+    form.querySelector('input[name="id"]').value = id;
+    form.requestSubmit();
+}
 
-// Cancel confirmation
-document.querySelectorAll('.btn-cancel').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        const form = this.closest('form');
-        window.SpmSwal.confirm({
-            title: 'Batalkan Pengajuan?',
-            text: 'Pengajuan yang dibatalkan tidak dapat dikembalikan.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, Batalkan',
-            cancelButtonText: 'Tidak',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                form.requestSubmit();
-            }
-        });
+function confirmDelete(id) {
+    window.SpmSwal.confirm({
+        title: 'Hapus Pengajuan?',
+        text: 'Data pengajuan akan dihapus permanen.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal',
+    }).then((result) => {
+        if (result.isConfirmed) submitAkreditasiAction('delete-akreditasi-form', id);
     });
-});
+}
+
+function confirmCancel(id) {
+    window.SpmSwal.confirm({
+        title: 'Batalkan Pengajuan?',
+        text: 'Pengajuan yang dibatalkan tidak dapat dikembalikan.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Batalkan',
+        cancelButtonText: 'Tidak',
+    }).then((result) => {
+        if (result.isConfirmed) submitAkreditasiAction('cancel-akreditasi-form', id);
+    });
+}
 
 // Banding modal
 function openBandingModal(id) {

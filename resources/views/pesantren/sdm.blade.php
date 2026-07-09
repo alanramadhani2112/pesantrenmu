@@ -85,19 +85,18 @@
                     }
                 @endphp
                 <x-ui.section-card :title="$category['label']" subtitle="Input rekap per unit layanan" class="mb-6">
-                    <div class="table-responsive p-4">
-                        <table data-ui-simple-table="metronic" class="table table-bordered table-row-dashed align-middle">
-                            <thead>
-                                <tr class="bg-light">
-                                    <th class="fw-semibold text-gray-800 text-center" style="min-width:120px;">Kategori</th>
-                                    @foreach($levels as $level)
-                                        <th class="fw-semibold text-gray-800 text-center text-uppercase" style="min-width:90px;">
-                                            {{ str_replace(['satuan_pesantren_muadalah_(SPM)'], ['SPM'], $level) }}
-                                        </th>
-                                    @endforeach
-                                    <th class="fw-semibold text-gray-800 text-center bg-light-primary" style="min-width:80px;">Total</th>
-                                </tr>
-                            </thead>
+                    <x-ui.simple-table class="p-4" table-class="table-bordered">
+                        <thead>
+                            <tr class="bg-light">
+                                <x-ui.table-th align="center" style="min-width:120px;">Kategori</x-ui.table-th>
+                                @foreach($levels as $level)
+                                    <x-ui.table-th align="center" class="text-uppercase" style="min-width:90px;">
+                                        {{ str_replace(['satuan_pesantren_muadalah_(SPM)'], ['SPM'], $level) }}
+                                    </x-ui.table-th>
+                                @endforeach
+                                <x-ui.table-th align="center" class="bg-light-primary" style="min-width:80px;">Total</x-ui.table-th>
+                            </tr>
+                        </thead>
                             <tbody>
                                 <tr>
                                     <td class="fw-semibold text-gray-800">Laki-laki</td>
@@ -151,15 +150,14 @@
                                     <td class="text-center fw-semibold text-primary">{{ $rowTotalL + $rowTotalP }}</td>
                                 </tr>
                             </tfoot>
-                        </table>
-                    </div>
+                    </x-ui.simple-table>
                 </x-ui.section-card>
             @endforeach
 
             @if(!$isLocked)
                 <div class="d-flex justify-content-end mt-6">
                     <x-ui.button type="submit" variant="primary" id="btnSaveSdm">
-                        <i class="ki-solid ki-check fs-4 me-1"></i>
+                        <x-ui.icon name="check-circle" class="fs-4 me-1" />
                         Simpan Data SDM
                     </x-ui.button>
                 </div>
