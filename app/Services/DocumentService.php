@@ -61,6 +61,9 @@ class DocumentService
         if ($newFile) {
             $existingPath = $id ? $this->findDocument($id)?->file_path : null;
             $newPath = $newFile->store('documents', 'local');
+            if (! $newPath) {
+                throw new \RuntimeException('Document upload failed.');
+            }
             $payload['file_path'] = $newPath;
             $payload['uploaded_by_user_id'] = Auth::id();
             $payload['uploaded_by_role'] = Auth::user()?->role_id;

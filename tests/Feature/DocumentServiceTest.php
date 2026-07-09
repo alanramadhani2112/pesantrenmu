@@ -95,6 +95,30 @@ class DocumentServiceTest extends TestCase
         Storage::disk('public')->assertMissing($path);
     }
 
+    public function test_save_document_throws_when_upload_store_fails(): void
+    {
+        $file = new class
+        {
+            public function store(string $path, string $disk): false
+            {
+                return false;
+            }
+        };
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Document upload failed.');
+
+        try {
+            $this->service->saveDocument([
+                'title' => 'Failed Upload',
+                'status' => 1,
+                'category_id' => $this->category->id,
+            ], null, $file);
+        } finally {
+            $this->assertDatabaseMissing('documents', ['title' => 'Failed Upload']);
+        }
+    }
+
     public function test_save_document_sets_uploaded_by_user_id(): void
     {
         $file = UploadedFile::fake()->create('doc.pdf', 50, 'application/pdf');

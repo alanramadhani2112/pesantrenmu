@@ -82,6 +82,8 @@ class DocumentController extends Controller
             abort_unless($allowed, 403);
         }
 
+        abort_if(blank($document->file_path), 404);
+
         $disk = Storage::disk('local')->exists($document->file_path) ? 'local' : 'public';
         abort_unless(Storage::disk($disk)->exists($document->file_path), 404);
 

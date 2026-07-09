@@ -117,6 +117,20 @@ class DocumentDownloadAuthorizationTest extends TestCase
             ->assertOk();
     }
 
+    public function test_active_visible_document_with_blank_file_path_returns_not_found(): void
+    {
+        $this->seedBasePermissions();
+        $asesor = User::factory()->create(['role_id' => 2, 'email_verified_at' => now()]);
+        $document = $this->document(
+            $this->category('Public Blank', 'public_blank', DocumentCategory::VISIBILITY_PUBLIC),
+            ''
+        );
+
+        $this->actingAs($asesor)
+            ->get(route('documents.download', $document))
+            ->assertNotFound();
+    }
+
     private function seedBasePermissions(): void
     {
         $this->seed(RoleSeeder::class);
