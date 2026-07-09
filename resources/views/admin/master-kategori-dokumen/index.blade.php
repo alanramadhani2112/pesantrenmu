@@ -13,24 +13,18 @@
         </x-slot>
 
         {{-- Search & PerPage --}}
-        <div class="d-flex align-items-center gap-3 mb-5">
-            <form method="GET" action="{{ route('admin.master-kategori-dokumen.index') }}" class="d-flex align-items-center gap-3 flex-grow-1">
-                <div class="position-relative flex-grow-1" style="max-width: 320px;">
-                    <input type="text" name="search" value="{{ $search }}" class="form-control form-control-sm ps-10"
-                           placeholder="Cari kategori..." x-on:input.debounce.400ms="$el.closest('form').submit()">
-                    <span class="position-absolute top-50 start-0 translate-middle-y ms-3">
-                        <i class="ki-outline ki-magnifier fs-6 text-muted"></i>
-                    </span>
-                </div>
-                <select name="perPage" class="form-select form-select-sm" style="width: 80px;" onchange="this.form.submit()">
+        <form method="GET" action="{{ route('admin.master-kategori-dokumen.index') }}" id="kategori-dokumen-filter-form" class="mb-5">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <x-datatable.search name="search" placeholder="Cari kategori..." :value="$search" form="kategori-dokumen-filter-form" />
+                <x-ui.select name="perPage" size="sm" class="w-auto" onchange="this.form.submit()">
                     @foreach([10, 25, 50] as $pp)
                         <option value="{{ $pp }}" @selected($perPage == $pp)>{{ $pp }}</option>
                     @endforeach
-                </select>
+                </x-ui.select>
                 <input type="hidden" name="sort" value="{{ $sortField }}">
                 <input type="hidden" name="direction" value="{{ $sortAsc ? 'asc' : 'desc' }}">
-            </form>
-        </div>
+            </div>
+        </form>
 
         {{-- Table --}}
         <x-ui.simple-table>
@@ -72,20 +66,24 @@
                         </td>
                         <td class="text-center">{{ $cat->sort_order }}</td>
                         <td class="text-end">
-                            <div class="d-flex align-items-center justify-content-end gap-2">
-                                <x-ui.icon-button
-                                    icon="pencil"
-                                    label="Edit"
+                            <x-ui.action-menu>
+                                <x-ui.action-menu-item
                                     variant="primary"
                                     x-on:click="openEditModal({{ \Illuminate\Support\Js::from($cat) }})"
-                                />
-                                <form method="POST" action="{{ route('admin.master-kategori-dokumen.destroy', $cat) }}" class="d-inline"
-                                      x-on:submit.prevent="confirmDelete($event)">
-                                    @csrf
-                                    @method('DELETE')
-                                    <x-ui.icon-button type="submit" icon="trash" label="Hapus" variant="danger" />
-                                </form>
-                            </div>
+                                >
+                                    <x-ui.icon name="pencil" class="fs-5" />
+                                    Edit Kategori
+                                </x-ui.action-menu-item>
+
+                                <x-ui.action-menu-item
+                                    variant="danger"
+                                    data-delete-url="{{ route('admin.master-kategori-dokumen.destroy', $cat) }}"
+                                    x-on:click="confirmDelete($el.dataset.deleteUrl)"
+                                >
+                                    <x-ui.icon name="trash" class="fs-5" />
+                                    Hapus Kategori
+                                </x-ui.action-menu-item>
+                            </x-ui.action-menu>
                         </td>
                     </tr>
                 @empty
@@ -99,9 +97,14 @@
         </x-ui.simple-table>
 
         <div class="mt-5">
-            {{ $categories->links() }}
+            <x-ui.pagination :paginator="$categories" />
         </div>
     </x-ui.index-layout>
+
+    <form id="kategori-delete-form" method="POST" class="d-none">
+        @csrf
+        @method('DELETE')
+    </form>
 
     {{-- Modal Create/Edit --}}
     <x-ui.modal name="kategori-modal" focusable>
@@ -112,7 +115,7 @@
             </template>
 
             <x-ui.modal-header
-                x-bind:title="isEditing ? 'Edit Kategori' : 'Tambah Kategori'"
+                title="Kelola Kategori"
                 subtitle="Lengkapi data kategori dokumen."
                 icon="folder"
             />
@@ -266,21 +269,21 @@
                 e.target.submit();
             },
 
-            confirmDelete(e) {
-                if (typeof Swal !== 'undefined') {
-                    window.SpmSwal.confirm({
-                        title: 'Hapus kategori ini?',
-                        text: 'Kategori yang masih memiliki dokumen tidak bisa dihapus.',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Ya, hapus',
-                        cancelButtonText: 'Batal',
-                    }).then((result) => {
-                        if (result.isConfirmed) e.target.submit();
-                    });
-                } else {
-                    if (confirm('Hapus kategori ini?')) e.target.submit();
-                }
+            confirmDelete(url) {
+                window.SpmSwal.confirm({
+                    title: 'Hapus kategori ini?',
+                    text: 'Kategori yang masih memiliki dokumen tidak bisa dihapus.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, hapus',
+                    cancelButtonText: 'Batal',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const form = document.getElementById('kategori-delete-form');
+                        form.action = url;
+                        form.requestSubmit();
+                    }
+                });
             }
         };
     }

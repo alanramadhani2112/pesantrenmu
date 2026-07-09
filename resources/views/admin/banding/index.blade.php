@@ -13,33 +13,27 @@
             <x-ui.badge variant="warning">Tertunda: {{ $pendingCount }}</x-ui.badge>
         </x-slot>
 
+        <form method="GET" action="{{ route('admin.banding') }}" id="banding-filter-form" class="mb-5">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <x-datatable.search name="search" placeholder="Cari Pesantren..." :value="$search" form="banding-filter-form" />
+
+                <x-ui.select name="statusFilter" size="sm" class="w-auto min-w-200px" onchange="this.form.submit()">
+                    <option value="all" @selected($statusFilter === 'all')>Semua</option>
+                    <option value="pending" @selected($statusFilter === 'pending')>Tertunda</option>
+                    <option value="under_review" @selected($statusFilter === 'under_review')>Dalam Peninjauan</option>
+                    <option value="accepted" @selected($statusFilter === 'accepted')>Diterima</option>
+                    <option value="rejected" @selected($statusFilter === 'rejected')>Ditolak</option>
+                </x-ui.select>
+
+                <x-ui.select name="perPage" size="sm" class="w-auto" onchange="this.form.submit()">
+                    @foreach([10, 25, 50] as $pp)
+                        <option value="{{ $pp }}" @selected($perPage == $pp)>{{ $pp }}</option>
+                    @endforeach
+                </x-ui.select>
+            </div>
+        </form>
+
         <x-ui.simple-table>
-            <x-slot name="filters">
-                <form method="GET" action="{{ route('admin.banding') }}" class="d-flex align-items-center gap-3 mb-5">
-                    <div class="position-relative" style="min-width: 240px;">
-                        <input type="text" name="search" value="{{ $search }}" class="form-control form-control-sm ps-10"
-                               placeholder="Cari Pesantren...">
-                        <span class="position-absolute top-50 start-0 translate-middle-y ms-3">
-                            <i class="ki-outline ki-magnifier fs-6 text-muted"></i>
-                        </span>
-                    </div>
-
-                    <select name="statusFilter" class="form-select form-select-sm" style="width: 200px;" onchange="this.form.submit()">
-                        <option value="all" @selected($statusFilter === 'all')>Semua</option>
-                        <option value="pending" @selected($statusFilter === 'pending')>Tertunda</option>
-                        <option value="under_review" @selected($statusFilter === 'under_review')>Dalam Peninjauan</option>
-                        <option value="accepted" @selected($statusFilter === 'accepted')>Diterima</option>
-                        <option value="rejected" @selected($statusFilter === 'rejected')>Ditolak</option>
-                    </select>
-
-                    <select name="perPage" class="form-select form-select-sm" style="width: 80px;" onchange="this.form.submit()">
-                        @foreach([10, 25, 50] as $pp)
-                            <option value="{{ $pp }}" @selected($perPage == $pp)>{{ $pp }}</option>
-                        @endforeach
-                    </select>
-                </form>
-            </x-slot>
-
             <thead>
                 <tr>
                     <x-ui.table-th>Pesantren</x-ui.table-th>
@@ -127,6 +121,10 @@
                 @endforelse
             </tbody>
         </x-ui.simple-table>
+
+        <div class="mt-5">
+            <x-ui.pagination :paginator="$bandings" />
+        </div>
     </x-ui.index-layout>
 </div>
 @endsection

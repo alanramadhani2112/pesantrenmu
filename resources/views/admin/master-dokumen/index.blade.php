@@ -13,24 +13,18 @@
         </x-slot>
 
         {{-- Search & PerPage --}}
-        <div class="d-flex align-items-center gap-3 mb-5">
-            <form method="GET" action="{{ route('admin.master-dokumen.index') }}" class="d-flex align-items-center gap-3 flex-grow-1">
-                <div class="position-relative flex-grow-1" style="max-width: 320px;">
-                    <input type="text" name="search" value="{{ $search }}" class="form-control form-control-sm ps-10"
-                           placeholder="Cari dokumen..." x-on:input.debounce.400ms="$el.closest('form').submit()">
-                    <span class="position-absolute top-50 start-0 translate-middle-y ms-3">
-                        <i class="ki-outline ki-magnifier fs-6 text-muted"></i>
-                    </span>
-                </div>
-                <select name="perPage" class="form-select form-select-sm" style="width: 80px;" onchange="this.form.submit()">
+        <form method="GET" action="{{ route('admin.master-dokumen.index') }}" id="master-dokumen-filter-form" class="mb-5">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <x-datatable.search name="search" placeholder="Cari dokumen..." :value="$search" form="master-dokumen-filter-form" />
+                <x-ui.select name="perPage" size="sm" class="w-auto" onchange="this.form.submit()">
                     @foreach([10, 25, 50] as $pp)
                         <option value="{{ $pp }}" @selected($perPage == $pp)>{{ $pp }}</option>
                     @endforeach
-                </select>
+                </x-ui.select>
                 <input type="hidden" name="sort" value="{{ $sortField }}">
                 <input type="hidden" name="direction" value="{{ $sortAsc ? 'asc' : 'desc' }}">
-            </form>
-        </div>
+            </div>
+        </form>
 
         {{-- Table --}}
         <x-ui.simple-table>
@@ -79,25 +73,28 @@
                         </td>
                         <td>{{ $doc->created_at->format('d M Y') }}</td>
                         <td class="text-end">
-                            <div class="d-flex align-items-center justify-content-end gap-2">
+                            <x-ui.action-menu>
                                 @if($doc->file_path)
-                                    <a href="{{ route('documents.download', $doc) }}" target="_blank" class="btn btn-icon btn-sm btn-light-info" title="Download">
-                                        <i class="ki-outline ki-cloud-download fs-6"></i>
-                                    </a>
+                                    <x-ui.action-menu-item :href="route('documents.download', $doc)" target="_blank" variant="primary">
+                                        <x-ui.icon name="document" class="fs-5" />
+                                        Download
+                                    </x-ui.action-menu-item>
                                 @endif
-                                <x-ui.icon-button
-                                    icon="pencil"
-                                    label="Edit"
-                                    variant="primary"
-                                    x-on:click="openEditModal(@js($doc))"
-                                />
-                                <form method="POST" action="{{ route('admin.master-dokumen.destroy', $doc->id) }}" class="d-inline"
-                                      x-on:submit.prevent="confirmDelete($event)">
-                                    @csrf
-                                    @method('DELETE')
-                                    <x-ui.icon-button type="submit" icon="trash" label="Hapus" variant="danger" />
-                                </form>
-                            </div>
+
+                                <x-ui.action-menu-item variant="primary" x-on:click="openEditModal(@js($doc))">
+                                    <x-ui.icon name="pencil" class="fs-5" />
+                                    Edit Dokumen
+                                </x-ui.action-menu-item>
+
+                                <x-ui.action-menu-item
+                                    variant="danger"
+                                    data-delete-url="{{ route('admin.master-dokumen.destroy', $doc->id) }}"
+                                    x-on:click="confirmDelete($el.dataset.deleteUrl)"
+                                >
+                                    <x-ui.icon name="trash" class="fs-5" />
+                                    Hapus Dokumen
+                                </x-ui.action-menu-item>
+                            </x-ui.action-menu>
                         </td>
                     </tr>
                 @empty
@@ -111,9 +108,14 @@
         </x-ui.simple-table>
 
         <div class="mt-5">
-            {{ $documents->links() }}
+            <x-ui.pagination :paginator="$documents" />
         </div>
     </x-ui.index-layout>
+
+    <form id="document-delete-form" method="POST" class="d-none">
+        @csrf
+        @method('DELETE')
+    </form>
 
     {{-- Modal Create/Edit --}}
     <x-ui.modal name="document-modal" focusable>
@@ -124,7 +126,7 @@
             </template>
 
             <x-ui.modal-header
-                x-bind:title="isEditing ? 'Edit Dokumen' : 'Tambah Dokumen'"
+                title="Kelola Dokumen"
                 subtitle="Lengkapi informasi dokumen."
                 icon="document"
             />
@@ -247,21 +249,21 @@
                 e.target.submit();
             },
 
-            confirmDelete(e) {
-                if (typeof Swal !== 'undefined') {
-                    window.SpmSwal.confirm({
-                        title: 'Hapus dokumen ini?',
-                        text: 'File terkait juga akan dihapus.',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Ya, hapus',
-                        cancelButtonText: 'Batal',
-                    }).then((result) => {
-                        if (result.isConfirmed) e.target.submit();
-                    });
-                } else {
-                    if (confirm('Hapus dokumen ini?')) e.target.submit();
-                }
+            confirmDelete(url) {
+                window.SpmSwal.confirm({
+                    title: 'Hapus dokumen ini?',
+                    text: 'File terkait juga akan dihapus.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, hapus',
+                    cancelButtonText: 'Batal',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const form = document.getElementById('document-delete-form');
+                        form.action = url;
+                        form.requestSubmit();
+                    }
+                });
             }
         };
     }
