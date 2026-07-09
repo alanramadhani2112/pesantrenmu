@@ -400,15 +400,15 @@ class AkreditasiWorkflowService
         $asesor1User = User::findOrFail($asesor1Id);
 
         DB::transaction(function () use ($akreditasi, $tanggalMulai, $tanggalAkhir, $catatan, $asesor1User) {
-            // Save schedule data to akreditasi
+            // Transition first so the optimistic lock checks the row loaded
+            // at the start of this action, before this method changes updated_at.
+            $this->stateMachine->transition($akreditasi, AkreditasiStateMachine::STATUS_VISITASI, $asesor1User);
+
             $akreditasi->update([
                 'tgl_visitasi' => $tanggalMulai,
                 'tgl_visitasi_akhir' => $tanggalAkhir,
                 'catatan_visitasi' => $catatan,
             ]);
-
-            // Transition 4 → 3 via state machine
-            $this->stateMachine->transition($akreditasi, AkreditasiStateMachine::STATUS_VISITASI, $asesor1User);
         });
 
         // Req 5.5: Notify Pesantren and Admin (after transaction)
