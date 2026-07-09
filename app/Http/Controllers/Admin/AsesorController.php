@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Exports\AsesorExport;
+use App\Http\Controllers\Controller;
 use App\Services\AsesorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -80,7 +80,7 @@ class AsesorController extends Controller
 
         return Excel::download(
             new AsesorExport($search, $filterPeran, $filterPenugasan, $filterStatus, $sortField, $sortAsc),
-            'data-asesor-' . now()->format('Y-m-d') . '.xlsx'
+            'data-asesor-'.now()->format('Y-m-d').'.xlsx'
         );
     }
 }

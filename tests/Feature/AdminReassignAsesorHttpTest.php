@@ -27,10 +27,10 @@ class AdminReassignAsesorHttpTest extends TestCase
         $admin = User::factory()->create(['role_id' => 1, 'email_verified_at' => now()]);
         $pesantrenUser = User::factory()->create(['role_id' => 3, 'email_verified_at' => now()]);
         Pesantren::create(['user_id' => $pesantrenUser->id, 'nama_pesantren' => 'Pesantren Test']);
-        
+
         $oldAsesorUser = User::factory()->create(['role_id' => 2, 'email_verified_at' => now()]);
         $oldAsesor = Asesor::create(['user_id' => $oldAsesorUser->id, 'nama_dengan_gelar' => 'Old Asesor', 'nama_tanpa_gelar' => 'Old Asesor']);
-        
+
         $newAsesorUser = User::factory()->create(['role_id' => 2, 'email_verified_at' => now()]);
         $newAsesor = Asesor::create(['user_id' => $newAsesorUser->id, 'nama_dengan_gelar' => 'New Asesor', 'nama_tanpa_gelar' => 'New Asesor']);
 
@@ -53,7 +53,7 @@ class AdminReassignAsesorHttpTest extends TestCase
 
         $response->assertRedirect();
         $response->assertSessionHas('success', 'Asesor berhasil diganti. Deadline baru telah ditetapkan.');
-        
+
         $this->assertDatabaseHas('assessments', [
             'akreditasi_id' => $akreditasi->id,
             'asesor_id' => $newAsesor->id,

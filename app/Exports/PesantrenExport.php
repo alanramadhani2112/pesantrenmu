@@ -13,10 +13,10 @@ class PesantrenExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMa
 {
     public function __construct(
         protected ?string $search,
-        protected string  $filterStatus,
-        protected string  $filterAkreditasi,
-        protected string  $sortField,
-        protected bool    $sortAsc,
+        protected string $filterStatus,
+        protected string $filterAkreditasi,
+        protected string $sortField,
+        protected bool $sortAsc,
     ) {}
 
     public function query()
@@ -24,11 +24,11 @@ class PesantrenExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMa
         return User::where('role_id', 3)
             ->when($this->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('email', 'like', '%' . $search . '%')
+                    $q->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('email', 'like', '%'.$search.'%')
                         ->orWhereHas('pesantren', function ($pq) use ($search) {
-                            $pq->where('nama_pesantren', 'like', '%' . $search . '%')
-                                ->orWhere('ns_pesantren', 'like', '%' . $search . '%');
+                            $pq->where('nama_pesantren', 'like', '%'.$search.'%')
+                                ->orWhere('ns_pesantren', 'like', '%'.$search.'%');
                         });
                 });
             })

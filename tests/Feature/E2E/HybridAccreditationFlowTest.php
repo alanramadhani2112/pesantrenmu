@@ -15,8 +15,8 @@ use Tests\TestCase;
 
 class HybridAccreditationFlowTest extends TestCase
 {
-    use RefreshDatabase;
     use BusinessFlowTestHelpers;
+    use RefreshDatabase;
 
     public function test_http_e2e_canonical_accreditation_flow_reaches_final_result(): void
     {

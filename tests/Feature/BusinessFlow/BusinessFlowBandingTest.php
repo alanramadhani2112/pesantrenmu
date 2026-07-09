@@ -9,8 +9,8 @@ use Tests\TestCase;
 
 class BusinessFlowBandingTest extends TestCase
 {
-    use RefreshDatabase;
     use BusinessFlowTestHelpers;
+    use RefreshDatabase;
 
     private AkreditasiWorkflowService $workflow;
 

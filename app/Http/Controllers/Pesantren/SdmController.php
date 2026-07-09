@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Services\PesantrenService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class SdmController extends Controller
 {
@@ -114,6 +113,7 @@ class SdmController extends Controller
                     return false;
                 }
             }
+
             return true;
         });
 

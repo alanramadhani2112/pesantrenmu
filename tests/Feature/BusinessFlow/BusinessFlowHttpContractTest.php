@@ -8,8 +8,8 @@ use Tests\TestCase;
 
 class BusinessFlowHttpContractTest extends TestCase
 {
-    use RefreshDatabase;
     use BusinessFlowTestHelpers;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {

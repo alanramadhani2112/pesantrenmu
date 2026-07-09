@@ -36,7 +36,6 @@ class RoleMutationAuthorizationTest extends TestCase
         $this->assertDatabaseMissing('roles', ['name' => 'operator']);
     }
 
-
     public function test_super_admin_can_create_update_and_delete_custom_role(): void
     {
         $superAdmin = User::factory()->create(['role_id' => Role::ID_SUPER_ADMIN]);
@@ -59,6 +58,7 @@ class RoleMutationAuthorizationTest extends TestCase
 
         $this->assertDatabaseMissing('roles', ['id' => $role->id]);
     }
+
     public function test_super_admin_cannot_update_canonical_role(): void
     {
         $superAdmin = User::factory()->create(['role_id' => Role::ID_SUPER_ADMIN]);
@@ -82,4 +82,3 @@ class RoleMutationAuthorizationTest extends TestCase
         $this->assertDatabaseHas('roles', ['id' => Role::ID_ASESOR, 'name' => 'asesor', 'parameter' => 'asesor']);
     }
 }
-

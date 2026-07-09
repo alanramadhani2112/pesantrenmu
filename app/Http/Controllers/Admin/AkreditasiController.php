@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\AkreditasiExport;
 use App\Http\Controllers\Controller;
 use App\Models\Akreditasi;
 use App\Services\AkreditasiService;
@@ -9,8 +10,6 @@ use App\Services\DeadlineService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\AkreditasiExport;
-use App\Models\AkreditasiCatatan;
 
 class AkreditasiController extends Controller
 {
@@ -37,9 +36,9 @@ class AkreditasiController extends Controller
 
             if ($search) {
                 $query->whereHas('user', function ($q) use ($search) {
-                    $q->where('name', 'like', '%' . $search . '%')
+                    $q->where('name', 'like', '%'.$search.'%')
                         ->orWhereHas('pesantren', function ($q2) use ($search) {
-                            $q2->where('nama_pesantren', 'like', '%' . $search . '%');
+                            $q2->where('nama_pesantren', 'like', '%'.$search.'%');
                         });
                 });
             }
@@ -112,7 +111,7 @@ class AkreditasiController extends Controller
                 $request->input('sortField', 'created_at'),
                 $request->input('sortAsc', 'false') === 'true'
             ),
-            'data-akreditasi-' . $request->input('statusFilter', 'pengajuan') . '-' . now()->format('Y-m-d') . '.xlsx'
+            'data-akreditasi-'.$request->input('statusFilter', 'pengajuan').'-'.now()->format('Y-m-d').'.xlsx'
         );
     }
 
@@ -127,6 +126,7 @@ class AkreditasiController extends Controller
                 $map[$akreditasi->id] = $this->deadlineService->getDaysOverdue($primaryAssessment);
             }
         }
+
         return $map;
     }
 }

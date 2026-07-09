@@ -25,11 +25,11 @@ class FailedNotificationController extends Controller
 
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
-                $q->where('notification_type', 'like', '%' . $search . '%')
-                    ->orWhere('failure_reason', 'like', '%' . $search . '%')
+                $q->where('notification_type', 'like', '%'.$search.'%')
+                    ->orWhere('failure_reason', 'like', '%'.$search.'%')
                     ->orWhereHas('notifiable', function ($uq) use ($search) {
-                        $uq->where('name', 'like', '%' . $search . '%')
-                            ->orWhere('email', 'like', '%' . $search . '%');
+                        $uq->where('name', 'like', '%'.$search.'%')
+                            ->orWhere('email', 'like', '%'.$search.'%');
                     });
             });
         }

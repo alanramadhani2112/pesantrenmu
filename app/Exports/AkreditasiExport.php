@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Akreditasi;
+use App\Services\AkreditasiService;
 use App\Services\DeadlineService;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -12,10 +13,10 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 class AkreditasiExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMapping
 {
     public function __construct(
-        protected string  $statusFilter,
+        protected string $statusFilter,
         protected ?string $search,
-        protected string  $sortField,
-        protected bool    $sortAsc,
+        protected string $sortField,
+        protected bool $sortAsc,
     ) {}
 
     public function query()
@@ -28,9 +29,9 @@ class AkreditasiExport implements FromQuery, ShouldAutoSize, WithHeadings, WithM
 
             if ($this->search) {
                 $query->whereHas('user', function ($q) {
-                    $q->where('name', 'like', '%' . $this->search . '%')
+                    $q->where('name', 'like', '%'.$this->search.'%')
                         ->orWhereHas('pesantren', function ($q2) {
-                            $q2->where('nama_pesantren', 'like', '%' . $this->search . '%');
+                            $q2->where('nama_pesantren', 'like', '%'.$this->search.'%');
                         });
                 });
             }
@@ -38,7 +39,7 @@ class AkreditasiExport implements FromQuery, ShouldAutoSize, WithHeadings, WithM
             return $query->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc');
         }
 
-        return app(\App\Services\AkreditasiService::class)->getPaginatedAkreditasis(
+        return app(AkreditasiService::class)->getPaginatedAkreditasis(
             $this->statusFilter,
             $this->search,
             10, // unused — we override pagination via FromQuery
@@ -65,23 +66,23 @@ class AkreditasiExport implements FromQuery, ShouldAutoSize, WithHeadings, WithM
 
         /** @var Akreditasi $item */
         $stage = match ((int) $item->status) {
-            Akreditasi::STATUS_PENGAJUAN         => 'Pengajuan',
+            Akreditasi::STATUS_PENGAJUAN => 'Pengajuan',
             Akreditasi::STATUS_VERIFIKASI_BERKAS => 'Verifikasi Berkas',
-            Akreditasi::STATUS_ASSESSMENT        => 'Review Asesor',
-            Akreditasi::STATUS_VISITASI          => 'Visitasi',
-            Akreditasi::STATUS_PASCA_VISITASI    => 'Pasca Visitasi',
-            Akreditasi::STATUS_VALIDASI_ADMIN    => 'Validasi Admin',
-            Akreditasi::STATUS_SELESAI           => 'Selesai',
-            Akreditasi::STATUS_DITOLAK           => 'Ditolak',
-            Akreditasi::STATUS_BANDING           => 'Banding',
-            default                              => 'Tidak Diketahui',
+            Akreditasi::STATUS_ASSESSMENT => 'Review Asesor',
+            Akreditasi::STATUS_VISITASI => 'Visitasi',
+            Akreditasi::STATUS_PASCA_VISITASI => 'Pasca Visitasi',
+            Akreditasi::STATUS_VALIDASI_ADMIN => 'Validasi Admin',
+            Akreditasi::STATUS_SELESAI => 'Selesai',
+            Akreditasi::STATUS_DITOLAK => 'Ditolak',
+            Akreditasi::STATUS_BANDING => 'Banding',
+            default => 'Tidak Diketahui',
         };
 
         $statusLabel = match ((int) $item->status) {
-            Akreditasi::STATUS_SELESAI  => 'Tersertifikasi',
-            Akreditasi::STATUS_DITOLAK  => 'Ditolak',
-            Akreditasi::STATUS_BANDING  => 'Banding',
-            default                     => 'Dalam Proses',
+            Akreditasi::STATUS_SELESAI => 'Tersertifikasi',
+            Akreditasi::STATUS_DITOLAK => 'Ditolak',
+            Akreditasi::STATUS_BANDING => 'Banding',
+            default => 'Dalam Proses',
         };
 
         return [

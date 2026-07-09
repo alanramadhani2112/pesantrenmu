@@ -24,8 +24,8 @@ class MasterKategoriDokumenController extends Controller
         $categories = DocumentCategory::query()
             ->when($search, fn ($q) => $q->where(function ($qq) use ($search) {
                 $qq->where('name', 'like', "%{$search}%")
-                   ->orWhere('slug', 'like', "%{$search}%")
-                   ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('slug', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
             }))
             ->orderBy($sortField, $sortAsc ? 'asc' : 'desc')
             ->paginate($perPage)
@@ -45,7 +45,7 @@ class MasterKategoriDokumenController extends Controller
             'slug' => ['required', 'string', 'max:100', 'regex:/^[a-z0-9_]+$/', Rule::unique('document_categories', 'slug')],
             'description' => 'nullable|string|max:1000',
             'icon' => 'required|string|max:50',
-            'visibility' => 'required|in:' . implode(',', DocumentCategory::VISIBILITIES),
+            'visibility' => 'required|in:'.implode(',', DocumentCategory::VISIBILITIES),
             'pesantren_can_upload' => 'boolean',
             'asesor_can_upload' => 'boolean',
             'is_active' => 'boolean',
@@ -72,7 +72,7 @@ class MasterKategoriDokumenController extends Controller
             'slug' => ['required', 'string', 'max:100', 'regex:/^[a-z0-9_]+$/', Rule::unique('document_categories', 'slug')->ignore($category->id)],
             'description' => 'nullable|string|max:1000',
             'icon' => 'required|string|max:50',
-            'visibility' => 'required|in:' . implode(',', DocumentCategory::VISIBILITIES),
+            'visibility' => 'required|in:'.implode(',', DocumentCategory::VISIBILITIES),
             'pesantren_can_upload' => 'boolean',
             'asesor_can_upload' => 'boolean',
             'is_active' => 'boolean',

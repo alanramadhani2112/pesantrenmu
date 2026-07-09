@@ -45,10 +45,12 @@ class ProfileController extends Controller
 
         if ($success) {
             $this->deleteOldFiles($newlyStored);
+
             return back()->with('success', 'Draft profil pesantren berhasil disimpan.');
         }
 
         $this->rollbackNewFiles($newlyStored);
+
         return back()->with('error', 'Gagal menyimpan draft profil.');
     }
 
@@ -76,10 +78,12 @@ class ProfileController extends Controller
 
         if ($success) {
             $this->deleteOldFiles($newlyStored);
+
             return back()->with('success', 'Profil pesantren berhasil disubmit.');
         }
 
         $this->rollbackNewFiles($newlyStored);
+
         return back()->with('error', 'Gagal menyimpan profil pesantren.');
     }
 
@@ -196,7 +200,7 @@ class ProfileController extends Controller
             'provinsi' => 'nullable|string|max:255',
             'provinsi_kode' => 'nullable|string|max:10',
             'kabupaten_kode' => 'nullable|string|max:10',
-            'tahun_pendirian' => 'nullable|integer|min:1900|max:' . date('Y'),
+            'tahun_pendirian' => 'nullable|integer|min:1900|max:'.date('Y'),
             'nama_mudir' => 'nullable|string|max:255',
             'jenjang_pendidikan_mudir' => 'nullable|string|max:255',
             'telp_pesantren' => 'nullable|string|max:50',
@@ -221,7 +225,7 @@ class ProfileController extends Controller
         $rules['alamat'] = 'required|string|max:1000';
         $rules['layanan_satuan_pendidikan'] = 'required|array|min:1';
         $rules['provinsi_kode'] = 'required|string|max:10';
-        $rules['tahun_pendirian'] = 'required|integer|min:1900|max:' . date('Y');
+        $rules['tahun_pendirian'] = 'required|integer|min:1900|max:'.date('Y');
 
         return $rules;
     }

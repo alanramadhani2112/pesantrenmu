@@ -24,7 +24,7 @@ class RolePermissionController extends Controller
         $permissionsQuery = Permission::query()
             ->when($search, fn ($q) => $q->where(function ($qq) use ($search) {
                 $qq->where('key', 'like', "%{$search}%")
-                   ->orWhere('label', 'like', "%{$search}%");
+                    ->orWhere('label', 'like', "%{$search}%");
             }))
             ->when($groupFilter, fn ($q) => $q->where('group', $groupFilter))
             ->orderBy('group')

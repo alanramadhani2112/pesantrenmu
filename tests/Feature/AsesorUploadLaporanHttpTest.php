@@ -111,10 +111,10 @@ class AsesorUploadLaporanHttpTest extends TestCase
 
         $asesor1User = User::factory()->create(['role_id' => 2, 'email_verified_at' => now()]);
         $asesor1 = Asesor::create(['user_id' => $asesor1User->id, 'nama_dengan_gelar' => 'Asesor 1', 'nama_tanpa_gelar' => 'Asesor 1']);
-        
+
         $asesor2User = User::factory()->create(['role_id' => 2, 'email_verified_at' => now()]);
         $asesor2 = Asesor::create(['user_id' => $asesor2User->id, 'nama_dengan_gelar' => 'Asesor 2', 'nama_tanpa_gelar' => 'Asesor 2']);
-        
+
         $pesantrenUser = User::factory()->create(['role_id' => 3, 'email_verified_at' => now()]);
         Pesantren::create(['user_id' => $pesantrenUser->id, 'nama_pesantren' => 'Pesantren Test']);
 

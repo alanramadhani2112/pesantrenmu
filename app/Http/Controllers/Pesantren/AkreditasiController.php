@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Pesantren;
 
 use App\Http\Controllers\Controller;
+use App\Models\Akreditasi;
 use App\Services\AkreditasiWorkflowService;
 use App\Services\PesantrenService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 
 class AkreditasiController extends Controller
 {
@@ -61,6 +61,7 @@ class AkreditasiController extends Controller
 
         try {
             $this->workflowService->submitPengajuan(Auth::id());
+
             return back()->with('success', 'Pengajuan akreditasi berhasil dibuat. Data profil telah dikunci.');
         } catch (\DomainException $e) {
             return back()->with('error', $e->getMessage());
@@ -126,12 +127,12 @@ class AkreditasiController extends Controller
     {
         abort_unless(auth()->user()->isPesantren(), 403);
 
-        $akreditasi = \App\Models\Akreditasi::with(['catatans.user'])
+        $akreditasi = Akreditasi::with(['catatans.user'])
             ->where('user_id', Auth::id())
             ->findOrFail($id);
 
         return response()->json([
-            'catatans' => $akreditasi->catatans->map(fn($c) => [
+            'catatans' => $akreditasi->catatans->map(fn ($c) => [
                 'user_name' => $c->user?->name ?? 'System',
                 'catatan' => $c->catatan,
                 'created_at' => $c->created_at->format('d M Y H:i'),

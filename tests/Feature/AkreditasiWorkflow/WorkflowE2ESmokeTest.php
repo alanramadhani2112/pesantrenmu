@@ -262,5 +262,3 @@ class WorkflowE2ESmokeTest extends TestCase
         }
     }
 }
-
-

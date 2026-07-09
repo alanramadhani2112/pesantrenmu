@@ -21,7 +21,6 @@ use Database\Seeders\MasterEdpmSeeder;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 
 trait BusinessFlowTestHelpers

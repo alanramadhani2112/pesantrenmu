@@ -59,4 +59,3 @@ class AsesorVisitasiVisibilityTest extends TestCase
         $this->assertNotNull($fresh->tgl_visitasi);
     }
 }
-

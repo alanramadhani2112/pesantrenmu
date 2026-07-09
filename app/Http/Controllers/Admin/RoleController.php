@@ -9,9 +9,7 @@ use Illuminate\Support\Facades\Gate;
 
 class RoleController extends Controller
 {
-    public function __construct(private RoleService $service)
-    {
-    }
+    public function __construct(private RoleService $service) {}
 
     public function index(Request $request)
     {
@@ -48,8 +46,8 @@ class RoleController extends Controller
         $this->authorizeRoleMutation($id);
 
         $data = $request->validate([
-            'name' => 'required|string|max:255|unique:roles,name,' . $id,
-            'parameter' => 'required|string|max:255|unique:roles,parameter,' . $id,
+            'name' => 'required|string|max:255|unique:roles,name,'.$id,
+            'parameter' => 'required|string|max:255|unique:roles,parameter,'.$id,
         ]);
 
         $this->service->saveRole($data, $id);

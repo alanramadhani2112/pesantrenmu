@@ -72,7 +72,7 @@ jobs:
           php artisan key:generate
 
       - name: Run Tests
-        run: php artisan test --parallel --no-coverage
+        run: php artisan test --no-coverage
 
   build:
     name: Build Frontend

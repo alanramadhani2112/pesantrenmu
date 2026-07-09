@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Akreditasi;
 use App\Models\Banding;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -16,7 +16,7 @@ class LayoutDataController extends Controller
     public function sidebarBadges(): JsonResponse
     {
         try {
-            /** @var \App\Models\User $user */
+            /** @var User $user */
             $user = Auth::user();
 
             if (! $user) {
@@ -48,7 +48,7 @@ class LayoutDataController extends Controller
 
                 if ($asesor) {
                     $activeTaskCount = Cache::remember(
-                        'badge:asesor:' . $asesor->id . ':active_tasks',
+                        'badge:asesor:'.$asesor->id.':active_tasks',
                         30,
                         fn () => Akreditasi::whereIn('status', [4, 5])
                             ->whereHas('assessments', function ($query) use ($asesor) {
@@ -80,7 +80,7 @@ class LayoutDataController extends Controller
     public function notifications(): JsonResponse
     {
         try {
-            /** @var \App\Models\User $user */
+            /** @var User $user */
             $user = Auth::user();
 
             $notifications = $user->notifications()->take(10)->get()->map(function ($notification) {
@@ -113,7 +113,7 @@ class LayoutDataController extends Controller
     public function markNotificationRead(string $id): JsonResponse
     {
         try {
-            /** @var \App\Models\User $user */
+            /** @var User $user */
             $user = Auth::user();
 
             $notification = $user->notifications()->find($id);
@@ -140,7 +140,7 @@ class LayoutDataController extends Controller
     public function markAllNotificationsRead(): JsonResponse
     {
         try {
-            /** @var \App\Models\User $user */
+            /** @var User $user */
             $user = Auth::user();
 
             $user->unreadNotifications->markAsRead();

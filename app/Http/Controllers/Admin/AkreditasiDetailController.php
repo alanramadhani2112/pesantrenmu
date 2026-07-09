@@ -2,18 +2,23 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exceptions\ConflictException;
+use App\Exceptions\ImmutableValueException;
+use App\Exceptions\StaleStateException;
 use App\Http\Controllers\Controller;
-use App\Models\Akreditasi;
+use App\Models\AkreditasiEdpm;
 use App\Models\Asesor;
+use App\Notifications\AkreditasiNotification;
 use App\Services\AkreditasiService;
 use App\Services\AkreditasiWorkflowService;
-use App\Services\AuditTrailService;
 use App\Services\AssessorScoringService;
+use App\Services\AuditTrailService;
 use App\Services\DeadlineService;
 use App\Services\PesantrenService;
 use App\Services\ProgressTracker;
 use App\Services\RejectionService;
 use App\Services\ScoreCalculationService;
+use App\StateMachine\AkreditasiStateMachine;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -113,7 +118,7 @@ class AkreditasiDetailController extends Controller
         $asesor1NkProgress = null;
         $asesor2NaProgress = null;
 
-        if ($akreditasi->status == \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
+        if ($akreditasi->status == AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
             $progress = $this->progressTracker->getAkreditasiProgress($akreditasi->id);
             $asesor1NaProgress = $progress['asesor1_na'];
             $asesor1NkProgress = $progress['asesor1_nk'];
@@ -138,7 +143,7 @@ class AkreditasiDetailController extends Controller
             ->get()
             ->map(fn (Asesor $asesor): array => [
                 'user_id' => $asesor->user_id,
-                'name' => $asesor->nama_tanpa_gelar ?? ($asesor->user?->name ?? 'Asesor #' . $asesor->user_id),
+                'name' => $asesor->nama_tanpa_gelar ?? ($asesor->user?->name ?? 'Asesor #'.$asesor->user_id),
             ])
             ->all();
 
@@ -157,7 +162,7 @@ class AkreditasiDetailController extends Controller
             }
         }
 
-        $showFinalDecision = (int) $akreditasi->status === \App\StateMachine\AkreditasiStateMachine::STATUS_VALIDASI_ADMIN
+        $showFinalDecision = (int) $akreditasi->status === AkreditasiStateMachine::STATUS_VALIDASI_ADMIN
             && (bool) $akreditasi->is_nv_final;
 
         // Compute scoring progress cards (replaces adminScoringProgressCards())
@@ -165,10 +170,10 @@ class AkreditasiDetailController extends Controller
             $asesor1NaProgress, $asesor1NkProgress, $asesor2NaProgress
         );
         $scoringBlockers = array_values(array_map(
-            fn(array $card): string => 'Menunggu ' . $card['label'],
+            fn (array $card): string => 'Menunggu '.$card['label'],
             array_filter(
                 $scoringProgressCards,
-                fn(array $card): bool => (float) ($card['progress']['percentage'] ?? 0) < 100.0
+                fn (array $card): bool => (float) ($card['progress']['percentage'] ?? 0) < 100.0
             )
         ));
 
@@ -246,6 +251,7 @@ class AkreditasiDetailController extends Controller
                 return null;
             }
             $card['color'] = $this->progressTracker->getColorClass((float) ($card['progress']['percentage'] ?? 0));
+
             return $card;
         }, $cards)));
     }
@@ -276,6 +282,7 @@ class AkreditasiDetailController extends Controller
                 $requiredCount++;
                 if (blank($nvValue)) {
                     $pendingCount++;
+
                     continue;
                 }
 
@@ -347,7 +354,9 @@ class AkreditasiDetailController extends Controller
         abort_unless(auth()->user()->canAccessAdminArea(), 403);
 
         $akreditasi = $this->akreditasiService->findAkreditasi($uuid);
-        if (! $akreditasi) abort(404);
+        if (! $akreditasi) {
+            abort(404);
+        }
 
         Gate::authorize('akreditasi.approve');
 
@@ -379,7 +388,9 @@ class AkreditasiDetailController extends Controller
         abort_unless(auth()->user()->canAccessAdminArea(), 403);
 
         $akreditasi = $this->akreditasiService->findAkreditasi($uuid);
-        if (! $akreditasi) abort(404);
+        if (! $akreditasi) {
+            abort(404);
+        }
 
         Gate::authorize('akreditasi.approve');
 
@@ -411,7 +422,7 @@ class AkreditasiDetailController extends Controller
                 try {
                     $this->scoringService->saveNV($akreditasi->id, $adminId, (int) $butirId, (int) $nvValue, false, $reason);
                 } catch (\Throwable $e) {
-                    $errors[] = "Butir #{$butirId}: " . $e->getMessage();
+                    $errors[] = "Butir #{$butirId}: ".$e->getMessage();
                 }
             }
         }
@@ -428,7 +439,9 @@ class AkreditasiDetailController extends Controller
         abort_unless(auth()->user()->canAccessAdminArea(), 403);
 
         $akreditasi = $this->akreditasiService->findAkreditasi($uuid);
-        if (! $akreditasi) abort(404);
+        if (! $akreditasi) {
+            abort(404);
+        }
 
         Gate::authorize('akreditasi.approve');
 
@@ -462,7 +475,7 @@ class AkreditasiDetailController extends Controller
                         try {
                             $this->scoringService->saveNV($akreditasi->id, $adminId, (int) $butirId, (int) $nvValue, true, $reason);
                             $finalizedCount++;
-                        } catch (\App\Exceptions\ImmutableValueException $e) {
+                        } catch (ImmutableValueException $e) {
                             $finalizedCount++;
                         }
                     }
@@ -476,7 +489,7 @@ class AkreditasiDetailController extends Controller
             return back()->withInput()->with('error', 'Tidak ada NV valid yang dikirim untuk difinalisasi.');
         }
 
-        $requiredNvQuery = \App\Models\AkreditasiEdpm::where('akreditasi_id', $akreditasi->id)
+        $requiredNvQuery = AkreditasiEdpm::where('akreditasi_id', $akreditasi->id)
             ->whereNotNull('nk');
 
         $expectedFinalCount = (clone $requiredNvQuery)->count();
@@ -500,12 +513,15 @@ class AkreditasiDetailController extends Controller
         abort_unless(auth()->user()->canAccessAdminArea(), 403);
 
         $akreditasi = $this->akreditasiService->findAkreditasi($uuid);
-        if (! $akreditasi) abort(404);
+        if (! $akreditasi) {
+            abort(404);
+        }
 
         Gate::authorize('akreditasi.approve');
 
         try {
             $this->workflowService->openForReview($akreditasi->id, Auth::id());
+
             return back()->with('success', 'Pengajuan dibuka untuk verifikasi berkas.');
         } catch (\DomainException $e) {
             return back()->with('error', $e->getMessage());
@@ -517,7 +533,9 @@ class AkreditasiDetailController extends Controller
         abort_unless(auth()->user()->canAccessAdminArea(), 403);
 
         $akreditasi = $this->akreditasiService->findAkreditasi($uuid);
-        if (! $akreditasi) abort(404);
+        if (! $akreditasi) {
+            abort(404);
+        }
 
         Gate::authorize('akreditasi.approve');
 
@@ -538,10 +556,11 @@ class AkreditasiDetailController extends Controller
                 (int) $validated['asesor2Id'],
                 $akreditasi->updated_at->toISOString()
             );
+
             return back()->with('success', 'Berkas disetujui. Asesor telah ditugaskan.');
         } catch (\DomainException $e) {
             return back()->with('error', $e->getMessage());
-        } catch (\App\Exceptions\StaleStateException $e) {
+        } catch (StaleStateException $e) {
             return back()->with('error', 'Akreditasi telah dimodifikasi oleh pengguna lain. Silakan muat ulang halaman.');
         }
     }
@@ -551,7 +570,9 @@ class AkreditasiDetailController extends Controller
         abort_unless(auth()->user()->canAccessAdminArea(), 403);
 
         $akreditasi = $this->akreditasiService->findAkreditasi($uuid);
-        if (! $akreditasi) abort(404);
+        if (! $akreditasi) {
+            abort(404);
+        }
 
         Gate::authorize('akreditasi.approve');
 
@@ -581,7 +602,9 @@ class AkreditasiDetailController extends Controller
         abort_unless(auth()->user()->canAccessAdminArea(), 403);
 
         $akreditasi = $this->akreditasiService->findAkreditasi($uuid);
-        if (! $akreditasi) abort(404);
+        if (! $akreditasi) {
+            abort(404);
+        }
 
         Gate::authorize('finalize', $akreditasi);
 
@@ -610,14 +633,17 @@ class AkreditasiDetailController extends Controller
             ], $akreditasi->updated_at->toISOString());
 
             return redirect()->route('admin.akreditasi')->with('success', 'SK Akreditasi berhasil diterbitkan.');
-        } catch (\App\Exceptions\ConflictException $e) {
+        } catch (ConflictException $e) {
             $this->cleanupStoredCertificate($sertifikatPath);
+
             return back()->withInput($request->except('sertifikat_file'))->with('error', 'Akreditasi telah dimodifikasi oleh pengguna lain. Silakan muat ulang halaman.');
         } catch (\DomainException $e) {
             $this->cleanupStoredCertificate($sertifikatPath);
+
             return back()->withInput($request->except('sertifikat_file'))->with('error', $e->getMessage());
-        } catch (\App\Exceptions\StaleStateException $e) {
+        } catch (StaleStateException $e) {
             $this->cleanupStoredCertificate($sertifikatPath);
+
             return back()->withInput($request->except('sertifikat_file'))->with('error', 'Akreditasi telah dimodifikasi oleh pengguna lain. Silakan muat ulang halaman.');
         }
     }
@@ -634,7 +660,9 @@ class AkreditasiDetailController extends Controller
         abort_unless(auth()->user()->canAccessAdminArea(), 403);
 
         $akreditasi = $this->akreditasiService->findAkreditasi($uuid);
-        if (! $akreditasi) abort(404);
+        if (! $akreditasi) {
+            abort(404);
+        }
 
         Gate::authorize('finalize', $akreditasi);
 
@@ -654,7 +682,7 @@ class AkreditasiDetailController extends Controller
 
         try {
             $reason = collect($validated['rejectionCategories'])
-                ->map(fn($c) => ($c['category'] ?? '') . ': ' . ($c['explanation'] ?? ''))
+                ->map(fn ($c) => ($c['category'] ?? '').': '.($c['explanation'] ?? ''))
                 ->implode('; ');
 
             $this->workflowService->rejectAtValidasi(
@@ -668,7 +696,7 @@ class AkreditasiDetailController extends Controller
             return redirect()->route('admin.akreditasi')->with('success', 'Akreditasi telah ditolak.');
         } catch (\DomainException $e) {
             return back()->withInput()->with('error', $e->getMessage());
-        } catch (\App\Exceptions\StaleStateException $e) {
+        } catch (StaleStateException $e) {
             return back()->withInput()->with('error', 'Akreditasi telah dimodifikasi oleh pengguna lain. Silakan muat ulang halaman.');
         }
     }
@@ -678,7 +706,9 @@ class AkreditasiDetailController extends Controller
         abort_unless(auth()->user()->canAccessAdminArea(), 403);
 
         $akreditasi = $this->akreditasiService->findAkreditasi($uuid);
-        if (! $akreditasi) abort(404);
+        if (! $akreditasi) {
+            abort(404);
+        }
 
         Gate::authorize('pesantren.lock');
 
@@ -691,7 +721,7 @@ class AkreditasiDetailController extends Controller
             $status = $pesantren->is_locked ? 'terkunci' : 'terbuka';
 
             if ($prevLocked && ! $pesantren->is_locked) {
-                $akreditasi->user->notify(new \App\Notifications\AkreditasiNotification(
+                $akreditasi->user->notify(new AkreditasiNotification(
                     'buka_kunci',
                     'Akses Data Dibuka',
                     'Administrator telah membuka kunci data Anda. Anda sekarang dapat memperbarui profil dan dokumen.',
@@ -710,7 +740,9 @@ class AkreditasiDetailController extends Controller
         abort_unless(auth()->user()->canAccessAdminArea(), 403);
 
         $akreditasi = $this->akreditasiService->findAkreditasi($uuid);
-        if (! $akreditasi) abort(404);
+        if (! $akreditasi) {
+            abort(404);
+        }
 
         Gate::authorize('asesor.assign');
 
@@ -730,12 +762,10 @@ class AkreditasiDetailController extends Controller
 
         try {
             $this->deadlineService->reassignAsesor($primaryAssessment, (int) $validated['reassignAsesorId']);
+
             return back()->with('success', 'Asesor berhasil diganti. Deadline baru telah ditetapkan.');
         } catch (\DomainException $e) {
-            return back()->with('error', 'Gagal mengganti asesor: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengganti asesor: '.$e->getMessage());
         }
     }
 }
-
-
-

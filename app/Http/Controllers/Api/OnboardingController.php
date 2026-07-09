@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\OnboardingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ class OnboardingController extends Controller
     public function status(): JsonResponse
     {
         try {
-            /** @var \App\Models\User $user */
+            /** @var User $user */
             $user = Auth::user();
 
             if (! $user) {
@@ -60,7 +61,7 @@ class OnboardingController extends Controller
         try {
             $request->validate(['step_key' => 'required|string']);
 
-            /** @var \App\Models\User $user */
+            /** @var User $user */
             $user = Auth::user();
 
             if (! $user) {
@@ -92,7 +93,7 @@ class OnboardingController extends Controller
     public function skip(): JsonResponse
     {
         try {
-            /** @var \App\Models\User $user */
+            /** @var User $user */
             $user = Auth::user();
 
             if (! $user) {
@@ -114,7 +115,7 @@ class OnboardingController extends Controller
     public function complete(): JsonResponse
     {
         try {
-            /** @var \App\Models\User $user */
+            /** @var User $user */
             $user = Auth::user();
 
             if (! $user) {

@@ -87,6 +87,7 @@ class IpmController extends Controller
                     Storage::disk('public')->delete($oldPath);
                 }
             }
+
             return back()->with('success', 'Data IPM berhasil diperbarui.');
         }
 

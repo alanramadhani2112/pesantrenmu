@@ -10,9 +10,7 @@ use Illuminate\Support\Facades\Gate;
 
 class MasterDokumenController extends Controller
 {
-    public function __construct(private DocumentService $service)
-    {
-    }
+    public function __construct(private DocumentService $service) {}
 
     public function index(Request $request)
     {

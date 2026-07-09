@@ -12,8 +12,8 @@ use Tests\TestCase;
 
 class BusinessFlowHappyPathTest extends TestCase
 {
-    use RefreshDatabase;
     use BusinessFlowTestHelpers;
+    use RefreshDatabase;
 
     private AkreditasiWorkflowService $workflow;
 

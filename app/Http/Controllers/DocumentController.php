@@ -45,7 +45,7 @@ class DocumentController extends Controller
             if ($firstDoc && $firstDoc->category) {
                 $pageTitle = $firstDoc->category->name;
             } else {
-                $category = \App\Models\DocumentCategory::query()
+                $category = DocumentCategory::query()
                     ->where('slug', $doc)
                     ->value('name');
                 $pageTitle = $category ?: 'Daftar Dokumen';

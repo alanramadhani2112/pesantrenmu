@@ -124,4 +124,3 @@ class ProfileController extends Controller
         return back()->with('error', 'Gagal memperbarui profil asesor.');
     }
 }
-

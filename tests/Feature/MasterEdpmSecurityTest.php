@@ -61,7 +61,7 @@ class MasterEdpmSecurityTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        preg_match('/x-on:click="(openKomponenModal\(' . $komponen->id . ',.*?\))"/s', $html, $matches);
+        preg_match('/x-on:click="(openKomponenModal\('.$komponen->id.',.*?\))"/s', $html, $matches);
         $this->assertNotEmpty($matches, 'Expected component edit-button handler to be present.');
 
         $handler = html_entity_decode($matches[1], ENT_QUOTES);

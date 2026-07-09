@@ -71,7 +71,6 @@ class TrashAuthorizationTest extends TestCase
         $response->assertStatus(403);
     }
 
-
     public function test_admin_without_restore_permission_cannot_restore_trash(): void
     {
         $admin = $this->makeAdmin();
@@ -107,10 +106,10 @@ class TrashAuthorizationTest extends TestCase
 
         return $akreditasi;
     }
+
     public function test_unauthenticated_user_gets_redirected(): void
     {
         $response = $this->get(route('admin.trash'));
         $response->assertRedirect(route('login'));
     }
 }
-

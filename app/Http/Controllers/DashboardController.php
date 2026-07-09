@@ -57,7 +57,7 @@ class DashboardController extends Controller
             default => 'MONTH(created_at)',
         };
 
-        $submissionQuery = Akreditasi::selectRaw($monthExpression . ' as month, COUNT(*) as count')
+        $submissionQuery = Akreditasi::selectRaw($monthExpression.' as month, COUNT(*) as count')
             ->whereYear('created_at', date('Y'));
 
         if ($isPesantren) {
@@ -168,7 +168,7 @@ class DashboardController extends Controller
                 ['key' => 'ipm', 'label' => 'Data IPM', 'done' => $sectionProgress['ipm'] === 'complete', 'route' => 'pesantren.ipm'],
                 ['key' => 'sdm', 'label' => 'Data SDM', 'done' => $sectionProgress['sdm'] === 'complete', 'route' => 'pesantren.sdm'],
                 ['key' => 'edpm', 'label' => 'Evaluasi Diri (EDPM)', 'done' => $edpmCount > 0, 'route' => 'pesantren.edpm'],
-                ['key' => 'dokumen', 'label' => "Dokumen ($docFilled/" . count($docFields) . ')', 'done' => $docFilled >= 7, 'route' => 'pesantren.profile'],
+                ['key' => 'dokumen', 'label' => "Dokumen ($docFilled/".count($docFields).')', 'done' => $docFilled >= 7, 'route' => 'pesantren.profile'],
             ];
         }
 

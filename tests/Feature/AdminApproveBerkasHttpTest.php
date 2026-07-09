@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Akreditasi;
 use App\Models\Asesor;
-use App\Models\Assessment;
 use App\Models\Pesantren;
 use App\Models\User;
 use App\StateMachine\AkreditasiStateMachine;

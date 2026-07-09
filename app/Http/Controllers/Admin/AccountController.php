@@ -8,7 +8,6 @@ use App\Services\RoleService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class AccountController extends Controller
@@ -78,7 +77,7 @@ class AccountController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,' . $id],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,'.$id],
             'role_id' => ['required', 'exists:roles,id'],
             'status' => ['boolean'],
             'sso_sync_role' => ['boolean'],
@@ -132,6 +131,6 @@ class AccountController extends Controller
         $user->profile_data()->delete();
         $user->update(['sso_linked_at' => null]);
 
-        return back()->with('success', 'SSO berhasil di-unlink dari akun ' . $user->name . '.');
+        return back()->with('success', 'SSO berhasil di-unlink dari akun '.$user->name.'.');
     }
 }

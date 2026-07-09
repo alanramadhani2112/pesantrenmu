@@ -7,8 +7,8 @@ use Tests\TestCase;
 
 class BusinessFlowRoleTest extends TestCase
 {
-    use RefreshDatabase;
     use BusinessFlowTestHelpers;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {

@@ -445,8 +445,6 @@ class MetronicFrontendTest extends TestCase
         );
     }
 
-
-
     public function test_render_markup_does_not_contain_direct_queries(): void
     {
         $views = [
@@ -751,14 +749,6 @@ class MetronicFrontendTest extends TestCase
             ->assertSee('data-ui-modal-header="metronic"', false)
             ->assertSee('data-ui-form-field="metronic"', false);
     }
-
-
-
-
-
-
-
-
 
     public function test_form_modal_views_use_reusable_metronic_form_controls(): void
     {

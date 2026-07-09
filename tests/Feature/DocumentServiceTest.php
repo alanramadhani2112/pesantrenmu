@@ -157,7 +157,6 @@ class DocumentServiceTest extends TestCase
         Storage::disk('public')->assertMissing($updated->file_path);
     }
 
-
     public function test_save_document_deletes_new_file_when_repository_create_fails(): void
     {
         $repo = Mockery::mock(DocumentRepositoryInterface::class);
@@ -338,4 +337,3 @@ class DocumentServiceTest extends TestCase
         $this->assertNull($this->service->findDocument(99999));
     }
 }
-

@@ -454,6 +454,7 @@ class PesantrenService
                             ['catatan' => $catatan]
                         );
                     }
+
                     return true;
                 }
 
@@ -478,6 +479,7 @@ class PesantrenService
                         ['catatan' => $catatan]
                     );
                 }
+
                 return $hasUnlocked;
             });
         }
@@ -598,8 +600,12 @@ class PesantrenService
             if ((int) $akreditasi->status === 5) {
                 return DB::transaction(function () use ($userId, $data) {
                     $existingIpm = Ipm::where('user_id', $userId)->first();
-                    if ($existingIpm) { $existingIpm->update($data); }
-                    else { Ipm::create(['user_id' => $userId] + $data); }
+                    if ($existingIpm) {
+                        $existingIpm->update($data);
+                    } else {
+                        Ipm::create(['user_id' => $userId] + $data);
+                    }
+
                     return true;
                 });
             }

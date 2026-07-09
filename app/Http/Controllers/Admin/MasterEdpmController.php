@@ -9,9 +9,7 @@ use Illuminate\Support\Facades\Gate;
 
 class MasterEdpmController extends Controller
 {
-    public function __construct(private MasterEdpmService $service)
-    {
-    }
+    public function __construct(private MasterEdpmService $service) {}
 
     public function index()
     {

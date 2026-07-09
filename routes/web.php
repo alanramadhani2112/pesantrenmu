@@ -1,12 +1,29 @@
 <?php
 
+use App\Http\Controllers\Admin\AccountController;
+use App\Http\Controllers\Admin\AkreditasiController;
+use App\Http\Controllers\Admin\AkreditasiDetailController;
+use App\Http\Controllers\Admin\AsesorController;
+use App\Http\Controllers\Admin\BandingController;
+use App\Http\Controllers\Admin\BandingDetailController;
+use App\Http\Controllers\Admin\FailedNotificationController;
 use App\Http\Controllers\Admin\MasterDokumenController;
 use App\Http\Controllers\Admin\MasterEdpmController;
 use App\Http\Controllers\Admin\MasterKategoriDokumenController;
+use App\Http\Controllers\Admin\PesantrenController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\RolePermissionController;
+use App\Http\Controllers\Admin\TrashController;
+use App\Http\Controllers\Api\LayoutDataController;
+use App\Http\Controllers\Api\OnboardingController;
+use App\Http\Controllers\Asesor\ProfileController as AsesorProfileController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\PanduanRedirectController;
+use App\Http\Controllers\Pesantren\EdpmController;
+use App\Http\Controllers\Pesantren\IpmController;
+use App\Http\Controllers\Pesantren\SdmController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SecureAsesorDocumentController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,13 +34,12 @@ Route::get('dashboard', DashboardController::class)
     ->name('dashboard');
 
 Route::middleware('auth')->prefix('profile')->name('profile.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('edit');
-    Route::put('/info', [\App\Http\Controllers\ProfileController::class, 'updateInfo'])->name('info');
-    Route::put('/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('password');
-    Route::put('/photo', [\App\Http\Controllers\ProfileController::class, 'updatePhoto'])->name('photo');
-    Route::delete('/photo', [\App\Http\Controllers\ProfileController::class, 'removePhoto'])->name('photo.remove');
+    Route::get('/', [ProfileController::class, 'edit'])->name('edit');
+    Route::put('/info', [ProfileController::class, 'updateInfo'])->name('info');
+    Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password');
+    Route::put('/photo', [ProfileController::class, 'updatePhoto'])->name('photo');
+    Route::delete('/photo', [ProfileController::class, 'removePhoto'])->name('photo.remove');
 });
-
 
 Route::get('roles', [RoleController::class, 'index'])->middleware(['auth', 'verified', 'permission:master.role']);
 
@@ -41,20 +57,20 @@ Route::middleware(['auth', 'verified', 'permission:account.view'])
     ->prefix('accounts')
     ->name('accounts.')
     ->group(function () {
-        Route::get('/', [App\Http\Controllers\Admin\AccountController::class, 'index'])->name('index');
-        Route::post('/', [App\Http\Controllers\Admin\AccountController::class, 'store'])->name('store');
-        Route::put('/{id}', [App\Http\Controllers\Admin\AccountController::class, 'update'])->name('update');
-        Route::delete('/{id}', [App\Http\Controllers\Admin\AccountController::class, 'destroy'])->name('destroy');
-        Route::post('/toggle-status', [App\Http\Controllers\Admin\AccountController::class, 'toggleStatus'])->name('toggle-status');
-        Route::post('/unlink-sso', [App\Http\Controllers\Admin\AccountController::class, 'unlinkSso'])->name('unlink-sso');
+        Route::get('/', [AccountController::class, 'index'])->name('index');
+        Route::post('/', [AccountController::class, 'store'])->name('store');
+        Route::put('/{id}', [AccountController::class, 'update'])->name('update');
+        Route::delete('/{id}', [AccountController::class, 'destroy'])->name('destroy');
+        Route::post('/toggle-status', [AccountController::class, 'toggleStatus'])->name('toggle-status');
+        Route::post('/unlink-sso', [AccountController::class, 'unlinkSso'])->name('unlink-sso');
     });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('documents/{document}/download', [App\Http\Controllers\DocumentController::class, 'download'])
+    Route::get('documents/{document}/download', [DocumentController::class, 'download'])
         ->whereNumber('document')
         ->name('documents.download');
 
-    Route::get('documents/{doc?}', [App\Http\Controllers\DocumentController::class, 'index'])
+    Route::get('documents/{doc?}', [DocumentController::class, 'index'])
         ->name('documents.index');
 });
 
@@ -133,98 +149,98 @@ Route::middleware(['auth', 'verified', 'role:admin'])
             ->name('role-permission.save');
 
         // Akreditasi
-        Route::get('akreditasi', [App\Http\Controllers\Admin\AkreditasiController::class, 'index'])
+        Route::get('akreditasi', [AkreditasiController::class, 'index'])
             ->name('akreditasi');
-        Route::post('akreditasi/catatan-modal', [App\Http\Controllers\Admin\AkreditasiController::class, 'catatanModal'])
+        Route::post('akreditasi/catatan-modal', [AkreditasiController::class, 'catatanModal'])
             ->name('akreditasi.catatan-modal');
-        Route::delete('akreditasi', [App\Http\Controllers\Admin\AkreditasiController::class, 'delete'])
+        Route::delete('akreditasi', [AkreditasiController::class, 'delete'])
             ->name('akreditasi.delete');
-        Route::post('akreditasi/export', [App\Http\Controllers\Admin\AkreditasiController::class, 'export'])
+        Route::post('akreditasi/export', [AkreditasiController::class, 'export'])
             ->name('akreditasi.export');
 
-        Route::get('akreditasi/{uuid}', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'show'])
+        Route::get('akreditasi/{uuid}', [AkreditasiDetailController::class, 'show'])
             ->name('akreditasi-detail');
-        Route::post('akreditasi/{uuid}/reschedule-visitasi', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'rescheduleVisitasi'])
+        Route::post('akreditasi/{uuid}/reschedule-visitasi', [AkreditasiDetailController::class, 'rescheduleVisitasi'])
             ->name('akreditasi-detail.reschedule-visitasi');
-        Route::post('akreditasi/{uuid}/reassign-asesor', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'reassignAsesor'])
+        Route::post('akreditasi/{uuid}/reassign-asesor', [AkreditasiDetailController::class, 'reassignAsesor'])
             ->name('akreditasi-detail.reassign-asesor');
-        Route::post('akreditasi/{uuid}/save-nv', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'saveAdminNv'])
+        Route::post('akreditasi/{uuid}/save-nv', [AkreditasiDetailController::class, 'saveAdminNv'])
             ->name('akreditasi-detail.save-nv');
-        Route::post('akreditasi/{uuid}/finalize-nv', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'finalizeAllNv'])
+        Route::post('akreditasi/{uuid}/finalize-nv', [AkreditasiDetailController::class, 'finalizeAllNv'])
             ->name('akreditasi-detail.finalize-nv');
-        Route::post('akreditasi/{uuid}/toggle-lock', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'toggleLock'])
+        Route::post('akreditasi/{uuid}/toggle-lock', [AkreditasiDetailController::class, 'toggleLock'])
             ->name('akreditasi-detail.toggle-lock');
-        Route::post('akreditasi/{uuid}/approve-berkas', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'approveBerkas'])
+        Route::post('akreditasi/{uuid}/approve-berkas', [AkreditasiDetailController::class, 'approveBerkas'])
             ->name('akreditasi-detail.approve-berkas');
-        Route::post('akreditasi/{uuid}/reject-berkas', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'rejectBerkas'])
+        Route::post('akreditasi/{uuid}/reject-berkas', [AkreditasiDetailController::class, 'rejectBerkas'])
             ->name('akreditasi-detail.reject-berkas');
-        Route::post('akreditasi/{uuid}/approve', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'approve'])
+        Route::post('akreditasi/{uuid}/approve', [AkreditasiDetailController::class, 'approve'])
             ->name('akreditasi-detail.approve');
-        Route::post('akreditasi/{uuid}/reject', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'reject'])
+        Route::post('akreditasi/{uuid}/reject', [AkreditasiDetailController::class, 'reject'])
             ->name('akreditasi-detail.reject');
-        Route::post('akreditasi/{uuid}/open-for-review', [App\Http\Controllers\Admin\AkreditasiDetailController::class, 'openForReview'])
+        Route::post('akreditasi/{uuid}/open-for-review', [AkreditasiDetailController::class, 'openForReview'])
             ->name('akreditasi-detail.open-for-review');
 
-        Route::get('asesor', [App\Http\Controllers\Admin\AsesorController::class, 'index'])
+        Route::get('asesor', [AsesorController::class, 'index'])
             ->name('asesor.index');
-        Route::get('asesor/{uuid}', [App\Http\Controllers\Admin\AsesorController::class, 'show'])
+        Route::get('asesor/{uuid}', [AsesorController::class, 'show'])
             ->name('asesor.detail');
-        Route::post('asesor/toggle-status', [App\Http\Controllers\Admin\AsesorController::class, 'toggleStatus'])
+        Route::post('asesor/toggle-status', [AsesorController::class, 'toggleStatus'])
             ->name('asesor.toggle-status');
-        Route::post('asesor/export', [App\Http\Controllers\Admin\AsesorController::class, 'export'])
+        Route::post('asesor/export', [AsesorController::class, 'export'])
             ->name('asesor.export');
 
         // Banding
-        Route::get('banding', [App\Http\Controllers\Admin\BandingController::class, 'index'])
+        Route::get('banding', [BandingController::class, 'index'])
             ->middleware('permission:banding.view')
             ->name('banding');
 
-        Route::get('banding/{id}', [App\Http\Controllers\Admin\BandingDetailController::class, 'show'])
+        Route::get('banding/{id}', [BandingDetailController::class, 'show'])
             ->middleware('permission:banding.view')
             ->name('banding-detail');
-        Route::post('banding/{id}/assign-reviewer', [App\Http\Controllers\Admin\BandingDetailController::class, 'assignReviewer'])
+        Route::post('banding/{id}/assign-reviewer', [BandingDetailController::class, 'assignReviewer'])
             ->middleware('permission:banding.view')
             ->name('banding.assign-reviewer');
-        Route::post('banding/{id}/reassign-reviewer', [App\Http\Controllers\Admin\BandingDetailController::class, 'reassignReviewer'])
+        Route::post('banding/{id}/reassign-reviewer', [BandingDetailController::class, 'reassignReviewer'])
             ->middleware('permission:banding.view')
             ->name('banding.reassign-reviewer');
-        Route::post('banding/{id}/submit-decision', [App\Http\Controllers\Admin\BandingDetailController::class, 'submitDecision'])
+        Route::post('banding/{id}/submit-decision', [BandingDetailController::class, 'submitDecision'])
             ->middleware('permission:banding.view')
             ->name('banding.submit-decision');
 
-        Route::get('pesantren', [App\Http\Controllers\Admin\PesantrenController::class, 'index'])
+        Route::get('pesantren', [PesantrenController::class, 'index'])
             ->middleware('permission:pesantren.view')
             ->name('pesantren.index');
-        Route::get('pesantren/{uuid}', [App\Http\Controllers\Admin\PesantrenController::class, 'show'])
+        Route::get('pesantren/{uuid}', [PesantrenController::class, 'show'])
             ->middleware('permission:pesantren.view')
             ->name('pesantren.detail');
-        Route::post('pesantren/toggle-lock', [App\Http\Controllers\Admin\PesantrenController::class, 'toggleLock'])
+        Route::post('pesantren/toggle-lock', [PesantrenController::class, 'toggleLock'])
             ->middleware('permission:pesantren.lock')
             ->name('pesantren.toggle-lock');
-        Route::post('pesantren/export', [App\Http\Controllers\Admin\PesantrenController::class, 'export'])
+        Route::post('pesantren/export', [PesantrenController::class, 'export'])
             ->middleware('permission:pesantren.view')
             ->name('pesantren.export');
 
-        Route::get('failed-notifications', [App\Http\Controllers\Admin\FailedNotificationController::class, 'index'])
+        Route::get('failed-notifications', [FailedNotificationController::class, 'index'])
             ->middleware('permission:notification.view')
             ->name('failed-notifications');
-        Route::post('failed-notifications/{id}/retry', [App\Http\Controllers\Admin\FailedNotificationController::class, 'retry'])
+        Route::post('failed-notifications/{id}/retry', [FailedNotificationController::class, 'retry'])
             ->middleware('permission:notification.retry')
             ->name('failed-notifications.retry');
-        Route::post('failed-notifications/{id}/dismiss', [App\Http\Controllers\Admin\FailedNotificationController::class, 'dismiss'])
+        Route::post('failed-notifications/{id}/dismiss', [FailedNotificationController::class, 'dismiss'])
             ->middleware('permission:notification.dismiss')
             ->name('failed-notifications.dismiss');
 
-        Route::get('trash', [App\Http\Controllers\Admin\TrashController::class, 'index'])
+        Route::get('trash', [TrashController::class, 'index'])
             ->middleware('permission:trash.view')
             ->name('trash');
-        Route::get('trash/preview/{id}', [App\Http\Controllers\Admin\TrashController::class, 'restorePreview'])
+        Route::get('trash/preview/{id}', [TrashController::class, 'restorePreview'])
             ->middleware('permission:trash.view')
             ->name('trash.preview');
-        Route::post('trash/restore', [App\Http\Controllers\Admin\TrashController::class, 'restore'])
+        Route::post('trash/restore', [TrashController::class, 'restore'])
             ->middleware('permission:trash.restore')
             ->name('trash.restore');
-        Route::post('trash/force-delete', [App\Http\Controllers\Admin\TrashController::class, 'forceDelete'])
+        Route::post('trash/force-delete', [TrashController::class, 'forceDelete'])
             ->middleware('permission:trash.purge')
             ->name('trash.force-delete');
     });
@@ -238,9 +254,9 @@ Route::middleware(['auth', 'verified', 'role:asesor'])
     ->prefix('asesor')
     ->name('asesor.')
     ->group(function () {
-        Route::get('profile', [App\Http\Controllers\Asesor\ProfileController::class, 'show'])
+        Route::get('profile', [AsesorProfileController::class, 'show'])
             ->name('profile');
-        Route::post('profile', [App\Http\Controllers\Asesor\ProfileController::class, 'update'])
+        Route::post('profile', [AsesorProfileController::class, 'update'])
             ->name('profile.update');
 
         Route::get('akreditasi', [App\Http\Controllers\Asesor\AkreditasiController::class, 'index'])
@@ -290,21 +306,21 @@ Route::middleware(['auth', 'verified', 'role:pesantren'])
         Route::post('profile', [App\Http\Controllers\Pesantren\ProfileController::class, 'save'])
             ->name('profile.save');
 
-        Route::get('ipm', [App\Http\Controllers\Pesantren\IpmController::class, 'show'])
+        Route::get('ipm', [IpmController::class, 'show'])
             ->name('ipm');
-        Route::post('ipm', [App\Http\Controllers\Pesantren\IpmController::class, 'update'])
+        Route::post('ipm', [IpmController::class, 'update'])
             ->name('ipm.update');
 
-        Route::get('sdm', [App\Http\Controllers\Pesantren\SdmController::class, 'show'])
+        Route::get('sdm', [SdmController::class, 'show'])
             ->name('sdm');
-        Route::post('sdm', [App\Http\Controllers\Pesantren\SdmController::class, 'save'])
+        Route::post('sdm', [SdmController::class, 'save'])
             ->name('sdm.save');
 
-        Route::get('edpm', [App\Http\Controllers\Pesantren\EdpmController::class, 'show'])
+        Route::get('edpm', [EdpmController::class, 'show'])
             ->name('edpm');
-        Route::post('edpm', [App\Http\Controllers\Pesantren\EdpmController::class, 'save'])
+        Route::post('edpm', [EdpmController::class, 'save'])
             ->name('edpm.save');
-        Route::post('edpm/draft', [App\Http\Controllers\Pesantren\EdpmController::class, 'saveDraft'])
+        Route::post('edpm/draft', [EdpmController::class, 'saveDraft'])
             ->name('edpm.save-draft');
 
         Route::get('akreditasi', [App\Http\Controllers\Pesantren\AkreditasiController::class, 'index'])
@@ -376,19 +392,16 @@ Route::middleware(['auth', 'verified', 'role:pesantren'])
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->prefix('_api')->name('api.')->group(function () {
-    Route::get('/sidebar-badges', [\App\Http\Controllers\Api\LayoutDataController::class, 'sidebarBadges'])->name('sidebar-badges');
-    Route::get('/notifications', [\App\Http\Controllers\Api\LayoutDataController::class, 'notifications'])->name('notifications');
-    Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\LayoutDataController::class, 'markNotificationRead'])->name('notifications.read');
-    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\Api\LayoutDataController::class, 'markAllNotificationsRead'])->name('notifications.mark-all-read');
+    Route::get('/sidebar-badges', [LayoutDataController::class, 'sidebarBadges'])->name('sidebar-badges');
+    Route::get('/notifications', [LayoutDataController::class, 'notifications'])->name('notifications');
+    Route::post('/notifications/{id}/read', [LayoutDataController::class, 'markNotificationRead'])->name('notifications.read');
+    Route::post('/notifications/mark-all-read', [LayoutDataController::class, 'markAllNotificationsRead'])->name('notifications.mark-all-read');
 
-    Route::get('/onboarding/status', [\App\Http\Controllers\Api\OnboardingController::class, 'status'])->name('onboarding.status');
-    Route::post('/onboarding/navigate', [\App\Http\Controllers\Api\OnboardingController::class, 'navigateToStep'])->name('onboarding.navigate');
-    Route::post('/onboarding/skip', [\App\Http\Controllers\Api\OnboardingController::class, 'skip'])->name('onboarding.skip');
-    Route::post('/onboarding/complete', [\App\Http\Controllers\Api\OnboardingController::class, 'complete'])->name('onboarding.complete');
+    Route::get('/onboarding/status', [OnboardingController::class, 'status'])->name('onboarding.status');
+    Route::post('/onboarding/navigate', [OnboardingController::class, 'navigateToStep'])->name('onboarding.navigate');
+    Route::post('/onboarding/skip', [OnboardingController::class, 'skip'])->name('onboarding.skip');
+    Route::post('/onboarding/complete', [OnboardingController::class, 'complete'])->name('onboarding.complete');
 });
 
 require __DIR__.'/auth.php';
 require __DIR__.'/sso/sso.php';
-
-
-

@@ -47,9 +47,10 @@ class TrashController extends Controller
 
         try {
             $count = $this->trashService->restore($request->integer('id'));
-            return back()->with('success', 'Akreditasi berhasil dipulihkan beserta ' . ($count - 1) . ' record terkait.');
+
+            return back()->with('success', 'Akreditasi berhasil dipulihkan beserta '.($count - 1).' record terkait.');
         } catch (\Throwable $e) {
-            return back()->with('error', 'Gagal memulihkan akreditasi: ' . $e->getMessage());
+            return back()->with('error', 'Gagal memulihkan akreditasi: '.$e->getMessage());
         }
     }
 
@@ -61,9 +62,10 @@ class TrashController extends Controller
 
         try {
             $count = $this->trashService->forceDelete($request->integer('id'));
+
             return back()->with('success', "{$count} record berhasil dihapus permanen.");
         } catch (\Throwable $e) {
-            return back()->with('error', 'Gagal menghapus permanen: ' . $e->getMessage());
+            return back()->with('error', 'Gagal menghapus permanen: '.$e->getMessage());
         }
     }
 }

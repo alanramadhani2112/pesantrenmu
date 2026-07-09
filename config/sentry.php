@@ -67,7 +67,6 @@ return [
         // Capture Laravel cache events (hits, writes etc.) as breadcrumbs
         'cache' => env('SENTRY_BREADCRUMBS_CACHE_ENABLED', true),
 
-
         // Capture SQL queries as breadcrumbs
         'sql_queries' => env('SENTRY_BREADCRUMBS_SQL_QUERIES_ENABLED', true),
 
@@ -109,7 +108,6 @@ return [
 
         // Capture views rendered as spans
         'views' => env('SENTRY_TRACE_VIEWS_ENABLED', true),
-
 
         // Capture HTTP client requests as spans
         'http_client_requests' => env('SENTRY_TRACE_HTTP_CLIENT_REQUESTS_ENABLED', true),

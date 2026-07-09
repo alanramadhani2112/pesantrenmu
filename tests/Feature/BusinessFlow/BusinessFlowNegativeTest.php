@@ -3,8 +3,6 @@
 namespace Tests\Feature\BusinessFlow;
 
 use App\Exceptions\InvalidTransitionException;
-use App\Models\Akreditasi;
-use App\Models\Assessment;
 use App\Services\AkreditasiWorkflowService;
 use App\StateMachine\AkreditasiStateMachine;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,8 +10,8 @@ use Tests\TestCase;
 
 class BusinessFlowNegativeTest extends TestCase
 {
-    use RefreshDatabase;
     use BusinessFlowTestHelpers;
+    use RefreshDatabase;
 
     private AkreditasiWorkflowService $workflow;
 

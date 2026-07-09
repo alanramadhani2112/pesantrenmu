@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Exports\PesantrenExport;
+use App\Http\Controllers\Controller;
+use App\Models\Pesantren;
 use App\Services\PesantrenService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -62,8 +63,9 @@ class PesantrenController extends Controller
         $request->validate(['pesantren_id' => 'required|integer|exists:pesantrens,id']);
 
         if ($this->pesantrenService->toggleDataLock($request->integer('pesantren_id'))) {
-            $pesantren = $request->user()->pesantren ?? \App\Models\Pesantren::find($request->integer('pesantren_id'));
+            $pesantren = $request->user()->pesantren ?? Pesantren::find($request->integer('pesantren_id'));
             $status = $pesantren?->refresh()->is_locked ? 'terkunci' : 'terbuka';
+
             return back()->with('success', "Akses data pesantren berhasil diubah menjadi {$status}.");
         }
 
@@ -82,7 +84,7 @@ class PesantrenController extends Controller
 
         return Excel::download(
             new PesantrenExport($search, $filterStatus, $filterAkreditasi, $sortField, $sortAsc),
-            'data-pesantren-' . now()->format('Y-m-d') . '.xlsx'
+            'data-pesantren-'.now()->format('Y-m-d').'.xlsx'
         );
     }
 }
