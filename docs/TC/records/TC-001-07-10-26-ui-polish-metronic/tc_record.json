@@ -5,7 +5,7 @@
   "status": "in_progress",
   "priority": "high",
   "created": "2026-07-09T17:17:36+00:00",
-  "updated": "2026-07-09T17:38:44+00:00",
+  "updated": "2026-07-09T17:47:42+00:00",
   "created_by": "Claude",
   "project": "SPM Fix",
   "description": {
@@ -75,6 +75,27 @@
     },
     {
       "path": "resources/views/admin/akreditasi/detail/tabs/instrumen/score-table.blade.php",
+      "action": "modified",
+      "description": null,
+      "lines_added": null,
+      "lines_removed": null
+    },
+    {
+      "path": "resources/views/asesor/akreditasi.blade.php",
+      "action": "modified",
+      "description": null,
+      "lines_added": null,
+      "lines_removed": null
+    },
+    {
+      "path": "resources/views/asesor/akreditasi-detail/tabs/instrumen.blade.php",
+      "action": "modified",
+      "description": null,
+      "lines_added": null,
+      "lines_removed": null
+    },
+    {
+      "path": "resources/views/asesor/akreditasi-detail/tabs/laporan-visitasi.blade.php",
       "action": "modified",
       "description": null,
       "lines_added": null,
@@ -269,6 +290,60 @@
           "reason": null
         }
       ]
+    },
+    {
+      "revision_id": "R5",
+      "timestamp": "2026-07-09T17:47:42+00:00",
+      "author": "Claude",
+      "summary": "+file resources/views/asesor/akreditasi.blade.php (modified); +file resources/views/asesor/akreditasi-detail/tabs/instrumen.blade.php (modified); +file resources/views/asesor/akreditasi-detail/tabs/laporan-visitasi.blade.php (modified); handoff: updated progress_summary; handoff: +next_step 'Continue Phase 4 Pesantren UI polish: akreditasi list/detail, profile, IPM/SDM/EDPM forms.'; handoff: +context",
+      "field_changes": [
+        {
+          "field": "files_affected",
+          "action": "added",
+          "new_value": {
+            "path": "resources/views/asesor/akreditasi.blade.php",
+            "action": "modified"
+          },
+          "reason": null
+        },
+        {
+          "field": "files_affected",
+          "action": "added",
+          "new_value": {
+            "path": "resources/views/asesor/akreditasi-detail/tabs/instrumen.blade.php",
+            "action": "modified"
+          },
+          "reason": null
+        },
+        {
+          "field": "files_affected",
+          "action": "added",
+          "new_value": {
+            "path": "resources/views/asesor/akreditasi-detail/tabs/laporan-visitasi.blade.php",
+            "action": "modified"
+          },
+          "reason": null
+        },
+        {
+          "field": "session_context.handoff.progress_summary",
+          "action": "changed",
+          "old_value": "Committed Super Admin slice 91317f0, Admin master/list slice 132bce2, Admin akreditasi slice c838fd1.",
+          "new_value": "Committed Asesor UI polish slice 44648d6 after focused Asesor verification.",
+          "reason": null
+        },
+        {
+          "field": "session_context.handoff.next_steps",
+          "action": "added",
+          "new_value": "Continue Phase 4 Pesantren UI polish: akreditasi list/detail, profile, IPM/SDM/EDPM forms.",
+          "reason": null
+        },
+        {
+          "field": "session_context.handoff.key_context",
+          "action": "added",
+          "new_value": "Latest verification: Asesor focused tests pass 47 passed, 1 skipped; npm run build pass.",
+          "reason": null
+        }
+      ]
     }
   ],
   "sub_tcs": [],
@@ -286,15 +361,16 @@
       "platform": "claude_code",
       "model": "unknown",
       "started": "2026-07-09T17:17:36+00:00",
-      "last_active": "2026-07-09T17:38:44+00:00"
+      "last_active": "2026-07-09T17:47:42+00:00"
     },
     "handoff": {
-      "progress_summary": "Committed Super Admin slice 91317f0, Admin master/list slice 132bce2, Admin akreditasi slice c838fd1.",
+      "progress_summary": "Committed Asesor UI polish slice 44648d6 after focused Asesor verification.",
       "next_steps": [
         "Commit current Super Admin UI polish slice after final status review.",
         "Continue Admin pages polish: admin akreditasi list/detail, asesor/pesantren lists, banding, master data pages.",
         "Run full suite or role smoke before merge.",
-        "Continue Phase 3 Asesor UI polish: asesor task list, detail score table, laporan visitasi upload/profile consistency."
+        "Continue Phase 3 Asesor UI polish: asesor task list, detail score table, laporan visitasi upload/profile consistency.",
+        "Continue Phase 4 Pesantren UI polish: akreditasi list/detail, profile, IPM/SDM/EDPM forms."
       ],
       "blockers": [
         "None. Tests/build currently pass."
@@ -302,7 +378,8 @@
       "key_context": [
         "Verification: npm run build pass; focused tests pass: 46 passed, 1 skipped, 702 assertions.",
         "Branch: ui-polish-metronic. Do not edit main directly.",
-        "Latest verification: Admin akreditasi focused tests pass 51 passed, 1 skipped; npm run build pass."
+        "Latest verification: Admin akreditasi focused tests pass 51 passed, 1 skipped; npm run build pass.",
+        "Latest verification: Asesor focused tests pass 47 passed, 1 skipped; npm run build pass."
       ],
       "files_in_progress": [],
       "decisions_made": []
@@ -316,7 +393,7 @@
     "project": "SPM Fix",
     "created_by": "Claude",
     "last_modified_by": "Claude",
-    "last_modified": "2026-07-09T17:38:44+00:00",
+    "last_modified": "2026-07-09T17:47:42+00:00",
     "estimated_effort": null
   }
 }
