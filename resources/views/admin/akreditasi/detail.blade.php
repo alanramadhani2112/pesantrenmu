@@ -219,24 +219,38 @@
     <x-ui.card flush>
         <div class="spm-detail-tabs-shell px-6 pt-5 pb-5">
             <x-ui.tabs>
-                <x-ui.tab @click="activeTab = 'profil'" :active="$activeTab === 'profil'">Profil</x-ui.tab>
-                <x-ui.tab @click="activeTab = 'ipm'" :active="$activeTab === 'ipm'">IPM</x-ui.tab>
-                <x-ui.tab @click="activeTab = 'sdm'" :active="$activeTab === 'sdm'">SDM</x-ui.tab>
-                <x-ui.tab @click="activeTab = 'edpm_pesantren'" :active="$activeTab === 'edpm_pesantren'">EDPM</x-ui.tab>
-                <x-ui.tab @click="activeTab = 'instrumen'" :active="$activeTab === 'instrumen'">Nilai</x-ui.tab>
-                <x-ui.tab @click="activeTab = 'laporan_visitasi'" :active="$activeTab === 'laporan_visitasi'">Laporan Visitasi</x-ui.tab>
-                <x-ui.tab @click="activeTab = 'audit_trail'" :active="$activeTab === 'audit_trail'">Audit Trail</x-ui.tab>
+                <x-ui.tab :href="request()->fullUrlWithQuery(['tab' => 'profil'])" :active="$activeTab === 'profil'">Profil</x-ui.tab>
+                <x-ui.tab :href="request()->fullUrlWithQuery(['tab' => 'ipm'])" :active="$activeTab === 'ipm'">IPM</x-ui.tab>
+                <x-ui.tab :href="request()->fullUrlWithQuery(['tab' => 'sdm'])" :active="$activeTab === 'sdm'">SDM</x-ui.tab>
+                <x-ui.tab :href="request()->fullUrlWithQuery(['tab' => 'edpm_pesantren'])" :active="$activeTab === 'edpm_pesantren'">EDPM</x-ui.tab>
+                <x-ui.tab :href="request()->fullUrlWithQuery(['tab' => 'instrumen'])" :active="$activeTab === 'instrumen'">Nilai</x-ui.tab>
+                <x-ui.tab :href="request()->fullUrlWithQuery(['tab' => 'laporan_visitasi'])" :active="$activeTab === 'laporan_visitasi'">Laporan Visitasi</x-ui.tab>
+                <x-ui.tab :href="request()->fullUrlWithQuery(['tab' => 'audit_trail'])" :active="$activeTab === 'audit_trail'">Audit Trail</x-ui.tab>
             </x-ui.tabs>
         </div>
 
         <div class="spm-detail-tab-content p-6">
-            @include('admin.akreditasi.detail.tabs.profil')
-            @include('admin.akreditasi.detail.tabs.ipm')
-            @include('admin.akreditasi.detail.tabs.sdm')
-            @include('admin.akreditasi.detail.tabs.edpm-pesantren')
-            @include('admin.akreditasi.detail.tabs.instrumen')
-            @include('admin.akreditasi.detail.tabs.laporan-visitasi')
-            @include('admin.akreditasi.detail.tabs.audit-trail')
+            <div x-show="activeTab === 'profil'" x-cloak>
+                @include('admin.akreditasi.detail.tabs.profil')
+            </div>
+            <div x-show="activeTab === 'ipm'" x-cloak>
+                @include('admin.akreditasi.detail.tabs.ipm')
+            </div>
+            <div x-show="activeTab === 'sdm'" x-cloak>
+                @include('admin.akreditasi.detail.tabs.sdm')
+            </div>
+            <div x-show="activeTab === 'edpm_pesantren'" x-cloak>
+                @include('admin.akreditasi.detail.tabs.edpm-pesantren')
+            </div>
+            <div x-show="activeTab === 'instrumen'" x-cloak>
+                @include('admin.akreditasi.detail.tabs.instrumen')
+            </div>
+            <div x-show="activeTab === 'laporan_visitasi'" x-cloak>
+                @include('admin.akreditasi.detail.tabs.laporan-visitasi')
+            </div>
+            <div x-show="activeTab === 'audit_trail'" x-cloak>
+                @include('admin.akreditasi.detail.tabs.audit-trail')
+            </div>
         </div>
 
         {{-- Visitasi Edit Modal --}}
