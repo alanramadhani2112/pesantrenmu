@@ -12,6 +12,7 @@
             title="Daftar Asesor"
             subtitle="Daftar asesor beserta peran kelompok, penugasan aktif, dan status akses."
             :records="$asesors"
+            :show-per-page="false"
         >
             <x-slot name="filters">
                 <x-ui.filter-bar>

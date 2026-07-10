@@ -153,15 +153,6 @@
     min-height: 42px;
 }
 
-.spm-table-utility-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    min-height: 42px;
-    margin-bottom: 18px;
-}
-
 [data-ui-table="metronic"] .table thead th {
     padding: 13px 18px !important;
     color: #7c8aa0 !important;

@@ -129,7 +129,7 @@
             </div>
         </div>
 
-        <x-ui.table title="Daftar Akreditasi" subtitle="Pengajuan, penilaian, visitasi, dan tindak lanjut pesantren." :records="$akreditasis">
+        <x-ui.table title="Daftar Akreditasi" subtitle="Pengajuan, penilaian, visitasi, dan tindak lanjut pesantren." :records="$akreditasis" :show-per-page="false">
             <x-slot name="filters">
                 <form method="GET" action="{{ route('admin.akreditasi') }}" id="admin-akreditasi-filters">
                     <div class="d-flex align-items-center gap-3 flex-wrap">

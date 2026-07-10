@@ -32,6 +32,7 @@
             title="Daftar Akreditasi Terhapus"
             subtitle="Cari berdasarkan nama pesantren atau pengguna pengaju."
             :records="$trashedAkreditasis->appends(compact('search', 'perPage'))"
+            :show-per-page="false"
         >
             <x-slot name="filters">
                 <form method="GET" action="{{ route('admin.trash') }}" id="trash-filter-form" class="mb-5">

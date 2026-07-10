@@ -12,6 +12,7 @@
             title="Daftar Pesantren"
             subtitle="Daftar pesantren beserta status akun dan progres akreditasi terbaru."
             :records="$pesantrens"
+            :show-per-page="false"
             class="spm-table-shell--admin-pesantren"
         >
             <x-slot name="filters">

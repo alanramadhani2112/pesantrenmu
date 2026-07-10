@@ -13,7 +13,7 @@
         </x-slot>
 
         {{-- Table --}}
-        <x-ui.table title="Daftar Dokumen Wajib" subtitle="Template dan dokumen pendukung untuk pesantren dan asesor." :records="$documents">
+        <x-ui.table title="Daftar Dokumen Wajib" subtitle="Template dan dokumen pendukung untuk pesantren dan asesor." :records="$documents" :show-per-page="false">
             <x-slot name="filters">
                 <form method="GET" action="{{ route('admin.master-dokumen.index') }}" id="master-dokumen-filter-form">
                     <div class="d-flex align-items-center gap-3 flex-wrap">

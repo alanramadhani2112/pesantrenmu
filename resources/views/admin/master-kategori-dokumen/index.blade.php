@@ -13,7 +13,7 @@
         </x-slot>
 
         {{-- Table --}}
-        <x-ui.table title="Daftar Kategori Dokumen" subtitle="Kategori, visibilitas, status, dan urutan tampil." :records="$categories">
+        <x-ui.table title="Daftar Kategori Dokumen" subtitle="Kategori, visibilitas, status, dan urutan tampil." :records="$categories" :show-per-page="false">
             <x-slot name="filters">
                 <form method="GET" action="{{ route('admin.master-kategori-dokumen.index') }}" id="kategori-dokumen-filter-form">
                     <div class="d-flex align-items-center gap-3 flex-wrap">

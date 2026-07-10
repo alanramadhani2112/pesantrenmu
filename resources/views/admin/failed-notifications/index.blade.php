@@ -17,6 +17,7 @@
             title="Daftar Notifikasi Gagal"
             subtitle="Gunakan tombol Kirim Ulang untuk mencoba kembali, atau Abaikan untuk menutup laporan."
             :records="$failedNotifications"
+            :show-per-page="false"
         >
             <x-slot name="filters">
                 <form method="GET" action="{{ route('admin.failed-notifications') }}" id="fn-filter-form" class="mb-5">

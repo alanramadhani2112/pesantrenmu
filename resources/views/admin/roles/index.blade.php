@@ -13,7 +13,7 @@
         </x-slot>
 
         {{-- Table --}}
-        <x-ui.table title="Daftar Role" subtitle="ID, nama, parameter, dan aksi untuk tiap role." :records="$roles">
+        <x-ui.table title="Daftar Role" subtitle="ID, nama, parameter, dan aksi untuk tiap role." :records="$roles" :show-per-page="false">
             <x-slot name="filters">
                 <form method="GET" action="{{ route('admin.roles.index') }}" id="roles-filter-form">
                     <div class="d-flex align-items-center gap-3 flex-wrap">

@@ -124,12 +124,6 @@
     min-height: var(--spm-control-height);
 }
 
-.spm-table-utility-row {
-    justify-content: flex-end;
-    min-height: 38px;
-    margin-bottom: 14px !important;
-}
-
 .spm-table-scroll {
     overflow-x: auto;
     overflow-y: visible;
@@ -165,78 +159,10 @@
     white-space: nowrap;
 }
 
-.spm-table-shell--pesantren-akreditasi .spm-datatable {
-    min-width: 1020px;
-}
-
-.spm-table-shell--pesantren-hasil .spm-datatable {
-    width: 100%;
-    min-width: 100% !important;
-    table-layout: fixed;
-}
-
-.spm-year-col,
-.spm-year-cell {
-    width: 96px;
-    min-width: 96px !important;
-}
-
-.spm-table-shell--pesantren-hasil .spm-year-col,
-.spm-table-shell--pesantren-hasil .spm-year-cell {
-    width: 82px;
-    min-width: 82px !important;
-}
-
-.spm-result-col,
-.spm-result-cell {
-    min-width: 390px;
-}
-
-.spm-table-shell--pesantren-hasil .spm-result-col,
-.spm-table-shell--pesantren-hasil .spm-result-cell {
-    min-width: 0 !important;
-}
-
-.spm-certificate-col,
-.spm-certificate-cell {
-    width: 190px;
-    min-width: 190px !important;
-}
-
-.spm-table-shell--pesantren-hasil .spm-certificate-col,
-.spm-table-shell--pesantren-hasil .spm-certificate-cell {
-    width: 164px;
-    min-width: 164px !important;
-}
-
-.spm-appeal-col,
-.spm-appeal-cell {
-    width: 220px;
-    min-width: 220px !important;
-}
-
-.spm-table-shell--pesantren-hasil .spm-appeal-col,
-.spm-table-shell--pesantren-hasil .spm-appeal-cell {
-    width: 170px;
-    min-width: 170px !important;
-}
-
 .spm-action-col,
 .spm-action-cell {
     width: 126px;
     min-width: 126px !important;
-}
-
-.spm-table-shell--pesantren-hasil .spm-action-col,
-.spm-table-shell--pesantren-hasil .spm-action-cell {
-    width: 112px;
-    min-width: 112px !important;
-}
-
-.spm-result-recommendation {
-    max-width: 520px;
-    white-space: normal;
-    overflow-wrap: anywhere;
 }
 
 .spm-table-compact-action {
