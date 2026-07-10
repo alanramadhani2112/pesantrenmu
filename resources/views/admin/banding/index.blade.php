@@ -119,5 +119,6 @@
                 @endforelse
             </x-slot>
         </x-ui.table>
+    </x-ui.index-layout>
 </div>
 @endsection
