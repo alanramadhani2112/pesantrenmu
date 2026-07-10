@@ -236,7 +236,7 @@
 
                 {{-- Pagination preserves all query params (tab + filters) --}}
                 <div class="mt-5">
-                    {{ $auditLogs->appends(request()->query())->links() }}
+                    <x-ui.pagination :paginator="$auditLogs->appends(request()->query())" />
                 </div>
             @endif
         </div>

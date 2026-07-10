@@ -129,32 +129,31 @@
             </div>
         </div>
 
-        <form method="GET" action="{{ route('admin.akreditasi') }}" id="admin-akreditasi-filters" class="mb-5">
-            <div class="d-flex align-items-center gap-3 flex-wrap">
-                <x-datatable.search name="search" placeholder="Cari Pesantren..." :value="$search" form="admin-akreditasi-filters" />
+        <x-ui.table title="Daftar Akreditasi" subtitle="Pengajuan, penilaian, visitasi, dan tindak lanjut pesantren." :records="$akreditasis">
+            <x-slot name="filters">
+                <form method="GET" action="{{ route('admin.akreditasi') }}" id="admin-akreditasi-filters">
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <x-datatable.search name="search" placeholder="Cari Pesantren..." :value="$search" form="admin-akreditasi-filters" />
 
-                <x-ui.select name="statusFilter" size="sm" class="w-auto min-w-280px" onchange="this.form.submit()">
-                    <option value="pengajuan" @selected($statusFilter === 'pengajuan')>Pengajuan ({{ $statusCounts['pengajuan'] ?? 0 }})</option>
-                    <option value="verifikasi" @selected($statusFilter === 'verifikasi')>Verifikasi Berkas ({{ $statusCounts['verifikasi'] ?? 0 }})</option>
-                    <option value="assessment" @selected($statusFilter === 'assessment')>Review Asesor ({{ $statusCounts['assessment'] ?? 0 }})</option>
-                    <option value="visitasi" @selected($statusFilter === 'visitasi')>Visitasi & Penilaian Pasca Visitasi ({{ ($statusCounts['visitasi'] ?? 0) + ($statusCounts['pasca_visitasi'] ?? 0) }})</option>
-                    <option value="validasi" @selected($statusFilter === 'validasi')>Validasi Admin ({{ $statusCounts['validasi'] ?? 0 }})</option>
-                    <option value="overdue" @selected($statusFilter === 'overdue')>Terlambat ({{ $statusCounts['overdue'] ?? 0 }})</option>
-                    <option value="" @selected($statusFilter === '')>Semua</option>
-                </x-ui.select>
+                        <x-ui.select name="statusFilter" size="sm" class="w-auto min-w-280px" onchange="this.form.submit()">
+                            <option value="pengajuan" @selected($statusFilter === 'pengajuan')>Pengajuan ({{ $statusCounts['pengajuan'] ?? 0 }})</option>
+                            <option value="verifikasi" @selected($statusFilter === 'verifikasi')>Verifikasi Berkas ({{ $statusCounts['verifikasi'] ?? 0 }})</option>
+                            <option value="assessment" @selected($statusFilter === 'assessment')>Review Asesor ({{ $statusCounts['assessment'] ?? 0 }})</option>
+                            <option value="visitasi" @selected($statusFilter === 'visitasi')>Visitasi & Penilaian Pasca Visitasi ({{ ($statusCounts['visitasi'] ?? 0) + ($statusCounts['pasca_visitasi'] ?? 0) }})</option>
+                            <option value="validasi" @selected($statusFilter === 'validasi')>Validasi Admin ({{ $statusCounts['validasi'] ?? 0 }})</option>
+                            <option value="overdue" @selected($statusFilter === 'overdue')>Terlambat ({{ $statusCounts['overdue'] ?? 0 }})</option>
+                            <option value="" @selected($statusFilter === '')>Semua</option>
+                        </x-ui.select>
 
-                <x-ui.select name="perPage" size="sm" class="w-auto" onchange="this.form.submit()">
-                    @foreach([10, 25, 50] as $pp)
-                        <option value="{{ $pp }}" @selected($perPage == $pp)>{{ $pp }}</option>
-                    @endforeach
-                </x-ui.select>
+                        <x-ui.table-per-page name="perPage" :value="$perPage" :options="[10, 25, 50]" form="admin-akreditasi-filters" />
 
-                <input type="hidden" name="sortField" value="{{ $sortField }}">
-                <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
-            </div>
-        </form>
+                        <input type="hidden" name="sortField" value="{{ $sortField }}">
+                        <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
+                    </div>
+                </form>
+            </x-slot>
 
-        <x-ui.simple-table>
+            <x-slot name="thead">
             <thead>
                 <tr>
                     <x-ui.table-th :min-width="false" align="center" class="w-60px">
@@ -179,9 +178,9 @@
                     <x-ui.table-th>Catatan</x-ui.table-th>
                     <x-ui.table-th align="end">Aksi</x-ui.table-th>
                 </tr>
-            </thead>
+            </x-slot>
 
-            <tbody>
+            <x-slot name="tbody">
                 @forelse ($akreditasis as $item)
                 @php
                     $stage = $stageMap[(int) $item->status] ?? ['label' => 'Unknown', 'variant' => 'secondary'];
@@ -303,17 +302,8 @@
                     </td>
                 </tr>
                 @endforelse
-            </tbody>
-        </x-ui.simple-table>
-
-        <div class="spm-table-footer spm-table-footer--datatable">
-            <div class="spm-table-footer-start">
-                <x-ui.table-per-page :value="$perPage" :options="[10, 25, 50]" form="admin-akreditasi-filters" />
-            </div>
-            <div class="spm-table-footer-end pagination-indonesia">
-                {{ $akreditasis->links() }}
-            </div>
-        </div>
+            </x-slot>
+        </x-ui.table>
     </x-ui.index-layout>
 
     {{-- Catatan Modal --}}
