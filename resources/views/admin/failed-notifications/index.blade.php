@@ -13,7 +13,7 @@
             @endif
         </x-slot>
 
-        <x-datatable.layout
+        <x-ui.table
             title="Daftar Notifikasi Gagal"
             subtitle="Gunakan tombol Kirim Ulang untuk mencoba kembali, atau Abaikan untuk menutup laporan."
             :records="$failedNotifications"
@@ -42,11 +42,7 @@
                     <div class="d-flex gap-3 align-items-center">
                         <x-datatable.search name="search" placeholder="Cari tipe, alasan, atau penerima..." :value="$search" form="fn-filter-form" />
                         <input type="hidden" name="status" value="{{ $statusFilter }}" />
-                        <select name="perPage" class="form-select form-select-sm" style="width: 80px;" onchange="this.form.submit()">
-                            @foreach([15, 25, 50] as $pp)
-                                <option value="{{ $pp }}" @selected($perPage == $pp)>{{ $pp }}</option>
-                            @endforeach
-                        </select>
+                        <x-ui.table-per-page name="perPage" :value="$perPage" :options="[15, 25, 50]" form="fn-filter-form" />
                     </div>
                 </form>
             </x-slot>
@@ -154,7 +150,7 @@
                     </tr>
                 @endforelse
             </x-slot>
-        </x-datatable.layout>
+        </x-ui.table>
     </x-ui.index-layout>
 </div>
 @endsection

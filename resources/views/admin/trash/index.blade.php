@@ -28,7 +28,7 @@
             </div>
         </x-ui.card>
 
-        <x-datatable.layout
+        <x-ui.table
             title="Daftar Akreditasi Terhapus"
             subtitle="Cari berdasarkan nama pesantren atau pengguna pengaju."
             :records="$trashedAkreditasis->appends(compact('search', 'perPage'))"
@@ -128,7 +128,7 @@
                     </tr>
                 @endforelse
             </x-slot>
-        </x-datatable.layout>
+        </x-ui.table>
     </x-ui.index-layout>
 
     {{-- Restore confirmation modal --}}

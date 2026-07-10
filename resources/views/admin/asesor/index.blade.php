@@ -8,7 +8,7 @@
         title="Asesor"
         subtitle="Kelola data asesor, status akun, dan riwayat penugasan."
     >
-        <x-datatable.layout
+        <x-ui.table
             title="Daftar Asesor"
             subtitle="Daftar asesor beserta peran kelompok, penugasan aktif, dan status akses."
             :records="$asesors"
@@ -165,7 +165,7 @@
                 </tr>
                 @endforelse
             </x-slot>
-        </x-datatable.layout>
+        </x-ui.table>
     </x-ui.index-layout>
 </div>
 @endsection

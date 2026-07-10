@@ -8,7 +8,7 @@
         title="Akun Pengguna"
         subtitle="Kelola akun admin, asesor, dan pesantren dari satu daftar."
     >
-        <x-datatable.layout
+        <x-ui.table
             title="Daftar Akun"
             subtitle="Ringkasan akun pengguna menurut peran dan status akses."
             :records="$users"
@@ -26,12 +26,12 @@
                     @endforeach
                 </x-ui.tabs>
 
-                <form method="GET" action="{{ route('accounts.index') }}" class="d-flex align-items-center gap-2">
+                <form method="GET" action="{{ route('accounts.index') }}" id="accounts-filter-form" class="d-flex align-items-center gap-3 flex-wrap">
                     <input type="hidden" name="activeTab" value="{{ $activeTab }}">
                     <input type="hidden" name="perPage" value="{{ $perPage }}">
                     <input type="hidden" name="sortField" value="{{ $sortField }}">
                     <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
-                    <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama atau email..." class="form-control form-control-sm" onchange="this.form.submit()">
+                    <x-datatable.search name="search" placeholder="Cari nama atau email..." :value="$search" form="accounts-filter-form" onchange="this.form.submit()" />
                 </form>
             </x-slot>
 
@@ -43,22 +43,8 @@
 
             <x-slot name="thead">
                 <x-ui.table-th :min-width="false" class="w-70px">No</x-ui.table-th>
-                <th class="min-w-200px cursor-pointer">
-                    <a href="{{ route('accounts.index', array_merge(request()->query(), ['sortField' => 'name', 'sortAsc' => ($sortField === 'name' && $sortAsc) ? 'false' : 'true'])) }}" class="text-decoration-none text-inherit">
-                        Pengguna
-                        @if ($sortField === 'name')
-                            <x-ui.icon :name="$sortAsc ? 'arrow-up' : 'arrow-down'" class="fs-7 ms-1" />
-                        @endif
-                    </a>
-                </th>
-                <th class="min-w-200px cursor-pointer">
-                    <a href="{{ route('accounts.index', array_merge(request()->query(), ['sortField' => 'email', 'sortAsc' => ($sortField === 'email' && $sortAsc) ? 'false' : 'true'])) }}" class="text-decoration-none text-inherit">
-                        Email
-                        @if ($sortField === 'email')
-                            <x-ui.icon :name="$sortAsc ? 'arrow-up' : 'arrow-down'" class="fs-7 ms-1" />
-                        @endif
-                    </a>
-                </th>
+                <x-ui.table-th field="name" :sortField="$sortField" :sortAsc="$sortAsc" form="accounts-filter-form">Pengguna</x-ui.table-th>
+                <x-ui.table-th field="email" :sortField="$sortField" :sortAsc="$sortAsc" form="accounts-filter-form">Email</x-ui.table-th>
                 <x-ui.table-th align="center">Status</x-ui.table-th>
                 <x-ui.table-th align="end">Aksi</x-ui.table-th>
             </x-slot>
@@ -141,7 +127,7 @@
                 </tr>
                 @endforelse
             </x-slot>
-        </x-datatable.layout>
+        </x-ui.table>
     </x-ui.index-layout>
 
     {{-- Create/Edit Modal --}}

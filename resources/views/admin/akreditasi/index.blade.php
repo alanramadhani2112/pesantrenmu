@@ -154,30 +154,16 @@
             </x-slot>
 
             <x-slot name="thead">
-            <thead>
-                <tr>
-                    <x-ui.table-th :min-width="false" align="center" class="w-60px">
-                        <input type="checkbox" class="form-check-input" x-on:change="selectAllToggle($event)">
-                    </x-ui.table-th>
-
-                    <x-ui.table-th>
-                        <a href="{{ route('admin.akreditasi', array_merge(request()->except(['sortField', 'sortAsc']), ['sortField' => 'user_id', 'sortAsc' => ($sortField === 'user_id' && $sortAsc) ? 'false' : 'true'])) }}"
-                           class="text-dark text-hover-primary">
-                            Pesantren @if($sortField === 'user_id') <i class="ki-outline ki-arrow-{{ $sortAsc ? 'up' : 'down' }} fs-7"></i> @endif
-                        </a>
-                    </x-ui.table-th>
-                    <x-ui.table-th>
-                        <a href="{{ route('admin.akreditasi', array_merge(request()->except(['sortField', 'sortAsc']), ['sortField' => 'created_at', 'sortAsc' => ($sortField === 'created_at' && $sortAsc) ? 'false' : 'true'])) }}"
-                           class="text-dark text-hover-primary">
-                            Tahap Akreditasi @if($sortField === 'created_at') <i class="ki-outline ki-arrow-{{ $sortAsc ? 'up' : 'down' }} fs-7"></i> @endif
-                        </a>
-                    </x-ui.table-th>
-                    <x-ui.table-th align="center">Nilai</x-ui.table-th>
-                    <x-ui.table-th align="center">Peringkat</x-ui.table-th>
-                    <x-ui.table-th align="center">Status</x-ui.table-th>
-                    <x-ui.table-th>Catatan</x-ui.table-th>
-                    <x-ui.table-th align="end">Aksi</x-ui.table-th>
-                </tr>
+                <x-ui.table-th class="w-60px">
+                    <x-ui.table-checkbox model="selectAll" />
+                </x-ui.table-th>
+                <x-ui.table-th field="user_id" :sortField="$sortField" :sortAsc="$sortAsc" form="admin-akreditasi-filters">Pesantren</x-ui.table-th>
+                <x-ui.table-th field="created_at" :sortField="$sortField" :sortAsc="$sortAsc" form="admin-akreditasi-filters">Tahap Akreditasi</x-ui.table-th>
+                <x-ui.table-th align="center">Nilai</x-ui.table-th>
+                <x-ui.table-th align="center">Peringkat</x-ui.table-th>
+                <x-ui.table-th align="center">Status</x-ui.table-th>
+                <x-ui.table-th>Catatan</x-ui.table-th>
+                <x-ui.table-th align="end">Aksi</x-ui.table-th>
             </x-slot>
 
             <x-slot name="tbody">
@@ -199,7 +185,7 @@
 
                 <tr>
                     <td class="text-center">
-                        <input type="checkbox" class="form-check-input row-checkbox" value="{{ $item->id }}" x-model="selectedIds">
+                        <x-ui.table-checkbox value="{{ $item->id }}" x-model="selectedIds" />
                     </td>
 
                     <td>

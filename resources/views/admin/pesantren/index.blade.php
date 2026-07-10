@@ -8,7 +8,7 @@
         title="Pesantren"
         subtitle="Kelola data pesantren, status akun, dan status akreditasi."
     >
-        <x-datatable.layout
+        <x-ui.table
             title="Daftar Pesantren"
             subtitle="Daftar pesantren beserta status akun dan progres akreditasi terbaru."
             :records="$pesantrens"
@@ -39,11 +39,7 @@
                         form="pesantren-filter-form"
                     />
 
-                    <select name="perPage" class="form-select form-select-sm" style="width: 80px;" onchange="this.form.submit()">
-                        @foreach([10, 25, 50] as $pp)
-                            <option value="{{ $pp }}" @selected($perPage == $pp)>{{ $pp }}</option>
-                        @endforeach
-                    </select>
+                    <x-ui.table-per-page name="perPage" :value="$perPage" :options="[10, 25, 50]" form="pesantren-filter-form" />
 
                     <input type="hidden" name="sortField" x-model="sortField">
                     <input type="hidden" name="sortAsc" x-model="sortAsc">
@@ -124,11 +120,7 @@
                 </tr>
                 @endforelse
             </x-slot>
-        </x-datatable.layout>
-
-        <div class="d-flex justify-content-center mt-4">
-            {{ $pesantrens->appends(compact('search', 'filterStatus', 'filterAkreditasi', 'perPage', 'sortField', 'sortAsc'))->links() }}
-        </div>
+        </x-ui.table>
     </x-ui.index-layout>
 </div>
 @endsection
