@@ -19,28 +19,18 @@
                     <div class="d-flex align-items-center gap-3 flex-wrap">
                         <x-datatable.search name="search" placeholder="Cari dokumen..." :value="$search" form="master-dokumen-filter-form" />
                         <x-ui.table-per-page name="perPage" :value="$perPage" :options="[10, 25, 50]" form="master-dokumen-filter-form" />
-                        <input type="hidden" name="sort" value="{{ $sortField }}">
-                        <input type="hidden" name="direction" value="{{ $sortAsc ? 'asc' : 'desc' }}">
+                        <input type="hidden" name="sortField" value="{{ $sortField }}">
+                        <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
                     </div>
                 </form>
             </x-slot>
 
             <x-slot name="thead">
-                <tr>
-                    <x-ui.table-th>
-                        <a href="{{ route('admin.master-dokumen.index', array_merge(request()->query(), ['sort' => 'title', 'direction' => ($sortField === 'title' && $sortAsc) ? 'desc' : 'asc'])) }}" class="text-dark text-hover-primary">
-                            Nama Dokumen @if($sortField === 'title') <i class="ki-outline ki-arrow-{{ $sortAsc ? 'up' : 'down' }} fs-7"></i> @endif
-                        </a>
-                    </x-ui.table-th>
-                    <x-ui.table-th align="center">Kategori</x-ui.table-th>
-                    <x-ui.table-th align="center">Status</x-ui.table-th>
-                    <x-ui.table-th>
-                        <a href="{{ route('admin.master-dokumen.index', array_merge(request()->query(), ['sort' => 'created_at', 'direction' => ($sortField === 'created_at' && $sortAsc) ? 'desc' : 'asc'])) }}" class="text-dark text-hover-primary">
-                            Tanggal Upload @if($sortField === 'created_at') <i class="ki-outline ki-arrow-{{ $sortAsc ? 'up' : 'down' }} fs-7"></i> @endif
-                        </a>
-                    </x-ui.table-th>
-                    <x-ui.table-th align="end">Aksi</x-ui.table-th>
-                </tr>
+                <x-ui.table-th field="title" :sortField="$sortField" :sortAsc="$sortAsc" form="master-dokumen-filter-form">Nama Dokumen</x-ui.table-th>
+                <x-ui.table-th align="center">Kategori</x-ui.table-th>
+                <x-ui.table-th align="center">Status</x-ui.table-th>
+                <x-ui.table-th field="created_at" :sortField="$sortField" :sortAsc="$sortAsc" form="master-dokumen-filter-form">Tanggal Upload</x-ui.table-th>
+                <x-ui.table-th align="end">Aksi</x-ui.table-th>
             </x-slot>
 
             <x-slot name="tbody">

@@ -20,7 +20,7 @@
                 <input type="hidden" name="visible_permission_ids[]" value="{{ $permission->id }}">
             @endforeach
 
-            <x-ui.table title="Matriks Permission" subtitle="{{ $permissions->count() }} permissions &middot; {{ $roles->count() }} roles" :records="null" table-class="table-bordered table-sm text-nowrap">
+            <x-ui.table title="Matriks Permission" subtitle="{{ $permissions->count() }} permissions &middot; {{ $roles->count() }} roles" :records="null">
                 <x-slot name="filters">
                     <form method="GET" action="{{ route('admin.role-permission.index') }}" id="role-permission-filter-form">
                         <div class="d-flex align-items-center gap-3 flex-wrap">
@@ -36,13 +36,11 @@
                 </x-slot>
 
                 <x-slot name="thead">
-                    <tr>
-                        <x-ui.table-th class="ps-4" style="min-width: 200px;">Permission</x-ui.table-th>
-                        <x-ui.table-th style="min-width: 150px;">Label</x-ui.table-th>
-                        @foreach($roles as $role)
-                            <x-ui.table-th align="center" style="min-width: 100px;">{{ $role->name }}</x-ui.table-th>
-                        @endforeach
-                    </tr>
+                    <x-ui.table-th class="ps-4" style="min-width: 200px;">Permission</x-ui.table-th>
+                    <x-ui.table-th style="min-width: 150px;">Label</x-ui.table-th>
+                    @foreach($roles as $role)
+                        <x-ui.table-th align="center" style="min-width: 100px;">{{ $role->name }}</x-ui.table-th>
+                    @endforeach
                 </x-slot>
 
                 <x-slot name="tbody">

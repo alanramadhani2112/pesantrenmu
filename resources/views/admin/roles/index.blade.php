@@ -18,31 +18,18 @@
                 <form method="GET" action="{{ route('admin.roles.index') }}" id="roles-filter-form">
                     <div class="d-flex align-items-center gap-3 flex-wrap">
                         <x-datatable.search name="search" placeholder="Cari role..." :value="$search" form="roles-filter-form" />
-                        <input type="hidden" name="sort" value="{{ $sortField }}">
-                        <input type="hidden" name="direction" value="{{ $sortAsc ? 'asc' : 'desc' }}">
+                        <x-ui.table-per-page name="perPage" :value="$perPage" :options="[10, 25, 50]" form="roles-filter-form" />
+                        <input type="hidden" name="sortField" value="{{ $sortField }}">
+                        <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
                     </div>
                 </form>
             </x-slot>
 
             <x-slot name="thead">
-                <tr>
-                    <x-ui.table-th>
-                        <a href="{{ route('admin.roles.index', array_merge(request()->query(), ['sort' => 'id', 'direction' => ($sortField === 'id' && $sortAsc) ? 'desc' : 'asc'])) }}" class="text-dark text-hover-primary">
-                            ID @if($sortField === 'id') <i class="ki-outline ki-arrow-{{ $sortAsc ? 'up' : 'down' }} fs-7"></i> @endif
-                        </a>
-                    </x-ui.table-th>
-                    <x-ui.table-th>
-                        <a href="{{ route('admin.roles.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => ($sortField === 'name' && $sortAsc) ? 'desc' : 'asc'])) }}" class="text-dark text-hover-primary">
-                            Nama Role @if($sortField === 'name') <i class="ki-outline ki-arrow-{{ $sortAsc ? 'up' : 'down' }} fs-7"></i> @endif
-                        </a>
-                    </x-ui.table-th>
-                    <x-ui.table-th>
-                        <a href="{{ route('admin.roles.index', array_merge(request()->query(), ['sort' => 'parameter', 'direction' => ($sortField === 'parameter' && $sortAsc) ? 'desc' : 'asc'])) }}" class="text-dark text-hover-primary">
-                            Parameter @if($sortField === 'parameter') <i class="ki-outline ki-arrow-{{ $sortAsc ? 'up' : 'down' }} fs-7"></i> @endif
-                        </a>
-                    </x-ui.table-th>
-                    <x-ui.table-th align="end">Aksi</x-ui.table-th>
-                </tr>
+                <x-ui.table-th field="id" :sortField="$sortField" :sortAsc="$sortAsc" form="roles-filter-form" :min-width="false" class="w-70px">ID</x-ui.table-th>
+                <x-ui.table-th field="name" :sortField="$sortField" :sortAsc="$sortAsc" form="roles-filter-form">Nama Role</x-ui.table-th>
+                <x-ui.table-th field="parameter" :sortField="$sortField" :sortAsc="$sortAsc" form="roles-filter-form">Parameter</x-ui.table-th>
+                <x-ui.table-th align="end">Aksi</x-ui.table-th>
             </x-slot>
 
             <x-slot name="tbody">

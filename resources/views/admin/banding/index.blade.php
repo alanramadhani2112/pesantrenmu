@@ -33,15 +33,13 @@
             </x-slot>
 
             <x-slot name="thead">
-                <tr>
-                    <x-ui.table-th>Pesantren</x-ui.table-th>
-                    <x-ui.table-th>Tanggal Pengajuan</x-ui.table-th>
-                    <x-ui.table-th>Alasan</x-ui.table-th>
-                    <x-ui.table-th align="center">Status</x-ui.table-th>
-                    <x-ui.table-th>Peninjau</x-ui.table-th>
-                    <x-ui.table-th align="center">Hari Sejak Pengajuan</x-ui.table-th>
-                    <x-ui.table-th align="end">Aksi</x-ui.table-th>
-                </tr>
+                <x-ui.table-th>Pesantren</x-ui.table-th>
+                <x-ui.table-th>Tanggal Pengajuan</x-ui.table-th>
+                <x-ui.table-th>Alasan</x-ui.table-th>
+                <x-ui.table-th align="center">Status</x-ui.table-th>
+                <x-ui.table-th>Peninjau</x-ui.table-th>
+                <x-ui.table-th align="center">Hari Sejak Pengajuan</x-ui.table-th>
+                <x-ui.table-th align="end">Aksi</x-ui.table-th>
             </x-slot>
 
             <x-slot name="tbody">

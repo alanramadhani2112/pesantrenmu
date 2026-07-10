@@ -19,29 +19,19 @@
                     <div class="d-flex align-items-center gap-3 flex-wrap">
                         <x-datatable.search name="search" placeholder="Cari kategori..." :value="$search" form="kategori-dokumen-filter-form" />
                         <x-ui.table-per-page name="perPage" :value="$perPage" :options="[10, 25, 50]" form="kategori-dokumen-filter-form" />
-                        <input type="hidden" name="sort" value="{{ $sortField }}">
-                        <input type="hidden" name="direction" value="{{ $sortAsc ? 'asc' : 'desc' }}">
+                        <input type="hidden" name="sortField" value="{{ $sortField }}">
+                        <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
                     </div>
                 </form>
             </x-slot>
 
             <x-slot name="thead">
-                <tr>
-                    <x-ui.table-th>
-                        <a href="{{ route('admin.master-kategori-dokumen.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => ($sortField === 'name' && $sortAsc) ? 'desc' : 'asc'])) }}" class="text-dark text-hover-primary">
-                            Nama @if($sortField === 'name') <i class="ki-outline ki-arrow-{{ $sortAsc ? 'up' : 'down' }} fs-7"></i> @endif
-                        </a>
-                    </x-ui.table-th>
-                    <x-ui.table-th>Slug</x-ui.table-th>
-                    <x-ui.table-th align="center">Visibility</x-ui.table-th>
-                    <x-ui.table-th align="center">Status</x-ui.table-th>
-                    <x-ui.table-th align="center">
-                        <a href="{{ route('admin.master-kategori-dokumen.index', array_merge(request()->query(), ['sort' => 'sort_order', 'direction' => ($sortField === 'sort_order' && $sortAsc) ? 'desc' : 'asc'])) }}" class="text-dark text-hover-primary">
-                            Urutan @if($sortField === 'sort_order') <i class="ki-outline ki-arrow-{{ $sortAsc ? 'up' : 'down' }} fs-7"></i> @endif
-                        </a>
-                    </x-ui.table-th>
-                    <x-ui.table-th align="end">Aksi</x-ui.table-th>
-                </tr>
+                <x-ui.table-th field="name" :sortField="$sortField" :sortAsc="$sortAsc" form="kategori-dokumen-filter-form">Nama</x-ui.table-th>
+                <x-ui.table-th>Slug</x-ui.table-th>
+                <x-ui.table-th align="center">Visibility</x-ui.table-th>
+                <x-ui.table-th align="center">Status</x-ui.table-th>
+                <x-ui.table-th field="sort_order" :sortField="$sortField" :sortAsc="$sortAsc" form="kategori-dokumen-filter-form" align="center">Urutan</x-ui.table-th>
+                <x-ui.table-th align="end">Aksi</x-ui.table-th>
             </x-slot>
 
             <x-slot name="tbody">
