@@ -2,10 +2,10 @@
   "tc_id": "TC-001-07-10-26-ui-polish-metronic",
   "parent_tc": null,
   "title": "Polish Metronic UI per role",
-  "status": "in_progress",
+  "status": "deployed",
   "priority": "high",
   "created": "2026-07-09T17:17:36+00:00",
-  "updated": "2026-07-09T17:59:55+00:00",
+  "updated": "2026-07-10T01:07:14+00:00",
   "created_by": "Claude",
   "project": "SPM Fix",
   "description": {
@@ -441,6 +441,51 @@
           "reason": null
         }
       ]
+    },
+    {
+      "revision_id": "R7",
+      "timestamp": "2026-07-10T01:07:13+00:00",
+      "author": "Claude",
+      "summary": "status: in_progress -> implemented",
+      "field_changes": [
+        {
+          "field": "status",
+          "action": "changed",
+          "old_value": "in_progress",
+          "new_value": "implemented",
+          "reason": "All UI polish slices merged to main"
+        }
+      ]
+    },
+    {
+      "revision_id": "R8",
+      "timestamp": "2026-07-10T01:07:14+00:00",
+      "author": "Claude",
+      "summary": "status: implemented -> tested",
+      "field_changes": [
+        {
+          "field": "status",
+          "action": "changed",
+          "old_value": "implemented",
+          "new_value": "tested",
+          "reason": "Full suite 3104 passed, build pass"
+        }
+      ]
+    },
+    {
+      "revision_id": "R9",
+      "timestamp": "2026-07-10T01:07:14+00:00",
+      "author": "Claude",
+      "summary": "status: tested -> deployed",
+      "field_changes": [
+        {
+          "field": "status",
+          "action": "changed",
+          "old_value": "tested",
+          "new_value": "deployed",
+          "reason": "Pushed to origin/main 83679cc..6787672"
+        }
+      ]
     }
   ],
   "sub_tcs": [],
@@ -458,7 +503,7 @@
       "platform": "claude_code",
       "model": "unknown",
       "started": "2026-07-09T17:17:36+00:00",
-      "last_active": "2026-07-09T17:59:55+00:00"
+      "last_active": "2026-07-10T01:07:14+00:00"
     },
     "handoff": {
       "progress_summary": "Committed Pesantren UI polish slice b3f2aef after focused Pesantren verification.",
@@ -493,7 +538,7 @@
     "project": "SPM Fix",
     "created_by": "Claude",
     "last_modified_by": "Claude",
-    "last_modified": "2026-07-09T17:59:55+00:00",
+    "last_modified": "2026-07-10T01:07:14+00:00",
     "estimated_effort": null
   }
 }
