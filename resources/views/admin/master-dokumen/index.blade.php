@@ -12,23 +12,20 @@
             </x-ui.button>
         </x-slot>
 
-        {{-- Search & PerPage --}}
-        <form method="GET" action="{{ route('admin.master-dokumen.index') }}" id="master-dokumen-filter-form" class="mb-5">
-            <div class="d-flex align-items-center gap-3 flex-wrap">
-                <x-datatable.search name="search" placeholder="Cari dokumen..." :value="$search" form="master-dokumen-filter-form" />
-                <x-ui.select name="perPage" size="sm" class="w-auto" onchange="this.form.submit()">
-                    @foreach([10, 25, 50] as $pp)
-                        <option value="{{ $pp }}" @selected($perPage == $pp)>{{ $pp }}</option>
-                    @endforeach
-                </x-ui.select>
-                <input type="hidden" name="sort" value="{{ $sortField }}">
-                <input type="hidden" name="direction" value="{{ $sortAsc ? 'asc' : 'desc' }}">
-            </div>
-        </form>
-
         {{-- Table --}}
-        <x-ui.simple-table>
-            <thead>
+        <x-ui.table title="Daftar Dokumen Wajib" subtitle="Template dan dokumen pendukung untuk pesantren dan asesor." :records="$documents">
+            <x-slot name="filters">
+                <form method="GET" action="{{ route('admin.master-dokumen.index') }}" id="master-dokumen-filter-form">
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <x-datatable.search name="search" placeholder="Cari dokumen..." :value="$search" form="master-dokumen-filter-form" />
+                        <x-ui.table-per-page name="perPage" :value="$perPage" :options="[10, 25, 50]" form="master-dokumen-filter-form" />
+                        <input type="hidden" name="sort" value="{{ $sortField }}">
+                        <input type="hidden" name="direction" value="{{ $sortAsc ? 'asc' : 'desc' }}">
+                    </div>
+                </form>
+            </x-slot>
+
+            <x-slot name="thead">
                 <tr>
                     <x-ui.table-th>
                         <a href="{{ route('admin.master-dokumen.index', array_merge(request()->query(), ['sort' => 'title', 'direction' => ($sortField === 'title' && $sortAsc) ? 'desc' : 'asc'])) }}" class="text-dark text-hover-primary">
@@ -44,8 +41,9 @@
                     </x-ui.table-th>
                     <x-ui.table-th align="end">Aksi</x-ui.table-th>
                 </tr>
-            </thead>
-            <tbody>
+            </x-slot>
+
+            <x-slot name="tbody">
                 @forelse($documents as $doc)
                     <tr>
                         <td>
@@ -104,12 +102,8 @@
                         </td>
                     </tr>
                 @endforelse
-            </tbody>
-        </x-ui.simple-table>
-
-        <div class="mt-5">
-            <x-ui.pagination :paginator="$documents" />
-        </div>
+            </x-slot>
+        </x-ui.table>
     </x-ui.index-layout>
 
     <form id="document-delete-form" method="POST" class="d-none">
