@@ -13,28 +13,26 @@
             <x-ui.badge variant="warning">Tertunda: {{ $pendingCount }}</x-ui.badge>
         </x-slot>
 
-        <form method="GET" action="{{ route('admin.banding') }}" id="banding-filter-form" class="mb-5">
-            <div class="d-flex align-items-center gap-3 flex-wrap">
-                <x-datatable.search name="search" placeholder="Cari Pesantren..." :value="$search" form="banding-filter-form" />
+        <x-ui.table title="Daftar Banding" subtitle="Pengajuan banding dari pesantren." :records="$bandings">
+            <x-slot name="filters">
+                <form method="GET" action="{{ route('admin.banding') }}" id="banding-filter-form">
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <x-datatable.search name="search" placeholder="Cari Pesantren..." :value="$search" form="banding-filter-form" />
 
-                <x-ui.select name="statusFilter" size="sm" class="w-auto min-w-200px" onchange="this.form.submit()">
-                    <option value="all" @selected($statusFilter === 'all')>Semua</option>
-                    <option value="pending" @selected($statusFilter === 'pending')>Tertunda</option>
-                    <option value="under_review" @selected($statusFilter === 'under_review')>Dalam Peninjauan</option>
-                    <option value="accepted" @selected($statusFilter === 'accepted')>Diterima</option>
-                    <option value="rejected" @selected($statusFilter === 'rejected')>Ditolak</option>
-                </x-ui.select>
+                        <x-ui.select name="statusFilter" size="sm" class="w-auto min-w-200px" onchange="this.form.submit()">
+                            <option value="all" @selected($statusFilter === 'all')>Semua</option>
+                            <option value="pending" @selected($statusFilter === 'pending')>Tertunda</option>
+                            <option value="under_review" @selected($statusFilter === 'under_review')>Dalam Peninjauan</option>
+                            <option value="accepted" @selected($statusFilter === 'accepted')>Diterima</option>
+                            <option value="rejected" @selected($statusFilter === 'rejected')>Ditolak</option>
+                        </x-ui.select>
 
-                <x-ui.select name="perPage" size="sm" class="w-auto" onchange="this.form.submit()">
-                    @foreach([10, 25, 50] as $pp)
-                        <option value="{{ $pp }}" @selected($perPage == $pp)>{{ $pp }}</option>
-                    @endforeach
-                </x-ui.select>
-            </div>
-        </form>
+                        <x-ui.table-per-page name="perPage" :value="$perPage" :options="[10, 25, 50]" form="banding-filter-form" />
+                    </div>
+                </form>
+            </x-slot>
 
-        <x-ui.simple-table>
-            <thead>
+            <x-slot name="thead">
                 <tr>
                     <x-ui.table-th>Pesantren</x-ui.table-th>
                     <x-ui.table-th>Tanggal Pengajuan</x-ui.table-th>
@@ -44,9 +42,9 @@
                     <x-ui.table-th align="center">Hari Sejak Pengajuan</x-ui.table-th>
                     <x-ui.table-th align="end">Aksi</x-ui.table-th>
                 </tr>
-            </thead>
+            </x-slot>
 
-            <tbody>
+            <x-slot name="tbody">
                 @forelse ($bandings as $banding)
                 @php
                     $isOverdue = $banding->isOverdue();
@@ -119,12 +117,7 @@
                     </td>
                 </tr>
                 @endforelse
-            </tbody>
-        </x-ui.simple-table>
-
-        <div class="mt-5">
-            <x-ui.pagination :paginator="$bandings" />
-        </div>
-    </x-ui.index-layout>
+            </x-slot>
+        </x-ui.table>
 </div>
 @endsection

@@ -16,41 +16,27 @@
             <x-slot name="filters">
                 <x-ui.filter-bar>
                     <form method="GET" action="{{ route('admin.asesor.index') }}" id="asesor-filter-form" class="d-flex align-items-center gap-3 flex-wrap">
-                        <div class="position-relative">
-                            <x-ui.icon name="magnifier" class="fs-3 position-absolute top-50 translate-middle-y ms-4 text-gray-500" />
-                            <input
-                                type="text"
-                                name="search"
-                                value="{{ $search }}"
-                                placeholder="Cari Asesor..."
-                                class="form-control form-control-solid ps-12"
-                                style="min-width: 240px;"
-                            >
-                        </div>
+                        <x-datatable.search name="search" placeholder="Cari Asesor..." :value="$search" form="asesor-filter-form" />
 
-                        <select name="filterPeran" class="form-select form-select-sm form-select-solid" style="max-width: 200px;">
+                        <x-ui.select name="filterPeran" size="sm" class="w-auto min-w-180px" onchange="this.form.submit()">
                             <option value="">Semua Peran</option>
                             <option value="1" @selected($filterPeran === '1')>Ketua Kelompok</option>
                             <option value="2" @selected($filterPeran === '2')>Anggota Kelompok</option>
-                        </select>
+                        </x-ui.select>
 
-                        <select name="filterPenugasan" class="form-select form-select-sm form-select-solid" style="max-width: 200px;">
+                        <x-ui.select name="filterPenugasan" size="sm" class="w-auto min-w-180px" onchange="this.form.submit()">
                             <option value="">Semua Penugasan</option>
                             <option value="bertugas" @selected($filterPenugasan === 'bertugas')>Sedang Bertugas</option>
                             <option value="bebas" @selected($filterPenugasan === 'bebas')>Bebas Tugas</option>
-                        </select>
+                        </x-ui.select>
 
-                        <select name="filterStatus" class="form-select form-select-sm form-select-solid" style="max-width: 200px;">
+                        <x-ui.select name="filterStatus" size="sm" class="w-auto min-w-160px" onchange="this.form.submit()">
                             <option value="">Semua Status</option>
                             <option value="1" @selected($filterStatus === '1')>Aktif</option>
                             <option value="0" @selected($filterStatus === '0')>Tidak Aktif</option>
-                        </select>
+                        </x-ui.select>
 
-                        <select name="perPage" class="form-select form-select-sm" style="width: 80px;">
-                            @foreach([10, 25, 50] as $pp)
-                                <option value="{{ $pp }}" @selected($perPage == $pp)>{{ $pp }}</option>
-                            @endforeach
-                        </select>
+                        <x-ui.table-per-page name="perPage" :value="$perPage" :options="[10, 25, 50]" form="asesor-filter-form" />
 
                         <input type="hidden" name="sortField" value="{{ $sortField }}">
                         <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
@@ -180,10 +166,6 @@
                 @endforelse
             </x-slot>
         </x-datatable.layout>
-
-        <div class="d-flex justify-content-center mt-4">
-            {{ $asesors->appends(compact('search', 'filterPeran', 'filterPenugasan', 'filterStatus', 'perPage', 'sortField', 'sortAsc'))->links() }}
-        </div>
     </x-ui.index-layout>
 </div>
 @endsection

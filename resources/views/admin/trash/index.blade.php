@@ -31,17 +31,13 @@
         <x-datatable.layout
             title="Daftar Akreditasi Terhapus"
             subtitle="Cari berdasarkan nama pesantren atau pengguna pengaju."
-            :records="$trashedAkreditasis"
+            :records="$trashedAkreditasis->appends(compact('search', 'perPage'))"
         >
             <x-slot name="filters">
                 <form method="GET" action="{{ route('admin.trash') }}" id="trash-filter-form" class="mb-5">
                     <div class="d-flex gap-3 align-items-center">
                         <x-datatable.search name="search" placeholder="Cari pesantren atau pengguna..." :value="$search" form="trash-filter-form" />
-                        <select name="perPage" class="form-select form-select-sm" style="width: 80px;" onchange="this.form.submit()">
-                            @foreach([10, 25, 50] as $pp)
-                                <option value="{{ $pp }}" @selected($perPage == $pp)>{{ $pp }}</option>
-                            @endforeach
-                        </select>
+                        <x-ui.table-per-page name="perPage" :value="$perPage" :options="[10, 25, 50]" form="trash-filter-form" />
                     </div>
                 </form>
             </x-slot>
@@ -133,10 +129,6 @@
                 @endforelse
             </x-slot>
         </x-datatable.layout>
-
-        <div class="d-flex justify-content-center mt-4">
-            {{ $trashedAkreditasis->appends(compact('search', 'perPage'))->links() }}
-        </div>
     </x-ui.index-layout>
 
     {{-- Restore confirmation modal --}}
