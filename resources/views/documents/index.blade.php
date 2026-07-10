@@ -16,7 +16,7 @@
         :title="$pageTitle"
         subtitle="Daftar dokumen yang tersedia sesuai hak akses pengguna."
     >
-        <x-datatable.layout
+        <x-ui.table
             :title="$pageTitle"
             subtitle="Buka berkas yang dibutuhkan untuk proses akreditasi."
             :records="$documents"
@@ -27,9 +27,9 @@
             </x-slot>
 
             <x-slot name="filters">
-                <form method="GET" action="{{ route('documents.index', ['doc' => $doc]) }}" class="d-flex align-items-center gap-2">
+                <form method="GET" action="{{ route('documents.index', ['doc' => $doc]) }}" id="documents-filter-form" class="d-flex align-items-center gap-3 flex-wrap">
                     <input type="hidden" name="perPage" value="{{ $perPage }}">
-                    <input type="text" name="search" value="{{ $search }}" placeholder="Cari dokumen..." class="form-control form-control-sm" onchange="this.form.submit()">
+                    <x-datatable.search name="search" placeholder="Cari dokumen..." :value="$search" form="documents-filter-form" onchange="this.form.submit()" />
                 </form>
             </x-slot>
 
@@ -91,7 +91,7 @@
                     </tr>
                 @endforelse
             </x-slot>
-        </x-datatable.layout>
+        </x-ui.table>
     </x-ui.page>
 </div>
 @endsection

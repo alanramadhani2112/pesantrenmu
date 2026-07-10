@@ -101,7 +101,7 @@
             </div>
         </div>
 
-        <x-datatable.layout
+        <x-ui.table
             :title="$context['tableTitle']"
             :subtitle="$context['tableSubtitle']"
             :records="$assessments"
@@ -241,7 +241,7 @@
                 </tr>
                 @endforelse
             </x-slot>
-        </x-datatable.layout>
+        </x-ui.table>
     </x-ui.page>
 
     {{-- Modal Atur Jadwal Visitasi --}}

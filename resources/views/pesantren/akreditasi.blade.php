@@ -91,127 +91,118 @@
         @endforeach
     </x-ui.tabs>
 
-    {{-- Filter Form --}}
-    <form method="GET" action="{{ route('pesantren.akreditasi') }}" id="pesantren-akreditasi-filter-form" class="mb-6">
-        <input type="hidden" name="focus" value="{{ $focus }}">
-        <input type="hidden" name="sortField" value="{{ $sortField }}">
-        <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
-        <div class="d-flex align-items-center gap-3 flex-wrap">
-            <x-datatable.search name="search" placeholder="Cari periode atau ID..." :value="$search" form="pesantren-akreditasi-filter-form" />
+    <x-ui.table
+        title="Daftar Pengajuan Akreditasi"
+        subtitle="Riwayat pengajuan, status, tahapan, dan tindak lanjut akreditasi."
+        :records="$akreditasis"
+        :show-per-page="false"
+    >
+        <x-slot name="filters">
+            <form method="GET" action="{{ route('pesantren.akreditasi') }}" id="pesantren-akreditasi-filter-form">
+                <input type="hidden" name="focus" value="{{ $focus }}">
+                <input type="hidden" name="sortField" value="{{ $sortField }}">
+                <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <x-datatable.search name="search" placeholder="Cari periode atau ID..." :value="$search" form="pesantren-akreditasi-filter-form" />
 
-            <x-ui.input name="periodeFilter" value="{{ $periodeFilter }}" class="w-auto min-w-120px" placeholder="2025" />
+                    <x-ui.input name="periodeFilter" value="{{ $periodeFilter }}" class="w-auto min-w-120px" placeholder="2025" />
 
-            <x-ui.select name="tahapanFilter" size="sm" class="w-auto min-w-160px" onchange="this.form.submit()">
-                <option value="">Semua Tahapan</option>
-                @foreach($tahapanLabels as $val => $label)
-                    <option value="{{ $val }}" {{ $tahapanFilter === $val ? 'selected' : '' }}>{{ $label }}</option>
-                @endforeach
-            </x-ui.select>
+                    <x-ui.select name="tahapanFilter" size="sm" class="w-auto min-w-160px" onchange="this.form.submit()">
+                        <option value="">Semua Tahapan</option>
+                        @foreach($tahapanLabels as $val => $label)
+                            <option value="{{ $val }}" {{ $tahapanFilter === $val ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </x-ui.select>
 
-            <x-ui.select name="perPage" size="sm" class="w-auto" onchange="this.form.submit()">
-                @foreach([5, 10, 25, 50] as $pp)
-                    <option value="{{ $pp }}" {{ $perPage == $pp ? 'selected' : '' }}>{{ $pp }}</option>
-                @endforeach
-            </x-ui.select>
+                    <x-ui.table-per-page name="perPage" :value="$perPage" :options="[5, 10, 25, 50]" form="pesantren-akreditasi-filter-form" />
 
-            <x-ui.button type="submit" variant="light" size="sm">
-                <x-ui.icon name="setting-2" class="fs-4 me-1" />
-                Filter
-            </x-ui.button>
-        </div>
-    </form>
+                    <x-ui.button type="submit" variant="light" size="sm">
+                        <x-ui.icon name="setting-2" class="fs-4 me-1" />
+                        Filter
+                    </x-ui.button>
+                </div>
+            </form>
+        </x-slot>
 
-    {{-- Table --}}
-    @if($akreditasis->count() > 0)
-        <x-ui.simple-table table-class="table-bordered">
-            <thead>
-                <tr class="bg-light">
-                    <x-ui.table-th :min-width="false">No</x-ui.table-th>
-                    <x-ui.table-th :min-width="false">ID</x-ui.table-th>
-                    <x-ui.table-th>Periode</x-ui.table-th>
-                    <x-ui.table-th>Status</x-ui.table-th>
-                    <x-ui.table-th>Tahapan</x-ui.table-th>
-                    <x-ui.table-th>Tanggal Pengajuan</x-ui.table-th>
-                    <x-ui.table-th align="end">Aksi</x-ui.table-th>
+        <x-slot name="thead">
+            <x-ui.table-th :min-width="false">No</x-ui.table-th>
+            <x-ui.table-th :min-width="false">ID</x-ui.table-th>
+            <x-ui.table-th>Periode</x-ui.table-th>
+            <x-ui.table-th>Status</x-ui.table-th>
+            <x-ui.table-th>Tahapan</x-ui.table-th>
+            <x-ui.table-th>Tanggal Pengajuan</x-ui.table-th>
+            <x-ui.table-th align="end">Aksi</x-ui.table-th>
+        </x-slot>
+
+        <x-slot name="tbody">
+            @forelse($akreditasis as $akreditasi)
+                @php $statusLabel = $statusLabels[$akreditasi->status] ?? $akreditasi->status; @endphp
+                <tr>
+                    <td>{{ $loop->iteration + (($akreditasis->currentPage() - 1) * $akreditasis->perPage()) }}</td>
+                    <td class="fw-semibold">{{ $akreditasi->id }}</td>
+                    <td>{{ $akreditasi->periode }}</td>
+                    <td>
+                        <span class="badge {{ $statusBadgeClass[$akreditasi->status] ?? 'badge-light-secondary' }}">
+                            {{ $statusLabel }}
+                        </span>
+                    </td>
+                    <td>{{ $tahapanLabels[$akreditasi->tahapan] ?? ucfirst($akreditasi->tahapan) }}</td>
+                    <td>{{ $akreditasi->created_at->format('d M Y') }}</td>
+                    <td class="text-end">
+                        <x-ui.action-menu>
+                            @if($akreditasi->kartu_kendali)
+                                <x-ui.action-menu-item :href="route('pesantren.akreditasi-detail', $akreditasi->uuid)" variant="primary">
+                                    <x-ui.icon name="eye" class="fs-5" />
+                                    Lihat Detail
+                                </x-ui.action-menu-item>
+                            @endif
+
+                            @if($akreditasi->status === '0')
+                                <x-ui.action-menu-item variant="danger" x-on:click="confirmDelete({{ $akreditasi->id }})">
+                                    <x-ui.icon name="trash" class="fs-5" />
+                                    Hapus Pengajuan
+                                </x-ui.action-menu-item>
+
+                                <x-ui.action-menu-item variant="warning" x-on:click="confirmCancel({{ $akreditasi->id }})">
+                                    <x-ui.icon name="cross-circle" class="fs-5" />
+                                    Batalkan Pengajuan
+                                </x-ui.action-menu-item>
+                            @endif
+
+                            @if($akreditasi->status === '-1')
+                                <x-ui.action-menu-item variant="danger" x-on:click="confirmDelete({{ $akreditasi->id }})">
+                                    <x-ui.icon name="trash" class="fs-5" />
+                                    Hapus Pengajuan
+                                </x-ui.action-menu-item>
+
+                                <x-ui.action-menu-item variant="primary" x-on:click="openBandingModal({{ $akreditasi->id }})">
+                                    <x-ui.icon name="document" class="fs-5" />
+                                    Banding
+                                </x-ui.action-menu-item>
+                            @endif
+
+                            @if(in_array($akreditasi->status, ['1', 'hasil_akhir']))
+                                <x-ui.action-menu-item variant="primary" x-on:click="openCatatanModal({{ $akreditasi->id }})">
+                                    <x-ui.icon name="document" class="fs-5" />
+                                    Catatan
+                                </x-ui.action-menu-item>
+                            @endif
+                        </x-ui.action-menu>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                    @foreach($akreditasis as $akreditasi)
-                        @php $statusLabel = $statusLabels[$akreditasi->status] ?? $akreditasi->status; @endphp
-                        <tr>
-                            <td>{{ $loop->iteration + (($akreditasis->currentPage() - 1) * $akreditasis->perPage()) }}</td>
-                            <td class="fw-semibold">{{ $akreditasi->id }}</td>
-                            <td>{{ $akreditasi->periode }}</td>
-                            <td>
-                                <span class="badge {{ $statusBadgeClass[$akreditasi->status] ?? 'badge-light-secondary' }}">
-                                    {{ $statusLabel }}
-                                </span>
-                            </td>
-                            <td>{{ $tahapanLabels[$akreditasi->tahapan] ?? ucfirst($akreditasi->tahapan) }}</td>
-                            <td>{{ $akreditasi->created_at->format('d M Y') }}</td>
-                            <td class="text-end">
-                                <x-ui.action-menu>
-                                    @if($akreditasi->kartu_kendali)
-                                        <x-ui.action-menu-item :href="route('pesantren.akreditasi-detail', $akreditasi->uuid)" variant="primary">
-                                            <x-ui.icon name="eye" class="fs-5" />
-                                            Lihat Detail
-                                        </x-ui.action-menu-item>
-                                    @endif
-
-                                    @if($akreditasi->status === '0')
-                                        <x-ui.action-menu-item
-                                            variant="danger"
-                                            x-on:click="confirmDelete({{ $akreditasi->id }})"
-                                        >
-                                            <x-ui.icon name="trash" class="fs-5" />
-                                            Hapus Pengajuan
-                                        </x-ui.action-menu-item>
-
-                                        <x-ui.action-menu-item
-                                            variant="warning"
-                                            x-on:click="confirmCancel({{ $akreditasi->id }})"
-                                        >
-                                            <x-ui.icon name="cross-circle" class="fs-5" />
-                                            Batalkan Pengajuan
-                                        </x-ui.action-menu-item>
-                                    @endif
-
-                                    @if($akreditasi->status === '-1')
-                                        <x-ui.action-menu-item
-                                            variant="danger"
-                                            x-on:click="confirmDelete({{ $akreditasi->id }})"
-                                        >
-                                            <x-ui.icon name="trash" class="fs-5" />
-                                            Hapus Pengajuan
-                                        </x-ui.action-menu-item>
-
-                                        <x-ui.action-menu-item variant="primary" x-on:click="openBandingModal({{ $akreditasi->id }})">
-                                            <x-ui.icon name="document" class="fs-5" />
-                                            Banding
-                                        </x-ui.action-menu-item>
-                                    @endif
-
-                                    @if(in_array($akreditasi->status, ['1', 'hasil_akhir']))
-                                        <x-ui.action-menu-item variant="primary" x-on:click="openCatatanModal({{ $akreditasi->id }})">
-                                            <x-ui.icon name="document" class="fs-5" />
-                                            Catatan
-                                        </x-ui.action-menu-item>
-                                    @endif
-                                </x-ui.action-menu>
-                            </td>
-                        </tr>
-                    @endforeach
-            </tbody>
-        </x-ui.simple-table>
-
-        <div class="mt-4">
-            <x-ui.pagination :paginator="$akreditasis->appends(request()->query())" />
-        </div>
-    @else
-        <x-ui.alert variant="info" title="Tidak Ada Data" class="mb-0">
-            Belum ada pengajuan akreditasi. Lengkapi profil dan data pendukung untuk mengajukan akreditasi.
-        </x-ui.alert>
-    @endif
+            @empty
+                <tr>
+                    <td colspan="7">
+                        <x-ui.empty-state
+                            title="Tidak ada pengajuan akreditasi"
+                            description="Lengkapi profil dan data pendukung untuk mengajukan akreditasi."
+                            class="py-15"
+                        />
+                    </td>
+                </tr>
+            @endforelse
+        </x-slot>
+    </x-ui.table>
 </x-ui.page>
 </div>
 

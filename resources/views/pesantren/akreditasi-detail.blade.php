@@ -151,14 +151,14 @@
         <x-ui.section-card title="B. Layanan Satuan Pendidikan" class="mb-6">
             <div class="p-6">
                 @if(!empty($profil->units) && count($profil->units) > 0)
-                    <table data-ui-simple-table="metronic" class="table table-bordered table-row-dashed">
+                    <x-ui.simple-table>
                         <thead><tr><th>Unit</th><th>Jumlah Rombel</th></tr></thead>
                         <tbody>
                             @foreach($profil->units as $unit)
                                 <tr><td>{{ $unit->unit }}</td><td>{{ $unit->jumlah_rombel }}</td></tr>
                             @endforeach
                         </tbody>
-                    </table>
+                    </x-ui.simple-table>
                 @else
                     <div class="text-muted">Belum ada layanan yang dipilih.</div>
                 @endif
@@ -185,7 +185,7 @@
                         'laporan_tahunan' => 'Laporan Tahunan',
                     ];
                 @endphp
-                <table data-ui-simple-table="metronic" class="table table-bordered table-row-dashed">
+                <x-ui.simple-table>
                     <thead><tr><th>Dokumen</th><th>Status</th></tr></thead>
                     <tbody>
                         @foreach($mainDocs as $field => $label)
@@ -201,7 +201,7 @@
                             </tr>
                         @endforeach
                     </tbody>
-                </table>
+                </x-ui.simple-table>
             </div>
         </x-ui.section-card>
 
@@ -217,7 +217,7 @@
         @endphp
         <x-ui.section-card title="Kriteria IPM" class="mb-6">
             <div class="p-6">
-                <table data-ui-simple-table="metronic" class="table table-bordered table-row-dashed">
+                <x-ui.simple-table>
                     <thead><tr><th>Kriteria</th><th>Status</th></tr></thead>
                     <tbody>
                         @foreach($ipmCriteria as $field => $label)
@@ -236,7 +236,7 @@
                             </tr>
                         @endforeach
                     </tbody>
-                </table>
+                </x-ui.simple-table>
             </div>
         </x-ui.section-card>
 
