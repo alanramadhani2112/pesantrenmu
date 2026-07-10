@@ -12,18 +12,19 @@
             </x-ui.button>
         </x-slot>
 
-        {{-- Search --}}
-        <form method="GET" action="{{ route('admin.roles.index') }}" id="roles-filter-form" class="mb-5">
-            <div class="d-flex align-items-center gap-3 flex-wrap">
-                <x-datatable.search name="search" placeholder="Cari role..." :value="$search" form="roles-filter-form" />
-                <input type="hidden" name="sort" value="{{ $sortField }}">
-                <input type="hidden" name="direction" value="{{ $sortAsc ? 'asc' : 'desc' }}">
-            </div>
-        </form>
-
         {{-- Table --}}
-        <x-ui.simple-table>
-            <thead>
+        <x-ui.table title="Daftar Role" subtitle="ID, nama, parameter, dan aksi untuk tiap role." :records="$roles">
+            <x-slot name="filters">
+                <form method="GET" action="{{ route('admin.roles.index') }}" id="roles-filter-form">
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <x-datatable.search name="search" placeholder="Cari role..." :value="$search" form="roles-filter-form" />
+                        <input type="hidden" name="sort" value="{{ $sortField }}">
+                        <input type="hidden" name="direction" value="{{ $sortAsc ? 'asc' : 'desc' }}">
+                    </div>
+                </form>
+            </x-slot>
+
+            <x-slot name="thead">
                 <tr>
                     <x-ui.table-th>
                         <a href="{{ route('admin.roles.index', array_merge(request()->query(), ['sort' => 'id', 'direction' => ($sortField === 'id' && $sortAsc) ? 'desc' : 'asc'])) }}" class="text-dark text-hover-primary">
@@ -42,8 +43,9 @@
                     </x-ui.table-th>
                     <x-ui.table-th align="end">Aksi</x-ui.table-th>
                 </tr>
-            </thead>
-            <tbody>
+            </x-slot>
+
+            <x-slot name="tbody">
                 @forelse($roles as $role)
                     <tr>
                         <td>{{ $role->id }}</td>
@@ -81,12 +83,8 @@
                         </td>
                     </tr>
                 @endforelse
-            </tbody>
-        </x-ui.simple-table>
-
-        <div class="mt-5">
-            <x-ui.pagination :paginator="$roles" />
-        </div>
+            </x-slot>
+        </x-ui.table>
     </x-ui.index-layout>
 
     <form id="role-delete-form" method="POST" class="d-none">
