@@ -1,4 +1,4 @@
-@props(['active', 'icon' => 'home', 'progressStatus' => null, 'badgeCount' => null, 'tooltip' => null, 'badgeText' => null, 'disabled' => false])
+@props(['active', 'icon' => 'home', 'badgeCount' => null, 'tooltip' => null, 'badgeText' => null, 'disabled' => false])
 
 @php
     $active = (bool) ($active ?? false);
@@ -42,12 +42,6 @@
     $isChild = $icon === 'none';
     $classes = 'spm-sidebar-link' . ($active ? ' active' : '') . ($isChild ? ' spm-sidebar-link-child' : '') . ($disabled ? ' spm-sidebar-link-disabled' : '') . ' menu-link';
     $disabledAttrs = $disabled ? 'aria-disabled="true" tabindex="-1" style="opacity:.6;cursor:not-allowed;pointer-events:none;"' : '';
-    $progressMeta = match ($progressStatus) {
-        'complete' => ['label' => 'Lengkap', 'class' => 'spm-sidebar-progress-badge--complete', 'aria' => 'Kesiapan data lengkap'],
-        'incomplete' => ['label' => 'Draft', 'class' => 'spm-sidebar-progress-badge--incomplete', 'aria' => 'Kesiapan data masih draft'],
-        'not_started' => ['label' => 'Belum', 'class' => 'spm-sidebar-progress-badge--empty', 'aria' => 'Data belum diisi'],
-        default => null,
-    };
 @endphp
 
 @if($tooltip)
@@ -65,20 +59,6 @@
         @endif
 
         <span class="spm-sidebar-title menu-title truncate">{{ $slot }}</span>
-
-        {{-- Progress status indicator --}}
-        @if($progressMeta)
-            <span class="menu-badge">
-                <span
-                    class="spm-sidebar-progress-badge {{ $progressMeta['class'] }}"
-                    aria-label="{{ $progressMeta['aria'] }}"
-                    title="{{ $progressMeta['aria'] }}"
-                >
-                    <span class="spm-sidebar-progress-dot" aria-hidden="true"></span>
-                    <span class="visually-hidden">{{ $progressMeta['aria'] }}</span>
-                </span>
-            </span>
-        @endif
 
         {{-- Badge count --}}
         @if($badgeCount && $badgeCount > 0)
@@ -110,20 +90,6 @@
         @endif
 
         <span class="spm-sidebar-title menu-title truncate">{{ $slot }}</span>
-
-        {{-- Progress status indicator --}}
-        @if($progressMeta)
-            <span class="menu-badge">
-                <span
-                    class="spm-sidebar-progress-badge {{ $progressMeta['class'] }}"
-                    aria-label="{{ $progressMeta['aria'] }}"
-                    title="{{ $progressMeta['aria'] }}"
-                >
-                    <span class="spm-sidebar-progress-dot" aria-hidden="true"></span>
-                    <span class="visually-hidden">{{ $progressMeta['aria'] }}</span>
-                </span>
-            </span>
-        @endif
 
         {{-- Badge count --}}
         @if($badgeCount && $badgeCount > 0)

@@ -233,14 +233,13 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('Komponen', $html);
 
         $progressHtml = Blade::render(<<<'BLADE'
-            <x-sidebar-link href="/pesantren/profile" :active="false" icon="hat" progressStatus="complete">
+            <x-sidebar-link href="/pesantren/profile" :active="false" icon="hat">
                 Profil Pesantren
             </x-sidebar-link>
             BLADE);
 
-        $this->assertStringContainsString('spm-sidebar-progress-dot', $progressHtml);
-        $this->assertStringContainsString('Kesiapan data lengkap', $progressHtml);
-        $this->assertStringNotContainsString('>Lengkap<', $progressHtml);
+        $this->assertStringNotContainsString('spm-sidebar-progress-dot', $progressHtml);
+        $this->assertStringNotContainsString('Kesiapan data lengkap', $progressHtml);
     }
 
     public function test_sidebar_shell_uses_metronic_drawer_markup_without_button_display_conflict(): void
@@ -318,7 +317,7 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('[data-ui-table-checkbox="metronic"]', $css);
         $this->assertStringContainsString('.spm-card-title', $css);
         $this->assertStringContainsString('Visual Audit Normalization V1', $css);
-        $this->assertStringContainsString('.spm-sidebar-progress-dot', $css);
+        $this->assertStringNotContainsString('.spm-sidebar-progress-dot', $css);
         $this->assertStringContainsString('.spm-table-shell--document-category', $css);
         $this->assertStringContainsString('.spm-detail-page', $css);
         $this->assertStringContainsString('.spm-stat-card', $css);

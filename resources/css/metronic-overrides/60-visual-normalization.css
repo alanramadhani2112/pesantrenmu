@@ -1227,40 +1227,6 @@
     margin-left: 8px !important;
 }
 
-.spm-sidebar-progress-badge {
-    min-width: 14px !important;
-    width: 14px !important;
-    height: 14px !important;
-    padding: 0 !important;
-    border-radius: 999px !important;
-}
-
-.spm-sidebar-progress-dot {
-    display: block;
-    width: 6px;
-    height: 6px;
-    border-radius: 999px;
-    background-color: currentColor;
-}
-
-.spm-sidebar-progress-badge--complete {
-    color: #039855 !important;
-    border-color: #abefc6 !important;
-    background-color: #ecfdf3 !important;
-}
-
-.spm-sidebar-progress-badge--incomplete {
-    color: #dc6803 !important;
-    border-color: #fedf89 !important;
-    background-color: #fffaeb !important;
-}
-
-.spm-sidebar-progress-badge--empty {
-    color: #98a2b3 !important;
-    border-color: #e4e7ec !important;
-    background-color: #f9fafb !important;
-}
-
 .spm-app-sidebar .app-sidebar-footer {
     min-height: 88px !important;
     padding: 14px 16px !important;

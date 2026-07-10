@@ -14,25 +14,6 @@
     $menuService = app(\App\Services\SidebarMenuService::class);
     $sections = $menuService->getMenuForRole($currentUser?->role_id ?? 0);
 
-    // Get progress data for Pesantren users
-    $progressData = [];
-    if ($isPesantren && $currentUser) {
-        try {
-            $progressService = app(\App\Services\SidebarProgressService::class);
-            $progressData = $progressService->getProgressForUser($currentUser->id);
-        } catch (\Throwable $e) {
-            $progressData = [];
-        }
-    }
-
-    // Map progress keys to menu item keys
-    $progressKeyMap = [
-        'profil_pesantren' => 'profil',
-        'ipm' => 'ipm',
-        'data_sdm' => 'sdm',
-        'edpm_ipr' => 'edpm',
-    ];
-
     // Compute badge counts for items with show_badge=true
     $badgeCounts = [];
     if ($canAccessAdminArea || $isAsesor) {
@@ -168,15 +149,6 @@
                                 }
                             }
 
-                            // Determine progress status (only for Pesantren items with show_progress)
-                            $progressStatus = null;
-                            if (($item['show_progress'] ?? false) && $isPesantren) {
-                                $progressKey = $progressKeyMap[$item['key']] ?? null;
-                                if ($progressKey) {
-                                    $progressStatus = $progressData[$progressKey] ?? null;
-                                }
-                            }
-
                             // Badge count for items with show_badge=true
                             $badgeCount = null;
                             if ($item['show_badge'] ?? false) {
@@ -188,7 +160,6 @@
                             :href="$href"
                             :active="$isActive"
                             :icon="$item['icon']"
-                            :progressStatus="$progressStatus"
                             :badgeCount="$badgeCount"
                             :tooltip="$item['tooltip']"
                             :badgeText="$badgeText"
