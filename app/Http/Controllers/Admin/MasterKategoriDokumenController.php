@@ -19,7 +19,7 @@ class MasterKategoriDokumenController extends Controller
         $sortField = $request->input('sort', $request->input('sortField', 'sort_order'));
         $sortField = in_array($sortField, ['name', 'sort_order'], true) ? $sortField : 'sort_order';
         $direction = $request->input('direction');
-        $sortAsc = $direction ? $direction === 'asc' : ($request->input('sortAsc', 'true') === 'true');
+        $sortAsc = $direction ? $direction === 'asc' : filter_var($request->input('sortAsc', 'true'), FILTER_VALIDATE_BOOLEAN);
 
         $categories = DocumentCategory::query()
             ->when($search, fn ($q) => $q->where(function ($qq) use ($search) {

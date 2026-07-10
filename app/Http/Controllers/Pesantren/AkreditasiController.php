@@ -27,7 +27,7 @@ class AkreditasiController extends Controller
         $tahapanFilter = $request->input('tahapanFilter', '');
         $perPage = $request->integer('perPage', 10);
         $sortField = $request->input('sortField', 'created_at');
-        $sortAsc = $request->input('sortAsc', 'false') === 'true';
+        $sortAsc = filter_var($request->input('sortAsc', 'false'), FILTER_VALIDATE_BOOLEAN);
 
         $effectiveStatusFilter = match ($focus) {
             'perbaikan' => '-1',

@@ -23,7 +23,7 @@ class PesantrenController extends Controller
         $filterAkreditasi = $request->input('filterAkreditasi', '');
         $perPage = $request->integer('perPage', 10);
         $sortField = $request->input('sortField', 'name');
-        $sortAsc = $request->input('sortAsc', 'true') === 'true';
+        $sortAsc = filter_var($request->input('sortAsc', 'true'), FILTER_VALIDATE_BOOLEAN);
 
         $pesantrens = $this->pesantrenService->getPaginatedData(
             $search,
@@ -80,7 +80,7 @@ class PesantrenController extends Controller
         $filterStatus = $request->input('filterStatus', '');
         $filterAkreditasi = $request->input('filterAkreditasi', '');
         $sortField = $request->input('sortField', 'name');
-        $sortAsc = $request->input('sortAsc', 'true') === 'true';
+        $sortAsc = filter_var($request->input('sortAsc', 'true'), FILTER_VALIDATE_BOOLEAN);
 
         return Excel::download(
             new PesantrenExport($search, $filterStatus, $filterAkreditasi, $sortField, $sortAsc),

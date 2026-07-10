@@ -1,3 +1,20 @@
+{{--
+    SPM Table Component — Standard operational table with Metronic styling.
+
+    SLOT USAGE (IMPORTANT):
+    - thead: Pass <th> elements ONLY. Do NOT wrap in <tr>. Component renders <tr> automatically.
+    - tbody: Pass <tr> elements directly.
+    - filters: Search/filter form. Use x-datatable.search, x-ui.select, x-ui.table-per-page.
+    - toolbar: Buttons, badges (optional).
+    - Pagination automatic if :records receives paginator. No manual ->links().
+
+    EXAMPLE thead:
+        <x-slot name="thead">
+            <x-ui.table-th field="name" :sortField="$sortField" :sortAsc="$sortAsc">Name</x-ui.table-th>
+            <x-ui.table-th align="center">Status</x-ui.table-th>
+            <x-ui.table-th align="end">Aksi</x-ui.table-th>
+        </x-slot>
+--}}
 @props([
     'title' => null,
     'subtitle' => null,
@@ -12,7 +29,8 @@
     $perPagePosition = in_array($perPagePosition, ['toolbar', 'footer'], true) ? $perPagePosition : 'toolbar';
     $showToolbarPerPage = $showPerPage && $perPagePosition === 'toolbar';
     $showFooterPerPage = $showPerPage && $perPagePosition === 'footer';
-    $tableClasses = $tableClass ?: 'table table-striped table-row-bordered align-middle gy-5 gs-7 mb-0 spm-datatable spm-table spm-table--list spm-table--metronic-docs';
+    $defaultClasses = 'table table-striped table-row-bordered align-middle gy-5 gs-7 mb-0 spm-datatable spm-table spm-table--list spm-table--metronic-docs';
+    $tableClasses = $tableClass ? trim($defaultClasses . ' ' . $tableClass) : $defaultClasses;
 @endphp
 
 <div data-ui-table="metronic" {{ $attributes->merge(['class' => 'card spm-table-shell spm-table-shell--standard']) }}>
@@ -66,6 +84,7 @@
     <div class="card-body pt-0 spm-table-body-wrap">
         <div class="table-responsive spm-table-scroll">
             <table class="{{ $tableClasses }}">
+                {{-- SLOT thead: <th> elements only. Do NOT wrap in <tr> — component renders <tr> here. --}}
                 <thead>
                     <tr class="text-start text-gray-500 fw-semibold gs-0 spm-table-head">
                         {{ $thead }}

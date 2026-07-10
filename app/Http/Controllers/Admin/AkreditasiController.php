@@ -26,7 +26,7 @@ class AkreditasiController extends Controller
         $search = $request->input('search', '');
         $perPage = $request->integer('perPage', 10);
         $sortField = $request->input('sortField', 'created_at');
-        $sortAsc = $request->input('sortAsc', 'false') === 'true';
+        $sortAsc = filter_var($request->input('sortAsc', 'false'), FILTER_VALIDATE_BOOLEAN);
 
         if ($statusFilter === 'overdue') {
             $overdueIds = $this->deadlineService->getOverdueAkreditasi()->pluck('id')->toArray();
@@ -109,7 +109,7 @@ class AkreditasiController extends Controller
                 $request->input('statusFilter', 'pengajuan'),
                 $request->input('search', ''),
                 $request->input('sortField', 'created_at'),
-                $request->input('sortAsc', 'false') === 'true'
+                filter_var($request->input('sortAsc', 'false'), FILTER_VALIDATE_BOOLEAN)
             ),
             'data-akreditasi-'.$request->input('statusFilter', 'pengajuan').'-'.now()->format('Y-m-d').'.xlsx'
         );

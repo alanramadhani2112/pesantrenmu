@@ -26,7 +26,7 @@ class AccountController extends Controller
         $search = $request->input('search', '');
         $perPage = $request->integer('perPage', 10);
         $sortField = $request->input('sortField', 'id');
-        $sortAsc = $request->input('sortAsc', 'false') === 'true';
+        $sortAsc = filter_var($request->input('sortAsc', 'false'), FILTER_VALIDATE_BOOLEAN);
 
         $users = $this->userService->getPaginatedAccounts(
             $activeTab,

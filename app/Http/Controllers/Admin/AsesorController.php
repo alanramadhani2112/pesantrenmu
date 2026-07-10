@@ -23,7 +23,7 @@ class AsesorController extends Controller
         $filterStatus = $request->input('filterStatus', '');
         $perPage = $request->integer('perPage', 10);
         $sortField = $request->input('sortField', 'name');
-        $sortAsc = $request->input('sortAsc', 'true') === 'true';
+        $sortAsc = filter_var($request->input('sortAsc', 'true'), FILTER_VALIDATE_BOOLEAN);
 
         $asesors = $this->asesorService->getPaginatedAsesors(
             compact('search', 'filterStatus', 'filterPeran', 'filterPenugasan'),
@@ -76,7 +76,7 @@ class AsesorController extends Controller
         $filterPenugasan = $request->input('filterPenugasan', '');
         $filterStatus = $request->input('filterStatus', '');
         $sortField = $request->input('sortField', 'name');
-        $sortAsc = $request->input('sortAsc', 'true') === 'true';
+        $sortAsc = filter_var($request->input('sortAsc', 'true'), FILTER_VALIDATE_BOOLEAN);
 
         return Excel::download(
             new AsesorExport($search, $filterPeran, $filterPenugasan, $filterStatus, $sortField, $sortAsc),

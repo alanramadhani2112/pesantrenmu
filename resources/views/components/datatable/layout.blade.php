@@ -1,3 +1,9 @@
+{{--
+    @deprecated Use <x-ui.table> directly instead. This is a thin alias.
+
+    x-datatable.layout forwards to x-ui.table with data-ui-table-adapter="datatable".
+    All new code should use <x-ui.table> — see docs/table-standardization-comprehensive-2026-07-10.md.
+--}}
 @props([
     'title' => '',
     'subtitle' => null,

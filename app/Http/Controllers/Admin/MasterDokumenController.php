@@ -21,7 +21,7 @@ class MasterDokumenController extends Controller
         $sortField = $request->input('sort', $request->input('sortField', 'created_at'));
         $sortField = in_array($sortField, ['title', 'created_at'], true) ? $sortField : 'created_at';
         $direction = $request->input('direction');
-        $sortAsc = $direction ? $direction === 'asc' : ($request->input('sortAsc', 'false') === 'true');
+        $sortAsc = $direction ? $direction === 'asc' : filter_var($request->input('sortAsc', 'false'), FILTER_VALIDATE_BOOLEAN);
 
         $documents = $this->service->getPaginatedDocuments($search, $perPage, $sortField, $sortAsc);
         $categories = DocumentCategory::active()->ordered()->get();

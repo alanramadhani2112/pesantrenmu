@@ -39,7 +39,7 @@ class AkreditasiController extends Controller
         $statusFilter = $request->input('statusFilter', '');
         $perPage = $request->integer('perPage', 10);
         $sortField = $request->input('sortField', 'id');
-        $sortAsc = $request->input('sortAsc', 'false') === 'true';
+        $sortAsc = filter_var($request->input('sortAsc', 'false'), FILTER_VALIDATE_BOOLEAN);
 
         // Map focus to expected statusFilter
         $focusStatusMap = [
