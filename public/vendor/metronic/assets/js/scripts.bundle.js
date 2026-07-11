@@ -7847,15 +7847,13 @@ KTUtil.onDOMContentLoaded(function () {
 // Class definition
 var KTThemeModeUser = function () {
     
-	var handleSubmit = function() {
+    var handleSubmit = function() {
 		// Update chart on theme mode change
-        if (typeof KTThemeMode === 'undefined' || !KTThemeMode || typeof KTThemeMode.on !== 'function') {
-            return;
-        }
-
         KTThemeMode.on("kt.thememode.change", function() {                
             var menuMode = KTThemeMode.getMenuMode();
             var mode = KTThemeMode.getMode();
+            console.log("user selected theme mode:" + menuMode);
+            console.log("theme mode:" + mode);
 
             // Submit selected theme mode menu option via ajax and 
             // store it in user profile and set the user opted theme mode via HTML attribute
