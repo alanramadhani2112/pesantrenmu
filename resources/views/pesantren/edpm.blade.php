@@ -69,7 +69,7 @@
             </x-ui.tabs>
 
             {{-- Stepper + Content --}}
-            <div class="row g-6">
+            <div class="spm-section-stack row g-6">
                 {{-- Stepper Sidebar --}}
                 <div class="col-lg-3">
                     <div class="d-flex flex-column gap-2">
@@ -118,7 +118,7 @@
                                         <template x-if="komponen">
                                             <div class="p-6">
                                                 <div class="table-responsive">
-                                                    <table data-ui-simple-table="metronic" class="table table-bordered table-row-dashed">
+                                                    <table data-ui-simple-table="metronic" class="spm-table-compact table table-bordered table-row-dashed align-middle">
                                                         <thead>
                                                             <tr class="bg-light">
                                                                 <th style="width:50px">No</th>
@@ -177,7 +177,7 @@
                                         <template x-if="komponen">
                                             <div class="p-6">
                                                 <div class="table-responsive">
-                                                    <table data-ui-simple-table="metronic" class="table table-bordered table-row-dashed">
+                                                    <table data-ui-simple-table="metronic" class="spm-table-compact table table-bordered table-row-dashed align-middle">
                                                         <thead>
                                                             <tr class="bg-light">
                                                                 <th style="width:50px">No</th>

@@ -1,0 +1,100 @@
+/*
+ * SPM Utility Classes — reusable layout, grid, interaction helpers.
+ *
+ * Additive only. These compose *with* existing Metronic components.
+ * Do not remove existing class attributes on target elements.
+ */
+
+/* ── Section Stack: vertical container with 2rem gap ── */
+.spm-section-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ── File Grid: responsive auto-fill grid for document/criteria cards ── */
+.spm-file-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+/* ── Enhanced Progress: 8px height, fully rounded ── */
+.spm-progress-enhanced {
+  height: 8px;
+  border-radius: 4px;
+}
+.spm-progress-enhanced .progress-bar {
+  border-radius: 4px;
+}
+
+/* ── Compact Table: tighter cell padding ── */
+.spm-table-compact th,
+.spm-table-compact td {
+  padding: 0.75rem;
+}
+
+/* ── Card Lift: subtle hover elevation ── */
+.spm-card-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.spm-card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Status Badge: uniform sizing ── */
+.spm-status-badge {
+  font-size: 0.8125rem;
+  padding: 0.35em 0.75em;
+  white-space: nowrap;
+}
+
+/* ── Tab Spacing: vertical rhythm around tab navigation ── */
+.spm-tab-spacing {
+  margin-bottom: 1.5rem;
+}
+.spm-tab-spacing .nav-link {
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* ── Detail Alignment: section-card inner padding consistency ── */
+.spm-detail-alignment .card-body,
+.spm-detail-alignment > .p-6,
+.spm-detail-alignment > [class*="p-"] {
+  padding: 1.5rem;
+}
+
+/* ── Modal Consistency: uniform modal dialog body ── */
+.spm-modal-consistent .modal-body {
+  padding: 1.5rem 2rem;
+}
+.spm-modal-consistent .modal-header {
+  padding: 1.25rem 2rem;
+}
+.spm-modal-consistent .modal-footer {
+  padding: 1rem 2rem;
+}
+
+/* ── Step Card Spacing: numbered guide step cards ── */
+.spm-step-card {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--bs-gray-200, #e4e6ef);
+  border-radius: 0.625rem;
+  transition: border-color 0.2s ease;
+}
+.spm-step-card:hover {
+  border-color: var(--bs-primary, #009ef7);
+}
+
+/* ── Image Hover: subtle zoom on guide screenshots ── */
+.spm-image-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.spm-image-hover:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}

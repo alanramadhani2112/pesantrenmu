@@ -113,7 +113,7 @@
     </x-ui.section-card>
 
     {{-- Tabs --}}
-    <div class="spm-detail-tabs-shell">
+    <div class="spm-detail-tabs-shell spm-tab-spacing">
     <x-ui.tabs class="mb-6">
         @foreach($tabs as $key => $label)
             @if($key !== 'banding' || !empty($akreditasi->banding))
@@ -126,7 +126,7 @@
     </div>
 
     {{-- Tab Content --}}
-    <div class="spm-detail-tab-content">
+    <div class="spm-detail-tab-content spm-detail-alignment">
     @if($activeTab === 'profil')
         {{-- Profil Tab --}}
         <x-ui.section-card title="A. Identitas Pesantren" class="mb-6">

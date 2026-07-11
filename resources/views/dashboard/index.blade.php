@@ -81,8 +81,8 @@
         ],
         $isPesantren => [
             ['label' => 'Profil Pesantren', 'icon' => 'profile-user', 'route' => route('pesantren.profile'), 'variant' => 'primary'],
-            ['label' => 'Data IPM', 'icon' => 'check-circle', 'route' => route('pesantren.ipm'), 'variant' => 'info'],
-            ['label' => 'Data SDM', 'icon' => 'profile-user', 'route' => route('pesantren.sdm'), 'variant' => 'success'],
+            ['label' => 'Data IPM', 'icon' => 'data', 'route' => route('pesantren.ipm'), 'variant' => 'info'],
+            ['label' => 'Data SDM', 'icon' => 'people', 'route' => route('pesantren.sdm'), 'variant' => 'success'],
             ['label' => 'EDPM', 'icon' => 'document', 'route' => route('pesantren.edpm'), 'variant' => 'warning'],
         ],
         $isAsesor => [
@@ -123,7 +123,8 @@
 
         {{-- Greeting Hero --}}
         <div class="spm-dashboard-hero rounded p-5 p-md-6 mb-6">
-            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
+            <div class="spm-hero-pattern"></div>
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4 position-relative">
                 <div class="d-flex flex-column flex-grow-1">
                     <div class="text-white opacity-75 fw-semibold fs-8 fs-md-7 text-uppercase mb-1">{{ $today }}</div>
                     <h2 class="text-white fw-semibold fs-3 fs-md-2 mb-2">{{ $greeting }}, {{ $firstName }}.</h2>
@@ -227,10 +228,13 @@
                                 <span class="fw-semibold fs-6 {{ $progressPercent === 100 ? 'text-success' : 'text-primary' }}">{{ $progressPercent }}%</span>
                             </div>
 
-                            <div class="px-6 pb-4">
+                            <div class="px-6 pb-5">
                                 <x-ui.progress
                                     :value="$progressPercent"
                                     :variant="$progressPercent === 100 ? 'success' : 'primary'"
+                                    :label="'Kesiapan Data'"
+                                    :meta="$progressPercent . '%'"
+                                    class="spm-dashboard-progress"
                                 />
                             </div>
 

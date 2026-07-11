@@ -63,7 +63,7 @@
         <x-ui.alert variant="warning" icon="information-3" title="Data Belum Lengkap" class="mb-4">
             <div class="mb-3">
                 <div class="d-flex align-items-center gap-3 mb-2">
-                    <div class="progress flex-grow-1" style="height:8px;">
+                    <div class="progress flex-grow-1 spm-progress-enhanced" style="height:8px;">
                         <div class="progress-bar bg-warning" style="width:{{ $completeness['percentage'] }}%"></div>
                     </div>
                     <span class="text-muted fs-8">{{ $completeness['complete'] }}/{{ $completeness['total'] }} ({{ $completeness['percentage'] }}%)</span>
@@ -96,6 +96,7 @@
         subtitle="Riwayat pengajuan, status, tahapan, dan tindak lanjut akreditasi."
         :records="$akreditasis"
         :show-per-page="false"
+        table-class="spm-table-compact"
     >
         <x-slot name="filters">
             <form method="GET" action="{{ route('pesantren.akreditasi') }}" id="pesantren-akreditasi-filter-form">
@@ -142,7 +143,7 @@
                     <td class="fw-semibold">{{ $akreditasi->id }}</td>
                     <td>{{ $akreditasi->periode }}</td>
                     <td>
-                        <span class="badge {{ $statusBadgeClass[$akreditasi->status] ?? 'badge-light-secondary' }}">
+                        <span class="spm-status-badge badge {{ $statusBadgeClass[$akreditasi->status] ?? 'badge-light-secondary' }}">
                             {{ $statusLabel }}
                         </span>
                     </td>

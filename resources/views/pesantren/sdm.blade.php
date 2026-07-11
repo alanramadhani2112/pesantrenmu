@@ -75,6 +75,7 @@
                 </x-ui.alert>
             @endif
 
+            <div class="spm-section-stack">
             @foreach($categories as $category)
                 @php
                     $catKey = $category['key'];
@@ -85,7 +86,7 @@
                     }
                 @endphp
                 <x-ui.section-card :title="$category['label']" subtitle="Input rekap per unit layanan" class="mb-6">
-                    <x-ui.simple-table class="p-4" table-class="table-bordered">
+                    <x-ui.simple-table class="spm-table-compact p-4" table-class="table-bordered">
                         <thead>
                             <tr class="bg-light">
                                 <x-ui.table-th align="center" style="min-width:120px;">Kategori</x-ui.table-th>
@@ -153,6 +154,7 @@
                     </x-ui.simple-table>
                 </x-ui.section-card>
             @endforeach
+            </div>
 
             @if(!$isLocked)
                 <div class="d-flex justify-content-end mt-6">

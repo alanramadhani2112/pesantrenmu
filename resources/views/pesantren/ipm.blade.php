@@ -93,13 +93,13 @@
             </x-ui.alert>
         @endif
 
-        <div class="d-flex flex-column gap-5">
+        <div class="spm-file-grid d-flex flex-column gap-5">
             @foreach($criteria as $index => $item)
                 @php
                     $hasFile = filled($existingFiles[$item['field']] ?? null);
                     $cardVariant = $hasFile ? 'success' : 'light';
                 @endphp
-                <x-ui.section-card :title="$item['label']" :subtitle="$item['description']">
+                <x-ui.section-card :title="$item['label']" :subtitle="$item['description']" class="spm-card-lift">
                     <div class="p-6">
                         <div class="row align-items-center">
                             <div class="col-md-8">

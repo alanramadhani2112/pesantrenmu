@@ -27,7 +27,7 @@
             <div class="panduan-screenshot mb-6 text-center">
                 <img src="{{ $screenshot }}"
                      alt="{{ $screenshotAlt }}"
-                     class="img-fluid w-100"
+                     class="img-fluid w-100 spm-image-hover"
                      loading="lazy"
                      style="max-height: 500px; object-fit: contain;" />
             </div>
