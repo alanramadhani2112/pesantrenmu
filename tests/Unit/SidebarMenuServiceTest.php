@@ -213,19 +213,30 @@ class SidebarMenuServiceTest extends TestCase
     {
         $menu = $this->service->getMenuForRole(3);
 
-        $this->assertCount(5, $menu);
+        $this->assertCount(6, $menu);
 
         $sectionLabels = array_column($menu, 'label');
         $this->assertSame(
-            ['Persiapan Akreditasi', 'Pengajuan', 'Visitasi', 'Hasil Akreditasi', 'Dokumen'],
+            ['Monitoring', 'Persiapan Akreditasi', 'Pengajuan', 'Visitasi', 'Hasil Akreditasi', 'Dokumen'],
             $sectionLabels
         );
+    }
+
+    public function test_pesantren_menu_monitoring_section_items(): void
+    {
+        $menu = $this->service->getMenuForRole(3);
+        $items = $menu[0]['items'];
+
+        $this->assertCount(1, $items);
+        $this->assertSame('dashboard', $items[0]['key']);
+        $this->assertSame('Dashboard', $items[0]['label']);
+        $this->assertSame('dashboard', $items[0]['route']);
     }
 
     public function test_pesantren_menu_persiapan_data_section_items(): void
     {
         $menu = $this->service->getMenuForRole(3);
-        $items = $menu[0]['items'];
+        $items = $menu[1]['items'];
 
         $this->assertCount(4, $items);
 
@@ -236,7 +247,7 @@ class SidebarMenuServiceTest extends TestCase
     public function test_pesantren_menu_proses_akreditasi_section_items(): void
     {
         $menu = $this->service->getMenuForRole(3);
-        $items = $menu[1]['items'];
+        $items = $menu[2]['items'];
 
         $this->assertCount(2, $items);
 
@@ -248,8 +259,8 @@ class SidebarMenuServiceTest extends TestCase
     {
         $menu = $this->service->getMenuForRole(3);
 
-        $visitasiKeys = array_column($menu[2]['items'], 'key');
-        $hasilKeys = array_column($menu[3]['items'], 'key');
+        $visitasiKeys = array_column($menu[3]['items'], 'key');
+        $hasilKeys = array_column($menu[4]['items'], 'key');
 
         $this->assertSame(['kartu_kendali_visitasi'], $visitasiKeys);
         $this->assertSame(['hasil_akhir'], $hasilKeys);
@@ -258,7 +269,7 @@ class SidebarMenuServiceTest extends TestCase
     public function test_pesantren_menu_dokumen_includes_public_and_pesantren_secret_only(): void
     {
         $menu = $this->service->getMenuForRole(3);
-        $items = $menu[4]['items'];
+        $items = $menu[5]['items'];
 
         // IAPM public + Semua Dokumen. Kartu Kendali is represented in the Visitasi section.
         $this->assertCount(2, $items);
@@ -281,7 +292,7 @@ class SidebarMenuServiceTest extends TestCase
         // Force a fresh service so the in-memory cache is bypassed
         $service = new SidebarMenuService;
         $menu = $service->getMenuForRole(3);
-        $items = $menu[4]['items'];
+        $items = $menu[5]['items'];
 
         $keys = array_column($items, 'key');
         $this->assertSame(
@@ -450,7 +461,7 @@ class SidebarMenuServiceTest extends TestCase
     {
         $menu = $this->service->getMenuForRole(3);
 
-        $progressMap = collect($menu[0]['items'])->pluck('show_progress', 'key')->all();
+        $progressMap = collect($menu[1]['items'])->pluck('show_progress', 'key')->all();
 
         $this->assertTrue($progressMap['profil_pesantren']);
         $this->assertTrue($progressMap['ipm']);
@@ -462,7 +473,7 @@ class SidebarMenuServiceTest extends TestCase
     {
         $menu = $this->service->getMenuForRole(3);
 
-        $item = $menu[2]['items'][0];
+        $item = $menu[3]['items'][0];
 
         $this->assertSame('kartu_kendali_visitasi', $item['key']);
         $this->assertSame(['focus' => 'kartu_kendali'], $item['route_query']);
@@ -472,7 +483,7 @@ class SidebarMenuServiceTest extends TestCase
     public function test_dokumen_items_share_documents_route(): void
     {
         $menu = $this->service->getMenuForRole(3);
-        $items = $menu[4]['items'];
+        $items = $menu[5]['items'];
 
         foreach ($items as $item) {
             $this->assertSame('documents.index', $item['route']);

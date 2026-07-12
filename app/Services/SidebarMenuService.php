@@ -130,6 +130,21 @@ class SidebarMenuService
     {
         return [
             [
+                'label' => 'Monitoring',
+                'items' => [
+                    [
+                        'key' => 'dashboard',
+                        'label' => 'Dashboard',
+                        'route' => 'dashboard',
+                        'icon' => 'category',
+                        'active_pattern' => 'dashboard',
+                        'tooltip' => 'Lihat ringkasan dan statistik sistem akreditasi',
+                        'show_progress' => false,
+                        'show_badge' => false,
+                    ],
+                ],
+            ],
+            [
                 'label' => 'Persiapan Akreditasi',
                 'items' => [
                     [
