@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('header', 'Evaluasi Diri Pesantren/Madrasah (EDPM)')
 
@@ -68,6 +68,10 @@
             </x-ui.alert>
         @endif
 
+        <x-ui.alert variant="info" icon="information-5" title="Cara Pengisian EDPM/IPR" class="mb-5">
+            EDPM dan IPR boleh diisi bebas urutan. Gunakan <strong>Simpan Draft</strong> untuk menyimpan sementara. Gunakan <strong>Submit Final</strong> hanya saat semua nilai dan tautan bukti sudah lengkap.
+        </x-ui.alert>
+
         @if($komponens->isNotEmpty())
             {{-- Group Toggle Tabs --}}
             <x-ui.tabs class="mb-5 spm-edpm-tabs">
@@ -98,7 +102,7 @@
                 <span class="text-muted fw-semibold fs-8">
                     Komponen <span x-text="activeStep + 1" class="text-primary"></span> / <span x-text="componentCount()"></span>
                     <span class="text-gray-400 mx-1">·</span>
-                    <span x-text="activeGroup === 'edpm' ? 'EDPM' : 'IPR'" class="text-gray-500"></span>
+                    <span x-text="activeGroupLabel()" class="text-gray-500"></span>
                 </span>
                 <div class="progress" style="height: 4px; width: 120px;">
                     <div class="progress-bar bg-primary" role="progressbar"
@@ -303,26 +307,26 @@
                         {{-- Navigation --}}
                         <div class="spm-edpm-nav d-flex align-items-center justify-content-between mt-6">
                             <div>
-                                <x-ui.button type="button" variant="light" x-show="activeStep > 0"
+                                <x-ui.button type="button" variant="light" x-show="canGoBack()"
                                     @click="prevStep()">
-                                    <i class="ki-solid ki-arrow-left fs-4 me-1"></i> Sebelumnya
+                                    <i class="ki-solid ki-arrow-left fs-4 me-1"></i> <span x-text="prevLabel()"></span>
                                 </x-ui.button>
                             </div>
                             <div class="d-flex gap-3">
                                 @if(!$isLocked)
                                     <x-ui.button type="button" variant="light" id="btnSaveDraft">
-                                        <i class="ki-solid ki-save-2 fs-4 me-1"></i> Draft
+                                        <i class="ki-solid ki-save-2 fs-4 me-1"></i> Simpan Draft
                                     </x-ui.button>
                                     <x-ui.button type="submit" variant="primary" id="btnSaveEdpm">
-                                        <i class="ki-solid ki-check fs-4 me-1"></i> Simpan
+                                        <i class="ki-solid ki-check fs-4 me-1"></i> Submit Final
                                     </x-ui.button>
                                 @endif
                             </div>
                             <div>
                                 <x-ui.button type="button" variant="light"
-                                    x-show="activeStep < componentCount() - 1"
+                                    x-show="canGoNext()"
                                     @click="nextStep()">
-                                    Selanjutnya <i class="ki-solid ki-arrow-right fs-4 ms-1"></i>
+                                    <span x-text="nextLabel()"></span> <i class="ki-solid ki-arrow-right fs-4 ms-1"></i>
                                 </x-ui.button>
                             </div>
                         </div>
@@ -368,17 +372,48 @@ document.addEventListener('alpine:init', () => {
         nextStep() {
             if (this.activeStep < this.componentCount() - 1) {
                 this.activeStep++;
+                return;
+            }
+            if (this.activeGroup === 'edpm' && this.iprCount > 0) {
+                this.setGroup('ipr');
             }
         },
 
         prevStep() {
             if (this.activeStep > 0) {
                 this.activeStep--;
+                return;
+            }
+            if (this.activeGroup === 'ipr') {
+                this.activeGroup = 'edpm';
+                this.activeStep = Math.max(this.edpmKomponens.length - 1, 0);
             }
         },
 
         componentCount() {
             return this.activeGroup === 'edpm' ? this.edpmKomponens.length : this.iprKomponens.length;
+        },
+
+        activeGroupLabel() {
+            return this.activeGroup === 'edpm' ? 'EDPM' : 'IPR';
+        },
+
+        canGoBack() {
+            return this.activeStep > 0 || this.activeGroup === 'ipr';
+        },
+
+        canGoNext() {
+            return this.activeStep < this.componentCount() - 1 || (this.activeGroup === 'edpm' && this.iprCount > 0);
+        },
+
+        prevLabel() {
+            if (this.activeStep > 0) return 'Komponen sebelumnya';
+            return 'Kembali ke EDPM';
+        },
+
+        nextLabel() {
+            if (this.activeStep < this.componentCount() - 1) return 'Komponen selanjutnya';
+            return 'Lanjut ke IPR';
         },
 
         stepButtonClass(index) {
@@ -411,8 +446,8 @@ document.addEventListener('alpine:init', () => {
 document.getElementById('btnSaveEdpm')?.addEventListener('click', function(e) {
     e.preventDefault();
     window.SpmSwal.confirm({
-        title: 'Submit Final EDPM?',
-        text: 'Data tidak boleh submit final jika belum terisi semua. Gunakan Draft jika belum selesai.',
+        title: 'Submit Final EDPM/IPR?',
+        text: 'Final akan divalidasi: semua nilai evaluasi dan tautan bukti EDPM/IPR wajib lengkap. Draft boleh belum lengkap.',
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Ya, Submit Final',
@@ -426,8 +461,8 @@ document.getElementById('btnSaveEdpm')?.addEventListener('click', function(e) {
 
 document.getElementById('btnSaveDraft')?.addEventListener('click', function() {
     window.SpmSwal.confirm({
-        title: 'Simpan Draft EDPM?',
-        text: 'Draft dapat dilanjutkan kapan saja.',
+        title: 'Simpan Draft EDPM/IPR?',
+        text: 'Menyimpan isian sementara. Data boleh belum lengkap dan bisa dilanjutkan nanti.',
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Ya, Simpan Draft',
