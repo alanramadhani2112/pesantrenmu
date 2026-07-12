@@ -213,11 +213,11 @@ class SidebarMenuServiceTest extends TestCase
     {
         $menu = $this->service->getMenuForRole(3);
 
-        $this->assertCount(5, $menu);
+        $this->assertCount(3, $menu);
 
         $sectionLabels = array_column($menu, 'label');
         $this->assertSame(
-            ['Persiapan Akreditasi', 'Pengajuan', 'Visitasi', 'Hasil Akreditasi', 'Dokumen'],
+            ['Persiapan Akreditasi', 'Akreditasi', 'Panduan'],
             $sectionLabels
         );
     }
@@ -233,39 +233,28 @@ class SidebarMenuServiceTest extends TestCase
         $this->assertSame(['profil_pesantren', 'ipm', 'data_sdm', 'edpm_ipr'], $keys);
     }
 
-    public function test_pesantren_menu_proses_akreditasi_section_items(): void
+    public function test_pesantren_menu_akreditasi_section_is_single_hub(): void
     {
         $menu = $this->service->getMenuForRole(3);
         $items = $menu[1]['items'];
 
-        $this->assertCount(2, $items);
+        $this->assertCount(1, $items);
 
         $keys = array_column($items, 'key');
-        $this->assertSame(['pengajuan', 'status_perbaikan'], $keys);
-    }
-
-    public function test_pesantren_menu_visitasi_and_hasil_items_follow_business_flow(): void
-    {
-        $menu = $this->service->getMenuForRole(3);
-
-        $visitasiKeys = array_column($menu[2]['items'], 'key');
-        $hasilKeys = array_column($menu[3]['items'], 'key');
-
-        $this->assertSame(['kartu_kendali_visitasi'], $visitasiKeys);
-        $this->assertSame(['hasil_akhir'], $hasilKeys);
+        $this->assertSame(['pusat_akreditasi'], $keys);
     }
 
     public function test_pesantren_menu_dokumen_includes_public_and_pesantren_secret_only(): void
     {
         $menu = $this->service->getMenuForRole(3);
-        $items = $menu[4]['items'];
+        $items = $menu[2]['items'];
 
-        // IAPM public + Semua Dokumen. Kartu Kendali is represented in the Visitasi section.
-        $this->assertCount(2, $items);
+        // IAPM public only. Kartu Kendali is represented inside Pusat Akreditasi.
+        $this->assertCount(1, $items);
 
         $keys = array_column($items, 'key');
         $this->assertSame(
-            ['dokumen_pesantren_iapm', 'semua_dokumen_pesantren'],
+            ['dokumen_pesantren_iapm'],
             $keys
         );
 
@@ -281,11 +270,11 @@ class SidebarMenuServiceTest extends TestCase
         // Force a fresh service so the in-memory cache is bypassed
         $service = new SidebarMenuService;
         $menu = $service->getMenuForRole(3);
-        $items = $menu[4]['items'];
+        $items = $menu[2]['items'];
 
         $keys = array_column($items, 'key');
         $this->assertSame(
-            ['dokumen_pesantren_iapm', 'semua_dokumen_pesantren'],
+            ['dokumen_pesantren_iapm'],
             $keys
         );
     }
@@ -458,21 +447,10 @@ class SidebarMenuServiceTest extends TestCase
         $this->assertTrue($progressMap['edpm_ipr']);
     }
 
-    public function test_kartu_kendali_menu_targets_pascha_visitasi_context(): void
-    {
-        $menu = $this->service->getMenuForRole(3);
-
-        $item = $menu[2]['items'][0];
-
-        $this->assertSame('kartu_kendali_visitasi', $item['key']);
-        $this->assertSame('pesantren.akreditasi.kartu-kendali', $item['route']);
-        $this->assertSame('pesantren.akreditasi.kartu-kendali', $item['active_pattern']);
-    }
-
     public function test_dokumen_items_share_documents_route(): void
     {
         $menu = $this->service->getMenuForRole(3);
-        $items = $menu[4]['items'];
+        $items = $menu[2]['items'];
 
         foreach ($items as $item) {
             $this->assertSame('documents.index', $item['route']);

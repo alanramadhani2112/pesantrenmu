@@ -29,18 +29,11 @@ class AkreditasiController extends Controller
         $sortField = $request->input('sortField', 'created_at');
         $sortAsc = filter_var($request->input('sortAsc', 'false'), FILTER_VALIDATE_BOOLEAN);
 
-        $effectiveStatusFilter = match ($focus) {
-            'perbaikan' => '-1',
-            'kartu_kendali' => '2',
-            'hasil', 'sertifikat', 'banding' => 'hasil_akhir',
-            default => $statusFilter,
-        };
-
         $akreditasis = $this->pesantrenService->getAkreditasis(
             Auth::id(),
             $search ?: null,
             $periodeFilter ?: null,
-            $effectiveStatusFilter ?: null,
+            $statusFilter ?: null,
             $tahapanFilter ?: null,
             $perPage,
             $sortField,

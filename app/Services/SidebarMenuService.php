@@ -175,63 +175,22 @@ class SidebarMenuService
                 ],
             ],
             [
-                'label' => 'Pengajuan',
+                'label' => 'Akreditasi',
                 'items' => [
                     [
-                        'key' => 'pengajuan',
-                        'label' => 'Pengajuan Akreditasi',
+                        'key' => 'pusat_akreditasi',
+                        'label' => 'Pusat Akreditasi',
                         'route' => 'pesantren.akreditasi',
                         'icon' => 'lock-2',
                         'active_pattern' => 'pesantren.akreditasi*',
-                        'tooltip' => 'Ajukan dan pantau status akreditasi pesantren',
-                        'active_query_absent' => ['focus', 'statusFilter', 'tahapanFilter'],
-                        'show_progress' => false,
-                        'show_badge' => false,
-                    ],
-                    [
-                        'key' => 'status_perbaikan',
-                        'label' => 'Status Perbaikan',
-                        'route' => 'pesantren.akreditasi.perbaikan',
-                        'icon' => 'messages',
-                        'active_pattern' => 'pesantren.akreditasi.perbaikan',
-                        'tooltip' => 'Pantau catatan penolakan dan tindak lanjut perbaikan berkas',
+                        'tooltip' => 'Ajukan, pantau perbaikan, kartu kendali, dan hasil akreditasi dalam satu tempat',
                         'show_progress' => false,
                         'show_badge' => false,
                     ],
                 ],
             ],
             [
-                'label' => 'Visitasi',
-                'items' => [
-                    [
-                        'key' => 'kartu_kendali_visitasi',
-                        'label' => 'Kartu Kendali',
-                        'route' => 'pesantren.akreditasi.kartu-kendali',
-                        'icon' => 'check-circle',
-                        'active_pattern' => 'pesantren.akreditasi.kartu-kendali',
-                        'tooltip' => 'Unggah dan pantau kartu kendali setelah visitasi selesai',
-                        'show_progress' => false,
-                        'show_badge' => false,
-                    ],
-                ],
-            ],
-            [
-                'label' => 'Hasil Akreditasi',
-                'items' => [
-                    [
-                        'key' => 'hasil_akhir',
-                        'label' => 'Hasil Akhir',
-                        'route' => 'pesantren.akreditasi.hasil',
-                        'icon' => 'chart-line-up',
-                        'active_pattern' => 'pesantren.akreditasi.hasil',
-                        'tooltip' => 'Lihat nilai akhir, rekomendasi, sertifikat, dan status banding dalam satu tempat',
-                        'show_progress' => false,
-                        'show_badge' => false,
-                    ],
-                ],
-            ],
-            [
-                'label' => 'Dokumen',
+                'label' => 'Panduan',
                 'items' => $this->buildDokumenItems('pesantren', ['kartu_kendali']),
             ],
         ];
@@ -489,18 +448,19 @@ class SidebarMenuService
 
             return [
                 'key' => $key,
-                'label' => $cat->name,
+                'label' => $cat->slug === 'iapm' ? 'Panduan IAPM' : $cat->name,
                 'route' => 'documents.index',
                 'route_params' => ['doc' => $cat->slug],
                 'icon' => $cat->icon ?: 'files-tablet',
                 'active_pattern' => 'documents.index.'.$cat->slug,
-                'tooltip' => $cat->description ?: ('Lihat dokumen '.$cat->name),
+                'tooltip' => $cat->slug === 'iapm' ? 'Baca panduan IAPM yang dibagikan admin' : ($cat->description ?: ('Lihat dokumen '.$cat->name)),
                 'show_progress' => false,
                 'show_badge' => false,
             ];
         })->all();
 
-        $items[] = [
+        if ($roleScope !== 'pesantren') {
+            $items[] = [
             'key' => 'semua_dokumen_'.$roleScope,
             'label' => 'Semua Dokumen',
             'route' => 'documents.index',
@@ -510,7 +470,8 @@ class SidebarMenuService
             'tooltip' => 'Lihat seluruh dokumen yang tersedia untuk Anda',
             'show_progress' => false,
             'show_badge' => false,
-        ];
+            ];
+        }
 
         return $items;
     }
@@ -556,10 +517,7 @@ class SidebarMenuService
             'ipm' => 'Kelola Indikator Pemenuhan Mutlak dan dokumen pendukung pesantren',
             'data_sdm' => 'Kelola data sumber daya manusia pesantren',
             'edpm_ipr' => 'Isi Evaluasi Diri Penjaminan Mutu dan Indikator Pemenuhan Relatif',
-            'pengajuan' => 'Ajukan dan pantau status akreditasi pesantren',
-            'status_perbaikan' => 'Pantau catatan penolakan dan tindak lanjut perbaikan berkas',
-            'kartu_kendali_visitasi' => 'Unggah dan pantau kartu kendali setelah visitasi selesai',
-            'hasil_akhir' => 'Lihat nilai akhir, rekomendasi, sertifikat, dan status banding dalam satu tempat',
+            'pusat_akreditasi' => 'Ajukan, pantau perbaikan, kartu kendali, dan hasil akreditasi dalam satu tempat',
 
             // Admin tooltips
             'dashboard' => 'Lihat ringkasan dan statistik sistem akreditasi',

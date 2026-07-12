@@ -28,7 +28,8 @@ class PesantrenAkreditasiMenuContextTest extends TestCase
         $this->actingAs($pesantren)
             ->get('/pesantren/akreditasi')
             ->assertOk()
-            ->assertSee('Pengajuan Akreditasi');
+            ->assertSee('Pusat Akreditasi')
+            ->assertSee('Satu Proses, Bukan Banyak Halaman');
     }
 
     public function test_perbaikan_page_uses_repair_context(): void
@@ -39,12 +40,14 @@ class PesantrenAkreditasiMenuContextTest extends TestCase
         $this->actingAs($pesantren)
             ->get('/pesantren/akreditasi/perbaikan')
             ->assertOk()
-            ->assertSee('Status Perbaikan');
+            ->assertSee('Pusat Akreditasi')
+            ->assertSee('Bagian dari proses akreditasi');
 
         $this->actingAs($pesantren)
             ->get('/pesantren/akreditasi?focus=perbaikan')
             ->assertOk()
-            ->assertSee('Status Perbaikan');
+            ->assertSee('Pusat Akreditasi')
+            ->assertSee('Bagian dari proses akreditasi');
     }
 
     public function test_kartu_kendali_page_uses_post_visitasi_context(): void
@@ -55,12 +58,14 @@ class PesantrenAkreditasiMenuContextTest extends TestCase
         $this->actingAs($pesantren)
             ->get('/pesantren/akreditasi/kartu-kendali')
             ->assertOk()
-            ->assertSee('Kartu Kendali Visitasi');
+            ->assertSee('Pusat Akreditasi')
+            ->assertSee('bukan proses terpisah dari pengajuan');
 
         $this->actingAs($pesantren)
             ->get('/pesantren/akreditasi?focus=kartu_kendali')
             ->assertOk()
-            ->assertSee('Kartu Kendali Visitasi');
+            ->assertSee('Pusat Akreditasi')
+            ->assertSee('bukan proses terpisah dari pengajuan');
     }
 
     public function test_hasil_page_consolidates_result_certificate_and_banding_context(): void
@@ -78,11 +83,13 @@ class PesantrenAkreditasiMenuContextTest extends TestCase
         $this->actingAs($pesantren)
             ->get('/pesantren/akreditasi/hasil')
             ->assertOk()
-            ->assertSee('Hasil Akhir Akreditasi');
+            ->assertSee('Pusat Akreditasi')
+            ->assertSee('Hasil akhir muncul di halaman yang sama');
 
         $this->actingAs($pesantren)
             ->get('/pesantren/akreditasi?focus=hasil')
             ->assertOk()
-            ->assertSee('Hasil Akhir Akreditasi');
+            ->assertSee('Pusat Akreditasi')
+            ->assertSee('Hasil akhir muncul di halaman yang sama');
     }
 }

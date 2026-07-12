@@ -3,14 +3,20 @@
 @section('content')
 <div data-module-page="dokumen">
     @php
-        $activeDocLabel = $doc === 'all' || $doc === ''
-            ? 'Semua Dokumen'
-            : str($doc)->replace(['-', '_'], ' ')->upper()->toString();
+        $activeDocLabel = match ($doc) {
+            'all', '', null => 'Semua Dokumen',
+            'iapm' => 'Panduan IAPM',
+            default => str($doc)->replace(['-', '_'], ' ')->upper()->toString(),
+        };
         $activeCategory = $documentCategories->firstWhere('slug', $doc);
-        $documentSubtitle = $activeCategory?->description
-            ?: ($doc === 'all' || $doc === ''
-                ? 'Semua dokumen yang tersedia sesuai hak akses Anda.'
-                : 'Dokumen kategori '.$activeDocLabel.' yang tersedia untuk proses akreditasi.');
+        $documentSubtitle = $doc === 'iapm'
+            ? 'Panduan IAPM dibagikan admin sebagai bahan baca/acuan. Pesantren tidak perlu mengunggah dokumen IAPM di halaman ini.'
+            : ($activeCategory?->description
+                ?: ($doc === 'all' || $doc === ''
+                    ? 'Semua dokumen yang tersedia sesuai hak akses Anda.'
+                    : 'Dokumen kategori '.$activeDocLabel.' yang tersedia untuk proses akreditasi.'));
+        $displayPageTitle = $doc === 'iapm' ? 'Panduan IAPM' : $pageTitle;
+        $guideDocument = $doc === 'iapm' ? $documents->first() : null;
         $tabQueryParams = array_filter(request()->except(['page']));
         $categoryLinks = collect([[
             'slug' => 'all',
@@ -18,17 +24,17 @@
             'href' => route('documents.index', ['doc' => 'all']).($tabQueryParams ? '?'.http_build_query($tabQueryParams) : ''),
         ]])->merge($documentCategories->map(fn ($category) => [
             'slug' => $category->slug,
-            'label' => $category->name,
+            'label' => $category->slug === 'iapm' ? 'Panduan IAPM' : $category->name,
             'href' => route('documents.index', ['doc' => $category->slug]).($tabQueryParams ? '?'.http_build_query($tabQueryParams) : ''),
         ]));
     @endphp
 
     <x-slot name="header">
-        {{ $pageTitle }}
+        {{ $displayPageTitle }}
     </x-slot>
 
     <x-ui.page
-        :title="$pageTitle"
+        :title="$displayPageTitle"
         :subtitle="$documentSubtitle"
     >
         <div class="row g-5 mb-6 spm-document-summary">
@@ -43,6 +49,7 @@
             </div>
         </div>
 
+        @unless($doc === 'iapm' && auth()->user()->isPesantren())
         <x-ui.tabs class="mb-5 spm-document-category-tabs">
             @foreach($categoryLinks as $categoryLink)
                 <li class="nav-item">
@@ -56,9 +63,42 @@
                 </li>
             @endforeach
         </x-ui.tabs>
+        @endunless
+
+        @if($doc === 'iapm')
+            <x-ui.section-card title="Panduan IAPM" subtitle="Baca panduan dari admin. Tidak ada unggah dokumen dari sisi pesantren." class="spm-iapm-viewer-card">
+                <div class="p-6">
+                    @if($guideDocument)
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-5">
+                            <div>
+                                <div class="fw-semibold text-gray-900">{{ $guideDocument->title }}</div>
+                                <div class="text-muted fs-8">{{ basename($guideDocument->file_path) }}</div>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <x-ui.button :href="route('documents.view', $guideDocument)" target="_blank" variant="light-primary" size="sm" icon="eye">
+                                    Buka di Tab Baru
+                                </x-ui.button>
+                                <x-ui.button :href="route('documents.download', $guideDocument)" target="_blank" variant="primary" size="sm" icon="document">
+                                    Download
+                                </x-ui.button>
+                            </div>
+                        </div>
+                        <div class="ratio ratio-16x9 border rounded bg-light">
+                            <iframe src="{{ route('documents.view', $guideDocument) }}" title="Panduan IAPM" class="w-100 h-100 border-0" loading="lazy"></iframe>
+                        </div>
+                    @else
+                        <x-ui.empty-state
+                            title="Panduan IAPM belum tersedia"
+                            description="Admin belum mengunggah Panduan IAPM. Silakan cek kembali nanti."
+                            class="py-15"
+                        />
+                    @endif
+                </div>
+            </x-ui.section-card>
+        @else
 
         <x-ui.table
-            :title="$pageTitle"
+            :title="$displayPageTitle"
             :subtitle="$documentSubtitle"
             :records="$documents"
             class="spm-table-shell--document-category spm-table-shell--document-library"
@@ -136,6 +176,7 @@
                 @endforelse
             </x-slot>
         </x-ui.table>
+        @endif
     </x-ui.page>
 </div>
 @endsection

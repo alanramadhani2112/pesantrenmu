@@ -38,7 +38,7 @@
         $docSlug = request()->route('doc');
         $docTitle = match ($docSlug) {
             'all' => __('Semua Dokumen'),
-            'iapm' => __('IAPM (Instrumen Akreditasi Penjaminan Mutu)'),
+            'iapm' => __('Panduan IAPM'),
             'kartu_kendali' => __('Kartu Kendali'),
             'visitasi' => __('Laporan Visitasi'),
             default => $docSlug ? str($docSlug)->replace(['-', '_'], ' ')->title()->toString() : __('Dokumen'),
@@ -74,10 +74,10 @@
             'pesantren.ipm' => ['title' => __('Indikator Pemenuhan Mutlak (IPM)'), 'section' => __('Persiapan Akreditasi')],
             'pesantren.sdm' => ['title' => __('Data SDM Pesantren'), 'section' => __('Persiapan Akreditasi')],
             'pesantren.edpm' => ['title' => __('EDPM/IPR'), 'section' => __('Persiapan Akreditasi')],
-            'pesantren.akreditasi' => ['title' => __('Pengajuan Akreditasi'), 'section' => __('Pengajuan')],
-            'pesantren.akreditasi.perbaikan' => ['title' => __('Status Perbaikan'), 'section' => __('Pengajuan')],
-            'pesantren.akreditasi.kartu-kendali' => ['title' => __('Kartu Kendali Visitasi'), 'section' => __('Visitasi')],
-            'pesantren.akreditasi.hasil' => ['title' => __('Hasil Akhir Akreditasi'), 'section' => __('Hasil Akreditasi')],
+            'pesantren.akreditasi' => ['title' => __('Pusat Akreditasi'), 'section' => __('Akreditasi')],
+            'pesantren.akreditasi.perbaikan' => ['title' => __('Pusat Akreditasi'), 'section' => __('Akreditasi')],
+            'pesantren.akreditasi.kartu-kendali' => ['title' => __('Pusat Akreditasi'), 'section' => __('Akreditasi')],
+            'pesantren.akreditasi.hasil' => ['title' => __('Pusat Akreditasi'), 'section' => __('Akreditasi')],
             'pesantren.akreditasi-detail' => ['title' => __('Detail Pengajuan Akreditasi'), 'section' => __('Pengajuan')],
 
             'panduan.superadmin' => ['title' => __('Panduan Super Admin'), 'section' => __('Panduan')],
@@ -88,16 +88,6 @@
 
         $routeTitle = $routeMeta[$routeName]['title'] ?? null;
         $routeSection = $routeMeta[$routeName]['section'] ?? null;
-
-        if ($routeName === 'pesantren.akreditasi') {
-            $akreditasiFocus = request()->query('focus');
-            $routeTitle = match ($akreditasiFocus) {
-                'perbaikan' => __('Status Perbaikan'),
-                'kartu_kendali' => __('Kartu Kendali Visitasi'),
-                'hasil', 'sertifikat', 'banding' => __('Hasil Akhir Akreditasi'),
-                default => $routeTitle,
-            };
-        }
 
         if ($routeName === 'asesor.akreditasi') {
             $asesorFocus = request()->query('focus');

@@ -27,6 +27,14 @@ class DocumentController extends Controller
             default => abort(403),
         };
 
+        if ($user->isPesantren() && ($doc === 'all' || $doc === '' || $doc === null)) {
+            return redirect()->route('documents.index', ['doc' => 'iapm']);
+        }
+
+        if ($user->isPesantren() && $doc === 'kartu_kendali') {
+            return redirect()->route('pesantren.akreditasi', ['focus' => 'kartu_kendali']);
+        }
+
         $search = $request->input('search', '');
         $perPage = $request->integer('perPage', 10);
 
@@ -62,7 +70,23 @@ class DocumentController extends Controller
         return view('documents.index', compact('documents', 'search', 'perPage', 'doc', 'pageTitle', 'documentCategories'));
     }
 
+    public function view(Document $document)
+    {
+        [$disk, $path] = $this->authorizedDocumentPath($document);
+
+        return response()->file(Storage::disk($disk)->path($path), [
+            'Content-Disposition' => 'inline; filename="'.basename($path).'"',
+        ]);
+    }
+
     public function download(Document $document)
+    {
+        [$disk, $path] = $this->authorizedDocumentPath($document);
+
+        return Storage::disk($disk)->download($path, basename($path));
+    }
+
+    private function authorizedDocumentPath(Document $document): array
     {
         $user = auth()->user();
         abort_unless($user, 403);
@@ -94,6 +118,6 @@ class DocumentController extends Controller
         $disk = Storage::disk('local')->exists($document->file_path) ? 'local' : 'public';
         abort_unless(Storage::disk($disk)->exists($document->file_path), 404);
 
-        return Storage::disk($disk)->download($document->file_path, basename($document->file_path));
+        return [$disk, $document->file_path];
     }
 }

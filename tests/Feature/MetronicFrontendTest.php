@@ -1047,9 +1047,7 @@ class MetronicFrontendTest extends TestCase
 
         foreach ([
             [$pesantren, '/pesantren/akreditasi', 'data-module-page="pesantren-akreditasi"'],
-            [$pesantren, '/documents/iapm', 'data-module-page="dokumen"'],
             [$asesor, '/asesor/akreditasi', 'data-module-page="asesor-akreditasi"'],
-            [$asesor, '/documents/iapm', 'data-module-page="dokumen"'],
         ] as [$user, $uri, $marker]) {
             $this->actingAs($user)
                 ->get($uri)
@@ -1062,10 +1060,12 @@ class MetronicFrontendTest extends TestCase
         $this->actingAs($pesantren)
             ->get('/documents/iapm')
             ->assertOk()
-            ->assertSee('spm-table-shell--document-library', false)
-            ->assertSee('spm-document-title-col', false)
-            ->assertSee('data-ui-table-per-page="metronic"', false)
-            ->assertSee('Menampilkan', false);
+            ->assertSee('data-module-page="dokumen"', false)
+            ->assertSee('spm-page-title', false)
+            ->assertSee('spm-iapm-viewer-card', false)
+            ->assertSee('Panduan IAPM dibagikan admin sebagai bahan baca/acuan', false)
+            ->assertDontSee('data-ui-table="metronic"', false)
+            ->assertDontSee('Kartu Kendali Visitasi', false);
     }
 
     public function test_detail_pages_render_metronic_detail_foundation(): void

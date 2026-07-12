@@ -66,6 +66,10 @@ Route::middleware(['auth', 'verified', 'permission:account.view'])
     });
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('documents/{document}/view', [DocumentController::class, 'view'])
+        ->whereNumber('document')
+        ->name('documents.view');
+
     Route::get('documents/{document}/download', [DocumentController::class, 'download'])
         ->whereNumber('document')
         ->name('documents.download');

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('header', 'Pengajuan Akreditasi')
+@section('header', 'Pusat Akreditasi')
 
 @section('content')
 @php
@@ -26,7 +26,7 @@
         'hasil' => 'Hasil',
     ];
     $focuses = [
-        '' => 'Semua',
+        '' => 'Semua Proses',
         'perbaikan' => 'Perbaikan',
         'kartu_kendali' => 'Kartu Kendali',
         'hasil' => 'Hasil',
@@ -39,20 +39,20 @@
     ];
     $focusConfig = [
         '' => [
-            'title' => 'Pengajuan Akreditasi',
-            'subtitle' => 'Ajukan akreditasi, pantau tahapan, dan tindak lanjuti pengajuan aktif.',
+            'title' => 'Pusat Akreditasi',
+            'subtitle' => 'Satu tempat untuk mengajukan, memperbaiki, memantau visitasi, dan melihat hasil akreditasi.',
             'table_title' => 'Riwayat Pengajuan',
             'table_subtitle' => 'Semua pengajuan akreditasi pesantren Anda.',
             'empty_title' => 'Belum ada pengajuan akreditasi',
-            'empty_description' => 'Lengkapi profil dan data pendukung untuk mengajukan akreditasi.',
+            'empty_description' => 'Belum ada pengajuan aktif. Lengkapi Profil, IPM, SDM, dan EDPM/IPR, lalu ajukan akreditasi dari halaman ini. Panduan IAPM tersedia sebagai bahan baca. Perbaikan, Kartu Kendali, dan Hasil akan muncul setelah proses berjalan.',
             'icon' => 'lock-2',
             'variant' => 'primary',
         ],
         'perbaikan' => [
             'title' => 'Status Perbaikan',
-            'subtitle' => 'Pantau catatan penolakan, batas waktu, dan tindak lanjut perbaikan berkas.',
-            'table_title' => 'Daftar Perbaikan',
-            'table_subtitle' => 'Pengajuan yang membutuhkan perbaikan dari pesantren.',
+            'subtitle' => 'Bagian dari proses akreditasi. Jika ada catatan, tindak lanjutnya tetap muncul di pusat akreditasi ini.',
+            'table_title' => 'Riwayat Pengajuan',
+            'table_subtitle' => 'Semua pengajuan tetap ditampilkan agar konteks proses tidak terputus. Fokus saat ini: Perbaikan.',
             'empty_title' => 'Tidak ada perbaikan aktif',
             'empty_description' => 'Semua pengajuan tidak sedang membutuhkan perbaikan berkas.',
             'icon' => 'messages',
@@ -60,9 +60,9 @@
         ],
         'kartu_kendali' => [
             'title' => 'Kartu Kendali Visitasi',
-            'subtitle' => 'Unggah dan pantau kartu kendali setelah proses visitasi selesai.',
-            'table_title' => 'Daftar Kartu Kendali',
-            'table_subtitle' => 'Pengajuan pasca visitasi yang memiliki konteks kartu kendali.',
+            'subtitle' => 'Kartu kendali adalah status/berkas visitasi dalam proses akreditasi, bukan proses terpisah dari pengajuan.',
+            'table_title' => 'Riwayat Pengajuan',
+            'table_subtitle' => 'Semua pengajuan tetap ditampilkan agar kartu kendali terbaca sebagai bagian dari proses visitasi.',
             'empty_title' => 'Belum ada kartu kendali',
             'empty_description' => 'Belum ada pengajuan yang masuk tahap kartu kendali visitasi.',
             'icon' => 'check-circle',
@@ -70,9 +70,9 @@
         ],
         'hasil' => [
             'title' => 'Hasil Akhir Akreditasi',
-            'subtitle' => 'Lihat nilai akhir, peringkat, SK, sertifikat, dan status banding.',
-            'table_title' => 'Daftar Hasil Akhir',
-            'table_subtitle' => 'Pengajuan yang sudah memiliki hasil akhir atau dokumen keputusan.',
+            'subtitle' => 'Hasil akhir muncul di halaman yang sama setelah validasi dan penerbitan SK selesai.',
+            'table_title' => 'Riwayat Pengajuan',
+            'table_subtitle' => 'Semua pengajuan tetap ditampilkan. Hasil akhir muncul jika validasi dan SK sudah selesai.',
             'empty_title' => 'Hasil akhir belum tersedia',
             'empty_description' => 'Hasil akhir akan muncul setelah proses validasi dan penerbitan SK selesai.',
             'icon' => 'chart-line-up',
@@ -90,7 +90,7 @@
 
 <div data-module-page="pesantren-akreditasi">
 <x-ui.page
-    :title="$activeFocusConfig['title']"
+    title="Pusat Akreditasi"
     :subtitle="$activeFocusConfig['subtitle']"
 >
     <x-slot:toolbar>
@@ -146,7 +146,7 @@
 
     <div class="row g-5 mb-6 spm-akreditasi-context-cards">
         <div class="col-md-4">
-            <x-ui.stat-card label="Konteks Halaman" value="{{ $activeFocusConfig['title'] }}" :variant="$activeFocusConfig['variant']" :icon="$activeFocusConfig['icon']" />
+            <x-ui.stat-card label="Proses Aktif" value="{{ $latestAkreditasi ? $activeFocusConfig['title'] : 'Belum Ada' }}" :variant="$activeFocusConfig['variant']" :icon="$activeFocusConfig['icon']" />
         </div>
         <div class="col-md-4">
             <x-ui.stat-card label="Data Tampil" value="{{ $akreditasis->total() }}" variant="info" icon="data" />
@@ -170,6 +170,15 @@
             </li>
         @endforeach
     </x-ui.tabs>
+
+    <x-ui.alert variant="info" icon="information-5" title="Satu Proses, Bukan Banyak Halaman" class="mb-5 spm-akreditasi-ux-note">
+        Pengajuan, Perbaikan, Kartu Kendali, dan Hasil adalah tahapan dari satu proses akreditasi. Panduan IAPM hanya bahan baca dari admin, bukan dokumen yang perlu diunggah pesantren.
+        <div class="mt-3 d-flex flex-wrap gap-2">
+            <a href="{{ route('documents.index', ['doc' => 'iapm']) }}" class="btn btn-sm btn-light-primary fw-semibold">
+                <x-ui.icon name="document" class="fs-5 me-1" /> Baca Panduan IAPM
+            </a>
+        </div>
+    </x-ui.alert>
 
     <x-ui.table
         :title="$activeFocusConfig['table_title']"
