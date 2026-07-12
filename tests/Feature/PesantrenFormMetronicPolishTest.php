@@ -89,6 +89,8 @@ class PesantrenFormMetronicPolishTest extends TestCase
             ->get('/pesantren/edpm')
             ->assertOk()
             ->assertSee('data-module-page="pesantren-edpm"', false)
+            ->assertSee('edpmCount: 4', false)
+            ->assertSee('iprCount: 1', false)
             ->assertSee('spm-pesantren-form-page', false)
             ->assertSee('spm-edpm-stepper-card', false)
             ->assertSee('spm-edpm-input-table', false);

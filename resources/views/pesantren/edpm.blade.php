@@ -5,8 +5,8 @@
 @section('content')
 @php
     $isLocked = $pesantren->is_locked ?? false;
-    $edpmKomponens = $komponens->where('jenis', 'edpm');
-    $iprKomponens = $komponens->where('jenis', 'ipr');
+    $edpmKomponens = $komponens->where('ipr', null);
+    $iprKomponens = $komponens->where('ipr', 1);
     $edpmCount = $edpmKomponens->count();
     $iprCount = $iprKomponens->count();
 @endphp
