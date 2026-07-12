@@ -136,6 +136,8 @@ class DashboardController extends Controller
                 'pesantren_name' => $akreditasi->user->pesantren->nama_pesantren ?? $akreditasi->user->name,
                 'status' => (int) $akreditasi->status,
                 'status_label' => Akreditasi::getStatusLabel($akreditasi->status),
+                'periode' => $akreditasi->periode,
+                'tahapan' => $akreditasi->tahapan,
                 'updated_at' => $akreditasi->updated_at,
                 'peringkat' => $akreditasi->peringkat,
             ];
