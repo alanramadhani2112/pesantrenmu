@@ -465,8 +465,8 @@ class SidebarMenuServiceTest extends TestCase
         $item = $menu[2]['items'][0];
 
         $this->assertSame('kartu_kendali_visitasi', $item['key']);
-        $this->assertSame(['focus' => 'kartu_kendali'], $item['route_query']);
-        $this->assertSame(['focus' => 'kartu_kendali'], $item['active_query']);
+        $this->assertSame('pesantren.akreditasi.kartu-kendali', $item['route']);
+        $this->assertSame('pesantren.akreditasi.kartu-kendali', $item['active_pattern']);
     }
 
     public function test_dokumen_items_share_documents_route(): void

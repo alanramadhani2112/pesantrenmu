@@ -37,6 +37,13 @@ class DocumentController extends Controller
             $perPage
         );
 
+        $categoriesQuery = DocumentCategory::query()->active()->ordered();
+        $documentCategories = match ($roleScope) {
+            'pesantren' => $categoriesQuery->visibleToPesantren()->get(),
+            'asesor' => $categoriesQuery->visibleToAsesor()->get(),
+            default => $categoriesQuery->get(),
+        };
+
         // Derive page title
         if ($doc === 'all' || $doc === '' || $doc === null) {
             $pageTitle = 'Daftar Dokumen';
@@ -52,7 +59,7 @@ class DocumentController extends Controller
             }
         }
 
-        return view('documents.index', compact('documents', 'search', 'perPage', 'doc', 'pageTitle'));
+        return view('documents.index', compact('documents', 'search', 'perPage', 'doc', 'pageTitle', 'documentCategories'));
     }
 
     public function download(Document $document)

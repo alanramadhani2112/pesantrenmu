@@ -31,13 +31,67 @@
         'kartu_kendali' => 'Kartu Kendali',
         'hasil' => 'Hasil',
     ];
+    $focusRoutes = [
+        '' => 'pesantren.akreditasi',
+        'perbaikan' => 'pesantren.akreditasi.perbaikan',
+        'kartu_kendali' => 'pesantren.akreditasi.kartu-kendali',
+        'hasil' => 'pesantren.akreditasi.hasil',
+    ];
+    $focusConfig = [
+        '' => [
+            'title' => 'Pengajuan Akreditasi',
+            'subtitle' => 'Ajukan akreditasi, pantau tahapan, dan tindak lanjuti pengajuan aktif.',
+            'table_title' => 'Riwayat Pengajuan',
+            'table_subtitle' => 'Semua pengajuan akreditasi pesantren Anda.',
+            'empty_title' => 'Belum ada pengajuan akreditasi',
+            'empty_description' => 'Lengkapi profil dan data pendukung untuk mengajukan akreditasi.',
+            'icon' => 'lock-2',
+            'variant' => 'primary',
+        ],
+        'perbaikan' => [
+            'title' => 'Status Perbaikan',
+            'subtitle' => 'Pantau catatan penolakan, batas waktu, dan tindak lanjut perbaikan berkas.',
+            'table_title' => 'Daftar Perbaikan',
+            'table_subtitle' => 'Pengajuan yang membutuhkan perbaikan dari pesantren.',
+            'empty_title' => 'Tidak ada perbaikan aktif',
+            'empty_description' => 'Semua pengajuan tidak sedang membutuhkan perbaikan berkas.',
+            'icon' => 'messages',
+            'variant' => 'warning',
+        ],
+        'kartu_kendali' => [
+            'title' => 'Kartu Kendali Visitasi',
+            'subtitle' => 'Unggah dan pantau kartu kendali setelah proses visitasi selesai.',
+            'table_title' => 'Daftar Kartu Kendali',
+            'table_subtitle' => 'Pengajuan pasca visitasi yang memiliki konteks kartu kendali.',
+            'empty_title' => 'Belum ada kartu kendali',
+            'empty_description' => 'Belum ada pengajuan yang masuk tahap kartu kendali visitasi.',
+            'icon' => 'check-circle',
+            'variant' => 'info',
+        ],
+        'hasil' => [
+            'title' => 'Hasil Akhir Akreditasi',
+            'subtitle' => 'Lihat nilai akhir, peringkat, SK, sertifikat, dan status banding.',
+            'table_title' => 'Daftar Hasil Akhir',
+            'table_subtitle' => 'Pengajuan yang sudah memiliki hasil akhir atau dokumen keputusan.',
+            'empty_title' => 'Hasil akhir belum tersedia',
+            'empty_description' => 'Hasil akhir akan muncul setelah proses validasi dan penerbitan SK selesai.',
+            'icon' => 'chart-line-up',
+            'variant' => 'success',
+        ],
+    ];
+    $activeFocusConfig = $focusConfig[$focus] ?? $focusConfig[''];
     $queryParams = array_filter(request()->except(['focus', 'page']));
+    $currentRoute = $focusRoutes[$focus] ?? $focusRoutes[''];
+    $latestAkreditasi = $akreditasis->first();
+    $latestStatusLabel = $latestAkreditasi
+        ? ($statusLabels[$latestAkreditasi->status] ?? $latestAkreditasi->status)
+        : 'Belum Ada';
 @endphp
 
 <div data-module-page="pesantren-akreditasi">
 <x-ui.page
-    title="Pengajuan Akreditasi"
-    subtitle="Kelola pengajuan, pantau status, dan ajukan banding akreditasi pesantren Anda."
+    :title="$activeFocusConfig['title']"
+    :subtitle="$activeFocusConfig['subtitle']"
 >
     <x-slot:toolbar>
         @if($completeness['can_submit'] ?? false)
@@ -90,25 +144,42 @@
         </x-ui.alert>
     @endif
 
+    <div class="row g-5 mb-6 spm-akreditasi-context-cards">
+        <div class="col-md-4">
+            <x-ui.stat-card label="Konteks Halaman" value="{{ $activeFocusConfig['title'] }}" :variant="$activeFocusConfig['variant']" :icon="$activeFocusConfig['icon']" />
+        </div>
+        <div class="col-md-4">
+            <x-ui.stat-card label="Data Tampil" value="{{ $akreditasis->total() }}" variant="info" icon="data" />
+        </div>
+        <div class="col-md-4">
+            <x-ui.stat-card label="Status Terbaru" value="{{ $latestStatusLabel }}" variant="secondary" icon="information-5" />
+        </div>
+    </div>
+
     {{-- Focus Tabs --}}
-    <x-ui.tabs class="mb-6">
+    <x-ui.tabs class="mb-5 spm-akreditasi-focus-tabs">
         @foreach($focuses as $key => $label)
-            <a href="{{ request()->fullUrlWithQuery(array_merge($queryParams, ['focus' => $key])) }}" class="nav-link {{ $focus === $key ? 'active' : '' }}">
-                {{ $label }}
-            </a>
+            <li class="nav-item">
+                <a href="{{ route($focusRoutes[$key]) }}{{ $queryParams ? '?' . http_build_query($queryParams) : '' }}"
+                    data-ui-tab="metronic"
+                    role="tab"
+                    class="nav-link text-active-primary spm-tab-link {{ $focus === $key ? 'active' : '' }}"
+                    aria-selected="{{ $focus === $key ? 'true' : 'false' }}">
+                    {{ $label }}
+                </a>
+            </li>
         @endforeach
     </x-ui.tabs>
 
     <x-ui.table
-        title="Daftar Pengajuan Akreditasi"
-        subtitle="Riwayat pengajuan, status, tahapan, dan tindak lanjut akreditasi."
+        :title="$activeFocusConfig['table_title']"
+        :subtitle="$activeFocusConfig['table_subtitle']"
         :records="$akreditasis"
         :per-page-options="[5, 10, 25, 50]"
         table-class="spm-table-compact"
     >
         <x-slot name="filters">
-            <form method="GET" action="{{ route('pesantren.akreditasi') }}" id="pesantren-akreditasi-filter-form">
-                <input type="hidden" name="focus" value="{{ $focus }}">
+            <form method="GET" action="{{ route($currentRoute) }}" id="pesantren-akreditasi-filter-form">
                 <input type="hidden" name="sortField" value="{{ $sortField }}">
                 <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
                 <div class="d-flex align-items-center gap-3 flex-wrap">
@@ -201,8 +272,8 @@
                 <tr>
                     <td colspan="7">
                         <x-ui.empty-state
-                            title="Tidak ada pengajuan akreditasi"
-                            description="Lengkapi profil dan data pendukung untuk mengajukan akreditasi."
+                            :title="$activeFocusConfig['empty_title']"
+                            :description="$activeFocusConfig['empty_description']"
                             class="py-15"
                         />
                     </td>

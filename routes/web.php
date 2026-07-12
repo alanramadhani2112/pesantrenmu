@@ -325,6 +325,15 @@ Route::middleware(['auth', 'verified', 'role:pesantren'])
 
         Route::get('akreditasi', [App\Http\Controllers\Pesantren\AkreditasiController::class, 'index'])
             ->name('akreditasi');
+        Route::get('akreditasi/perbaikan', [App\Http\Controllers\Pesantren\AkreditasiController::class, 'index'])
+            ->defaults('focus', 'perbaikan')
+            ->name('akreditasi.perbaikan');
+        Route::get('akreditasi/kartu-kendali', [App\Http\Controllers\Pesantren\AkreditasiController::class, 'index'])
+            ->defaults('focus', 'kartu_kendali')
+            ->name('akreditasi.kartu-kendali');
+        Route::get('akreditasi/hasil', [App\Http\Controllers\Pesantren\AkreditasiController::class, 'index'])
+            ->defaults('focus', 'hasil')
+            ->name('akreditasi.hasil');
         Route::post('akreditasi/create', [App\Http\Controllers\Pesantren\AkreditasiController::class, 'create'])
             ->name('akreditasi.create');
         Route::post('akreditasi/delete', [App\Http\Controllers\Pesantren\AkreditasiController::class, 'delete'])

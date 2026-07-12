@@ -6,6 +6,21 @@
         $activeDocLabel = $doc === 'all' || $doc === ''
             ? 'Semua Dokumen'
             : str($doc)->replace(['-', '_'], ' ')->upper()->toString();
+        $activeCategory = $documentCategories->firstWhere('slug', $doc);
+        $documentSubtitle = $activeCategory?->description
+            ?: ($doc === 'all' || $doc === ''
+                ? 'Semua dokumen yang tersedia sesuai hak akses Anda.'
+                : 'Dokumen kategori '.$activeDocLabel.' yang tersedia untuk proses akreditasi.');
+        $tabQueryParams = array_filter(request()->except(['page']));
+        $categoryLinks = collect([[
+            'slug' => 'all',
+            'label' => 'Semua',
+            'href' => route('documents.index', ['doc' => 'all']).($tabQueryParams ? '?'.http_build_query($tabQueryParams) : ''),
+        ]])->merge($documentCategories->map(fn ($category) => [
+            'slug' => $category->slug,
+            'label' => $category->name,
+            'href' => route('documents.index', ['doc' => $category->slug]).($tabQueryParams ? '?'.http_build_query($tabQueryParams) : ''),
+        ]));
     @endphp
 
     <x-slot name="header">
@@ -14,11 +29,37 @@
 
     <x-ui.page
         :title="$pageTitle"
-        subtitle="Daftar dokumen yang tersedia sesuai hak akses pengguna."
+        :subtitle="$documentSubtitle"
     >
+        <div class="row g-5 mb-6 spm-document-summary">
+            <div class="col-md-4">
+                <x-ui.stat-card label="Kategori Aktif" value="{{ $activeDocLabel }}" variant="primary" icon="document" />
+            </div>
+            <div class="col-md-4">
+                <x-ui.stat-card label="Dokumen Tampil" value="{{ $documents->total() }}" variant="info" icon="files-tablet" />
+            </div>
+            <div class="col-md-4">
+                <x-ui.stat-card label="Hak Akses" value="{{ auth()->user()->role?->name ?? 'Pengguna' }}" variant="secondary" icon="shield-tick" />
+            </div>
+        </div>
+
+        <x-ui.tabs class="mb-5 spm-document-category-tabs">
+            @foreach($categoryLinks as $categoryLink)
+                <li class="nav-item">
+                    <a href="{{ $categoryLink['href'] }}"
+                        data-ui-tab="metronic"
+                        role="tab"
+                        class="nav-link text-active-primary spm-tab-link {{ ($doc ?: 'all') === $categoryLink['slug'] ? 'active' : '' }}"
+                        aria-selected="{{ ($doc ?: 'all') === $categoryLink['slug'] ? 'true' : 'false' }}">
+                        {{ $categoryLink['label'] }}
+                    </a>
+                </li>
+            @endforeach
+        </x-ui.tabs>
+
         <x-ui.table
             :title="$pageTitle"
-            subtitle="Buka berkas yang dibutuhkan untuk proses akreditasi."
+            :subtitle="$documentSubtitle"
             :records="$documents"
             class="spm-table-shell--document-category spm-table-shell--document-library"
         >
@@ -54,6 +95,9 @@
                                 <div class="d-flex flex-column">
                                     <span class="text-gray-900 fw-semibold fs-6">{{ $document->title }}</span>
                                     <span class="text-muted fw-semibold fs-7 spm-document-file-name">{{ basename($document->file_path) }}</span>
+                                    @if($document->category)
+                                        <span class="text-muted fs-8">{{ $document->category->name }}</span>
+                                    @endif
                                 </div>
                             </div>
                         </td>
@@ -83,8 +127,8 @@
                     <tr>
                         <td colspan="4">
                             <x-ui.empty-state
-                                title="Belum ada dokumen"
-                                description="Admin belum membagikan dokumen untuk kategori ini."
+                                title="{{ ($doc ?: 'all') === 'all' ? 'Belum ada dokumen' : 'Dokumen '.$activeDocLabel.' belum tersedia' }}"
+                                description="{{ ($doc ?: 'all') === 'all' ? 'Admin belum membagikan dokumen untuk Anda.' : 'Admin belum membagikan dokumen untuk kategori ini.' }}"
                                 class="py-15"
                             />
                         </td>

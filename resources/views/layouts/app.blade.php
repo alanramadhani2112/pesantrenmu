@@ -75,6 +75,9 @@
             'pesantren.sdm' => ['title' => __('Data SDM Pesantren'), 'section' => __('Persiapan Akreditasi')],
             'pesantren.edpm' => ['title' => __('EDPM/IPR'), 'section' => __('Persiapan Akreditasi')],
             'pesantren.akreditasi' => ['title' => __('Pengajuan Akreditasi'), 'section' => __('Pengajuan')],
+            'pesantren.akreditasi.perbaikan' => ['title' => __('Status Perbaikan'), 'section' => __('Pengajuan')],
+            'pesantren.akreditasi.kartu-kendali' => ['title' => __('Kartu Kendali Visitasi'), 'section' => __('Visitasi')],
+            'pesantren.akreditasi.hasil' => ['title' => __('Hasil Akhir Akreditasi'), 'section' => __('Hasil Akreditasi')],
             'pesantren.akreditasi-detail' => ['title' => __('Detail Pengajuan Akreditasi'), 'section' => __('Pengajuan')],
 
             'panduan.superadmin' => ['title' => __('Panduan Super Admin'), 'section' => __('Panduan')],

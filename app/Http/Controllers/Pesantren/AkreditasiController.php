@@ -20,7 +20,7 @@ class AkreditasiController extends Controller
     {
         abort_unless(auth()->user()->isPesantren(), 403);
 
-        $focus = $request->input('focus', '');
+        $focus = $request->route('focus') ?? $request->input('focus', '');
         $search = $request->input('search', '');
         $periodeFilter = $request->input('periodeFilter', '');
         $statusFilter = $request->input('statusFilter', '');
