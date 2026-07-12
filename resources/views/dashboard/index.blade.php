@@ -213,7 +213,7 @@
         @endif
 
         {{-- Quick Actions --}}
-        @if(count($quickActions) > 0)
+        @if(count($quickActions) > 0 && ! $isPesantren)
             <div class="row g-3 g-md-4 mb-6">
                 @foreach($quickActions as $action)
                     <div class="col-6 col-md-4 col-lg-3">
@@ -289,7 +289,7 @@
             {{-- Pesantren: Readiness Progress Tracker --}}
             <div class="row g-6">
                 <div class="col-12 col-lg-7 col-xl-8">
-                    <x-ui.card title="Kesiapan Pengajuan Akreditasi" subtitle="Lengkapi semua data berikut sebelum mengajukan akreditasi.">
+                    <x-ui.card title="Kesiapan Pengajuan Akreditasi" subtitle="{{ $stats['total_aktif'] > 0 ? 'Data terkunci selama pengajuan berjalan.' : 'Lengkapi semua data berikut sebelum mengajukan akreditasi.' }}">
                         <div class="d-flex flex-column gap-0">
                             @php
                                 $doneCount = collect($readiness)->where('done', true)->count();
@@ -335,15 +335,19 @@
                                     </div>
                                     <div class="flex-shrink-0">
                                         @if($step['done'])
-                                            <x-ui.badge variant="success">Lengkap</x-ui.badge>
+                                            @if($stats['total_aktif'] > 0)
+                                            <x-ui.badge variant="warning">Terkunci</x-ui.badge>
                                         @else
-                                            <span class="text-primary fw-semibold fs-8">Lengkapi →</span>
+                                            <x-ui.badge variant="success">Lengkap</x-ui.badge>
+                                        @endif
+                                        @else
+                                            <span class="text-primary fw-semibold fs-8">{{ $stats['total_aktif'] > 0 ? 'Lihat →' : 'Lengkapi →' }}</span>
                                         @endif
                                     </div>
                                 </a>
                             @endforeach
 
-                            @if($progressPercent === 100)
+                            @if($progressPercent === 100 && $stats['total_aktif'] === 0)
                                 <div class="px-6 py-5 bg-light-success">
                                     <div class="d-flex align-items-center gap-3">
                                         <x-ui.icon name="check-circle" class="fs-2x text-success" />
