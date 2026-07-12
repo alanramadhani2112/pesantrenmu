@@ -11,7 +11,7 @@
     $iprCount = $iprKomponens->count();
 @endphp
 
-<div x-data="pesantrenEdpmPage({
+<div id="edpmPage" x-data="pesantrenEdpmPage({
     edpmCount: {{ $edpmCount }},
     iprCount: {{ $iprCount }},
     evaluasis: @js($evaluasis),
@@ -103,6 +103,8 @@
                     Komponen <span x-text="activeStep + 1" class="text-primary"></span> / <span x-text="componentCount()"></span>
                     <span class="text-gray-400 mx-1">·</span>
                     <span x-text="activeGroupLabel()" class="text-gray-500"></span>
+                    <span class="text-gray-400 mx-1">·</span>
+                    <span x-text="filledButirs() + '/' + totalButirs() + ' butir lengkap'" class="text-gray-500"></span>
                 </span>
                 <div class="progress" style="height: 4px; width: 120px;">
                     <div class="progress-bar bg-primary" role="progressbar"
@@ -416,6 +418,39 @@ document.addEventListener('alpine:init', () => {
             return 'Lanjut ke IPR';
         },
 
+        allKomponens() {
+            return [...this.edpmKomponens, ...this.iprKomponens];
+        },
+
+        totalButirs() {
+            return this.allKomponens().reduce((total, komponen) => total + komponen.butirs.length, 0);
+        },
+
+        isButirComplete(butir) {
+            return !!this.evaluasis[butir.id] && !!this.links[butir.id];
+        },
+
+        filledButirs() {
+            return this.allKomponens().reduce((total, komponen) => total + komponen.butirs.filter((butir) => this.isButirComplete(butir)).length, 0);
+        },
+
+        firstIncomplete() {
+            for (const group of ['edpm', 'ipr']) {
+                const komponens = group === 'edpm' ? this.edpmKomponens : this.iprKomponens;
+                for (let index = 0; index < komponens.length; index++) {
+                    if (komponens[index].butirs.some((butir) => !this.isButirComplete(butir))) {
+                        return { group, index };
+                    }
+                }
+            }
+            return null;
+        },
+
+        jumpToIncomplete(target) {
+            this.activeGroup = target.group;
+            this.activeStep = target.index;
+        },
+
         stepButtonClass(index) {
             if (index === this.activeStep) return 'btn-primary';
             return 'btn-light btn-light-hover';
@@ -445,6 +480,18 @@ document.addEventListener('alpine:init', () => {
 // SweetAlert confirmations
 document.getElementById('btnSaveEdpm')?.addEventListener('click', function(e) {
     e.preventDefault();
+    const page = window.Alpine?.$data(document.getElementById('edpmPage'));
+    const incomplete = page?.firstIncomplete();
+    if (incomplete) {
+        page.jumpToIncomplete(incomplete);
+        window.SpmSwal.alert({
+            title: 'Data belum lengkap',
+            text: 'Lengkapi nilai evaluasi dan tautan bukti pada komponen yang dibuka sebelum Submit Final.',
+            icon: 'warning',
+        });
+        return;
+    }
+
     window.SpmSwal.confirm({
         title: 'Submit Final EDPM/IPR?',
         text: 'Final akan divalidasi: semua nilai evaluasi dan tautan bukti EDPM/IPR wajib lengkap. Draft boleh belum lengkap.',
@@ -458,7 +505,6 @@ document.getElementById('btnSaveEdpm')?.addEventListener('click', function(e) {
         }
     });
 });
-
 document.getElementById('btnSaveDraft')?.addEventListener('click', function() {
     window.SpmSwal.confirm({
         title: 'Simpan Draft EDPM/IPR?',
