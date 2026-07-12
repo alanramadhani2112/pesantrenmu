@@ -118,7 +118,7 @@ class DashboardController extends Controller
         };
 
         // Recent Activity (5 latest)
-        $recentQuery = Akreditasi::with(['user.pesantren'])
+        $recentQuery = Akreditasi::with(['user.pesantren', 'catatans.user'])
             ->orderBy('updated_at', 'desc')
             ->limit(5);
 
@@ -140,6 +140,7 @@ class DashboardController extends Controller
                 'tahapan' => $akreditasi->tahapan,
                 'updated_at' => $akreditasi->updated_at,
                 'peringkat' => $akreditasi->peringkat,
+                'latest_catatan' => $akreditasi->catatans->sortByDesc('created_at')->first()?->catatan,
             ];
         });
 

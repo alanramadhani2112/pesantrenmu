@@ -193,6 +193,16 @@
 
         @if($isPesantren && $latestPesantrenActivity)
             <x-ui.card title="Timeline Pengajuan Terbaru" subtitle="Posisi pengajuan periode {{ $latestPesantrenActivity['periode'] ?? '-' }}." class="mb-6">
+                @if($latestPesantrenActivity['status'] < 0)
+                    <div class="alert alert-danger d-flex align-items-start gap-3 mb-5">
+                        <x-ui.icon name="information-5" class="fs-2 text-danger" />
+                        <div>
+                            <div class="fw-semibold text-gray-900">{{ $latestPesantrenActivity['status_label'] }}</div>
+                            <div class="text-muted fs-7">Pengajuan butuh tindak lanjut. Cek catatan terbaru dan halaman Pusat Akreditasi.</div>
+                        </div>
+                    </div>
+                @endif
+
                 <div class="d-flex flex-wrap align-items-center gap-3 p-2">
                     @foreach($akreditasiTimeline as $status => $label)
                         @php
@@ -209,6 +219,13 @@
                         @endunless
                     @endforeach
                 </div>
+
+                @if($latestPesantrenActivity['latest_catatan'] ?? null)
+                    <div class="rounded bg-light-warning border border-warning border-dashed p-4 mt-5">
+                        <div class="fw-semibold text-gray-900 mb-1">Catatan terbaru</div>
+                        <div class="text-muted fs-7" style="white-space: pre-line;">{{ $latestPesantrenActivity['latest_catatan'] }}</div>
+                    </div>
+                @endif
             </x-ui.card>
         @endif
 
