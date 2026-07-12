@@ -81,7 +81,7 @@
         ],
         $isPesantren => [
             ['label' => 'Profil Pesantren', 'icon' => 'profile-user', 'route' => route('pesantren.profile'), 'variant' => 'primary'],
-            ['label' => 'Data IPM', 'icon' => 'data', 'route' => route('pesantren.ipm'), 'variant' => 'info'],
+            ['label' => 'IPM', 'icon' => 'data', 'route' => route('pesantren.ipm'), 'variant' => 'info'],
             ['label' => 'Data SDM', 'icon' => 'people', 'route' => route('pesantren.sdm'), 'variant' => 'success'],
             ['label' => 'EDPM', 'icon' => 'document', 'route' => route('pesantren.edpm'), 'variant' => 'warning'],
         ],
@@ -180,7 +180,7 @@
                                 @if($isPesantren && isset($readinessMap[$action['route']]))
                                     <span class="d-flex align-items-center gap-1 mt-1 fs-8 fw-semibold {{ $readinessMap[$action['route']] ? 'text-success' : 'text-muted' }}">
                                         <x-ui.icon :name="$readinessMap[$action['route']] ? 'check-circle' : 'information-5'" class="fs-8" />
-                                        {{ $readinessMap[$action['route']] ? 'Selesai' : 'Belum' }}
+                                        {{ $readinessMap[$action['route']] ? 'Selesai' : 'Belum lengkap' }}
                                     </span>
                                 @endif
                             </div>
@@ -282,6 +282,7 @@
                                     </div>
                                     <div class="flex-grow-1 min-w-0">
                                         <span class="fw-semibold fs-7 {{ $step['done'] ? 'text-gray-600' : 'text-gray-900' }}">{{ $step['label'] }}</span>
+                                        <span class="d-block text-muted fs-8 mt-1">{{ $step['meta'] ?? '' }} terisi</span>
                                     </div>
                                     <div class="flex-shrink-0">
                                         @if($step['done'])

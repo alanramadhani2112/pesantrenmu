@@ -145,30 +145,19 @@ class DashboardController extends Controller
         $readiness = [];
         if ($isPesantren) {
             $pesantren = $user->pesantren;
-            $edpmCount = $pesantren ? $user->edpms()->count() : 0;
             $progressService = app(SidebarProgressService::class);
             $sectionProgress = [
-                'profil' => $progressService->getSectionProgress($user->id, 'profil')['status'],
-                'ipm' => $progressService->getSectionProgress($user->id, 'ipm')['status'],
-                'sdm' => $progressService->getSectionProgress($user->id, 'sdm')['status'],
+                'profil' => $progressService->getSectionProgress($user->id, 'profil'),
+                'ipm' => $progressService->getSectionProgress($user->id, 'ipm'),
+                'sdm' => $progressService->getSectionProgress($user->id, 'sdm'),
+                'edpm' => $progressService->getSectionProgress($user->id, 'edpm'),
             ];
 
-            $docFields = ['status_kepemilikan_tanah', 'sertifikat_nsp', 'rk_anggaran', 'silabus_rpp', 'peraturan_kepegawaian', 'file_lk_iapm', 'laporan_tahunan', 'dok_profil', 'dok_nsp', 'dok_renstra', 'dok_rk_anggaran', 'dok_kurikulum', 'dok_silabus_rpp', 'dok_kepengasuhan', 'dok_peraturan_kepegawaian', 'dok_sarpras', 'dok_laporan_tahunan', 'dok_sop'];
-            $docFilled = 0;
-            if ($pesantren) {
-                foreach ($docFields as $field) {
-                    if (! empty($pesantren->$field)) {
-                        $docFilled++;
-                    }
-                }
-            }
-
             $readiness = [
-                ['key' => 'profil', 'label' => 'Profil Pesantren', 'done' => $sectionProgress['profil'] === 'complete', 'route' => 'pesantren.profile'],
-                ['key' => 'ipm', 'label' => 'Data IPM', 'done' => $sectionProgress['ipm'] === 'complete', 'route' => 'pesantren.ipm'],
-                ['key' => 'sdm', 'label' => 'Data SDM', 'done' => $sectionProgress['sdm'] === 'complete', 'route' => 'pesantren.sdm'],
-                ['key' => 'edpm', 'label' => 'Evaluasi Diri (EDPM)', 'done' => $edpmCount > 0, 'route' => 'pesantren.edpm'],
-                ['key' => 'dokumen', 'label' => "Dokumen ($docFilled/".count($docFields).')', 'done' => $docFilled >= 7, 'route' => 'pesantren.profile'],
+                ['key' => 'profil', 'label' => 'Profil Pesantren', 'done' => $sectionProgress['profil']['status'] === 'complete', 'route' => 'pesantren.profile', 'meta' => $sectionProgress['profil']['filled'].'/'.$sectionProgress['profil']['total']],
+                ['key' => 'ipm', 'label' => 'IPM', 'done' => $sectionProgress['ipm']['status'] === 'complete', 'route' => 'pesantren.ipm', 'meta' => $sectionProgress['ipm']['filled'].'/'.$sectionProgress['ipm']['total']],
+                ['key' => 'sdm', 'label' => 'Data SDM', 'done' => $sectionProgress['sdm']['status'] === 'complete', 'route' => 'pesantren.sdm', 'meta' => $sectionProgress['sdm']['filled'].'/'.$sectionProgress['sdm']['total']],
+                ['key' => 'edpm', 'label' => 'EDPM/IPR', 'done' => $sectionProgress['edpm']['status'] === 'complete', 'route' => 'pesantren.edpm', 'meta' => $sectionProgress['edpm']['filled'].'/'.$sectionProgress['edpm']['total']],
             ];
         }
 

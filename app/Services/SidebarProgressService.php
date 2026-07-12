@@ -17,11 +17,40 @@ class SidebarProgressService
         'nama_pesantren',
         'ns_pesantren',
         'alamat',
-        'provinsi',
+        'provinsi_kode',
         'kota_kabupaten',
         'tahun_pendirian',
+        'luas_tanah',
+        'luas_bangunan',
         'nama_mudir',
-        'layanan_satuan_pendidikan',
+        'jenjang_pendidikan_mudir',
+        'telp_pesantren',
+        'hp_wa',
+        'email_pesantren',
+        'persyarikatan',
+        'visi',
+        'misi',
+    ];
+
+    private const PROFIL_DOCUMENT_FIELDS = [
+        'status_kepemilikan_tanah',
+        'sertifikat_nsp',
+        'rk_anggaran',
+        'silabus_rpp',
+        'peraturan_kepegawaian',
+        'file_lk_iapm',
+        'laporan_tahunan',
+        'dok_profil',
+        'dok_nsp',
+        'dok_renstra',
+        'dok_rk_anggaran',
+        'dok_kurikulum',
+        'dok_silabus_rpp',
+        'dok_kepengasuhan',
+        'dok_peraturan_kepegawaian',
+        'dok_sarpras',
+        'dok_laporan_tahunan',
+        'dok_sop',
     ];
 
     /**
@@ -72,8 +101,9 @@ class SidebarProgressService
      */
     private function calculateProfilProgress(int $userId): array
     {
-        $total = count(self::PROFIL_REQUIRED_FIELDS);
-        $pesantren = Pesantren::where('user_id', $userId)->first();
+        $pesantren = Pesantren::with('units')->where('user_id', $userId)->first();
+        $unitCount = $pesantren?->units->count() ?? 0;
+        $total = count(self::PROFIL_REQUIRED_FIELDS) + count(self::PROFIL_DOCUMENT_FIELDS) + 1 + $unitCount;
 
         if (! $pesantren) {
             return ['status' => 'not_started', 'filled' => 0, 'total' => $total];
@@ -81,12 +111,23 @@ class SidebarProgressService
 
         $filled = 0;
         foreach (self::PROFIL_REQUIRED_FIELDS as $field) {
-            $value = $pesantren->{$field};
-
-            if (is_array($value) ? $value !== [] : ! empty($value)) {
+            if (filled($pesantren->{$field})) {
                 $filled++;
             }
         }
+
+        foreach (self::PROFIL_DOCUMENT_FIELDS as $field) {
+            if (filled($pesantren->{$field})) {
+                $filled++;
+            }
+        }
+
+        $layanan = $pesantren->layanan_satuan_pendidikan ?? [];
+        if (is_array($layanan) && $layanan !== []) {
+            $filled++;
+        }
+
+        $filled += $pesantren->units->filter(fn ($unit) => (int) $unit->jumlah_rombel > 0)->count();
 
         return [
             'status' => $this->determineStatus($filled, $total),
@@ -126,13 +167,23 @@ class SidebarProgressService
      */
     private function calculateSdmProgress(int $userId): array
     {
-        $total = 1; // At least one SDM record must exist
-        $count = SdmPesantren::where('user_id', $userId)->count();
-        $filled = $count > 0 ? 1 : 0;
+        $pesantren = Pesantren::with('units')->where('user_id', $userId)->first();
+        $levels = $pesantren?->units->pluck('unit')->all() ?? [];
+        $total = count($levels);
+
+        if ($total === 0) {
+            return ['status' => 'not_started', 'filled' => 0, 'total' => 0];
+        }
+
+        $filled = SdmPesantren::query()
+            ->where('user_id', $userId)
+            ->whereIn('tingkat', $levels)
+            ->distinct('tingkat')
+            ->count('tingkat');
 
         return [
-            'status' => $filled > 0 ? 'complete' : 'not_started',
-            'filled' => $filled,
+            'status' => $this->determineStatus(min($filled, $total), $total),
+            'filled' => min($filled, $total),
             'total' => $total,
         ];
     }
