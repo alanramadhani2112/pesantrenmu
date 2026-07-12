@@ -46,8 +46,7 @@
 @if($pesantren->units && $pesantren->units->count() > 0)
 <x-ui.section-card title="Layanan Pendidikan" subtitle="Unit layanan pendidikan pesantren" class="mt-4">
     <div class="p-6">
-        <div class="table-responsive">
-            <table data-ui-simple-table="metronic" class="table table-row-bordered table-row-gray-200 align-middle gs-0 gy-3">
+        <x-ui.simple-table table-class="table-row-gray-200">
                 <thead>
                     <tr class="fw-semibold text-muted">
                         <th>No</th>
@@ -64,8 +63,7 @@
                         </tr>
                     @endforeach
                 </tbody>
-            </table>
-        </div>
+        </x-ui.simple-table>
     </div>
 </x-ui.section-card>
 @endif

@@ -13,7 +13,7 @@
             <x-ui.badge variant="warning">Tertunda: {{ $pendingCount }}</x-ui.badge>
         </x-slot>
 
-        <x-ui.table title="Daftar Banding" subtitle="Pengajuan banding dari pesantren." :records="$bandings" :show-per-page="false">
+        <x-ui.table title="Daftar Banding" subtitle="Pengajuan banding dari pesantren." :records="$bandings">
             <x-slot name="filters">
                 <form method="GET" action="{{ route('admin.banding') }}" id="banding-filter-form">
                     <div class="d-flex align-items-center gap-3 flex-wrap">
@@ -27,7 +27,6 @@
                             <option value="rejected" @selected($statusFilter === 'rejected')>Ditolak</option>
                         </x-ui.select>
 
-                        <x-ui.table-per-page name="perPage" :value="$perPage" :options="[10, 25, 50]" form="banding-filter-form" />
                     </div>
                 </form>
             </x-slot>

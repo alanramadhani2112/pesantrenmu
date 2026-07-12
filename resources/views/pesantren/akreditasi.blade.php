@@ -95,7 +95,7 @@
         title="Daftar Pengajuan Akreditasi"
         subtitle="Riwayat pengajuan, status, tahapan, dan tindak lanjut akreditasi."
         :records="$akreditasis"
-        :show-per-page="false"
+        :per-page-options="[5, 10, 25, 50]"
         table-class="spm-table-compact"
     >
         <x-slot name="filters">
@@ -114,8 +114,6 @@
                             <option value="{{ $val }}" {{ $tahapanFilter === $val ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
                     </x-ui.select>
-
-                    <x-ui.table-per-page name="perPage" :value="$perPage" :options="[5, 10, 25, 50]" form="pesantren-akreditasi-filter-form" />
 
                     <x-ui.button type="submit" variant="light" size="sm">
                         <x-ui.icon name="setting-2" class="fs-4 me-1" />

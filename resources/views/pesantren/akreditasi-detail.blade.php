@@ -245,8 +245,7 @@
         <x-ui.section-card title="Data SDM" class="mb-6">
             <div class="p-6">
                 @if(!empty($sdm) && count($sdm) > 0)
-                    <div class="table-responsive">
-                        <table data-ui-simple-table="metronic" class="table table-bordered table-row-dashed">
+                    <x-ui.simple-table table-class="table-bordered">
                             <thead>
                                 <tr><th>Tingkat</th><th>Santri L</th><th>Santri P</th><th>Ust. Dirosah L</th><th>Ust. Dirosah P</th><th>Ust. Non Dirosah L</th><th>Ust. Non Dirosah P</th><th>Pamong L</th><th>Pamong P</th><th>Musyrif L</th><th>Musyrif P</th><th>Tendik L</th><th>Tendik P</th></tr>
                             </thead>
@@ -263,8 +262,7 @@
                                     </tr>
                                 @endforeach
                             </tbody>
-                        </table>
-                    </div>
+                    </x-ui.simple-table>
                 @else
                     <div class="text-muted">Belum ada data SDM.</div>
                 @endif

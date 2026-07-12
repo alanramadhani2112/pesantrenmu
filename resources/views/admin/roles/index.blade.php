@@ -13,12 +13,11 @@
         </x-slot>
 
         {{-- Table --}}
-        <x-ui.table title="Daftar Role" subtitle="ID, nama, parameter, dan aksi untuk tiap role." :records="$roles" :show-per-page="false">
+        <x-ui.table title="Daftar Role" subtitle="ID, nama, parameter, dan aksi untuk tiap role." :records="$roles">
             <x-slot name="filters">
                 <form method="GET" action="{{ route('admin.roles.index') }}" id="roles-filter-form">
                     <div class="d-flex align-items-center gap-3 flex-wrap">
                         <x-datatable.search name="search" placeholder="Cari role..." :value="$search" form="roles-filter-form" />
-                        <x-ui.table-per-page name="perPage" :value="$perPage" :options="[10, 25, 50]" form="roles-filter-form" />
                         <input type="hidden" name="sortField" value="{{ $sortField }}">
                         <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
                     </div>

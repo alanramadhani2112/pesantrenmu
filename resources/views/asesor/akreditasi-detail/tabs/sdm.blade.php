@@ -1,8 +1,7 @@
 {{-- Tab: SDM (Sumber Daya Manusia) --}}
 <x-ui.section-card title="Rekapitulasi SDM" subtitle="Data sumber daya manusia pesantren">
     <div class="p-6">
-        <div class="table-responsive">
-            <table data-ui-simple-table="metronic" class="table table-row-bordered table-row-gray-200 align-middle gs-0 gy-3">
+        <x-ui.simple-table table-class="table-row-gray-200">
                 <thead>
                     <tr class="fw-semibold text-muted">
                         <th>Jenjang</th>
@@ -57,7 +56,6 @@
                     </tr>
                 </tfoot>
                 @endif
-            </table>
-        </div>
+        </x-ui.simple-table>
     </div>
 </x-ui.section-card>

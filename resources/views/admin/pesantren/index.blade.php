@@ -12,7 +12,6 @@
             title="Daftar Pesantren"
             subtitle="Daftar pesantren beserta status akun dan progres akreditasi terbaru."
             :records="$pesantrens"
-            :show-per-page="false"
             class="spm-table-shell--admin-pesantren"
         >
             <x-slot name="filters">
@@ -39,8 +38,6 @@
                         :value="$filterStatus"
                         form="pesantren-filter-form"
                     />
-
-                    <x-ui.table-per-page name="perPage" :value="$perPage" :options="[10, 25, 50]" form="pesantren-filter-form" />
 
                     <input type="hidden" name="sortField" x-model="sortField">
                     <input type="hidden" name="sortAsc" x-model="sortAsc">

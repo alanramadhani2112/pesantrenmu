@@ -129,7 +129,7 @@
             </div>
         </div>
 
-        <x-ui.table title="Daftar Akreditasi" subtitle="Pengajuan, penilaian, visitasi, dan tindak lanjut pesantren." :records="$akreditasis" :show-per-page="false">
+        <x-ui.table title="Daftar Akreditasi" subtitle="Pengajuan, penilaian, visitasi, dan tindak lanjut pesantren." :records="$akreditasis">
             <x-slot name="filters">
                 <form method="GET" action="{{ route('admin.akreditasi') }}" id="admin-akreditasi-filters">
                     <div class="d-flex align-items-center gap-3 flex-wrap">
@@ -144,8 +144,6 @@
                             <option value="overdue" @selected($statusFilter === 'overdue')>Terlambat ({{ $statusCounts['overdue'] ?? 0 }})</option>
                             <option value="" @selected($statusFilter === '')>Semua</option>
                         </x-ui.select>
-
-                        <x-ui.table-per-page name="perPage" :value="$perPage" :options="[10, 25, 50]" form="admin-akreditasi-filters" />
 
                         <input type="hidden" name="sortField" value="{{ $sortField }}">
                         <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">

@@ -4,7 +4,7 @@
     SLOT USAGE (IMPORTANT):
     - thead: Pass <th> elements ONLY. Do NOT wrap in <tr>. Component renders <tr> automatically.
     - tbody: Pass <tr> elements directly.
-    - filters: Search/filter form. Use x-datatable.search, x-ui.select, x-ui.table-per-page.
+    - filters: Search/filter form. Use x-datatable.search and x-ui.select. Per-page control renders in footer.
     - toolbar: Buttons, badges (optional).
     - Pagination automatic if :records receives paginator. No manual ->links().
 
@@ -20,13 +20,15 @@
     'subtitle' => null,
     'records' => null,
     'showPerPage' => true,
-    'perPagePosition' => 'toolbar',
-    'perPageVariant' => 'labeled',
+    'perPagePosition' => 'footer',
+    'perPageVariant' => 'compact',
+    'perPageOptions' => [10, 25, 50],
     'tableClass' => null,
 ])
 
 @php
-    $perPagePosition = in_array($perPagePosition, ['toolbar', 'footer'], true) ? $perPagePosition : 'toolbar';
+    $perPagePosition = in_array($perPagePosition, ['toolbar', 'footer'], true) ? $perPagePosition : 'footer';
+    $usesDatatableAdapter = $attributes->has('data-ui-table-adapter');
     $showToolbarPerPage = $showPerPage && $perPagePosition === 'toolbar';
     $showFooterPerPage = $showPerPage && $perPagePosition === 'footer';
     $defaultClasses = 'table table-striped table-row-bordered align-middle gy-5 gs-7 mb-0 spm-datatable spm-table spm-table--list spm-table--metronic-docs';
@@ -61,9 +63,11 @@
                             </div>
                         </div>
 
-                        @if($showToolbarPerPage)
+                        @if($showToolbarPerPage || ! $usesDatatableAdapter)
                             <div class="spm-table-dom-end">
-                                <x-ui.table-per-page :variant="$perPageVariant" />
+                                @if($showToolbarPerPage)
+                                <x-ui.table-per-page :variant="$perPageVariant" :options="$perPageOptions" />
+                                @endif
                             </div>
                         @endif
                     </div>
@@ -73,7 +77,7 @@
                     <div class="spm-table-dom-row">
                         <div class="spm-table-dom-start"></div>
                         <div class="spm-table-dom-end">
-                            <x-ui.table-per-page :variant="$perPageVariant" />
+                            <x-ui.table-per-page :variant="$perPageVariant" :options="$perPageOptions" />
                         </div>
                     </div>
                 </div>
@@ -98,9 +102,9 @@
 
         @if($records && method_exists($records, 'links'))
             <div class="spm-table-footer {{ $showFooterPerPage ? 'spm-table-footer--datatable' : '' }}">
-                <div class="spm-table-footer-start">
+                    <div class="spm-table-footer-start">
                     @if($showFooterPerPage)
-                        <x-ui.table-per-page variant="compact" />
+                        <x-ui.table-per-page :variant="$perPageVariant" :options="$perPageOptions" />
                     @endif
 
                     <div class="spm-table-result-meta">

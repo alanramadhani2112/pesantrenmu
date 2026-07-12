@@ -117,8 +117,7 @@
                                     <x-ui.section-card :title="'Komponen ' . $edpmKomponens->first()?->nama">
                                         <template x-if="komponen">
                                             <div class="p-6">
-                                                <div class="table-responsive">
-                                                    <table data-ui-simple-table="metronic" class="spm-table-compact table table-bordered table-row-dashed align-middle">
+                                                <x-ui.simple-table table-class="spm-table-compact table-bordered">
                                                         <thead>
                                                             <tr class="bg-light">
                                                                 <th style="width:50px">No</th>
@@ -152,8 +151,7 @@
                                                                 </tr>
                                                             </template>
                                                         </tbody>
-                                                    </table>
-                                                </div>
+                                                </x-ui.simple-table>
                                                 <div class="mt-4">
                                                     <label class="form-label fw-semibold text-gray-700">Catatan</label>
                                                     <textarea class="form-control"
@@ -176,8 +174,7 @@
                                     <x-ui.section-card title="Komponen IPR">
                                         <template x-if="komponen">
                                             <div class="p-6">
-                                                <div class="table-responsive">
-                                                    <table data-ui-simple-table="metronic" class="spm-table-compact table table-bordered table-row-dashed align-middle">
+                                                <x-ui.simple-table table-class="spm-table-compact table-bordered">
                                                         <thead>
                                                             <tr class="bg-light">
                                                                 <th style="width:50px">No</th>
@@ -211,8 +208,7 @@
                                                                 </tr>
                                                             </template>
                                                         </tbody>
-                                                    </table>
-                                                </div>
+                                                </x-ui.simple-table>
                                                 <div class="mt-4">
                                                     <label class="form-label fw-semibold text-gray-700">Catatan</label>
                                                     <textarea class="form-control"

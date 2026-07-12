@@ -17,7 +17,7 @@
             title="Daftar Notifikasi Gagal"
             subtitle="Gunakan tombol Kirim Ulang untuk mencoba kembali, atau Abaikan untuk menutup laporan."
             :records="$failedNotifications"
-            :show-per-page="false"
+            :per-page-options="[15, 25, 50]"
         >
             <x-slot name="filters">
                 <form method="GET" action="{{ route('admin.failed-notifications') }}" id="fn-filter-form" class="mb-5">
@@ -43,7 +43,6 @@
                     <div class="d-flex gap-3 align-items-center">
                         <x-datatable.search name="search" placeholder="Cari tipe, alasan, atau penerima..." :value="$search" form="fn-filter-form" />
                         <input type="hidden" name="status" value="{{ $statusFilter }}" />
-                        <x-ui.table-per-page name="perPage" :value="$perPage" :options="[15, 25, 50]" form="fn-filter-form" />
                     </div>
                 </form>
             </x-slot>

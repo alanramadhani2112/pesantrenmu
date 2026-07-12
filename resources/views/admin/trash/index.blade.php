@@ -32,13 +32,11 @@
             title="Daftar Akreditasi Terhapus"
             subtitle="Cari berdasarkan nama pesantren atau pengguna pengaju."
             :records="$trashedAkreditasis->appends(compact('search', 'perPage'))"
-            :show-per-page="false"
         >
             <x-slot name="filters">
                 <form method="GET" action="{{ route('admin.trash') }}" id="trash-filter-form" class="mb-5">
                     <div class="d-flex gap-3 align-items-center">
                         <x-datatable.search name="search" placeholder="Cari pesantren atau pengguna..." :value="$search" form="trash-filter-form" />
-                        <x-ui.table-per-page name="perPage" :value="$perPage" :options="[10, 25, 50]" form="trash-filter-form" />
                     </div>
                 </form>
             </x-slot>

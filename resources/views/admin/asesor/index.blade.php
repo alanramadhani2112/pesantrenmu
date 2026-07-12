@@ -12,7 +12,6 @@
             title="Daftar Asesor"
             subtitle="Daftar asesor beserta peran kelompok, penugasan aktif, dan status akses."
             :records="$asesors"
-            :show-per-page="false"
         >
             <x-slot name="filters">
                 <x-ui.filter-bar>
@@ -36,8 +35,6 @@
                             <option value="1" @selected($filterStatus === '1')>Aktif</option>
                             <option value="0" @selected($filterStatus === '0')>Tidak Aktif</option>
                         </x-ui.select>
-
-                        <x-ui.table-per-page name="perPage" :value="$perPage" :options="[10, 25, 50]" form="asesor-filter-form" />
 
                         <input type="hidden" name="sortField" value="{{ $sortField }}">
                         <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">

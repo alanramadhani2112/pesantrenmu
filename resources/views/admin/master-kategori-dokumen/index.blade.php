@@ -13,12 +13,11 @@
         </x-slot>
 
         {{-- Table --}}
-        <x-ui.table title="Daftar Kategori Dokumen" subtitle="Kategori, visibilitas, status, dan urutan tampil." :records="$categories" :show-per-page="false">
+        <x-ui.table title="Daftar Kategori Dokumen" subtitle="Kategori, visibilitas, status, dan urutan tampil." :records="$categories">
             <x-slot name="filters">
                 <form method="GET" action="{{ route('admin.master-kategori-dokumen.index') }}" id="kategori-dokumen-filter-form">
                     <div class="d-flex align-items-center gap-3 flex-wrap">
                         <x-datatable.search name="search" placeholder="Cari kategori..." :value="$search" form="kategori-dokumen-filter-form" />
-                        <x-ui.table-per-page name="perPage" :value="$perPage" :options="[10, 25, 50]" form="kategori-dokumen-filter-form" />
                         <input type="hidden" name="sortField" value="{{ $sortField }}">
                         <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
                     </div>
