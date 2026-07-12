@@ -119,8 +119,56 @@
     min-height: 38px;
 }
 
+[data-module-page="pesantren-edpm"].spm-page {
+    gap: 1.35rem !important;
+}
+
+[data-module-page="pesantren-edpm"] .spm-edpm-stats {
+    margin-bottom: 1.25rem !important;
+}
+
+[data-module-page="pesantren-edpm"] .spm-edpm-tabs {
+    margin-bottom: 0.9rem !important;
+    border-bottom: 0;
+}
+
+[data-module-page="pesantren-edpm"] .spm-edpm-tabs .spm-tabs-nav {
+    width: auto;
+    border-radius: 10px;
+}
+
+[data-module-page="pesantren-edpm"] .spm-edpm-progress {
+    padding: 10px 14px !important;
+    background: #ffffff;
+    border: 1px solid var(--spm-pesantren-border);
+    border-radius: 10px;
+}
+
+[data-module-page="pesantren-edpm"] .spm-edpm-progress .progress {
+    overflow: hidden;
+    background: #e9eef5;
+    border-radius: 999px;
+}
+
+[data-module-page="pesantren-edpm"] .spm-edpm-workspace {
+    display: grid;
+    grid-template-columns: minmax(230px, 280px) minmax(0, 1fr);
+    align-items: start;
+    gap: 1.25rem;
+}
+
+[data-module-page="pesantren-edpm"] .spm-edpm-stepper {
+    position: sticky;
+    top: calc(var(--bs-app-header-height, 72px) + 16px);
+    padding: 12px;
+    background: #ffffff;
+    border: 1px solid var(--spm-pesantren-border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.035);
+}
+
 [data-module-page="pesantren-edpm"] .btn.w-100.text-start {
-    min-height: 54px;
+    min-height: 58px;
     border: 1px solid var(--spm-pesantren-border);
 }
 
@@ -133,7 +181,7 @@
 [data-module-page="pesantren-edpm"] .spm-edpm-step-btn {
     border: 1px solid transparent;
     border-radius: var(--spm-radius, 8px);
-    padding: 10px 12px;
+    padding: 11px 12px;
     transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
@@ -155,10 +203,51 @@
     font-size: 12px;
 }
 
+[data-module-page="pesantren-edpm"] .spm-edpm-step-btn .text-truncate {
+    display: -webkit-box;
+    overflow: hidden;
+    white-space: normal;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+[data-module-page="pesantren-edpm"] .spm-edpm-panel {
+    min-width: 0;
+}
+
+[data-module-page="pesantren-edpm"] .spm-edpm-panel .card-header {
+    min-height: 58px;
+    padding: 16px 20px !important;
+}
+
+[data-module-page="pesantren-edpm"] .spm-edpm-panel .card-body > .p-6 {
+    padding: 18px !important;
+}
+
+[data-module-page="pesantren-edpm"] .spm-edpm-panel [data-ui-simple-table="metronic"] {
+    overflow-x: auto;
+}
+
+[data-module-page="pesantren-edpm"] .spm-edpm-panel .spm-table-compact {
+    min-width: 760px;
+}
+
+[data-module-page="pesantren-edpm"] .spm-edpm-panel .spm-table-compact th,
+[data-module-page="pesantren-edpm"] .spm-edpm-panel .spm-table-compact td {
+    padding: 0.7rem 0.85rem;
+}
+
+[data-module-page="pesantren-edpm"] .spm-edpm-panel .spm-table-compact td:nth-child(2) {
+    line-height: 1.45;
+}
+
 /* EDPM navigation */
 [data-module-page="pesantren-edpm"] .spm-edpm-nav {
-    padding: 12px 0;
-    border-top: 1px solid var(--spm-pesantren-border);
+    margin-top: 16px !important;
+    padding: 12px 16px !important;
+    background: #ffffff;
+    border: 1px solid var(--spm-pesantren-border);
+    border-radius: 10px;
 }
 
 /* EDPM tab nav fix */
@@ -173,7 +262,22 @@
 }
 
 @media (max-width: 991.98px) {
+    [data-module-page="pesantren-edpm"] .spm-edpm-workspace {
+        grid-template-columns: 1fr;
+    }
+
+    [data-module-page="pesantren-edpm"] .spm-edpm-stepper {
+        position: static;
+    }
+
+    [data-module-page="pesantren-edpm"] .spm-edpm-stepper > .d-flex {
+        flex-direction: row !important;
+        overflow-x: auto;
+        padding-bottom: 2px;
+    }
+
     [data-module-page="pesantren-edpm"] .spm-edpm-step-btn {
+        min-width: 220px;
         min-height: 48px;
     }
 }
@@ -225,6 +329,22 @@
 
     [data-module-page^="pesantren-"] .row.g-5.mb-6 > [class*="col-"] {
         margin-bottom: 0;
+    }
+
+    [data-module-page="pesantren-edpm"] .spm-edpm-progress,
+    [data-module-page="pesantren-edpm"] .spm-edpm-nav {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 10px;
+    }
+
+    [data-module-page="pesantren-edpm"] .spm-edpm-progress .progress {
+        width: 100% !important;
+    }
+
+    [data-module-page="pesantren-edpm"] .spm-edpm-nav > div,
+    [data-module-page="pesantren-edpm"] .spm-edpm-nav [data-ui-button="metronic"] {
+        width: 100%;
     }
 }
 

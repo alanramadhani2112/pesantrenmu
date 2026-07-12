@@ -30,7 +30,7 @@
             </x-ui.button>
         </x-slot:toolbar>
 
-        <div class="row g-5 mb-8">
+        <div class="row g-5 mb-6 spm-edpm-stats">
             <div class="col-lg-4">
                 <x-ui.stat-card label="Status EDPM" value="{{ $isLocked ? 'Terkunci' : 'Aktif' }}" variant="{{ $isLocked ? 'warning' : 'success' }}" icon="shield-tick" />
             </div>
@@ -67,21 +67,31 @@
 
         @if($komponens->isNotEmpty())
             {{-- Group Toggle Tabs --}}
-            <x-ui.tabs class="mb-6">
-                <a href="#" class="nav-link" :class="activeGroup === 'edpm' ? 'active' : ''" x-on:click.prevent="setGroup('edpm')">
-                    Komponen EDPM
-                    <span class="badge badge-light-primary ms-2">{{ $edpmCount }}</span>
-                </a>
-                @if($iprCount > 0)
-                    <a href="#" class="nav-link" :class="activeGroup === 'ipr' ? 'active' : ''" x-on:click.prevent="setGroup('ipr')">
-                        Komponen IPR
-                        <span class="badge badge-light-success ms-2">{{ $iprCount }}</span>
+            <x-ui.tabs class="mb-5 spm-edpm-tabs">
+                <li class="nav-item">
+                    <a href="#" data-ui-tab="metronic" role="tab" class="nav-link text-active-primary spm-tab-link"
+                        :class="activeGroup === 'edpm' ? 'active' : ''"
+                        :aria-selected="activeGroup === 'edpm' ? 'true' : 'false'"
+                        x-on:click.prevent="setGroup('edpm')">
+                        Komponen EDPM
+                        <span class="badge badge-light-primary ms-2">{{ $edpmCount }}</span>
                     </a>
+                </li>
+                @if($iprCount > 0)
+                    <li class="nav-item">
+                        <a href="#" data-ui-tab="metronic" role="tab" class="nav-link text-active-primary spm-tab-link"
+                            :class="activeGroup === 'ipr' ? 'active' : ''"
+                            :aria-selected="activeGroup === 'ipr' ? 'true' : 'false'"
+                            x-on:click.prevent="setGroup('ipr')">
+                            Komponen IPR
+                            <span class="badge badge-light-success ms-2">{{ $iprCount }}</span>
+                        </a>
+                    </li>
                 @endif
             </x-ui.tabs>
 
             {{-- Component Progress Hint --}}
-            <div class="d-flex align-items-center justify-content-between px-1 mb-4">
+            <div class="spm-edpm-progress d-flex align-items-center justify-content-between px-1 mb-4">
                 <span class="text-muted fw-semibold fs-8">
                     Komponen <span x-text="activeStep + 1" class="text-primary"></span> / <span x-text="componentCount()"></span>
                     <span class="text-gray-400 mx-1">·</span>
@@ -95,9 +105,9 @@
             </div>
 
             {{-- Stepper + Content --}}
-            <div class="spm-section-stack row g-6">
+            <div class="spm-edpm-workspace">
                 {{-- Stepper Sidebar --}}
-                <div class="col-lg-3">
+                <aside class="spm-edpm-stepper">
                     <div class="d-flex flex-column gap-2">
                         {{-- EDPM Steps --}}
                         <template x-if="activeGroup === 'edpm'">
@@ -130,10 +140,10 @@
                             </template>
                         </template>
                     </div>
-                </div>
+                </aside>
 
                 {{-- Content Area --}}
-                <div class="col-lg-9">
+                <div class="spm-edpm-panel">
                     <form action="{{ route('pesantren.edpm.save') }}" method="POST" id="edpmSaveForm">
                         @csrf
                         {{-- EDPM Content --}}

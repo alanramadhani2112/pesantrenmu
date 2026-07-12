@@ -1193,6 +1193,7 @@ class MetronicFrontendTest extends TestCase
                 'Komponen IPR',
                 'MUTU LULUSAN',
                 'B. INDIKATOR PEMENUHAN RELATIF',
+                'spm-edpm-workspace',
                 'spm-edpm-step-btn',
                 'spm-edpm-nav',
             ],
