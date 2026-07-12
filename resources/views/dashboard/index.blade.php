@@ -371,6 +371,7 @@
             </div>
         @endif
 
+        @unless($isPesantren)
         <div class="row g-6 mt-0">
             @foreach($statCards as $card)
                 <div class="col-6 col-lg-4">
@@ -456,6 +457,8 @@
             </div>
         </div>
 
+        @endunless
+
         {{-- Recent Activity --}}
         <div class="row g-6 mt-0">
             <div class="col-12">
@@ -464,6 +467,43 @@
                     subtitle="{{ $isAdmin ? 'Pengajuan akreditasi terbaru dari seluruh pesantren.' : ($isPesantren ? 'Riwayat pengajuan akreditasi pesantren Anda.' : 'Tugas penilaian terbaru yang ditugaskan kepada Anda.') }}"
                 >
                     @if($recentActivities->count() > 0)
+                        @if($isPesantren)
+                        <x-ui.simple-table>
+                            <thead>
+                                <tr class="text-uppercase fs-8 fw-semibold text-muted">
+                                    <th class="min-w-100px ps-4">Periode</th>
+                                    <th class="min-w-120px">Tahapan</th>
+                                    <th class="min-w-120px">Status</th>
+                                    <th class="min-w-150px d-none d-sm-table-cell">Update Terakhir</th>
+                                    <th class="text-end pe-4"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($recentActivities as $activity)
+                                    <tr>
+                                        <td class="ps-4 fw-semibold text-gray-900">{{ $activity['periode'] ?? '-' }}</td>
+                                        <td>{{ ucfirst($activity['tahapan'] ?? '-') }}</td>
+                                        <td>
+                                            <x-ui.status-badge :variant="$statusVariantMap[$activity['status']] ?? 'secondary'">
+                                                {{ $activity['status_label'] }}
+                                            </x-ui.status-badge>
+                                        </td>
+                                        <td class="d-none d-sm-table-cell">
+                                            <span class="text-muted fw-semibold fs-7">
+                                                {{ $activity['updated_at']->translatedFormat('d M Y, H:i') }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <x-ui.button :href="$recentRouteFor($activity['uuid'])" variant="light" size="sm" class="btn-icon btn-sm-auto">
+                                                <x-ui.icon name="eye" class="fs-5" />
+                                                <span class="d-none d-sm-inline ms-1">Detail</span>
+                                            </x-ui.button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </x-ui.simple-table>
+                    @else
                         <x-ui.simple-table>
                             <thead>
                                 <tr class="text-uppercase fs-8 fw-semibold text-muted">
@@ -519,6 +559,7 @@
                                 @endforeach
                             </tbody>
                         </x-ui.simple-table>
+                    @endif
                     @else
                         <x-ui.empty-state
                             title="Belum ada aktivitas"
@@ -537,8 +578,8 @@
                                 </x-slot>
                             @elseif($isPesantren)
                                 <x-slot name="action">
-                                    <x-ui.button :href="route('pesantren.akreditasi')" variant="primary" size="sm">
-                                        Buat Pengajuan
+                                    <x-ui.button :href="$pesantrenNextAction['route']" variant="primary" size="sm">
+                                        {{ $pesantrenNextAction['label'] }}
                                     </x-ui.button>
                                 </x-slot>
                             @endif
