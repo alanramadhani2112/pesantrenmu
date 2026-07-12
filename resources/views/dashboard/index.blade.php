@@ -107,6 +107,16 @@
         if ($isAsesor) return route('asesor.akreditasi-detail', $uuid);
         return '#';
     };
+
+    $pesantrenNextAction = null;
+    if ($isPesantren) {
+        $nextReadiness = collect($readiness)->firstWhere('done', false);
+        $pesantrenNextAction = $nextReadiness
+            ? ['label' => $nextReadiness['label'], 'route' => route($nextReadiness['route']), 'copy' => 'Lengkapi bagian ini dulu']
+            : ['label' => 'Ajukan Akreditasi', 'route' => route('pesantren.akreditasi'), 'copy' => 'Semua data utama siap'];
+
+        $readinessMap = collect($readiness)->mapWithKeys(fn ($s) => [route($s['route']), $s['done']])->toArray();
+    }
 @endphp
 
 <div data-dashboard-page="metronic" x-data='dashboardCharts(@json($chartData), @json($stats))'>
@@ -124,14 +134,25 @@
         {{-- Greeting Hero --}}
         <div class="spm-dashboard-hero rounded p-5 p-md-6 mb-6">
             <div class="spm-hero-pattern"></div>
-            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4 position-relative">
+            <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-4 position-relative">
                 <div class="d-flex flex-column flex-grow-1">
                     <div class="text-white opacity-75 fw-semibold fs-8 fs-md-7 text-uppercase mb-1">{{ $today }}</div>
                     <h2 class="text-white fw-semibold fs-3 fs-md-2 mb-2">{{ $greeting }}, {{ $firstName }}.</h2>
                     <div class="text-white opacity-75 fw-semibold fs-7 fs-md-6">{{ $contextualMessage }}</div>
                 </div>
 
-                @if($primaryAction)
+                @if($isPesantren && $pesantrenNextAction)
+                    <div class="spm-dashboard-next-action">
+                        <span class="spm-dashboard-next-action-label">Langkah berikut</span>
+                        <span class="spm-dashboard-next-action-title">{{ $pesantrenNextAction['label'] }}</span>
+                        <div class="d-flex align-items-center justify-content-between gap-3 mt-3">
+                            <span class="text-white opacity-75 fs-8 fw-semibold">{{ $pesantrenNextAction['copy'] }}</span>
+                            <x-ui.button :href="$pesantrenNextAction['route']" variant="light" size="sm">
+                                Buka
+                            </x-ui.button>
+                        </div>
+                    </div>
+                @elseif($primaryAction)
                     <div class="flex-shrink-0">
                         <x-ui.button :href="$primaryAction['route']" variant="light" size="sm" class="btn-md-md w-100 w-md-auto">
                             <x-ui.icon name="arrow-right" class="fs-4 me-1" />
@@ -156,6 +177,12 @@
                                     </div>
                                 </div>
                                 <span class="fw-semibold fs-8 fs-md-7 text-gray-800">{{ $action['label'] }}</span>
+                                @if($isPesantren && isset($readinessMap[$action['route']]))
+                                    <span class="d-flex align-items-center gap-1 mt-1 fs-8 fw-semibold {{ $readinessMap[$action['route']] ? 'text-success' : 'text-muted' }}">
+                                        <x-ui.icon :name="$readinessMap[$action['route']] ? 'check-circle' : 'information-5'" class="fs-8" />
+                                        {{ $readinessMap[$action['route']] ? 'Selesai' : 'Belum' }}
+                                    </span>
+                                @endif
                             </div>
                         </a>
                     </div>

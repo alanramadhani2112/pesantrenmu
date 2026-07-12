@@ -18,6 +18,7 @@
 <x-ui.page
     title="Detail Akreditasi"
     subtitle="Pantau detail pengajuan akreditasi pesantren Anda."
+    data-module-page="pesantren-akreditasi-detail"
 >
     <x-slot:toolbar>
         <x-ui.button :href="route('pesantren.akreditasi')" variant="light">

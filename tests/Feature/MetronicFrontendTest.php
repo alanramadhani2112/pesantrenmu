@@ -1188,6 +1188,13 @@ class MetronicFrontendTest extends TestCase
                 'data-ui-simple-table="metronic"',
                 'data-ui-select="metronic"',
                 'data-ui-input="metronic"',
+                'Status EDPM',
+                'Komponen EDPM',
+                'Komponen IPR',
+                'MUTU LULUSAN',
+                'B. INDIKATOR PEMENUHAN RELATIF',
+                'spm-edpm-step-btn',
+                'spm-edpm-nav',
             ],
         ];
 

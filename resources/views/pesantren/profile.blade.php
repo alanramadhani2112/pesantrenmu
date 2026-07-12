@@ -94,6 +94,8 @@
         </div>
     </div>
 
+    <x-ui.progress :value="$totalFields > 0 ? round(($filledCount / $totalFields) * 100) : 0" :variant="$filledCount >= $totalFields ? 'success' : 'info'" :label="'Kelengkapan Dokumen'" :meta="$filledCount . '/' . $totalFields" class="mb-6" />
+
     @if($isLocked)
         <x-ui.alert variant="warning" icon="shield-tick" title="Data Terkunci — Akreditasi Berlangsung" class="mb-6">
             Profil pesantren tidak dapat diubah karena sedang dalam proses akreditasi. Hubungi admin untuk informasi lebih lanjut.

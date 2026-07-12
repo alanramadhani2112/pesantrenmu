@@ -1,0 +1,238 @@
+/* ============================================================
+   Pesantren Role UI Polish
+   ============================================================ */
+
+[data-dashboard-page="metronic"],
+[data-module-page="pesantren-profile"],
+[data-module-page="pesantren-ipm"],
+[data-module-page="pesantren-sdm"],
+[data-module-page="pesantren-edpm"],
+[data-module-page="pesantren-akreditasi"],
+[data-module-page="pesantren-akreditasi-detail"],
+[data-module-page="dokumen"] {
+    --spm-pesantren-surface: #f8fafc;
+    --spm-pesantren-border: #e4e9f2;
+    --spm-pesantren-muted: #667085;
+}
+
+[data-dashboard-page="metronic"] .spm-dashboard-hero {
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 18px 44px rgba(0, 85, 51, 0.18);
+}
+
+.spm-dashboard-next-action {
+    min-width: min(100%, 280px);
+    padding: 14px 16px;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.13);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 10px;
+    backdrop-filter: blur(8px);
+}
+
+.spm-dashboard-next-action-label {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.spm-dashboard-next-action-title {
+    display: block;
+    margin-top: 4px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.spm-quick-action {
+    border-color: var(--spm-pesantren-border) !important;
+}
+
+.spm-quick-action .card-body {
+    min-height: 132px;
+}
+
+.spm-readiness-item {
+    min-height: 68px;
+}
+
+.spm-readiness-item .badge,
+.spm-readiness-item [data-ui-badge="metronic"] {
+    min-width: 74px;
+}
+
+.spm-readiness-item:not(.spm-readiness-item-pending) {
+    background: linear-gradient(90deg, rgba(18, 183, 106, 0.035), transparent);
+}
+
+.spm-readiness-item-pending {
+    background: linear-gradient(90deg, rgba(247, 144, 9, 0.045), transparent);
+}
+
+[data-module-page^="pesantren-"] .spm-stat-card,
+[data-dashboard-page="metronic"] .spm-dashboard-stat,
+[data-module-page="dokumen"] [data-ui-table="metronic"] {
+    border-color: var(--spm-pesantren-border) !important;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+[data-module-page^="pesantren-"] .spm-section-card,
+[data-module-page^="pesantren-"] [data-ui-section-card="metronic"] {
+    overflow: hidden;
+    border-color: var(--spm-pesantren-border) !important;
+}
+
+[data-module-page^="pesantren-"] .spm-section-card > .card-header,
+[data-module-page^="pesantren-"] [data-ui-section-card="metronic"] > .card-header {
+    background:
+        linear-gradient(90deg, rgba(var(--spm-primary-rgb), 0.035), transparent 72%),
+        #ffffff;
+}
+
+[data-module-page="pesantren-profile"] .spm-section-card,
+[data-module-page="pesantren-ipm"] .spm-section-card,
+[data-module-page="pesantren-sdm"] .spm-section-card,
+[data-module-page="pesantren-edpm"] .spm-section-card {
+    scroll-margin-top: calc(var(--bs-app-header-height, 72px) + 16px);
+}
+
+[data-module-page="pesantren-ipm"] .spm-card-lift {
+    border-left: 3px solid rgba(var(--spm-primary-rgb), 0.18);
+}
+
+[data-module-page="pesantren-ipm"] .spm-card-lift:has(.badge-light-success) {
+    border-left-color: var(--spm-success, #12b76a);
+}
+
+[data-module-page="pesantren-sdm"] [data-ui-simple-table="metronic"],
+[data-module-page="pesantren-edpm"] [data-ui-simple-table="metronic"],
+[data-module-page="pesantren-akreditasi-detail"] [data-ui-simple-table="metronic"] {
+    background: #ffffff;
+}
+
+[data-module-page="pesantren-sdm"] [data-ui-simple-table="metronic"] .form-control,
+[data-module-page="pesantren-edpm"] [data-ui-simple-table="metronic"] .form-control,
+[data-module-page="pesantren-edpm"] [data-ui-simple-table="metronic"] .form-select {
+    min-height: 38px;
+}
+
+[data-module-page="pesantren-edpm"] .btn.w-100.text-start {
+    min-height: 54px;
+    border: 1px solid var(--spm-pesantren-border);
+}
+
+[data-module-page="pesantren-edpm"] .btn.w-100.text-start.btn-primary {
+    border-color: var(--spm-primary);
+    box-shadow: 0 8px 18px rgba(var(--spm-primary-rgb), 0.16);
+}
+
+/* EDPM Stepper sidebar */
+[data-module-page="pesantren-edpm"] .spm-edpm-step-btn {
+    border: 1px solid transparent;
+    border-radius: var(--spm-radius, 8px);
+    padding: 10px 12px;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+[data-module-page="pesantren-edpm"] .spm-edpm-step-btn:hover:not(:disabled) {
+    border-color: var(--spm-pesantren-border);
+}
+
+[data-module-page="pesantren-edpm"] .spm-edpm-step-btn.btn-primary {
+    border-color: var(--spm-primary);
+    box-shadow: 0 4px 12px rgba(var(--spm-primary-rgb), 0.12);
+}
+
+[data-module-page="pesantren-edpm"] .badge-circle {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+/* EDPM navigation */
+[data-module-page="pesantren-edpm"] .spm-edpm-nav {
+    padding: 12px 0;
+    border-top: 1px solid var(--spm-pesantren-border);
+}
+
+/* EDPM tab nav fix */
+[data-module-page="pesantren-edpm"] [data-ui-tabs="metronic"] .nav-link {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* EDPM section card subtitle */
+[data-module-page="pesantren-edpm"] .spm-section-card .card-title .badge {
+    font-size: 11px;
+}
+
+@media (max-width: 991.98px) {
+    [data-module-page="pesantren-edpm"] .spm-edpm-step-btn {
+        min-height: 48px;
+    }
+}
+
+[data-module-page="pesantren-akreditasi"] [data-ui-tabs="metronic"],
+[data-module-page="pesantren-akreditasi-detail"] [data-ui-tabs="metronic"] {
+    margin-bottom: 18px;
+}
+
+[data-module-page="pesantren-akreditasi"] [data-ui-table="metronic"] {
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-tab-content {
+    padding-top: 2px;
+}
+
+[data-module-page="dokumen"] .spm-table-shell--document-library {
+    border-top: 3px solid rgba(var(--spm-primary-rgb), 0.22);
+}
+
+[data-module-page="dokumen"] .spm-document-title-cell .symbol-label {
+    background: var(--spm-primary-light, #e6f5ee) !important;
+    color: var(--spm-primary) !important;
+}
+
+.panduan-content > .card.card-flush:first-child {
+    border-top: 3px solid rgba(var(--spm-primary-rgb), 0.24) !important;
+}
+
+.panduan-section-body ol.list-unstyled > li {
+    transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+.panduan-section-body ol.list-unstyled > li:hover {
+    transform: translateY(-1px);
+    border-color: rgba(var(--spm-primary-rgb), 0.18);
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.045);
+}
+
+@media (max-width: 767.98px) {
+    .spm-dashboard-next-action {
+        width: 100%;
+    }
+
+    .spm-quick-action .card-body {
+        min-height: 112px;
+    }
+
+    [data-module-page^="pesantren-"] .row.g-5.mb-6 > [class*="col-"] {
+        margin-bottom: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .spm-dashboard-hero,
+    .spm-quick-action,
+    .spm-readiness-item,
+    .panduan-section-body ol.list-unstyled > li {
+        transition: none !important;
+    }
+}

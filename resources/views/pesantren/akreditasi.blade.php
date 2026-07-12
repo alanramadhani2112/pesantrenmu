@@ -73,11 +73,19 @@
                         <strong>Data yang perlu dilengkapi:</strong>
                         <ul class="mb-0 ps-3 mt-1">
                             @foreach($completeness['incomplete_items'] as $item)
-                                <li>{{ $item }}</li>
+                                <li class="d-flex align-items-start gap-1">
+                                    <x-ui.icon name="information-5" class="fs-8 text-warning mt-1 flex-shrink-0" />
+                                    <span>{{ $item }}</span>
+                                </li>
                             @endforeach
                         </ul>
                     </div>
                 @endif
+                <div class="mt-3">
+                    <a href="{{ route('pesantren.profile') }}" class="btn btn-sm btn-warning fw-semibold">
+                        <x-ui.icon name="pencil" class="fs-4 me-1" /> Lengkapi Data Sekarang
+                    </a>
+                </div>
             </div>
         </x-ui.alert>
     @endif

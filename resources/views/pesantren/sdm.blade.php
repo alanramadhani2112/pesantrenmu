@@ -156,6 +156,22 @@
             @endforeach
             </div>
 
+            {{-- Grand Total Summary --}}
+            <div class="card border border-primary border-dashed bg-light-primary spm-sdm-grand-total mb-0">
+                <div class="card-body py-4 px-6">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <x-ui.icon name="people" class="fs-2x text-primary" />
+                            <div>
+                                <span class="fw-bold text-gray-900 fs-6">Total Seluruh SDM</span>
+                                <span class="text-muted fw-semibold fs-8 d-block">Semua kategori dan unit layanan</span>
+                            </div>
+                        </div>
+                        <span class="badge badge-light-primary fs-4 fw-bold px-4 py-2">{{ $grandTotal }} Data</span>
+                    </div>
+                </div>
+            </div>
+
             @if(!$isLocked)
                 <div class="d-flex justify-content-end mt-6">
                     <x-ui.button type="submit" variant="primary" id="btnSaveSdm">

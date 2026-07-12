@@ -5,8 +5,8 @@
 @section('content')
 @php
     $isLocked = $pesantren->is_locked ?? false;
-    $edpmKomponens = $komponens->where('jenis', 'edpm');
-    $iprKomponens = $komponens->where('jenis', 'ipr');
+    $edpmKomponens = $komponens->filter(fn ($komponen) => is_null($komponen->ipr))->values();
+    $iprKomponens = $komponens->filter(fn ($komponen) => ! is_null($komponen->ipr))->values();
     $edpmCount = $edpmKomponens->count();
     $iprCount = $iprKomponens->count();
 @endphp
@@ -29,6 +29,18 @@
                 Kembali
             </x-ui.button>
         </x-slot:toolbar>
+
+        <div class="row g-5 mb-8">
+            <div class="col-lg-4">
+                <x-ui.stat-card label="Status EDPM" value="{{ $isLocked ? 'Terkunci' : 'Aktif' }}" variant="{{ $isLocked ? 'warning' : 'success' }}" icon="shield-tick" />
+            </div>
+            <div class="col-lg-4">
+                <x-ui.stat-card label="Komponen EDPM" value="{{ $edpmCount }}" variant="info" icon="document" />
+            </div>
+            <div class="col-lg-4">
+                <x-ui.stat-card label="Komponen IPR" value="{{ $iprCount }}" variant="primary" icon="data" />
+            </div>
+        </div>
 
         @if($isLocked)
             <x-ui.alert variant="warning" icon="shield-tick" title="Data Terkunci" class="mb-4">
@@ -56,17 +68,31 @@
         @if($komponens->isNotEmpty())
             {{-- Group Toggle Tabs --}}
             <x-ui.tabs class="mb-6">
-                <x-ui.tab :active="true" x-on:click="setGroup('edpm')">
+                <a href="#" class="nav-link" :class="activeGroup === 'edpm' ? 'active' : ''" x-on:click.prevent="setGroup('edpm')">
                     Komponen EDPM
                     <span class="badge badge-light-primary ms-2">{{ $edpmCount }}</span>
-                </x-ui.tab>
+                </a>
                 @if($iprCount > 0)
-                    <x-ui.tab x-on:click="setGroup('ipr')">
+                    <a href="#" class="nav-link" :class="activeGroup === 'ipr' ? 'active' : ''" x-on:click.prevent="setGroup('ipr')">
                         Komponen IPR
                         <span class="badge badge-light-success ms-2">{{ $iprCount }}</span>
-                    </x-ui.tab>
+                    </a>
                 @endif
             </x-ui.tabs>
+
+            {{-- Component Progress Hint --}}
+            <div class="d-flex align-items-center justify-content-between px-1 mb-4">
+                <span class="text-muted fw-semibold fs-8">
+                    Komponen <span x-text="activeStep + 1" class="text-primary"></span> / <span x-text="componentCount()"></span>
+                    <span class="text-gray-400 mx-1">·</span>
+                    <span x-text="activeGroup === 'edpm' ? 'EDPM' : 'IPR'" class="text-gray-500"></span>
+                </span>
+                <div class="progress" style="height: 4px; width: 120px;">
+                    <div class="progress-bar bg-primary" role="progressbar"
+                         :style="'width: ' + (((activeStep + 1) / componentCount()) * 100) + '%'">
+                    </div>
+                </div>
+            </div>
 
             {{-- Stepper + Content --}}
             <div class="spm-section-stack row g-6">
@@ -76,12 +102,12 @@
                         {{-- EDPM Steps --}}
                         <template x-if="activeGroup === 'edpm'">
                             <template x-for="(komponen, index) in edpmKomponens" :key="index">
-                                <button type="button" class="btn w-100 text-start"
+                                <button type="button" class="btn w-100 text-start spm-edpm-step-btn"
                                     :class="stepButtonClass(index)"
                                     @click="setStep(index)"
                                     :disabled="{{ $isLocked ? 'true' : 'false' }}">
-                                    <span class="badge me-3" :class="stepBadgeClass(index)" x-text="index + 1"></span>
-                                    <span class="d-flex flex-column min-w-0">
+                                    <span class="badge badge-circle me-3 flex-shrink-0" :class="stepBadgeClass(index)" x-text="index + 1"></span>
+                                    <span class="d-flex flex-column min-w-0 text-start">
                                         <span class="fw-semibold text-truncate fs-7" x-text="komponen.nama"></span>
                                         <span class="fs-8 opacity-75" x-text="komponen.butirs.length + ' butir'"></span>
                                     </span>
@@ -91,12 +117,12 @@
                         {{-- IPR Steps --}}
                         <template x-if="activeGroup === 'ipr'">
                             <template x-for="(komponen, index) in iprKomponens" :key="index">
-                                <button type="button" class="btn w-100 text-start"
+                                <button type="button" class="btn w-100 text-start spm-edpm-step-btn"
                                     :class="stepButtonClass(index)"
                                     @click="setStep(index)"
                                     :disabled="{{ $isLocked ? 'true' : 'false' }}">
-                                    <span class="badge me-3" :class="stepBadgeClass(index)" x-text="index + 1"></span>
-                                    <span class="d-flex flex-column min-w-0">
+                                    <span class="badge badge-circle me-3 flex-shrink-0" :class="stepBadgeClass(index)" x-text="index + 1"></span>
+                                    <span class="d-flex flex-column min-w-0 text-start">
                                         <span class="fw-semibold text-truncate fs-7" x-text="komponen.nama"></span>
                                         <span class="fs-8 opacity-75" x-text="komponen.butirs.length + ' butir'"></span>
                                     </span>
@@ -114,7 +140,21 @@
                         <template x-if="activeGroup === 'edpm'">
                             <template x-for="(komponen, kIndex) in edpmKomponens" :key="'edpm-' + kIndex">
                                 <div x-show="activeStep === kIndex">
-                                    <x-ui.section-card :title="'Komponen ' . $edpmKomponens->first()?->nama">
+                                    <div class="card spm-section-card" data-ui-section-card="metronic">
+                                        <div class="card-header border-0 py-4">
+                                            <div class="card-title d-flex align-items-center gap-3 m-0">
+                                                <span class="spm-section-card-accent"></span>
+                                                <div>
+                                                    <h3 class="spm-card-title text-gray-900 mb-1">
+                                                        <span class="d-inline-flex align-items-center gap-2">
+                                                            <span class="badge badge-light-primary rounded-circle" x-text="kIndex + 1"></span>
+                                                            <span x-text="komponen ? komponen.nama : 'Komponen'"></span>
+                                                        </span>
+                                                    </h3>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-0">
                                         <template x-if="komponen">
                                             <div class="p-6">
                                                 <x-ui.simple-table table-class="spm-table-compact table-bordered">
@@ -130,7 +170,7 @@
                                                             <template x-for="(butir, bIndex) in komponen.butirs" :key="bIndex">
                                                                 <tr>
                                                                     <td class="text-center" x-text="butir.nomor_butir"></td>
-                                                                    <td x-text="butir.indikator"></td>
+                                                                    <td x-text="butir.butir_pernyataan"></td>
                                                                     <td>
                                                                         <select data-ui-select="metronic" class="form-select form-select-sm"
                                                                             :name="'evaluasis[' + butir.id + ']'"
@@ -162,7 +202,8 @@
                                                 </div>
                                             </div>
                                         </template>
-                                    </x-ui.section-card>
+                                        </div>
+                                    </div>
                                 </div>
                             </template>
                         </template>
@@ -171,7 +212,21 @@
                         <template x-if="activeGroup === 'ipr'">
                             <template x-for="(komponen, kIndex) in iprKomponens" :key="'ipr-' + kIndex">
                                 <div x-show="activeStep === kIndex">
-                                    <x-ui.section-card title="Komponen IPR">
+                                    <div class="card spm-section-card" data-ui-section-card="metronic">
+                                        <div class="card-header border-0 py-4">
+                                            <div class="card-title d-flex align-items-center gap-3 m-0">
+                                                <span class="spm-section-card-accent"></span>
+                                                <div>
+                                                    <h3 class="spm-card-title text-gray-900 mb-1">
+                                                        <span class="d-inline-flex align-items-center gap-2">
+                                                            <span class="badge badge-light-success rounded-circle" x-text="kIndex + 1"></span>
+                                                            <span x-text="komponen ? komponen.nama : 'Komponen IPR'"></span>
+                                                        </span>
+                                                    </h3>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-0">
                                         <template x-if="komponen">
                                             <div class="p-6">
                                                 <x-ui.simple-table table-class="spm-table-compact table-bordered">
@@ -187,7 +242,7 @@
                                                             <template x-for="(butir, bIndex) in komponen.butirs" :key="bIndex">
                                                                 <tr>
                                                                     <td class="text-center" x-text="butir.nomor_butir"></td>
-                                                                    <td x-text="butir.indikator"></td>
+                                                                    <td x-text="butir.butir_pernyataan"></td>
                                                                     <td>
                                                                         <select data-ui-select="metronic" class="form-select form-select-sm"
                                                                             :name="'evaluasis[' + butir.id + ']'"
@@ -219,13 +274,15 @@
                                                 </div>
                                             </div>
                                         </template>
-                                    </x-ui.section-card>
+                                        </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </template>
                         </template>
 
                         {{-- Navigation --}}
-                        <div class="d-flex justify-content-between mt-6">
+                        <div class="spm-edpm-nav d-flex align-items-center justify-content-between mt-6">
                             <div>
                                 <x-ui.button type="button" variant="light" x-show="activeStep > 0"
                                     @click="prevStep()">
@@ -235,7 +292,7 @@
                             <div class="d-flex gap-3">
                                 @if(!$isLocked)
                                     <x-ui.button type="button" variant="light" id="btnSaveDraft">
-                                        <i class="ki-solid ki-save-2 fs-4 me-1"></i> Simpan Draft
+                                        <i class="ki-solid ki-save-2 fs-4 me-1"></i> Draft
                                     </x-ui.button>
                                     <x-ui.button type="submit" variant="primary" id="btnSaveEdpm">
                                         <i class="ki-solid ki-check fs-4 me-1"></i> Simpan
@@ -304,7 +361,7 @@ document.addEventListener('alpine:init', () => {
 
         stepButtonClass(index) {
             if (index === this.activeStep) return 'btn-primary';
-            return 'btn-light';
+            return 'btn-light btn-light-hover';
         },
 
         stepBadgeClass(index) {

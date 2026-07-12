@@ -17,6 +17,27 @@ $sections = [
 
 <x-panduan::layout title="Panduan Pesantren" :sections="$sections" currentSection="dashboard">
 
+{{-- Intro --}}
+<div class="card card-flush border border-primary border-dashed mb-6">
+    <div class="card-body py-5 px-6">
+        <div class="d-flex align-items-start gap-4">
+            <div class="symbol symbol-50px flex-shrink-0">
+                <div class="symbol-label bg-light-primary text-primary">
+                    <x-ui.icon name="information-5" class="fs-2x" />
+                </div>
+            </div>
+            <div>
+                <h5 class="fw-bold text-gray-900 mb-1">Panduan Pengajuan Akreditasi Pesantren</h5>
+                <p class="text-muted fs-7 mb-0">
+                    Panduan ini membantu Anda menyiapkan data, mengajukan akreditasi, dan memantau prosesnya.
+                    Ikuti langkah berikut secara berurutan untuk hasil terbaik.
+                    Mulai dari melengkapi profil, hingga mengajukan akreditasi dan memantau status.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{-- Screenshot tampilan penuh dashboard pesantren --}}
 <div class="card card-flush mb-8">
     <div class="card-header border-0 pt-6 pb-0 px-6">
