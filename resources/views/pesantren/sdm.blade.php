@@ -18,6 +18,7 @@
     title="Data SDM Pesantren"
     subtitle="Kelola rekap santri, ustadz, pamong, musyrif, dan tenaga kependidikan."
     data-module-page="pesantren-sdm"
+    class="spm-pesantren-form-page"
 >
     <x-slot:toolbar>
         <x-ui.status-badge :variant="$isLocked ? 'warning' : 'success'">
@@ -85,7 +86,7 @@
                         $catTotal += (int) ($data[$level][$catKey . '_p'] ?? 0);
                     }
                 @endphp
-                <x-ui.section-card :title="$category['label']" subtitle="Input rekap per unit layanan" class="mb-6">
+                <x-ui.section-card :title="$category['label']" subtitle="Input rekap per unit layanan" class="mb-6 spm-sdm-table-card">
                     <x-ui.simple-table class="spm-table-compact p-4" table-class="table-bordered">
                         <thead>
                             <tr class="bg-light">
@@ -111,9 +112,8 @@
                                                 name="data[{{ $level }}][{{ $catKey }}_l]"
                                                 value="{{ $val }}"
                                                 min="0"
-                                                class="form-control form-control-sm text-center @error('data.' . $level . '.' . $catKey . '_l') is-invalid @enderror"
+                                                class="form-control form-control-sm form-control-solid text-center spm-sdm-number-input @error('data.' . $level . '.' . $catKey . '_l') is-invalid @enderror"
                                                 @if($isLocked) disabled @endif
-                                                style="width: 90px; margin: 0 auto;"
                                             />
                                         </td>
                                     @endforeach
@@ -131,9 +131,8 @@
                                                 name="data[{{ $level }}][{{ $catKey }}_p]"
                                                 value="{{ $val }}"
                                                 min="0"
-                                                class="form-control form-control-sm text-center @error('data.' . $level . '.' . $catKey . '_p') is-invalid @enderror"
+                                                class="form-control form-control-sm form-control-solid text-center spm-sdm-number-input @error('data.' . $level . '.' . $catKey . '_p') is-invalid @enderror"
                                                 @if($isLocked) disabled @endif
-                                                style="width: 90px; margin: 0 auto;"
                                             />
                                         </td>
                                     @endforeach
@@ -157,7 +156,7 @@
             </div>
 
             @if(!$isLocked)
-                <div class="d-flex justify-content-end mt-6">
+                <div class="spm-pesantren-form-actions d-flex justify-content-end mt-6">
                     <x-ui.button type="submit" variant="primary" id="btnSaveSdm">
                         <x-ui.icon name="check-circle" class="fs-4 me-1" />
                         Simpan Data SDM

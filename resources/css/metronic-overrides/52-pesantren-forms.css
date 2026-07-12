@@ -1,0 +1,168 @@
+/*
+ * Pesantren form pages — additive Metronic polish.
+ * Scoped to Pesantren data-entry pages only.
+ */
+
+.spm-pesantren-form-page .spm-section-card {
+    border: 1px solid var(--bs-gray-200);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+.spm-pesantren-form-page .spm-section-card .card-header {
+    min-height: 68px;
+    background: linear-gradient(180deg, rgba(var(--spm-primary-rgb), 0.035), rgba(255, 255, 255, 0));
+}
+
+.spm-pesantren-form-page .spm-form-field {
+    margin-bottom: 0;
+}
+
+.spm-pesantren-form-page .form-control-solid,
+.spm-pesantren-form-page .form-select-solid,
+.spm-pesantren-form-page .form-control[data-ui-file-upload="metronic"] {
+    border: 1px solid var(--bs-gray-300);
+    background-color: var(--bs-gray-100);
+}
+
+.spm-pesantren-form-page .form-control-solid:hover,
+.spm-pesantren-form-page .form-select-solid:hover,
+.spm-pesantren-form-page .form-control[data-ui-file-upload="metronic"]:hover {
+    border-color: rgba(var(--spm-primary-rgb), 0.35);
+}
+
+.spm-pesantren-form-page textarea.form-control {
+    min-height: 108px;
+    resize: vertical;
+}
+
+.spm-pesantren-form-page .form-text,
+.spm-pesantren-form-page .text-muted.fs-8 {
+    color: var(--spm-text-muted) !important;
+    font-weight: 500;
+}
+
+.spm-profile-upload-card,
+.spm-ipm-criteria-card {
+    position: relative;
+    height: 100%;
+    padding: 1rem;
+    border: 1px dashed var(--bs-gray-300);
+    border-radius: 0.75rem;
+    background: var(--bs-gray-100);
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.spm-profile-upload-card:hover,
+.spm-ipm-criteria-card:hover {
+    border-color: rgba(var(--spm-primary-rgb), 0.45);
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+}
+
+.spm-profile-upload-card.is-complete,
+.spm-ipm-criteria-card.is-complete {
+    border-style: solid;
+    border-color: rgba(80, 205, 137, 0.45);
+    background: rgba(80, 205, 137, 0.06);
+}
+
+.spm-pesantren-file-control {
+    cursor: pointer;
+}
+
+.spm-pesantren-form-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border: 1px solid var(--bs-gray-200);
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.06);
+    backdrop-filter: blur(8px);
+}
+
+.spm-sdm-table-card .spm-table-shell {
+    border: 1px solid var(--bs-gray-200);
+    border-radius: 0.75rem;
+    overflow: auto;
+}
+
+.spm-sdm-table-card .table th {
+    white-space: nowrap;
+    color: var(--spm-text-heading);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.spm-sdm-table-card .table td {
+    vertical-align: middle;
+}
+
+.spm-sdm-number-input {
+    width: 92px;
+    min-width: 92px;
+    margin: 0 auto;
+    font-weight: 700;
+}
+
+.spm-edpm-stepper-card {
+    position: sticky;
+    top: 96px;
+    padding: 1rem;
+    border: 1px solid var(--bs-gray-200);
+    border-radius: 0.75rem;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+.spm-edpm-step-button {
+    min-height: 54px;
+    border: 1px solid transparent;
+}
+
+.spm-edpm-step-button.btn-primary {
+    box-shadow: 0 8px 18px rgba(var(--spm-primary-rgb), 0.16);
+}
+
+.spm-edpm-step-button.btn-light:hover {
+    border-color: rgba(var(--spm-primary-rgb), 0.25);
+    color: var(--spm-primary);
+}
+
+.spm-edpm-input-table .table-responsive {
+    border: 1px solid var(--bs-gray-200);
+    border-radius: 0.75rem;
+}
+
+.spm-edpm-input-table table th {
+    white-space: nowrap;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--spm-text-heading);
+}
+
+.spm-edpm-input-table table td:first-child {
+    font-weight: 700;
+    color: var(--spm-primary);
+}
+
+.spm-edpm-input-table .form-select,
+.spm-edpm-input-table .form-control {
+    min-width: 112px;
+}
+
+.spm-edpm-input-table input[type="url"] {
+    min-width: 190px;
+}
+
+@media (max-width: 991.98px) {
+    .spm-edpm-stepper-card {
+        position: static;
+    }
+
+    .spm-pesantren-form-actions {
+        position: static;
+    }
+}

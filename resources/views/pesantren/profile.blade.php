@@ -75,6 +75,7 @@
     title="Profil Pesantren"
     subtitle="Kelola data profil, unit layanan, dan dokumen pendukung pesantren."
     data-module-page="pesantren-profile"
+    class="spm-pesantren-form-page"
 >
     <x-slot:toolbar>
         <x-ui.status-badge :variant="$isLocked ? 'warning' : 'success'">
@@ -359,22 +360,24 @@
                         $hasFile = filled($existingPath);
                     @endphp
                     <div class="col-lg-6">
-                        <x-ui.form-field label="{{ $doc['label'] }}" for="{{ $inputName }}">
-                            @if($hasFile)
-                                <div class="d-flex align-items-center gap-2 mb-2">
-                                    <x-ui.icon name="check-circle" class="fs-5 text-success" />
-                                    <a href="{{ Storage::url($existingPath) }}" target="_blank"
-                                        class="fw-semibold text-success fs-7 text-hover-primary">Lihat Dokumen</a>
-                                </div>
-                            @endif
-                            @if(!$isLocked)
-                                <input type="file" name="{{ $inputName }}" id="{{ $inputName }}"
-                                    class="form-control form-control-solid @error($inputName) is-invalid @enderror"
-                                    accept=".pdf,.jpg,.jpeg,.png">
-                                <div class="text-muted fs-8 mt-1">PDF, JPG, PNG. Maks 2MB.</div>
-                                @error($inputName) <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            @endif
-                        </x-ui.form-field>
+                        <div class="spm-profile-upload-card {{ $hasFile ? 'is-complete' : '' }}">
+                            <x-ui.form-field label="{{ $doc['label'] }}" for="{{ $inputName }}">
+                                @if($hasFile)
+                                    <div class="d-flex align-items-center gap-2 mb-3">
+                                        <x-ui.icon name="check-circle" class="fs-5 text-success" />
+                                        <a href="{{ Storage::url($existingPath) }}" target="_blank"
+                                            class="fw-semibold text-success fs-7 text-hover-primary">Lihat Dokumen</a>
+                                    </div>
+                                @endif
+                                @if(!$isLocked)
+                                    <input type="file" name="{{ $inputName }}" id="{{ $inputName }}"
+                                        class="form-control form-control-solid spm-pesantren-file-control @error($inputName) is-invalid @enderror"
+                                        accept=".pdf,.jpg,.jpeg,.png">
+                                    <div class="text-muted fs-8 mt-2">PDF, JPG, PNG. Maks 2MB.</div>
+                                    @error($inputName) <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                @endif
+                            </x-ui.form-field>
+                        </div>
                     </div>
                 @endforeach
             </div>
@@ -394,22 +397,24 @@
                         $hasFile = filled($existingPath);
                     @endphp
                     <div class="col-lg-6">
-                        <x-ui.form-field label="{{ $doc['label'] }}" for="{{ $inputName }}">
-                            @if($hasFile)
-                                <div class="d-flex align-items-center gap-2 mb-2">
-                                    <x-ui.icon name="check-circle" class="fs-5 text-success" />
-                                    <a href="{{ Storage::url($existingPath) }}" target="_blank"
-                                        class="fw-semibold text-success fs-7 text-hover-primary">Lihat Dokumen</a>
-                                </div>
-                            @endif
-                            @if(!$isLocked)
-                                <input type="file" name="{{ $inputName }}" id="{{ $inputName }}"
-                                    class="form-control form-control-solid @error($inputName) is-invalid @enderror"
-                                    accept=".pdf,.jpg,.jpeg,.png">
-                                <div class="text-muted fs-8 mt-1">PDF, JPG, PNG. Maks 2MB.</div>
-                                @error($inputName) <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            @endif
-                        </x-ui.form-field>
+                        <div class="spm-profile-upload-card {{ $hasFile ? 'is-complete' : '' }}">
+                            <x-ui.form-field label="{{ $doc['label'] }}" for="{{ $inputName }}">
+                                @if($hasFile)
+                                    <div class="d-flex align-items-center gap-2 mb-3">
+                                        <x-ui.icon name="check-circle" class="fs-5 text-success" />
+                                        <a href="{{ Storage::url($existingPath) }}" target="_blank"
+                                            class="fw-semibold text-success fs-7 text-hover-primary">Lihat Dokumen</a>
+                                    </div>
+                                @endif
+                                @if(!$isLocked)
+                                    <input type="file" name="{{ $inputName }}" id="{{ $inputName }}"
+                                        class="form-control form-control-solid spm-pesantren-file-control @error($inputName) is-invalid @enderror"
+                                        accept=".pdf,.jpg,.jpeg,.png">
+                                    <div class="text-muted fs-8 mt-2">PDF, JPG, PNG. Maks 2MB.</div>
+                                    @error($inputName) <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                @endif
+                            </x-ui.form-field>
+                        </div>
                     </div>
                 @endforeach
             </div>
@@ -418,7 +423,7 @@
 
     {{-- SUBMIT BUTTONS --}}
     @if(!$isLocked)
-        <div class="d-flex align-items-center justify-content-end gap-3">
+        <div class="spm-pesantren-form-actions d-flex align-items-center justify-content-end gap-3">
             <button type="submit" name="draft" formaction="{{ route('pesantren.profile.save-draft') }}"
                 class="btn btn-light-primary fw-semibold">
                 <x-ui.icon name="document" class="fs-4 me-1" />

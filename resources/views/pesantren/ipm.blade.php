@@ -38,6 +38,7 @@
     title="Indikator Pemenuhan Mutlak (IPM)"
     subtitle="Unggah dokumen pendukung untuk empat kriteria pemenuhan mutlak."
     data-module-page="pesantren-ipm"
+    class="spm-pesantren-form-page"
 >
     <x-slot:toolbar>
         <x-ui.status-badge :variant="$isLocked ? 'warning' : 'success'">
@@ -99,7 +100,7 @@
                     $hasFile = filled($existingFiles[$item['field']] ?? null);
                     $cardVariant = $hasFile ? 'success' : 'light';
                 @endphp
-                <x-ui.section-card :title="$item['label']" :subtitle="$item['description']" class="spm-card-lift">
+                <x-ui.section-card :title="$item['label']" :subtitle="$item['description']" class="spm-card-lift spm-ipm-criteria-card {{ $hasFile ? 'is-complete' : '' }}">
                     <div class="p-6">
                         <div class="row align-items-center">
                             <div class="col-md-8">
@@ -122,7 +123,7 @@
                                         data-ui-file-upload="metronic"
                                         type="file"
                                         name="{{ $item['input'] }}"
-                                        class="form-control form-control-sm @error($item['input']) is-invalid @enderror"
+                                        class="form-control form-control-sm form-control-solid spm-pesantren-file-control @error($item['input']) is-invalid @enderror"
                                         accept="application/pdf,image/png,image/jpeg"
                                     />
                                     @error($item['input'])
@@ -150,7 +151,7 @@
         </div>
 
         @if(!$isLocked)
-            <div class="d-flex justify-content-end gap-3 mt-6">
+            <div class="spm-pesantren-form-actions d-flex justify-content-end gap-3 mt-6">
                 <x-ui.button type="submit" variant="primary" id="btnSaveIpm">
                     <x-ui.icon name="check-circle" class="fs-4 me-1" />
                     Simpan IPM

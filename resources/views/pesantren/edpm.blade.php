@@ -19,6 +19,7 @@
         title="Evaluasi Diri Pesantren/Madrasah (EDPM)"
         subtitle="Isi nilai evaluasi, tautan bukti, dan catatan untuk setiap komponen."
         data-module-page="pesantren-edpm"
+        class="spm-pesantren-form-page"
     >
         <x-slot:toolbar>
             <x-ui.status-badge :variant="$isLocked ? 'warning' : 'success'">
@@ -72,11 +73,11 @@
             <div class="spm-section-stack row g-6">
                 {{-- Stepper Sidebar --}}
                 <div class="col-lg-3">
-                    <div class="d-flex flex-column gap-2">
+                    <div class="spm-edpm-stepper-card d-flex flex-column gap-2">
                         {{-- EDPM Steps --}}
                         <template x-if="activeGroup === 'edpm'">
                             <template x-for="(komponen, index) in edpmKomponens" :key="index">
-                                <button type="button" class="btn w-100 text-start"
+                                <button type="button" class="btn w-100 text-start spm-edpm-step-button"
                                     :class="stepButtonClass(index)"
                                     @click="setStep(index)"
                                     :disabled="{{ $isLocked ? 'true' : 'false' }}">
@@ -91,7 +92,7 @@
                         {{-- IPR Steps --}}
                         <template x-if="activeGroup === 'ipr'">
                             <template x-for="(komponen, index) in iprKomponens" :key="index">
-                                <button type="button" class="btn w-100 text-start"
+                                <button type="button" class="btn w-100 text-start spm-edpm-step-button"
                                     :class="stepButtonClass(index)"
                                     @click="setStep(index)"
                                     :disabled="{{ $isLocked ? 'true' : 'false' }}">
@@ -114,7 +115,7 @@
                         <template x-if="activeGroup === 'edpm'">
                             <template x-for="(komponen, kIndex) in edpmKomponens" :key="'edpm-' + kIndex">
                                 <div x-show="activeStep === kIndex">
-                                    <x-ui.section-card :title="'Komponen ' . $edpmKomponens->first()?->nama">
+                                    <x-ui.section-card :title="'Komponen ' . $edpmKomponens->first()?->nama" class="spm-edpm-input-table">
                                         <template x-if="komponen">
                                             <div class="p-6">
                                                 <div class="table-responsive">
@@ -133,7 +134,7 @@
                                                                     <td class="text-center" x-text="butir.nomor_butir"></td>
                                                                     <td x-text="butir.indikator"></td>
                                                                     <td>
-                                                                        <select data-ui-select="metronic" class="form-select form-select-sm"
+                                                                        <select data-ui-select="metronic" class="form-select form-select-sm form-select-solid"
                                                                             :name="'evaluasis[' + butir.id + ']'"
                                                                             @if($isLocked) disabled @endif>
                                                                             <option value="">Pilih</option>
@@ -144,7 +145,7 @@
                                                                         </select>
                                                                     </td>
                                                                     <td>
-                                                                        <input data-ui-input="metronic" type="url" class="form-control form-control-sm"
+                                                                        <input data-ui-input="metronic" type="url" class="form-control form-control-sm form-control-solid"
                                                                             :name="'links[' + butir.id + ']'"
                                                                             placeholder="https://"
                                                                             @if($isLocked) disabled @endif />
@@ -156,7 +157,7 @@
                                                 </div>
                                                 <div class="mt-4">
                                                     <label class="form-label fw-semibold text-gray-700">Catatan</label>
-                                                    <textarea class="form-control"
+                                                    <textarea class="form-control form-control-solid"
                                                         :name="'catatans[' + komponen.id + ']'"
                                                         rows="3"
                                                         placeholder="Catatan untuk komponen ini..."
@@ -173,7 +174,7 @@
                         <template x-if="activeGroup === 'ipr'">
                             <template x-for="(komponen, kIndex) in iprKomponens" :key="'ipr-' + kIndex">
                                 <div x-show="activeStep === kIndex">
-                                    <x-ui.section-card title="Komponen IPR">
+                                    <x-ui.section-card title="Komponen IPR" class="spm-edpm-input-table">
                                         <template x-if="komponen">
                                             <div class="p-6">
                                                 <div class="table-responsive">
@@ -192,7 +193,7 @@
                                                                     <td class="text-center" x-text="butir.nomor_butir"></td>
                                                                     <td x-text="butir.indikator"></td>
                                                                     <td>
-                                                                        <select data-ui-select="metronic" class="form-select form-select-sm"
+                                                                        <select data-ui-select="metronic" class="form-select form-select-sm form-select-solid"
                                                                             :name="'evaluasis[' + butir.id + ']'"
                                                                             @if($isLocked) disabled @endif>
                                                                             <option value="">Pilih</option>
@@ -203,7 +204,7 @@
                                                                         </select>
                                                                     </td>
                                                                     <td>
-                                                                        <input data-ui-input="metronic" type="url" class="form-control form-control-sm"
+                                                                        <input data-ui-input="metronic" type="url" class="form-control form-control-sm form-control-solid"
                                                                             :name="'links[' + butir.id + ']'"
                                                                             placeholder="https://"
                                                                             @if($isLocked) disabled @endif />
@@ -215,7 +216,7 @@
                                                 </div>
                                                 <div class="mt-4">
                                                     <label class="form-label fw-semibold text-gray-700">Catatan</label>
-                                                    <textarea class="form-control"
+                                                    <textarea class="form-control form-control-solid"
                                                         :name="'catatans[' + komponen.id + ']'"
                                                         rows="3"
                                                         placeholder="Catatan untuk komponen ini..."
@@ -229,7 +230,7 @@
                         </template>
 
                         {{-- Navigation --}}
-                        <div class="d-flex justify-content-between mt-6">
+                        <div class="spm-pesantren-form-actions d-flex justify-content-between mt-6">
                             <div>
                                 <x-ui.button type="button" variant="light" x-show="activeStep > 0"
                                     @click="prevStep()">
