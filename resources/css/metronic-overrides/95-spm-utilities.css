@@ -87,7 +87,7 @@
   transition: border-color 0.2s ease;
 }
 .spm-step-card:hover {
-  border-color: var(--bs-primary, #009ef7);
+  border-color: var(--spm-primary, #005533);
 }
 
 /* ── Image Hover: subtle zoom on guide screenshots ── */
