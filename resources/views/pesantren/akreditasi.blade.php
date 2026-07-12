@@ -146,7 +146,7 @@
 
     <div class="row g-5 mb-6 spm-akreditasi-context-cards">
         <div class="col-md-4">
-            <x-ui.stat-card label="Proses Aktif" value="{{ $latestAkreditasi ? $activeFocusConfig['title'] : 'Belum Ada' }}" :variant="$activeFocusConfig['variant']" :icon="$activeFocusConfig['icon']" />
+            <x-ui.stat-card label="Pengajuan Terbaru" value="{{ $latestAkreditasi ? ($tahapanLabels[$latestAkreditasi->tahapan] ?? ucfirst($latestAkreditasi->tahapan)) : 'Belum Ada' }}" :variant="$activeFocusConfig['variant']" :icon="$activeFocusConfig['icon']" />
         </div>
         <div class="col-md-4">
             <x-ui.stat-card label="Data Tampil" value="{{ $akreditasis->total() }}" variant="info" icon="data" />
@@ -156,23 +156,8 @@
         </div>
     </div>
 
-    {{-- Focus Tabs --}}
-    <x-ui.tabs class="mb-5 spm-akreditasi-focus-tabs">
-        @foreach($focuses as $key => $label)
-            <li class="nav-item">
-                <a href="{{ route($focusRoutes[$key]) }}{{ $queryParams ? '?' . http_build_query($queryParams) : '' }}"
-                    data-ui-tab="metronic"
-                    role="tab"
-                    class="nav-link text-active-primary spm-tab-link {{ $focus === $key ? 'active' : '' }}"
-                    aria-selected="{{ $focus === $key ? 'true' : 'false' }}">
-                    {{ $label }}
-                </a>
-            </li>
-        @endforeach
-    </x-ui.tabs>
-
-    <x-ui.alert variant="info" icon="information-5" title="Satu Proses, Bukan Banyak Halaman" class="mb-5 spm-akreditasi-ux-note">
-        Pengajuan, Perbaikan, Kartu Kendali, dan Hasil adalah tahapan dari satu proses akreditasi. Panduan IAPM hanya bahan baca dari admin, bukan dokumen yang perlu diunggah pesantren.
+    <x-ui.alert variant="info" icon="information-5" title="Alur Akreditasi" class="mb-5 spm-akreditasi-ux-note">
+        Gunakan filter Tahapan untuk melihat posisi pengajuan. Perbaikan, kartu kendali, dan hasil tetap bagian dari satu alur yang sama.
         <div class="mt-3 d-flex flex-wrap gap-2">
             <a href="{{ route('documents.index', ['doc' => 'iapm']) }}" class="btn btn-sm btn-light-primary fw-semibold">
                 <x-ui.icon name="document" class="fs-5 me-1" /> Baca Panduan IAPM
