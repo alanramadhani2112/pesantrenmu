@@ -117,6 +117,19 @@
 
         $readinessMap = collect($readiness)->mapWithKeys(fn ($s) => [route($s['route']), $s['done']])->toArray();
     }
+
+    $latestPesantrenActivity = $isPesantren ? $recentActivities->first() : null;
+    $akreditasiTimeline = [
+        6 => 'Pengajuan',
+        5 => 'Verifikasi',
+        4 => 'Assessment',
+        3 => 'Visitasi',
+        1 => 'Validasi',
+        0 => 'Hasil',
+    ];
+    $activeTimelineIndex = $latestPesantrenActivity
+        ? array_search($latestPesantrenActivity['status'], array_keys($akreditasiTimeline), true)
+        : false;
 @endphp
 
 <div data-dashboard-page="metronic" x-data='dashboardCharts(@json($chartData), @json($stats))'>
@@ -124,7 +137,11 @@
         <x-slot name="toolbar">
             <x-ui.badge variant="primary">{{ $roleLabel }}</x-ui.badge>
 
-            @if($primaryAction)
+            @if($isPesantren && $pesantrenNextAction)
+                <x-ui.button :href="$pesantrenNextAction['route']" variant="primary" size="sm">
+                    {{ $pesantrenNextAction['label'] }}
+                </x-ui.button>
+            @elseif($primaryAction)
                 <x-ui.button :href="$primaryAction['route']" variant="primary" size="sm">
                     {{ $primaryAction['label'] }}
                 </x-ui.button>
@@ -162,6 +179,38 @@
                 @endif
             </div>
         </div>
+
+        @if($isPesantren && $stats['total_aktif'] > 0)
+            <x-ui.alert variant="info" icon="lock-2" title="Data Terkunci" class="mb-6">
+                Data Profil, IPM, SDM, dan EDPM/IPR terkunci karena pengajuan akreditasi sedang berjalan.
+                <div class="mt-3">
+                    <x-ui.button :href="route('pesantren.akreditasi')" variant="light-primary" size="sm">
+                        Pantau Pengajuan
+                    </x-ui.button>
+                </div>
+            </x-ui.alert>
+        @endif
+
+        @if($isPesantren && $latestPesantrenActivity)
+            <x-ui.card title="Timeline Pengajuan Terbaru" subtitle="Posisi pengajuan periode {{ $latestPesantrenActivity['periode'] ?? '-' }}." class="mb-6">
+                <div class="d-flex flex-wrap align-items-center gap-3 p-2">
+                    @foreach($akreditasiTimeline as $status => $label)
+                        @php
+                            $index = $loop->index;
+                            $isCurrent = $latestPesantrenActivity['status'] === $status;
+                            $isDone = $activeTimelineIndex !== false && $index < $activeTimelineIndex;
+                        @endphp
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge badge-circle {{ $isCurrent ? 'badge-primary' : ($isDone ? 'badge-light-success' : 'badge-light-secondary') }}">{{ $index + 1 }}</span>
+                            <span class="fw-semibold fs-8 {{ $isCurrent ? 'text-primary' : ($isDone ? 'text-success' : 'text-muted') }}">{{ $label }}</span>
+                        </div>
+                        @unless($loop->last)
+                            <span class="text-muted">/</span>
+                        @endunless
+                    @endforeach
+                </div>
+            </x-ui.card>
+        @endif
 
         {{-- Quick Actions --}}
         @if(count($quickActions) > 0)
