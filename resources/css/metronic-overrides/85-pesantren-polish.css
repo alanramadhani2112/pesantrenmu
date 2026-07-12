@@ -392,3 +392,15 @@
         transition: none !important;
     }
 }
+
+[data-module-page="dokumen"] .spm-iapm-pdf-frame {
+    height: min(78vh, 920px);
+    min-height: 640px;
+}
+
+@media (max-width: 767.98px) {
+    [data-module-page="dokumen"] .spm-iapm-pdf-frame {
+        height: 72vh;
+        min-height: 520px;
+    }
+}

@@ -73,9 +73,14 @@ class DocumentController extends Controller
     public function view(Document $document)
     {
         [$disk, $path] = $this->authorizedDocumentPath($document);
+        $absolutePath = Storage::disk($disk)->path($path);
 
-        return response()->file(Storage::disk($disk)->path($path), [
+        return response()->stream(function () use ($absolutePath) {
+            readfile($absolutePath);
+        }, 200, [
+            'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="'.basename($path).'"',
+            'X-Content-Type-Options' => 'nosniff',
         ]);
     }
 

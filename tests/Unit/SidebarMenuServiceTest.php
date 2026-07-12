@@ -213,11 +213,11 @@ class SidebarMenuServiceTest extends TestCase
     {
         $menu = $this->service->getMenuForRole(3);
 
-        $this->assertCount(3, $menu);
+        $this->assertCount(4, $menu);
 
         $sectionLabels = array_column($menu, 'label');
         $this->assertSame(
-            ['Persiapan Akreditasi', 'Akreditasi', 'Panduan'],
+            ['Monitoring', 'Persiapan Akreditasi', 'Akreditasi', 'Panduan'],
             $sectionLabels
         );
     }
@@ -225,7 +225,7 @@ class SidebarMenuServiceTest extends TestCase
     public function test_pesantren_menu_persiapan_data_section_items(): void
     {
         $menu = $this->service->getMenuForRole(3);
-        $items = $menu[0]['items'];
+        $items = $menu[1]['items'];
 
         $this->assertCount(4, $items);
 
@@ -236,7 +236,7 @@ class SidebarMenuServiceTest extends TestCase
     public function test_pesantren_menu_akreditasi_section_is_single_hub(): void
     {
         $menu = $this->service->getMenuForRole(3);
-        $items = $menu[1]['items'];
+        $items = $menu[2]['items'];
 
         $this->assertCount(1, $items);
 
@@ -247,7 +247,7 @@ class SidebarMenuServiceTest extends TestCase
     public function test_pesantren_menu_dokumen_includes_public_and_pesantren_secret_only(): void
     {
         $menu = $this->service->getMenuForRole(3);
-        $items = $menu[2]['items'];
+        $items = $menu[3]['items'];
 
         // IAPM public only. Kartu Kendali is represented inside Pusat Akreditasi.
         $this->assertCount(1, $items);
@@ -270,7 +270,7 @@ class SidebarMenuServiceTest extends TestCase
         // Force a fresh service so the in-memory cache is bypassed
         $service = new SidebarMenuService;
         $menu = $service->getMenuForRole(3);
-        $items = $menu[2]['items'];
+        $items = $menu[3]['items'];
 
         $keys = array_column($items, 'key');
         $this->assertSame(
@@ -439,7 +439,7 @@ class SidebarMenuServiceTest extends TestCase
     {
         $menu = $this->service->getMenuForRole(3);
 
-        $progressMap = collect($menu[0]['items'])->pluck('show_progress', 'key')->all();
+        $progressMap = collect($menu[1]['items'])->pluck('show_progress', 'key')->all();
 
         $this->assertTrue($progressMap['profil_pesantren']);
         $this->assertTrue($progressMap['ipm']);
@@ -450,7 +450,7 @@ class SidebarMenuServiceTest extends TestCase
     public function test_dokumen_items_share_documents_route(): void
     {
         $menu = $this->service->getMenuForRole(3);
-        $items = $menu[2]['items'];
+        $items = $menu[3]['items'];
 
         foreach ($items as $item) {
             $this->assertSame('documents.index', $item['route']);

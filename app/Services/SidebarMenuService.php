@@ -130,6 +130,21 @@ class SidebarMenuService
     {
         return [
             [
+                'label' => 'Monitoring',
+                'items' => [
+                    [
+                        'key' => 'dashboard_pesantren',
+                        'label' => 'Dashboard',
+                        'route' => 'dashboard',
+                        'icon' => 'category',
+                        'active_pattern' => 'dashboard',
+                        'tooltip' => 'Lihat ringkasan status dan aktivitas akreditasi pesantren',
+                        'show_progress' => false,
+                        'show_badge' => false,
+                    ],
+                ],
+            ],
+            [
                 'label' => 'Persiapan Akreditasi',
                 'items' => [
                     [
@@ -513,6 +528,7 @@ class SidebarMenuService
     {
         return [
             // Pesantren tooltips
+            'dashboard_pesantren' => 'Lihat ringkasan status dan aktivitas akreditasi pesantren',
             'profil_pesantren' => 'Kelola data profil dan informasi dasar pesantren Anda',
             'ipm' => 'Kelola Indikator Pemenuhan Mutlak dan dokumen pendukung pesantren',
             'data_sdm' => 'Kelola data sumber daya manusia pesantren',

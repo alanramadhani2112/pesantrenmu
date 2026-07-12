@@ -37,6 +37,7 @@
         :title="$displayPageTitle"
         :subtitle="$documentSubtitle"
     >
+        @unless($doc === 'iapm' && auth()->user()->isPesantren())
         <div class="row g-5 mb-6 spm-document-summary">
             <div class="col-md-4">
                 <x-ui.stat-card label="Kategori Aktif" value="{{ $activeDocLabel }}" variant="primary" icon="document" />
@@ -48,6 +49,7 @@
                 <x-ui.stat-card label="Hak Akses" value="{{ auth()->user()->role?->name ?? 'Pengguna' }}" variant="secondary" icon="shield-tick" />
             </div>
         </div>
+        @endunless
 
         @unless($doc === 'iapm' && auth()->user()->isPesantren())
         <x-ui.tabs class="mb-5 spm-document-category-tabs">
@@ -66,7 +68,7 @@
         @endunless
 
         @if($doc === 'iapm')
-            <x-ui.section-card title="Panduan IAPM" subtitle="Baca panduan dari admin. Tidak ada unggah dokumen dari sisi pesantren." class="spm-iapm-viewer-card">
+            <x-ui.section-card title="Panduan IAPM" subtitle="Baca panduan dari admin. Tidak ada unggah dokumen dari sisi pesantren." class="spm-iapm-viewer-card spm-iapm-viewer-card--wide">
                 <div class="p-6">
                     @if($guideDocument)
                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-5">
@@ -83,7 +85,7 @@
                                 </x-ui.button>
                             </div>
                         </div>
-                        <div class="ratio ratio-16x9 border rounded bg-light">
+                        <div class="spm-iapm-pdf-frame border rounded bg-light overflow-hidden">
                             <iframe src="{{ route('documents.view', $guideDocument) }}" title="Panduan IAPM" class="w-100 h-100 border-0" loading="lazy"></iframe>
                         </div>
                     @else
