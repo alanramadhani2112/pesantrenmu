@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('header', 'Indikator Pemenuhan Mutlak (IPM)')
 

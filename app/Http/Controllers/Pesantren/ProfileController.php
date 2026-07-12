@@ -64,7 +64,7 @@ class ProfileController extends Controller
             return back()->with('error', 'Data terkunci karena sedang dalam proses akreditasi.');
         }
 
-        $request->validate($this->finalRules($request), $this->validationMessages());
+        $request->validate($this->finalRules($request, $pesantren), $this->validationMessages());
 
         $data = $this->buildProfileData($request);
         $units = $this->buildUnitsData($request);
@@ -216,16 +216,28 @@ class ProfileController extends Controller
         ], $fileRules);
     }
 
-    protected function finalRules(Request $request): array
+    protected function finalRules(Request $request, $pesantren): array
     {
         $rules = $this->draftRules();
 
-        $rules['nama_pesantren'] = 'required|string|max:255';
-        $rules['ns_pesantren'] = 'required|string|max:255';
-        $rules['alamat'] = 'required|string|max:1000';
+        foreach ([
+            'nama_pesantren', 'ns_pesantren', 'alamat', 'kota_kabupaten', 'provinsi_kode',
+            'tahun_pendirian', 'nama_mudir', 'jenjang_pendidikan_mudir', 'telp_pesantren',
+            'hp_wa', 'email_pesantren', 'persyarikatan', 'visi', 'misi', 'luas_tanah', 'luas_bangunan',
+        ] as $field) {
+            $rules[$field] = str_replace('nullable', 'required', $rules[$field]);
+        }
+
         $rules['layanan_satuan_pendidikan'] = 'required|array|min:1';
-        $rules['provinsi_kode'] = 'required|string|max:10';
-        $rules['tahun_pendirian'] = 'required|integer|min:1900|max:'.date('Y');
+        foreach ($request->input('layanan_satuan_pendidikan', []) as $unit) {
+            $rules["units_data.{$unit}.jumlah_rombel"] = 'required|integer|min:1|max:9999';
+        }
+
+        foreach (array_merge($this->mainDocFields(), $this->secondaryDocFields()) as $inputName => $dbField) {
+            if (blank($pesantren->{$dbField})) {
+                $rules[$inputName] = str_replace('nullable', 'required', $rules[$inputName]);
+            }
+        }
 
         return $rules;
     }

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('header', 'Profil Pesantren')
 
@@ -15,9 +15,10 @@
         'smk' => 'SMK',
         'satuan_pesantren_muadalah_(SPM)' => 'SPM',
     ];
-    $selectedLayanan = is_array($pesantren->layanan_satuan_pendidikan)
+    $selectedLayanan = old('layanan_satuan_pendidikan', is_array($pesantren->layanan_satuan_pendidikan)
         ? $pesantren->layanan_satuan_pendidikan
-        : [];
+        : []);
+    $unitRombels = $pesantren->units->pluck('jumlah_rombel', 'unit');
 
     $mainDocs = [
         'status_kepemilikan_tanah_file' => ['label' => 'Status Kepemilikan Tanah', 'field' => 'status_kepemilikan_tanah'],
@@ -62,13 +63,22 @@
         '95' => 'Papua Tengah', '96' => 'Papua Pegunungan',
     ];
 
-    $filledCount = 0;
-    $totalFields = count($mainDocs) + count($secondaryDocs);
+    $requiredProfileFields = [
+        'nama_pesantren', 'ns_pesantren', 'alamat', 'provinsi_kode', 'kota_kabupaten',
+        'tahun_pendirian', 'luas_tanah', 'luas_bangunan', 'nama_mudir',
+        'jenjang_pendidikan_mudir', 'telp_pesantren', 'hp_wa', 'email_pesantren',
+        'persyarikatan', 'visi', 'misi',
+    ];
+    $filledProfileCount = collect($requiredProfileFields)->filter(fn ($field) => filled(old($field, $pesantren->{$field} ?? null)))->count();
+    $rombelFilledCount = collect($selectedLayanan)->filter(fn ($unit) => (int) old("units_data.{$unit}.jumlah_rombel", $unitRombels[$unit] ?? 0) > 0)->count();
+    $filledDocCount = 0;
     foreach (array_merge($mainDocs, $secondaryDocs) as $doc) {
         if (filled($pesantren->{$doc['field']} ?? null)) {
-            $filledCount++;
+            $filledDocCount++;
         }
     }
+    $filledCount = $filledProfileCount + (count($selectedLayanan) > 0 ? 1 : 0) + $rombelFilledCount + $filledDocCount;
+    $totalFields = count($requiredProfileFields) + 1 + count($selectedLayanan) + count($mainDocs) + count($secondaryDocs);
 @endphp
 
 <x-ui.page
@@ -80,6 +90,10 @@
         <x-ui.status-badge :variant="$isLocked ? 'warning' : 'success'">
             {{ $isLocked ? 'Terkunci' : 'Aktif' }}
         </x-ui.status-badge>
+        <x-ui.button :href="route('pesantren.ipm')" variant="light">
+            <x-ui.icon name="arrow-right" class="fs-4 me-1" />
+            Lanjut IPM
+        </x-ui.button>
     </x-slot:toolbar>
 
     <div class="row g-5 mb-8">
@@ -87,14 +101,14 @@
             <x-ui.stat-card label="Status Profil" value="{{ $isLocked ? 'Terkunci' : 'Aktif' }}" variant="{{ $isLocked ? 'warning' : 'success' }}" icon="shield-tick" />
         </div>
         <div class="col-lg-4">
-            <x-ui.stat-card label="Dokumen Terunggah" value="{{ $filledCount }} / {{ $totalFields }}" variant="info" icon="document" />
+            <x-ui.stat-card label="Kelengkapan Profil" value="{{ $filledCount }} / {{ $totalFields }}" variant="info" icon="document" />
         </div>
         <div class="col-lg-4">
             <x-ui.stat-card label="Layanan Satuan" value="{{ count($selectedLayanan) }} Unit" variant="primary" icon="building" />
         </div>
     </div>
 
-    <x-ui.progress :value="$totalFields > 0 ? round(($filledCount / $totalFields) * 100) : 0" :variant="$filledCount >= $totalFields ? 'success' : 'info'" :label="'Kelengkapan Dokumen'" :meta="$filledCount . '/' . $totalFields" class="mb-6" />
+    <x-ui.progress :value="$totalFields > 0 ? round(($filledCount / $totalFields) * 100) : 0" :variant="$filledCount >= $totalFields ? 'success' : 'info'" :label="'Kelengkapan Profil'" :meta="$filledCount . '/' . $totalFields" class="mb-6" />
 
     @if($isLocked)
         <x-ui.alert variant="warning" icon="shield-tick" title="Data Terkunci — Akreditasi Berlangsung" class="mb-6">
@@ -136,7 +150,7 @@
                         <input type="text" name="nama_pesantren" id="nama_pesantren"
                             class="form-control form-control-solid @error('nama_pesantren') is-invalid @enderror"
                             value="{{ old('nama_pesantren', $pesantren->nama_pesantren) }}"
-                            {{ $isLocked ? 'disabled' : '' }}>
+                            required {{ $isLocked ? 'disabled' : '' }}>
                         @error('nama_pesantren') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
                 </div>
@@ -145,7 +159,7 @@
                         <input type="text" name="ns_pesantren" id="ns_pesantren"
                             class="form-control form-control-solid @error('ns_pesantren') is-invalid @enderror"
                             value="{{ old('ns_pesantren', $pesantren->ns_pesantren) }}"
-                            {{ $isLocked ? 'disabled' : '' }}>
+                            required {{ $isLocked ? 'disabled' : '' }}>
                         @error('ns_pesantren') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
                 </div>
@@ -153,15 +167,15 @@
                     <x-ui.form-field label="Alamat Pesantren" for="alamat" :required="true">
                         <textarea name="alamat" id="alamat" rows="3"
                             class="form-control form-control-solid @error('alamat') is-invalid @enderror"
-                            {{ $isLocked ? 'disabled' : '' }}>{{ old('alamat', $pesantren->alamat) }}</textarea>
+                            required {{ $isLocked ? 'disabled' : '' }}>{{ old('alamat', $pesantren->alamat) }}</textarea>
                         @error('alamat') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
                 </div>
                 <div class="col-lg-6">
-                    <x-ui.form-field label="Provinsi" for="provinsi_kode">
+                    <x-ui.form-field label="Provinsi" for="provinsi_kode" :required="true">
                         <select name="provinsi_kode" id="provinsi_kode"
                             class="form-select form-select-solid @error('provinsi_kode') is-invalid @enderror"
-                            {{ $isLocked ? 'disabled' : '' }}>
+                            required {{ $isLocked ? 'disabled' : '' }}>
                             <option value="">Pilih Provinsi</option>
                             @foreach($provinsiMap as $kode => $nama)
                                 <option value="{{ $kode }}" {{ old('provinsi_kode', $pesantren->provinsi_kode) == $kode ? 'selected' : '' }}>{{ $nama }}</option>
@@ -171,11 +185,11 @@
                     </x-ui.form-field>
                 </div>
                 <div class="col-lg-6">
-                    <x-ui.form-field label="Kota / Kabupaten" for="kota_kabupaten">
+                    <x-ui.form-field label="Kota / Kabupaten" for="kota_kabupaten" :required="true">
                         <input type="text" name="kota_kabupaten" id="kota_kabupaten"
                             class="form-control form-control-solid @error('kota_kabupaten') is-invalid @enderror"
                             value="{{ old('kota_kabupaten', $pesantren->kota_kabupaten) }}"
-                            {{ $isLocked ? 'disabled' : '' }}>
+                            required {{ $isLocked ? 'disabled' : '' }}>
                         @error('kota_kabupaten') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
                 </div>
@@ -185,25 +199,25 @@
                             class="form-control form-control-solid @error('tahun_pendirian') is-invalid @enderror"
                             value="{{ old('tahun_pendirian', $pesantren->tahun_pendirian) }}"
                             min="1900" max="{{ date('Y') }}"
-                            {{ $isLocked ? 'disabled' : '' }}>
+                            required {{ $isLocked ? 'disabled' : '' }}>
                         @error('tahun_pendirian') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
                 </div>
                 <div class="col-lg-6">
-                    <x-ui.form-field label="Luas Tanah" for="luas_tanah">
+                    <x-ui.form-field label="Luas Tanah" for="luas_tanah" :required="true">
                         <input type="text" name="luas_tanah" id="luas_tanah"
                             class="form-control form-control-solid @error('luas_tanah') is-invalid @enderror"
                             value="{{ old('luas_tanah', $pesantren->luas_tanah) }}"
-                            placeholder="m²" {{ $isLocked ? 'disabled' : '' }}>
+                            placeholder="m²" required {{ $isLocked ? 'disabled' : '' }}>
                         @error('luas_tanah') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
                 </div>
                 <div class="col-lg-6">
-                    <x-ui.form-field label="Luas Bangunan" for="luas_bangunan">
+                    <x-ui.form-field label="Luas Bangunan" for="luas_bangunan" :required="true">
                         <input type="text" name="luas_bangunan" id="luas_bangunan"
                             class="form-control form-control-solid @error('luas_bangunan') is-invalid @enderror"
                             value="{{ old('luas_bangunan', $pesantren->luas_bangunan) }}"
-                            placeholder="m²" {{ $isLocked ? 'disabled' : '' }}>
+                            placeholder="m²" required {{ $isLocked ? 'disabled' : '' }}>
                         @error('luas_bangunan') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
                 </div>
@@ -219,72 +233,72 @@
         <div class="p-6">
             <div class="row g-6">
                 <div class="col-lg-6">
-                    <x-ui.form-field label="Nama Mudir / Pimpinan" for="nama_mudir">
+                    <x-ui.form-field label="Nama Mudir / Pimpinan" for="nama_mudir" :required="true">
                         <input type="text" name="nama_mudir" id="nama_mudir"
                             class="form-control form-control-solid @error('nama_mudir') is-invalid @enderror"
                             value="{{ old('nama_mudir', $pesantren->nama_mudir) }}"
-                            {{ $isLocked ? 'disabled' : '' }}>
+                            required {{ $isLocked ? 'disabled' : '' }}>
                         @error('nama_mudir') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
                 </div>
                 <div class="col-lg-6">
-                    <x-ui.form-field label="Jenjang Pendidikan Mudir" for="jenjang_pendidikan_mudir">
+                    <x-ui.form-field label="Jenjang Pendidikan Mudir" for="jenjang_pendidikan_mudir" :required="true">
                         <input type="text" name="jenjang_pendidikan_mudir" id="jenjang_pendidikan_mudir"
                             class="form-control form-control-solid @error('jenjang_pendidikan_mudir') is-invalid @enderror"
                             value="{{ old('jenjang_pendidikan_mudir', $pesantren->jenjang_pendidikan_mudir) }}"
-                            placeholder="S1, S2, S3" {{ $isLocked ? 'disabled' : '' }}>
+                            placeholder="S1, S2, S3" required {{ $isLocked ? 'disabled' : '' }}>
                         @error('jenjang_pendidikan_mudir') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
                 </div>
                 <div class="col-lg-6">
-                    <x-ui.form-field label="Telepon Pesantren" for="telp_pesantren">
+                    <x-ui.form-field label="Telepon Pesantren" for="telp_pesantren" :required="true">
                         <input type="text" name="telp_pesantren" id="telp_pesantren"
                             class="form-control form-control-solid @error('telp_pesantren') is-invalid @enderror"
                             value="{{ old('telp_pesantren', $pesantren->telp_pesantren) }}"
-                            {{ $isLocked ? 'disabled' : '' }}>
+                            required {{ $isLocked ? 'disabled' : '' }}>
                         @error('telp_pesantren') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
                 </div>
                 <div class="col-lg-6">
-                    <x-ui.form-field label="No. HP / WhatsApp" for="hp_wa">
+                    <x-ui.form-field label="No. HP / WhatsApp" for="hp_wa" :required="true">
                         <input type="text" name="hp_wa" id="hp_wa"
                             class="form-control form-control-solid @error('hp_wa') is-invalid @enderror"
                             value="{{ old('hp_wa', $pesantren->hp_wa) }}"
-                            {{ $isLocked ? 'disabled' : '' }}>
+                            required {{ $isLocked ? 'disabled' : '' }}>
                         @error('hp_wa') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
                 </div>
                 <div class="col-lg-6">
-                    <x-ui.form-field label="Email Pesantren" for="email_pesantren">
+                    <x-ui.form-field label="Email Pesantren" for="email_pesantren" :required="true">
                         <input type="email" name="email_pesantren" id="email_pesantren"
                             class="form-control form-control-solid @error('email_pesantren') is-invalid @enderror"
                             value="{{ old('email_pesantren', $pesantren->email_pesantren) }}"
-                            {{ $isLocked ? 'disabled' : '' }}>
+                            required {{ $isLocked ? 'disabled' : '' }}>
                         @error('email_pesantren') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
                 </div>
                 <div class="col-lg-6">
-                    <x-ui.form-field label="Persyarikatan" for="persyarikatan">
+                    <x-ui.form-field label="Persyarikatan" for="persyarikatan" :required="true">
                         <input type="text" name="persyarikatan" id="persyarikatan"
                             class="form-control form-control-solid @error('persyarikatan') is-invalid @enderror"
                             value="{{ old('persyarikatan', $pesantren->persyarikatan) }}"
-                            placeholder="Muhammadiyah, NU, ..." {{ $isLocked ? 'disabled' : '' }}>
+                            placeholder="Muhammadiyah, NU, ..." required {{ $isLocked ? 'disabled' : '' }}>
                         @error('persyarikatan') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
                 </div>
                 <div class="col-12">
-                    <x-ui.form-field label="Visi" for="visi">
+                    <x-ui.form-field label="Visi" for="visi" :required="true">
                         <textarea name="visi" id="visi" rows="3"
                             class="form-control form-control-solid @error('visi') is-invalid @enderror"
-                            {{ $isLocked ? 'disabled' : '' }}>{{ old('visi', $pesantren->visi) }}</textarea>
+                            required {{ $isLocked ? 'disabled' : '' }}>{{ old('visi', $pesantren->visi) }}</textarea>
                         @error('visi') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
                 </div>
                 <div class="col-12">
-                    <x-ui.form-field label="Misi" for="misi">
+                    <x-ui.form-field label="Misi" for="misi" :required="true">
                         <textarea name="misi" id="misi" rows="3"
                             class="form-control form-control-solid @error('misi') is-invalid @enderror"
-                            {{ $isLocked ? 'disabled' : '' }}>{{ old('misi', $pesantren->misi) }}</textarea>
+                            required {{ $isLocked ? 'disabled' : '' }}>{{ old('misi', $pesantren->misi) }}</textarea>
                         @error('misi') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
                 </div>
@@ -305,7 +319,7 @@
                 @foreach($layananOptions as $value => $label)
                     <div class="col-md-3 col-sm-6">
                         <label class="form-check form-check-custom form-check-solid cursor-pointer {{ $isLocked ? 'opacity-50 pe-none' : '' }}">
-                            <input class="form-check-input" type="checkbox" name="layanan_satuan_pendidikan[]" value="{{ $value }}"
+                            <input class="form-check-input js-layanan" type="checkbox" name="layanan_satuan_pendidikan[]" value="{{ $value }}"
                                 {{ in_array($value, old('layanan_satuan_pendidikan', $selectedLayanan)) ? 'checked' : '' }}
                                 {{ $isLocked ? 'disabled' : '' }} />
                             <span class="form-check-label">
@@ -319,7 +333,6 @@
     </x-ui.section-card>
 
     {{-- JUMLAH ROMBEL --}}
-    @if(count($selectedLayanan) > 0)
     <x-ui.section-card title="Rombongan Belajar" subtitle="Input jumlah rombel per unit layanan." class="mb-6">
         <x-slot:toolbar>
             <x-ui.icon name="chart" class="fs-2x text-primary" />
@@ -327,26 +340,24 @@
         <div class="p-6">
             <div class="row g-6">
                 @foreach($layananOptions as $unitValue => $unitLabel)
-                    @if(in_array($unitValue, $selectedLayanan))
-                        @php
-                            $rombel = old("units_data.{$unitValue}.jumlah_rombel", $pesantren->units()->where('unit', $unitValue)->first()?->jumlah_rombel ?? 0);
-                        @endphp
-                        <div class="col-lg-4 col-md-6">
-                            <x-ui.form-field label="{{ $unitLabel }}" for="units_data_{{ $unitValue }}_jumlah_rombel">
+                    @php
+                        $checked = in_array($unitValue, $selectedLayanan);
+                        $rombel = old("units_data.{$unitValue}.jumlah_rombel", $unitRombels[$unitValue] ?? '');
+                    @endphp
+                    <div class="col-lg-4 col-md-6 js-rombel" data-unit="{{ $unitValue }}" @if(! $checked) style="display:none" @endif>
+                            <x-ui.form-field label="{{ $unitLabel }}" for="units_data_{{ $unitValue }}_jumlah_rombel" :required="true">
                                 <input type="number" name="units_data[{{ $unitValue }}][jumlah_rombel]" id="units_data_{{ $unitValue }}_jumlah_rombel"
                                     class="form-control form-control-solid @error('units_data.{{ $unitValue }}.jumlah_rombel') is-invalid @enderror"
                                     value="{{ $rombel }}"
-                                    min="0" max="9999"
+                                    min="1" max="9999" @if($checked) required @endif
                                     {{ $isLocked ? 'disabled' : '' }}>
                                 @error("units_data.{$unitValue}.jumlah_rombel") <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </x-ui.form-field>
                         </div>
-                    @endif
                 @endforeach
             </div>
         </div>
     </x-ui.section-card>
-    @endif
 
     {{-- DOKUMENTASI UTAMA --}}
     <x-ui.section-card title="Dokumentasi Pendukung Utama" subtitle="Unggah dokumen utama pendukung profil pesantren." class="mb-6">
@@ -361,7 +372,7 @@
                         $hasFile = filled($existingPath);
                     @endphp
                     <div class="col-lg-6">
-                        <x-ui.form-field label="{{ $doc['label'] }}" for="{{ $inputName }}">
+                        <x-ui.form-field label="{{ $doc['label'] }}" for="{{ $inputName }}" :required="!$hasFile">
                             @if($hasFile)
                                 <div class="d-flex align-items-center gap-2 mb-2">
                                     <x-ui.icon name="check-circle" class="fs-5 text-success" />
@@ -372,7 +383,7 @@
                             @if(!$isLocked)
                                 <input type="file" name="{{ $inputName }}" id="{{ $inputName }}"
                                     class="form-control form-control-solid @error($inputName) is-invalid @enderror"
-                                    accept=".pdf,.jpg,.jpeg,.png">
+                                    accept=".pdf,.jpg,.jpeg,.png" {{ $hasFile ? '' : 'required' }}>
                                 <div class="text-muted fs-8 mt-1">PDF, JPG, PNG. Maks 2MB.</div>
                                 @error($inputName) <div class="invalid-feedback">{{ $message }}</div> @enderror
                             @endif
@@ -396,7 +407,7 @@
                         $hasFile = filled($existingPath);
                     @endphp
                     <div class="col-lg-6">
-                        <x-ui.form-field label="{{ $doc['label'] }}" for="{{ $inputName }}">
+                        <x-ui.form-field label="{{ $doc['label'] }}" for="{{ $inputName }}" :required="!$hasFile">
                             @if($hasFile)
                                 <div class="d-flex align-items-center gap-2 mb-2">
                                     <x-ui.icon name="check-circle" class="fs-5 text-success" />
@@ -407,7 +418,7 @@
                             @if(!$isLocked)
                                 <input type="file" name="{{ $inputName }}" id="{{ $inputName }}"
                                     class="form-control form-control-solid @error($inputName) is-invalid @enderror"
-                                    accept=".pdf,.jpg,.jpeg,.png">
+                                    accept=".pdf,.jpg,.jpeg,.png" {{ $hasFile ? '' : 'required' }}>
                                 <div class="text-muted fs-8 mt-1">PDF, JPG, PNG. Maks 2MB.</div>
                                 @error($inputName) <div class="invalid-feedback">{{ $message }}</div> @enderror
                             @endif
@@ -421,7 +432,7 @@
     {{-- SUBMIT BUTTONS --}}
     @if(!$isLocked)
         <div class="d-flex align-items-center justify-content-end gap-3">
-            <button type="submit" name="draft" formaction="{{ route('pesantren.profile.save-draft') }}"
+            <button type="submit" name="draft" formnovalidate formaction="{{ route('pesantren.profile.save-draft') }}"
                 class="btn btn-light-primary fw-semibold">
                 <x-ui.icon name="document" class="fs-4 me-1" />
                 Simpan Draft
@@ -436,4 +447,19 @@
     @endif
 
 </x-ui.page>
+
+@push('scripts')
+<script>
+document.querySelectorAll('.js-layanan').forEach((checkbox) => {
+    checkbox.addEventListener('change', () => {
+        const row = document.querySelector(`.js-rombel[data-unit="${CSS.escape(checkbox.value)}"]`);
+        const input = row?.querySelector('input');
+        if (!row || !input) return;
+        row.style.display = checkbox.checked ? '' : 'none';
+        input.required = checkbox.checked;
+        if (!checkbox.checked) input.value = '';
+    });
+});
+</script>
+@endpush
 @endsection

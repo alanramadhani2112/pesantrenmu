@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('header', 'Evaluasi Diri Pesantren/Madrasah (EDPM)')
 
@@ -13,7 +13,10 @@
 
 <div x-data="pesantrenEdpmPage({
     edpmCount: {{ $edpmCount }},
-    iprCount: {{ $iprCount }}
+    iprCount: {{ $iprCount }},
+    evaluasis: @js($evaluasis),
+    links: @js($links),
+    catatans: @js($catatans)
 })">
     <x-ui.page
         title="Evaluasi Diri Pesantren/Madrasah (EDPM)"
@@ -24,9 +27,9 @@
             <x-ui.status-badge :variant="$isLocked ? 'warning' : 'success'">
                 {{ $isLocked ? 'Terkunci' : 'Aktif' }}
             </x-ui.status-badge>
-            <x-ui.button :href="route('pesantren.profile')" variant="light">
+            <x-ui.button :href="route('pesantren.sdm')" variant="light">
                 <x-ui.icon name="exit-right" class="fs-4 me-1" />
-                Kembali
+                Kembali SDM
             </x-ui.button>
         </x-slot:toolbar>
 
@@ -144,7 +147,7 @@
 
                 {{-- Content Area --}}
                 <div class="spm-edpm-panel">
-                    <form action="{{ route('pesantren.edpm.save') }}" method="POST" id="edpmSaveForm">
+                    <form action="{{ route('pesantren.edpm.save') }}" method="POST" id="edpmSaveForm" x-on:submit="appendStateTo($event.target)">
                         @csrf
                         {{-- EDPM Content --}}
                         <template x-if="activeGroup === 'edpm'">
@@ -184,6 +187,7 @@
                                                                     <td>
                                                                         <select data-ui-select="metronic" class="form-select form-select-sm"
                                                                             :name="'evaluasis[' + butir.id + ']'"
+                                                                            x-model="evaluasis[butir.id]"
                                                                             @if($isLocked) disabled @endif>
                                                                             <option value="">Pilih</option>
                                                                             <option value="1">1</option>
@@ -195,6 +199,7 @@
                                                                     <td>
                                                                         <input data-ui-input="metronic" type="url" class="form-control form-control-sm"
                                                                             :name="'links[' + butir.id + ']'"
+                                                                            x-model="links[butir.id]"
                                                                             placeholder="https://"
                                                                             @if($isLocked) disabled @endif />
                                                                     </td>
@@ -206,6 +211,7 @@
                                                     <label class="form-label fw-semibold text-gray-700">Catatan</label>
                                                     <textarea class="form-control"
                                                         :name="'catatans[' + komponen.id + ']'"
+                                                        x-model="catatans[komponen.id]"
                                                         rows="3"
                                                         placeholder="Catatan untuk komponen ini..."
                                                         @if($isLocked) disabled @endif></textarea>
@@ -256,6 +262,7 @@
                                                                     <td>
                                                                         <select data-ui-select="metronic" class="form-select form-select-sm"
                                                                             :name="'evaluasis[' + butir.id + ']'"
+                                                                            x-model="evaluasis[butir.id]"
                                                                             @if($isLocked) disabled @endif>
                                                                             <option value="">Pilih</option>
                                                                             <option value="1">1</option>
@@ -267,6 +274,7 @@
                                                                     <td>
                                                                         <input data-ui-input="metronic" type="url" class="form-control form-control-sm"
                                                                             :name="'links[' + butir.id + ']'"
+                                                                            x-model="links[butir.id]"
                                                                             placeholder="https://"
                                                                             @if($isLocked) disabled @endif />
                                                                     </td>
@@ -278,6 +286,7 @@
                                                     <label class="form-label fw-semibold text-gray-700">Catatan</label>
                                                     <textarea class="form-control"
                                                         :name="'catatans[' + komponen.id + ']'"
+                                                        x-model="catatans[komponen.id]"
                                                         rows="3"
                                                         placeholder="Catatan untuk komponen ini..."
                                                         @if($isLocked) disabled @endif></textarea>
@@ -341,6 +350,9 @@ document.addEventListener('alpine:init', () => {
         activeGroup: 'edpm',
         edpmCount: config.edpmCount,
         iprCount: config.iprCount,
+        evaluasis: config.evaluasis,
+        links: config.links,
+        catatans: config.catatans,
         edpmKomponens: @json($edpmKomponens->values()),
         iprKomponens: @json($iprKomponens->values()),
 
@@ -377,6 +389,20 @@ document.addEventListener('alpine:init', () => {
         stepBadgeClass(index) {
             if (index === this.activeStep) return 'badge-light-primary';
             return 'badge-light-secondary';
+        },
+
+        appendStateTo(form) {
+            form.querySelectorAll('[data-state-field]').forEach((input) => input.remove());
+            [['evaluasis', this.evaluasis], ['links', this.links], ['catatans', this.catatans]].forEach(([group, values]) => {
+                Object.entries(values || {}).forEach(([id, value]) => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = `${group}[${id}]`;
+                    input.value = value ?? '';
+                    input.dataset.stateField = 'true';
+                    form.appendChild(input);
+                });
+            });
         }
     }));
 });
@@ -385,11 +411,11 @@ document.addEventListener('alpine:init', () => {
 document.getElementById('btnSaveEdpm')?.addEventListener('click', function(e) {
     e.preventDefault();
     window.SpmSwal.confirm({
-        title: 'Simpan Data EDPM?',
-        text: 'Pastikan semua nilai evaluasi dan tautan bukti sudah diisi dengan benar.',
+        title: 'Submit Final EDPM?',
+        text: 'Data tidak boleh submit final jika belum terisi semua. Gunakan Draft jika belum selesai.',
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: 'Ya, Simpan',
+        confirmButtonText: 'Ya, Submit Final',
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
@@ -408,15 +434,11 @@ document.getElementById('btnSaveDraft')?.addEventListener('click', function() {
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            // Clone all inputs from save form to draft form
             const saveForm = document.getElementById('edpmSaveForm');
             const draftForm = document.getElementById('edpmDraftForm');
-            draftForm.querySelectorAll('[data-draft-clone]').forEach(input => input.remove());
-            saveForm.querySelectorAll('select, input, textarea').forEach(input => {
-                const clone = input.cloneNode(true);
-                clone.dataset.draftClone = 'true';
-                draftForm.appendChild(clone);
-            });
+            draftForm.querySelectorAll('[data-state-field]').forEach((input) => input.remove());
+            saveForm.dispatchEvent(new Event('submit', { cancelable: true }));
+            saveForm.querySelectorAll('[data-state-field]').forEach((input) => draftForm.appendChild(input.cloneNode(true)));
             draftForm.requestSubmit();
         }
     });

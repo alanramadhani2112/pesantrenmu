@@ -71,7 +71,7 @@
             'asesor.akreditasi-detail' => ['title' => __('Detail Akreditasi'), 'section' => __('Tugas Akreditasi')],
 
             'pesantren.profile' => ['title' => __('Profil Pesantren'), 'section' => __('Persiapan Akreditasi')],
-            'pesantren.ipm' => ['title' => __('Indikator Pemenuhan Mutlak (IPM)'), 'section' => __('Persiapan Akreditasi')],
+            'pesantren.ipm' => ['title' => __('IPM'), 'section' => __('Persiapan Akreditasi')],
             'pesantren.sdm' => ['title' => __('Data SDM Pesantren'), 'section' => __('Persiapan Akreditasi')],
             'pesantren.edpm' => ['title' => __('EDPM/IPR'), 'section' => __('Persiapan Akreditasi')],
             'pesantren.akreditasi' => ['title' => __('Pusat Akreditasi'), 'section' => __('Akreditasi')],

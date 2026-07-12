@@ -159,7 +159,7 @@ class SidebarMenuService
                     ],
                     [
                         'key' => 'ipm',
-                        'label' => 'IPM Mutlak',
+                        'label' => 'IPM',
                         'route' => 'pesantren.ipm',
                         'icon' => 'document',
                         'active_pattern' => 'pesantren.ipm',

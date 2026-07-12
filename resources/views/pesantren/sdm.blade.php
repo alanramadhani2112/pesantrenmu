@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('header', 'Data SDM Pesantren')
 
@@ -23,9 +23,13 @@
         <x-ui.status-badge :variant="$isLocked ? 'warning' : 'success'">
             {{ $isLocked ? 'Terkunci' : 'Aktif' }}
         </x-ui.status-badge>
-        <x-ui.button :href="route('pesantren.profile')" variant="light">
+        <x-ui.button :href="route('pesantren.ipm')" variant="light">
             <x-ui.icon name="exit-right" class="fs-4 me-1" />
-            Kembali
+            Kembali IPM
+        </x-ui.button>
+        <x-ui.button :href="route('pesantren.edpm')" variant="light">
+            <x-ui.icon name="arrow-right" class="fs-4 me-1" />
+            Lanjut EDPM/IPR
         </x-ui.button>
     </x-slot:toolbar>
 
@@ -106,18 +110,18 @@
                                         @php $val = (int) ($data[$level][$catKey . '_l'] ?? 0); $rowTotalL += $val; @endphp
                                         <td class="text-center">
                                             <input
-                                                data-ui-input="metronic"
+                                                data-ui-input="metronic" data-sdm-input
                                                 type="number"
                                                 name="data[{{ $level }}][{{ $catKey }}_l]"
                                                 value="{{ $val }}"
                                                 min="0"
-                                                class="form-control form-control-sm text-center @error('data.' . $level . '.' . $catKey . '_l') is-invalid @enderror"
+                                                class="form-control form-control-sm text-center spm-sdm-input @error('data.' . $level . '.' . $catKey . '_l') is-invalid @enderror"
                                                 @if($isLocked) disabled @endif
                                                 style="width: 90px; margin: 0 auto;"
                                             />
                                         </td>
                                     @endforeach
-                                    <td class="text-center fw-semibold bg-light-primary text-primary">{{ $rowTotalL }}</td>
+                                    <td class="text-center fw-semibold bg-light-primary text-primary js-row-total">{{ $rowTotalL }}</td>
                                 </tr>
                                 <tr>
                                     <td class="fw-semibold text-gray-800">Perempuan</td>
@@ -126,29 +130,27 @@
                                         @php $val = (int) ($data[$level][$catKey . '_p'] ?? 0); $rowTotalP += $val; @endphp
                                         <td class="text-center">
                                             <input
-                                                data-ui-input="metronic"
+                                                data-ui-input="metronic" data-sdm-input
                                                 type="number"
                                                 name="data[{{ $level }}][{{ $catKey }}_p]"
                                                 value="{{ $val }}"
                                                 min="0"
-                                                class="form-control form-control-sm text-center @error('data.' . $level . '.' . $catKey . '_p') is-invalid @enderror"
+                                                class="form-control form-control-sm text-center spm-sdm-input @error('data.' . $level . '.' . $catKey . '_p') is-invalid @enderror"
                                                 @if($isLocked) disabled @endif
                                                 style="width: 90px; margin: 0 auto;"
                                             />
                                         </td>
                                     @endforeach
-                                    <td class="text-center fw-semibold bg-light-primary text-primary">{{ $rowTotalP }}</td>
+                                    <td class="text-center fw-semibold bg-light-primary text-primary js-row-total">{{ $rowTotalP }}</td>
                                 </tr>
                             </tbody>
                             <tfoot>
                                 <tr class="bg-light-primary">
                                     <td class="fw-semibold text-primary">Total {{ $category['label'] }}</td>
                                     @foreach($levels as $level)
-                                        <td class="text-center fw-semibold text-primary">
-                                            {{ ((int) ($data[$level][$catKey . '_l'] ?? 0)) + ((int) ($data[$level][$catKey . '_p'] ?? 0)) }}
-                                        </td>
+                                        <td class="text-center fw-semibold text-primary js-col-total" data-level="{{ $level }}">{{ ((int) ($data[$level][$catKey . '_l'] ?? 0)) + ((int) ($data[$level][$catKey . '_p'] ?? 0)) }}</td>
                                     @endforeach
-                                    <td class="text-center fw-semibold text-primary">{{ $rowTotalL + $rowTotalP }}</td>
+                                    <td class="text-center fw-semibold text-primary js-category-total">{{ $rowTotalL + $rowTotalP }}</td>
                                 </tr>
                             </tfoot>
                     </x-ui.simple-table>
@@ -167,13 +169,17 @@
                                 <span class="text-muted fw-semibold fs-8 d-block">Semua kategori dan unit layanan</span>
                             </div>
                         </div>
-                        <span class="badge badge-light-primary fs-4 fw-bold px-4 py-2">{{ $grandTotal }} Data</span>
+                        <span class="badge badge-light-primary fs-4 fw-bold px-4 py-2"><span id="sdmGrandTotal">{{ $grandTotal }}</span> Data</span>
                     </div>
                 </div>
             </div>
 
             @if(!$isLocked)
-                <div class="d-flex justify-content-end mt-6">
+                <div class="d-flex justify-content-end gap-3 mt-6">
+                    <x-ui.button type="submit" variant="light" id="btnDraftSdm">
+                        <x-ui.icon name="document" class="fs-4 me-1" />
+                        Simpan Draft
+                    </x-ui.button>
                     <x-ui.button type="submit" variant="primary" id="btnSaveSdm">
                         <x-ui.icon name="check-circle" class="fs-4 me-1" />
                         Simpan Data SDM
@@ -186,6 +192,35 @@
 
 @push('scripts')
 <script>
+function updateSdmTotals() {
+    let grandTotal = 0;
+    document.querySelectorAll('.spm-table-compact table, table.spm-table-compact').forEach((table) => {
+        const bodyRows = table.querySelectorAll('tbody tr');
+        const levelCount = bodyRows[0]?.querySelectorAll('input').length ?? 0;
+        const colTotals = Array(levelCount).fill(0);
+        let categoryTotal = 0;
+
+        bodyRows.forEach((row) => {
+            let rowTotal = 0;
+            row.querySelectorAll('input[data-sdm-input]').forEach((input, index) => {
+                const value = Number(input.value) || 0;
+                rowTotal += value;
+                colTotals[index] += value;
+            });
+            categoryTotal += rowTotal;
+            row.querySelector('.js-row-total').textContent = rowTotal;
+        });
+
+        table.querySelectorAll('.js-col-total').forEach((cell, index) => cell.textContent = colTotals[index] ?? 0);
+        table.querySelector('.js-category-total').textContent = categoryTotal;
+        grandTotal += categoryTotal;
+    });
+    document.getElementById('sdmGrandTotal').textContent = grandTotal;
+}
+
+document.querySelectorAll('input[data-sdm-input]').forEach(input => input.addEventListener('input', updateSdmTotals));
+updateSdmTotals();
+
 document.getElementById('btnSaveSdm')?.addEventListener('click', function(e) {
     e.preventDefault();
     window.SpmSwal.confirm({
