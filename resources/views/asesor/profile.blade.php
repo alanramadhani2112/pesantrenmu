@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+<div data-module-page="asesor-profile">
 <x-ui.page-header title="Profil Asesor" subtitle="Kelola data profil, pengalaman, dan dokumen pendukung Anda.">
     <x-slot:toolbar>
         @if(!request('edit'))
@@ -17,6 +18,7 @@
     </x-slot:toolbar>
 </x-ui.page-header>
 
+@if(request('edit'))
 {{-- Profile Photo Upload (inline Blade form) --}}
 <x-ui.section-card title="Foto Profil" subtitle="Unggah foto profil akun Anda. Maksimal 2MB, format JPG/PNG." class="mb-6">
     <div class="p-6">
@@ -83,6 +85,7 @@
         @endif
     </div>
 </x-ui.section-card>
+@endif
 
 @if(request('edit'))
 {{-- ===== EDIT MODE ===== --}}
@@ -536,11 +539,43 @@ function asesorProfileEdit() {
 
 @else
 {{-- ===== VIEW MODE ===== --}}
+@php
+    $identityFilled = collect([
+        $asesor->nbm_nia,
+        $asesor->nik,
+        $asesor->tempat_lahir,
+        $asesor->tanggal_lahir,
+        $asesor->jenis_kelamin,
+        $asesor->pendidikan_terakhir,
+        $asesor->tahun_terbit_sertifikat,
+        $asesor->unit_kerja,
+        $asesor->telp_kantor,
+        $asesor->alamat_kantor,
+    ])->filter(fn ($value) => filled($value))->count();
+
+    $documentUploaded = collect([$asesor->ktp_file, $asesor->ijazah_file, $asesor->kartu_nbm_file])
+        ->filter(fn ($value) => filled($value))->count();
+
+    $profileMetrics = [
+        ['label' => 'Identitas Terisi', 'value' => $identityFilled.'/10', 'variant' => 'primary', 'icon' => 'profile-user'],
+        ['label' => 'Dokumen', 'value' => $documentUploaded.'/3', 'variant' => $documentUploaded >= 3 ? 'success' : 'warning', 'icon' => 'document'],
+        ['label' => 'Status', 'value' => 'Aktif', 'variant' => 'success', 'icon' => 'check-circle'],
+    ];
+@endphp
+
+<div class="row g-4 mb-6 spm-asesor-profile-metrics">
+    @foreach($profileMetrics as $metric)
+        <div class="col-md-4">
+            <x-ui.stat-card :label="$metric['label']" :value="$metric['value']" :variant="$metric['variant']" :icon="$metric['icon']" />
+        </div>
+    @endforeach
+</div>
+
 <div class="row g-6">
     {{-- Sidebar --}}
     <div class="col-xl-4">
         <div class="d-flex flex-column gap-6">
-            <x-ui.card>
+            <x-ui.card class="spm-asesor-profile-card">
                 <div class="d-flex flex-column align-items-center text-center">
                     <div class="mb-5">
                         @if(auth()->user()->profile_photo_path && Storage::disk('public')->exists(auth()->user()->profile_photo_path))
@@ -566,24 +601,24 @@ function asesorProfileEdit() {
                 </div>
             </x-ui.card>
 
-            <x-ui.section-card title="Informasi Kontak">
+            <x-ui.section-card title="Informasi Kontak" class="spm-asesor-contact-card">
                 <div class="p-6">
                     <div class="d-flex flex-column gap-4">
-                        <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-3 spm-asesor-contact-item">
                             <x-ui.icon name="sms" class="fs-3 text-muted" />
                             <div>
                                 <div class="fs-8 text-muted">Email</div>
                                 <div class="fw-semibold fs-7">{{ auth()->user()->email ?: '-' }}</div>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-3 spm-asesor-contact-item">
                             <x-ui.icon name="whatsapp" class="fs-3 text-muted" />
                             <div>
                                 <div class="fs-8 text-muted">WhatsApp</div>
                                 <div class="fw-semibold fs-7">{{ $asesor->whatsapp ?: '-' }}</div>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-3 spm-asesor-contact-item">
                             <x-ui.icon name="geolocation" class="fs-3 text-muted" />
                             <div>
                                 <div class="fs-8 text-muted">Alamat</div>
@@ -604,7 +639,7 @@ function asesorProfileEdit() {
             {{-- A. Identitas --}}
             <x-ui.section-card title="A. Identitas Diri" subtitle="Data pribadi dan informasi pekerjaan.">
                 <div class="p-6">
-                    <div class="row g-4">
+                    <div class="row g-4 spm-asesor-detail-grid">
                         @php
                             $identityFields = [
                                 'NBM / NIA' => $asesor->nbm_nia,
@@ -743,5 +778,7 @@ function asesorProfileEdit() {
 </div>
 @endif
 
+</div>
 @endsection
+
 

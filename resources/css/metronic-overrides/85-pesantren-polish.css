@@ -1056,3 +1056,69 @@
         width: 100%;
     }
 }
+
+/* Asesor profile polish */
+[data-module-page="asesor-profile"] .spm-section-card,
+[data-module-page="asesor-profile"] [data-ui-card="metronic"],
+[data-module-page="asesor-profile"] [data-ui-section-card="metronic"] {
+    border: 1px solid var(--spm-pesantren-border, #e4e9f2);
+    border-radius: 1rem;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, .055);
+}
+
+[data-module-page="asesor-profile"] .spm-section-card > .card-header,
+[data-module-page="asesor-profile"] [data-ui-section-card="metronic"] > .card-header {
+    min-height: 76px;
+    border-bottom: 1px solid var(--spm-pesantren-border, #e4e9f2) !important;
+    background: linear-gradient(90deg, rgba(var(--spm-primary-rgb), .035), transparent 72%), #fff;
+}
+
+[data-module-page="asesor-profile"] .spm-asesor-profile-metrics .spm-stat-card,
+[data-module-page="asesor-profile"] .spm-asesor-profile-metrics [data-ui-card="metronic"] {
+    height: 100%;
+}
+
+[data-module-page="asesor-profile"] .spm-asesor-profile-card > .card-body {
+    padding: 2rem 1.5rem !important;
+}
+
+[data-module-page="asesor-profile"] .spm-asesor-contact-item {
+    min-height: 64px;
+    padding: 1rem;
+    border: 1px solid var(--spm-pesantren-border, #e4e9f2);
+    border-radius: .9rem;
+    background: #fff;
+}
+
+[data-module-page="asesor-profile"] .spm-asesor-contact-item > i,
+[data-module-page="asesor-profile"] .spm-asesor-contact-item > .ki-duotone,
+[data-module-page="asesor-profile"] .spm-asesor-contact-item > [data-ui-icon] {
+    flex: 0 0 auto;
+}
+
+[data-module-page="asesor-profile"] .spm-asesor-detail-grid .detail-item {
+    height: 100%;
+    padding: 1rem;
+    border: 1px solid var(--spm-pesantren-border, #e4e9f2);
+    border-radius: .9rem;
+    background: #f9fbfd;
+}
+
+[data-module-page="asesor-profile"] .spm-document-list .spm-document-item {
+    border-radius: .9rem;
+}
+
+[data-module-page="asesor-profile"] .border-bottom.border-dashed {
+    border-color: #e4e9f2 !important;
+}
+
+@media (max-width: 767.98px) {
+    [data-module-page="asesor-profile"] .spm-section-card > .card-header,
+    [data-module-page="asesor-profile"] [data-ui-section-card="metronic"] > .card-header {
+        min-height: auto;
+    }
+
+    [data-module-page="asesor-profile"] .spm-asesor-profile-card > .card-body {
+        padding: 1.5rem 1rem !important;
+    }
+}
