@@ -68,6 +68,22 @@ class EdpmServiceTest extends TestCase
         $this->service = app(PesantrenService::class);
     }
 
+    public function test_edpm_page_shows_clear_butir_progress_copy(): void
+    {
+        Edpm::create([
+            'user_id' => $this->user->id,
+            'butir_id' => $this->butir1->id,
+            'isian' => '3',
+            'link' => 'https://example.com/bukti1',
+        ]);
+
+        $this->actingAs($this->user)
+            ->get(route('pesantren.edpm'))
+            ->assertOk()
+            ->assertSee('butir terisi lengkap (nilai + tautan bukti)', false)
+            ->assertSee('butir terisi', false)
+            ->assertSee('componentFilledButirs(komponen)', false);
+    }
     // ─── getEdpmData ─────────────────────────────────────────────────────────
 
     public function test_get_edpm_data_returns_komponens(): void

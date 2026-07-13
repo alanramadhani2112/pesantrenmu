@@ -104,7 +104,7 @@
                     <span class="text-gray-400 mx-1">·</span>
                     <span x-text="activeGroupLabel()" class="text-gray-500"></span>
                     <span class="text-gray-400 mx-1">·</span>
-                    <span x-text="filledButirs() + '/' + totalButirs() + ' butir lengkap'" class="text-gray-500"></span>
+                    <span x-text="filledButirs() + '/' + totalButirs() + ' butir terisi lengkap (nilai + tautan bukti)'" class="text-gray-500"></span>
                 </span>
                 <div class="progress" style="height: 4px; width: 120px;">
                     <div class="progress-bar bg-primary" role="progressbar"
@@ -128,7 +128,7 @@
                                     <span class="badge badge-circle me-3 flex-shrink-0" :class="stepBadgeClass(index)" x-text="index + 1"></span>
                                     <span class="d-flex flex-column min-w-0 text-start">
                                         <span class="fw-semibold text-truncate fs-7" x-text="komponen.nama"></span>
-                                        <span class="fs-8 opacity-75" x-text="komponen.butirs.length + ' butir'"></span>
+                                        <span class="fs-8 opacity-75" x-text="componentFilledButirs(komponen) + '/' + komponen.butirs.length + ' butir terisi'"></span>
                                     </span>
                                 </button>
                             </template>
@@ -143,7 +143,7 @@
                                     <span class="badge badge-circle me-3 flex-shrink-0" :class="stepBadgeClass(index)" x-text="index + 1"></span>
                                     <span class="d-flex flex-column min-w-0 text-start">
                                         <span class="fw-semibold text-truncate fs-7" x-text="komponen.nama"></span>
-                                        <span class="fs-8 opacity-75" x-text="komponen.butirs.length + ' butir'"></span>
+                                        <span class="fs-8 opacity-75" x-text="componentFilledButirs(komponen) + '/' + komponen.butirs.length + ' butir terisi'"></span>
                                     </span>
                                 </button>
                             </template>
@@ -432,6 +432,10 @@ document.addEventListener('alpine:init', () => {
 
         filledButirs() {
             return this.allKomponens().reduce((total, komponen) => total + komponen.butirs.filter((butir) => this.isButirComplete(butir)).length, 0);
+        },
+
+        componentFilledButirs(komponen) {
+            return komponen.butirs.filter((butir) => this.isButirComplete(butir)).length;
         },
 
         firstIncomplete() {

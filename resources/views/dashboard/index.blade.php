@@ -325,7 +325,7 @@
                                 <div>
                                     <span class="fw-semibold text-gray-900 fs-6">{{ $doneCount }}/{{ $totalSteps }} langkah selesai</span>
                                 </div>
-                                <span class="fw-semibold fs-6 {{ $progressPercent === 100 ? 'text-success' : 'text-primary' }}">{{ $progressPercent }}%</span>
+                                <span class="fw-semibold fs-6 {{ $progressPercent === 100 ? 'text-success' : 'text-primary' }}">{{ $progressPercent === 100 ? 'Siap diajukan' : 'Belum lengkap' }}</span>
                             </div>
 
                             <div class="px-6 pb-5">
