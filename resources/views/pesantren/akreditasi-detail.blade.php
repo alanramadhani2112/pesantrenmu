@@ -61,7 +61,7 @@
             <x-ui.stat-card label="Periode" value="{{ $akreditasi->periode ?? '-' }}" variant="primary" icon="calendar" />
         </div>
         <div class="col-lg-4">
-            <x-ui.stat-card label="Status" value="{{ ucfirst($akreditasi->status ?? '-') }}" variant="info" icon="information-3" />
+            <x-ui.stat-card label="Status" value="{{ \App\Models\Akreditasi::getStatusLabel($akreditasi->status) }}" variant="info" icon="information-3" />
         </div>
         <div class="col-lg-4">
             <x-ui.stat-card label="Tahapan" value="{{ ucfirst($akreditasi->tahapan ?? '-') }}" variant="success" icon="check-circle" />

@@ -114,9 +114,15 @@
     $pesantrenNextAction = null;
     if ($isPesantren) {
         $nextReadiness = collect($readiness)->firstWhere('done', false);
-        $pesantrenNextAction = $nextReadiness
-            ? ['label' => $nextReadiness['label'], 'route' => route($nextReadiness['route']), 'copy' => 'Lengkapi bagian ini dulu']
-            : ['label' => 'Ajukan Akreditasi', 'route' => route('pesantren.akreditasi'), 'copy' => 'Semua data utama siap'];
+        $pesantrenNextAction = $stats['total_aktif'] > 0
+            ? [
+                'label' => 'Pantau Pengajuan',
+                'route' => $activeAkreditasiUuid ? route('pesantren.akreditasi-detail', $activeAkreditasiUuid) : route('pesantren.akreditasi'),
+                'copy' => 'Pengajuan sedang diproses',
+            ]
+            : ($nextReadiness
+                ? ['label' => $nextReadiness['label'], 'route' => route($nextReadiness['route']), 'copy' => 'Lengkapi bagian ini dulu']
+                : ['label' => 'Ajukan Akreditasi', 'route' => route('pesantren.akreditasi'), 'copy' => 'Semua data utama siap']);
 
         $readinessMap = collect($readiness)->mapWithKeys(fn ($s) => [route($s['route']), $s['done']])->toArray();
     }
@@ -141,17 +147,18 @@
         <x-slot name="toolbar">
             <x-ui.badge variant="primary">{{ $roleLabel }}</x-ui.badge>
 
-            @if($isPesantren && $pesantrenNextAction)
+            @if($isPesantren && $pesantrenNextAction && $stats['total_aktif'] === 0)
                 <x-ui.button :href="$pesantrenNextAction['route']" variant="primary" size="sm">
                     {{ $pesantrenNextAction['label'] }}
                 </x-ui.button>
-            @elseif($primaryAction)
+            @elseif(! $isPesantren && $primaryAction)
                 <x-ui.button :href="$primaryAction['route']" variant="primary" size="sm">
                     {{ $primaryAction['label'] }}
                 </x-ui.button>
             @endif
         </x-slot>
 
+        @unless($isPesantren && $latestPesantrenActivity && $stats['total_aktif'] > 0)
         {{-- Greeting Hero --}}
         <div class="spm-dashboard-hero rounded p-5 p-md-6 mb-6">
             <div class="spm-hero-pattern"></div>
@@ -162,7 +169,7 @@
                     <div class="text-white opacity-75 fw-semibold fs-7 fs-md-6">{{ $contextualMessage }}</div>
                 </div>
 
-                @if($isPesantren && $pesantrenNextAction)
+                @if($isPesantren && $pesantrenNextAction && $stats['total_aktif'] === 0)
                     <div class="spm-dashboard-next-action">
                         <span class="spm-dashboard-next-action-label">Langkah berikut</span>
                         <span class="spm-dashboard-next-action-title">{{ $pesantrenNextAction['label'] }}</span>
@@ -173,7 +180,7 @@
                             </x-ui.button>
                         </div>
                     </div>
-                @elseif($primaryAction)
+                @elseif(! $isPesantren && $primaryAction)
                     <div class="flex-shrink-0">
                         <x-ui.button :href="$primaryAction['route']" variant="light" size="sm" class="btn-md-md w-100 w-md-auto">
                             <x-ui.icon name="arrow-right" class="fs-4 me-1" />
@@ -184,55 +191,7 @@
             </div>
         </div>
 
-        @if($isPesantren && $stats['total_aktif'] > 0)
-            <x-ui.alert variant="info" icon="lock-2" title="Data Terkunci" class="mb-6">
-                Data Profil, IPM, SDM, dan EDPM/IPR terkunci karena pengajuan akreditasi sedang berjalan.
-                <div class="mt-3">
-                    <x-ui.button :href="route('pesantren.akreditasi')" variant="light-primary" size="sm">
-                        Pantau Pengajuan
-                    </x-ui.button>
-                </div>
-            </x-ui.alert>
-        @endif
-
-        @if($isPesantren && $latestPesantrenActivity)
-            <x-ui.card title="Timeline Pengajuan Terbaru" subtitle="Posisi pengajuan periode {{ $latestPesantrenActivity['periode'] ?? '-' }}." class="mb-6">
-                @if($latestPesantrenActivity['status'] < 0)
-                    <div class="alert alert-danger d-flex align-items-start gap-3 mb-5">
-                        <x-ui.icon name="information-5" class="fs-2 text-danger" />
-                        <div>
-                            <div class="fw-semibold text-gray-900">{{ $latestPesantrenActivity['status_label'] }}</div>
-                            <div class="text-muted fs-7">Pengajuan butuh tindak lanjut. Cek catatan terbaru dan halaman Pusat Akreditasi.</div>
-                        </div>
-                    </div>
-                @endif
-
-                <div class="spm-dashboard-timeline d-flex flex-wrap align-items-center gap-3 p-2">
-                    @foreach($akreditasiTimeline as $status => $label)
-                        @php
-                            $index = $loop->index;
-                            $isCurrent = $latestPesantrenActivity['status'] === $status;
-                            $isDone = $activeTimelineIndex !== false && $index < $activeTimelineIndex;
-                        @endphp
-                        <div class="spm-dashboard-timeline-step d-flex align-items-center gap-2">
-                            <span class="badge badge-circle {{ $isCurrent ? 'badge-primary' : ($isDone ? 'badge-light-success' : 'badge-light-secondary') }}">{{ $index + 1 }}</span>
-                            <span class="fw-semibold fs-8 {{ $isCurrent ? 'text-primary' : ($isDone ? 'text-success' : 'text-muted') }}">{{ $label }}</span>
-                        </div>
-                        @unless($loop->last)
-                            <span class="spm-dashboard-timeline-separator text-muted">/</span>
-                        @endunless
-                    @endforeach
-                </div>
-
-                @if($latestPesantrenActivity['latest_catatan'] ?? null)
-                    <div class="rounded bg-light-warning border border-warning border-dashed p-4 mt-5">
-                        <div class="fw-semibold text-gray-900 mb-1">Catatan terbaru</div>
-                        <div class="text-muted fs-7" style="white-space: pre-line;">{{ $latestPesantrenActivity['latest_catatan'] }}</div>
-                    </div>
-                @endif
-            </x-ui.card>
-        @endif
-
+        @endunless
         {{-- Quick Actions --}}
         @if(count($quickActions) > 0 && ! $isPesantren)
             <div class="row g-3 g-md-4 mb-6">
@@ -307,98 +266,167 @@
                 </div>
             </div>
         @elseif($isPesantren)
-            {{-- Pesantren: Readiness Progress Tracker --}}
+            @php
+                $doneCount = collect($readiness)->where('done', true)->count();
+                $totalSteps = count($readiness);
+                $progressPercent = $totalSteps > 0 ? round(($doneCount / $totalSteps) * 100) : 0;
+                $hasActivePengajuan = $latestPesantrenActivity && $stats['total_aktif'] > 0;
+                $nextActionTitle = match (true) {
+                    ! $latestPesantrenActivity => 'Lengkapi data, lalu ajukan akreditasi.',
+                    $latestPesantrenActivity['status'] < 0 => 'Cek catatan dan lakukan perbaikan.',
+                    $latestPesantrenActivity['status'] === 6 => 'Menunggu verifikasi admin.',
+                    $latestPesantrenActivity['status'] === 5 => 'Berkas sedang diverifikasi admin.',
+                    $latestPesantrenActivity['status'] === 4 => 'Menunggu review asesor.',
+                    $latestPesantrenActivity['status'] === 3 => 'Pantau jadwal visitasi.',
+                    $latestPesantrenActivity['status'] === 2 => 'Menunggu penilaian pasca visitasi.',
+                    $latestPesantrenActivity['status'] === 1 => 'Menunggu validasi akhir admin.',
+                    default => 'Lihat hasil akhir akreditasi.',
+                };
+            @endphp
+
             <div class="row g-6">
-                <div class="col-12 col-lg-7 col-xl-8">
-                    <x-ui.card title="Kesiapan Pengajuan Akreditasi" subtitle="{{ $stats['total_aktif'] > 0 ? 'Data terkunci selama pengajuan berjalan.' : 'Lengkapi semua data berikut sebelum mengajukan akreditasi.' }}">
-                        <div class="d-flex flex-column gap-0">
-                            @php
-                                $doneCount = collect($readiness)->where('done', true)->count();
-                                $totalSteps = count($readiness);
-                                $progressPercent = $totalSteps > 0 ? round(($doneCount / $totalSteps) * 100) : 0;
-                                $lockedReadinessRoute = ($stats['total_aktif'] > 0 && $activeAkreditasiUuid)
-                                    ? route('pesantren.akreditasi-detail', $activeAkreditasiUuid)
-                                    : null;
-                            @endphp
-
-                            <div class="d-flex align-items-center justify-content-between px-6 pt-4 pb-3">
-                                <div>
-                                    <span class="fw-semibold text-gray-900 fs-6">{{ $doneCount }}/{{ $totalSteps }} langkah selesai</span>
-                                </div>
-                                <span class="fw-semibold fs-6 {{ $progressPercent === 100 ? 'text-success' : 'text-primary' }}">{{ $progressPercent === 100 ? 'Siap diajukan' : 'Belum lengkap' }}</span>
-                            </div>
-
-                            <div class="px-6 pb-5">
-                                <x-ui.progress
-                                    :value="$progressPercent"
-                                    :variant="$progressPercent === 100 ? 'success' : 'primary'"
-                                    :label="'Kesiapan Data'"
-                                    :meta="$progressPercent . '%'"
-                                    class="spm-dashboard-progress"
-                                />
-                            </div>
-
-                            <div class="separator"></div>
-
-                            @foreach($readiness as $step)
-                                <a href="{{ $lockedReadinessRoute ?? route($step['route']) }}" class="d-flex align-items-center gap-4 px-6 py-4 text-decoration-none border-bottom border-dashed spm-readiness-item {{ $step['done'] ? '' : 'spm-readiness-item-pending' }}">
-                                    <div class="symbol symbol-35px flex-shrink-0">
-                                        @if($step['done'])
-                                            <span class="symbol-label bg-light-success text-success rounded-circle">
-                                                <x-ui.icon name="check" class="fs-4" />
-                                            </span>
-                                        @else
-                                            <span class="symbol-label bg-light-warning text-warning rounded-circle">
-                                                <x-ui.icon name="information" class="fs-4" />
-                                            </span>
-                                        @endif
-                                    </div>
-                                    <div class="flex-grow-1 min-w-0">
-                                        <span class="fw-semibold fs-7 {{ $step['done'] ? 'text-gray-600' : 'text-gray-900' }}">{{ $step['label'] }}</span>
-                                        <span class="d-block text-muted fs-8 mt-1">{{ $step['meta'] ?? '' }} terisi</span>
-                                    </div>
-                                    <div class="flex-shrink-0">
-                                        @if($step['done'])
-                                            @if($stats['total_aktif'] > 0)
-                                            <x-ui.badge variant="warning">Terkunci</x-ui.badge>
-                                        @else
-                                            <x-ui.badge variant="success">Lengkap</x-ui.badge>
-                                        @endif
-                                        @else
-                                            <span class="text-primary fw-semibold fs-8">{{ $stats['total_aktif'] > 0 ? 'Lihat data →' : 'Lengkapi →' }}</span>
-                                        @endif
-                                    </div>
-                                </a>
-                            @endforeach
-
-                            @if($progressPercent === 100 && $stats['total_aktif'] === 0)
-                                <div class="px-6 py-5 bg-light-success">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <x-ui.icon name="check-circle" class="fs-2x text-success" />
-                                        <div>
-                                            <div class="fw-semibold text-gray-900">Data Anda sudah lengkap!</div>
-                                            <div class="text-muted fs-7">Anda bisa mengajukan akreditasi sekarang.</div>
+                <div class="{{ $hasActivePengajuan ? 'col-12' : 'col-12 col-lg-8' }}">
+                    @if($hasActivePengajuan)
+                        <x-ui.card title="Pengajuan Berjalan" subtitle="Pantau posisi dan langkah berikutnya dari satu tempat." class="h-100">
+                            <div class="p-6">
+                                <div class="row g-5 align-items-stretch mb-6">
+                                    <div class="col-lg-8">
+                                        <div class="rounded bg-light-primary border border-primary border-dashed p-5 h-100">
+                                            <div class="d-flex flex-column flex-md-row justify-content-between gap-4">
+                                                <div>
+                                                    <div class="text-muted fw-semibold fs-8 text-uppercase mb-2">Tahap Saat Ini</div>
+                                                    <h3 class="fw-semibold text-gray-900 mb-2">{{ $latestPesantrenActivity['status_label'] }}</h3>
+                                                    <div class="text-muted fw-semibold fs-7">Periode {{ $latestPesantrenActivity['periode'] ?? '-' }} - update {{ $latestPesantrenActivity['updated_at']->translatedFormat('d M Y, H:i') }}</div>
+                                                </div>
+                                                <div class="flex-shrink-0">
+                                                    <x-ui.status-badge :variant="$statusVariantMap[$latestPesantrenActivity['status']] ?? 'secondary'">
+                                                        {{ $latestPesantrenActivity['status_label'] }}
+                                                    </x-ui.status-badge>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <x-ui.button :href="route('pesantren.akreditasi')" variant="success" size="sm" class="ms-auto">
-                                            Ajukan Akreditasi
-                                        </x-ui.button>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="rounded bg-light-success border border-success border-dashed p-5 h-100">
+                                            <div class="text-muted fw-semibold fs-8 text-uppercase mb-2">Langkah Berikut</div>
+                                            <div class="fw-semibold text-gray-900 mb-2">{{ $nextActionTitle }}</div>
+                                            <div class="text-muted fs-7">Data terkunci selama pengajuan diproses.</div>
+                                        </div>
                                     </div>
                                 </div>
+
+                                <div class="mb-6">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="fw-semibold text-gray-900 fs-7">Alur Akreditasi</span>
+                                        <span class="text-muted fw-semibold fs-8">Tahap {{ ($activeTimelineIndex === false ? 0 : $activeTimelineIndex + 1) }}/{{ count($akreditasiTimeline) }}</span>
+                                    </div>
+                                    <x-ui.progress
+                                        :value="($activeTimelineIndex === false ? 0 : (($activeTimelineIndex + 1) / count($akreditasiTimeline)) * 100)"
+                                        variant="success"
+                                        :label="'Progress Pengajuan'"
+                                        :meta="($activeTimelineIndex === false ? 0 : $activeTimelineIndex + 1) . '/' . count($akreditasiTimeline)"
+                                        class="spm-dashboard-progress"
+                                    />
+                                </div>
+
+                                <div class="d-flex flex-wrap gap-2 mb-6">
+                                    @foreach($akreditasiTimeline as $status => $label)
+                                        @php
+                                            $index = $loop->index;
+                                            $isCurrent = $latestPesantrenActivity['status'] === $status;
+                                            $isDone = $activeTimelineIndex !== false && $index < $activeTimelineIndex;
+                                            $variant = $isCurrent ? 'primary' : ($isDone ? 'success' : 'secondary');
+                                        @endphp
+                                        <x-ui.badge :variant="$variant" class="px-3 py-2">
+                                            {{ $index + 1 }}. {{ $label }}
+                                        </x-ui.badge>
+                                    @endforeach
+                                </div>
+
+                                @if($latestPesantrenActivity['latest_catatan'] ?? null)
+                                    <x-ui.alert variant="warning" icon="information-5" title="Catatan terbaru" class="mb-6">
+                                        <div style="white-space: pre-line;">{{ $latestPesantrenActivity['latest_catatan'] }}</div>
+                                    </x-ui.alert>
+                                @endif
+
+                                <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4 border-top pt-5">
+                                    <div class="text-muted fw-semibold fs-7">Tidak perlu mengubah data kecuali ada catatan perbaikan dari admin atau asesor.</div>
+                                    <x-ui.button :href="$recentRouteFor($latestPesantrenActivity['uuid'])" variant="primary" size="sm">
+                                        Lihat Detail Pengajuan
+                                    </x-ui.button>
+                                </div>
+                            </div>
+                        </x-ui.card>
+                    @else
+                        <x-ui.card title="Kesiapan Pengajuan Akreditasi" subtitle="Lengkapi semua data berikut sebelum mengajukan akreditasi.">
+                            <div class="d-flex flex-column gap-0">
+                                <div class="d-flex align-items-center justify-content-between px-6 pt-4 pb-3">
+                                    <span class="fw-semibold text-gray-900 fs-6">{{ $doneCount }}/{{ $totalSteps }} langkah selesai</span>
+                                    <span class="fw-semibold fs-6 {{ $progressPercent >= 100 ? 'text-success' : 'text-primary' }}">{{ $progressPercent >= 100 ? 'Siap diajukan' : 'Belum lengkap' }}</span>
+                                </div>
+
+                                <div class="px-6 pb-5">
+                                    <x-ui.progress :value="$progressPercent" :variant="$progressPercent >= 100 ? 'success' : 'primary'" :label="'Kesiapan Data'" :meta="$progressPercent . '%'" class="spm-dashboard-progress" />
+                                </div>
+
+                                <div class="separator"></div>
+
+                                @foreach($readiness as $step)
+                                    <a href="{{ route($step['route']) }}" class="d-flex align-items-center gap-4 px-6 py-4 text-decoration-none border-bottom border-dashed spm-readiness-item {{ $step['done'] ? '' : 'spm-readiness-item-pending' }}">
+                                        <div class="symbol symbol-35px flex-shrink-0">
+                                            <span class="symbol-label {{ $step['done'] ? 'bg-light-success text-success' : 'bg-light-warning text-warning' }} rounded-circle">
+                                                <x-ui.icon :name="$step['done'] ? 'check' : 'information'" class="fs-4" />
+                                            </span>
+                                        </div>
+                                        <div class="flex-grow-1 min-w-0">
+                                            <span class="fw-semibold fs-7 {{ $step['done'] ? 'text-gray-600' : 'text-gray-900' }}">{{ $step['label'] }}</span>
+                                            <span class="d-block text-muted fs-8 mt-1">{{ $step['meta'] ?? '' }} terisi</span>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <x-ui.badge :variant="$step['done'] ? 'success' : 'warning'">{{ $step['done'] ? 'Lengkap' : 'Lengkapi' }}</x-ui.badge>
+                                        </div>
+                                    </a>
+                                @endforeach
+
+                                @if($progressPercent >= 100)
+                                    <div class="px-6 py-5 bg-light-success">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <x-ui.icon name="check-circle" class="fs-2x text-success" />
+                                            <div>
+                                                <div class="fw-semibold text-gray-900">Data Anda sudah lengkap!</div>
+                                                <div class="text-muted fs-7">Anda bisa mengajukan akreditasi sekarang.</div>
+                                            </div>
+                                            <x-ui.button :href="route('pesantren.akreditasi')" variant="success" size="sm" class="ms-auto">Ajukan Akreditasi</x-ui.button>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </x-ui.card>
+                    @endif
+                </div>
+
+                @unless($hasActivePengajuan)
+                <div class="col-12 col-lg-4">
+                    <x-ui.card title="Aksi Berikutnya" subtitle="Panduan singkat untuk langkah Anda." class="h-100">
+                        <div class="p-6 d-flex flex-column gap-4">
+                            <div class="rounded bg-light-primary border border-primary border-dashed p-4">
+                                <div class="fw-semibold text-gray-900 mb-1">{{ $nextActionTitle }}</div>
+                                <div class="text-muted fs-7">{{ $hasActivePengajuan ? 'Tidak perlu mengubah data kecuali ada catatan perbaikan.' : 'Mulai dari bagian yang belum lengkap.' }}</div>
+                            </div>
+
+                            @if($hasActivePengajuan)
+                                <div class="rounded bg-light-warning p-4">
+                                    <div class="fw-semibold text-gray-900 mb-1">Data Pesantren Terkunci</div>
+                                    <div class="text-muted fs-7">Profil, IPM, SDM, dan EDPM/IPR dikunci selama pengajuan berjalan.</div>
+                                </div>
+                                <x-ui.button :href="route('pesantren.akreditasi')" variant="light-primary" size="sm" class="w-100">Ke Pusat Akreditasi</x-ui.button>
+                            @else
+                                <x-ui.button :href="$pesantrenNextAction['route']" variant="primary" size="sm" class="w-100">{{ $pesantrenNextAction['label'] }}</x-ui.button>
                             @endif
                         </div>
                     </x-ui.card>
                 </div>
-
-                <div class="col-12 col-lg-5 col-xl-4">
-                    <x-ui.card title="Status Pengajuan" subtitle="Ringkasan pengajuan akreditasi Anda." class="h-100 spm-dashboard-stat">
-                        <div class="d-flex flex-column">
-                            <x-ui.metric-row label="Pengajuan Berjalan" :value="$stats['total_aktif']" variant="primary" icon="abstract-26" :href="route('pesantren.akreditasi')" />
-                            <x-ui.metric-row label="Sedang Dinilai" :value="$stats['assessment']" variant="info" icon="document" :href="route('pesantren.akreditasi', ['statusFilter' => 4])" />
-                            <x-ui.metric-row label="Proses Visitasi" :value="$stats['visitasi']" variant="warning" icon="geolocation" :href="route('pesantren.akreditasi', ['statusFilter' => 3])" />
-                            <x-ui.metric-row label="Perlu Diperbaiki" :value="$stats['ditolak']" variant="danger" icon="cross-circle" :href="route('pesantren.akreditasi', ['statusFilter' => -1])" class="border-bottom-0" />
-                        </div>
-                    </x-ui.card>
-                </div>
+                @endunless
             </div>
         @elseif($isAsesor)
             <div class="row g-6">
@@ -536,6 +564,7 @@
 
         @endunless
 
+        @unless($isPesantren)
         {{-- Recent Activity --}}
         <div class="row g-6 mt-0">
             <div class="col-12">
@@ -665,6 +694,7 @@
                 </x-ui.card>
             </div>
         </div>
+        @endunless
     </x-ui.page>
 </div>
 @endsection

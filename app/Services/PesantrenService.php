@@ -35,7 +35,7 @@ class PesantrenService
         'nama_pesantren' => 'Nama Pesantren',
         'ns_pesantren' => 'Nomor Statistik Pesantren (NSP)',
         'alamat' => 'Alamat Pesantren',
-        'provinsi' => 'Provinsi',
+        'provinsi_kode' => 'Provinsi',
         'kota_kabupaten' => 'Kota / Kabupaten',
         'tahun_pendirian' => 'Tahun Pendirian',
         'nama_mudir' => 'Nama Mudir / Pimpinan',
@@ -209,7 +209,9 @@ class PesantrenService
         $missing = [];
 
         foreach (self::PROFILE_REQUIRED_FIELDS as $field => $label) {
-            $value = $pesantren->{$field};
+            $value = $field === 'provinsi_kode'
+                ? ($pesantren->provinsi_kode ?: $pesantren->provinsi)
+                : $pesantren->{$field};
 
             if (is_array($value) ? $value === [] : blank($value)) {
                 $missing[] = $label;
@@ -707,6 +709,7 @@ class PesantrenService
         return [
             'akreditasi' => $akreditasi,
             'pesantren' => $pesantren,
+            'profil' => $pesantren,
             'ipm' => $ipm,
             'sdm' => $sdm,
             'komponens' => $komponens,
