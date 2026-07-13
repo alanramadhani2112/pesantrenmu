@@ -690,3 +690,104 @@
     top: auto !important;
     z-index: auto !important;
 }
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid .spm-detail-item {
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid .spm-detail-item-surface {
+    height: 100%;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--spm-pesantren-border);
+    border-radius: 0.75rem;
+    background: #f8fafc;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid {
+    --bs-gutter-x: 2rem;
+    --bs-gutter-y: 0;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid .spm-detail-item {
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid .spm-detail-item-surface {
+    height: 100%;
+    padding: 1rem 0;
+    border: 0;
+    border-bottom: 1px solid var(--spm-pesantren-border);
+    border-radius: 0;
+    background: transparent;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid .spm-detail-label {
+    margin-bottom: 0.35rem;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid .spm-detail-value {
+    color: #111827;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid {
+    --bs-gutter-x: 1rem;
+    --bs-gutter-y: 1rem;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid .spm-detail-item {
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid .spm-detail-item-surface {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 4.25rem;
+    height: 100%;
+    padding: 1rem 1.125rem;
+    border: 1px solid #e4e9f2;
+    border-radius: 0.85rem;
+    background: #f9fbfd;
+    box-shadow: none;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid .spm-detail-label {
+    margin-bottom: 0.35rem;
+    color: #7e8ba8;
+    font-size: 0.69rem;
+    line-height: 1.2;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid .spm-detail-value {
+    color: #071437;
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid .col-md-12 .spm-detail-item-surface {
+    min-height: 4.5rem;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid {
+    --bs-gutter-x: 1.5rem;
+    --bs-gutter-y: 1rem;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid > .spm-detail-item {
+    padding-right: calc(var(--bs-gutter-x) * 0.5) !important;
+    padding-left: calc(var(--bs-gutter-x) * 0.5) !important;
+    margin-top: var(--bs-gutter-y) !important;
+}

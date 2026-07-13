@@ -11,12 +11,14 @@
 @endphp
 
 <div data-ui-detail-item="metronic" {{ $attributes->merge(['class' => "{$columnClass} spm-detail-item"]) }}>
-    <div class="spm-detail-label">{{ $label }}</div>
-    <div class="spm-detail-value">
-        @if($hasSlot)
-            {{ $slot }}
-        @else
-            {{ filled($value) ? $value : '-' }}
-        @endif
+    <div class="spm-detail-item-surface">
+        <div class="spm-detail-label">{{ $label }}</div>
+        <div class="spm-detail-value">
+            @if($hasSlot)
+                {{ $slot }}
+            @else
+                {{ filled($value) ? $value : '-' }}
+            @endif
+        </div>
     </div>
 </div>
