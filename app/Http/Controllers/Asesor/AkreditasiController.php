@@ -33,10 +33,10 @@ class AkreditasiController extends Controller
             abort(403);
         }
 
-        $focus = $request->input('focus', '');
+        $focus = $request->input('focus', $request->route('focus', ''));
         $search = $request->input('search', '');
         $periodeFilter = $request->input('periodeFilter', '');
-        $statusFilter = $request->input('statusFilter', '');
+        $statusFilter = $request->input('statusFilter', $request->route('statusFilter', ''));
         $perPage = $request->integer('perPage', 10);
         $sortField = $request->input('sortField', 'id');
         $sortAsc = filter_var($request->input('sortAsc', 'false'), FILTER_VALIDATE_BOOLEAN);

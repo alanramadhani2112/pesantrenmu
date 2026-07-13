@@ -149,7 +149,7 @@ class SidebarMenuServiceTest extends TestCase
 
         $sectionLabels = array_column($menu, 'label');
         $this->assertSame(
-            ['Monitoring', 'Profil', 'Tugas Akreditasi', 'Dokumen'],
+            ['Monitoring', 'Akun Asesor', 'Workflow Akreditasi', 'Referensi'],
             $sectionLabels
         );
     }

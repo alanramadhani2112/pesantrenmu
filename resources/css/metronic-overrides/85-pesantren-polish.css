@@ -791,3 +791,268 @@
     padding-left: calc(var(--bs-gutter-x) * 0.5) !important;
     margin-top: var(--bs-gutter-y) !important;
 }
+
+/* Pesantren dashboard polish */
+[data-dashboard-page="metronic"] {
+    --spm-dashboard-card-radius: 1rem;
+    --spm-dashboard-soft-shadow: 0 12px 32px rgba(15, 23, 42, 0.055);
+}
+
+[data-dashboard-page="metronic"] [data-ui-card="metronic"] {
+    border: 1px solid var(--spm-pesantren-border);
+    border-radius: var(--spm-dashboard-card-radius);
+    box-shadow: var(--spm-dashboard-soft-shadow);
+}
+
+[data-dashboard-page="metronic"] [data-ui-card="metronic"] > .card-header {
+    min-height: 86px;
+    padding: 1.35rem 1.5rem;
+    border-bottom: 1px solid var(--spm-pesantren-border) !important;
+    background:
+        linear-gradient(90deg, rgba(var(--spm-primary-rgb), 0.035), transparent 72%),
+        #ffffff;
+}
+
+[data-dashboard-page="metronic"] [data-ui-card="metronic"] > .card-body {
+    padding: 0;
+}
+
+[data-dashboard-page="metronic"] .spm-dashboard-hero {
+    padding: 1.75rem !important;
+    border: 0;
+    border-radius: 1.15rem !important;
+    background:
+        radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.2), transparent 28%),
+        linear-gradient(135deg, #00422b 0%, var(--spm-primary) 58%, #087a4f 100%);
+    box-shadow: 0 18px 42px rgba(0, 66, 43, 0.2);
+}
+
+[data-dashboard-page="metronic"] .spm-dashboard-next-action {
+    border-radius: 0.95rem;
+    background: rgba(255, 255, 255, 0.14);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+[data-dashboard-page="metronic"] .spm-dashboard-progress {
+    padding: 0.15rem 0;
+}
+
+[data-dashboard-page="metronic"] .spm-dashboard-progress .spm-progress-label,
+[data-dashboard-page="metronic"] .spm-dashboard-progress .spm-progress-meta {
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+[data-dashboard-page="metronic"] .spm-dashboard-progress .progress {
+    height: 0.65rem !important;
+    background: #edf2f7;
+    border-radius: 999px;
+}
+
+[data-dashboard-page="metronic"] .spm-dashboard-progress .progress-bar {
+    border-radius: 999px;
+}
+
+[data-dashboard-page="metronic"] .spm-readiness-item {
+    min-height: 76px;
+    margin: 0.75rem 1rem;
+    padding: 1rem !important;
+    border: 1px solid var(--spm-pesantren-border) !important;
+    border-radius: 0.9rem;
+    background: #ffffff;
+    transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+[data-dashboard-page="metronic"] .spm-readiness-item:hover {
+    border-color: rgba(var(--spm-primary-rgb), 0.24) !important;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    transform: translateY(-1px);
+}
+
+[data-dashboard-page="metronic"] .spm-readiness-item-pending {
+    background:
+        linear-gradient(90deg, rgba(247, 144, 9, 0.06), transparent 54%),
+        #ffffff;
+}
+
+[data-dashboard-page="metronic"] .spm-readiness-item:not(.spm-readiness-item-pending) {
+    background:
+        linear-gradient(90deg, rgba(18, 183, 106, 0.05), transparent 54%),
+        #ffffff;
+}
+
+[data-dashboard-page="metronic"] .spm-readiness-item .symbol-label {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+[data-dashboard-page="metronic"] .spm-readiness-item:last-of-type {
+    margin-bottom: 1rem;
+}
+
+[data-dashboard-page="metronic"] .spm-dashboard-stat [data-ui-card="metronic"],
+[data-dashboard-page="metronic"] .spm-dashboard-stat.spm-stat-card {
+    border-radius: var(--spm-dashboard-card-radius);
+}
+
+[data-dashboard-page="metronic"] .rounded.bg-light-primary,
+[data-dashboard-page="metronic"] .rounded.bg-light-success,
+[data-dashboard-page="metronic"] .rounded.bg-light-warning {
+    border-radius: 0.95rem !important;
+}
+
+@media (max-width: 767.98px) {
+    [data-dashboard-page="metronic"] [data-ui-card="metronic"] > .card-header {
+        min-height: auto;
+        padding: 1rem 1.125rem;
+    }
+
+    [data-dashboard-page="metronic"] .spm-dashboard-hero {
+        padding: 1.25rem !important;
+        border-radius: 1rem !important;
+    }
+
+    [data-dashboard-page="metronic"] .spm-readiness-item {
+        margin: 0.65rem 0.85rem;
+        padding: 0.9rem !important;
+    }
+}
+
+[data-module-page="asesor-akreditasi"] .spm-asesor-workflow-tabs .spm-tabs-nav,
+[data-module-page="dokumen"] .spm-document-category-tabs .spm-tabs-nav {
+    gap: .5rem;
+    overflow-x: auto;
+    padding-bottom: .25rem;
+    scrollbar-width: thin;
+}
+
+[data-module-page="asesor-akreditasi"] .spm-asesor-workflow-tabs .spm-tab-link {
+    min-height: 42px;
+    border: 1px solid var(--spm-pesantren-border, #e4e9f2);
+    border-radius: .85rem;
+    background: #fff;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+[data-module-page="asesor-akreditasi"] .spm-asesor-workflow-tabs .spm-tab-link.active {
+    color: var(--spm-primary-700) !important;
+    border-color: rgba(var(--spm-primary-rgb), .25);
+    background: var(--spm-primary-light);
+}
+
+[data-module-page="asesor-akreditasi"] [data-ui-card="metronic"],
+[data-module-page="asesor-akreditasi"] .spm-table-shell,
+[data-module-page="dokumen"] [data-ui-card="metronic"],
+[data-module-page="dokumen"] .spm-table-shell {
+    border: 1px solid var(--spm-pesantren-border, #e4e9f2);
+    border-radius: 1rem;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, .055);
+}
+
+[data-module-page="asesor-akreditasi"] .spm-table-shell tbody td,
+[data-module-page="dokumen"] .spm-table-shell tbody td {
+    vertical-align: middle;
+}
+
+@media (max-width: 767.98px) {
+    [data-module-page="asesor-akreditasi"] .spm-asesor-workflow-tabs .spm-tabs-nav,
+    [data-module-page="dokumen"] .spm-document-category-tabs .spm-tabs-nav {
+        flex-wrap: nowrap;
+    }
+}
+
+/* Asesor dashboard polish */
+[data-dashboard-page="metronic"][data-dashboard-role="asesor"] [data-ui-card="metronic"] > .card-body {
+    padding: 1.5rem !important;
+}
+
+[data-dashboard-page="metronic"][data-dashboard-role="asesor"] .spm-dashboard-quick-actions {
+    max-width: 820px;
+}
+
+[data-dashboard-page="metronic"][data-dashboard-role="asesor"] .spm-quick-action--dashboard {
+    border: 1px solid var(--spm-pesantren-border, #e4e9f2) !important;
+    border-radius: 1rem;
+    box-shadow: 0 10px 26px rgba(15, 23, 42, .04) !important;
+}
+
+[data-dashboard-page="metronic"][data-dashboard-role="asesor"] .spm-quick-action--dashboard .card-body {
+    min-height: 118px;
+    padding: 1.25rem !important;
+}
+
+[data-dashboard-page="metronic"][data-dashboard-role="asesor"] .spm-quick-action--dashboard .symbol-label {
+    width: 42px;
+    height: 42px;
+    border-radius: .8rem;
+}
+
+[data-dashboard-page="metronic"][data-dashboard-role="asesor"] .spm-asesor-task-cards {
+    align-items: stretch;
+}
+
+[data-dashboard-page="metronic"][data-dashboard-role="asesor"] .spm-asesor-task-card {
+    display: flex;
+    min-height: 170px;
+    flex-direction: column;
+    justify-content: space-between;
+    border-radius: 1rem !important;
+}
+
+[data-dashboard-page="metronic"][data-dashboard-role="asesor"] .spm-dashboard-stat [data-ui-card="metronic"] > .card-body,
+[data-dashboard-page="metronic"][data-dashboard-role="asesor"] .spm-stat-card .card-body {
+    padding: 1.25rem !important;
+}
+
+[data-dashboard-page="metronic"][data-dashboard-role="asesor"] .min-h-300px {
+    min-height: 300px !important;
+}
+
+@media (max-width: 767.98px) {
+    [data-dashboard-page="metronic"][data-dashboard-role="asesor"] [data-ui-card="metronic"] > .card-body {
+        padding: 1rem !important;
+    }
+
+    [data-dashboard-page="metronic"][data-dashboard-role="asesor"] .spm-quick-action--dashboard .card-body {
+        min-height: 104px;
+    }
+}
+
+[data-dashboard-page="metronic"][data-dashboard-role="asesor"] .spm-asesor-dashboard-workspace {
+    align-items: stretch;
+}
+
+[data-dashboard-page="metronic"][data-dashboard-role="asesor"] .spm-asesor-workflow-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 86px;
+    padding: 1rem;
+    border: 1px solid var(--spm-pesantren-border, #e4e9f2);
+    border-radius: 1rem;
+    background: #fff;
+    transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+[data-dashboard-page="metronic"][data-dashboard-role="asesor"] .spm-asesor-workflow-item:hover {
+    border-color: rgba(var(--spm-primary-rgb), .24);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, .07);
+    transform: translateY(-1px);
+}
+
+[data-dashboard-page="metronic"][data-dashboard-role="asesor"] .spm-asesor-focus-card [data-ui-card="metronic"] > .card-body,
+[data-dashboard-page="metronic"][data-dashboard-role="asesor"] .spm-asesor-summary-card [data-ui-card="metronic"] > .card-body {
+    padding: 1.5rem !important;
+}
+
+@media (max-width: 575.98px) {
+    [data-dashboard-page="metronic"][data-dashboard-role="asesor"] .spm-asesor-workflow-item {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    [data-dashboard-page="metronic"][data-dashboard-role="asesor"] .spm-asesor-workflow-item .btn {
+        width: 100%;
+    }
+}

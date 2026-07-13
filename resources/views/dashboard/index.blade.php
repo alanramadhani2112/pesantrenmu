@@ -142,7 +142,7 @@
         : false;
 @endphp
 
-<div data-dashboard-page="metronic" x-data='dashboardCharts(@json($chartData), @json($stats))'>
+<div data-dashboard-page="metronic" data-dashboard-role="{{ $isAsesor ? 'asesor' : ($isPesantren ? 'pesantren' : ($isAdminArea ? 'admin' : 'user')) }}" x-data='dashboardCharts(@json($chartData), @json($stats))'>
     <x-ui.page title="Dashboard" :subtitle="$pageSubtitle">
         <x-slot name="toolbar">
             <x-ui.badge variant="primary">{{ $roleLabel }}</x-ui.badge>
@@ -193,12 +193,12 @@
 
         @endunless
         {{-- Quick Actions --}}
-        @if(count($quickActions) > 0 && ! $isPesantren)
-            <div class="row g-3 g-md-4 mb-6">
+        @if(count($quickActions) > 0 && ! $isPesantren && ! $isAsesor)
+            <div class="row g-3 g-md-4 mb-6 spm-dashboard-quick-actions">
                 @foreach($quickActions as $action)
                     <div class="col-6 col-md-4 col-lg-3">
                         <a href="{{ $action['route'] }}"
-                           class="card border-0 shadow-sm h-100 text-decoration-none spm-quick-action">
+                           class="card border-0 shadow-sm h-100 text-decoration-none spm-quick-action spm-quick-action--dashboard">
                             <div class="card-body d-flex flex-column align-items-center text-center p-4 p-md-5">
                                 <div class="symbol symbol-40px symbol-md-50px mb-3">
                                     <div class="symbol-label bg-light-{{ $action['variant'] }} text-{{ $action['variant'] }}">
@@ -429,54 +429,88 @@
                 @endunless
             </div>
         @elseif($isAsesor)
-            <div class="row g-6">
-                <div class="col-12 col-lg-7 col-xl-8">
-                    <x-ui.card title="Tugas Aktif" subtitle="Prioritaskan penilaian dan visitasi yang sedang berjalan." class="h-100">
-                        <div class="row g-5">
-                            <div class="col-sm-6 col-md-4">
-                                <div class="rounded border border-dashed border-primary bg-light-primary p-5 h-100">
-                                    <x-ui.badge variant="primary" class="mb-4">Total Tugas</x-ui.badge>
-                                    <div class="fs-2x fw-semibold text-gray-900 mb-1">{{ $stats['total_aktif'] }}</div>
-                                    <div class="text-muted fw-semibold fs-7 mb-5">Penilaian atau visitasi yang masih aktif.</div>
-                                    <x-ui.button :href="route('asesor.akreditasi')" variant="light" size="sm">Buka Tugas</x-ui.button>
-                                </div>
-                            </div>
+            @php
+                $asesorWorkflow = [
+                    [
+                        'label' => 'Review Berkas',
+                        'copy' => 'Cek profil, IPM, SDM, dan EDPM sebelum visitasi.',
+                        'value' => $stats['assessment'],
+                        'route' => route('asesor.akreditasi.review'),
+                        'variant' => 'primary',
+                        'icon' => 'eye',
+                    ],
+                    [
+                        'label' => 'Atur Jadwal',
+                        'copy' => 'Tetapkan jadwal visitasi untuk pengajuan siap visitasi.',
+                        'value' => $stats['visitasi'],
+                        'route' => route('asesor.akreditasi.jadwal'),
+                        'variant' => 'warning',
+                        'icon' => 'calendar-tick',
+                    ],
+                    [
+                        'label' => 'Input Nilai',
+                        'copy' => 'Isi instrumen penilaian setelah visitasi selesai.',
+                        'value' => $stats['assessment'],
+                        'route' => route('asesor.akreditasi.nilai'),
+                        'variant' => 'info',
+                        'icon' => 'pencil',
+                    ],
+                    [
+                        'label' => 'Upload Laporan',
+                        'copy' => 'Lengkapi laporan individu dan kelompok visitasi.',
+                        'value' => $stats['visitasi'],
+                        'route' => route('asesor.akreditasi.laporan-visitasi'),
+                        'variant' => 'success',
+                        'icon' => 'file-up',
+                    ],
+                ];
+            @endphp
 
-                            <div class="col-sm-6 col-md-4">
-                                <div class="rounded border border-dashed border-info bg-light-info p-5 h-100">
-                                    <x-ui.badge variant="info" class="mb-4">Penilaian</x-ui.badge>
-                                    <div class="fs-2x fw-semibold text-gray-900 mb-1">{{ $stats['assessment'] }}</div>
-                                    <div class="text-muted fw-semibold fs-7 mb-5">Tugas penilaian instrumen yang perlu diproses.</div>
-                                    <x-ui.button :href="route('asesor.akreditasi')" variant="light-info" size="sm">Isi Instrumen</x-ui.button>
-                                </div>
-                            </div>
-
-                            <div class="col-sm-6 col-md-4">
-                                <div class="rounded border border-dashed border-warning bg-light-warning p-5 h-100">
-                                    <x-ui.badge variant="warning" class="mb-4">Visitasi</x-ui.badge>
-                                    <div class="fs-2x fw-semibold text-gray-900 mb-1">{{ $stats['visitasi'] }}</div>
-                                    <div class="text-muted fw-semibold fs-7 mb-5">Tugas visitasi yang perlu dijadwalkan atau diselesaikan.</div>
-                                    <x-ui.button :href="route('asesor.akreditasi')" variant="light-warning" size="sm">Atur Visitasi</x-ui.button>
-                                </div>
-                            </div>
+            <div class="row g-6 spm-asesor-dashboard-workspace">
+                <div class="col-12 col-xl-8">
+                    <x-ui.card title="Fokus Hari Ini" subtitle="Mulai dari tahap paling kiri yang masih memiliki pekerjaan." class="h-100 spm-asesor-focus-card">
+                        <div class="d-flex flex-column gap-4">
+                            @foreach($asesorWorkflow as $step)
+                                <a href="{{ $step['route'] }}" class="spm-asesor-workflow-item text-decoration-none">
+                                    <div class="symbol symbol-44px flex-shrink-0">
+                                        <span class="symbol-label bg-light-{{ $step['variant'] }} text-{{ $step['variant'] }} rounded-3">
+                                            <x-ui.icon :name="$step['icon']" class="fs-2" />
+                                        </span>
+                                    </div>
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <span class="fw-semibold text-gray-900 fs-6">{{ $step['label'] }}</span>
+                                            <x-ui.badge :variant="$step['variant']">{{ $step['value'] }} tugas</x-ui.badge>
+                                        </div>
+                                        <div class="text-muted fw-semibold fs-7">{{ $step['copy'] }}</div>
+                                    </div>
+                                    <span class="btn btn-sm btn-light-{{ $step['variant'] }} flex-shrink-0">Buka</span>
+                                </a>
+                            @endforeach
                         </div>
                     </x-ui.card>
                 </div>
 
-                <div class="col-12 col-lg-5 col-xl-4">
-                    <x-ui.card title="Ringkasan Pekerjaan" subtitle="Status pekerjaan asesor saat ini." class="h-100">
-                        <div class="d-flex flex-column">
-                            <x-ui.metric-row label="Tugas Aktif" :value="$stats['total_aktif']" variant="primary" icon="abstract-26" />
-                            <x-ui.metric-row label="Perlu Penilaian" :value="$stats['assessment']" variant="info" icon="document" />
-                            <x-ui.metric-row label="Tahap Visitasi" :value="$stats['visitasi']" variant="warning" icon="geolocation" />
-                            <x-ui.metric-row label="Selesai" :value="$stats['terakreditasi']" variant="success" icon="check-circle" class="border-bottom-0" />
+                <div class="col-12 col-xl-4">
+                    <x-ui.card title="Ringkasan" subtitle="Status pekerjaan asesor saat ini." class="h-100 spm-asesor-summary-card">
+                        <div class="d-flex flex-column gap-4">
+                            <div class="rounded bg-light-primary border border-primary border-dashed p-5">
+                                <div class="text-muted fw-semibold fs-8 text-uppercase mb-2">Tugas aktif</div>
+                                <div class="fs-2x fw-semibold text-gray-900 mb-2">{{ $stats['total_aktif'] }}</div>
+                                <x-ui.button :href="route('asesor.akreditasi')" variant="light-primary" size="sm">Lihat Semua Tugas</x-ui.button>
+                            </div>
+                            <div class="d-flex flex-column">
+                                <x-ui.metric-row label="Perlu Penilaian" :value="$stats['assessment']" variant="info" icon="document" />
+                                <x-ui.metric-row label="Tahap Visitasi" :value="$stats['visitasi']" variant="warning" icon="geolocation" />
+                                <x-ui.metric-row label="Selesai" :value="$stats['terakreditasi']" variant="success" icon="check-circle" class="border-bottom-0" />
+                            </div>
                         </div>
                     </x-ui.card>
                 </div>
             </div>
         @endif
 
-        @unless($isPesantren)
+        @unless($isPesantren || $isAsesor)
         <div class="row g-6 mt-0">
             @foreach($statCards as $card)
                 <div class="col-6 col-lg-4">
@@ -698,3 +732,6 @@
     </x-ui.page>
 </div>
 @endsection
+
+
+

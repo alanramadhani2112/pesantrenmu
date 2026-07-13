@@ -30,6 +30,30 @@
             $visitasiAktif = $assessmentCollection->filter(fn ($item) => $item->akreditasi && in_array((int) $item->akreditasi->status, [3, 2], true))->count();
         @endphp
 
+        @php
+            $workflowTabs = [
+                ['label' => 'Semua Tugas', 'route' => route('asesor.akreditasi'), 'active' => $activeFocus === 'tugas'],
+                ['label' => 'Review Berkas', 'route' => route('asesor.akreditasi.review'), 'active' => $activeFocus === 'review'],
+                ['label' => 'Jadwal Visitasi', 'route' => route('asesor.akreditasi.jadwal'), 'active' => $activeFocus === 'jadwal'],
+                ['label' => 'Input Nilai', 'route' => route('asesor.akreditasi.nilai'), 'active' => $activeFocus === 'nilai'],
+                ['label' => 'Laporan Visitasi', 'route' => route('asesor.akreditasi.laporan-visitasi'), 'active' => $activeFocus === 'laporan_visitasi'],
+            ];
+        @endphp
+
+        <x-ui.tabs class="mb-6 spm-asesor-workflow-tabs">
+            @foreach($workflowTabs as $tab)
+                <li class="nav-item">
+                    <a href="{{ $tab['route'] }}"
+                        data-ui-tab="metronic"
+                        role="tab"
+                        class="nav-link text-active-primary spm-tab-link {{ $tab['active'] ? 'active' : '' }}"
+                        aria-selected="{{ $tab['active'] ? 'true' : 'false' }}">
+                        {{ $tab['label'] }}
+                    </a>
+                </li>
+            @endforeach
+        </x-ui.tabs>
+
         <div class="row g-6 mb-6">
             <div class="col-12 col-xl-8">
                 <x-ui.card

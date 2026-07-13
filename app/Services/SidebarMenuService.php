@@ -372,7 +372,7 @@ class SidebarMenuService
                 ],
             ],
             [
-                'label' => 'Profil',
+                'label' => 'Akun Asesor',
                 'items' => [
                     [
                         'key' => 'profil_asesor',
@@ -387,7 +387,7 @@ class SidebarMenuService
                 ],
             ],
             [
-                'label' => 'Tugas Akreditasi',
+                'label' => 'Workflow Akreditasi',
                 'items' => [
                     [
                         'key' => 'daftar_tugas',
@@ -403,11 +403,9 @@ class SidebarMenuService
                     [
                         'key' => 'review_berkas',
                         'label' => 'Review Berkas',
-                        'route' => 'asesor.akreditasi',
-                        'route_query' => ['statusFilter' => 'belum', 'focus' => 'review'],
+                        'route' => 'asesor.akreditasi.review',
                         'icon' => 'eye',
-                        'active_pattern' => 'asesor.akreditasi*',
-                        'active_query' => ['statusFilter' => 'belum', 'focus' => 'review'],
+                        'active_pattern' => 'asesor.akreditasi.review',
                         'tooltip' => 'Review profil, IPM, SDM, EDPM/IPR, dan catatan berkas pesantren',
                         'show_progress' => false,
                         'show_badge' => false,
@@ -415,11 +413,9 @@ class SidebarMenuService
                     [
                         'key' => 'jadwal_visitasi',
                         'label' => 'Atur Jadwal Visitasi',
-                        'route' => 'asesor.akreditasi',
-                        'route_query' => ['statusFilter' => 'belum', 'focus' => 'jadwal'],
+                        'route' => 'asesor.akreditasi.jadwal',
                         'icon' => 'calendar-tick',
-                        'active_pattern' => 'asesor.akreditasi*',
-                        'active_query' => ['statusFilter' => 'belum', 'focus' => 'jadwal'],
+                        'active_pattern' => 'asesor.akreditasi.jadwal',
                         'tooltip' => 'Atur jadwal visitasi dan catatan awal untuk pesantren yang ditugaskan',
                         'show_progress' => false,
                         'show_badge' => false,
@@ -427,11 +423,9 @@ class SidebarMenuService
                     [
                         'key' => 'input_nilai',
                         'label' => 'Input Nilai Visitasi',
-                        'route' => 'asesor.akreditasi',
-                        'route_query' => ['statusFilter' => 'penilaian', 'focus' => 'nilai'],
+                        'route' => 'asesor.akreditasi.nilai',
                         'icon' => 'pencil',
-                        'active_pattern' => 'asesor.akreditasi*',
-                        'active_query' => ['statusFilter' => 'penilaian', 'focus' => 'nilai'],
+                        'active_pattern' => 'asesor.akreditasi.nilai',
                         'tooltip' => 'Lanjutkan pengisian instrumen dan nilai hasil visitasi',
                         'show_progress' => false,
                         'show_badge' => false,
@@ -439,11 +433,9 @@ class SidebarMenuService
                     [
                         'key' => 'laporan_visitasi_workflow',
                         'label' => 'Laporan Visitasi',
-                        'route' => 'asesor.akreditasi',
-                        'route_query' => ['statusFilter' => 'penilaian', 'focus' => 'laporan_visitasi'],
+                        'route' => 'asesor.akreditasi.laporan-visitasi',
                         'icon' => 'file-up',
-                        'active_pattern' => 'asesor.akreditasi*',
-                        'active_query' => ['statusFilter' => 'penilaian', 'focus' => 'laporan_visitasi'],
+                        'active_pattern' => 'asesor.akreditasi.laporan-visitasi',
                         'tooltip' => 'Unggah laporan visitasi individu dan kelompok setelah penilaian selesai',
                         'show_progress' => false,
                         'show_badge' => false,
@@ -451,7 +443,7 @@ class SidebarMenuService
                 ],
             ],
             [
-                'label' => 'Dokumen',
+                'label' => 'Referensi',
                 'items' => $this->buildDokumenItems('asesor', ['visitasi']),
             ],
         ];
