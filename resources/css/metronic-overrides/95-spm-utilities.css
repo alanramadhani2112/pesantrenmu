@@ -98,3 +98,38 @@
   transform: scale(1.02);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
+
+/* Table filters: equal-width controls, no orphan button row. */
+[data-ui-table="metronic"] .spm-table-filter-row,
+[data-ui-table="metronic"] .spm-table-filter-row > form,
+[data-ui-table="metronic"] .spm-table-filter-row > form > .d-flex,
+[data-ui-table="metronic"] .spm-filter-bar,
+[data-ui-table="metronic"] .spm-filter-bar > form {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+[data-ui-table="metronic"] .spm-table-filter-row [data-ui-table-search="metronic"],
+[data-ui-table="metronic"] .spm-table-filter-row [data-ui-filter-select="metronic"],
+[data-ui-table="metronic"] .spm-table-filter-row .spm-filter-select,
+[data-ui-table="metronic"] .spm-table-filter-row .form-control,
+[data-ui-table="metronic"] .spm-table-filter-row .form-select,
+[data-ui-table="metronic"] .spm-table-filter-row .btn,
+[data-ui-table="metronic"] .spm-filter-bar [data-ui-table-search="metronic"],
+[data-ui-table="metronic"] .spm-filter-bar [data-ui-filter-select="metronic"],
+[data-ui-table="metronic"] .spm-filter-bar .spm-filter-select,
+[data-ui-table="metronic"] .spm-filter-bar .form-control,
+[data-ui-table="metronic"] .spm-filter-bar .form-select,
+[data-ui-table="metronic"] .spm-filter-bar .btn {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+}
+
+[data-ui-table="metronic"] .spm-table-filter-row .btn,
+[data-ui-table="metronic"] .spm-filter-bar .btn {
+  min-height: var(--spm-control-height, 42px);
+}
