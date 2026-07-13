@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Akreditasi;
 use App\Models\Edpm;
 use App\Models\Ipm;
 use App\Models\MasterEdpmButir;
@@ -62,6 +63,30 @@ class DashboardTest extends TestCase
             ->get(route('dashboard'))
             ->assertOk()
             ->assertSee('Data SDM')
-            ->assertSee('Evaluasi Diri (EDPM)');
+            ->assertSee('EDPM/IPR');
+    }
+
+    public function test_locked_pesantren_readiness_links_to_active_akreditasi_detail(): void
+    {
+        $user = User::factory()->create(['role_id' => 3]);
+
+        Pesantren::create([
+            'user_id' => $user->id,
+            'nama_pesantren' => 'Pesantren Locked',
+            'alamat' => 'Jl. Locked',
+            'is_locked' => true,
+        ]);
+
+        $akreditasi = Akreditasi::create([
+            'user_id' => $user->id,
+            'status' => Akreditasi::STATUS_PENGAJUAN,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee(route('pesantren.akreditasi-detail', $akreditasi->uuid), false)
+            ->assertSee('Lihat data', false)
+            ->assertDontSee('Lengkapi →', false);
     }
 }

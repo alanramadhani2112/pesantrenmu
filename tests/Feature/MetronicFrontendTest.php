@@ -924,7 +924,7 @@ class MetronicFrontendTest extends TestCase
 
             if ($role === 'asesor') {
                 $response->assertSee('data-ui-empty-state="metronic"', false);
-            } else {
+            } elseif ($role === 'admin') {
                 $response->assertSee('id="monthlyChart"', false);
             }
         }

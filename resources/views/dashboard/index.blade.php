@@ -312,6 +312,9 @@
                                 $doneCount = collect($readiness)->where('done', true)->count();
                                 $totalSteps = count($readiness);
                                 $progressPercent = $totalSteps > 0 ? round(($doneCount / $totalSteps) * 100) : 0;
+                                $lockedReadinessRoute = ($stats['total_aktif'] > 0 && $activeAkreditasiUuid)
+                                    ? route('pesantren.akreditasi-detail', $activeAkreditasiUuid)
+                                    : null;
                             @endphp
 
                             <div class="d-flex align-items-center justify-content-between px-6 pt-4 pb-3">
@@ -334,7 +337,7 @@
                             <div class="separator"></div>
 
                             @foreach($readiness as $step)
-                                <a href="{{ route($step['route']) }}" class="d-flex align-items-center gap-4 px-6 py-4 text-decoration-none border-bottom border-dashed spm-readiness-item {{ $step['done'] ? '' : 'spm-readiness-item-pending' }}">
+                                <a href="{{ $lockedReadinessRoute ?? route($step['route']) }}" class="d-flex align-items-center gap-4 px-6 py-4 text-decoration-none border-bottom border-dashed spm-readiness-item {{ $step['done'] ? '' : 'spm-readiness-item-pending' }}">
                                     <div class="symbol symbol-35px flex-shrink-0">
                                         @if($step['done'])
                                             <span class="symbol-label bg-light-success text-success rounded-circle">
@@ -358,7 +361,7 @@
                                             <x-ui.badge variant="success">Lengkap</x-ui.badge>
                                         @endif
                                         @else
-                                            <span class="text-primary fw-semibold fs-8">{{ $stats['total_aktif'] > 0 ? 'Lihat →' : 'Lengkapi →' }}</span>
+                                            <span class="text-primary fw-semibold fs-8">{{ $stats['total_aktif'] > 0 ? 'Lihat data →' : 'Lengkapi →' }}</span>
                                         @endif
                                     </div>
                                 </a>
@@ -383,7 +386,7 @@
                 </div>
 
                 <div class="col-12 col-lg-5 col-xl-4">
-                    <x-ui.card title="Status Pengajuan" subtitle="Ringkasan pengajuan akreditasi Anda." class="h-100">
+                    <x-ui.card title="Status Pengajuan" subtitle="Ringkasan pengajuan akreditasi Anda." class="h-100 spm-dashboard-stat">
                         <div class="d-flex flex-column">
                             <x-ui.metric-row label="Pengajuan Berjalan" :value="$stats['total_aktif']" variant="primary" icon="abstract-26" />
                             <x-ui.metric-row label="Sedang Dinilai" :value="$stats['assessment']" variant="info" icon="document" />

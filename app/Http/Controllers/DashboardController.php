@@ -146,8 +146,13 @@ class DashboardController extends Controller
 
         // Pesantren Readiness Checklist
         $readiness = [];
+        $activeAkreditasiUuid = null;
         if ($isPesantren) {
             $pesantren = $user->pesantren;
+            $activeAkreditasiUuid = Akreditasi::where('user_id', $user->id)
+                ->whereIn('status', $this->activeStatuses())
+                ->latest('updated_at')
+                ->value('uuid');
             $progressService = app(SidebarProgressService::class);
             $sectionProgress = [
                 'profil' => $progressService->getSectionProgress($user->id, 'profil'),
@@ -180,7 +185,8 @@ class DashboardController extends Controller
             'totalAkun',
             'greeting',
             'recentActivities',
-            'readiness'
+            'readiness',
+            'activeAkreditasiUuid'
         ));
     }
 
