@@ -118,6 +118,36 @@
         <x-ui.alert variant="danger" title="Gagal" class="mb-4">{{ session('error') }}</x-ui.alert>
     @endif
 
+    <div class="card spm-asesor-detail-hero mb-6">
+        <div class="card-body p-6 p-lg-8">
+            <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-5">
+                <div class="min-w-0">
+                    <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+                        <x-ui.status-badge :variant="$statusVariant">
+                            {{ Akreditasi::getStatusLabel($akreditasi->status) }}
+                        </x-ui.status-badge>
+                        <span class="badge badge-light-primary fw-semibold">{{ $asesorTipe === 1 ? 'Ketua Asesor' : 'Anggota Asesor' }}</span>
+                    </div>
+                    <h2 class="fw-bold text-gray-900 mb-2 text-break">{{ $pesantren->nama_pesantren ?? $pesantren->name ?? '-' }}</h2>
+                    <div class="text-muted fw-semibold lh-lg">{{ $pesantren->alamat ?? 'Alamat belum tersedia' }}</div>
+                </div>
+                <div class="spm-asesor-detail-next-step">
+                    <div class="spm-detail-label mb-2">Fokus Saat Ini</div>
+                    <div class="fw-bold text-gray-900">
+                        @if($canScheduleVisitasi)
+                            Jadwalkan visitasi dan beri catatan awal.
+                        @elseif($canConfirmVisitasi)
+                            Konfirmasi visitasi setelah selesai di lapangan.
+                        @elseif((int) $akreditasi->status === AkreditasiStateMachine::STATUS_PASCA_VISITASI)
+                            Lengkapi nilai dan laporan visitasi.
+                        @else
+                            Review data dan pantau status akreditasi.
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     {{-- Stats Row --}}
     <div class="row g-5 mb-6">
         <div class="col-lg-4">
@@ -155,39 +185,44 @@
     />
 
     {{-- Tabs Navigation --}}
-    <div class="spm-detail-tabs-shell">
-        <div data-ui-tabs="metronic" class="nav nav-tabs nav-line-tabs mb-6 spm-tabs-nav">
+    <div class="spm-detail-tabs-shell" aria-label="Navigasi detail akreditasi">
+        <div data-ui-tabs="metronic" class="nav nav-tabs nav-line-tabs mb-6 spm-tabs-nav" role="tablist">
         @foreach($tabs as $key => $label)
-            <a class="nav-item nav-link cursor-pointer spm-tab-link"
+            <button type="button"
+               class="nav-item nav-link cursor-pointer spm-tab-link"
+               id="tab-{{ $key }}"
+               role="tab"
+               :aria-selected="activeTab === '{{ $key }}' ? 'true' : 'false'"
+               aria-controls="panel-{{ $key }}"
                :class="{ 'active': activeTab === '{{ $key }}' }"
                x-on:click="activeTab = '{{ $key }}'">
                 {{ $label }}
-            </a>
+            </button>
         @endforeach
         </div>
     </div>
 
     {{-- Tab Content --}}
     <div class="spm-detail-tab-content">
-    <div x-show="activeTab === 'profil'" x-cloak>
+    <div x-show="activeTab === 'profil'" id="panel-profil" role="tabpanel" aria-labelledby="tab-profil" x-cloak>
         @include('asesor.akreditasi-detail.tabs.profil')
     </div>
-    <div x-show="activeTab === 'ipm'" x-cloak>
+    <div x-show="activeTab === 'ipm'" id="panel-ipm" role="tabpanel" aria-labelledby="tab-ipm" x-cloak>
         @include('asesor.akreditasi-detail.tabs.ipm')
     </div>
-    <div x-show="activeTab === 'sdm'" x-cloak>
+    <div x-show="activeTab === 'sdm'" id="panel-sdm" role="tabpanel" aria-labelledby="tab-sdm" x-cloak>
         @include('asesor.akreditasi-detail.tabs.sdm')
     </div>
-    <div x-show="activeTab === 'edpm'" x-cloak>
+    <div x-show="activeTab === 'edpm'" id="panel-edpm" role="tabpanel" aria-labelledby="tab-edpm" x-cloak>
         @include('asesor.akreditasi-detail.tabs.edpm')
     </div>
     @if(in_array((int) $akreditasi->status, [AkreditasiStateMachine::STATUS_PASCA_VISITASI, AkreditasiStateMachine::STATUS_VALIDASI_ADMIN, AkreditasiStateMachine::STATUS_SELESAI, AkreditasiStateMachine::STATUS_DITOLAK], true))
-        <div x-show="activeTab === 'instrumen'" x-cloak>
+        <div x-show="activeTab === 'instrumen'" id="panel-instrumen" role="tabpanel" aria-labelledby="tab-instrumen" x-cloak>
             @include('asesor.akreditasi-detail.tabs.instrumen')
         </div>
     @endif
     @if(in_array((int) $akreditasi->status, [AkreditasiStateMachine::STATUS_PASCA_VISITASI, AkreditasiStateMachine::STATUS_VALIDASI_ADMIN, AkreditasiStateMachine::STATUS_SELESAI, AkreditasiStateMachine::STATUS_DITOLAK], true))
-    <div x-show="activeTab === 'laporan'" x-cloak>
+    <div x-show="activeTab === 'laporan'" id="panel-laporan" role="tabpanel" aria-labelledby="tab-laporan" x-cloak>
         @include('asesor.akreditasi-detail.tabs.laporan-visitasi')
     </div>
     @endif
@@ -412,6 +447,10 @@ function asesorAkreditasiDetailPage() {
         },
 
         async saveNa(butirId, value, isFinal = false) {
+            if (isFinal && !value) {
+                window.SpmSwal.warning('Peringatan', 'Pilih nilai sebelum mengunci.');
+                return;
+            }
             this.loading = true;
             try {
                 const res = await fetch('{{ route("asesor.akreditasi.save-na") }}', {

@@ -14,7 +14,7 @@
             </div>
         </x-ui.alert>
         {{-- Laporan Individu --}}
-        <div class="mb-6">
+        <div class="spm-upload-panel mb-6">
             <h6 class="fw-semibold mb-3">Laporan Individu</h6>
             <p class="text-muted fs-7 mb-3">Unggah laporan visitasi individu Anda (PDF/DOCX, maks 5MB).</p>
 
@@ -40,11 +40,12 @@
                 <form method="POST" action="{{ route('asesor.akreditasi.upload-laporan-individu') }}" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" name="akreditasi_id" value="{{ $akreditasi->id }}">
-                    <div class="d-flex align-items-end gap-3">
+                    <div class="d-flex align-items-end gap-3 spm-upload-row">
                         <div class="flex-grow-1">
-                            <input data-ui-file-upload="metronic" type="file" class="form-control form-control-sm" name="laporan_individu_file" accept=".pdf,.doc,.docx" required>
+                            <label class="form-label fw-semibold" for="laporanIndividuFile">File laporan individu</label>
+                            <input id="laporanIndividuFile" data-ui-file-upload="metronic" type="file" class="form-control" name="laporan_individu_file" accept=".pdf,.doc,.docx" required>
                         </div>
-                        <x-ui.button type="submit" variant="primary" size="sm">
+                        <x-ui.button type="submit" variant="primary">
                             <x-ui.icon name="file-up" class="fs-5 me-1" />
                             Unggah
                         </x-ui.button>
@@ -75,11 +76,12 @@
                     <form method="POST" action="{{ route('asesor.akreditasi.upload-laporan-kelompok') }}" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="akreditasi_id" value="{{ $akreditasi->id }}">
-                        <div class="d-flex align-items-end gap-3">
+                        <div class="d-flex align-items-end gap-3 spm-upload-row">
                             <div class="flex-grow-1">
-                                <input data-ui-file-upload="metronic" type="file" class="form-control form-control-sm" name="laporan_kelompok_file" accept=".pdf,.doc,.docx" required>
+                                <label class="form-label fw-semibold" for="laporanKelompokFile">File laporan kelompok</label>
+                                <input id="laporanKelompokFile" data-ui-file-upload="metronic" type="file" class="form-control" name="laporan_kelompok_file" accept=".pdf,.doc,.docx" required>
                             </div>
-                            <x-ui.button type="submit" variant="primary" size="sm">
+                            <x-ui.button type="submit" variant="primary">
                                 <x-ui.icon name="file-up" class="fs-5 me-1" />
                                 Unggah
                             </x-ui.button>

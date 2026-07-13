@@ -5,7 +5,7 @@
 
 {{-- Scoring Progress --}}
 @if(!empty($scoringProgressCards))
-<div class="row g-4 mb-6">
+<div class="row g-4 mb-6 spm-scoring-progress">
     @foreach($scoringProgressCards as $card)
         <div class="col-md-3">
             <x-ui.stat-card
@@ -49,7 +49,7 @@
 
 {{-- Score Table --}}
 <x-ui.section-card title="Butir Penilaian" subtitle="Isi nilai per komponen dan butir. Nilai kelompok digunakan oleh ketua setelah nilai ketua dan anggota final.">
-    <x-ui.simple-table class="p-6" table-class="table-row-gray-200 gy-2 fs-7">
+    <x-ui.simple-table class="p-0 spm-score-table-wrap" table-class="table-row-gray-200 gy-2 fs-7 spm-score-table">
         <thead>
             <tr class="fw-semibold text-muted bg-light">
                 <x-ui.table-th class="min-w-80px">Komponen</x-ui.table-th>
@@ -102,7 +102,7 @@
                                             <x-ui.badge variant="primary">{{ $asesorEval->value ?? '-' }}</x-ui.badge>
                                             <i class="ki-solid ki-lock fs-7 text-muted ms-1"></i>
                                         @else
-                                            <select class="form-select form-select-sm"
+                                            <select class="form-select form-select-sm spm-score-select" aria-label="Nilai NA butir {{ $butir->nomor_butir ?? $loop->iteration }}"
                                                     x-on:change="saveNa({{ $butirId }}, $event.target.value, false)">
                                                 <option value="">-</option>
                                                 @for($i = 1; $i <= 4; $i++)
@@ -110,6 +110,7 @@
                                                 @endfor
                                             </select>
                                             <x-ui.button type="button" variant="light-primary" size="sm" class="btn-icon mt-1"
+                                                    aria-label="Kunci nilai butir {{ $butir->nomor_butir ?? $loop->iteration }}"
                                                     x-on:click="saveNa({{ $butirId }}, '{{ $asesorEval->value ?? '' }}', true)"
                                                     title="Kunci Nilai">
                                                 <i class="ki-solid ki-lock fs-7"></i>
@@ -124,7 +125,7 @@
                                         @if($isLocked || ! $nilaiKelompokUnlocked)
                                             <x-ui.badge variant="{{ !empty($nkValue) ? 'success' : 'light' }}">{{ $nkValue ?? '-' }}</x-ui.badge>
                                         @else
-                                            <select class="form-select form-select-sm"
+                                            <select class="form-select form-select-sm spm-score-select" aria-label="Nilai NK butir {{ $butir->nomor_butir ?? $loop->iteration }}"
                                                     x-on:change="saveNk({{ $butirId }}, $event.target.value, false)">
                                                 <option value="">-</option>
                                                 @for($i = 1; $i <= 4; $i++)
@@ -136,7 +137,7 @@
                                     {{-- Catatan Butir --}}
                                     <td>
                                         @if(!$isLocked)
-                                            <textarea class="form-control form-control-sm" rows="1" placeholder="Catatan..."
+                                            <textarea class="form-control form-control-sm spm-score-note" rows="2" placeholder="Catatan butir..." aria-label="Catatan butir {{ $butir->nomor_butir ?? $loop->iteration }}"
                                                       name="catatan_butir[{{ $butirId }}]"
                                                       >{{ $butirCatatan }}</textarea>
                                         @else
@@ -150,7 +151,7 @@
                                             <x-ui.badge variant="primary">{{ $asesorEval->value ?? '-' }}</x-ui.badge>
                                             <i class="ki-solid ki-lock fs-7 text-muted ms-1"></i>
                                         @else
-                                            <select class="form-select form-select-sm"
+                                            <select class="form-select form-select-sm spm-score-select" aria-label="Nilai NA butir {{ $butir->nomor_butir ?? $loop->iteration }}"
                                                     x-on:change="saveNa({{ $butirId }}, $event.target.value, false)">
                                                 <option value="">-</option>
                                                 @for($i = 1; $i <= 4; $i++)
@@ -158,6 +159,7 @@
                                                 @endfor
                                             </select>
                                             <x-ui.button type="button" variant="light-primary" size="sm" class="btn-icon mt-1"
+                                                    aria-label="Kunci nilai butir {{ $butir->nomor_butir ?? $loop->iteration }}"
                                                     x-on:click="saveNa({{ $butirId }}, '{{ $asesorEval->value ?? '' }}', true)"
                                                     title="Kunci Nilai">
                                                 <i class="ki-solid ki-lock fs-7"></i>
@@ -187,7 +189,7 @@
 @endif
 
 {{-- Scroll Actions --}}
-<div class="position-fixed bottom-0 end-0 mb-6 me-6 d-flex flex-column gap-2" style="z-index: 100;">
+<div class="position-fixed bottom-0 end-0 mb-6 me-6 d-flex flex-column gap-2 spm-scroll-actions" style="z-index: 100;">
     <x-ui.button type="button" variant="light-primary" size="sm" class="btn-icon shadow" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Ke Atas">
         <i class="ki-solid ki-arrow-up fs-5"></i>
     </x-ui.button>
