@@ -5,16 +5,24 @@
 @section('content')
 @php
     $statusBadgeClass = [
-        '0' => 'badge-light-warning',
-        '1' => 'badge-light-success',
+        '6' => 'badge-light-primary',
+        '5' => 'badge-light-warning',
+        '4' => 'badge-light-info',
+        '3' => 'badge-light-warning',
         '2' => 'badge-light-info',
+        '1' => 'badge-light-success',
+        '0' => 'badge-light-success',
         '-1' => 'badge-light-danger',
         'hasil_akhir' => 'badge-light-primary',
     ];
     $statusLabels = [
-        '0' => 'Pending',
-        '1' => 'Selesai',
-        '2' => 'Kartu Kendali',
+        '6' => 'Pengajuan',
+        '5' => 'Verifikasi Berkas',
+        '4' => 'Assessment',
+        '3' => 'Visitasi',
+        '2' => 'Pasca Visitasi',
+        '1' => 'Validasi Admin',
+        '0' => 'Selesai',
         '-1' => 'Perbaikan',
         'hasil_akhir' => 'Hasil Akhir',
     ];
@@ -86,6 +94,7 @@
     $latestStatusLabel = $latestAkreditasi
         ? ($statusLabels[$latestAkreditasi->status] ?? $latestAkreditasi->status)
         : 'Belum Ada';
+    $activeStatusFilterLabel = $statusFilter !== '' ? ($statusLabels[$statusFilter] ?? 'Status '.$statusFilter) : null;
 @endphp
 
 <div data-module-page="pesantren-akreditasi">
@@ -176,6 +185,9 @@
             <form method="GET" action="{{ route($currentRoute) }}" id="pesantren-akreditasi-filter-form">
                 <input type="hidden" name="sortField" value="{{ $sortField }}">
                 <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
+                @if($statusFilter !== '')
+                    <input type="hidden" name="statusFilter" value="{{ $statusFilter }}">
+                @endif
                 <div class="d-flex align-items-center gap-3 flex-wrap">
                     <x-datatable.search name="search" placeholder="Cari periode atau ID..." :value="$search" form="pesantren-akreditasi-filter-form" />
 
@@ -192,6 +204,12 @@
                         <x-ui.icon name="setting-2" class="fs-4 me-1" />
                         Filter
                     </x-ui.button>
+                    @if($activeStatusFilterLabel)
+                        <x-ui.badge variant="primary">Status: {{ $activeStatusFilterLabel }}</x-ui.badge>
+                        <x-ui.button :href="route($currentRoute, request()->except(['statusFilter', 'page']))" variant="light" size="sm">
+                            Reset Status
+                        </x-ui.button>
+                    @endif
                 </div>
             </form>
         </x-slot>

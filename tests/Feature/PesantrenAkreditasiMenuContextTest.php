@@ -29,7 +29,7 @@ class PesantrenAkreditasiMenuContextTest extends TestCase
             ->get('/pesantren/akreditasi')
             ->assertOk()
             ->assertSee('Pusat Akreditasi')
-            ->assertSee('Satu Proses, Bukan Banyak Halaman');
+            ->assertSee('Satu tempat untuk mengajukan');
     }
 
     public function test_perbaikan_page_uses_repair_context(): void
@@ -91,5 +91,16 @@ class PesantrenAkreditasiMenuContextTest extends TestCase
             ->assertOk()
             ->assertSee('Pusat Akreditasi')
             ->assertSee('Hasil akhir muncul di halaman yang sama');
+    }
+    public function test_status_filter_shows_active_chip_and_reset_action(): void
+    {
+        $pesantren = User::factory()->create(['role_id' => Role::ID_PESANTREN]);
+        Akreditasi::create(['user_id' => $pesantren->id, 'status' => 4]);
+
+        $this->actingAs($pesantren)
+            ->get('/pesantren/akreditasi?statusFilter=4')
+            ->assertOk()
+            ->assertSee('Status: Assessment')
+            ->assertSee('Reset Status');
     }
 }
