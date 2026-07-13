@@ -203,19 +203,19 @@
                     </div>
                 @endif
 
-                <div class="d-flex flex-wrap align-items-center gap-3 p-2">
+                <div class="spm-dashboard-timeline d-flex flex-wrap align-items-center gap-3 p-2">
                     @foreach($akreditasiTimeline as $status => $label)
                         @php
                             $index = $loop->index;
                             $isCurrent = $latestPesantrenActivity['status'] === $status;
                             $isDone = $activeTimelineIndex !== false && $index < $activeTimelineIndex;
                         @endphp
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="spm-dashboard-timeline-step d-flex align-items-center gap-2">
                             <span class="badge badge-circle {{ $isCurrent ? 'badge-primary' : ($isDone ? 'badge-light-success' : 'badge-light-secondary') }}">{{ $index + 1 }}</span>
                             <span class="fw-semibold fs-8 {{ $isCurrent ? 'text-primary' : ($isDone ? 'text-success' : 'text-muted') }}">{{ $label }}</span>
                         </div>
                         @unless($loop->last)
-                            <span class="text-muted">/</span>
+                            <span class="spm-dashboard-timeline-separator text-muted">/</span>
                         @endunless
                     @endforeach
                 </div>

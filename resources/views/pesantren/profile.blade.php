@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('header', 'Profil Pesantren')
 
@@ -108,7 +108,7 @@
         </div>
     </div>
 
-    <x-ui.progress :value="$totalFields > 0 ? round(($filledCount / $totalFields) * 100) : 0" :variant="$filledCount >= $totalFields ? 'success' : 'info'" :label="'Kelengkapan Profil'" :meta="$filledCount . '/' . $totalFields" class="mb-6" />
+    <x-ui.progress id="profileProgress" :value="$totalFields > 0 ? round(($filledCount / $totalFields) * 100) : 0" :variant="$filledCount >= $totalFields ? 'success' : 'info'" :label="'Kelengkapan Profil'" :meta="$filledCount . '/' . $totalFields" class="mb-6" />
 
     @if($isLocked)
         <x-ui.alert variant="warning" icon="shield-tick" title="Data Terkunci — Akreditasi Berlangsung" class="mb-6">
@@ -450,6 +450,43 @@
 
 @push('scripts')
 <script>
+const profileRequiredFields = @js($requiredProfileFields);
+const profileExistingDocCount = {{ $filledDocCount }};
+const profileMissingDocInputNames = @js(collect(array_merge($mainDocs, $secondaryDocs))->filter(fn ($doc) => blank($pesantren->{$doc['field']} ?? null))->keys()->values());
+const profileBaseTotal = profileRequiredFields.length + 1 + {{ count($mainDocs) + count($secondaryDocs) }};
+
+function updateProfileProgress() {
+    const form = document.getElementById('profileForm');
+    const progress = document.getElementById('profileProgress');
+    if (!form || !progress) return;
+
+    const checkedLayanan = [...form.querySelectorAll('.js-layanan:checked')];
+    const total = profileBaseTotal + checkedLayanan.length;
+    let filled = profileExistingDocCount;
+
+    profileRequiredFields.forEach((name) => {
+        const field = form.elements[name];
+        if (field && String(field.value || '').trim() !== '') filled++;
+    });
+
+    if (checkedLayanan.length > 0) filled++;
+
+    checkedLayanan.forEach((checkbox) => {
+        const input = form.querySelector(`.js-rombel[data-unit="${CSS.escape(checkbox.value)}"] input`);
+        if (Number(input?.value) > 0) filled++;
+    });
+
+    profileMissingDocInputNames.forEach((name) => {
+        const input = form.elements[name];
+        if (input?.files?.length > 0) filled++;
+    });
+
+    const pct = total > 0 ? Math.round((filled / total) * 100) : 0;
+    progress.querySelector('.progress-bar')?.style.setProperty('width', `${pct}%`);
+    progress.querySelector('.progress-bar')?.setAttribute('aria-valuenow', pct);
+    progress.querySelector('.spm-progress-meta')?.replaceChildren(document.createTextNode(`${filled}/${total}`));
+}
+
 document.querySelectorAll('.js-layanan').forEach((checkbox) => {
     checkbox.addEventListener('change', () => {
         const row = document.querySelector(`.js-rombel[data-unit="${CSS.escape(checkbox.value)}"]`);
@@ -458,8 +495,13 @@ document.querySelectorAll('.js-layanan').forEach((checkbox) => {
         row.style.display = checkbox.checked ? '' : 'none';
         input.required = checkbox.checked;
         if (!checkbox.checked) input.value = '';
+        updateProfileProgress();
     });
 });
+
+document.getElementById('profileForm')?.addEventListener('input', updateProfileProgress);
+document.getElementById('profileForm')?.addEventListener('change', updateProfileProgress);
+updateProfileProgress();
 </script>
 @endpush
 @endsection

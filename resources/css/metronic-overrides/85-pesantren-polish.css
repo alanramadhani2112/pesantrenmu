@@ -404,3 +404,36 @@
         min-height: 520px;
     }
 }
+
+@media (max-width: 575.98px) {
+    [data-dashboard-page="metronic"] .spm-dashboard-timeline {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 0 !important;
+        padding: 0 !important;
+    }
+
+    [data-dashboard-page="metronic"] .spm-dashboard-timeline-step {
+        width: 100%;
+        padding: 10px 0;
+        border-bottom: 1px dashed var(--spm-pesantren-border, #e5e7eb);
+    }
+
+    [data-dashboard-page="metronic"] .spm-dashboard-timeline-step:last-of-type {
+        border-bottom: 0;
+    }
+
+    [data-dashboard-page="metronic"] .spm-dashboard-timeline-separator {
+        display: none;
+    }
+
+    [data-module-page="pesantren-edpm"] .spm-edpm-stepper > .d-flex {
+        flex-direction: column !important;
+        overflow-x: visible;
+    }
+
+    [data-module-page="pesantren-edpm"] .spm-edpm-step-btn {
+        width: 100%;
+        min-width: 0;
+    }
+}
