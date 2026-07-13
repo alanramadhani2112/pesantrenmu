@@ -149,9 +149,9 @@
     <x-ui.tabs class="mb-5">
         @foreach($tabs as $key => $label)
             @if($key !== 'banding' || !empty($akreditasi->banding))
-                <a href="{{ request()->fullUrlWithQuery(['tab' => $key]) }}" class="nav-link spm-tab-link {{ $activeTab === $key ? 'active' : '' }}">
+                <x-ui.tab :href="request()->fullUrlWithQuery(['tab' => $key])" :active="$activeTab === $key">
                     {{ $label }}
-                </a>
+                </x-ui.tab>
             @endif
         @endforeach
     </x-ui.tabs>
@@ -266,30 +266,58 @@
         <x-ui.section-card title="Data SDM" subtitle="Rekap santri, ustadz, pamong, musyrif, dan tenaga kependidikan." class="mb-5 spm-detail-panel">
             <div class="p-5">
                 @if(!empty($sdm) && count($sdm) > 0)
-                    <x-ui.simple-table dense table-class="table-bordered spm-sdm-review-table">
-                            <thead>
-                                <tr><th>Tingkat</th><th>Santri L</th><th>Santri P</th><th>Ust. Dirosah L</th><th>Ust. Dirosah P</th><th>Ust. Non Dirosah L</th><th>Ust. Non Dirosah P</th><th>Pamong L</th><th>Pamong P</th><th>Musyrif L</th><th>Musyrif P</th><th>Tendik L</th><th>Tendik P</th></tr>
-                            </thead>
-                            <tbody>
-                                @foreach($sdm as $row)
-                                    <tr>
-                                        <td class="fw-semibold text-gray-900">{{ $row->tingkat }}</td>
-                                        <td>{{ $row->santri_l }}</td><td>{{ $row->santri_p }}</td>
-                                        <td>{{ $row->ustadz_dirosah_l }}</td><td>{{ $row->ustadz_dirosah_p }}</td>
-                                        <td>{{ $row->ustadz_non_dirosah_l }}</td><td>{{ $row->ustadz_non_dirosah_p }}</td>
-                                        <td>{{ $row->pamong_l }}</td><td>{{ $row->pamong_p }}</td>
-                                        <td>{{ $row->musyrif_l }}</td><td>{{ $row->musyrif_p }}</td>
-                                        <td>{{ $row->tendik_l }}</td><td>{{ $row->tendik_p }}</td>
-                                    </tr>
+                    <x-ui.simple-table dense table-class="spm-sdm-matrix-table">
+                        <thead>
+                            <tr class="spm-sdm-group-row">
+                                <th rowspan="2" class="ps-5 align-middle min-w-120px">Tingkat</th>
+                                <th colspan="2" class="text-center">Santri</th>
+                                <th colspan="2" class="text-center">Ust. Dirosah</th>
+                                <th colspan="2" class="text-center">Ust. Non Dirosah</th>
+                                <th colspan="2" class="text-center">Pamong</th>
+                                <th colspan="2" class="text-center">Musyrif</th>
+                                <th colspan="2" class="text-center pe-5">Tendik</th>
+                            </tr>
+                            <tr class="spm-sdm-sex-row">
+                                @foreach(range(1, 6) as $i)
+                                    <th class="text-center">Laki-laki</th>
+                                    <th class="text-center {{ $i === 6 ? 'pe-5' : '' }}">Perempuan</th>
                                 @endforeach
-                            </tbody>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($sdm as $row)
+                                @php
+                                    $metrics = [
+                                        [$row->santri_l, $row->santri_p],
+                                        [$row->ustadz_dirosah_l, $row->ustadz_dirosah_p],
+                                        [$row->ustadz_non_dirosah_l, $row->ustadz_non_dirosah_p],
+                                        [$row->pamong_l, $row->pamong_p],
+                                        [$row->musyrif_l, $row->musyrif_p],
+                                        [$row->tendik_l, $row->tendik_p],
+                                    ];
+                                @endphp
+                                <tr>
+                                    <td class="ps-5 spm-sdm-level-cell">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <span class="symbol symbol-35px">
+                                                <span class="symbol-label bg-light-primary text-primary fw-bold">{{ strtoupper(substr((string) $row->tingkat, 0, 2)) }}</span>
+                                            </span>
+                                            <span class="fw-bold text-gray-900">{{ strtoupper($row->tingkat) }}</span>
+                                        </div>
+                                    </td>
+                                    @foreach($metrics as [$male, $female])
+                                        <td class="text-center spm-sdm-number spm-sdm-male">{{ $male ?? 0 }}</td>
+                                        <td class="text-center spm-sdm-number spm-sdm-female {{ $loop->last ? 'pe-5' : '' }}">{{ $female ?? 0 }}</td>
+                                    @endforeach
+                                </tr>
+                            @endforeach
+                        </tbody>
                     </x-ui.simple-table>
                 @else
                     <x-ui.empty-state title="Belum ada data SDM" description="Data SDM akan muncul setelah dilengkapi di menu persiapan akreditasi." variant="secondary" class="py-6" />
                 @endif
             </div>
-        </x-ui.section-card>
-    @elseif($activeTab === 'edpm')
+        </x-ui.section-card>    @elseif($activeTab === 'edpm')
         {{-- EDPM Tab --}}
         <x-akreditasi.edpm-review
             :komponens="$komponens"

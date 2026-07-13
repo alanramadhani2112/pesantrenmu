@@ -581,3 +581,112 @@
         flex-direction: column;
     }
 }
+
+/* Akreditasi detail Metronic tabs + flat detail fields */
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-tabs-shell {
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--spm-pesantren-border) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-tabs-shell .spm-tabs-nav {
+    display: flex !important;
+    gap: 1.5rem !important;
+    min-height: 44px;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-tabs-shell .spm-tab-link {
+    min-height: 44px;
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 2px solid transparent !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-tabs-shell .spm-tab-link.active {
+    border-bottom-color: var(--spm-primary) !important;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-alignment [data-ui-section-card="metronic"] > .card-body {
+    padding: 0 !important;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid .spm-detail-item {
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--spm-pesantren-border);
+    border-radius: 0.75rem;
+    background: #f8fafc;
+    box-shadow: none;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid .spm-detail-item .spm-detail-value {
+    min-height: 0;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-tabs-shell {
+    border-bottom: 0 !important;
+}
+
+/* SDM matrix table */
+[data-module-page="pesantren-akreditasi-detail"] .spm-sdm-matrix-table {
+    min-width: 1180px;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-sdm-matrix-table th {
+    color: var(--spm-pesantren-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-sdm-group-row th {
+    padding-top: 0.9rem;
+    padding-bottom: 0.55rem;
+    color: #475467;
+    text-transform: none;
+    border-bottom: 0 !important;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-sdm-sex-row th {
+    padding-top: 0.35rem;
+    padding-bottom: 0.75rem;
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    background: #f8fafc;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-sdm-level-cell {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: #ffffff;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-sdm-number {
+    min-width: 70px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-sdm-male {
+    background: rgba(var(--spm-primary-rgb), 0.025);
+}
+
+[data-module-page="pesantren-akreditasi-detail"] .spm-sdm-female {
+    background: rgba(59, 130, 246, 0.025);
+}
+[data-module-page="pesantren-akreditasi-detail"] .spm-detail-tabs-shell {
+    position: static !important;
+    top: auto !important;
+    z-index: auto !important;
+}
