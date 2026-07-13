@@ -93,12 +93,15 @@
     };
 
     $statusVariantMap = [
-        1 => 'success',
-        2 => 'danger',
-        3 => 'warning',
-        4 => 'info',
-        5 => 'info',
         6 => 'primary',
+        5 => 'warning',
+        4 => 'info',
+        3 => 'warning',
+        2 => 'info',
+        1 => 'warning',
+        0 => 'success',
+        -1 => 'danger',
+        -2 => 'warning',
     ];
 
     $recentRouteFor = function ($uuid) use ($isAdmin, $isPesantren, $isAsesor) {
@@ -124,6 +127,7 @@
         5 => 'Verifikasi',
         4 => 'Assessment',
         3 => 'Visitasi',
+        2 => 'Penilaian',
         1 => 'Validasi',
         0 => 'Hasil',
     ];
