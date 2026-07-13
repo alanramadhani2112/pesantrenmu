@@ -357,6 +357,21 @@ class SidebarMenuService
     {
         return [
             [
+                'label' => 'Monitoring',
+                'items' => [
+                    [
+                        'key' => 'dashboard_asesor',
+                        'label' => 'Dashboard',
+                        'route' => 'dashboard',
+                        'icon' => 'category',
+                        'active_pattern' => 'dashboard',
+                        'tooltip' => 'Lihat ringkasan tugas dan aktivitas akreditasi asesor',
+                        'show_progress' => false,
+                        'show_badge' => false,
+                    ],
+                ],
+            ],
+            [
                 'label' => 'Profil',
                 'items' => [
                     [
@@ -551,6 +566,7 @@ class SidebarMenuService
             'trash' => 'Kelola data akreditasi terhapus dengan masa retensi sebelum dihapus permanen',
 
             // Asesor tooltips
+            'dashboard_asesor' => 'Lihat ringkasan tugas dan aktivitas akreditasi asesor',
             'profil_asesor' => 'Kelola data profil dan informasi asesor Anda',
             'daftar_tugas' => 'Lihat dan kelola tugas penilaian akreditasi Anda',
             'review_berkas' => 'Review profil, IPM, SDM, EDPM/IPR, dan catatan berkas pesantren',

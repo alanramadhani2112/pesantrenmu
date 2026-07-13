@@ -145,19 +145,29 @@ class SidebarMenuServiceTest extends TestCase
     {
         $menu = $this->service->getMenuForRole(2);
 
-        $this->assertCount(3, $menu);
+        $this->assertCount(4, $menu);
 
         $sectionLabels = array_column($menu, 'label');
         $this->assertSame(
-            ['Profil', 'Tugas Akreditasi', 'Dokumen'],
+            ['Monitoring', 'Profil', 'Tugas Akreditasi', 'Dokumen'],
             $sectionLabels
         );
+    }
+
+    public function test_asesor_menu_monitoring_section_items(): void
+    {
+        $menu = $this->service->getMenuForRole(2);
+        $items = $menu[0]['items'];
+
+        $this->assertCount(1, $items);
+        $this->assertSame('dashboard_asesor', $items[0]['key']);
+        $this->assertSame('dashboard', $items[0]['route']);
     }
 
     public function test_asesor_menu_profil_section_items(): void
     {
         $menu = $this->service->getMenuForRole(2);
-        $items = $menu[0]['items'];
+        $items = $menu[1]['items'];
 
         $this->assertCount(1, $items);
         $this->assertSame('profil_asesor', $items[0]['key']);
@@ -166,7 +176,7 @@ class SidebarMenuServiceTest extends TestCase
     public function test_asesor_menu_tugas_section_items(): void
     {
         $menu = $this->service->getMenuForRole(2);
-        $items = $menu[1]['items'];
+        $items = $menu[2]['items'];
 
         $this->assertCount(5, $items);
 
@@ -180,7 +190,7 @@ class SidebarMenuServiceTest extends TestCase
     public function test_asesor_menu_dokumen_includes_public_and_asesor_secret_only(): void
     {
         $menu = $this->service->getMenuForRole(2);
-        $items = $menu[2]['items'];
+        $items = $menu[3]['items'];
 
         // IAPM public + Semua Dokumen. Laporan Visitasi is represented in the workflow section.
         $this->assertCount(2, $items);
@@ -199,7 +209,7 @@ class SidebarMenuServiceTest extends TestCase
     public function test_asesor_dokumen_items_use_documents_route_with_slug_param(): void
     {
         $menu = $this->service->getMenuForRole(2);
-        $items = $menu[2]['items'];
+        $items = $menu[3]['items'];
 
         $iapmItem = collect($items)->firstWhere('key', 'dokumen_asesor_iapm');
 
@@ -430,7 +440,7 @@ class SidebarMenuServiceTest extends TestCase
     {
         $menu = $this->service->getMenuForRole(2);
 
-        $tugasItem = $menu[1]['items'][0];
+        $tugasItem = $menu[2]['items'][0];
         $this->assertSame('daftar_tugas', $tugasItem['key']);
         $this->assertTrue($tugasItem['show_badge']);
     }
