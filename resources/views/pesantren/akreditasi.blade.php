@@ -222,12 +222,10 @@
                     <td>{{ $akreditasi->created_at->format('d M Y') }}</td>
                     <td class="text-end">
                         <x-ui.action-menu>
-                            @if($akreditasi->kartu_kendali)
-                                <x-ui.action-menu-item :href="route('pesantren.akreditasi-detail', $akreditasi->uuid)" variant="primary">
-                                    <x-ui.icon name="eye" class="fs-5" />
-                                    Lihat Detail
-                                </x-ui.action-menu-item>
-                            @endif
+                            <x-ui.action-menu-item :href="route('pesantren.akreditasi-detail', $akreditasi->uuid)" variant="primary">
+                                <x-ui.icon name="eye" class="fs-5" />
+                                Lihat Detail
+                            </x-ui.action-menu-item>
 
                             @if($akreditasi->status === '0')
                                 <x-ui.action-menu-item variant="danger" x-on:click="confirmDelete({{ $akreditasi->id }})">
