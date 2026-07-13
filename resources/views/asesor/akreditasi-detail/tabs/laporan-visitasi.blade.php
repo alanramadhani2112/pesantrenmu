@@ -3,9 +3,16 @@
     use Illuminate\Support\Facades\Storage;
 @endphp
 
-<x-ui.section-card title="Laporan Visitasi" subtitle="Unggah laporan individu dan kelompok visitasi">
+<x-ui.section-card title="Upload Laporan Visitasi" subtitle="Halaman ini khusus unggah dokumen laporan. Butir dan komponen ada di tab Butir Penilaian.">
     <div class="p-6">
-
+        <x-ui.alert variant="info" title="Butir penilaian ada di tab lain" class="mb-6">
+            Halaman ini hanya untuk unggah laporan visitasi. Untuk melihat komponen, butir pertanyaan, dan input nilai, buka tab <strong>Butir Penilaian</strong>.
+            <div class="mt-3">
+                <x-ui.button type="button" variant="light-primary" size="sm" x-on:click="activeTab = 'instrumen'">
+                    Buka Butir Penilaian
+                </x-ui.button>
+            </div>
+        </x-ui.alert>
         {{-- Laporan Individu --}}
         <div class="mb-6">
             <h6 class="fw-semibold mb-3">Laporan Individu</h6>
@@ -30,11 +37,12 @@
             @endif
 
             @if(!$isLocked)
-                <form method="POST" action="{{ route('asesor.akreditasi.upload-laporan-individu', $akreditasi->uuid) }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('asesor.akreditasi.upload-laporan-individu') }}" enctype="multipart/form-data">
                     @csrf
+                    <input type="hidden" name="akreditasi_id" value="{{ $akreditasi->id }}">
                     <div class="d-flex align-items-end gap-3">
                         <div class="flex-grow-1">
-                            <input data-ui-file-upload="metronic" type="file" class="form-control form-control-sm" name="laporan_individu" accept=".pdf,.doc,.docx" required>
+                            <input data-ui-file-upload="metronic" type="file" class="form-control form-control-sm" name="laporan_individu_file" accept=".pdf,.doc,.docx" required>
                         </div>
                         <x-ui.button type="submit" variant="primary" size="sm">
                             <x-ui.icon name="file-up" class="fs-5 me-1" />
@@ -64,11 +72,12 @@
                 @endif
 
                 @if(!$isLocked)
-                    <form method="POST" action="{{ route('asesor.akreditasi.upload-laporan-kelompok', $akreditasi->uuid) }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('asesor.akreditasi.upload-laporan-kelompok') }}" enctype="multipart/form-data">
                         @csrf
+                        <input type="hidden" name="akreditasi_id" value="{{ $akreditasi->id }}">
                         <div class="d-flex align-items-end gap-3">
                             <div class="flex-grow-1">
-                                <input data-ui-file-upload="metronic" type="file" class="form-control form-control-sm" name="laporan_kelompok" accept=".pdf,.doc,.docx" required>
+                                <input data-ui-file-upload="metronic" type="file" class="form-control form-control-sm" name="laporan_kelompok_file" accept=".pdf,.doc,.docx" required>
                             </div>
                             <x-ui.button type="submit" variant="primary" size="sm">
                                 <x-ui.icon name="file-up" class="fs-5 me-1" />

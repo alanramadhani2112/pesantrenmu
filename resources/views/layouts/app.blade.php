@@ -89,16 +89,6 @@
         $routeTitle = $routeMeta[$routeName]['title'] ?? null;
         $routeSection = $routeMeta[$routeName]['section'] ?? null;
 
-        if ($routeName === 'asesor.akreditasi') {
-            $asesorFocus = request()->query('focus');
-            $routeTitle = match ($asesorFocus) {
-                'review' => __('Review Berkas'),
-                'jadwal' => __('Atur Jadwal Visitasi'),
-                'nilai' => __('Input Nilai Visitasi'),
-                'laporan_visitasi' => __('Laporan Visitasi'),
-                default => $routeTitle,
-            };
-        }
 
         $slotHeaderTitle = isset($header) ? trim(strip_tags((string) $header)) : '';
         $pageTitle = $routeTitle ?: ($slotHeaderTitle !== '' ? $slotHeaderTitle : __('Dashboard'));

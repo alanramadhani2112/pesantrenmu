@@ -74,6 +74,10 @@ class AsesorService
         return $this->akreditasiRepository->getAssessmentsByAsesor($asesorId, $search, $periodeFilter, $statusFilter, $perPage, $sortField, $sortAsc);
     }
 
+    public function getAssessmentSummary(int $asesorId, ?string $search = null, ?string $periodeFilter = null, ?string $statusFilter = null): array
+    {
+        return $this->akreditasiRepository->getAssessmentSummaryByAsesor($asesorId, $search, $periodeFilter, $statusFilter);
+    }
     public function findAssessment(int $id): ?Assessment
     {
         return $this->akreditasiRepository->findAssessment($id, ['akreditasi.user.pesantren', 'akreditasi.catatans.user']);
@@ -294,3 +298,5 @@ class AsesorService
         ];
     }
 }
+
+

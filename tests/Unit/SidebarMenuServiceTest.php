@@ -178,11 +178,11 @@ class SidebarMenuServiceTest extends TestCase
         $menu = $this->service->getMenuForRole(2);
         $items = $menu[2]['items'];
 
-        $this->assertCount(5, $items);
+        $this->assertCount(1, $items);
 
         $keys = array_column($items, 'key');
         $this->assertSame(
-            ['daftar_tugas', 'review_berkas', 'jadwal_visitasi', 'input_nilai', 'laporan_visitasi_workflow'],
+            ['daftar_tugas'],
             $keys
         );
     }

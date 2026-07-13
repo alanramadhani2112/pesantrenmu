@@ -53,11 +53,13 @@
         'edpm' => 'EDPM',
     ];
 
-    if ((int) $akreditasi->status >= AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
-        $tabs['instrumen'] = 'Penilaian';
+    if (in_array((int) $akreditasi->status, [AkreditasiStateMachine::STATUS_PASCA_VISITASI, AkreditasiStateMachine::STATUS_VALIDASI_ADMIN, AkreditasiStateMachine::STATUS_SELESAI, AkreditasiStateMachine::STATUS_DITOLAK], true)) {
+        $tabs['instrumen'] = 'Butir Penilaian';
     }
 
-    $tabs['laporan'] = 'Laporan Visitasi';
+    if (in_array((int) $akreditasi->status, [AkreditasiStateMachine::STATUS_PASCA_VISITASI, AkreditasiStateMachine::STATUS_VALIDASI_ADMIN, AkreditasiStateMachine::STATUS_SELESAI, AkreditasiStateMachine::STATUS_DITOLAK], true)) {
+        $tabs['laporan'] = 'Upload Laporan';
+    }
 @endphp
 
 <x-slot name="header">{{ __('Detail Akreditasi') }}</x-slot>
@@ -74,7 +76,7 @@
             {{ Akreditasi::getStatusLabel($akreditasi->status) }}
         </x-ui.status-badge>
 
-        @if((int) $akreditasi->status === AkreditasiStateMachine::STATUS_VISITASI && $asesorTipe === 1)
+        @if($canConfirmVisitasi)
             <x-ui.button variant="success" x-on:click="confirmVisitasiSelesai()">
                 <i class="ki-solid ki-check-circle fs-4 me-1"></i>
                 Konfirmasi Visitasi Selesai
@@ -179,14 +181,16 @@
     <div x-show="activeTab === 'edpm'" x-cloak>
         @include('asesor.akreditasi-detail.tabs.edpm')
     </div>
-    @if((int) $akreditasi->status >= AkreditasiStateMachine::STATUS_PASCA_VISITASI)
+    @if(in_array((int) $akreditasi->status, [AkreditasiStateMachine::STATUS_PASCA_VISITASI, AkreditasiStateMachine::STATUS_VALIDASI_ADMIN, AkreditasiStateMachine::STATUS_SELESAI, AkreditasiStateMachine::STATUS_DITOLAK], true))
         <div x-show="activeTab === 'instrumen'" x-cloak>
             @include('asesor.akreditasi-detail.tabs.instrumen')
         </div>
     @endif
+    @if(in_array((int) $akreditasi->status, [AkreditasiStateMachine::STATUS_PASCA_VISITASI, AkreditasiStateMachine::STATUS_VALIDASI_ADMIN, AkreditasiStateMachine::STATUS_SELESAI, AkreditasiStateMachine::STATUS_DITOLAK], true))
     <div x-show="activeTab === 'laporan'" x-cloak>
         @include('asesor.akreditasi-detail.tabs.laporan-visitasi')
     </div>
+    @endif
     </div>
 
     {{-- Rejection Section (Asesor 1 Only) --}}
@@ -205,8 +209,9 @@
 
                     @if($rejectionStatus['status'] === 'corrected')
                         <div class="d-flex gap-3">
-                            <form method="POST" action="{{ route('asesor.akreditasi.accept-perbaikan', $akreditasi->uuid) }}">
+                            <form method="POST" action="{{ route('asesor.akreditasi.accept-perbaikan') }}">
                                 @csrf
+                                <input type="hidden" name="akreditasi_id" value="{{ $akreditasi->id }}">
                                 <x-ui.button type="button" variant="success" x-on:click="confirmAcceptPerbaikan($el.closest('form'))">
                                     <i class="ki-solid ki-check fs-4 me-1"></i>
                                     Terima Perbaikan
@@ -253,8 +258,9 @@
 
     {{-- Reject Documents Modal --}}
     <x-ui.modal name="reject-documents-modal" title="Tolak Dokumen" maxWidth="lg">
-        <form method="POST" action="{{ route('asesor.akreditasi.reject-document', $akreditasi->id) }}" id="rejectDocumentsForm">
+        <form method="POST" action="{{ route('asesor.akreditasi.reject-document') }}" id="rejectDocumentsForm">
             @csrf
+            <input type="hidden" name="akreditasi_id" value="{{ $akreditasi->id }}">
             <div class="p-6">
                 <p class="text-muted mb-4">Pilih dokumen yang ditolak dan berikan alasan penolakan.</p>
 
@@ -302,8 +308,9 @@
 
     {{-- Schedule Visitasi Modal --}}
     <x-ui.modal name="schedule-visitasi-modal" title="Jadwalkan Visitasi" maxWidth="md">
-        <form method="POST" action="{{ route('asesor.akreditasi.schedule-visitasi', $akreditasi->id) }}" id="scheduleVisitasiForm">
+        <form method="POST" action="{{ route('asesor.akreditasi.schedule-visitasi') }}" id="scheduleVisitasiForm">
             @csrf
+            <input type="hidden" name="akreditasi_id" value="{{ $akreditasi->id }}">
             <div class="p-6">
                 <div class="mb-4">
                     <label class="form-label fw-semibold" for="tanggalMulai">Tanggal Mulai</label>
@@ -315,7 +322,7 @@
                 </div>
                 <div class="mb-4">
                     <label class="form-label fw-semibold" for="catatanVisitasi">Catatan</label>
-                    <textarea class="form-control" name="catatan_visitasi" id="catatanVisitasi" rows="3" placeholder="Catatan tambahan untuk visitasi..."></textarea>
+                    <textarea class="form-control" name="catatan" id="catatanVisitasi" rows="3" placeholder="Catatan tambahan untuk visitasi..."></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -407,10 +414,10 @@ function asesorAkreditasiDetailPage() {
         async saveNa(butirId, value, isFinal = false) {
             this.loading = true;
             try {
-                const res = await fetch('{{ route("asesor.akreditasi.save-na", $akreditasi->uuid) }}', {
+                const res = await fetch('{{ route("asesor.akreditasi.save-na") }}', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                    body: JSON.stringify({ butir_id: butirId, value: value, is_final: isFinal })
+                    body: JSON.stringify({ akreditasi_id: {{ $akreditasi->id }}, butir_id: butirId, value: value, is_final: isFinal })
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || 'Gagal menyimpan');
@@ -427,10 +434,10 @@ function asesorAkreditasiDetailPage() {
         async saveNk(butirId, value, isFinal = false) {
             this.loading = true;
             try {
-                const res = await fetch('{{ route("asesor.akreditasi.save-nk", $akreditasi->uuid) }}', {
+                const res = await fetch('{{ route("asesor.akreditasi.save-nk") }}', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                    body: JSON.stringify({ butir_id: butirId, value: value, is_final: isFinal })
+                    body: JSON.stringify({ akreditasi_id: {{ $akreditasi->id }}, butir_id: butirId, value: value, is_final: isFinal })
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || 'Gagal menyimpan');

@@ -13,8 +13,9 @@
 @if((int) $akreditasi->status >= \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI)
 <x-ui.section-card title="Penilaian EDPM Asesor" subtitle="Penilaian asesor terhadap EDPM pesantren" class="mt-4">
     <div class="p-6">
-        <form method="POST" action="{{ route('asesor.akreditasi.save-edpm', $akreditasi->uuid) }}" id="edpmForm">
+        <form method="POST" action="{{ route('asesor.akreditasi.save-edpm') }}" id="edpmForm">
             @csrf
+            <input type="hidden" name="akreditasi_id" value="{{ $akreditasi->id }}">
             <input type="hidden" name="is_final" value="0">
 
             <x-akreditasi.edpm-review

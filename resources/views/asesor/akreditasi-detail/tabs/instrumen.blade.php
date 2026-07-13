@@ -1,17 +1,17 @@
-{{-- Tab: Instrumen Penilaian --}}
+{{-- Tab: Butir Penilaian --}}
 @php
     use App\StateMachine\AkreditasiStateMachine;
 @endphp
 
 {{-- Scoring Progress --}}
-@if(!empty($scoringProgress))
+@if(!empty($scoringProgressCards))
 <div class="row g-4 mb-6">
-    @foreach($scoringProgress as $card)
+    @foreach($scoringProgressCards as $card)
         <div class="col-md-3">
             <x-ui.stat-card
                 :label="$card['label'] ?? ''"
-                :value="($card['current'] ?? 0) . '/' . ($card['total'] ?? 0)"
-                :variant="($card['current'] ?? 0) >= ($card['total'] ?? 1) ? 'success' : 'warning'"
+                :value="($card['completed'] ?? 0) . '/' . ($card['total'] ?? 0)"
+                :variant="($card['completed'] ?? 0) >= ($card['total'] ?? 1) ? 'success' : 'warning'"
                 icon="chart-simple"
             />
         </div>
@@ -19,10 +19,24 @@
 </div>
 @endif
 
-{{-- Kelompok Unlocked Warning --}}
-@if(!empty($asesorFinalStatus['kelompok_unlocked']) && $asesorTipe === 1)
-    <x-ui.alert variant="info" title="Nilai Kelompok Terbuka" class="mb-4">
-        Nilai Ketua dan Anggota sudah lengkap. Anda dapat mengisi Nilai Kelompok (NK).
+{{-- Status input nilai --}}
+@if($asesorTipe === 1 && ! $nilaiKelompokUnlocked)
+    <x-ui.alert variant="warning" title="NK belum bisa diisi" class="mb-4">
+        @if(! $nilaiKetuaFinalComplete && ! $nilaiAnggotaFinalComplete)
+            NA1 Ketua dan NA2 Anggota belum selesai/final. Lengkapi keduanya sebelum input NK.
+        @elseif(! $nilaiKetuaFinalComplete)
+            NA1 Ketua belum selesai/final. Lengkapi NA1 sebelum input NK.
+        @elseif(! $nilaiAnggotaFinalComplete)
+            NA2 Anggota belum selesai/final. Tunggu anggota menyelesaikan NA2 sebelum input NK.
+        @endif
+    </x-ui.alert>
+@elseif($asesorTipe === 1 && $nilaiKelompokUnlocked)
+    <x-ui.alert variant="success" title="NK sudah bisa diisi" class="mb-4">
+        NA1 Ketua dan NA2 Anggota sudah selesai/final. Ketua dapat mengisi NK.
+    </x-ui.alert>
+@elseif($asesorTipe === 2)
+    <x-ui.alert variant="info" title="Tugas Anggota Asesor" class="mb-4">
+        Anggota asesor hanya mengisi NA2. NK diisi oleh ketua setelah NA1 dan NA2 selesai/final.
     </x-ui.alert>
 @endif
 
@@ -34,7 +48,7 @@
 @endif
 
 {{-- Score Table --}}
-<x-ui.section-card title="Tabel Penilaian Instrumen" subtitle="Isi nilai NA dan NK per butir pernyataan">
+<x-ui.section-card title="Butir Penilaian" subtitle="Isi nilai per komponen dan butir. Nilai kelompok digunakan oleh ketua setelah nilai ketua dan anggota final.">
     <x-ui.simple-table class="p-6" table-class="table-row-gray-200 gy-2 fs-7">
         <thead>
             <tr class="fw-semibold text-muted bg-light">
@@ -44,13 +58,12 @@
                 <x-ui.table-th class="min-w-200px">Butir Pernyataan</x-ui.table-th>
                 <x-ui.table-th align="center" class="min-w-60px">EDPM</x-ui.table-th>
                 @if($asesorTipe === 1)
-                    <x-ui.table-th align="center" class="min-w-120px">Nilai Ketua (NA)</x-ui.table-th>
-                    <x-ui.table-th align="center" class="min-w-100px">Nilai Anggota</x-ui.table-th>
-                    <x-ui.table-th align="center" class="min-w-60px">Delta</x-ui.table-th>
-                    <x-ui.table-th align="center" class="min-w-120px">Nilai Kelompok (NK)</x-ui.table-th>
+                    <x-ui.table-th align="center" class="min-w-120px">NA1 Ketua</x-ui.table-th>
+                    <x-ui.table-th align="center" class="min-w-100px">NA2 Anggota</x-ui.table-th>
+                    <x-ui.table-th align="center" class="min-w-120px">NK Ketua</x-ui.table-th>
                     <x-ui.table-th class="min-w-150px">Catatan Butir</x-ui.table-th>
                 @else
-                    <x-ui.table-th align="center" class="min-w-120px">Nilai Anggota (NA)</x-ui.table-th>
+                    <x-ui.table-th align="center" class="min-w-120px">NA2 Anggota</x-ui.table-th>
                 @endif
             </tr>
         </thead>
@@ -68,13 +81,6 @@
                                 $isNaFinal = !empty($asesorEval) && ($asesorEval->is_final ?? false);
                                 $edpmValue = $pesantrenEval->value ?? '-';
 
-                                // Delta calculation (Asesor 1 only)
-                                $delta = null;
-                                $deltaVariant = 'secondary';
-                                if ($asesorTipe === 1 && $asesorEval && $otherEval) {
-                                    $delta = abs(($asesorEval->value ?? 0) - ($otherEval->value ?? 0));
-                                    $deltaVariant = $delta > 1 ? 'danger' : ($delta > 0 ? 'warning' : 'success');
-                                }
                             @endphp
                             <tr>
                                 @if($loop->first)
@@ -83,14 +89,14 @@
                                     </td>
                                 @endif
                                 <td class="text-muted">{{ $butir->no_sk ?? '-' }}</td>
-                                <td class="text-muted">{{ $butir->no_butir ?? $loop->iteration }}</td>
-                                <td>{{ $butir->pernyataan ?? $butir->statement ?? '-' }}</td>
+                                <td class="text-muted">{{ $butir->nomor_butir ?? $loop->iteration }}</td>
+                                <td>{{ $butir->butir_pernyataan ?? '-' }}</td>
                                 <td class="text-center">
                                     <x-ui.badge variant="light">{{ $edpmValue }}</x-ui.badge>
                                 </td>
 
                                 @if($asesorTipe === 1)
-                                    {{-- Nilai Ketua (NA) --}}
+                                    {{-- NA1 Ketua --}}
                                     <td class="text-center">
                                         @if($isNaFinal || $isLocked)
                                             <x-ui.badge variant="primary">{{ $asesorEval->value ?? '-' }}</x-ui.badge>
@@ -99,7 +105,7 @@
                                             <select class="form-select form-select-sm"
                                                     x-on:change="saveNa({{ $butirId }}, $event.target.value, false)">
                                                 <option value="">-</option>
-                                                @for($i = 1; $i <= 5; $i++)
+                                                @for($i = 1; $i <= 4; $i++)
                                                     <option value="{{ $i }}" {{ ($asesorEval->value ?? '') == $i ? 'selected' : '' }}>{{ $i }}</option>
                                                 @endfor
                                             </select>
@@ -114,23 +120,14 @@
                                     <td class="text-center">
                                         <x-ui.badge variant="light">{{ $otherEval->value ?? '-' }}</x-ui.badge>
                                     </td>
-                                    {{-- Delta --}}
                                     <td class="text-center">
-                                        @if($delta !== null)
-                                            <x-ui.badge :variant="$deltaVariant">{{ $delta }}</x-ui.badge>
-                                        @else
-                                            <span class="text-muted">-</span>
-                                        @endif
-                                    </td>
-                                    {{-- Nilai Kelompok (NK) --}}
-                                    <td class="text-center">
-                                        @if($isLocked || !($asesorFinalStatus['kelompok_unlocked'] ?? false))
+                                        @if($isLocked || ! $nilaiKelompokUnlocked)
                                             <x-ui.badge variant="{{ !empty($nkValue) ? 'success' : 'light' }}">{{ $nkValue ?? '-' }}</x-ui.badge>
                                         @else
                                             <select class="form-select form-select-sm"
                                                     x-on:change="saveNk({{ $butirId }}, $event.target.value, false)">
                                                 <option value="">-</option>
-                                                @for($i = 1; $i <= 5; $i++)
+                                                @for($i = 1; $i <= 4; $i++)
                                                     <option value="{{ $i }}" {{ ($nkValue ?? '') == $i ? 'selected' : '' }}>{{ $i }}</option>
                                                 @endfor
                                             </select>
@@ -156,7 +153,7 @@
                                             <select class="form-select form-select-sm"
                                                     x-on:change="saveNa({{ $butirId }}, $event.target.value, false)">
                                                 <option value="">-</option>
-                                                @for($i = 1; $i <= 5; $i++)
+                                                @for($i = 1; $i <= 4; $i++)
                                                     <option value="{{ $i }}" {{ ($asesorEval->value ?? '') == $i ? 'selected' : '' }}>{{ $i }}</option>
                                                 @endfor
                                             </select>

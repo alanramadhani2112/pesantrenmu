@@ -918,7 +918,6 @@
     }
 }
 
-[data-module-page="asesor-akreditasi"] .spm-asesor-workflow-tabs .spm-tabs-nav,
 [data-module-page="dokumen"] .spm-document-category-tabs .spm-tabs-nav {
     gap: .5rem;
     overflow-x: auto;
@@ -926,20 +925,7 @@
     scrollbar-width: thin;
 }
 
-[data-module-page="asesor-akreditasi"] .spm-asesor-workflow-tabs .spm-tab-link {
-    min-height: 42px;
-    border: 1px solid var(--spm-pesantren-border, #e4e9f2);
-    border-radius: .85rem;
-    background: #fff;
-    font-weight: 700;
-    white-space: nowrap;
-}
 
-[data-module-page="asesor-akreditasi"] .spm-asesor-workflow-tabs .spm-tab-link.active {
-    color: var(--spm-primary-700) !important;
-    border-color: rgba(var(--spm-primary-rgb), .25);
-    background: var(--spm-primary-light);
-}
 
 [data-module-page="asesor-akreditasi"] [data-ui-card="metronic"],
 [data-module-page="asesor-akreditasi"] .spm-table-shell,
@@ -956,7 +942,6 @@
 }
 
 @media (max-width: 767.98px) {
-    [data-module-page="asesor-akreditasi"] .spm-asesor-workflow-tabs .spm-tabs-nav,
     [data-module-page="dokumen"] .spm-document-category-tabs .spm-tabs-nav {
         flex-wrap: nowrap;
     }

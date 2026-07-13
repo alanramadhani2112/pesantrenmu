@@ -43,10 +43,10 @@ class AkreditasiController extends Controller
 
         // Map focus to expected statusFilter
         $focusStatusMap = [
-            'review' => 'belum',
-            'jadwal' => 'belum',
-            'nilai' => 'penilaian',
-            'laporan_visitasi' => 'penilaian',
+            'review' => 'review',
+            'jadwal' => 'review',
+            'nilai' => '2',
+            'laporan_visitasi' => '2',
         ];
 
         $expectedStatus = $focusStatusMap[$focus] ?? null;
@@ -59,8 +59,8 @@ class AkreditasiController extends Controller
 
         // Derive effective status filter
         $effectiveStatusFilter = match ($focus) {
-            'review', 'jadwal' => 'belum',
-            'nilai', 'laporan_visitasi' => 'penilaian',
+            'review', 'jadwal' => 'review',
+            'nilai', 'laporan_visitasi' => '2',
             default => $statusFilter,
         };
 
@@ -74,47 +74,23 @@ class AkreditasiController extends Controller
             $sortAsc
         );
 
-        // Context based on focus
-        $activeFocus = in_array($focus, ['review', 'jadwal', 'nilai', 'laporan_visitasi'], true)
-            ? $focus
-            : 'tugas';
-
-        $context = match ($activeFocus) {
-            'review' => [
-                'title' => 'Review Berkas',
-                'subtitle' => 'Fokus pada pengajuan yang perlu dicek sebelum visitasi dijadwalkan.',
-                'tableTitle' => 'Daftar Review Berkas',
-                'tableSubtitle' => 'Buka detail untuk meninjau profil, IPM, SDM, EDPM/IPR, dan catatan berkas pesantren.',
-            ],
-            'jadwal' => [
-                'title' => 'Atur Jadwal Visitasi',
-                'subtitle' => 'Fokus pada pengajuan yang belum memiliki jadwal visitasi.',
-                'tableTitle' => 'Daftar Penjadwalan Visitasi',
-                'tableSubtitle' => 'Gunakan aksi baris untuk menetapkan atau mengubah jadwal visitasi.',
-            ],
-            'nilai' => [
-                'title' => 'Penilaian Visitasi',
-                'subtitle' => 'Fokus pada pesantren yang sedang dalam proses penilaian.',
-                'tableTitle' => 'Daftar Penilaian',
-                'tableSubtitle' => 'Buka detail akreditasi untuk mengisi nilai EDPM.',
-            ],
-            'laporan_visitasi' => [
-                'title' => 'Laporan Visitasi',
-                'subtitle' => 'Fokus pada laporan visitasi yang perlu dilengkapi.',
-                'tableTitle' => 'Daftar Laporan',
-                'tableSubtitle' => 'Lengkapi laporan visitasi setelah penilaian selesai.',
-            ],
-            default => [
-                'title' => 'Tugas Akreditasi',
-                'subtitle' => 'Daftar semua penugasan akreditasi untuk Anda.',
-                'tableTitle' => 'Daftar Tugas',
-                'tableSubtitle' => 'Kelola semua tugas akreditasi dari sini.',
-            ],
-        };
+        $summary = $this->asesorService->getAssessmentSummary(
+            $asesor->id,
+            $search ?: null,
+            $periodeFilter ?: null,
+            $effectiveStatusFilter ?: null
+        );
+        $activeFocus = 'tugas';
+        $context = [
+            'title' => 'Tugas Akreditasi',
+            'subtitle' => 'Daftar semua penugasan akreditasi untuk Anda. Gunakan filter status untuk fokus pada tahap tertentu.',
+            'tableTitle' => 'Daftar Tugas',
+            'tableSubtitle' => 'Kelola review berkas, jadwal visitasi, input nilai, dan laporan dari aksi tiap baris.',
+        ];
 
         return view('asesor.akreditasi', compact(
             'assessments', 'search', 'periodeFilter', 'statusFilter',
-            'perPage', 'sortField', 'sortAsc', 'focus', 'activeFocus', 'context'
+            'perPage', 'sortField', 'sortAsc', 'focus', 'activeFocus', 'context', 'summary'
         ));
     }
 
@@ -590,3 +566,5 @@ class AkreditasiController extends Controller
         }
     }
 }
+
+
