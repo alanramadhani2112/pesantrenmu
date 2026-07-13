@@ -474,7 +474,7 @@
 
 [data-module-page="pesantren-akreditasi-detail"] .spm-detail-hero-meta {
     min-width: min(100%, 230px);
-    padding: 16px 18px;
+    padding: 1rem;
     border: 1px solid rgba(var(--spm-primary-rgb), 0.12);
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.72);
@@ -483,7 +483,7 @@
 [data-module-page="pesantren-akreditasi-detail"] .spm-detail-hero-label,
 [data-module-page="pesantren-akreditasi-detail"] .spm-detail-label {
     color: var(--spm-pesantren-muted);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -492,7 +492,7 @@
 [data-module-page="pesantren-akreditasi-detail"] .spm-detail-hero-value {
     margin-top: 6px;
     color: #111827;
-    font-size: 20px;
+    font-size: 17px;
     font-weight: 700;
 }
 
@@ -500,8 +500,8 @@
     position: sticky;
     top: calc(var(--bs-app-header-height, 72px) + 8px);
     z-index: 7;
-    padding: 8px;
-    margin-bottom: 18px;
+    padding: 0.5rem;
+    margin-bottom: 1.25rem;
     border: 1px solid var(--spm-pesantren-border);
     border-radius: 14px;
     background: rgba(248, 250, 252, 0.92);
@@ -520,7 +520,7 @@
 [data-module-page="pesantren-akreditasi-detail"] .spm-detail-text-block,
 [data-module-page="pesantren-akreditasi-detail"] .spm-asesor-card,
 [data-module-page="pesantren-akreditasi-detail"] .spm-edpm-review-metric {
-    padding: 16px;
+    padding: 1rem;
     border: 1px solid var(--spm-pesantren-border);
     border-radius: 12px;
     background: #ffffff;
@@ -537,9 +537,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 14px;
-    min-height: 64px;
-    padding: 14px 16px;
+    gap: 0.85rem;
+    min-height: 56px;
+    padding: 0.85rem 1rem;
     border: 1px solid var(--spm-pesantren-border);
     border-radius: 12px;
     background: #ffffff;
@@ -548,7 +548,7 @@
 [data-module-page="pesantren-akreditasi-detail"] .spm-document-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
+    gap: 0.85rem;
 }
 
 [data-module-page="pesantren-akreditasi-detail"] .spm-sdm-review-table {
