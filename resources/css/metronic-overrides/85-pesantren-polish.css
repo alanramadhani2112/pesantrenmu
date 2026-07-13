@@ -437,3 +437,28 @@
         min-width: 0;
     }
 }
+[data-module-page="pesantren-akreditasi"] .spm-table-body-wrap {
+    overflow: hidden;
+}
+
+[data-module-page="pesantren-akreditasi"] .spm-table-scroll {
+    max-width: 100%;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+}
+
+[data-module-page="pesantren-akreditasi"] .spm-datatable {
+    min-width: 720px;
+}
+
+[data-module-page="pesantren-akreditasi"] td[colspan] > [data-ui-empty-state="metronic"] {
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+}
+
+@media (max-width: 767.98px) {
+    [data-module-page="pesantren-akreditasi"] .spm-datatable {
+        min-width: 640px;
+    }
+}
