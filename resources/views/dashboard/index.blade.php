@@ -388,10 +388,10 @@
                 <div class="col-12 col-lg-5 col-xl-4">
                     <x-ui.card title="Status Pengajuan" subtitle="Ringkasan pengajuan akreditasi Anda." class="h-100 spm-dashboard-stat">
                         <div class="d-flex flex-column">
-                            <x-ui.metric-row label="Pengajuan Berjalan" :value="$stats['total_aktif']" variant="primary" icon="abstract-26" />
-                            <x-ui.metric-row label="Sedang Dinilai" :value="$stats['assessment']" variant="info" icon="document" />
-                            <x-ui.metric-row label="Proses Visitasi" :value="$stats['visitasi']" variant="warning" icon="geolocation" />
-                            <x-ui.metric-row label="Perlu Diperbaiki" :value="$stats['ditolak']" variant="danger" icon="cross-circle" class="border-bottom-0" />
+                            <x-ui.metric-row label="Pengajuan Berjalan" :value="$stats['total_aktif']" variant="primary" icon="abstract-26" :href="route('pesantren.akreditasi')" />
+                            <x-ui.metric-row label="Sedang Dinilai" :value="$stats['assessment']" variant="info" icon="document" :href="route('pesantren.akreditasi', ['statusFilter' => 4])" />
+                            <x-ui.metric-row label="Proses Visitasi" :value="$stats['visitasi']" variant="warning" icon="geolocation" :href="route('pesantren.akreditasi', ['statusFilter' => 3])" />
+                            <x-ui.metric-row label="Perlu Diperbaiki" :value="$stats['ditolak']" variant="danger" icon="cross-circle" :href="route('pesantren.akreditasi', ['statusFilter' => -1])" class="border-bottom-0" />
                         </div>
                     </x-ui.card>
                 </div>

@@ -89,4 +89,26 @@ class DashboardTest extends TestCase
             ->assertSee('Lihat data', false)
             ->assertDontSee('Lengkapi →', false);
     }
+    public function test_pesantren_status_cards_link_to_filtered_akreditasi_center(): void
+    {
+        $user = User::factory()->create(['role_id' => 3]);
+
+        Pesantren::create([
+            'user_id' => $user->id,
+            'nama_pesantren' => 'Pesantren Status Links',
+            'alamat' => 'Jl. Status',
+        ]);
+
+        Akreditasi::create(['user_id' => $user->id, 'status' => Akreditasi::STATUS_ASSESSMENT]);
+        Akreditasi::create(['user_id' => $user->id, 'status' => Akreditasi::STATUS_VISITASI]);
+        Akreditasi::create(['user_id' => $user->id, 'status' => Akreditasi::STATUS_DITOLAK]);
+
+        $this->actingAs($user)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee(route('pesantren.akreditasi'), false)
+            ->assertSee(route('pesantren.akreditasi', ['statusFilter' => 4]), false)
+            ->assertSee(route('pesantren.akreditasi', ['statusFilter' => 3]), false)
+            ->assertSee(route('pesantren.akreditasi', ['statusFilter' => -1]), false);
+    }
 }
