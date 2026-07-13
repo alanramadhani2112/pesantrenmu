@@ -8,6 +8,7 @@ use App\Models\Ipm;
 use App\Models\MasterEdpmButir;
 use App\Models\MasterEdpmKomponen;
 use App\Models\Pesantren;
+use App\Models\PesantrenUnit;
 use App\Models\SdmPesantren;
 use App\Models\User;
 use App\Services\OnboardingService;
@@ -50,11 +51,38 @@ class OnboardingStepCompletionPropertyTest extends TestCase
         'nama_pesantren',
         'ns_pesantren',
         'alamat',
-        'provinsi',
+        'provinsi_kode',
         'kota_kabupaten',
         'tahun_pendirian',
+        'luas_tanah',
+        'luas_bangunan',
         'nama_mudir',
+        'jenjang_pendidikan_mudir',
+        'telp_pesantren',
+        'hp_wa',
+        'email_pesantren',
+        'persyarikatan',
+        'visi',
+        'misi',
         'layanan_satuan_pendidikan',
+        'status_kepemilikan_tanah',
+        'sertifikat_nsp',
+        'rk_anggaran',
+        'silabus_rpp',
+        'peraturan_kepegawaian',
+        'file_lk_iapm',
+        'laporan_tahunan',
+        'dok_profil',
+        'dok_nsp',
+        'dok_renstra',
+        'dok_rk_anggaran',
+        'dok_kurikulum',
+        'dok_silabus_rpp',
+        'dok_kepengasuhan',
+        'dok_peraturan_kepegawaian',
+        'dok_sarpras',
+        'dok_laporan_tahunan',
+        'dok_sop',
     ];
 
     /**
@@ -128,7 +156,15 @@ class OnboardingStepCompletionPropertyTest extends TestCase
                 $profilData[$field] = $field === 'layanan_satuan_pendidikan' ? [] : '';
             }
         }
-        Pesantren::create($profilData);
+        $pesantren = Pesantren::create($profilData);
+        if (! empty($profilData['layanan_satuan_pendidikan'])) {
+            PesantrenUnit::create([
+                'pesantren_id' => $pesantren->id,
+                'unit' => 'spm',
+                'jumlah_rombel' => 1,
+            ]);
+            $profilFilledCount++;
+        }
 
         // --- Set up IPM data ---
         $ipmData = ['user_id' => $user->id];
@@ -191,12 +227,13 @@ class OnboardingStepCompletionPropertyTest extends TestCase
         $completionStatus = $this->service->getStepCompletionStatus($user->id, 3);
 
         // --- Verify 'profil' step ---
-        $expectedProfilComplete = ($profilFilledCount === count(self::PROFIL_FIELDS));
+        $profilTotal = count(self::PROFIL_FIELDS) + (! empty($profilData['layanan_satuan_pendidikan']) ? 1 : 0);
+        $expectedProfilComplete = ($profilFilledCount === $profilTotal);
         $this->assertEquals(
             $expectedProfilComplete,
             $completionStatus['profil'],
             'Profil step: expected '.($expectedProfilComplete ? 'true' : 'false')
-            ." for {$profilFilledCount}/".count(self::PROFIL_FIELDS)." fields filled (bitmask: {$profilBitmask})"
+            ." for {$profilFilledCount}/{$profilTotal} fields filled (bitmask: {$profilBitmask})"
         );
 
         // --- Verify 'ipm' step ---
@@ -209,10 +246,11 @@ class OnboardingStepCompletionPropertyTest extends TestCase
         );
 
         // --- Verify 'sdm' step ---
+        $expectedSdmComplete = $sdmPresent && ! empty($profilData['layanan_satuan_pendidikan']);
         $this->assertEquals(
-            $sdmPresent,
+            $expectedSdmComplete,
             $completionStatus['sdm'],
-            'SDM step: expected '.($sdmPresent ? 'true' : 'false')
+            'SDM step: expected '.($expectedSdmComplete ? 'true' : 'false')
         );
 
         // --- Verify 'edpm' step ---

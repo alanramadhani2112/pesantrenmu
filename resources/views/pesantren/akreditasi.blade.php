@@ -122,7 +122,7 @@
     @endif
 
     {{-- Completeness Check --}}
-    @if(!($completeness['can_submit'] ?? true))
+    @if(!empty($completeness['incomplete_items'] ?? []))
         <x-ui.alert variant="warning" icon="information-3" title="Data Belum Lengkap" class="mb-4">
             <div class="mb-3">
                 <div class="d-flex align-items-center gap-3 mb-2">

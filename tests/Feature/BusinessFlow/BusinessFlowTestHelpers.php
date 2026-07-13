@@ -85,7 +85,7 @@ trait BusinessFlowTestHelpers
             'nama_pesantren' => 'BF Pesantren '.$user->id,
             'ns_pesantren' => 'BF-NSP-'.$user->id,
             'alamat' => 'Jl. BF '.$user->id,
-            'provinsi' => 'DI Yogyakarta',
+            'provinsi_kode' => '34',
             'kota_kabupaten' => 'Yogyakarta',
             'tahun_pendirian' => '2010',
             'nama_mudir' => 'Mudir BF',
