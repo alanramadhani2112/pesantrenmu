@@ -106,7 +106,7 @@ Coverage terhadap docs publik:
 | Image input | Good | Profile and asesor profile image inputs expose root `data-kt-image-input="true"` plus change/cancel actions. |
 | Stepper | Good | Stepper is explicitly visual-only via `data-ui-stepper-mode="visual"`; no fake KTStepper child attributes remain. |
 | Editors/Quill | Good | Unused Quill bridge and component removed; no editor runtime is exposed until a page needs it. |
-| Custom plugins | Weak | Banyak plugin vendor ada, tetapi tidak direferensikan runtime. |
+| Custom plugins | Good | Unused `plugins/custom` payload removed; add custom plugins only when a real page needs them. |
 | Theme mode | Good | Light-only theme is explicit on `<html data-bs-theme="light">`, matching Metronic documentElement convention. |
 
 ## Gap Utama
@@ -139,11 +139,10 @@ Resolved - theme mode mengikuti kontrak docs.
 - Repo memilih light-only theme.
 - `data-bs-theme="light"` dipasang di `<html>`, bukan `<body>`, agar cocok dengan pola Metronic `documentElement`.
 
-P1 - vendor custom plugin belum punya ownership.
+Resolved - vendor custom plugin ownership.
 
-- `public/vendor/metronic/assets/plugins/custom` berisi 63 file, 15.651.144 byte.
-- Folder yang ada: `ckeditor`, `cookiealert`, `cropper`, `datatables`, `draggable`, `flotcharts`, `formrepeater`, `fslightbox`, `fullcalendar`, `jkanban`, `jstree`, `leaflet`, `prismjs`, `tinymce`, `typedjs`, `vis-timeline`.
-- Search repo tidak menemukan referensi runtime ke plugin custom tersebut.
+- `public/vendor/metronic/assets/plugins/custom` tidak direferensikan runtime dan sudah dihapus.
+- Custom plugin Metronic hanya boleh ditambahkan kembali saat ada halaman nyata yang membutuhkan.
 
 P2 - override CSS besar.
 
@@ -169,11 +168,10 @@ P2 - override CSS besar.
 - Putuskan ownership Chart.js: global plugin bundle atau import eksplisit.
 - Quill bridge/component unused sudah dihapus; load editor hanya saat ada halaman pemakai nyata.
 
-### P1 - bersihkan plugin custom
+### Resolved P1 - plugin custom
 
-- Karantina atau hapus plugin custom yang tidak dipakai dari public runtime.
-- Simpan daftar allowed plugins di docs.
-- Tambah test ringan yang memastikan plugin custom berat tidak muncul tanpa referensi.
+- `plugins/custom` sudah dihapus dari public runtime karena tidak dipakai.
+- Plugin custom baru harus lewat kebutuhan halaman nyata dan sebaiknya scoped per halaman.
 
 ### P2 - kurangi design debt override
 
@@ -186,7 +184,7 @@ P2 - override CSS besar.
 
 - Pertahankan dokumen asset strategy dan audit ini tetap sinkron setiap kali load order berubah.
 - Tambah `docs/metronic-runtime-manifest.json` berisi versi, source path, file hash, dan bundle size.
-- Hapus/karantina `plugins/custom` bila tidak dipakai, potensi pengurangan sekitar 15 MB.
+- `plugins/custom` sudah dihapus; jangan kembalikan tanpa kebutuhan halaman nyata.
 - Tambah real browser smoke dengan Playwright/Puppeteer saat dependency tersedia; saat ini kontrak shell runtime dijaga lewat Feature test.
 - Tambah komentar singkat di layout yang menjelaskan alasan load order final.
 
@@ -207,14 +205,14 @@ Yang sudah diverifikasi selama audit:
 - Public docs recrawl: HTML `8.3.2`, Laravel `8.3.1`.
 - Source lokal: `C:\laragon\www\dist\dist`, `Product Version: 8.1.8`, demo42.
 - Hash 4 bundle runtime repo sama dengan source lokal.
-- Asset runtime repo: 122 file, 30.843.945 byte.
-- Custom plugin folder: 63 file, 15.651.144 byte.
+- Asset runtime repo now excludes unused `plugins/custom` payload.
+- Custom plugin folder removed: 63 files, 15.651.144 bytes deleted from public runtime.
 - Komponen Blade: 81 total, 49 `x-ui.*`.
 - Override CSS: 18 modul, 8.942 line, 903 `!important`, 5 `:has()`.
 - `git diff --check`: lulus setelah laporan dibuat.
 - `npm run build`: lulus pada task audit yang terinterupsi.
 - Asesor/sidebar test subset: lulus 36 test, 335 assertion pada task audit yang terinterupsi.
-- `php artisan test tests\Feature\PerformanceOptimizationTest.php --no-ansi`: 1 gagal, 1 skipped, 2 lulus, 15 assertion. Gagal karena layout sekarang load plugin bundle global sementara test melarangnya.
+- `php artisan test tests/Feature/PerformanceOptimizationTest.php`: 3 passed, 1 skipped after Metronic bundle policy sync.
 
 ## Update Eksekusi P0
 
@@ -233,9 +231,9 @@ Verifikasi setelah eksekusi:
 
 - `npm run build`: lulus.
 - `php artisan test tests/Feature/PerformanceOptimizationTest.php`: 3 lulus, 1 skipped.
-- `php artisan test tests/Feature/MetronicFrontendTest.php`: 34 lulus, 1 skipped.
+- `php artisan test tests/Feature/MetronicFrontendTest.php`: 35+ lulus, 1 skipped after Metronic shell/runtime contracts.
 
 Catatan residual:
 
 - Full Metronic bundle membawa dependency yang juga masih ada di Vite (`Dropzone`, `autosize`, `SweetAlert`, `Popper`, Chart). Ini diterima untuk stabilitas demo42 sekarang; pengurangan duplikasi dependency bisa jadi task performa terpisah setelah smoke browser.
-- Plugin custom Metronic di `public/vendor/metronic/assets/plugins/custom` masih perlu audit pemakaian terpisah.
+- Plugin custom Metronic sudah diaudit: tidak dipakai dan dihapus dari public runtime.

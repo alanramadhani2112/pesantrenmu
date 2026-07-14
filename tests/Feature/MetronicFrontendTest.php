@@ -99,6 +99,7 @@ class MetronicFrontendTest extends TestCase
     public function test_unused_full_metronic_public_assets_are_removed(): void
     {
         $this->assertDirectoryDoesNotExist(public_path('assets'));
+        $this->assertDirectoryDoesNotExist(public_path('vendor/metronic/assets/plugins/custom'));
         $this->assertFileExists(public_path('vendor/metronic/assets/css/style.bundle.css'));
         $this->assertFileExists(public_path('vendor/metronic/assets/plugins/global/plugins.bundle.css'));
     }
