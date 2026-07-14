@@ -484,7 +484,7 @@
 [data-module-page="pesantren-akreditasi-detail"] .spm-detail-label {
     color: var(--spm-pesantren-muted);
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
 }
@@ -493,7 +493,7 @@
     margin-top: 6px;
     color: #111827;
     font-size: 17px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 [data-module-page="pesantren-akreditasi-detail"] .spm-detail-tabs-shell {
@@ -644,7 +644,7 @@
 [data-module-page="pesantren-akreditasi-detail"] .spm-sdm-matrix-table th {
     color: var(--spm-pesantren-muted);
     font-size: 0.72rem;
-    font-weight: 700;
+    font-weight: 600;
     white-space: nowrap;
 }
 
@@ -674,7 +674,7 @@
 [data-module-page="pesantren-akreditasi-detail"] .spm-sdm-number {
     min-width: 70px;
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 600;
     color: #111827;
 }
 
@@ -734,7 +734,7 @@
 [data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid .spm-detail-value {
     color: #111827;
     font-size: 0.95rem;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 [data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid {
@@ -772,7 +772,7 @@
 [data-module-page="pesantren-akreditasi-detail"] .spm-detail-grid .spm-detail-value {
     color: #071437;
     font-size: 0.95rem;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.35;
     overflow-wrap: anywhere;
 }
@@ -840,7 +840,7 @@
 [data-dashboard-page="metronic"] .spm-dashboard-progress .spm-progress-label,
 [data-dashboard-page="metronic"] .spm-dashboard-progress .spm-progress-meta {
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 [data-dashboard-page="metronic"] .spm-dashboard-progress .progress {
@@ -1141,7 +1141,7 @@
 [data-module-page="asesor-akreditasi-detail"] .spm-detail-label {
     color: var(--spm-asesor-muted);
     font-size: .68rem;
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: .04em;
     text-transform: uppercase;
 }
@@ -1171,7 +1171,7 @@
     border: 1px solid var(--spm-asesor-border) !important;
     border-radius: .75rem !important;
     background: #ffffff;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1;
     white-space: nowrap;
     transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
@@ -1268,4 +1268,262 @@
     [data-module-page="asesor-akreditasi-detail"] * {
         scroll-behavior: auto !important;
     }
+}
+
+/* Asesor detail content polish */
+[data-module-page="asesor-akreditasi-detail"] .spm-asesor-profile-panel .card-body > .p-6,
+[data-module-page="asesor-akreditasi-detail"] .spm-asesor-document-panel .card-body > .p-6,
+[data-module-page="asesor-akreditasi-detail"] .spm-asesor-table-panel .card-body > .p-6,
+[data-module-page="asesor-akreditasi-detail"] .spm-asesor-edpm-panel .card-body > .p-6 {
+    padding: 1.25rem !important;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-asesor-detail-grid > [class*="col-"] {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+[data-module-page="asesor-akreditasi-detail"] .spm-asesor-detail-grid {
+    --bs-gutter-x: 1rem;
+    --bs-gutter-y: 1rem;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-asesor-detail-field {
+    min-height: 72px;
+    padding: .9rem 1rem;
+    border: 1px solid var(--spm-asesor-border);
+    border-radius: .9rem;
+    background: #f9fbfd;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-asesor-detail-field .spm-detail-label {
+    margin-bottom: .35rem;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-asesor-detail-field .spm-detail-value {
+    color: #071437;
+    font-size: .95rem;
+    font-weight: 600;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-document-review-item {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    min-height: 44px;
+    padding: .7rem .85rem;
+    border: 1px solid var(--spm-asesor-border);
+    border-radius: .8rem;
+    background: #fff;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-document-review-item i {
+    flex: 0 0 auto;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-document-review-item a,
+[data-module-page="asesor-akreditasi-detail"] .spm-document-review-item span {
+    line-height: 1.35;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-sdm-table-wrap,
+[data-module-page="asesor-akreditasi-detail"] .spm-score-table-wrap {
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-sdm-review-table {
+    min-width: 1080px;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-sdm-review-table th,
+[data-module-page="asesor-akreditasi-detail"] .spm-score-table th,
+[data-module-page="asesor-akreditasi-detail"] .spm-edpm-review-table th {
+    color: #667085;
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .015em;
+    text-transform: uppercase;
+    background: #f8fafc;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-sdm-review-table td,
+[data-module-page="asesor-akreditasi-detail"] .spm-edpm-review-table td {
+    color: #344054;
+    font-weight: 600;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-edpm-review {
+    gap: 1rem !important;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-edpm-review > [data-ui-section-card="metronic"] > .card-body > .p-6 {
+    padding: 1rem !important;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-edpm-review-metric {
+    min-height: 86px;
+    background: #f9fbfd;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-edpm-review-component {
+    padding: 1rem;
+    border-radius: .95rem;
+    background: #fff;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-edpm-review-component + .spm-edpm-review-component {
+    margin-top: .25rem;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-edpm-statement {
+    color: #1f2937;
+    line-height: 1.45;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-score-table tbody tr,
+[data-module-page="asesor-akreditasi-detail"] .spm-edpm-review-table tbody tr {
+    transition: background-color 120ms ease;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-score-table tbody tr:hover,
+[data-module-page="asesor-akreditasi-detail"] .spm-edpm-review-table tbody tr:hover {
+    background: #fbfdfc;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-upload-panel {
+    background: #fdfefe;
+}
+
+@media (max-width: 767.98px) {
+    [data-module-page="asesor-akreditasi-detail"] .spm-asesor-profile-panel .card-body > .p-6,
+    [data-module-page="asesor-akreditasi-detail"] .spm-asesor-document-panel .card-body > .p-6,
+    [data-module-page="asesor-akreditasi-detail"] .spm-asesor-table-panel .card-body > .p-6,
+    [data-module-page="asesor-akreditasi-detail"] .spm-asesor-edpm-panel .card-body > .p-6 {
+        padding: 1rem !important;
+    }
+
+    [data-module-page="asesor-akreditasi-detail"] .spm-document-review-item {
+        align-items: flex-start;
+    }
+}
+
+/* Asesor document checklist refinement */
+[data-module-page="asesor-akreditasi-detail"] .spm-asesor-document-panel .row.g-3 {
+    --bs-gutter-x: .75rem;
+    --bs-gutter-y: .75rem;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-document-review-item {
+    position: relative;
+    min-height: 58px;
+    padding: .8rem .9rem .8rem 3rem;
+    border-color: #e8edf4;
+    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, .025);
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-document-review-item > i {
+    position: absolute;
+    top: .85rem;
+    left: .85rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.55rem;
+    height: 1.55rem;
+    border-radius: .55rem;
+    background: #f2f5f9;
+    color: #98a2b3 !important;
+    font-size: .9rem !important;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-document-review-item > i.text-success {
+    color: var(--spm-primary) !important;
+    background: rgba(var(--spm-primary-rgb), .1);
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-document-review-item a,
+[data-module-page="asesor-akreditasi-detail"] .spm-document-review-item span {
+    display: block;
+    color: #344054 !important;
+    font-size: .82rem !important;
+    font-weight: 600 !important;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-document-review-item a::after,
+[data-module-page="asesor-akreditasi-detail"] .spm-document-review-item span::after {
+    display: block;
+    margin-top: .2rem;
+    color: #98a2b3;
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-document-review-item a::after {
+    content: "Tersedia - buka dokumen";
+    color: var(--spm-primary);
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-document-review-item span::after {
+    content: "Belum ada dokumen";
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-document-review-item:has(a) {
+    border-color: rgba(var(--spm-primary-rgb), .18);
+    background: linear-gradient(180deg, #ffffff 0%, rgba(var(--spm-primary-rgb), .025) 100%);
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-document-review-item:has(a):hover {
+    border-color: rgba(var(--spm-primary-rgb), .32);
+    box-shadow: 0 8px 20px rgba(var(--spm-primary-rgb), .08);
+}
+
+/* Asesor detail flat Metronic standard */
+[data-module-page="asesor-akreditasi-detail"] {
+    --spm-flat-radius: .85rem;
+    --spm-flat-radius-sm: .65rem;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .card,
+[data-module-page="asesor-akreditasi-detail"] [data-ui-card="metronic"],
+[data-module-page="asesor-akreditasi-detail"] [data-ui-section-card="metronic"],
+[data-module-page="asesor-akreditasi-detail"] [data-ui-simple-table="metronic"],
+[data-module-page="asesor-akreditasi-detail"] .spm-asesor-detail-hero,
+[data-module-page="asesor-akreditasi-detail"] .spm-detail-tabs-shell,
+[data-module-page="asesor-akreditasi-detail"] .spm-asesor-detail-next-step,
+[data-module-page="asesor-akreditasi-detail"] .spm-asesor-detail-field,
+[data-module-page="asesor-akreditasi-detail"] .spm-document-review-item,
+[data-module-page="asesor-akreditasi-detail"] .spm-edpm-review-component,
+[data-module-page="asesor-akreditasi-detail"] .spm-upload-panel,
+[data-module-page="asesor-akreditasi-detail"] .spm-edpm-review-metric {
+    box-shadow: none !important;
+    border-radius: var(--spm-flat-radius) !important;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .btn,
+[data-module-page="asesor-akreditasi-detail"] [data-ui-button="metronic"],
+[data-module-page="asesor-akreditasi-detail"] .form-control,
+[data-module-page="asesor-akreditasi-detail"] .form-select,
+[data-module-page="asesor-akreditasi-detail"] .badge,
+[data-module-page="asesor-akreditasi-detail"] [data-ui-badge="metronic"],
+[data-module-page="asesor-akreditasi-detail"] [data-ui-status-badge="metronic"] {
+    box-shadow: none !important;
+    border-radius: var(--spm-flat-radius-sm) !important;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-detail-tabs-shell .spm-tab-link.active {
+    box-shadow: inset 3px 0 0 var(--spm-primary) !important;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-document-review-item:has(a):hover {
+    box-shadow: none !important;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-scroll-actions [data-ui-button="metronic"] {
+    box-shadow: none !important;
 }

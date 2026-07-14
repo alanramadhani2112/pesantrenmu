@@ -35,11 +35,21 @@ class PerformanceOptimizationTest extends TestCase
         $this->assertStringContainsString('OPcache', $docs);
     }
 
-    public function test_global_layouts_do_not_load_metronic_plugin_bundle_css_or_js(): void
+    public function test_app_and_guest_layouts_follow_metronic_bundle_order_while_public_pages_stay_light(): void
     {
         foreach ([
             resource_path('views/layouts/app.blade.php'),
             resource_path('views/layouts/guest.blade.php'),
+        ] as $path) {
+            $source = file_get_contents($path);
+
+            $this->assertStringContainsString('vendor/metronic/assets/plugins/global/plugins.bundle.css', $source);
+            $this->assertStringContainsString('vendor/metronic/assets/css/style.bundle.css', $source);
+            $this->assertStringContainsString('vendor/metronic/assets/plugins/global/plugins.bundle.js', $source);
+            $this->assertStringContainsString('vendor/metronic/assets/js/scripts.bundle.js', $source);
+        }
+
+        foreach ([
             resource_path('views/welcome.blade.php'),
             resource_path('views/errors/403.blade.php'),
             resource_path('views/errors/404.blade.php'),
@@ -50,9 +60,7 @@ class PerformanceOptimizationTest extends TestCase
         ] as $path) {
             $source = file_get_contents($path);
 
-            $this->assertStringNotContainsString('vendor/metronic/assets/plugins/global/plugins.bundle.css', $source);
             $this->assertStringNotContainsString('vendor/metronic/assets/plugins/global/plugins.bundle.js', $source);
-            $this->assertStringContainsString('vendor/metronic/assets/css/style.bundle.css', $source);
         }
     }
 

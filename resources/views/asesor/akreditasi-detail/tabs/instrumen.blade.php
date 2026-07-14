@@ -190,10 +190,10 @@
 
 {{-- Scroll Actions --}}
 <div class="position-fixed bottom-0 end-0 mb-6 me-6 d-flex flex-column gap-2 spm-scroll-actions" style="z-index: 100;">
-    <x-ui.button type="button" variant="light-primary" size="sm" class="btn-icon shadow" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Ke Atas">
+    <x-ui.button type="button" variant="light-primary" size="sm" class="btn-icon" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Ke Atas">
         <i class="ki-solid ki-arrow-up fs-5"></i>
     </x-ui.button>
-    <x-ui.button type="button" variant="light-primary" size="sm" class="btn-icon shadow" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" title="Ke Bawah">
+    <x-ui.button type="button" variant="light-primary" size="sm" class="btn-icon" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" title="Ke Bawah">
         <i class="ki-solid ki-arrow-down fs-5"></i>
     </x-ui.button>
 </div>

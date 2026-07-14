@@ -74,7 +74,7 @@
                     <x-ui.status-badge variant="secondary">ID #{{ $akreditasi->id }}</x-ui.status-badge>
                     <x-ui.status-badge variant="secondary">Periode {{ $akreditasi->created_at?->format('Y') ?? '-' }}</x-ui.status-badge>
                 </div>
-                <h2 class="text-gray-900 fw-bold mb-2">{{ $profil->nama_pesantren ?? 'Detail Akreditasi' }}</h2>
+                <h2 class="text-gray-900 fw-semibold mb-2">{{ $profil->nama_pesantren ?? 'Detail Akreditasi' }}</h2>
                 <div class="text-muted fw-semibold mw-700px">Pantau profil, dokumen, EDPM/IPR, asesor, dan hasil dalam satu alur pengajuan.</div>
             </div>
             <div class="spm-detail-hero-meta">
@@ -124,7 +124,7 @@
                     <div class="row align-items-end">
                         <div class="col-md-8">
                             <x-ui.form-field label="{{ !empty($akreditasi->kartu_kendali) ? 'Ganti File' : 'Unggah File' }}">
-                                <input type="file" name="kartu_kendali_file" class="form-control form-control-sm @error('kartu_kendali_file') is-invalid @enderror" accept="application/pdf,image/png,image/jpeg">
+                                <x-ui.input type="file" name="kartu_kendali_file" class="form-control-sm" :invalid="$errors->has('kartu_kendali_file')" accept="application/pdf,image/png,image/jpeg" />
                                 @error('kartu_kendali_file')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -185,14 +185,24 @@
                 <x-ui.section-card title="Layanan Satuan Pendidikan" subtitle="Unit pendidikan yang tercatat." class="h-100 spm-detail-panel">
                     <div class="p-5">
                         @if(!empty($profil->units) && count($profil->units) > 0)
-                            <div class="d-flex flex-column gap-3">
-                                @foreach($profil->units as $unit)
-                                    <div class="spm-detail-list-item">
-                                        <span class="fw-semibold text-gray-900">{{ $unit->unit }}</span>
-                                        <x-ui.status-badge variant="primary">{{ $unit->jumlah_rombel }} rombel</x-ui.status-badge>
-                                    </div>
-                                @endforeach
-                            </div>
+                            <x-ui.simple-table table-class="table-row-gray-200">
+                                <thead>
+                                    <tr class="fw-semibold text-muted">
+                                        <th>Unit</th>
+                                        <th class="text-end">Rombel</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($profil->units as $unit)
+                                        <tr>
+                                            <td class="fw-semibold text-gray-900">{{ $unit->unit }}</td>
+                                            <td class="text-end">
+                                                <x-ui.status-badge variant="primary">{{ $unit->jumlah_rombel }} rombel</x-ui.status-badge>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </x-ui.simple-table>
                         @else
                             <x-ui.empty-state title="Belum ada layanan" description="Layanan satuan pendidikan belum dipilih pada profil pesantren." variant="secondary" class="py-6" />
                         @endif
@@ -300,9 +310,9 @@
                                     <td class="ps-5 spm-sdm-level-cell">
                                         <div class="d-flex align-items-center gap-3">
                                             <span class="symbol symbol-35px">
-                                                <span class="symbol-label bg-light-primary text-primary fw-bold">{{ strtoupper(substr((string) $row->tingkat, 0, 2)) }}</span>
+                                                <span class="symbol-label bg-light-primary text-primary fw-semibold">{{ strtoupper(substr((string) $row->tingkat, 0, 2)) }}</span>
                                             </span>
-                                            <span class="fw-bold text-gray-900">{{ strtoupper($row->tingkat) }}</span>
+                                            <span class="fw-semibold text-gray-900">{{ strtoupper($row->tingkat) }}</span>
                                         </div>
                                     </td>
                                     @foreach($metrics as [$male, $female])
@@ -353,7 +363,7 @@
                                                 <x-ui.badge variant="primary">{{ $roleLabel }}</x-ui.badge>
                                                 <x-ui.status-badge variant="secondary">Tipe {{ $assignment->tipe }}</x-ui.status-badge>
                                             </div>
-                                            <div class="fw-bold text-gray-900 fs-5 mb-1">{{ $asesorProfile->nama_dengan_gelar ?? $asesorUser?->name ?? '-' }}</div>
+                                            <div class="fw-semibold text-gray-900 fs-5 mb-1">{{ $asesorProfile->nama_dengan_gelar ?? $asesorUser?->name ?? '-' }}</div>
                                             <div class="text-muted fw-semibold fs-7">{{ $asesorUser?->email ?? $asesorProfile?->email_pribadi ?? '-' }}</div>
                                             <div class="text-muted fw-semibold fs-7 mt-1">{{ $asesorProfile?->whatsapp ?? '-' }}</div>
                                         </div>

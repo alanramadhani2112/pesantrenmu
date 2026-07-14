@@ -52,7 +52,7 @@ Plugin custom seperti datatables, fullcalendar, formrepeater, tinymce, atau cked
 
 ## Loading Policy
 
-Asset Metronic sudah dimuat pada layout utama dan guest pada Phase 4.
+Asset Metronic dimuat pada layout utama dan guest dengan strategi standar Metronic 8.1.8 demo42.
 
 Urutan load aktif:
 
@@ -61,22 +61,27 @@ Metronic plugins CSS
 Metronic style bundle CSS
 Vite app.css
 Vite metronic-overrides.css
+Metronic plugins JS
+Metronic scripts bundle JS
 Vite app.js
 ```
 
-Urutan ini menjaga visual component Metronic tersedia, sementara brand override SPM tetap menang setelah bundle Metronic.
+Urutan ini menjaga kontrak demo42 lokal tetap utuh, sementara brand override SPM tetap menang setelah bundle Metronic. Vite tetap memuat adapter aplikasi dan helper yang spesifik untuk SPM.
 
 Catatan trim terbaru:
 
-- `layouts.app`, `layouts.guest`, dan `welcome.blade.php` tidak lagi memuat `plugins.bundle.js` dan `scripts.bundle.js`; halaman tersebut cukup memakai CSS Metronic + Vite.
+- `layouts.app` dan `layouts.guest` memuat `plugins.bundle.css`, `style.bundle.css`, `plugins.bundle.js`, dan `scripts.bundle.js` sesuai source lokal Metronic 8.1.8 demo42.
+- `welcome.blade.php` dan error pages tetap ringan dan tidak memuat plugin JS global.
 - Dropdown/action menu memakai Blade + Alpine dengan class Metronic, sehingga tidak bergantung pada `data-kt-menu` atau inisialisasi `KTMenu`.
+- Header menu/dropdown Metronic memakai bundle Metronic; adapter di `resources/js/app.js` tetap defensif untuk route/test tanpa global KT runtime.
 - Notifikasi tidak lagi melakukan polling legacy reactive layer setiap 15 detik; daftar notifikasi di-refresh saat tombol notifikasi dibuka.
 - Jangan mengembalikan `public/assets`; gunakan `public/vendor/metronic/assets` sebagai satu-satunya lokasi asset Metronic runtime.
 
 ## Legacy Reactive Compatibility Rules
 
 - Jangan start Alpine atau legacy reactive layer dua kali.
-- Metronic init di `resources/js/app.js` bersifat defensif/opsional. Jangan menambah dependency baru ke `plugins.bundle.js` atau `scripts.bundle.js` tanpa alasan fitur yang jelas.
+- Metronic init di `resources/js/app.js` bersifat defensif dan harus idempotent karena bundle Metronic juga tersedia global.
+- Chart.js dipakai eksplisit lewat Vite untuk dashboard; Dropzone, autosize, SweetAlert, dan Popper tetap dipakai oleh adapter aplikasi. Jangan tambah plugin custom baru tanpa kebutuhan halaman nyata.
 - Komponen yang bisa dibuat dengan Blade/legacy reactive layer native tidak perlu memaksa plugin Metronic JS.
 - Modal, dropdown, tooltip, drawer, dan menu harus diuji setelah reactive update lama.
 

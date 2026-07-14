@@ -222,7 +222,7 @@
         @if($isSuperAdmin || $isAdmin)
             <div class="row g-6">
                 <div class="col-12 col-lg-7 col-xl-8">
-                    <x-ui.card title="Perlu Ditindaklanjuti" subtitle="Prioritas proses aktif yang membutuhkan perhatian admin." class="h-100">
+                    <x-ui.card title="Perlu Ditindaklanjuti" subtitle="Prioritas proses aktif yang membutuhkan perhatian admin." class="h-100 spm-dashboard-stat">
                         <div class="row g-5">
                             <div class="col-sm-6 col-md-4">
                                 <div class="rounded border border-dashed border-warning bg-light-warning p-5 h-100">
@@ -255,7 +255,7 @@
                 </div>
 
                 <div class="col-12 col-lg-5 col-xl-4">
-                    <x-ui.card title="Monitoring Asesor" subtitle="Distribusi dan kapasitas tugas aktif." class="h-100">
+                    <x-ui.card title="Monitoring Asesor" subtitle="Distribusi dan kapasitas tugas aktif." class="h-100 spm-dashboard-stat">
                         <div class="d-flex flex-column">
                             <x-ui.metric-row label="Total Asesor Aktif" :value="$totalAsesor" variant="primary" icon="profile-user" />
                             <x-ui.metric-row label="Total Tugas Aktif" :value="$totalTugasAktif" variant="info" icon="document" />
@@ -287,7 +287,7 @@
             <div class="row g-6">
                 <div class="{{ $hasActivePengajuan ? 'col-12' : 'col-12 col-lg-8' }}">
                     @if($hasActivePengajuan)
-                        <x-ui.card title="Pengajuan Berjalan" subtitle="Pantau posisi dan langkah berikutnya dari satu tempat." class="h-100">
+                        <x-ui.card title="Pengajuan Berjalan" subtitle="Pantau posisi dan langkah berikutnya dari satu tempat." class="h-100 spm-dashboard-stat">
                             <div class="p-6">
                                 <div class="row g-5 align-items-stretch mb-6">
                                     <div class="col-lg-8">
@@ -407,7 +407,7 @@
 
                 @unless($hasActivePengajuan)
                 <div class="col-12 col-lg-4">
-                    <x-ui.card title="Aksi Berikutnya" subtitle="Panduan singkat untuk langkah Anda." class="h-100">
+                    <x-ui.card title="Aksi Berikutnya" subtitle="Panduan singkat untuk langkah Anda." class="h-100 spm-dashboard-stat">
                         <div class="p-6 d-flex flex-column gap-4">
                             <div class="rounded bg-light-primary border border-primary border-dashed p-4">
                                 <div class="fw-semibold text-gray-900 mb-1">{{ $nextActionTitle }}</div>
@@ -468,7 +468,7 @@
 
             <div class="row g-6 spm-asesor-dashboard-workspace">
                 <div class="col-12 col-xl-8">
-                    <x-ui.card title="Fokus Hari Ini" subtitle="Mulai dari tahap paling kiri yang masih memiliki pekerjaan." class="h-100 spm-asesor-focus-card">
+                    <x-ui.card title="Fokus Hari Ini" subtitle="Mulai dari tahap paling kiri yang masih memiliki pekerjaan." class="h-100 spm-asesor-focus-card spm-dashboard-stat">
                         <div class="d-flex flex-column gap-4">
                             @foreach($asesorWorkflow as $step)
                                 <a href="{{ $step['route'] }}" class="spm-asesor-workflow-item text-decoration-none">
@@ -492,7 +492,7 @@
                 </div>
 
                 <div class="col-12 col-xl-4">
-                    <x-ui.card title="Ringkasan" subtitle="Status pekerjaan asesor saat ini." class="h-100 spm-asesor-summary-card">
+                    <x-ui.card title="Ringkasan" subtitle="Status pekerjaan asesor saat ini." class="h-100 spm-asesor-summary-card spm-dashboard-stat">
                         <div class="d-flex flex-column gap-4">
                             <div class="rounded bg-light-primary border border-primary border-dashed p-5">
                                 <div class="text-muted fw-semibold fs-8 text-uppercase mb-2">Tugas aktif</div>
@@ -527,7 +527,7 @@
 
         <div class="row g-6 mt-0">
             <div class="col-12 col-lg-7 col-xl-8">
-                <x-ui.card title="Pengajuan Akreditasi per Bulan" subtitle="Tren pengajuan tahun {{ date('Y') }}" class="h-100">
+                <x-ui.card title="Pengajuan Akreditasi per Bulan" subtitle="Tren pengajuan tahun {{ date('Y') }}" class="h-100 spm-dashboard-stat">
                     <x-slot name="toolbar">
                         <x-ui.badge variant="primary">{{ date('Y') }}</x-ui.badge>
                     </x-slot>
@@ -558,7 +558,7 @@
             </div>
 
             <div class="col-12 col-lg-5 col-xl-4">
-                <x-ui.card title="Distribusi Status" subtitle="Hasil akhir pengajuan akreditasi." class="h-100">
+                <x-ui.card title="Distribusi Status" subtitle="Hasil akhir pengajuan akreditasi." class="h-100 spm-dashboard-stat">
                     @if($hasStatusData)
                         <div class="d-flex flex-column align-items-center justify-content-center">
                             <div class="position-relative h-250px w-250px d-flex align-items-center justify-content-center">

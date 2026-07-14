@@ -1,5 +1,5 @@
 {{-- Tab: EDPM (Evaluasi Diri Pesantren Mu'adalah) --}}
-<x-ui.section-card title="EDPM Pesantren" subtitle="Evaluasi Diri Pesantren Mu'adalah yang diisi pesantren">
+<x-ui.section-card title="EDPM Pesantren" subtitle="Evaluasi Diri Pesantren Mu'adalah yang diisi pesantren" class="spm-asesor-edpm-panel">
     <div class="p-6">
         <x-akreditasi.edpm-review
             :komponens="$komponens"
@@ -11,7 +11,7 @@
 </x-ui.section-card>
 
 @if((int) $akreditasi->status >= \App\StateMachine\AkreditasiStateMachine::STATUS_PASCA_VISITASI)
-<x-ui.section-card title="Penilaian EDPM Asesor" subtitle="Penilaian asesor terhadap EDPM pesantren" class="mt-4">
+<x-ui.section-card title="Penilaian EDPM Asesor" subtitle="Penilaian asesor terhadap EDPM pesantren" class="mt-4 spm-asesor-edpm-panel">
     <div class="p-6">
         <form method="POST" action="{{ route('asesor.akreditasi.save-edpm') }}" id="edpmForm">
             @csrf
