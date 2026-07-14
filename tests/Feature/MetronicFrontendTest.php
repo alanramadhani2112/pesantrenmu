@@ -89,10 +89,10 @@ class MetronicFrontendTest extends TestCase
 
         $this->get('/login')
             ->assertOk()
-            ->assertDontSee('vendor/metronic/assets/plugins/global/plugins.bundle.css', false)
+            ->assertSee('vendor/metronic/assets/plugins/global/plugins.bundle.css', false)
             ->assertSee('vendor/metronic/assets/css/style.bundle.css', false)
-            ->assertDontSee('vendor/metronic/assets/plugins/global/plugins.bundle.js', false)
-            ->assertDontSee('vendor/metronic/assets/js/scripts.bundle.js', false)
+            ->assertSee('vendor/metronic/assets/plugins/global/plugins.bundle.js', false)
+            ->assertSee('vendor/metronic/assets/js/scripts.bundle.js', false)
             ->assertDontSee('fonts.bunny.net', false);
     }
 
@@ -251,7 +251,11 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('data-kt-drawer-toggle="#kt_app_sidebar_mobile_toggle"', $source);
         $this->assertStringContainsString('hover-scroll-overlay-y my-5', $source);
         $this->assertStringContainsString('spm-sidebar-mobile-dismiss', $source);
+        $this->assertStringContainsString('data-kt-drawer-dismiss="true"', $source);
         $this->assertStringContainsString('ki-duotone ki-cross-circle', $source);
+        $this->assertStringNotContainsString('$store.sidebar', $source);
+        $this->assertStringNotContainsString('spm-drawer-open', $source);
+        $this->assertStringNotContainsString('spm-sidebar-backdrop', $source);
         $this->assertStringNotContainsString('class="btn-icon btn-active-color-primary d-lg-none"', $source);
         $this->assertStringNotContainsString('<x-ui.button', substr($source, strpos($source, 'id="kt_app_sidebar_logo"'), 1400));
 
@@ -808,7 +812,7 @@ class MetronicFrontendTest extends TestCase
                 <x-ui.action-menu-item type="button">Hapus</x-ui.action-menu-item>
             </x-ui.action-menu>
 
-            <x-ui.modal name="sample-modal" :show="true" maxWidth="lg" focusable>
+            <x-ui.modal name="sample-modal" title="Sample Modal" :show="true" maxWidth="lg" focusable>
                 <x-ui.modal-body>Isi modal</x-ui.modal-body>
             </x-ui.modal>
             BLADE);
@@ -830,6 +834,8 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('data-ui-modal="metronic"', $html);
         $this->assertStringContainsString('role="dialog"', $html);
         $this->assertStringContainsString('aria-modal="true"', $html);
+        $this->assertStringContainsString('aria-labelledby="spm-modal-sample-modal-title"', $html);
+        $this->assertStringContainsString('id="spm-modal-sample-modal-title"', $html);
     }
 
     public function test_sweetalert_actions_use_metronic_helper_without_inline_blade_alerts(): void

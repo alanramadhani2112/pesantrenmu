@@ -45,14 +45,6 @@
 
 <div class="spm-sidebar-host" style="display: contents;">
     <div
-        x-cloak
-        x-show="$store.sidebar.open"
-        x-transition.opacity.duration.150ms
-        class="spm-sidebar-backdrop d-lg-none"
-        x-on:click="$store.sidebar.open = false"
-    ></div>
-
-    <div
         id="kt_app_sidebar"
         data-ui-sidebar="metronic"
         data-kt-drawer="true"
@@ -63,7 +55,6 @@
         data-kt-drawer-direction="start"
         data-kt-drawer-toggle="#kt_app_sidebar_mobile_toggle"
         class="app-sidebar flex-column spm-app-sidebar"
-        x-bind:class="{ 'spm-drawer-open': $store.sidebar.open }"
     >
     <div class="app-sidebar-logo flex-shrink-0 d-flex align-items-center justify-content-between px-8" id="kt_app_sidebar_logo">
         <a href="{{ route('dashboard') }}" class="app-sidebar-logo-link d-flex align-items-center gap-3 min-w-0">
@@ -76,7 +67,7 @@
         <button
             type="button"
             class="btn btn-icon btn-active-color-primary w-30px h-30px d-lg-none spm-sidebar-mobile-dismiss"
-            x-on:click="$store.sidebar.open = false"
+            data-kt-drawer-dismiss="true"
             aria-label="Tutup menu"
         >
             <i class="ki-duotone ki-cross-circle fs-2">

@@ -30,7 +30,7 @@
                     id="kt_app_sidebar_mobile_toggle"
                     variant="light"
                     class="btn-icon btn-active-light-primary w-35px h-35px"
-                    x-on:click="$store.sidebar.open = true"
+
                     aria-label="Buka menu"
                 >
                     <x-ui.icon name="burger-menu" class="fs-2" />

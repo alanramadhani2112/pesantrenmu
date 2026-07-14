@@ -47,7 +47,7 @@
 @if($tooltip)
 <x-sidebar-tooltip :tooltip="$tooltip">
 <div class="menu-item">
-    <a {{ $attributes->merge(['class' => $classes]) }} {!! $disabledAttrs !!} @if(!$disabled) x-on:click="$store.sidebar.open = false" @endif>
+    <a {{ $attributes->merge(['class' => $classes]) }} {!! $disabledAttrs !!} @if(!$disabled) data-kt-drawer-dismiss="true" @endif>
         @if($isChild)
             <span class="menu-bullet">
                 <span class="bullet bullet-dot"></span>
@@ -78,7 +78,7 @@
 </x-sidebar-tooltip>
 @else
 <div class="menu-item">
-    <a {{ $attributes->merge(['class' => $classes]) }} {!! $disabledAttrs !!} @if(!$disabled) x-on:click="$store.sidebar.open = false" @endif>
+    <a {{ $attributes->merge(['class' => $classes]) }} {!! $disabledAttrs !!} @if(!$disabled) data-kt-drawer-dismiss="true" @endif>
         @if($isChild)
             <span class="menu-bullet">
                 <span class="bullet bullet-dot"></span>

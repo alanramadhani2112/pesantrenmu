@@ -849,7 +849,7 @@ window.addEventListener('pageshow', () => {
     hidePageLoadingOverlay();
 });
 
-Alpine.store('sidebar', { open: false });
+
 Alpine.data('spmActionMenu', window.spmActionMenu);
 
 // ── Dropzone File Upload Bridge ──
