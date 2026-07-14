@@ -208,7 +208,7 @@ Yang sudah diverifikasi selama audit:
 - Asset runtime repo now excludes unused `plugins/custom` payload.
 - Custom plugin folder removed: 63 files, 15.651.144 bytes deleted from public runtime.
 - Komponen Blade: 81 total, 49 `x-ui.*`.
-- Override CSS: 18 modul, 8.942 line, 903 `!important`, 5 `:has()`.
+- Override CSS: 18 modules; `!important` debt is tracked incrementally with no-important guards on low-risk modules.
 - `git diff --check`: lulus setelah laporan dibuat.
 - `npm run build`: lulus pada task audit yang terinterupsi.
 - Asesor/sidebar test subset: lulus 36 test, 335 assertion pada task audit yang terinterupsi.
