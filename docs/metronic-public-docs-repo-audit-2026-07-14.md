@@ -11,7 +11,7 @@ Audit ini melanjutkan task Metronic yang sempat belum selesai. Scope yang dipaka
 
 Kesimpulan utama: repo memakai Metronic `8.1.8 demo42` secara meyakinkan. Dokumentasi publik sekarang berada di HTML `8.3.2` dan Laravel `8.3.1`, jadi docs publik valid sebagai referensi kompatibilitas dan pola komponen, tetapi bukan otoritas exact-version untuk runtime lokal.
 
-Risiko terbesar saat ini bukan markup komponen. Risiko terbesar adalah strategi asset yang tidak konsisten: layout app/guest sekarang load full Metronic `plugins.bundle.*` dan `scripts.bundle.js`, sedangkan docs internal dan test performa masih menegakkan strategi lean tanpa plugin bundle global.
+Status terbaru: strategi asset sudah diputuskan ke standard Metronic bundle. Layout app/guest, docs internal, performance test, dan Metronic frontend test sudah sinkron ke load order Metronic 8.1.8 demo42. Risiko tersisa bergeser ke komponen KT khusus yang belum lengkap, dependency ownership yang masih dobel di beberapa adapter Vite, dan debt CSS override.
 
 ## Bukti Docs Publik
 
@@ -96,9 +96,9 @@ Coverage terhadap docs publik:
 
 | Area docs | Status repo | Catatan |
 | --- | --- | --- |
-| Getting Started / asset order | Partial | Layout sekarang mengikuti order full bundle, tetapi docs internal/test masih lean. |
+| Getting Started / asset order | Good | Layout app/guest, docs, and tests follow Metronic 8.1.8 demo42 bundle order. |
 | Layout / app shell | Good | Struktur Metronic demo42 cukup jelas di layout dan sidebar. |
-| Drawer/menu/scroll | Good | Markup shell tersedia; perlu pastikan init tidak dobel. |
+| Drawer/menu/scroll | Good | Sidebar is KTDrawer-owned; app fallback avoids duplicate KT init when `KTUtil` exists. |
 | Forms | Good | Komponen form reusable, autosize aktif lewat `data-kt-autosize`. |
 | Alerts/SweetAlert | Good | Ada helper `SpmSwal`; dependency ownership perlu dipilih. |
 | Tables | Good | Adapter Blade + server pagination lebih tepat untuk repo ini. |
@@ -111,12 +111,11 @@ Coverage terhadap docs publik:
 
 ## Gap Utama
 
-P0 - asset strategy berkontradiksi.
+Resolved - asset strategy sudah sinkron.
 
-- `resources/views/layouts/app.blade.php` dan `guest.blade.php` load `plugins.bundle.css`, `plugins.bundle.js`, dan `scripts.bundle.js`.
-- `docs/metronic-asset-strategy.md` dan `docs/performance-optimization.md` masih menyatakan plugin bundle tidak diload global.
-- `tests/Feature/PerformanceOptimizationTest.php` masih menguji plugin bundle global tidak boleh muncul.
-- `tests/Feature/MetronicFrontendTest.php::test_login_page_loads_metronic_foundation_assets` juga masih mengharapkan guest/login tidak load plugin/script bundle.
+- `resources/views/layouts/app.blade.php` dan `guest.blade.php` load `plugins.bundle.css`, `style.bundle.css`, `plugins.bundle.js`, dan `scripts.bundle.js`.
+- `docs/metronic-asset-strategy.md`, `docs/performance-optimization.md`, `tests/Feature/PerformanceOptimizationTest.php`, dan `tests/Feature/MetronicFrontendTest.php` sudah mengikuti policy standard Metronic bundle.
+- `welcome.blade.php` dan error pages tetap ringan tanpa plugin JS global.
 
 P0 - duplicate dependency ownership.
 
@@ -124,11 +123,10 @@ P0 - duplicate dependency ownership.
 - Vite juga membawa `@popperjs/core`, `dropzone`, `autosize`, dan `sweetalert2`.
 - Akibatnya ada dua sumber kebenaran untuk beberapa dependency runtime.
 
-P1 - init Metronic berpotensi dobel.
+Resolved - init Metronic tidak dobel saat bundle tersedia.
 
-- `scripts.bundle.js` menginisialisasi komponen KT.
-- `resources/js/app.js` juga memanggil `KTComponents`, `KTMenu`, `KTDrawer`, `KTScroll`, dan `KTSticky` saat `DOMContentLoaded`.
-- Perlu satu ownership: Metronic auto-init atau app-level defensive init, bukan dua jalur yang tidak terdokumentasi.
+- `scripts.bundle.js` menjadi owner init KT saat `window.KTUtil` tersedia.
+- `resources/js/app.js` tetap punya fallback defensif untuk route/test tanpa KT runtime, tetapi guard `if (window.KTUtil) return;` mencegah re-init global.
 
 P1 - kontrak komponen khusus belum lengkap.
 
@@ -157,33 +155,16 @@ P2 - override CSS besar.
 
 ## Roadmap
 
-### P0 - pilih satu strategi asset
+### Resolved P0 - strategi asset dan test kontrak
 
-Opsi A: Standard Metronic bundle.
+- Keputusan final: standard Metronic bundle untuk `layouts.app` dan `layouts.guest`.
+- Load order final: `plugins.bundle.css`, `style.bundle.css`, Vite CSS, `plugins.bundle.js`, `scripts.bundle.js`, lalu Vite `app.js`.
+- Public landing/error pages tetap ringan dan tidak memuat plugin JS global.
+- `PerformanceOptimizationTest`, `MetronicFrontendTest`, `docs/metronic-asset-strategy.md`, dan `docs/performance-optimization.md` sudah mengikuti keputusan ini.
+- Browser smoke contract sudah ditambahkan di `MetronicFrontendTest` untuk memastikan order asset, KT drawer/menu wiring, dan guard duplicate init.
+### P1 - lengkapi komponen KT khusus
 
-- Terima `plugins.bundle.*` dan `scripts.bundle.js` global.
-- Hapus dependency Vite yang duplikatif bila tidak diperlukan langsung: Popper, Dropzone, autosize, SweetAlert2.
-- Update `docs/metronic-asset-strategy.md`, `docs/performance-optimization.md`, `PerformanceOptimizationTest`, dan `MetronicFrontendTest`.
-- Ukur ulang payload dan first paint.
-
-Opsi B: Lean integration, rekomendasi performa.
-
-- Kembalikan layout global tanpa `plugins.bundle.*` dan `scripts.bundle.js`.
-- Sediakan Bootstrap/Chart/autosize/Dropzone/SweetAlert lewat Vite atau bundle scoped.
-- Load plugin berat hanya di halaman yang membutuhkan.
-- Pertahankan test performa yang sudah ada dengan penyesuaian kecil bila perlu.
-
-Keputusan P0 harus dibuat sebelum lanjut polish UI besar. Tanpa ini, setiap fix frontend akan bergerak di atas fondasi asset yang berubah-ubah.
-
-### P0 - hijaukan test kontrak
-
-- Jalankan dan perbaiki `php artisan test tests/Feature/PerformanceOptimizationTest.php --no-ansi`.
-- Jalankan subset Metronic setelah strategi asset dipilih: `php artisan test tests/Feature/MetronicFrontendTest.php --filter=login --no-ansi`.
-- Update docs dan test bersamaan agar policy runtime tidak saling melawan.
-
-### P1 - rapikan init dan komponen KT
-
-- Tentukan apakah `scripts.bundle.js` atau `app.js` yang menjadi pemilik init KT.
+- Init KT sudah owned by `scripts.bundle.js`; app fallback hanya jalan ketika `window.KTUtil` tidak tersedia.
 - Lengkapi image input root contract atau ganti ke komponen Blade/Alpine non-KT.
 - Lengkapi stepper root/init atau tandai stepper sebagai visual-only component.
 - Putuskan ownership Chart.js: global plugin bundle atau import eksplisit.
@@ -204,10 +185,10 @@ Keputusan P0 harus dibuat sebelum lanjut polish UI besar. Tanpa ini, setiap fix 
 
 ## Quick Wins
 
-- Update satu dokumen asset strategy setelah P0 dipilih; sekarang docs sudah menyesatkan pembaca berikutnya.
+- Pertahankan dokumen asset strategy dan audit ini tetap sinkron setiap kali load order berubah.
 - Tambah `docs/metronic-runtime-manifest.json` berisi versi, source path, file hash, dan bundle size.
 - Hapus/karantina `plugins/custom` bila tidak dipakai, potensi pengurangan sekitar 15 MB.
-- Buat smoke browser minimal untuk `/login`, `/dashboard`, sidebar drawer/menu, dashboard chart, dan satu form upload.
+- Tambah real browser smoke dengan Playwright/Puppeteer saat dependency tersedia; saat ini kontrak shell runtime dijaga lewat Feature test.
 - Tambah komentar singkat di layout yang menjelaskan alasan load order final.
 
 ## Hal Yang Dipertahankan
