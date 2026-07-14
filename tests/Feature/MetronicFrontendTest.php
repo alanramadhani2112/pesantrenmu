@@ -422,6 +422,12 @@ class MetronicFrontendTest extends TestCase
         $this->assertSame(1, substr_count($layout, 'resources/js/app.js'));
         $this->assertSame(1, substr_count($appJs, "document.addEventListener('DOMContentLoaded', initMetronic)"));
         $this->assertStringContainsString('if (window.KTUtil) return;', $appJs);
+        $this->assertStringContainsString("import Chart from 'chart.js/auto';", $appJs);
+        $this->assertStringContainsString('window.Chart = window.Chart ?? Chart;', $appJs);
+        $this->assertStringContainsString("import Dropzone from 'dropzone';", $appJs);
+        $this->assertStringContainsString("import autosize from 'autosize';", $appJs);
+        $this->assertStringContainsString("import { createPopper } from '@popperjs/core';", $appJs);
+        $this->assertStringContainsString("import('sweetalert2')", $appJs);
         $this->assertStringNotContainsString('quillEditor', $appJs);
         $this->assertFileDoesNotExist(resource_path('views/components/quill-editor.blade.php'));
         $this->assertStringNotContainsString("Alpine.store('modal')", $views);

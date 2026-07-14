@@ -100,9 +100,9 @@ Coverage terhadap docs publik:
 | Layout / app shell | Good | Struktur Metronic demo42 cukup jelas di layout dan sidebar. |
 | Drawer/menu/scroll | Good | Sidebar is KTDrawer-owned; app fallback avoids duplicate KT init when `KTUtil` exists. |
 | Forms | Good | Komponen form reusable, autosize aktif lewat `data-kt-autosize`. |
-| Alerts/SweetAlert | Good | Ada helper `SpmSwal`; dependency ownership perlu dipilih. |
+| Alerts/SweetAlert | Good | `SpmSwal` owns app alerts with dynamic SweetAlert import; views avoid inline `Swal.fire`. |
 | Tables | Good | Adapter Blade + server pagination lebih tepat untuk repo ini. |
-| Charts | Partial | Dashboard memakai `window.Chart`; sekarang bergantung implisit ke global plugin bundle. |
+| Charts | Good | Dashboard Chart.js is explicitly imported through Vite and assigned to `window.Chart`. |
 | Image input | Good | Profile and asesor profile image inputs expose root `data-kt-image-input="true"` plus change/cancel actions. |
 | Stepper | Good | Stepper is explicitly visual-only via `data-ui-stepper-mode="visual"`; no fake KTStepper child attributes remain. |
 | Editors/Quill | Good | Unused Quill bridge and component removed; no editor runtime is exposed until a page needs it. |
@@ -117,11 +117,11 @@ Resolved - asset strategy sudah sinkron.
 - `docs/metronic-asset-strategy.md`, `docs/performance-optimization.md`, `tests/Feature/PerformanceOptimizationTest.php`, dan `tests/Feature/MetronicFrontendTest.php` sudah mengikuti policy standard Metronic bundle.
 - `welcome.blade.php` dan error pages tetap ringan tanpa plugin JS global.
 
-P0 - duplicate dependency ownership.
+Resolved - dependency ownership untuk app adapters.
 
-- `plugins.bundle.js` membawa Bootstrap, jQuery, Popper, SweetAlert2, Dropzone, autosize, Chart.js, Quill, Select2, Flatpickr, dan plugin lain.
-- Vite juga membawa `@popperjs/core`, `dropzone`, `autosize`, dan `sweetalert2`.
-- Akibatnya ada dua sumber kebenaran untuk beberapa dependency runtime.
+- Full Metronic bundle tetap dipertahankan untuk demo42 shell/runtime.
+- Vite tetap menjadi owner eksplisit untuk app adapters: Chart dashboard, Dropzone upload shell, autosize textarea, Popper fallback menu, dan dynamic SweetAlert helper.
+- Duplikasi ini diterima sebagai tradeoff stabilitas; pengurangan dependency dilakukan hanya saat adapter terkait ikut diganti.
 
 Resolved - init Metronic tidak dobel saat bundle tersedia.
 
@@ -165,7 +165,7 @@ P2 - override CSS besar.
 - Init KT sudah owned by `scripts.bundle.js`; app fallback hanya jalan ketika `window.KTUtil` tidak tersedia.
 - Image input root contract sudah lengkap di profile dan asesor profile.
 - Stepper ditandai visual-only lewat `data-ui-stepper-mode="visual"`; tambah KTStepper JS hanya jika ada wizard interaktif nyata.
-- Putuskan ownership Chart.js: global plugin bundle atau import eksplisit.
+- Chart.js ownership sudah eksplisit via Vite import untuk dashboard.
 - Quill bridge/component unused sudah dihapus; load editor hanya saat ada halaman pemakai nyata.
 
 ### Resolved P1 - plugin custom
@@ -235,5 +235,5 @@ Verifikasi setelah eksekusi:
 
 Catatan residual:
 
-- Full Metronic bundle membawa dependency yang juga masih ada di Vite (`Dropzone`, `autosize`, `SweetAlert`, `Popper`, Chart). Ini diterima untuk stabilitas demo42 sekarang; pengurangan duplikasi dependency bisa jadi task performa terpisah setelah smoke browser.
+- Full Metronic bundle membawa dependency yang juga masih ada di Vite (`Dropzone`, `autosize`, `SweetAlert`, `Popper`, Chart). Ownership app adapter sudah eksplisit di Vite; pengurangan duplikasi hanya dilakukan bersama penggantian adapter terkait.
 - Plugin custom Metronic sudah diaudit: tidak dipakai dan dihapus dari public runtime.
