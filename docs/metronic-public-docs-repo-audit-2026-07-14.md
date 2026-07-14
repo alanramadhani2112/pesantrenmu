@@ -147,7 +147,7 @@ Resolved - vendor custom plugin ownership.
 P2 - override CSS besar.
 
 - Override layer berisi 18 modul, 8.942 line, 238.890 character.
-- Ada 903 `!important`.
+- `!important` debt is being reduced incrementally; low-risk utility overrides no longer use `!important`.
 - Ada 5 selector `:has()`.
 - Ini belum otomatis salah, tetapi perlu konsolidasi bertahap agar Metronic upgrade tidak mahal.
 
@@ -175,7 +175,7 @@ P2 - override CSS besar.
 
 ### P2 - kurangi design debt override
 
-- Prioritaskan modul dengan `!important` paling banyak.
+- Continue reducing `!important` only in low-risk, scoped modules first; avoid broad visual rewrites.
 - Ganti override global dengan token atau component variant.
 - Tambah manifest versi/hash Metronic agar provenance bisa dicek ulang otomatis.
 - Evaluasi upgrade `8.1.8 -> 8.3.x` sebagai proyek terpisah, bukan side quest saat polish.
