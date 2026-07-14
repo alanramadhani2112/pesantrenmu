@@ -105,7 +105,7 @@ Coverage terhadap docs publik:
 | Charts | Partial | Dashboard memakai `window.Chart`; sekarang bergantung implisit ke global plugin bundle. |
 | Image input | Good | Profile and asesor profile image inputs expose root `data-kt-image-input="true"` plus change/cancel actions. |
 | Stepper | Good | Stepper is explicitly visual-only via `data-ui-stepper-mode="visual"`; no fake KTStepper child attributes remain. |
-| Editors/Quill | Weak | Bridge Quill ada di `app.js`, tetapi belum jelas dipakai. |
+| Editors/Quill | Good | Unused Quill bridge and component removed; no editor runtime is exposed until a page needs it. |
 | Custom plugins | Weak | Banyak plugin vendor ada, tetapi tidak direferensikan runtime. |
 | Theme mode | Good | Light-only theme is explicit on `<html data-bs-theme="light">`, matching Metronic documentElement convention. |
 
@@ -132,7 +132,7 @@ P1 - kontrak komponen khusus belum lengkap.
 
 - Image input profile sudah memakai root `data-kt-image-input="true"` dan action `change`/`cancel`.
 - Stepper audit trail sudah visual-only; `data-kt-stepper-element` dihapus agar tidak terlihat seperti KTStepper JS.
-- Quill bridge ada, tetapi `window.Quill` hanya tersedia bila full plugin bundle tetap global.
+- Quill bridge dan unused component tidak dipakai dan sudah dihapus; editor runtime baru ditambahkan saat ada halaman nyata.
 
 Resolved - theme mode mengikuti kontrak docs.
 
@@ -167,7 +167,7 @@ P2 - override CSS besar.
 - Image input root contract sudah lengkap di profile dan asesor profile.
 - Stepper ditandai visual-only lewat `data-ui-stepper-mode="visual"`; tambah KTStepper JS hanya jika ada wizard interaktif nyata.
 - Putuskan ownership Chart.js: global plugin bundle atau import eksplisit.
-- Hapus bridge Quill bila tidak ada halaman pemakai; bila dipakai, load editor hanya di halaman terkait.
+- Quill bridge/component unused sudah dihapus; load editor hanya saat ada halaman pemakai nyata.
 
 ### P1 - bersihkan plugin custom
 

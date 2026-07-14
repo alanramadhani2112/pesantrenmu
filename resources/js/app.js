@@ -584,32 +584,6 @@ window.spmActionMenu = (menuId) => ({
     },
 });
 
-window.quillEditor = () => ({
-    quill: null,
-    content: '',
-    init() {
-        if (!window.Quill || !this.$refs.quillEditor) return;
-
-        this.quill = new window.Quill(this.$refs.quillEditor, {
-            theme: 'snow',
-            placeholder: this.$el.dataset.placeholder ?? '',
-            readOnly: this.$el.dataset.readOnly === 'true',
-        });
-
-        this.quill.root.innerHTML = this.content ?? '';
-
-        this.quill.on('text-change', () => {
-            this.content = this.quill.root.innerHTML;
-            this.$dispatch('input', this.content);
-        });
-
-        this.$watch('content', (value) => {
-            if (this.quill.root.innerHTML !== value) {
-                this.quill.root.innerHTML = value ?? '';
-            }
-        });
-    },
-});
 
 window.wilayahSelector = (config = {}) => ({
     provinsiList: wilayahProvinsi,
