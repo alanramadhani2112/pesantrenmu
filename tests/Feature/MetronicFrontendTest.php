@@ -103,6 +103,35 @@ class MetronicFrontendTest extends TestCase
         $this->assertFileExists(public_path('vendor/metronic/assets/plugins/global/plugins.bundle.css'));
     }
 
+    public function test_metronic_browser_smoke_contract_for_shell_runtime(): void
+    {
+        $layout = file_get_contents(resource_path('views/layouts/app.blade.php'));
+        $header = file_get_contents(resource_path('views/components/layout/app-header.blade.php'));
+        $sidebar = file_get_contents(resource_path('views/components/layout/app-sidebar.blade.php'));
+        $appJs = file_get_contents(resource_path('js/app.js'));
+
+        $this->assertLessThan(
+            strpos($layout, 'vendor/metronic/assets/css/style.bundle.css'),
+            strpos($layout, 'vendor/metronic/assets/plugins/global/plugins.bundle.css')
+        );
+        $this->assertLessThan(
+            strpos($layout, 'vendor/metronic/assets/js/scripts.bundle.js'),
+            strpos($layout, 'vendor/metronic/assets/plugins/global/plugins.bundle.js')
+        );
+        $this->assertLessThan(
+            strpos($layout, "resources/js/app.js"),
+            strpos($layout, 'vendor/metronic/assets/js/scripts.bundle.js')
+        );
+
+        $this->assertStringContainsString('id="kt_app_sidebar_mobile_toggle"', $header);
+        $this->assertStringContainsString('data-kt-menu-trigger="click"', $header);
+        $this->assertStringContainsString('data-kt-menu="true"', $header);
+        $this->assertStringContainsString('data-kt-drawer-toggle="#kt_app_sidebar_mobile_toggle"', $sidebar);
+        $this->assertStringContainsString('data-kt-drawer-dismiss="true"', $sidebar);
+        $this->assertStringNotContainsString('$store.sidebar', $sidebar);
+        $this->assertStringContainsString('if (window.KTUtil) return;', $appJs);
+    }
+
     public function test_metronic_ui_components_render_reusable_classes(): void
     {
         $html = Blade::render(<<<'BLADE'
