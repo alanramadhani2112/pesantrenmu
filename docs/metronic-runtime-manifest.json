@@ -1,0 +1,40 @@
+{
+  "metronic": {
+    "runtime_path": "public/vendor/metronic/assets",
+    "demo": "demo42",
+    "source_path": "C:\\laragon\\www\\dist\\dist",
+    "version": "8.1.8"
+  },
+  "bundles": [
+    {
+      "path": "public/vendor/metronic/assets/plugins/global/plugins.bundle.css",
+      "bytes": 840898,
+      "sha256": "2bcc6201c1fc40b83c173b779ca55fab5bc5743a7da29c78915198be5ddecbb6"
+    },
+    {
+      "path": "public/vendor/metronic/assets/css/style.bundle.css",
+      "bytes": 1464869,
+      "sha256": "6a6bd77abc321864db97ddc99dddbecd98e3695e8626a0494f0530f482882334"
+    },
+    {
+      "path": "public/vendor/metronic/assets/plugins/global/plugins.bundle.js",
+      "bytes": 3812926,
+      "sha256": "c303ae6c1998f8114cdc8c2cbea423bd0416479265075f2abf247913df5d42d3"
+    },
+    {
+      "path": "public/vendor/metronic/assets/js/scripts.bundle.js",
+      "bytes": 242042,
+      "sha256": "645af847c081e93a59883d03d7c2f80fa4d1e4f8d3e17f7ffe38dd5bbf2da016"
+    }
+  ],
+  "policy": {
+    "add_custom_plugins": "only when a real page needs them",
+    "public_light_pages": "no global plugin JS",
+    "app_guest_layouts": "standard Metronic 8.1.8 demo42 bundle order"
+  },
+  "runtime": {
+    "total_bytes": 15192801,
+    "custom_plugins_included": false,
+    "file_count": 59
+  }
+}

@@ -64,6 +64,24 @@ class PerformanceOptimizationTest extends TestCase
         }
     }
 
+    public function test_metronic_runtime_manifest_matches_public_assets(): void
+    {
+        $manifest = json_decode(file_get_contents(base_path('docs/metronic-runtime-manifest.json')), true, flags: JSON_THROW_ON_ERROR);
+
+        $this->assertSame('8.1.8', $manifest['metronic']['version']);
+        $this->assertSame('demo42', $manifest['metronic']['demo']);
+        $this->assertFalse($manifest['runtime']['custom_plugins_included']);
+        $this->assertDirectoryDoesNotExist(public_path('vendor/metronic/assets/plugins/custom'));
+
+        foreach ($manifest['bundles'] as $bundle) {
+            $path = base_path($bundle['path']);
+
+            $this->assertFileExists($path);
+            $this->assertSame($bundle['bytes'], filesize($path));
+            $this->assertSame($bundle['sha256'], hash_file('sha256', $path));
+        }
+    }
+
     public function test_detail_page_polling_is_visible_and_throttled(): void
     {
         $this->markTestSkipped('Detail pages migrated to Blade — no polling contract remains.');

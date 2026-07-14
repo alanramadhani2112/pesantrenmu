@@ -177,13 +177,13 @@ P2 - override CSS besar.
 
 - Continue reducing `!important` only in low-risk, scoped modules first; avoid broad visual rewrites.
 - Ganti override global dengan token atau component variant.
-- Tambah manifest versi/hash Metronic agar provenance bisa dicek ulang otomatis.
+- `docs/metronic-runtime-manifest.json` tracks Metronic version, demo, runtime policy, bundle size, and hashes.
 - Evaluasi upgrade `8.1.8 -> 8.3.x` sebagai proyek terpisah, bukan side quest saat polish.
 
 ## Quick Wins
 
 - Pertahankan dokumen asset strategy dan audit ini tetap sinkron setiap kali load order berubah.
-- Tambah `docs/metronic-runtime-manifest.json` berisi versi, source path, file hash, dan bundle size.
+- `docs/metronic-runtime-manifest.json` added for version/source/hash provenance.
 - `plugins/custom` sudah dihapus; jangan kembalikan tanpa kebutuhan halaman nyata.
 - Tambah real browser smoke dengan Playwright/Puppeteer saat dependency tersedia; saat ini kontrak shell runtime dijaga lewat Feature test.
 - Tambah komentar singkat di layout yang menjelaskan alasan load order final.
