@@ -14,33 +14,33 @@
 
 /* Dropzone overrides to match Metronic styling */
 .dz-message {
-    padding: 2.5rem 2rem !important;
-    border: 2px dashed var(--bs-gray-300) !important;
-    border-radius: 0.475rem !important;
-    background: var(--bs-gray-100) !important;
+    padding: 2.5rem 2rem;
+    border: 2px dashed var(--bs-gray-300);
+    border-radius: 0.475rem;
+    background: var(--bs-gray-100);
     cursor: pointer;
     transition: border-color 0.2s, background 0.2s;
 }
 
 .dz-message:hover {
-    border-color: var(--bs-primary) !important;
-    background: rgba(var(--bs-primary-rgb, 0, 158, 247), 0.03) !important;
+    border-color: var(--bs-primary);
+    background: rgba(var(--bs-primary-rgb, 0, 158, 247), 0.03);
 }
 
 .dz-message.dz-drag-hover {
-    border-color: var(--bs-primary) !important;
-    background: rgba(var(--bs-primary-rgb, 0, 158, 247), 0.06) !important;
+    border-color: var(--bs-primary);
+    background: rgba(var(--bs-primary-rgb, 0, 158, 247), 0.06);
 }
 
 .dz-message .dz-button {
-    color: var(--bs-gray-600) !important;
-    font-size: 0.925rem !important;
+    color: var(--bs-gray-600);
+    font-size: 0.925rem;
 }
 
 /* Ensure dropzone inner content fills the message area */
 .dz-message > div {
     min-height: 120px;
-    display: flex !important;
+    display: flex;
 }
 
 /* Upload icon container */
@@ -49,15 +49,15 @@
 }
 
 .dz-message:hover .symbol-label {
-    background: rgba(var(--bs-primary-rgb, 0, 158, 247), 0.12) !important;
+    background: rgba(var(--bs-primary-rgb, 0, 158, 247), 0.12);
 }
 
 .dz-preview {
     position: relative;
-    padding: 0.75rem !important;
-    border-radius: 0.475rem !important;
-    background: var(--bs-gray-50) !important;
-    margin: 0.5rem 0 !important;
+    padding: 0.75rem;
+    border-radius: 0.475rem;
+    background: var(--bs-gray-50);
+    margin: 0.5rem 0;
 }
 
 .dz-preview .dz-image img {
@@ -67,7 +67,7 @@
 }
 
 .dz-preview .dz-details {
-    padding: 0.5rem 0 !important;
+    padding: 0.5rem 0;
 }
 
 .dz-preview .dz-filename {

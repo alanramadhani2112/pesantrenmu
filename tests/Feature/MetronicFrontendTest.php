@@ -361,6 +361,10 @@ class MetronicFrontendTest extends TestCase
             $moduleCss = file_get_contents(resource_path("css/metronic-overrides/{$noImportantModule}"));
             $this->assertStringNotContainsString('!important', $moduleCss);
         }
+
+        $appCss = file_get_contents(resource_path('css/app.css'));
+        $dropzoneOverrides = strstr($appCss, '/* Dropzone overrides to match Metronic styling */') ?: '';
+        $this->assertStringNotContainsString('!important', $dropzoneOverrides);
         $this->assertStringContainsString('.spm-table-shell--document-category', $css);
         $this->assertStringContainsString('.spm-detail-page', $css);
         $this->assertStringContainsString('.spm-stat-card', $css);
