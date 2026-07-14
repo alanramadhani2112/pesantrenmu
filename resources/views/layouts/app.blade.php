@@ -9,13 +9,14 @@
     <title>@hasSection('title')@yield('title') — {{ config('app.name', 'PesantrenMu') }}@else{{ config('app.name', 'PesantrenMu') }}@endif</title>
     <meta name="description" content="Sistem Penjaminan Mutu PesantrenMu — Platform akreditasi pesantren Muhammadiyah.">
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand/favicon.svg') }}">
-    <link rel="preload" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}" as="style">
+
     <link rel="preconnect" href="{{ url('/') }}" crossorigin>
 
     <!-- Styles -->
-    {{-- Defer non-critical Metronic shell CSS to prevent render blocking. --}}
-    <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}" media="print" onload="this.media='all'">
-    {{-- Critical app CSS loaded normally --}}
+    {{-- Metronic 8.1.8 demo42 load order. --}}
+    <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.css') }}">
+    <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}">
+    {{-- App CSS overrides Metronic tokens/components. --}}
     @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css'])
 </head>
 
@@ -153,9 +154,9 @@
         </script>
     @endif
 
-    {{-- Metronic JS bundle — provides KT components (password meter, menu, drawer, etc.) --}}
+    {{-- Metronic 8.1.8 demo42 load order, then app adapters. --}}
+    <script src="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.js') }}"></script>
     <script src="{{ asset('vendor/metronic/assets/js/scripts.bundle.js') }}"></script>
-    {{-- Deferred app JS — loaded after content for faster first paint --}}
     @vite(['resources/js/app.js'])
     @stack('scripts')
 </body>

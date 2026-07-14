@@ -10,8 +10,9 @@
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand/favicon.svg') }}">
 
     <!-- Styles -->
+    <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.css') }}">
     <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}">
-    @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css'])
 </head>
 
 <body class="font-sans text-gray-900 antialiased spm-auth-body" style="background-color:#f5f7fa" data-bs-theme="light">
@@ -36,6 +37,9 @@
             </div>
         </div>
     </div>
+    <script src="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.js') }}"></script>
+    <script src="{{ asset('vendor/metronic/assets/js/scripts.bundle.js') }}"></script>
+    @vite(['resources/js/app.js'])
 </body>
 
 </html>

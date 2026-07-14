@@ -2,12 +2,14 @@ import Dropzone from 'dropzone';
 import axios from 'axios';
 import autosize from 'autosize';
 import { createPopper } from '@popperjs/core';
+import Chart from 'chart.js/auto';
 import formValidation from './validation';
 import Alpine from 'alpinejs';
 
 window.Dropzone = Dropzone;
 window.autosize = autosize;
 window.Popper = { createPopper };
+window.Chart = window.Chart ?? Chart;
 
 Alpine.data('formValidation', formValidation);
 
@@ -15,8 +17,144 @@ window.axios = axios;
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 window.Alpine = Alpine;
 
+const initAutosize = () => autosize(document.querySelectorAll('[data-kt-autosize="true"]'));
+
+const ktMenuFallbackInstances = new WeakMap();
+
+const closeKtMenuFallback = (trigger) => {
+    const instance = ktMenuFallbackInstances.get(trigger);
+    if (!instance) return;
+
+    instance.popper?.destroy?.();
+    instance.menu.classList.remove('show');
+    instance.menu.removeAttribute('data-popper-placement');
+    instance.host.classList.remove('show', 'menu-dropdown');
+    ktMenuFallbackInstances.delete(trigger);
+};
+
+const closeAllKtMenuFallbacks = (except = null) => {
+    document.querySelectorAll('[data-kt-menu-trigger]').forEach((trigger) => {
+        if (trigger !== except) closeKtMenuFallback(trigger);
+    });
+};
+
+const findKtMenuFallback = (trigger) => {
+    const host = trigger.closest('.app-navbar-item, .menu-item, [data-kt-menu-host]') ?? trigger.parentElement;
+    const menu = host?.querySelector(':scope > [data-kt-menu="true"], :scope > .menu-sub-dropdown');
+
+    if (!host || !menu) return null;
+
+    return { host, menu };
+};
+
+const openKtMenuFallback = (trigger) => {
+    const target = findKtMenuFallback(trigger);
+    if (!target) return;
+
+    closeAllKtMenuFallbacks(trigger);
+
+    const { host, menu } = target;
+    host.classList.add('show', 'menu-dropdown');
+    menu.classList.add('show');
+
+    const placement = trigger.dataset.ktMenuPlacement === 'bottom-end' ? 'bottom-end' : 'bottom-start';
+    const popper = createPopper(trigger, menu, {
+        placement,
+        modifiers: [
+            { name: 'offset', options: { offset: [0, 8] } },
+            { name: 'preventOverflow', options: { padding: 12 } },
+        ],
+    });
+
+    ktMenuFallbackInstances.set(trigger, { host, menu, popper });
+};
+
+const initKtMenuFallback = () => {
+    document.querySelectorAll('[data-kt-menu-trigger]').forEach((trigger) => {
+        if (trigger.dataset.spmKtMenuFallback === 'true') return;
+
+        trigger.dataset.spmKtMenuFallback = 'true';
+        trigger.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (ktMenuFallbackInstances.has(trigger)) {
+                closeKtMenuFallback(trigger);
+                return;
+            }
+
+            openKtMenuFallback(trigger);
+        });
+    });
+};
+
+document.addEventListener('click', () => closeAllKtMenuFallbacks());
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeAllKtMenuFallbacks();
+});
+
+class KtPasswordMeterFallback {
+    static instances = new WeakMap();
+
+    static getInstance(element) {
+        return KtPasswordMeterFallback.instances.get(element);
+    }
+
+    constructor(element, options = {}) {
+        this.element = element;
+        this.options = { minLength: 8, ...options };
+        this.input = element.querySelector('input[type="password"], input[type="text"]');
+        this.highlights = Array.from(element.querySelectorAll('[data-kt-password-meter-control="highlight"] > *'));
+        this.visibility = element.querySelector('[data-kt-password-meter-control="visibility"]');
+        this.onInput = () => this.update();
+        this.onVisibility = () => this.toggleVisibility();
+
+        this.input?.addEventListener('input', this.onInput);
+        this.visibility?.addEventListener('click', this.onVisibility);
+        KtPasswordMeterFallback.instances.set(element, this);
+        this.update();
+    }
+
+    destroy() {
+        this.input?.removeEventListener('input', this.onInput);
+        this.visibility?.removeEventListener('click', this.onVisibility);
+        KtPasswordMeterFallback.instances.delete(this.element);
+    }
+
+    toggleVisibility() {
+        if (!this.input) return;
+
+        this.input.type = this.input.type === 'password' ? 'text' : 'password';
+    }
+
+    update() {
+        const value = this.input?.value ?? '';
+        const checks = [
+            value.length >= this.options.minLength,
+            /[a-z]/.test(value) && /[A-Z]/.test(value),
+            /\d/.test(value),
+            /[^A-Za-z0-9]/.test(value),
+        ];
+        const strength = checks.filter(Boolean).length;
+
+        this.highlights.forEach((bar, index) => {
+            bar.classList.toggle('active', index < strength);
+            bar.classList.toggle('bg-success', index < strength);
+            bar.classList.toggle('bg-secondary', index >= strength);
+        });
+    }
+}
+
+window.KTMenu = window.KTMenu ?? { init: initKtMenuFallback };
+window.KTDrawer = window.KTDrawer ?? { init: () => {} };
+window.KTScroll = window.KTScroll ?? { init: () => {} };
+window.KTSticky = window.KTSticky ?? { init: () => {} };
+window.KTComponents = window.KTComponents ?? { init: initKtMenuFallback };
+window.KTPasswordMeter = window.KTPasswordMeter ?? KtPasswordMeterFallback;
+
 const initMetronic = () => {
     requestAnimationFrame(() => {
+        initAutosize();
         window.KTComponents?.init?.();
         window.KTMenu?.init?.();
         window.KTDrawer?.init?.();
@@ -223,6 +361,15 @@ const ask = (options = {}) => {
 
 window.SpmSwal = {
     fire: fireMetronicSwal,
+    alert: (title, text, options = {}) => fireMetronicSwal({
+        icon: options.icon ?? 'info',
+        title,
+        text,
+        html: options.html,
+        showConfirmButton: options.showConfirmButton ?? true,
+        confirmVariant: options.confirmVariant ?? confirmVariantForAlert(normalizeSwalIcon(options.icon ?? 'info')),
+        ...options,
+    }),
     confirm: ask,
     success: (title, text, options = {}) => fireMetronicSwal({
         icon: 'success',
