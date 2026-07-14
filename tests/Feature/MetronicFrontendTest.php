@@ -540,6 +540,7 @@ class MetronicFrontendTest extends TestCase
 
         $this->assertStringContainsString('data-akreditasi-workflow="metronic"', $html);
         $this->assertStringContainsString('data-ui-stepper="metronic"', $html);
+        $this->assertStringContainsString('data-ui-stepper-mode="visual"', $html);
         $this->assertStringContainsString('spm-workflow-stepper', $html);
         $this->assertStringContainsString('Alur Proses Akreditasi', $html);
         $this->assertStringContainsString('Review Asesor', $html);
@@ -552,6 +553,10 @@ class MetronicFrontendTest extends TestCase
             file_get_contents(base_path('resources/views/asesor/akreditasi-detail.blade.php')),
             'asesor akreditasi-detail should include the reusable akreditasi workflow stepper.'
         );
+
+        $auditTrail = file_get_contents(resource_path('views/admin/akreditasi/detail/tabs/audit-trail.blade.php'));
+        $this->assertStringContainsString('data-ui-audit-stepper="metronic"', $auditTrail);
+        $this->assertStringNotContainsString('data-kt-stepper-element', $auditTrail);
     }
 
     public function test_edpm_review_component_groups_edpm_and_ipr_with_metronic_tables(): void
