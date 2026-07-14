@@ -824,9 +824,17 @@ class MetronicFrontendTest extends TestCase
 
             $this->assertStringContainsString('<x-app-layout', $view, "{$path} should use the app layout.");
             $this->assertStringContainsString('<x-ui.form-field', $view, "{$path} should use reusable form fields.");
+            $this->assertStringContainsString('data-kt-image-input="true"', $view, "{$path} should expose the Metronic image input root contract.");
+            $this->assertStringContainsString('data-kt-image-input-action="change"', $view, "{$path} should keep the Metronic image input change action.");
+            $this->assertStringContainsString('data-kt-image-input-action="cancel"', $view, "{$path} should keep the Metronic image input cancel action.");
             $this->assertStringNotContainsString('<x-input-label', $view, "{$path} should not use legacy Breeze input labels.");
             $this->assertStringNotContainsString('<x-text-input', $view, "{$path} should not use legacy Breeze text inputs.");
         }
+
+        $asesorProfile = file_get_contents(resource_path('views/asesor/profile.blade.php'));
+        $this->assertStringContainsString('data-kt-image-input="true"', $asesorProfile);
+        $this->assertStringContainsString('data-kt-image-input-action="change"', $asesorProfile);
+        $this->assertStringContainsString('data-kt-image-input-action="cancel"', $asesorProfile);
     }
 
     public function test_metronic_accessibility_contract_for_tabs_menu_and_modal(): void

@@ -103,7 +103,7 @@ Coverage terhadap docs publik:
 | Alerts/SweetAlert | Good | Ada helper `SpmSwal`; dependency ownership perlu dipilih. |
 | Tables | Good | Adapter Blade + server pagination lebih tepat untuk repo ini. |
 | Charts | Partial | Dashboard memakai `window.Chart`; sekarang bergantung implisit ke global plugin bundle. |
-| Image input | Gap | View punya action attribute, tetapi root `data-kt-image-input="true"` belum terlihat. |
+| Image input | Good | Profile and asesor profile image inputs expose root `data-kt-image-input="true"` plus change/cancel actions. |
 | Stepper | Gap | Ada child `data-kt-stepper-element`, tetapi root/init stepper belum konsisten. |
 | Editors/Quill | Weak | Bridge Quill ada di `app.js`, tetapi belum jelas dipakai. |
 | Custom plugins | Weak | Banyak plugin vendor ada, tetapi tidak direferensikan runtime. |
@@ -130,7 +130,7 @@ Resolved - init Metronic tidak dobel saat bundle tersedia.
 
 P1 - kontrak komponen khusus belum lengkap.
 
-- Image input memakai `data-kt-image-input-action`, tetapi root `data-kt-image-input="true"` belum terlihat di view profile.
+- Image input profile sudah memakai root `data-kt-image-input="true"` dan action `change`/`cancel`.
 - Stepper audit trail punya `data-kt-stepper-element="nav"`, tetapi root `data-kt-stepper`/constructor belum jelas.
 - Quill bridge ada, tetapi `window.Quill` hanya tersedia bila full plugin bundle tetap global.
 
@@ -165,7 +165,7 @@ P2 - override CSS besar.
 ### P1 - lengkapi komponen KT khusus
 
 - Init KT sudah owned by `scripts.bundle.js`; app fallback hanya jalan ketika `window.KTUtil` tidak tersedia.
-- Lengkapi image input root contract atau ganti ke komponen Blade/Alpine non-KT.
+- Image input root contract sudah lengkap di profile dan asesor profile.
 - Lengkapi stepper root/init atau tandai stepper sebagai visual-only component.
 - Putuskan ownership Chart.js: global plugin bundle atau import eksplisit.
 - Hapus bridge Quill bila tidak ada halaman pemakai; bila dipakai, load editor hanya di halaman terkait.
