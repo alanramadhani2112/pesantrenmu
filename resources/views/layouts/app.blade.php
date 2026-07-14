@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="light">
 
 <head>
     <meta charset="utf-8">
@@ -24,7 +24,7 @@
     id="kt_app_body"
     class="app-default font-sans antialiased text-gray-900"
     style="background-color:#f6f8fb"
-    data-bs-theme="light"
+
     data-kt-app-header-fixed="true"
     data-kt-app-header-fixed-mobile="true"
     data-kt-app-sidebar-enabled="true"

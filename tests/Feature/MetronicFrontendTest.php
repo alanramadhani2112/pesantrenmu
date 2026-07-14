@@ -123,6 +123,10 @@ class MetronicFrontendTest extends TestCase
             strpos($layout, 'vendor/metronic/assets/js/scripts.bundle.js')
         );
 
+        $this->assertStringContainsString('<html', $layout);
+        $this->assertStringContainsString('data-bs-theme="light"', explode("\n", $layout)[1] ?? '');
+        $this->assertStringNotContainsString('<body data-bs-theme="light"', $layout);
+
         $this->assertStringContainsString('id="kt_app_sidebar_mobile_toggle"', $header);
         $this->assertStringContainsString('data-kt-menu-trigger="click"', $header);
         $this->assertStringContainsString('data-kt-menu="true"', $header);

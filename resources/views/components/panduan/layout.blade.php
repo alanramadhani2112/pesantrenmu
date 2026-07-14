@@ -5,7 +5,7 @@
 ])
 
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="light">
 
 <head>
     <meta charset="utf-8">
@@ -20,7 +20,7 @@
     @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css', 'resources/js/app.js'])
 </head>
 
-<body class="app-default font-sans antialiased text-gray-900" data-bs-theme="light">
+<body class="app-default font-sans antialiased text-gray-900">
 
     {{-- Mobile overlay --}}
     <div class="panduan-sidebar-backdrop d-lg-none d-none" id="kt_panduan_overlay"></div>

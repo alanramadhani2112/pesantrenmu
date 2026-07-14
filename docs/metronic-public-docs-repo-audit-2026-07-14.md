@@ -107,7 +107,7 @@ Coverage terhadap docs publik:
 | Stepper | Good | Stepper is explicitly visual-only via `data-ui-stepper-mode="visual"`; no fake KTStepper child attributes remain. |
 | Editors/Quill | Weak | Bridge Quill ada di `app.js`, tetapi belum jelas dipakai. |
 | Custom plugins | Weak | Banyak plugin vendor ada, tetapi tidak direferensikan runtime. |
-| Theme mode | Gap | Layout memaksa `data-bs-theme="light"` di body; docs Metronic menulis mode di `html`. |
+| Theme mode | Good | Light-only theme is explicit on `<html data-bs-theme="light">`, matching Metronic documentElement convention. |
 
 ## Gap Utama
 
@@ -134,11 +134,10 @@ P1 - kontrak komponen khusus belum lengkap.
 - Stepper audit trail sudah visual-only; `data-kt-stepper-element` dihapus agar tidak terlihat seperti KTStepper JS.
 - Quill bridge ada, tetapi `window.Quill` hanya tersedia bila full plugin bundle tetap global.
 
-P1 - theme mode belum mengikuti kontrak docs.
+Resolved - theme mode mengikuti kontrak docs.
 
-- Docs publik memakai `document.documentElement.setAttribute("data-bs-theme", themeMode)`.
-- Repo banyak memasang `data-bs-theme="light"` di body.
-- Keputusan perlu eksplisit: light-only dan hapus sisa dark token, atau implement real theme mode di `html`.
+- Repo memilih light-only theme.
+- `data-bs-theme="light"` dipasang di `<html>`, bukan `<body>`, agar cocok dengan pola Metronic `documentElement`.
 
 P1 - vendor custom plugin belum punya ownership.
 
