@@ -357,7 +357,7 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('Visual Audit Normalization V1', $css);
         $this->assertStringNotContainsString('.spm-sidebar-progress-dot', $css);
 
-        foreach (['95-spm-utilities.css', '55-landing.css'] as $noImportantModule) {
+        foreach (['95-spm-utilities.css', '55-landing.css', '56-auth-v3.css'] as $noImportantModule) {
             $moduleCss = file_get_contents(resource_path("css/metronic-overrides/{$noImportantModule}"));
             $this->assertStringNotContainsString('!important', $moduleCss);
         }
