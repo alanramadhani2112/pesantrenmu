@@ -11,7 +11,7 @@ Audit ini melanjutkan task Metronic yang sempat belum selesai. Scope yang dipaka
 
 Kesimpulan utama: repo memakai Metronic `8.1.8 demo42` secara meyakinkan. Dokumentasi publik sekarang berada di HTML `8.3.2` dan Laravel `8.3.1`, jadi docs publik valid sebagai referensi kompatibilitas dan pola komponen, tetapi bukan otoritas exact-version untuk runtime lokal.
 
-Status terbaru: strategi asset, app adapter dependency ownership, KT init, image input, visual stepper, theme mode, Quill cleanup, and custom plugin cleanup are resolved against the local Metronic 8.1.8 demo42 baseline. Remaining work is incremental CSS override debt reduction and optional real browser smoke once Playwright/Puppeteer is available.
+Status terbaru: strategi asset, app adapter dependency ownership, KT init, image input, visual stepper, theme mode, Quill cleanup, custom plugin cleanup, and real browser smoke are resolved against the local Metronic 8.1.8 demo42 baseline. Remaining work is incremental CSS override debt reduction.
 
 ## Bukti Docs Publik
 
@@ -185,7 +185,7 @@ P2 - override CSS besar.
 - Pertahankan dokumen asset strategy dan audit ini tetap sinkron setiap kali load order berubah.
 - `docs/metronic-runtime-manifest.json` added for version/source/hash provenance.
 - `plugins/custom` sudah dihapus; jangan kembalikan tanpa kebutuhan halaman nyata.
-- Tambah real browser smoke dengan Playwright/Puppeteer saat dependency tersedia; saat ini kontrak shell runtime dijaga lewat Feature test.
+- Real browser smoke lulus via Chrome CDP script lokal: 19 route inti lintas Super Admin, Admin, Asesor, dan Pesantren, `issues: []`.
 - Tambah komentar singkat di layout yang menjelaskan alasan load order final.
 
 ## Hal Yang Dipertahankan
