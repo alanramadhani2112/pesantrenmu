@@ -155,6 +155,10 @@ window.KTPasswordMeter = window.KTPasswordMeter ?? KtPasswordMeterFallback;
 const initMetronic = () => {
     requestAnimationFrame(() => {
         initAutosize();
+
+        // Metronic scripts.bundle.js owns KT initialization when present.
+        if (window.KTUtil) return;
+
         window.KTComponents?.init?.();
         window.KTMenu?.init?.();
         window.KTDrawer?.init?.();

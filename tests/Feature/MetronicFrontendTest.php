@@ -387,6 +387,7 @@ class MetronicFrontendTest extends TestCase
 
         $this->assertSame(1, substr_count($layout, 'resources/js/app.js'));
         $this->assertSame(1, substr_count($appJs, "document.addEventListener('DOMContentLoaded', initMetronic)"));
+        $this->assertStringContainsString('if (window.KTUtil) return;', $appJs);
         $this->assertStringNotContainsString("Alpine.store('modal')", $views);
         $this->assertStringNotContainsString('form.action = route(', $failedNotifications);
         $this->assertStringNotContainsString("route('admin.failed-notifications.retry', {", $failedNotifications);
