@@ -11,7 +11,7 @@ Audit ini melanjutkan task Metronic yang sempat belum selesai. Scope yang dipaka
 
 Kesimpulan utama: repo memakai Metronic `8.1.8 demo42` secara meyakinkan. Dokumentasi publik sekarang berada di HTML `8.3.2` dan Laravel `8.3.1`, jadi docs publik valid sebagai referensi kompatibilitas dan pola komponen, tetapi bukan otoritas exact-version untuk runtime lokal.
 
-Status terbaru: strategi asset sudah diputuskan ke standard Metronic bundle. Layout app/guest, docs internal, performance test, dan Metronic frontend test sudah sinkron ke load order Metronic 8.1.8 demo42. Risiko tersisa bergeser ke komponen KT khusus yang belum lengkap, dependency ownership yang masih dobel di beberapa adapter Vite, dan debt CSS override.
+Status terbaru: strategi asset, app adapter dependency ownership, KT init, image input, visual stepper, theme mode, Quill cleanup, and custom plugin cleanup are resolved against the local Metronic 8.1.8 demo42 baseline. Remaining work is incremental CSS override debt reduction and optional real browser smoke once Playwright/Puppeteer is available.
 
 ## Bukti Docs Publik
 
@@ -128,7 +128,7 @@ Resolved - init Metronic tidak dobel saat bundle tersedia.
 - `scripts.bundle.js` menjadi owner init KT saat `window.KTUtil` tersedia.
 - `resources/js/app.js` tetap punya fallback defensif untuk route/test tanpa KT runtime, tetapi guard `if (window.KTUtil) return;` mencegah re-init global.
 
-P1 - kontrak komponen khusus belum lengkap.
+Resolved - kontrak komponen khusus.
 
 - Image input profile sudah memakai root `data-kt-image-input="true"` dan action `change`/`cancel`.
 - Stepper audit trail sudah visual-only; `data-kt-stepper-element` dihapus agar tidak terlihat seperti KTStepper JS.
@@ -148,8 +148,8 @@ P2 - override CSS besar.
 
 - Override layer berisi 18 modul, 8.942 line, 238.890 character.
 - `!important` debt is being reduced incrementally; low-risk utility overrides no longer use `!important`.
-- Ada 5 selector `:has()`.
-- Ini belum otomatis salah, tetapi perlu konsolidasi bertahap agar Metronic upgrade tidak mahal.
+- `:has()` selectors remain documented CSS debt; reduce only when changing related UI modules.
+- Continue consolidating CSS debt gradually so a future Metronic upgrade stays manageable.
 
 ## Roadmap
 
@@ -160,7 +160,7 @@ P2 - override CSS besar.
 - Public landing/error pages tetap ringan dan tidak memuat plugin JS global.
 - `PerformanceOptimizationTest`, `MetronicFrontendTest`, `docs/metronic-asset-strategy.md`, dan `docs/performance-optimization.md` sudah mengikuti keputusan ini.
 - Browser smoke contract sudah ditambahkan di `MetronicFrontendTest` untuk memastikan order asset, KT drawer/menu wiring, dan guard duplicate init.
-### P1 - lengkapi komponen KT khusus
+### Resolved P1 - komponen KT khusus
 
 - Init KT sudah owned by `scripts.bundle.js`; app fallback hanya jalan ketika `window.KTUtil` tidak tersedia.
 - Image input root contract sudah lengkap di profile dan asesor profile.
