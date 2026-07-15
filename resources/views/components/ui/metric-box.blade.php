@@ -14,7 +14,7 @@
 
 <div {{ $attributes->merge(['class' => 'spm-metric-box border border-dashed border-gray-300 rounded-3 p-5 h-100']) }}>
     <div class="d-flex align-items-center justify-content-between mb-4">
-        <span class="badge badge-light-{{ $variant }} fw-semibold px-3 py-2">{{ $label }}</span>
+        <x-ui.badge :variant="$variant" class="px-3 py-2">{{ $label }}</x-ui.badge>
         <span class="fs-2hx fw-semibold text-gray-900 lh-1">{{ $value }}</span>
     </div>
 
