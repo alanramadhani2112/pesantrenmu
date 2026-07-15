@@ -55,6 +55,11 @@ class ProductionReadinessTest extends TestCase
         $scripts = $composer['scripts'] ?? [];
 
         $this->assertArrayHasKey('prod:check', $scripts);
+        $prodCheck = implode(' ', $scripts['prod:check']);
+        $this->assertStringContainsString('ProductionReadinessTest.php', $prodCheck);
+        $this->assertStringContainsString('PerformanceOptimizationTest.php', $prodCheck);
+        $this->assertStringContainsString('MetronicFrontendTest.php', $prodCheck);
+
         $this->assertArrayHasKey('perf:cache', $scripts);
         $this->assertContains('@php artisan config:cache', $scripts['perf:cache']);
         $this->assertContains('@php artisan route:cache', $scripts['perf:cache']);

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="light">
 
 <head>
     <meta charset="utf-8">
@@ -9,13 +9,14 @@
     <title>@hasSection('title')@yield('title') — {{ config('app.name', 'PesantrenMu') }}@else{{ config('app.name', 'PesantrenMu') }}@endif</title>
     <meta name="description" content="Sistem Penjaminan Mutu PesantrenMu — Platform akreditasi pesantren Muhammadiyah.">
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/brand/favicon.svg') }}">
-    <link rel="preload" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}" as="style">
+
     <link rel="preconnect" href="{{ url('/') }}" crossorigin>
 
     <!-- Styles -->
-    {{-- Defer non-critical Metronic shell CSS to prevent render blocking. --}}
-    <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}" media="print" onload="this.media='all'">
-    {{-- Critical app CSS loaded normally --}}
+    {{-- Metronic 8.1.8 demo42 load order. --}}
+    <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.css') }}">
+    <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}">
+    {{-- App CSS overrides Metronic tokens/components. --}}
     @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css'])
 </head>
 
@@ -23,7 +24,7 @@
     id="kt_app_body"
     class="app-default font-sans antialiased text-gray-900"
     style="background-color:#f6f8fb"
-    data-bs-theme="light"
+
     data-kt-app-header-fixed="true"
     data-kt-app-header-fixed-mobile="true"
     data-kt-app-sidebar-enabled="true"
@@ -89,16 +90,6 @@
         $routeTitle = $routeMeta[$routeName]['title'] ?? null;
         $routeSection = $routeMeta[$routeName]['section'] ?? null;
 
-        if ($routeName === 'asesor.akreditasi') {
-            $asesorFocus = request()->query('focus');
-            $routeTitle = match ($asesorFocus) {
-                'review' => __('Review Berkas'),
-                'jadwal' => __('Atur Jadwal Visitasi'),
-                'nilai' => __('Input Nilai Visitasi'),
-                'laporan_visitasi' => __('Laporan Visitasi'),
-                default => $routeTitle,
-            };
-        }
 
         $slotHeaderTitle = isset($header) ? trim(strip_tags((string) $header)) : '';
         $pageTitle = $routeTitle ?: ($slotHeaderTitle !== '' ? $slotHeaderTitle : __('Dashboard'));
@@ -163,9 +154,9 @@
         </script>
     @endif
 
-    {{-- Metronic JS bundle — provides KT components (password meter, menu, drawer, etc.) --}}
+    {{-- Metronic 8.1.8 demo42 load order, then app adapters. --}}
+    <script src="{{ asset('vendor/metronic/assets/plugins/global/plugins.bundle.js') }}"></script>
     <script src="{{ asset('vendor/metronic/assets/js/scripts.bundle.js') }}"></script>
-    {{-- Deferred app JS — loaded after content for faster first paint --}}
     @vite(['resources/js/app.js'])
     @stack('scripts')
 </body>

@@ -20,7 +20,7 @@
                                     @csrf
                                     @method('PUT')
 
-                                    <div class="image-input image-input-circle image-input-outline mb-4"
+                                    <div data-kt-image-input="true" class="image-input image-input-circle image-input-outline mb-4"
                                         :class="{ 'image-input-empty': isEmpty, 'image-input-changed': changed }"
                                         style="background-color: #f5f8fa;">
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-bs-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="{{ asset('vendor/metronic/assets/css/style.bundle.css') }}">
     @vite(['resources/css/app.css', 'resources/css/metronic-overrides.css'])
 </head>
-<body data-bs-theme="light" class="spm-error-page app-blank">
+<body class="spm-error-page app-blank">
     <main class="spm-error-shell d-flex flex-column align-items-center justify-content-center min-vh-100 px-6 py-10" aria-labelledby="error-title">
         <a href="{{ url('/') }}" class="spm-error-brand" aria-label="PesantrenMu">
             <img class="spm-error-brand-img" src="{{ asset('images/brand/logo-horizontal.svg') }}" alt="PesantrenMu" loading="lazy">

@@ -4,6 +4,7 @@
     'icon' => null,
     'variant' => 'primary',
     'close' => true,
+    'titleId' => null,
 ])
 
 @php
@@ -23,7 +24,7 @@
         @endif
 
         <div class="min-w-0">
-            <h2 class="fw-semibold text-gray-900 mb-1">{{ $title }}</h2>
+            <h2 @if($titleId) id="{{ $titleId }}" @endif class="fw-semibold text-gray-900 mb-1">{{ $title }}</h2>
 
             @if($subtitle)
                 <div class="text-muted fw-semibold fs-7">{{ $subtitle }}</div>

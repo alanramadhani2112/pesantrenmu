@@ -26,6 +26,8 @@ interface AkreditasiRepositoryInterface
 
     public function getAssessmentsByAsesor(int $asesorId, ?string $search = null, ?string $periodeFilter = null, ?string $statusFilter = null, int $perPage = 10, string $sortField = 'id', bool $sortAsc = false): LengthAwarePaginator;
 
+    public function getAssessmentSummaryByAsesor(int $asesorId, ?string $search = null, ?string $periodeFilter = null, ?string $statusFilter = null): array;
+
     public function findAssessment(int $id, array $relations = []): ?Assessment;
 
     public function addCatatan(array $data): AkreditasiCatatan;

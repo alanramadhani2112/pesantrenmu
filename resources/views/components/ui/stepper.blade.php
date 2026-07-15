@@ -10,7 +10,7 @@
     $classes = trim('stepper stepper-' . $variant . ($direction === 'column' ? ' stepper-column d-flex flex-column' : ''));
 @endphp
 
-<div data-ui-stepper="metronic" {{ $attributes->merge(['class' => $classes]) }}>
+<div data-ui-stepper="metronic" data-ui-stepper-mode="visual" {{ $attributes->merge(['class' => $classes]) }}>
     <div class="stepper-nav">
         {{ $slot }}
     </div>

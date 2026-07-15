@@ -3,7 +3,7 @@
 }
 
 .spm-edpm-component-card {
-    border: 1px solid #e3e9f2 !important;
+    border: 1px solid #e3e9f2;
     border-radius: 8px;
     box-shadow: 0 4px 18px rgba(16, 24, 40, 0.04);
 }
@@ -12,7 +12,7 @@
     align-items: center;
     gap: 16px;
     min-height: 68px;
-    padding: 18px 24px !important;
+    padding: 18px 24px;
 }
 
 .spm-edpm-component-card .card-title {
@@ -32,9 +32,9 @@
 }
 
 .spm-edpm-table-wrap {
-    border-right: 0 !important;
-    border-bottom: 0 !important;
-    border-left: 0 !important;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
     box-shadow: inset 0 1px 0 #eef2f7;
 }
 
@@ -45,11 +45,11 @@
 }
 
 .spm-edpm-table thead th {
-    padding: 12px 20px !important;
+    padding: 12px 20px;
 }
 
 .spm-edpm-table tbody td {
-    padding: 14px 20px !important;
+    padding: 14px 20px;
     vertical-align: middle;
 }
 
@@ -83,8 +83,8 @@
 }
 
 .spm-edpm-statement {
-    color: #243b53 !important;
-    font-weight: 500 !important;
+    color: #243b53;
+    font-weight: 500;
     line-height: 1.55;
     white-space: normal;
     overflow-wrap: anywhere;
@@ -103,17 +103,17 @@
 }
 
 .spm-permission-note {
-    padding: 14px 16px !important;
-    border-style: solid !important;
+    padding: 14px 16px;
+    border-style: solid;
 }
 
 .spm-permission-note .spm-alert-title {
-    margin-bottom: 2px !important;
+    margin-bottom: 2px;
 }
 
 .spm-permission-note .spm-alert-content {
-    color: #475467 !important;
-    font-weight: 500 !important;
+    color: #475467;
+    font-weight: 500;
 }
 
 .spm-permission-field-label {
@@ -130,7 +130,7 @@
 }
 
 .spm-permission-control-panel [data-ui-filter-select="metronic"] {
-    width: 100% !important;
+    width: 100%;
 }
 
 .spm-permission-metric {
@@ -204,10 +204,10 @@
 }
 
 .spm-permission-matrix-wrap {
-    border-right: 0 !important;
-    border-bottom: 0 !important;
-    border-left: 0 !important;
-    border-radius: 0 0 8px 8px !important;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 0 0 8px 8px;
 }
 
 .spm-permission-matrix {
@@ -247,16 +247,16 @@
 }
 
 .spm-permission-group-row td {
-    padding-top: 10px !important;
-    padding-bottom: 10px !important;
-    color: #475467 !important;
-    font-size: 11px !important;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    color: #475467;
+    font-size: 11px;
     font-weight: 600;
     line-height: 1.25;
     text-transform: uppercase;
-    background-color: #f8fafc !important;
-    border-top: 1px solid #e8edf4 !important;
-    border-bottom: 1px solid #e8edf4 !important;
+    background-color: #f8fafc;
+    border-top: 1px solid #e8edf4;
+    border-bottom: 1px solid #e8edf4;
 }
 
 .spm-permission-name-cell {
@@ -361,7 +361,7 @@
     [data-ui-table="metronic"] [data-ui-table-search] .form-control,
     [data-ui-table="metronic"] [data-ui-filter-select],
     [data-ui-table="metronic"] [data-ui-filter-select] .form-select {
-        width: 100% !important;
+        width: 100%;
     }
 
     [data-ui-table="metronic"] .spm-table-header {

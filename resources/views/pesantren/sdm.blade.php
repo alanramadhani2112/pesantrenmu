@@ -165,11 +165,11 @@
                         <div class="d-flex align-items-center gap-3">
                             <x-ui.icon name="people" class="fs-2x text-primary" />
                             <div>
-                                <span class="fw-bold text-gray-900 fs-6">Total Seluruh SDM</span>
+                                <span class="fw-semibold text-gray-900 fs-6">Total Seluruh SDM</span>
                                 <span class="text-muted fw-semibold fs-8 d-block">Semua kategori dan unit layanan</span>
                             </div>
                         </div>
-                        <span class="badge badge-light-primary fs-4 fw-bold px-4 py-2"><span id="sdmGrandTotal">{{ $grandTotal }}</span> Data</span>
+                        <span class="badge badge-light-primary fs-4 fw-semibold px-4 py-2"><span id="sdmGrandTotal">{{ $grandTotal }}</span> Data</span>
                     </div>
                 </div>
             </div>

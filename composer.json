@@ -68,7 +68,7 @@
             "@php artisan optimize:clear --ansi"
         ],
         "prod:check": [
-            "@php artisan test tests/Feature/ProductionReadinessTest.php tests/Feature/PerformanceOptimizationTest.php --stop-on-failure"
+            "@php artisan test tests/Feature/ProductionReadinessTest.php tests/Feature/PerformanceOptimizationTest.php tests/Feature/MetronicFrontendTest.php --stop-on-failure"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",

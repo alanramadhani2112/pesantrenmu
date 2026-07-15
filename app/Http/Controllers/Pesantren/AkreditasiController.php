@@ -40,7 +40,24 @@ class AkreditasiController extends Controller
             $sortAsc
         );
 
-        $completeness = $this->pesantrenService->checkDataCompleteness(Auth::id());
+        $userId = Auth::id();
+        $incompleteItems = $this->pesantrenService->checkDataCompleteness($userId);
+        $hasActiveSubmission = Akreditasi::where('user_id', $userId)
+            ->whereIn('status', Akreditasi::activeStatuses())
+            ->exists();
+        // ponytail: coarse progress only tracks Profil/IPM/SDM/EDPM; move exact field totals into PesantrenService when UI needs field-level progress.
+        $totalSections = 4;
+        $completeSections = empty($incompleteItems)
+            ? $totalSections
+            : max(0, $totalSections - \count($incompleteItems));
+        $completeness = [
+            'can_submit' => empty($incompleteItems) && ! $hasActiveSubmission,
+            'complete' => $completeSections,
+            'total' => $totalSections,
+            'percentage' => (int) round(($completeSections / $totalSections) * 100),
+            'incomplete_items' => $incompleteItems,
+            'has_active_submission' => $hasActiveSubmission,
+        ];
 
         return view('pesantren.akreditasi', compact(
             'akreditasis', 'search', 'periodeFilter', 'statusFilter',
@@ -48,7 +65,7 @@ class AkreditasiController extends Controller
         ));
     }
 
-    public function create(Request $request)
+    public function create()
     {
         abort_unless(auth()->user()->isPesantren(), 403);
 

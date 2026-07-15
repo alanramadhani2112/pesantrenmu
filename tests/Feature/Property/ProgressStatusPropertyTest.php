@@ -4,6 +4,7 @@ namespace Tests\Feature\Property;
 
 use App\Models\Ipm;
 use App\Models\Pesantren;
+use App\Models\PesantrenUnit;
 use App\Models\SdmPesantren;
 use App\Models\User;
 use App\Services\SidebarProgressService;
@@ -44,11 +45,38 @@ class ProgressStatusPropertyTest extends TestCase
         'nama_pesantren',
         'ns_pesantren',
         'alamat',
-        'provinsi',
+        'provinsi_kode',
         'kota_kabupaten',
         'tahun_pendirian',
+        'luas_tanah',
+        'luas_bangunan',
         'nama_mudir',
+        'jenjang_pendidikan_mudir',
+        'telp_pesantren',
+        'hp_wa',
+        'email_pesantren',
+        'persyarikatan',
+        'visi',
+        'misi',
         'layanan_satuan_pendidikan',
+        'status_kepemilikan_tanah',
+        'sertifikat_nsp',
+        'rk_anggaran',
+        'silabus_rpp',
+        'peraturan_kepegawaian',
+        'file_lk_iapm',
+        'laporan_tahunan',
+        'dok_profil',
+        'dok_nsp',
+        'dok_renstra',
+        'dok_rk_anggaran',
+        'dok_kurikulum',
+        'dok_silabus_rpp',
+        'dok_kepengasuhan',
+        'dok_peraturan_kepegawaian',
+        'dok_sarpras',
+        'dok_laporan_tahunan',
+        'dok_sop',
     ];
 
     /**
@@ -126,7 +154,15 @@ class ProgressStatusPropertyTest extends TestCase
             }
         }
 
-        Pesantren::create($profilData);
+        $pesantren = Pesantren::create($profilData);
+        if (! empty($profilData['layanan_satuan_pendidikan'])) {
+            PesantrenUnit::create([
+                'pesantren_id' => $pesantren->id,
+                'unit' => 'spm',
+                'jumlah_rombel' => 1,
+            ]);
+            $profilFilledCount++;
+        }
 
         // --- Set up IPM data ---
         $ipmFilledCount = 0;
@@ -159,15 +195,16 @@ class ProgressStatusPropertyTest extends TestCase
 
         // --- Verify Profil progress ---
         $profilResult = $this->service->getSectionProgress($user->id, 'profil');
-        $expectedProfilStatus = $this->expectedStatus($profilFilledCount, count(self::PROFIL_FIELDS));
+        $profilTotal = count(self::PROFIL_FIELDS) + (! empty($profilData['layanan_satuan_pendidikan']) ? 1 : 0);
+        $expectedProfilStatus = $this->expectedStatus($profilFilledCount, $profilTotal);
 
         $this->assertEquals(
             $expectedProfilStatus,
             $profilResult['status'],
-            "Profil: Expected '{$expectedProfilStatus}' for {$profilFilledCount}/".count(self::PROFIL_FIELDS)." fields filled (bitmask: {$profilBitmask})"
+            "Profil: Expected '{$expectedProfilStatus}' for {$profilFilledCount}/{$profilTotal} fields filled (bitmask: {$profilBitmask})"
         );
         $this->assertEquals($profilFilledCount, $profilResult['filled']);
-        $this->assertEquals(count(self::PROFIL_FIELDS), $profilResult['total']);
+        $this->assertEquals($profilTotal, $profilResult['total']);
 
         // --- Verify IPM progress ---
         $ipmResult = $this->service->getSectionProgress($user->id, 'ipm');
@@ -183,15 +220,16 @@ class ProgressStatusPropertyTest extends TestCase
 
         // --- Verify SDM progress ---
         $sdmResult = $this->service->getSectionProgress($user->id, 'sdm');
-        $expectedSdmStatus = $sdmPresent ? 'complete' : 'not_started';
+        $sdmTotal = ! empty($profilData['layanan_satuan_pendidikan']) ? 1 : 0;
+        $expectedSdmStatus = $sdmPresent && $sdmTotal > 0 ? 'complete' : 'not_started';
 
         $this->assertEquals(
             $expectedSdmStatus,
             $sdmResult['status'],
             "SDM: Expected '{$expectedSdmStatus}' for sdmPresent=".($sdmPresent ? 'true' : 'false')
         );
-        $this->assertEquals($sdmPresent ? 1 : 0, $sdmResult['filled']);
-        $this->assertEquals(1, $sdmResult['total']);
+        $this->assertEquals($expectedSdmStatus === 'complete' ? 1 : 0, $sdmResult['filled']);
+        $this->assertEquals($sdmTotal, $sdmResult['total']);
     }
 
     /**

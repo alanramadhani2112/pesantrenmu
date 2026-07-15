@@ -148,7 +148,6 @@
 
                         <div
                             class="stepper-item {{ $stateClass }} spm-audit-stepper-item spm-audit-stepper-item--{{ $color }} {{ $isLast ? 'spm-audit-stepper-item--last' : '' }}"
-                            data-kt-stepper-element="nav"
                             x-data="{ expanded: false }"
                         >
                             <div class="stepper-wrapper d-flex align-items-start">

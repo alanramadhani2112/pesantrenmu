@@ -265,6 +265,22 @@ Route::middleware(['auth', 'verified', 'role:asesor'])
 
         Route::get('akreditasi', [App\Http\Controllers\Asesor\AkreditasiController::class, 'index'])
             ->name('akreditasi');
+        Route::get('akreditasi/review-berkas', [App\Http\Controllers\Asesor\AkreditasiController::class, 'index'])
+            ->defaults('focus', 'review')
+            ->defaults('statusFilter', 'belum')
+            ->name('akreditasi.review');
+        Route::get('akreditasi/jadwal-visitasi', [App\Http\Controllers\Asesor\AkreditasiController::class, 'index'])
+            ->defaults('focus', 'jadwal')
+            ->defaults('statusFilter', 'belum')
+            ->name('akreditasi.jadwal');
+        Route::get('akreditasi/input-nilai', [App\Http\Controllers\Asesor\AkreditasiController::class, 'index'])
+            ->defaults('focus', 'nilai')
+            ->defaults('statusFilter', 'penilaian')
+            ->name('akreditasi.nilai');
+        Route::get('akreditasi/laporan-visitasi', [App\Http\Controllers\Asesor\AkreditasiController::class, 'index'])
+            ->defaults('focus', 'laporan_visitasi')
+            ->defaults('statusFilter', 'penilaian')
+            ->name('akreditasi.laporan-visitasi');
         Route::get('akreditasi/catatan/{id}', [App\Http\Controllers\Asesor\AkreditasiController::class, 'showCatatan'])
             ->name('akreditasi.catatan');
         Route::post('akreditasi/schedule-visitasi', [App\Http\Controllers\Asesor\AkreditasiController::class, 'scheduleVisitasi'])

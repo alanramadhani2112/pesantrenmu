@@ -53,11 +53,13 @@
         'edpm' => 'EDPM',
     ];
 
-    if ((int) $akreditasi->status >= AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
-        $tabs['instrumen'] = 'Penilaian';
+    if (in_array((int) $akreditasi->status, [AkreditasiStateMachine::STATUS_PASCA_VISITASI, AkreditasiStateMachine::STATUS_VALIDASI_ADMIN, AkreditasiStateMachine::STATUS_SELESAI, AkreditasiStateMachine::STATUS_DITOLAK], true)) {
+        $tabs['instrumen'] = 'Butir Penilaian';
     }
 
-    $tabs['laporan'] = 'Laporan Visitasi';
+    if (in_array((int) $akreditasi->status, [AkreditasiStateMachine::STATUS_PASCA_VISITASI, AkreditasiStateMachine::STATUS_VALIDASI_ADMIN, AkreditasiStateMachine::STATUS_SELESAI, AkreditasiStateMachine::STATUS_DITOLAK], true)) {
+        $tabs['laporan'] = 'Upload Laporan';
+    }
 @endphp
 
 <x-slot name="header">{{ __('Detail Akreditasi') }}</x-slot>
@@ -74,7 +76,7 @@
             {{ Akreditasi::getStatusLabel($akreditasi->status) }}
         </x-ui.status-badge>
 
-        @if((int) $akreditasi->status === AkreditasiStateMachine::STATUS_VISITASI && $asesorTipe === 1)
+        @if($canConfirmVisitasi)
             <x-ui.button variant="success" x-on:click="confirmVisitasiSelesai()">
                 <i class="ki-solid ki-check-circle fs-4 me-1"></i>
                 Konfirmasi Visitasi Selesai
@@ -116,6 +118,36 @@
         <x-ui.alert variant="danger" title="Gagal" class="mb-4">{{ session('error') }}</x-ui.alert>
     @endif
 
+    <div class="card spm-asesor-detail-hero mb-6">
+        <div class="card-body p-6 p-lg-8">
+            <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-5">
+                <div class="min-w-0">
+                    <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+                        <x-ui.status-badge :variant="$statusVariant">
+                            {{ Akreditasi::getStatusLabel($akreditasi->status) }}
+                        </x-ui.status-badge>
+                        <span class="badge badge-light-primary fw-semibold">{{ $asesorTipe === 1 ? 'Ketua Asesor' : 'Anggota Asesor' }}</span>
+                    </div>
+                    <h2 class="fw-semibold text-gray-900 mb-2 text-break">{{ $pesantren->nama_pesantren ?? $pesantren->name ?? '-' }}</h2>
+                    <div class="text-muted fw-semibold lh-lg">{{ $pesantren->alamat ?? 'Alamat belum tersedia' }}</div>
+                </div>
+                <div class="spm-asesor-detail-next-step">
+                    <div class="spm-detail-label mb-2">Fokus Saat Ini</div>
+                    <div class="fw-semibold text-gray-900">
+                        @if($canScheduleVisitasi)
+                            Jadwalkan visitasi dan beri catatan awal.
+                        @elseif($canConfirmVisitasi)
+                            Konfirmasi visitasi setelah selesai di lapangan.
+                        @elseif((int) $akreditasi->status === AkreditasiStateMachine::STATUS_PASCA_VISITASI)
+                            Lengkapi nilai dan laporan visitasi.
+                        @else
+                            Review data dan pantau status akreditasi.
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     {{-- Stats Row --}}
     <div class="row g-5 mb-6">
         <div class="col-lg-4">
@@ -153,40 +185,47 @@
     />
 
     {{-- Tabs Navigation --}}
-    <div class="spm-detail-tabs-shell">
-        <div data-ui-tabs="metronic" class="nav nav-tabs nav-line-tabs mb-6 spm-tabs-nav">
+    <div class="spm-detail-tabs-shell" aria-label="Navigasi detail akreditasi">
+        <div data-ui-tabs="metronic" class="nav nav-tabs nav-line-tabs mb-6 spm-tabs-nav" role="tablist">
         @foreach($tabs as $key => $label)
-            <a class="nav-item nav-link cursor-pointer spm-tab-link"
-               :class="{ 'active': activeTab === '{{ $key }}' }"
+            <x-ui.button type="button" :unstyled="true"
+               class="nav-item nav-link cursor-pointer spm-tab-link"
+               id="tab-{{ $key }}"
+               role="tab"
+               x-bind:aria-selected="activeTab === '{{ $key }}' ? 'true' : 'false'"
+               aria-controls="panel-{{ $key }}"
+               x-bind:class="{ 'active': activeTab === '{{ $key }}' }"
                x-on:click="activeTab = '{{ $key }}'">
                 {{ $label }}
-            </a>
+            </x-ui.button>
         @endforeach
         </div>
     </div>
 
     {{-- Tab Content --}}
     <div class="spm-detail-tab-content">
-    <div x-show="activeTab === 'profil'" x-cloak>
+    <div x-show="activeTab === 'profil'" id="panel-profil" role="tabpanel" aria-labelledby="tab-profil" x-cloak>
         @include('asesor.akreditasi-detail.tabs.profil')
     </div>
-    <div x-show="activeTab === 'ipm'" x-cloak>
+    <div x-show="activeTab === 'ipm'" id="panel-ipm" role="tabpanel" aria-labelledby="tab-ipm" x-cloak>
         @include('asesor.akreditasi-detail.tabs.ipm')
     </div>
-    <div x-show="activeTab === 'sdm'" x-cloak>
+    <div x-show="activeTab === 'sdm'" id="panel-sdm" role="tabpanel" aria-labelledby="tab-sdm" x-cloak>
         @include('asesor.akreditasi-detail.tabs.sdm')
     </div>
-    <div x-show="activeTab === 'edpm'" x-cloak>
+    <div x-show="activeTab === 'edpm'" id="panel-edpm" role="tabpanel" aria-labelledby="tab-edpm" x-cloak>
         @include('asesor.akreditasi-detail.tabs.edpm')
     </div>
-    @if((int) $akreditasi->status >= AkreditasiStateMachine::STATUS_PASCA_VISITASI)
-        <div x-show="activeTab === 'instrumen'" x-cloak>
+    @if(in_array((int) $akreditasi->status, [AkreditasiStateMachine::STATUS_PASCA_VISITASI, AkreditasiStateMachine::STATUS_VALIDASI_ADMIN, AkreditasiStateMachine::STATUS_SELESAI, AkreditasiStateMachine::STATUS_DITOLAK], true))
+        <div x-show="activeTab === 'instrumen'" id="panel-instrumen" role="tabpanel" aria-labelledby="tab-instrumen" x-cloak>
             @include('asesor.akreditasi-detail.tabs.instrumen')
         </div>
     @endif
-    <div x-show="activeTab === 'laporan'" x-cloak>
+    @if(in_array((int) $akreditasi->status, [AkreditasiStateMachine::STATUS_PASCA_VISITASI, AkreditasiStateMachine::STATUS_VALIDASI_ADMIN, AkreditasiStateMachine::STATUS_SELESAI, AkreditasiStateMachine::STATUS_DITOLAK], true))
+    <div x-show="activeTab === 'laporan'" id="panel-laporan" role="tabpanel" aria-labelledby="tab-laporan" x-cloak>
         @include('asesor.akreditasi-detail.tabs.laporan-visitasi')
     </div>
+    @endif
     </div>
 
     {{-- Rejection Section (Asesor 1 Only) --}}
@@ -205,8 +244,9 @@
 
                     @if($rejectionStatus['status'] === 'corrected')
                         <div class="d-flex gap-3">
-                            <form method="POST" action="{{ route('asesor.akreditasi.accept-perbaikan', $akreditasi->uuid) }}">
+                            <form method="POST" action="{{ route('asesor.akreditasi.accept-perbaikan') }}">
                                 @csrf
+                                <input type="hidden" name="akreditasi_id" value="{{ $akreditasi->id }}">
                                 <x-ui.button type="button" variant="success" x-on:click="confirmAcceptPerbaikan($el.closest('form'))">
                                     <i class="ki-solid ki-check fs-4 me-1"></i>
                                     Terima Perbaikan
@@ -251,82 +291,7 @@
         </x-ui.section-card>
     @endif
 
-    {{-- Reject Documents Modal --}}
-    <x-ui.modal name="reject-documents-modal" title="Tolak Dokumen" maxWidth="lg">
-        <form method="POST" action="{{ route('asesor.akreditasi.reject-document', $akreditasi->id) }}" id="rejectDocumentsForm">
-            @csrf
-            <div class="p-6">
-                <p class="text-muted mb-4">Pilih dokumen yang ditolak dan berikan alasan penolakan.</p>
-
-                <div class="mb-4">
-                    <label class="form-label fw-semibold">Dokumen yang Ditolak</label>
-                    @if(!empty($selectableItems))
-                        @foreach($selectableItems as $section)
-                            <div class="mb-3">
-                                <div class="fw-semibold fs-7 mb-2">{{ $section['label'] ?? '' }}</div>
-                                @if(!empty($section['children']))
-                                    @foreach($section['children'] as $child)
-                                        <div class="form-check mb-1 ms-3">
-                                            <input class="form-check-input" type="checkbox" name="perbaikan[]" value="{{ $child['value'] ?? '' }}" id="reject-{{ $loop->parent->index }}-{{ $loop->index }}">
-                                            <label class="form-check-label" for="reject-{{ $loop->parent->index }}-{{ $loop->index }}">{{ $child['label'] ?? '' }}</label>
-                                        </div>
-                                        @if(!empty($child['subChildren']))
-                                            @foreach($child['subChildren'] as $sub)
-                                                <div class="form-check mb-1 ms-6">
-                                                    <input class="form-check-input" type="checkbox" name="perbaikan[]" value="{{ $sub['value'] ?? '' }}" id="reject-{{ $loop->parent->parent->index }}-{{ $loop->parent->index }}-{{ $loop->index }}">
-                                                    <label class="form-check-label" for="reject-{{ $loop->parent->parent->index }}-{{ $loop->parent->index }}-{{ $loop->index }}">{{ $sub['label'] ?? '' }}</label>
-                                                </div>
-                                            @endforeach
-                                        @endif
-                                    @endforeach
-                                @endif
-                            </div>
-                        @endforeach
-                    @endif
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label fw-semibold" for="rejectionExplanation">Catatan Penolakan</label>
-                    <textarea class="form-control" name="catatan" id="rejectionExplanation" rows="4" placeholder="Jelaskan alasan penolakan dokumen..." required></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <x-ui.button type="button" variant="light" x-on:click="$dispatch('close-modal', 'reject-documents-modal')">Batal</x-ui.button>
-                <x-ui.button type="button" variant="danger" x-on:click="confirmSubmitRejection()">
-                    <i class="ki-solid ki-cross-circle fs-4 me-1"></i>
-                    Kirim Penolakan
-                </x-ui.button>
-            </div>
-        </form>
-    </x-ui.modal>
-
-    {{-- Schedule Visitasi Modal --}}
-    <x-ui.modal name="schedule-visitasi-modal" title="Jadwalkan Visitasi" maxWidth="md">
-        <form method="POST" action="{{ route('asesor.akreditasi.schedule-visitasi', $akreditasi->id) }}" id="scheduleVisitasiForm">
-            @csrf
-            <div class="p-6">
-                <div class="mb-4">
-                    <label class="form-label fw-semibold" for="tanggalMulai">Tanggal Mulai</label>
-                    <input type="date" class="form-control" name="tanggal_mulai" id="tanggalMulai" required>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label fw-semibold" for="tanggalAkhir">Tanggal Selesai</label>
-                    <input type="date" class="form-control" name="tanggal_akhir" id="tanggalAkhir" required>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label fw-semibold" for="catatanVisitasi">Catatan</label>
-                    <textarea class="form-control" name="catatan_visitasi" id="catatanVisitasi" rows="3" placeholder="Catatan tambahan untuk visitasi..."></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <x-ui.button type="button" variant="light" x-on:click="$dispatch('close-modal', 'schedule-visitasi-modal')">Batal</x-ui.button>
-                <x-ui.button type="submit" variant="info">
-                    <i class="ki-solid ki-calendar-add fs-4 me-1"></i>
-                    Jadwalkan
-                </x-ui.button>
-            </div>
-        </form>
-    </x-ui.modal>
+    @include('asesor.akreditasi-detail.modals')
 
 </x-ui.page>
 @endsection
@@ -405,12 +370,16 @@ function asesorAkreditasiDetailPage() {
         },
 
         async saveNa(butirId, value, isFinal = false) {
+            if (isFinal && !value) {
+                window.SpmSwal.warning('Peringatan', 'Pilih nilai sebelum mengunci.');
+                return;
+            }
             this.loading = true;
             try {
-                const res = await fetch('{{ route("asesor.akreditasi.save-na", $akreditasi->uuid) }}', {
+                const res = await fetch('{{ route("asesor.akreditasi.save-na") }}', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                    body: JSON.stringify({ butir_id: butirId, value: value, is_final: isFinal })
+                    body: JSON.stringify({ akreditasi_id: {{ $akreditasi->id }}, butir_id: butirId, value: value, is_final: isFinal })
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || 'Gagal menyimpan');
@@ -427,10 +396,10 @@ function asesorAkreditasiDetailPage() {
         async saveNk(butirId, value, isFinal = false) {
             this.loading = true;
             try {
-                const res = await fetch('{{ route("asesor.akreditasi.save-nk", $akreditasi->uuid) }}', {
+                const res = await fetch('{{ route("asesor.akreditasi.save-nk") }}', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                    body: JSON.stringify({ butir_id: butirId, value: value, is_final: isFinal })
+                    body: JSON.stringify({ akreditasi_id: {{ $akreditasi->id }}, butir_id: butirId, value: value, is_final: isFinal })
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message || 'Gagal menyimpan');

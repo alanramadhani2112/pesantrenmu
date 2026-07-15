@@ -13,6 +13,17 @@
         'hasil' => 'Hasil',
         'banding' => 'Banding',
     ];
+    $statusLabel = \App\Models\Akreditasi::getStatusLabel($akreditasi->status);
+    $statusVariant = match ((int) $akreditasi->status) {
+        \App\Models\Akreditasi::STATUS_SELESAI => 'success',
+        \App\Models\Akreditasi::STATUS_DITOLAK => 'danger',
+        \App\Models\Akreditasi::STATUS_BANDING => 'warning',
+        \App\Models\Akreditasi::STATUS_PENGAJUAN => 'primary',
+        default => 'info',
+    };
+    $asesorAssignments = $akreditasi->assessments
+        ->sortBy('tipe')
+        ->values();
 @endphp
 
 <x-ui.page
@@ -55,16 +66,33 @@
             </form>
         </div>
     @endif
+    <div class="spm-detail-hero card mb-5">
+        <div class="card-body p-5 p-lg-6 d-flex flex-column flex-lg-row justify-content-between gap-4">
+            <div class="min-w-0">
+                <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+                    <x-ui.badge :variant="$statusVariant">{{ $statusLabel }}</x-ui.badge>
+                    <x-ui.status-badge variant="secondary">ID #{{ $akreditasi->id }}</x-ui.status-badge>
+                    <x-ui.status-badge variant="secondary">Periode {{ $akreditasi->created_at?->format('Y') ?? '-' }}</x-ui.status-badge>
+                </div>
+                <h2 class="text-gray-900 fw-semibold mb-2">{{ $profil->nama_pesantren ?? 'Detail Akreditasi' }}</h2>
+                <div class="text-muted fw-semibold mw-700px">Pantau profil, dokumen, EDPM/IPR, asesor, dan hasil dalam satu alur pengajuan.</div>
+            </div>
+            <div class="spm-detail-hero-meta">
+                <div class="spm-detail-hero-label">Tanggal Pengajuan</div>
+                <div class="spm-detail-hero-value">{{ $akreditasi->created_at?->format('d M Y') ?? '-' }}</div>
+            </div>
+        </div>
+    </div>
     {{-- Info Bar --}}
-    <div class="row g-5 mb-6">
+    <div class="row g-4 mb-5 spm-detail-summary-grid">
         <div class="col-lg-4">
-            <x-ui.stat-card label="Periode" value="{{ $akreditasi->periode ?? '-' }}" variant="primary" icon="calendar" />
+            <x-ui.stat-card label="Periode" value="{{ $akreditasi->created_at?->format('Y') ?? '-' }}" variant="primary" icon="calendar" />
         </div>
         <div class="col-lg-4">
-            <x-ui.stat-card label="Status" value="{{ ucfirst($akreditasi->status ?? '-') }}" variant="info" icon="information-3" />
+            <x-ui.stat-card label="Status" value="{{ $statusLabel }}" variant="info" icon="information-3" />
         </div>
         <div class="col-lg-4">
-            <x-ui.stat-card label="Tahapan" value="{{ ucfirst($akreditasi->tahapan ?? '-') }}" variant="success" icon="check-circle" />
+            <x-ui.stat-card label="Tanggal Pengajuan" value="{{ $akreditasi->created_at?->format('d M Y') ?? '-' }}" variant="success" icon="calendar" />
         </div>
     </div>
 
@@ -72,12 +100,13 @@
         :status="$akreditasi->status"
         title="Tahapan Akreditasi LP2M"
         subtitle="Pantau posisi pengajuan dari review awal, review asesor, visitasi, penilaian pasca visitasi, validasi admin, sampai hasil akhir."
-        class="mb-6"
+        class="mb-5"
     />
 
+    @if((int) $akreditasi->status === \App\Models\Akreditasi::STATUS_PASCA_VISITASI || !empty($akreditasi->kartu_kendali))
     {{-- Kartu Kendali Upload --}}
-    <x-ui.section-card title="Kartu Kendali" subtitle="Unggah kartu kendali yang telah ditandatangani" class="mb-6">
-        <div class="p-6">
+    <x-ui.section-card title="Kartu Kendali" subtitle="Unggah kartu kendali yang telah ditandatangani" class="mb-5">
+        <div class="p-5">
             @if(!empty($akreditasi->kartu_kendali))
                 <div class="d-flex align-items-center gap-3 mb-4">
                     <x-ui.icon name="document" class="fs-2 text-success" />
@@ -88,14 +117,14 @@
                 </div>
             @endif
 
-            @if(!in_array($akreditasi->status, ['rejected', 'cancelled', 'withdrawn']))
+            @if((int) $akreditasi->status === \App\Models\Akreditasi::STATUS_PASCA_VISITASI)
                 <form action="{{ route('pesantren.akreditasi.upload-kartu-kendali') }}" method="POST" enctype="multipart/form-data" id="kartuKendaliForm">
                     @csrf
                     <input type="hidden" name="akreditasi_id" value="{{ $akreditasi->id }}">
                     <div class="row align-items-end">
                         <div class="col-md-8">
                             <x-ui.form-field label="{{ !empty($akreditasi->kartu_kendali) ? 'Ganti File' : 'Unggah File' }}">
-                                <input type="file" name="kartu_kendali_file" class="form-control form-control-sm @error('kartu_kendali_file') is-invalid @enderror" accept="application/pdf,image/png,image/jpeg">
+                                <x-ui.input type="file" name="kartu_kendali_file" class="form-control-sm" :invalid="$errors->has('kartu_kendali_file')" accept="application/pdf,image/png,image/jpeg" />
                                 @error('kartu_kendali_file')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -113,14 +142,16 @@
         </div>
     </x-ui.section-card>
 
+    @endif
+
     {{-- Tabs --}}
-    <div class="spm-detail-tabs-shell spm-tab-spacing">
-    <x-ui.tabs class="mb-6">
+    <div class="spm-detail-tabs-shell spm-tab-spacing" aria-label="Navigasi detail akreditasi">
+    <x-ui.tabs class="mb-5">
         @foreach($tabs as $key => $label)
             @if($key !== 'banding' || !empty($akreditasi->banding))
-                <a href="{{ request()->fullUrlWithQuery(['tab' => $key]) }}" class="nav-link spm-tab-link {{ $activeTab === $key ? 'active' : '' }}">
+                <x-ui.tab :href="request()->fullUrlWithQuery(['tab' => $key])" :active="$activeTab === $key">
                     {{ $label }}
-                </a>
+                </x-ui.tab>
             @endif
         @endforeach
     </x-ui.tabs>
@@ -130,51 +161,72 @@
     <div class="spm-detail-tab-content spm-detail-alignment">
     @if($activeTab === 'profil')
         {{-- Profil Tab --}}
-        <x-ui.section-card title="A. Identitas Pesantren" class="mb-6">
-            <div class="p-6">
-                <div class="row g-4">
-                    <div class="col-md-6"><strong>Nama Pesantren:</strong> {{ $profil->nama_pesantren ?? '-' }}</div>
-                    <div class="col-md-6"><strong>NSP:</strong> {{ $profil->ns_pesantren ?? '-' }}</div>
-                    <div class="col-12"><strong>Alamat:</strong> {{ $profil->alamat ?? '-' }}</div>
-                    <div class="col-md-6"><strong>Provinsi:</strong> {{ $profil->provinsi ?? '-' }}</div>
-                    <div class="col-md-6"><strong>Kota/Kabupaten:</strong> {{ $profil->kota_kabupaten ?? '-' }}</div>
-                    <div class="col-md-6"><strong>Tahun Pendirian:</strong> {{ $profil->tahun_pendirian ?? '-' }}</div>
-                    <div class="col-md-6"><strong>Nama Mudir:</strong> {{ $profil->nama_mudir ?? '-' }}</div>
-                    <div class="col-md-6"><strong>Jenjang Pendidikan Mudir:</strong> {{ $profil->jenjang_pendidikan_mudir ?? '-' }}</div>
-                    <div class="col-md-6"><strong>Telp:</strong> {{ $profil->telp_pesantren ?? '-' }}</div>
-                    <div class="col-md-6"><strong>HP/WA:</strong> {{ $profil->hp_wa ?? '-' }}</div>
-                    <div class="col-md-6"><strong>Email:</strong> {{ $profil->email_pesantren ?? '-' }}</div>
-                    <div class="col-md-6"><strong>Persyarikatan:</strong> {{ $profil->persyarikatan ?? '-' }}</div>
+        <x-ui.section-card title="Identitas Pesantren" subtitle="Ringkasan data utama yang menjadi dasar pengajuan." class="mb-5 spm-detail-panel">
+            <div class="p-5">
+                <div class="row g-4 spm-detail-grid">
+                    <x-ui.detail-item label="Nama Pesantren" :value="$profil->nama_pesantren ?? '-'" />
+                    <x-ui.detail-item label="NSP" :value="$profil->ns_pesantren ?? '-'" />
+                    <x-ui.detail-item label="Alamat" span="2" :value="$profil->alamat ?? '-'" />
+                    <x-ui.detail-item label="Provinsi" :value="$profil->provinsi ?? '-'" />
+                    <x-ui.detail-item label="Kota/Kabupaten" :value="$profil->kota_kabupaten ?? '-'" />
+                    <x-ui.detail-item label="Tahun Pendirian" :value="$profil->tahun_pendirian ?? '-'" />
+                    <x-ui.detail-item label="Nama Mudir" :value="$profil->nama_mudir ?? '-'" />
+                    <x-ui.detail-item label="Pendidikan Mudir" :value="$profil->jenjang_pendidikan_mudir ?? '-'" />
+                    <x-ui.detail-item label="Persyarikatan" :value="$profil->persyarikatan ?? '-'" />
+                    <x-ui.detail-item label="Telepon" :value="$profil->telp_pesantren ?? '-'" />
+                    <x-ui.detail-item label="HP/WA" :value="$profil->hp_wa ?? '-'" />
+                    <x-ui.detail-item label="Email" :value="$profil->email_pesantren ?? '-'" />
                 </div>
             </div>
         </x-ui.section-card>
 
-        <x-ui.section-card title="B. Layanan Satuan Pendidikan" class="mb-6">
-            <div class="p-6">
-                @if(!empty($profil->units) && count($profil->units) > 0)
-                    <x-ui.simple-table>
-                        <thead><tr><th>Unit</th><th>Jumlah Rombel</th></tr></thead>
-                        <tbody>
-                            @foreach($profil->units as $unit)
-                                <tr><td>{{ $unit->unit }}</td><td>{{ $unit->jumlah_rombel }}</td></tr>
-                            @endforeach
-                        </tbody>
-                    </x-ui.simple-table>
-                @else
-                    <div class="text-muted">Belum ada layanan yang dipilih.</div>
-                @endif
+        <div class="row g-5 mb-5">
+            <div class="col-lg-5">
+                <x-ui.section-card title="Layanan Satuan Pendidikan" subtitle="Unit pendidikan yang tercatat." class="h-100 spm-detail-panel">
+                    <div class="p-5">
+                        @if(!empty($profil->units) && count($profil->units) > 0)
+                            <x-ui.simple-table table-class="table-row-gray-200">
+                                <thead>
+                                    <tr class="fw-semibold text-muted">
+                                        <th>Unit</th>
+                                        <th class="text-end">Rombel</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($profil->units as $unit)
+                                        <tr>
+                                            <td class="fw-semibold text-gray-900">{{ $unit->unit }}</td>
+                                            <td class="text-end">
+                                                <x-ui.status-badge variant="primary">{{ $unit->jumlah_rombel }} rombel</x-ui.status-badge>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </x-ui.simple-table>
+                        @else
+                            <x-ui.empty-state title="Belum ada layanan" description="Layanan satuan pendidikan belum dipilih pada profil pesantren." variant="secondary" class="py-6" />
+                        @endif
+                    </div>
+                </x-ui.section-card>
             </div>
-        </x-ui.section-card>
-
-        <x-ui.section-card title="C. Visi & Misi" class="mb-6">
-            <div class="p-6">
-                <div class="mb-4"><strong>Visi:</strong><br>{{ $profil->visi ?? '-' }}</div>
-                <div><strong>Misi:</strong><br>{{ $profil->misi ?? '-' }}</div>
+            <div class="col-lg-7">
+                <x-ui.section-card title="Visi & Misi" subtitle="Arah kelembagaan pesantren." class="h-100 spm-detail-panel">
+                    <div class="p-5 d-flex flex-column gap-4">
+                        <div class="spm-detail-text-block">
+                            <div class="spm-detail-label mb-2">Visi</div>
+                            <div class="spm-detail-value">{{ filled($profil->visi ?? null) ? $profil->visi : '-' }}</div>
+                        </div>
+                        <div class="spm-detail-text-block">
+                            <div class="spm-detail-label mb-2">Misi</div>
+                            <div class="spm-detail-value">{{ filled($profil->misi ?? null) ? $profil->misi : '-' }}</div>
+                        </div>
+                    </div>
+                </x-ui.section-card>
             </div>
-        </x-ui.section-card>
+        </div>
 
-        <x-ui.section-card title="D. Dokumen" class="mb-6">
-            <div class="p-6">
+        <x-ui.section-card title="Dokumen Profil" subtitle="Dokumen pendukung utama pengajuan." class="mb-5 spm-detail-panel">
+            <div class="p-5">
                 @php
                     $mainDocs = [
                         'status_kepemilikan_tanah' => 'Status Kepemilikan Tanah',
@@ -186,23 +238,11 @@
                         'laporan_tahunan' => 'Laporan Tahunan',
                     ];
                 @endphp
-                <x-ui.simple-table>
-                    <thead><tr><th>Dokumen</th><th>Status</th></tr></thead>
-                    <tbody>
-                        @foreach($mainDocs as $field => $label)
-                            <tr>
-                                <td>{{ $label }}</td>
-                                <td>
-                                    @if(!empty($profil->$field))
-                                        <a data-ui-document-item="metronic" href="{{ Storage::url($profil->$field) }}" target="_blank" class="text-success">Lihat Dokumen</a>
-                                    @else
-                                        <span data-ui-document-item="metronic" class="text-muted">Belum diunggah</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </x-ui.simple-table>
+                <div class="spm-document-grid">
+                    @foreach($mainDocs as $field => $label)
+                        <x-ui.document-item :label="$label" :href="!empty($profil->$field) ? Storage::url($profil->$field) : null" />
+                    @endforeach
+                </div>
             </div>
         </x-ui.section-card>
 
@@ -210,67 +250,84 @@
         {{-- IPM Tab --}}
         @php
             $ipmCriteria = [
-                'nsp_file' => '1. NSP yang masih berlaku',
-                'lulus_santri_file' => '2. Santri lulus minimal satu angkatan',
-                'kurikulum_file' => '3. Kurikulum Dirasah Islamiyah',
-                'buku_ajar_file' => '4. Buku ajar terbitan LP2 PPM',
+                'nsp_file' => 'NSP yang masih berlaku',
+                'lulus_santri_file' => 'Santri lulus minimal satu angkatan',
+                'kurikulum_file' => 'Kurikulum Dirasah Islamiyah',
+                'buku_ajar_file' => 'Buku ajar terbitan LP2 PPM',
             ];
+            $ipmFilled = collect($ipmCriteria)->keys()->filter(fn ($field) => !empty($ipm?->$field))->count();
         @endphp
-        <x-ui.section-card title="Kriteria IPM" class="mb-6">
-            <div class="p-6">
-                <x-ui.simple-table>
-                    <thead><tr><th>Kriteria</th><th>Status</th></tr></thead>
-                    <tbody>
-                        @foreach($ipmCriteria as $field => $label)
-                            <tr>
-                                <td>{{ $label }}</td>
-                                <td>
-                                    @if(!empty($ipm->$field))
-                                        <div>
-                                            <a data-ui-document-item="metronic" href="{{ Storage::url($ipm->$field) }}" target="_blank" class="text-success">Lihat Dokumen</a>
-                                            <span class="badge badge-light-success ms-2">Terpenuhi</span>
-                                        </div>
-                                    @else
-                                        <span data-ui-document-item="metronic" class="badge badge-light-danger">Belum Terpenuhi</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </x-ui.simple-table>
+        <x-ui.section-card title="Kriteria IPM" subtitle="{{ $ipmFilled }}/{{ count($ipmCriteria) }} dokumen terpenuhi." class="mb-5 spm-detail-panel">
+            <div class="p-5">
+                <div class="spm-document-grid">
+                    @foreach($ipmCriteria as $field => $label)
+                        <x-ui.document-item
+                            :label="$label"
+                            :href="!empty($ipm?->$field) ? Storage::url($ipm->$field) : null"
+                            :description="!empty($ipm?->$field) ? 'Terpenuhi' : 'Belum terpenuhi'"
+                        />
+                    @endforeach
+                </div>
             </div>
         </x-ui.section-card>
 
     @elseif($activeTab === 'sdm')
         {{-- SDM Tab --}}
-        <x-ui.section-card title="Data SDM" class="mb-6">
-            <div class="p-6">
+        <x-ui.section-card title="Data SDM" subtitle="Rekap santri, ustadz, pamong, musyrif, dan tenaga kependidikan." class="mb-5 spm-detail-panel">
+            <div class="p-5">
                 @if(!empty($sdm) && count($sdm) > 0)
-                    <x-ui.simple-table table-class="table-bordered">
-                            <thead>
-                                <tr><th>Tingkat</th><th>Santri L</th><th>Santri P</th><th>Ust. Dirosah L</th><th>Ust. Dirosah P</th><th>Ust. Non Dirosah L</th><th>Ust. Non Dirosah P</th><th>Pamong L</th><th>Pamong P</th><th>Musyrif L</th><th>Musyrif P</th><th>Tendik L</th><th>Tendik P</th></tr>
-                            </thead>
-                            <tbody>
-                                @foreach($sdm as $row)
-                                    <tr>
-                                        <td>{{ $row->tingkat }}</td>
-                                        <td>{{ $row->santri_l }}</td><td>{{ $row->santri_p }}</td>
-                                        <td>{{ $row->ustadz_dirosah_l }}</td><td>{{ $row->ustadz_dirosah_p }}</td>
-                                        <td>{{ $row->ustadz_non_dirosah_l }}</td><td>{{ $row->ustadz_non_dirosah_p }}</td>
-                                        <td>{{ $row->pamong_l }}</td><td>{{ $row->pamong_p }}</td>
-                                        <td>{{ $row->musyrif_l }}</td><td>{{ $row->musyrif_p }}</td>
-                                        <td>{{ $row->tendik_l }}</td><td>{{ $row->tendik_p }}</td>
-                                    </tr>
+                    <x-ui.simple-table dense table-class="spm-sdm-matrix-table">
+                        <thead>
+                            <tr class="spm-sdm-group-row">
+                                <th rowspan="2" class="ps-5 align-middle min-w-120px">Tingkat</th>
+                                <th colspan="2" class="text-center">Santri</th>
+                                <th colspan="2" class="text-center">Ust. Dirosah</th>
+                                <th colspan="2" class="text-center">Ust. Non Dirosah</th>
+                                <th colspan="2" class="text-center">Pamong</th>
+                                <th colspan="2" class="text-center">Musyrif</th>
+                                <th colspan="2" class="text-center pe-5">Tendik</th>
+                            </tr>
+                            <tr class="spm-sdm-sex-row">
+                                @foreach(range(1, 6) as $i)
+                                    <th class="text-center">Laki-laki</th>
+                                    <th class="text-center {{ $i === 6 ? 'pe-5' : '' }}">Perempuan</th>
                                 @endforeach
-                            </tbody>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($sdm as $row)
+                                @php
+                                    $metrics = [
+                                        [$row->santri_l, $row->santri_p],
+                                        [$row->ustadz_dirosah_l, $row->ustadz_dirosah_p],
+                                        [$row->ustadz_non_dirosah_l, $row->ustadz_non_dirosah_p],
+                                        [$row->pamong_l, $row->pamong_p],
+                                        [$row->musyrif_l, $row->musyrif_p],
+                                        [$row->tendik_l, $row->tendik_p],
+                                    ];
+                                @endphp
+                                <tr>
+                                    <td class="ps-5 spm-sdm-level-cell">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <span class="symbol symbol-35px">
+                                                <span class="symbol-label bg-light-primary text-primary fw-semibold">{{ strtoupper(substr((string) $row->tingkat, 0, 2)) }}</span>
+                                            </span>
+                                            <span class="fw-semibold text-gray-900">{{ strtoupper($row->tingkat) }}</span>
+                                        </div>
+                                    </td>
+                                    @foreach($metrics as [$male, $female])
+                                        <td class="text-center spm-sdm-number spm-sdm-male">{{ $male ?? 0 }}</td>
+                                        <td class="text-center spm-sdm-number spm-sdm-female {{ $loop->last ? 'pe-5' : '' }}">{{ $female ?? 0 }}</td>
+                                    @endforeach
+                                </tr>
+                            @endforeach
+                        </tbody>
                     </x-ui.simple-table>
                 @else
-                    <div class="text-muted">Belum ada data SDM.</div>
+                    <x-ui.empty-state title="Belum ada data SDM" description="Data SDM akan muncul setelah dilengkapi di menu persiapan akreditasi." variant="secondary" class="py-6" />
                 @endif
             </div>
-        </x-ui.section-card>
-
-    @elseif($activeTab === 'edpm')
+        </x-ui.section-card>    @elseif($activeTab === 'edpm')
         {{-- EDPM Tab --}}
         <x-akreditasi.edpm-review
             :komponens="$komponens"
@@ -283,63 +340,71 @@
 
     @elseif($activeTab === 'asesor')
         {{-- Asesor Tab --}}
-        <x-ui.section-card title="Informasi Asesor" class="mb-6">
-            <div class="p-6">
-                @if(!empty($asesor))
+        <x-ui.section-card title="Informasi Asesor" subtitle="Tim asesor yang ditugaskan pada pengajuan ini." class="mb-5 spm-detail-panel">
+            <div class="p-5">
+                @if($asesorAssignments->isNotEmpty())
                     <div class="row g-4">
-                        <div class="col-md-6"><strong>Nama:</strong> {{ $asesor->name ?? '-' }}</div>
-                        <div class="col-md-6"><strong>Email:</strong> {{ $asesor->email ?? '-' }}</div>
-                        <div class="col-md-6"><strong>No. HP:</strong> {{ $asesor->hp ?? '-' }}</div>
-                        <div class="col-md-6"><strong>Peran:</strong> {{ $asesor->peran ?? '-' }}</div>
+                        @foreach($asesorAssignments as $assignment)
+                            @php
+                                $asesorProfile = $assignment->asesor;
+                                $asesorUser = $asesorProfile?->user;
+                                $roleLabel = (int) $assignment->tipe === 1 ? 'Ketua Kelompok' : 'Anggota Kelompok';
+                            @endphp
+                            <div class="col-lg-6">
+                                <div class="spm-asesor-card h-100">
+                                    <div class="d-flex align-items-start gap-4">
+                                        <div class="symbol symbol-55px flex-shrink-0">
+                                            <div class="symbol-label bg-light-primary text-primary">
+                                                <x-ui.icon name="profile-user" class="fs-2x" />
+                                            </div>
+                                        </div>
+                                        <div class="min-w-0 flex-grow-1">
+                                            <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                                                <x-ui.badge variant="primary">{{ $roleLabel }}</x-ui.badge>
+                                                <x-ui.status-badge variant="secondary">Tipe {{ $assignment->tipe }}</x-ui.status-badge>
+                                            </div>
+                                            <div class="fw-semibold text-gray-900 fs-5 mb-1">{{ $asesorProfile->nama_dengan_gelar ?? $asesorUser?->name ?? '-' }}</div>
+                                            <div class="text-muted fw-semibold fs-7">{{ $asesorUser?->email ?? $asesorProfile?->email_pribadi ?? '-' }}</div>
+                                            <div class="text-muted fw-semibold fs-7 mt-1">{{ $asesorProfile?->whatsapp ?? '-' }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
-                    @if(!empty($akreditasi->jadwal_visitasi))
-                        <div class="mt-4">
-                            <strong>Jadwal Visitasi:</strong><br>
-                            {{ \Carbon\Carbon::parse($akreditasi->jadwal_visitasi)->format('d M Y') }}
-                            @if(!empty($akreditasi->jadwal_visitasi_selesai))
-                                - {{ \Carbon\Carbon::parse($akreditasi->jadwal_visitasi_selesai)->format('d M Y') }}
-                            @endif
-                        </div>
-                    @endif
                 @else
-                    <div class="text-muted">Asesor belum ditugaskan.</div>
+                    <x-ui.empty-state title="Asesor belum ditugaskan" description="Tim asesor akan tampil setelah admin menyelesaikan penugasan pada tahap review." variant="secondary" class="py-6" />
                 @endif
             </div>
         </x-ui.section-card>
 
     @elseif($activeTab === 'hasil')
         {{-- Hasil Tab --}}
-        <x-ui.section-card title="Hasil Akreditasi" class="mb-6">
-            <div class="p-6">
+        <x-ui.section-card title="Hasil Akreditasi" subtitle="Nilai, peringkat, SK, sertifikat, dan rekomendasi akhir." class="mb-5 spm-detail-panel">
+            <div class="p-5">
                 @if(in_array((int) $akreditasi->status, [0, -1, -2, 1], true))
-                    <div class="row g-4">
-                        <div class="col-md-6"><strong>Nilai Akhir:</strong> {{ $akreditasi->nilai ?? '-' }}</div>
-                        <div class="col-md-6"><strong>Peringkat:</strong> {{ $akreditasi->peringkat ?? '-' }}</div>
-                        <div class="col-md-6"><strong>Nomor SK:</strong> {{ $akreditasi->nomor_sk ?? '-' }}</div>
-                        <div class="col-md-6"><strong>Masa Berlaku:</strong> {{ $akreditasi->masa_berlaku_akhir ? \Carbon\Carbon::parse($akreditasi->masa_berlaku_akhir)->format('d M Y') : '-' }}</div>
-                        <div class="col-12"><strong>Rekomendasi:</strong><br>{{ $akreditasi->catatan_rekomendasi_admin ?: '-' }}</div>
-                        <div class="col-md-6">
-                            <strong>Sertifikat:</strong>
-                            @if(!empty($akreditasi->sertifikat_path))
-                                <a data-ui-document-item="metronic" href="{{ Storage::url($akreditasi->sertifikat_path) }}" target="_blank" class="text-primary">Unduh Sertifikat</a>
-                            @else
-                                -
-                            @endif
+                    <div class="row g-4 spm-detail-grid">
+                        <x-ui.detail-item label="Nilai Akhir" :value="$akreditasi->nilai ?? '-'" />
+                        <x-ui.detail-item label="Peringkat" :value="$akreditasi->peringkat ?? '-'" />
+                        <x-ui.detail-item label="Nomor SK" :value="$akreditasi->nomor_sk ?? '-'" />
+                        <x-ui.detail-item label="Masa Berlaku" :value="$akreditasi->masa_berlaku_akhir ? \Carbon\Carbon::parse($akreditasi->masa_berlaku_akhir)->format('d M Y') : '-'" />
+                        <x-ui.detail-item label="Rekomendasi" span="2" :value="$akreditasi->catatan_rekomendasi_admin ?: '-'" />
+                        <div class="col-md-12">
+                            <x-ui.document-item label="Sertifikat Akreditasi" :href="!empty($akreditasi->sertifikat_path) ? Storage::url($akreditasi->sertifikat_path) : null" />
                         </div>
                     </div>
                 @else
-                    <div class="text-muted">Hasil akreditasi belum tersedia.</div>
+                    <x-ui.empty-state title="Hasil belum tersedia" description="Hasil akhir akan muncul setelah validasi admin dan penerbitan SK selesai." variant="secondary" class="py-6" />
                 @endif
             </div>
         </x-ui.section-card>
-
     @elseif($activeTab === 'banding')
         {{-- Banding Tab --}}
         @php
             $banding = $akreditasi->activeBanding ?? $akreditasi->bandings()->latest()->first();
         @endphp
-        <x-ui.section-card title="Informasi Banding" class="mb-6">
-            <div class="p-6">
+        <x-ui.section-card title="Informasi Banding" class="mb-5">
+            <div class="p-5">
                 @if(!empty($banding))
                     <div class="row g-4">
                         <div class="col-12"><strong>Alasan:</strong><br>{{ $banding->alasan ?? '-' }}</div>

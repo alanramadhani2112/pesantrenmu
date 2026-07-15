@@ -39,43 +39,43 @@ class AsesorAkreditasiMenuContextTest extends TestCase
             ->assertSee('data-akreditasi-context="tugas"', false);
     }
 
-    public function test_review_menu_context_redirects_to_review_filter(): void
+    public function test_review_deeplink_redirects_to_status_filter(): void
     {
         $asesor = $this->createAssignedAssessment(Akreditasi::STATUS_ASSESSMENT);
 
         $this->actingAs($asesor->user)
             ->get('/asesor/akreditasi?focus=review')
             ->assertRedirect(route('asesor.akreditasi', [
-                'statusFilter' => 'belum',
+                'statusFilter' => 'review',
                 'focus' => 'review',
             ]));
 
         $this->actingAs($asesor->user)
-            ->get('/asesor/akreditasi?statusFilter=belum&focus=review')
+            ->get('/asesor/akreditasi?statusFilter=review&focus=review')
             ->assertOk()
-            ->assertSee('Review Berkas')
-            ->assertSee('Daftar Review Berkas')
-            ->assertSee('data-akreditasi-context="review"', false)
+            ->assertSee('Tugas Akreditasi')
+            ->assertSee('Daftar Tugas')
+            ->assertSee('data-akreditasi-context="tugas"', false)
             ->assertSee('Lihat Detail');
     }
 
-    public function test_input_nilai_menu_context_targets_post_visitasi_filter(): void
+    public function test_input_nilai_deeplink_redirects_to_status_filter(): void
     {
         $asesor = $this->createAssignedAssessment(Akreditasi::STATUS_PASCA_VISITASI);
 
         $this->actingAs($asesor->user)
             ->get('/asesor/akreditasi?focus=nilai')
             ->assertRedirect(route('asesor.akreditasi', [
-                'statusFilter' => 'penilaian',
+                'statusFilter' => '2',
                 'focus' => 'nilai',
             ]));
 
         $this->actingAs($asesor->user)
-            ->get('/asesor/akreditasi?statusFilter=penilaian&focus=nilai')
+            ->get('/asesor/akreditasi?statusFilter=2&focus=nilai')
             ->assertOk()
-            ->assertSee('Penilaian Visitasi')
-            ->assertSee('Daftar Penilaian')
-            ->assertSee('data-akreditasi-context="nilai"', false)
+            ->assertSee('Tugas Akreditasi')
+            ->assertSee('Daftar Tugas')
+            ->assertSee('data-akreditasi-context="tugas"', false)
             ->assertSee('Lihat Detail');
     }
 

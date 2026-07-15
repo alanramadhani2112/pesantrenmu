@@ -7,6 +7,7 @@ use App\Models\Ipm;
 use App\Models\MasterEdpmButir;
 use App\Models\MasterEdpmKomponen;
 use App\Models\Pesantren;
+use App\Models\PesantrenUnit;
 use App\Models\SdmPesantren;
 use App\Models\User;
 use App\Services\SidebarProgressService;
@@ -24,6 +25,10 @@ use Tests\TestCase;
 class SidebarProgressServiceTest extends TestCase
 {
     use RefreshDatabase;
+
+    private const PROFILE_TOTAL_WITHOUT_UNIT = 35;
+
+    private const PROFILE_TOTAL_WITH_ONE_UNIT = 36;
 
     protected SidebarProgressService $service;
 
@@ -56,7 +61,7 @@ class SidebarProgressServiceTest extends TestCase
 
         $this->assertSame('not_started', $result['status']);
         $this->assertSame(0, $result['filled']);
-        $this->assertSame(8, $result['total']);
+        $this->assertSame(self::PROFILE_TOTAL_WITHOUT_UNIT, $result['total']);
     }
 
     public function test_user_with_no_data_ipm_section_returns_correct_counts(): void
@@ -73,6 +78,7 @@ class SidebarProgressServiceTest extends TestCase
     public function test_user_with_no_data_sdm_section_returns_correct_counts(): void
     {
         $user = User::factory()->create(['role_id' => 3]);
+        $this->createCompleteProfile($user, withUnit: true);
 
         $result = $this->service->getSectionProgress($user->id, 'sdm');
 
@@ -86,19 +92,7 @@ class SidebarProgressServiceTest extends TestCase
     public function test_user_with_complete_data_returns_all_complete(): void
     {
         $user = User::factory()->create(['role_id' => 3]);
-
-        // Create complete Pesantren record
-        Pesantren::create([
-            'user_id' => $user->id,
-            'nama_pesantren' => 'Pesantren Al-Hikmah',
-            'ns_pesantren' => '123456789',
-            'alamat' => 'Jl. Raya No. 1',
-            'provinsi' => 'Jawa Timur',
-            'kota_kabupaten' => 'Surabaya',
-            'tahun_pendirian' => '1998',
-            'nama_mudir' => 'Ahmad Mudir',
-            'layanan_satuan_pendidikan' => ['spm'],
-        ]);
+        $this->createCompleteProfile($user, withUnit: true);
 
         // Create complete IPM record
         Ipm::create([
@@ -126,24 +120,13 @@ class SidebarProgressServiceTest extends TestCase
     public function test_user_with_complete_profil_returns_correct_counts(): void
     {
         $user = User::factory()->create(['role_id' => 3]);
-
-        Pesantren::create([
-            'user_id' => $user->id,
-            'nama_pesantren' => 'Pesantren Al-Hikmah',
-            'ns_pesantren' => '123456789',
-            'alamat' => 'Jl. Raya No. 1',
-            'provinsi' => 'Jawa Timur',
-            'kota_kabupaten' => 'Surabaya',
-            'tahun_pendirian' => '1998',
-            'nama_mudir' => 'Ahmad Mudir',
-            'layanan_satuan_pendidikan' => ['spm'],
-        ]);
+        $this->createCompleteProfile($user, withUnit: true);
 
         $result = $this->service->getSectionProgress($user->id, 'profil');
 
         $this->assertSame('complete', $result['status']);
-        $this->assertSame(8, $result['filled']);
-        $this->assertSame(8, $result['total']);
+        $this->assertSame(self::PROFILE_TOTAL_WITH_ONE_UNIT, $result['filled']);
+        $this->assertSame(self::PROFILE_TOTAL_WITH_ONE_UNIT, $result['total']);
     }
 
     public function test_user_with_complete_ipm_returns_correct_counts(): void
@@ -168,6 +151,7 @@ class SidebarProgressServiceTest extends TestCase
     public function test_user_with_sdm_record_returns_complete(): void
     {
         $user = User::factory()->create(['role_id' => 3]);
+        $this->createCompleteProfile($user, withUnit: true);
 
         SdmPesantren::create([
             'user_id' => $user->id,
@@ -213,19 +197,7 @@ class SidebarProgressServiceTest extends TestCase
     public function test_user_with_profil_filled_but_no_ipm_returns_mixed_statuses(): void
     {
         $user = User::factory()->create(['role_id' => 3]);
-
-        // Create complete Pesantren record (profil filled)
-        Pesantren::create([
-            'user_id' => $user->id,
-            'nama_pesantren' => 'Pesantren Al-Hikmah',
-            'ns_pesantren' => '123456789',
-            'alamat' => 'Jl. Raya No. 1',
-            'provinsi' => 'Jawa Timur',
-            'kota_kabupaten' => 'Surabaya',
-            'tahun_pendirian' => '1998',
-            'nama_mudir' => 'Ahmad Mudir',
-            'layanan_satuan_pendidikan' => ['spm'],
-        ]);
+        $this->createCompleteProfile($user, withUnit: true);
 
         // No IPM record, no SDM record
 
@@ -247,7 +219,7 @@ class SidebarProgressServiceTest extends TestCase
             'nama_pesantren' => 'Pesantren Al-Hikmah',
             'ns_pesantren' => '123456789',
             'alamat' => '',
-            'provinsi' => '',
+            'provinsi_kode' => '',
             'kota_kabupaten' => '',
             'tahun_pendirian' => '',
             'nama_mudir' => '',
@@ -272,7 +244,7 @@ class SidebarProgressServiceTest extends TestCase
         // Verify specific counts
         $profilResult = $this->service->getSectionProgress($user->id, 'profil');
         $this->assertSame(2, $profilResult['filled']); // nama_pesantren + ns_pesantren
-        $this->assertSame(8, $profilResult['total']);
+        $this->assertSame(self::PROFILE_TOTAL_WITHOUT_UNIT, $profilResult['total']);
 
         $ipmResult = $this->service->getSectionProgress($user->id, 'ipm');
         $this->assertSame(1, $ipmResult['filled']); // nsp_file only
@@ -302,7 +274,7 @@ class SidebarProgressServiceTest extends TestCase
             'nama_pesantren' => '',
             'ns_pesantren' => '',
             'alamat' => '',
-            'provinsi' => '',
+            'provinsi_kode' => '',
             'kota_kabupaten' => '',
             'tahun_pendirian' => '',
             'nama_mudir' => '',
@@ -313,12 +285,13 @@ class SidebarProgressServiceTest extends TestCase
 
         $this->assertSame('not_started', $result['status']);
         $this->assertSame(0, $result['filled']);
-        $this->assertSame(8, $result['total']);
+        $this->assertSame(self::PROFILE_TOTAL_WITHOUT_UNIT, $result['total']);
     }
 
     public function test_multiple_sdm_records_still_returns_complete(): void
     {
         $user = User::factory()->create(['role_id' => 3]);
+        $this->createCompleteProfile($user, withUnit: true);
 
         SdmPesantren::create(['user_id' => $user->id, 'tingkat' => 'spm']);
         SdmPesantren::create(['user_id' => $user->id, 'tingkat' => 'ma']);
@@ -328,5 +301,57 @@ class SidebarProgressServiceTest extends TestCase
         $this->assertSame('complete', $result['status']);
         $this->assertSame(1, $result['filled']);
         $this->assertSame(1, $result['total']);
+    }
+
+    private function createCompleteProfile(User $user, bool $withUnit = false): Pesantren
+    {
+        $pesantren = Pesantren::create([
+            'user_id' => $user->id,
+            'nama_pesantren' => 'Pesantren Al-Hikmah',
+            'ns_pesantren' => '123456789',
+            'alamat' => 'Jl. Raya No. 1',
+            'provinsi_kode' => '35',
+            'kota_kabupaten' => 'Surabaya',
+            'tahun_pendirian' => '1998',
+            'luas_tanah' => '5000',
+            'luas_bangunan' => '2000',
+            'nama_mudir' => 'Ahmad Mudir',
+            'jenjang_pendidikan_mudir' => 'S2',
+            'telp_pesantren' => '031-123456',
+            'hp_wa' => '08123456789',
+            'email_pesantren' => 'pesantren@example.test',
+            'persyarikatan' => 'Muhammadiyah',
+            'visi' => 'Visi test',
+            'misi' => 'Misi test',
+            'layanan_satuan_pendidikan' => ['spm'],
+            'status_kepemilikan_tanah' => 'uploads/status-tanah.pdf',
+            'sertifikat_nsp' => 'uploads/sertifikat-nsp.pdf',
+            'rk_anggaran' => 'uploads/rk-anggaran.pdf',
+            'silabus_rpp' => 'uploads/silabus-rpp.pdf',
+            'peraturan_kepegawaian' => 'uploads/peraturan-kepegawaian.pdf',
+            'file_lk_iapm' => 'uploads/lk-iapm.pdf',
+            'laporan_tahunan' => 'uploads/laporan-tahunan.pdf',
+            'dok_profil' => 'uploads/dok-profil.pdf',
+            'dok_nsp' => 'uploads/dok-nsp.pdf',
+            'dok_renstra' => 'uploads/dok-renstra.pdf',
+            'dok_rk_anggaran' => 'uploads/dok-rk-anggaran.pdf',
+            'dok_kurikulum' => 'uploads/dok-kurikulum.pdf',
+            'dok_silabus_rpp' => 'uploads/dok-silabus-rpp.pdf',
+            'dok_kepengasuhan' => 'uploads/dok-kepengasuhan.pdf',
+            'dok_peraturan_kepegawaian' => 'uploads/dok-peraturan-kepegawaian.pdf',
+            'dok_sarpras' => 'uploads/dok-sarpras.pdf',
+            'dok_laporan_tahunan' => 'uploads/dok-laporan-tahunan.pdf',
+            'dok_sop' => 'uploads/dok-sop.pdf',
+        ]);
+
+        if ($withUnit) {
+            PesantrenUnit::create([
+                'pesantren_id' => $pesantren->id,
+                'unit' => 'spm',
+                'jumlah_rombel' => 1,
+            ]);
+        }
+
+        return $pesantren;
     }
 }

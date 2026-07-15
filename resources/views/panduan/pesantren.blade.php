@@ -27,7 +27,7 @@ $sections = [
                 </div>
             </div>
             <div>
-                <h5 class="fw-bold text-gray-900 mb-1">Panduan Pengajuan Akreditasi Pesantren</h5>
+                <h5 class="fw-semibold text-gray-900 mb-1">Panduan Pengajuan Akreditasi Pesantren</h5>
                 <p class="text-muted fs-7 mb-0">
                     Panduan ini membantu Anda menyiapkan data, mengajukan akreditasi, dan memantau prosesnya.
                     Ikuti langkah berikut secara berurutan untuk hasil terbaik.

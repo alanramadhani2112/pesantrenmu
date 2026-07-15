@@ -122,7 +122,7 @@
     @endif
 
     {{-- Completeness Check --}}
-    @if(!($completeness['can_submit'] ?? true))
+    @if(!empty($completeness['incomplete_items'] ?? []))
         <x-ui.alert variant="warning" icon="information-3" title="Data Belum Lengkap" class="mb-4">
             <div class="mb-3">
                 <div class="d-flex align-items-center gap-3 mb-2">
@@ -155,7 +155,7 @@
 
     <div class="row g-5 mb-6 spm-akreditasi-context-cards">
         <div class="col-md-4">
-            <x-ui.stat-card label="Pengajuan Terbaru" value="{{ $latestAkreditasi ? ($tahapanLabels[$latestAkreditasi->tahapan] ?? ucfirst($latestAkreditasi->tahapan)) : 'Belum Ada' }}" :variant="$activeFocusConfig['variant']" :icon="$activeFocusConfig['icon']" />
+            <x-ui.stat-card label="Pengajuan Terbaru" value="{{ $latestStatusLabel }}" :variant="$activeFocusConfig['variant']" :icon="$activeFocusConfig['icon']" />
         </div>
         <div class="col-md-4">
             <x-ui.stat-card label="Data Tampil" value="{{ $akreditasis->total() }}" variant="info" icon="data" />
@@ -219,7 +219,6 @@
             <x-ui.table-th :min-width="false">ID</x-ui.table-th>
             <x-ui.table-th>Periode</x-ui.table-th>
             <x-ui.table-th>Status</x-ui.table-th>
-            <x-ui.table-th>Tahapan</x-ui.table-th>
             <x-ui.table-th>Tanggal Pengajuan</x-ui.table-th>
             <x-ui.table-th align="end">Aksi</x-ui.table-th>
         </x-slot>
@@ -230,13 +229,12 @@
                 <tr>
                     <td>{{ $loop->iteration + (($akreditasis->currentPage() - 1) * $akreditasis->perPage()) }}</td>
                     <td class="fw-semibold">{{ $akreditasi->id }}</td>
-                    <td>{{ $akreditasi->periode }}</td>
+                    <td>{{ $akreditasi->created_at?->format('Y') ?? '-' }}</td>
                     <td>
                         <span class="spm-status-badge badge {{ $statusBadgeClass[$akreditasi->status] ?? 'badge-light-secondary' }}">
                             {{ $statusLabel }}
                         </span>
                     </td>
-                    <td>{{ $tahapanLabels[$akreditasi->tahapan] ?? ucfirst($akreditasi->tahapan) }}</td>
                     <td>{{ $akreditasi->created_at->format('d M Y') }}</td>
                     <td class="text-end">
                         <x-ui.action-menu>

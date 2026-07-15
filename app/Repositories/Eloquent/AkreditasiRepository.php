@@ -109,21 +109,19 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
 
         if ($statusFilter) {
             $query->whereHas('akreditasi', function ($q) use ($statusFilter) {
-                if ($statusFilter === 'selesai') {
-                    $q->where('status', Akreditasi::STATUS_SELESAI);
-                } elseif ($statusFilter === 'siap') {
-                    $q->where('status', Akreditasi::STATUS_VISITASI);
-                } elseif ($statusFilter === 'penilaian') {
-                    $q->where('status', Akreditasi::STATUS_PASCA_VISITASI);
-                } elseif ($statusFilter === 'revisi') {
-                    $q->where('status', Akreditasi::STATUS_ASSESSMENT)->whereHas('catatans', function ($cq) {
-                        $cq->whereNotNull('perbaikan')->where('perbaikan', '!=', '');
-                    });
-                } elseif ($statusFilter === 'belum') {
+                if ($statusFilter === 'review' || $statusFilter === 'belum') {
                     $q->where('status', Akreditasi::STATUS_ASSESSMENT)->whereNull('tgl_visitasi')
                         ->whereDoesntHave('catatans', function ($cq) {
                             $cq->whereNotNull('perbaikan')->where('perbaikan', '!=', '');
                         });
+                } elseif ($statusFilter === 'revisi') {
+                    $q->where('status', Akreditasi::STATUS_ASSESSMENT)->whereHas('catatans', function ($cq) {
+                        $cq->whereNotNull('perbaikan')->where('perbaikan', '!=', '');
+                    });
+                } elseif ($statusFilter === 'siap') {
+                    $q->where('status', Akreditasi::STATUS_VISITASI);
+                } elseif ($statusFilter === 'penilaian') {
+                    $q->where('status', Akreditasi::STATUS_PASCA_VISITASI);
                 } else {
                     $q->where('status', $statusFilter);
                 }
@@ -132,6 +130,24 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
 
         return $query->orderBy($sortField, $sortAsc ? 'asc' : 'desc')
             ->paginate($perPage);
+    }
+
+    public function getAssessmentSummaryByAsesor(int $asesorId, ?string $search = null, ?string $periodeFilter = null, ?string $statusFilter = null): array
+    {
+        $rows = $this->assessmentQueryForAsesor($asesorId, $search, $periodeFilter, $statusFilter)
+            ->join('akreditasis', 'akreditasis.id', '=', 'assessments.akreditasi_id')
+            ->selectRaw('COUNT(*) as total')
+            ->selectRaw('SUM(CASE WHEN akreditasis.status = ? THEN 1 ELSE 0 END) as review', [Akreditasi::STATUS_ASSESSMENT])
+            ->selectRaw('SUM(CASE WHEN akreditasis.status = ? THEN 1 ELSE 0 END) as visitasi', [Akreditasi::STATUS_VISITASI])
+            ->selectRaw('SUM(CASE WHEN akreditasis.status = ? THEN 1 ELSE 0 END) as penilaian', [Akreditasi::STATUS_PASCA_VISITASI])
+            ->first();
+
+        return [
+            'total' => (int) ($rows->total ?? 0),
+            'review' => (int) ($rows->review ?? 0),
+            'visitasi' => (int) ($rows->visitasi ?? 0),
+            'penilaian' => (int) ($rows->penilaian ?? 0),
+        ];
     }
 
     public function findAssessment(int $id, array $relations = []): ?Assessment
@@ -224,5 +240,49 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
                 });
             })
             ->get();
+    }
+
+    private function assessmentQueryForAsesor(int $asesorId, ?string $search = null, ?string $periodeFilter = null, ?string $statusFilter = null)
+    {
+        $query = Assessment::query()->where('asesor_id', $asesorId);
+
+        if ($search) {
+            $query->where(function ($query) use ($search) {
+                $query->whereHas('akreditasi.user.pesantren', function ($q) use ($search) {
+                    $q->where('nama_pesantren', 'like', '%'.$search.'%');
+                })->orWhereHas('akreditasi.user', function ($q) use ($search) {
+                    $q->where('name', 'like', '%'.$search.'%');
+                });
+            });
+        }
+
+        if ($periodeFilter) {
+            $query->whereHas('akreditasi', function ($q) use ($periodeFilter) {
+                $q->whereYear('created_at', $periodeFilter);
+            });
+        }
+
+        if ($statusFilter) {
+            $query->whereHas('akreditasi', function ($q) use ($statusFilter) {
+                if ($statusFilter === 'review' || $statusFilter === 'belum') {
+                    $q->where('status', Akreditasi::STATUS_ASSESSMENT)->whereNull('tgl_visitasi')
+                        ->whereDoesntHave('catatans', function ($cq) {
+                            $cq->whereNotNull('perbaikan')->where('perbaikan', '!=', '');
+                        });
+                } elseif ($statusFilter === 'revisi') {
+                    $q->where('status', Akreditasi::STATUS_ASSESSMENT)->whereHas('catatans', function ($cq) {
+                        $cq->whereNotNull('perbaikan')->where('perbaikan', '!=', '');
+                    });
+                } elseif ($statusFilter === 'siap') {
+                    $q->where('status', Akreditasi::STATUS_VISITASI);
+                } elseif ($statusFilter === 'penilaian') {
+                    $q->where('status', Akreditasi::STATUS_PASCA_VISITASI);
+                } else {
+                    $q->where('status', $statusFilter);
+                }
+            });
+        }
+
+        return $query;
     }
 }

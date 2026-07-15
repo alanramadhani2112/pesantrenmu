@@ -105,7 +105,7 @@
 [data-ui-table="metronic"] .spm-table-filter-row > form > .d-flex,
 [data-ui-table="metronic"] .spm-filter-bar,
 [data-ui-table="metronic"] .spm-filter-bar > form {
-  display: grid !important;
+  display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   align-items: center;
   gap: 10px;
@@ -124,9 +124,9 @@
 [data-ui-table="metronic"] .spm-filter-bar .form-control,
 [data-ui-table="metronic"] .spm-filter-bar .form-select,
 [data-ui-table="metronic"] .spm-filter-bar .btn {
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: none !important;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
 }
 
 [data-ui-table="metronic"] .spm-table-filter-row .btn,

@@ -7,6 +7,7 @@ use App\Models\Asesor;
 use App\Models\Assessment;
 use App\Models\Pesantren;
 use App\Models\User;
+use App\Services\PesantrenService;
 use App\Services\SidebarProgressService;
 use App\StateMachine\AkreditasiStateMachine;
 use Illuminate\Support\Facades\DB;
@@ -136,8 +137,8 @@ class DashboardController extends Controller
                 'pesantren_name' => $akreditasi->user->pesantren->nama_pesantren ?? $akreditasi->user->name,
                 'status' => (int) $akreditasi->status,
                 'status_label' => Akreditasi::getStatusLabel($akreditasi->status),
-                'periode' => $akreditasi->periode,
-                'tahapan' => $akreditasi->tahapan,
+                'periode' => $akreditasi->periode ?? $akreditasi->created_at?->format('Y'),
+                'tahapan' => $akreditasi->tahapan ?? Akreditasi::getStatusLabel($akreditasi->status),
                 'updated_at' => $akreditasi->updated_at,
                 'peringkat' => $akreditasi->peringkat,
                 'latest_catatan' => $akreditasi->catatans->sortByDesc('created_at')->first()?->catatan,
@@ -154,6 +155,10 @@ class DashboardController extends Controller
                 ->latest('updated_at')
                 ->value('uuid');
             $progressService = app(SidebarProgressService::class);
+            $missingData = app(PesantrenService::class)->checkDataCompleteness($user->id);
+            $isMissing = fn (array $needles): bool => collect($needles)->contains(
+                fn (string $needle) => collect($missingData)->contains(fn (string $item) => str_contains($item, $needle))
+            );
             $sectionProgress = [
                 'profil' => $progressService->getSectionProgress($user->id, 'profil'),
                 'ipm' => $progressService->getSectionProgress($user->id, 'ipm'),
@@ -162,10 +167,10 @@ class DashboardController extends Controller
             ];
 
             $readiness = [
-                ['key' => 'profil', 'label' => 'Profil Pesantren', 'done' => $sectionProgress['profil']['status'] === 'complete', 'route' => 'pesantren.profile', 'meta' => $sectionProgress['profil']['filled'].'/'.$sectionProgress['profil']['total']],
-                ['key' => 'ipm', 'label' => 'IPM', 'done' => $sectionProgress['ipm']['status'] === 'complete', 'route' => 'pesantren.ipm', 'meta' => $sectionProgress['ipm']['filled'].'/'.$sectionProgress['ipm']['total']],
-                ['key' => 'sdm', 'label' => 'Data SDM', 'done' => $sectionProgress['sdm']['status'] === 'complete', 'route' => 'pesantren.sdm', 'meta' => $sectionProgress['sdm']['filled'].'/'.$sectionProgress['sdm']['total']],
-                ['key' => 'edpm', 'label' => 'EDPM/IPR', 'done' => $sectionProgress['edpm']['status'] === 'complete', 'route' => 'pesantren.edpm', 'meta' => $sectionProgress['edpm']['filled'].'/'.$sectionProgress['edpm']['total']],
+                ['key' => 'profil', 'label' => 'Profil Pesantren', 'done' => ! $isMissing(['Profil Pesantren', 'Layanan Satuan Pendidikan']), 'route' => 'pesantren.profile', 'meta' => $sectionProgress['profil']['filled'].'/'.$sectionProgress['profil']['total']],
+                ['key' => 'ipm', 'label' => 'IPM', 'done' => ! $isMissing(['IPM']), 'route' => 'pesantren.ipm', 'meta' => $sectionProgress['ipm']['filled'].'/'.$sectionProgress['ipm']['total']],
+                ['key' => 'sdm', 'label' => 'Data SDM', 'done' => ! $isMissing(['SDM']), 'route' => 'pesantren.sdm', 'meta' => $sectionProgress['sdm']['filled'].'/'.$sectionProgress['sdm']['total']],
+                ['key' => 'edpm', 'label' => 'EDPM/IPR', 'done' => ! $isMissing(['EDPM', 'Evaluasi Diri']), 'route' => 'pesantren.edpm', 'meta' => $sectionProgress['edpm']['filled'].'/'.$sectionProgress['edpm']['total']],
             ];
         }
 

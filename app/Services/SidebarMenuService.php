@@ -357,7 +357,22 @@ class SidebarMenuService
     {
         return [
             [
-                'label' => 'Profil',
+                'label' => 'Monitoring',
+                'items' => [
+                    [
+                        'key' => 'dashboard_asesor',
+                        'label' => 'Dashboard',
+                        'route' => 'dashboard',
+                        'icon' => 'category',
+                        'active_pattern' => 'dashboard',
+                        'tooltip' => 'Lihat ringkasan tugas dan aktivitas akreditasi asesor',
+                        'show_progress' => false,
+                        'show_badge' => false,
+                    ],
+                ],
+            ],
+            [
+                'label' => 'Akun Asesor',
                 'items' => [
                     [
                         'key' => 'profil_asesor',
@@ -372,71 +387,22 @@ class SidebarMenuService
                 ],
             ],
             [
-                'label' => 'Tugas Akreditasi',
+                'label' => 'Workflow Akreditasi',
                 'items' => [
                     [
                         'key' => 'daftar_tugas',
-                        'label' => 'Daftar Tugas',
+                        'label' => 'Tugas Akreditasi',
                         'route' => 'asesor.akreditasi',
                         'icon' => 'lock-2',
                         'active_pattern' => 'asesor.akreditasi*',
-                        'tooltip' => 'Lihat dan kelola tugas penilaian akreditasi Anda',
-                        'active_query_absent' => ['focus', 'statusFilter'],
+                        'tooltip' => 'Kelola review berkas, jadwal visitasi, input nilai, dan laporan visitasi dalam satu halaman',
                         'show_progress' => false,
                         'show_badge' => true,
-                    ],
-                    [
-                        'key' => 'review_berkas',
-                        'label' => 'Review Berkas',
-                        'route' => 'asesor.akreditasi',
-                        'route_query' => ['statusFilter' => 'belum', 'focus' => 'review'],
-                        'icon' => 'eye',
-                        'active_pattern' => 'asesor.akreditasi*',
-                        'active_query' => ['statusFilter' => 'belum', 'focus' => 'review'],
-                        'tooltip' => 'Review profil, IPM, SDM, EDPM/IPR, dan catatan berkas pesantren',
-                        'show_progress' => false,
-                        'show_badge' => false,
-                    ],
-                    [
-                        'key' => 'jadwal_visitasi',
-                        'label' => 'Atur Jadwal Visitasi',
-                        'route' => 'asesor.akreditasi',
-                        'route_query' => ['statusFilter' => 'belum', 'focus' => 'jadwal'],
-                        'icon' => 'calendar-tick',
-                        'active_pattern' => 'asesor.akreditasi*',
-                        'active_query' => ['statusFilter' => 'belum', 'focus' => 'jadwal'],
-                        'tooltip' => 'Atur jadwal visitasi dan catatan awal untuk pesantren yang ditugaskan',
-                        'show_progress' => false,
-                        'show_badge' => false,
-                    ],
-                    [
-                        'key' => 'input_nilai',
-                        'label' => 'Input Nilai Visitasi',
-                        'route' => 'asesor.akreditasi',
-                        'route_query' => ['statusFilter' => 'penilaian', 'focus' => 'nilai'],
-                        'icon' => 'pencil',
-                        'active_pattern' => 'asesor.akreditasi*',
-                        'active_query' => ['statusFilter' => 'penilaian', 'focus' => 'nilai'],
-                        'tooltip' => 'Lanjutkan pengisian instrumen dan nilai hasil visitasi',
-                        'show_progress' => false,
-                        'show_badge' => false,
-                    ],
-                    [
-                        'key' => 'laporan_visitasi_workflow',
-                        'label' => 'Laporan Visitasi',
-                        'route' => 'asesor.akreditasi',
-                        'route_query' => ['statusFilter' => 'penilaian', 'focus' => 'laporan_visitasi'],
-                        'icon' => 'file-up',
-                        'active_pattern' => 'asesor.akreditasi*',
-                        'active_query' => ['statusFilter' => 'penilaian', 'focus' => 'laporan_visitasi'],
-                        'tooltip' => 'Unggah laporan visitasi individu dan kelompok setelah penilaian selesai',
-                        'show_progress' => false,
-                        'show_badge' => false,
                     ],
                 ],
             ],
             [
-                'label' => 'Dokumen',
+                'label' => 'Referensi',
                 'items' => $this->buildDokumenItems('asesor', ['visitasi']),
             ],
         ];
@@ -476,15 +442,15 @@ class SidebarMenuService
 
         if ($roleScope !== 'pesantren') {
             $items[] = [
-            'key' => 'semua_dokumen_'.$roleScope,
-            'label' => 'Semua Dokumen',
-            'route' => 'documents.index',
-            'route_params' => ['doc' => 'all'],
-            'icon' => 'document',
-            'active_pattern' => 'documents.index.all',
-            'tooltip' => 'Lihat seluruh dokumen yang tersedia untuk Anda',
-            'show_progress' => false,
-            'show_badge' => false,
+                'key' => 'semua_dokumen_'.$roleScope,
+                'label' => 'Semua Dokumen',
+                'route' => 'documents.index',
+                'route_params' => ['doc' => 'all'],
+                'icon' => 'document',
+                'active_pattern' => 'documents.index.all',
+                'tooltip' => 'Lihat seluruh dokumen yang tersedia untuk Anda',
+                'show_progress' => false,
+                'show_badge' => false,
             ];
         }
 
@@ -551,8 +517,9 @@ class SidebarMenuService
             'trash' => 'Kelola data akreditasi terhapus dengan masa retensi sebelum dihapus permanen',
 
             // Asesor tooltips
+            'dashboard_asesor' => 'Lihat ringkasan tugas dan aktivitas akreditasi asesor',
             'profil_asesor' => 'Kelola data profil dan informasi asesor Anda',
-            'daftar_tugas' => 'Lihat dan kelola tugas penilaian akreditasi Anda',
+            'daftar_tugas' => 'Kelola review berkas, jadwal visitasi, input nilai, dan laporan visitasi dalam satu halaman',
             'review_berkas' => 'Review profil, IPM, SDM, EDPM/IPR, dan catatan berkas pesantren',
             'jadwal_visitasi' => 'Atur jadwal visitasi dan catatan awal untuk pesantren yang ditugaskan',
             'input_nilai' => 'Lanjutkan pengisian instrumen dan nilai hasil visitasi',

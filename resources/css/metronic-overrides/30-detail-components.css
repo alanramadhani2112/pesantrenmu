@@ -12,8 +12,8 @@
 
 .spm-tabs .nav-link.active,
 .spm-tabs .nav-link:hover {
-    color: var(--spm-primary) !important;
-    border-bottom-color: var(--spm-primary) !important;
+    color: var(--spm-primary);
+    border-bottom-color: var(--spm-primary);
 }
 
 .spm-section-card {
@@ -25,7 +25,7 @@
 .spm-section-card .card-header {
     min-height: 52px;
     background-color: #ffffff;
-    border-bottom: 1px solid #eef2f7 !important;
+    border-bottom: 1px solid #eef2f7;
 }
 
 .spm-section-card-accent {
@@ -52,26 +52,26 @@
 }
 
 .spm-dashboard-stat .card-body {
-    padding: 24px 26px !important;
+    padding: 24px 26px;
 }
 
 .spm-dashboard-stat .text-muted {
-    color: #667085 !important;
-    font-size: 12px !important;
-    font-weight: 600 !important;
+    color: #667085;
+    font-size: 12px;
+    font-weight: 600;
     line-height: 1.35;
     text-transform: uppercase;
 }
 
 .spm-dashboard-stat .fs-2 {
-    font-size: 2rem !important;
+    font-size: 2rem;
     line-height: 1.1;
 }
 
 .spm-dashboard-stat .symbol-45px,
 .spm-dashboard-stat .symbol-45px > .symbol-label {
-    width: 54px !important;
-    height: 54px !important;
+    width: 54px;
+    height: 54px;
 }
 
 .spm-detail-item {
@@ -234,7 +234,7 @@
 }
 
 .spm-asesor-experience-card .card-body {
-    padding-top: 0 !important;
+    padding-top: 0;
 }
 
 .spm-asesor-experience-row {
@@ -266,11 +266,11 @@
 
 .spm-compact-empty-state h3 {
     font-size: 13px;
-    margin-bottom: 4px !important;
+    margin-bottom: 4px;
 }
 
 .spm-compact-empty-state p {
-    font-size: 12px !important;
+    font-size: 12px;
 }
 
 .spm-soft-panel {
@@ -365,7 +365,7 @@
     color: #1f2937;
     font-weight: 600;
     background-color: #f8fafc;
-    border-color: #e8edf4 !important;
+    border-color: #e8edf4;
 }
 
 .spm-action-panel {

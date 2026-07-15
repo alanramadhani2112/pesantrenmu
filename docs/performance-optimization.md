@@ -67,7 +67,7 @@ Terakhir diverifikasi pada 26 Mei 2026:
 - `config`, `route`, `event`, dan `view` cache sudah aktif melalui `composer perf:cache`.
 - Duplicate index lama di `akreditasis` dihapus, lalu composite index performa ditambahkan untuk assessment, catatan EDPM akreditasi, dan banding.
 - Bundle awal Vite turun karena SweetAlert2 dipisah menjadi dynamic import.
-- `plugins.bundle.css` dan `plugins.bundle.js` tidak diload global di layout app, guest, dan landing.
+- `layouts.app` dan `layouts.guest` mengikuti load order Metronic 8.1.8 (`plugins.bundle.css`, `style.bundle.css`, `plugins.bundle.js`, `scripts.bundle.js`); landing/error tetap tidak memuat plugin JS global.
 - Polling detail akreditasi diperlambat dan hanya berjalan saat komponen terlihat: admin `45s`, asesor `30s`.
 
 Baseline warm request lokal setelah cache:

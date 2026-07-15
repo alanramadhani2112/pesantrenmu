@@ -20,16 +20,11 @@
         data-akreditasi-context="{{ $activeFocus }}"
     >
         @php
-            $assessmentCollection = method_exists($assessments, 'getCollection')
-                ? $assessments->getCollection()
-                : collect($assessments);
-            $totalTugas = method_exists($assessments, 'total')
-                ? $assessments->total()
-                : $assessmentCollection->count();
-            $assessmentAktif = $assessmentCollection->filter(fn ($item) => $item->akreditasi && (int) $item->akreditasi->status === 4)->count();
-            $visitasiAktif = $assessmentCollection->filter(fn ($item) => $item->akreditasi && in_array((int) $item->akreditasi->status, [3, 2], true))->count();
+            $totalTugas = $summary['total'];
+            $reviewAktif = $summary['review'];
+            $visitasiAktif = $summary['visitasi'];
+            $penilaianAktif = $summary['penilaian'];
         @endphp
-
         <div class="row g-6 mb-6">
             <div class="col-12 col-xl-8">
                 <x-ui.card
@@ -49,19 +44,19 @@
 
                         <div class="col-12 col-md-4">
                             <x-ui.metric-box
-                                label="Penilaian"
-                                :value="$assessmentAktif"
+                                label="Review Berkas"
+                                :value="$reviewAktif"
                                 variant="warning"
-                                description="Tugas yang perlu dilanjutkan ke pengisian instrumen akreditasi."
+                                description="Tugas yang perlu dicek sebelum visitasi."
                             />
                         </div>
 
                         <div class="col-12 col-md-4">
                             <x-ui.metric-box
-                                label="Visitasi"
-                                :value="$visitasiAktif"
+                                label="Penilaian"
+                                :value="$penilaianAktif"
                                 variant="info"
-                                description="Jadwal dan laporan visitasi yang perlu diselesaikan."
+                                description="Tugas input nilai pasca visitasi."
                             />
                         </div>
                     </div>
@@ -109,7 +104,6 @@
         >
             <x-slot name="filters">
                 <form method="GET" action="{{ route('asesor.akreditasi') }}" id="asesor-akreditasi-filter-form" class="d-flex align-items-center gap-3 flex-wrap">
-                    <input type="hidden" name="focus" value="{{ $focus }}">
                     <input type="hidden" name="perPage" value="{{ $perPage }}">
                     <input type="hidden" name="sortField" value="{{ $sortField }}">
                     <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
@@ -123,13 +117,15 @@
                         @endfor
                     </x-ui.select>
 
-                    <x-ui.select name="statusFilter" size="sm" class="w-auto min-w-180px" onchange="this.form.submit()">
-                        <option value="">Status</option>
-                        <option value="belum" {{ $statusFilter === 'belum' ? 'selected' : '' }}>Review Berkas</option>
-                        <option value="siap" {{ $statusFilter === 'siap' ? 'selected' : '' }}>Visitasi Terjadwal</option>
-                        <option value="penilaian" {{ $statusFilter === 'penilaian' ? 'selected' : '' }}>Penilaian Pasca Visitasi</option>
+                    <x-ui.select name="statusFilter" size="sm" class="w-auto min-w-220px" onchange="this.form.submit()">
+                        <option value="">Semua Status</option>
+                        <option value="review" {{ $statusFilter === 'review' ? 'selected' : '' }}>Review Berkas</option>
                         <option value="revisi" {{ $statusFilter === 'revisi' ? 'selected' : '' }}>Perlu Revisi</option>
-                        <option value="selesai" {{ $statusFilter === 'selesai' ? 'selected' : '' }}>Selesai</option>
+                        <option value="3" {{ $statusFilter === '3' ? 'selected' : '' }}>Visitasi Terjadwal</option>
+                        <option value="2" {{ $statusFilter === '2' ? 'selected' : '' }}>Penilaian Pasca Visitasi</option>
+                        <option value="1" {{ $statusFilter === '1' ? 'selected' : '' }}>Validasi Admin</option>
+                        <option value="0" {{ $statusFilter === '0' ? 'selected' : '' }}>Selesai</option>
+                        <option value="-1" {{ $statusFilter === '-1' ? 'selected' : '' }}>Ditolak</option>
                     </x-ui.select>
                 </form>
             </x-slot>
@@ -192,10 +188,10 @@
                                 Lihat Detail
                             </x-ui.action-menu-item>
 
-                            @if(in_array((int) $item->akreditasi->status, [4], true) && $activeFocus === 'jadwal')
+                            @if(in_array((int) $item->akreditasi->status, [4], true))
                                 <x-ui.action-menu-item
                                     variant="primary"
-                                    x-on:click="openJadwalModal({{ $item->akreditasi->id }}, '{{ addslashes($item->akreditasi->user?->pesantren?->nama_pesantren ?? $item->akreditasi->user?->name ?? 'N/A') }}', '{{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('Y-m-d') }}', '{{ \Carbon\Carbon::parse($item->tanggal_berakhir)->format('Y-m-d') }}')"
+                                    x-on:click="openJadwalModal({{ $item->akreditasi->id }}, @js($item->akreditasi->user?->pesantren?->nama_pesantren ?? $item->akreditasi->user?->name ?? 'N/A'), @js(\Carbon\Carbon::parse($item->tanggal_mulai)->format('Y-m-d')), @js(\Carbon\Carbon::parse($item->tanggal_berakhir)->format('Y-m-d')))"
                                 >
                                     <x-ui.icon name="timer" class="fs-5" />
                                     Atur Jadwal
@@ -203,7 +199,7 @@
 
                                 <x-ui.action-menu-item
                                     variant="danger"
-                                    x-on:click="openTolakModal({{ $item->akreditasi->id }}, '{{ addslashes($item->akreditasi->user?->pesantren?->nama_pesantren ?? $item->akreditasi->user?->name ?? 'N/A') }}', '{{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d') }}-{{ \Carbon\Carbon::parse($item->tanggal_berakhir)->format('d M Y') }}')"
+                                    x-on:click="openTolakModal({{ $item->akreditasi->id }}, @js($item->akreditasi->user?->pesantren?->nama_pesantren ?? $item->akreditasi->user?->name ?? 'N/A'), @js(\Carbon\Carbon::parse($item->tanggal_mulai)->format('d').' - '.\Carbon\Carbon::parse($item->tanggal_berakhir)->format('d M Y')))"
                                 >
                                     <x-ui.icon name="cross-circle" class="fs-5" />
                                     Tolak Dokumen
@@ -245,7 +241,7 @@
     </x-ui.page>
 
     {{-- Modal Atur Jadwal Visitasi --}}
-    <div x-show="showJadwalModal" x-cloak class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div x-show="showJadwalModal" x-cloak class="modal fade" x-bind:class="{ 'show d-block': showJadwalModal }" tabindex="-1" role="dialog" aria-modal="true" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <form method="POST" action="{{ route('asesor.akreditasi.schedule-visitasi') }}">
@@ -254,7 +250,7 @@
 
                     <div class="modal-header">
                         <h5 class="modal-title">Atur Jadwal Visitasi</h5>
-                        <button type="button" class="btn-close" x-on:click="showJadwalModal = false"></button>
+                        <button type="button" class="btn-close" x-on:click="closeModals()"></button>
                     </div>
 
                     <div class="modal-body">
@@ -296,7 +292,7 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-light" x-on:click="showJadwalModal = false">Batal</button>
+                        <button type="button" class="btn btn-light" x-on:click="closeModals()">Batal</button>
                         <button type="submit" class="btn btn-primary">Atur Jadwal Visitasi</button>
                     </div>
                 </form>
@@ -305,7 +301,7 @@
     </div>
 
     {{-- Modal Tolak Dokumen --}}
-    <div x-show="showTolakModal" x-cloak class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div x-show="showTolakModal" x-cloak class="modal fade" x-bind:class="{ 'show d-block': showTolakModal }" tabindex="-1" role="dialog" aria-modal="true" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <form method="POST" action="{{ route('asesor.akreditasi.reject-document') }}">
@@ -314,7 +310,7 @@
 
                     <div class="modal-header">
                         <h5 class="modal-title text-danger">Tolak Dokumen</h5>
-                        <button type="button" class="btn-close" x-on:click="showTolakModal = false"></button>
+                        <button type="button" class="btn-close" x-on:click="closeModals()"></button>
                     </div>
 
                     <div class="modal-body">
@@ -353,7 +349,7 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-light" x-on:click="showTolakModal = false">Batal</button>
+                        <button type="button" class="btn btn-light" x-on:click="closeModals()">Batal</button>
                         <button type="submit" class="btn btn-danger">Tolak Dokumen</button>
                     </div>
                 </form>
@@ -362,12 +358,12 @@
     </div>
 
     {{-- Modal Catatan (AJAX loaded) --}}
-    <div x-show="showCatatanModal" x-cloak class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div x-show="showCatatanModal" x-cloak class="modal fade" x-bind:class="{ 'show d-block': showCatatanModal }" tabindex="-1" role="dialog" aria-modal="true" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Catatan Akreditasi</h5>
-                    <button type="button" class="btn-close" x-on:click="showCatatanModal = false"></button>
+                    <button type="button" class="btn-close" x-on:click="closeModals()"></button>
                 </div>
                 <div class="modal-body spm-modal-content-scroll">
                     <div x-show="catatanLoading" class="text-center py-8">
@@ -404,7 +400,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light" x-on:click="showCatatanModal = false">Tutup</button>
+                    <button type="button" class="btn btn-light" x-on:click="closeModals()">Tutup</button>
                 </div>
             </div>
         </div>
@@ -437,10 +433,19 @@ function asesorAkreditasiPage() {
             periodeLabel: '',
         },
 
+        closeModals() {
+            this.showJadwalModal = false;
+            this.showTolakModal = false;
+            this.showCatatanModal = false;
+        },
+
         openJadwalModal(akreditasiId, pesantren, periodeMulai, periodeAkhir) {
+            this.closeModals();
             const defaultDate = new Date();
             defaultDate.setDate(defaultDate.getDate() + 7);
             const defaultStr = defaultDate.toISOString().split('T')[0];
+            const startDate = [defaultStr, periodeMulai].sort().pop();
+            const clampedDate = [startDate, periodeAkhir].sort()[0];
 
             this.jadwalForm = {
                 akreditasi_id: akreditasiId,
@@ -448,13 +453,14 @@ function asesorAkreditasiPage() {
                 periodeLabel: periodeMulai + ' s/d ' + periodeAkhir,
                 periode_mulai: periodeMulai,
                 periode_akhir: periodeAkhir,
-                tanggal_mulai: defaultStr > periodeMulai ? defaultStr : periodeMulai,
-                tanggal_akhir: defaultStr > periodeMulai ? defaultStr : periodeMulai,
+                tanggal_mulai: clampedDate,
+                tanggal_akhir: clampedDate,
             };
             this.showJadwalModal = true;
         },
 
         openTolakModal(akreditasiId, pesantren, periodeLabel) {
+            this.closeModals();
             this.tolakForm = {
                 akreditasi_id: akreditasiId,
                 pesantren: pesantren,
@@ -464,6 +470,7 @@ function asesorAkreditasiPage() {
         },
 
         async openCatatanModal(akreditasiId) {
+            this.closeModals();
             this.catatanLoading = true;
             this.catatanData = null;
             this.showCatatanModal = true;
@@ -484,3 +491,7 @@ function asesorAkreditasiPage() {
 </script>
 @endpush
 @endsection
+
+
+
+

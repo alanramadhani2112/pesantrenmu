@@ -40,7 +40,7 @@
             @enderror
         </div>
 
-        <div class="fv-row spm-form-field mb-4" data-validate="required|minLength:8">
+        <div class="fv-row spm-form-field mb-4" data-validate="required|min:8">
             <label for="password" class="form-label fw-semibold text-gray-700 fs-7">
                 Password
                 <span class="text-danger ms-1">*</span>
@@ -58,7 +58,7 @@
             @enderror
         </div>
 
-        <div class="fv-row spm-form-field mb-6" data-validate="required|passwordMatch:password">
+        <div class="fv-row spm-form-field mb-6" data-validate="required|same:password">
             <label for="password_confirmation" class="form-label fw-semibold text-gray-700 fs-7">
                 Konfirmasi Password
                 <span class="text-danger ms-1">*</span>

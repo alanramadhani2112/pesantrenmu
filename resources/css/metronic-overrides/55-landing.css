@@ -326,13 +326,13 @@
 .spm-dossier-status {
     flex: 0 0 auto;
     min-height: 28px;
-    display: inline-flex !important;
+    display: inline-flex;
     align-items: center;
     padding: 0 10px;
-    color: #ffffff !important;
+    color: #ffffff;
     background-color: var(--spm-secondary);
     border-radius: 8px;
-    line-height: 1 !important;
+    line-height: 1;
 }
 
 .spm-dossier-score {

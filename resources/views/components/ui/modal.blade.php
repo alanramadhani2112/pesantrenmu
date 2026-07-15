@@ -2,6 +2,10 @@
     'name',
     'show' => false,
     'maxWidth' => '2xl',
+    'title' => null,
+    'subtitle' => null,
+    'icon' => null,
+    'variant' => 'primary',
 ])
 
 @php
@@ -20,9 +24,13 @@
         'xl' => 'spm-modal-xl',
         '2xl' => 'spm-modal-2xl',
     ][$maxWidth];
+
+    $modalId = 'spm-modal-' . str($name)->slug('-')->toString();
+    $titleId = $title ? $modalId . '-title' : null;
 @endphp
 
 <div
+    id="{{ $modalId }}"
     data-ui-modal="metronic"
     x-data="{
         show: @js($show),
@@ -55,6 +63,7 @@
     x-show="show"
     role="dialog"
     aria-modal="true"
+    @if($titleId) aria-labelledby="{{ $titleId }}" @endif
     class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-4 py-6 sm:px-6 lg:px-8 spm-modal-overlay"
     style="display: {{ $show ? 'flex' : 'none' }};"
 >
@@ -82,6 +91,9 @@
         x-transition:leave-start="opacity-100 translate-y-0"
         x-transition:leave-end="opacity-0 translate-y-2"
     >
+        @if($title)
+            <x-ui.modal-header :title="$title" :subtitle="$subtitle" :icon="$icon" :variant="$variant" :title-id="$titleId" />
+        @endif
         {{ $slot }}
     </div>
 </div>

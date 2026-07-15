@@ -89,18 +89,52 @@ class MetronicFrontendTest extends TestCase
 
         $this->get('/login')
             ->assertOk()
-            ->assertDontSee('vendor/metronic/assets/plugins/global/plugins.bundle.css', false)
+            ->assertSee('vendor/metronic/assets/plugins/global/plugins.bundle.css', false)
             ->assertSee('vendor/metronic/assets/css/style.bundle.css', false)
-            ->assertDontSee('vendor/metronic/assets/plugins/global/plugins.bundle.js', false)
-            ->assertDontSee('vendor/metronic/assets/js/scripts.bundle.js', false)
+            ->assertSee('vendor/metronic/assets/plugins/global/plugins.bundle.js', false)
+            ->assertSee('vendor/metronic/assets/js/scripts.bundle.js', false)
             ->assertDontSee('fonts.bunny.net', false);
     }
 
     public function test_unused_full_metronic_public_assets_are_removed(): void
     {
         $this->assertDirectoryDoesNotExist(public_path('assets'));
+        $this->assertDirectoryDoesNotExist(public_path('vendor/metronic/assets/plugins/custom'));
         $this->assertFileExists(public_path('vendor/metronic/assets/css/style.bundle.css'));
         $this->assertFileExists(public_path('vendor/metronic/assets/plugins/global/plugins.bundle.css'));
+    }
+
+    public function test_metronic_browser_smoke_contract_for_shell_runtime(): void
+    {
+        $layout = file_get_contents(resource_path('views/layouts/app.blade.php'));
+        $header = file_get_contents(resource_path('views/components/layout/app-header.blade.php'));
+        $sidebar = file_get_contents(resource_path('views/components/layout/app-sidebar.blade.php'));
+        $appJs = file_get_contents(resource_path('js/app.js'));
+
+        $this->assertLessThan(
+            strpos($layout, 'vendor/metronic/assets/css/style.bundle.css'),
+            strpos($layout, 'vendor/metronic/assets/plugins/global/plugins.bundle.css')
+        );
+        $this->assertLessThan(
+            strpos($layout, 'vendor/metronic/assets/js/scripts.bundle.js'),
+            strpos($layout, 'vendor/metronic/assets/plugins/global/plugins.bundle.js')
+        );
+        $this->assertLessThan(
+            strpos($layout, 'resources/js/app.js'),
+            strpos($layout, 'vendor/metronic/assets/js/scripts.bundle.js')
+        );
+
+        $this->assertStringContainsString('<html', $layout);
+        $this->assertStringContainsString('data-bs-theme="light"', explode("\n", $layout)[1] ?? '');
+        $this->assertStringNotContainsString('<body data-bs-theme="light"', $layout);
+
+        $this->assertStringContainsString('id="kt_app_sidebar_mobile_toggle"', $header);
+        $this->assertStringContainsString('data-kt-menu-trigger="click"', $header);
+        $this->assertStringContainsString('data-kt-menu="true"', $header);
+        $this->assertStringContainsString('data-kt-drawer-toggle="#kt_app_sidebar_mobile_toggle"', $sidebar);
+        $this->assertStringContainsString('data-kt-drawer-dismiss="true"', $sidebar);
+        $this->assertStringNotContainsString('$store.sidebar', $sidebar);
+        $this->assertStringContainsString('if (window.KTUtil) return;', $appJs);
     }
 
     public function test_metronic_ui_components_render_reusable_classes(): void
@@ -251,7 +285,11 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('data-kt-drawer-toggle="#kt_app_sidebar_mobile_toggle"', $source);
         $this->assertStringContainsString('hover-scroll-overlay-y my-5', $source);
         $this->assertStringContainsString('spm-sidebar-mobile-dismiss', $source);
+        $this->assertStringContainsString('data-kt-drawer-dismiss="true"', $source);
         $this->assertStringContainsString('ki-duotone ki-cross-circle', $source);
+        $this->assertStringNotContainsString('$store.sidebar', $source);
+        $this->assertStringNotContainsString('spm-drawer-open', $source);
+        $this->assertStringNotContainsString('spm-sidebar-backdrop', $source);
         $this->assertStringNotContainsString('class="btn-icon btn-active-color-primary d-lg-none"', $source);
         $this->assertStringNotContainsString('<x-ui.button', substr($source, strpos($source, 'id="kt_app_sidebar_logo"'), 1400));
 
@@ -318,6 +356,15 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('.spm-card-title', $css);
         $this->assertStringContainsString('Visual Audit Normalization V1', $css);
         $this->assertStringNotContainsString('.spm-sidebar-progress-dot', $css);
+
+        foreach (['95-spm-utilities.css', '55-landing.css', '56-auth-v3.css', '10-layout-header.css', '30-detail-components.css'] as $noImportantModule) {
+            $moduleCss = file_get_contents(resource_path("css/metronic-overrides/{$noImportantModule}"));
+            $this->assertStringNotContainsString('!important', $moduleCss);
+        }
+
+        $appCss = file_get_contents(resource_path('css/app.css'));
+        $dropzoneOverrides = strstr($appCss, '/* Dropzone overrides to match Metronic styling */') ?: '';
+        $this->assertStringNotContainsString('!important', $dropzoneOverrides);
         $this->assertStringContainsString('.spm-table-shell--document-category', $css);
         $this->assertStringContainsString('.spm-detail-page', $css);
         $this->assertStringContainsString('.spm-stat-card', $css);
@@ -383,6 +430,15 @@ class MetronicFrontendTest extends TestCase
 
         $this->assertSame(1, substr_count($layout, 'resources/js/app.js'));
         $this->assertSame(1, substr_count($appJs, "document.addEventListener('DOMContentLoaded', initMetronic)"));
+        $this->assertStringContainsString('if (window.KTUtil) return;', $appJs);
+        $this->assertStringContainsString("import Chart from 'chart.js/auto';", $appJs);
+        $this->assertStringContainsString('window.Chart = window.Chart ?? Chart;', $appJs);
+        $this->assertStringContainsString("import Dropzone from 'dropzone';", $appJs);
+        $this->assertStringContainsString("import autosize from 'autosize';", $appJs);
+        $this->assertStringContainsString("import { createPopper } from '@popperjs/core';", $appJs);
+        $this->assertStringContainsString("import('sweetalert2')", $appJs);
+        $this->assertStringNotContainsString('quillEditor', $appJs);
+        $this->assertFileDoesNotExist(resource_path('views/components/quill-editor.blade.php'));
         $this->assertStringNotContainsString("Alpine.store('modal')", $views);
         $this->assertStringNotContainsString('form.action = route(', $failedNotifications);
         $this->assertStringNotContainsString("route('admin.failed-notifications.retry', {", $failedNotifications);
@@ -506,6 +562,7 @@ class MetronicFrontendTest extends TestCase
 
         $this->assertStringContainsString('data-akreditasi-workflow="metronic"', $html);
         $this->assertStringContainsString('data-ui-stepper="metronic"', $html);
+        $this->assertStringContainsString('data-ui-stepper-mode="visual"', $html);
         $this->assertStringContainsString('spm-workflow-stepper', $html);
         $this->assertStringContainsString('Alur Proses Akreditasi', $html);
         $this->assertStringContainsString('Review Asesor', $html);
@@ -518,6 +575,10 @@ class MetronicFrontendTest extends TestCase
             file_get_contents(base_path('resources/views/asesor/akreditasi-detail.blade.php')),
             'asesor akreditasi-detail should include the reusable akreditasi workflow stepper.'
         );
+
+        $auditTrail = file_get_contents(resource_path('views/admin/akreditasi/detail/tabs/audit-trail.blade.php'));
+        $this->assertStringContainsString('data-ui-audit-stepper="metronic"', $auditTrail);
+        $this->assertStringNotContainsString('data-kt-stepper-element', $auditTrail);
     }
 
     public function test_edpm_review_component_groups_edpm_and_ipr_with_metronic_tables(): void
@@ -790,9 +851,17 @@ class MetronicFrontendTest extends TestCase
 
             $this->assertStringContainsString('<x-app-layout', $view, "{$path} should use the app layout.");
             $this->assertStringContainsString('<x-ui.form-field', $view, "{$path} should use reusable form fields.");
+            $this->assertStringContainsString('data-kt-image-input="true"', $view, "{$path} should expose the Metronic image input root contract.");
+            $this->assertStringContainsString('data-kt-image-input-action="change"', $view, "{$path} should keep the Metronic image input change action.");
+            $this->assertStringContainsString('data-kt-image-input-action="cancel"', $view, "{$path} should keep the Metronic image input cancel action.");
             $this->assertStringNotContainsString('<x-input-label', $view, "{$path} should not use legacy Breeze input labels.");
             $this->assertStringNotContainsString('<x-text-input', $view, "{$path} should not use legacy Breeze text inputs.");
         }
+
+        $asesorProfile = file_get_contents(resource_path('views/asesor/profile.blade.php'));
+        $this->assertStringContainsString('data-kt-image-input="true"', $asesorProfile);
+        $this->assertStringContainsString('data-kt-image-input-action="change"', $asesorProfile);
+        $this->assertStringContainsString('data-kt-image-input-action="cancel"', $asesorProfile);
     }
 
     public function test_metronic_accessibility_contract_for_tabs_menu_and_modal(): void
@@ -808,7 +877,7 @@ class MetronicFrontendTest extends TestCase
                 <x-ui.action-menu-item type="button">Hapus</x-ui.action-menu-item>
             </x-ui.action-menu>
 
-            <x-ui.modal name="sample-modal" :show="true" maxWidth="lg" focusable>
+            <x-ui.modal name="sample-modal" title="Sample Modal" :show="true" maxWidth="lg" focusable>
                 <x-ui.modal-body>Isi modal</x-ui.modal-body>
             </x-ui.modal>
             BLADE);
@@ -830,6 +899,8 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringContainsString('data-ui-modal="metronic"', $html);
         $this->assertStringContainsString('role="dialog"', $html);
         $this->assertStringContainsString('aria-modal="true"', $html);
+        $this->assertStringContainsString('aria-labelledby="spm-modal-sample-modal-title"', $html);
+        $this->assertStringContainsString('id="spm-modal-sample-modal-title"', $html);
     }
 
     public function test_sweetalert_actions_use_metronic_helper_without_inline_blade_alerts(): void

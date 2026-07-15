@@ -140,7 +140,7 @@ Checklist:
 | Query N+1 | Profiling halaman detail dan list utama | Tidak ada query berulang yang jelas bisa eager load |
 | Pagination | Semua table besar memakai pagination server-side | Halaman list tidak load seluruh dataset |
 | View render | Audit refresh/render yang berlebihan | Action kecil tidak memicu refresh penuh yang tidak perlu |
-| Asset | Trim asset Metronic yang tidak dipakai | Bundle JS/CSS tetap terkendali setelah build |
+| Asset | Metronic runtime memakai standard bundle; unused `plugins/custom` sudah dihapus; CSS override debt dikurangi bertahap | `npm run build`, runtime manifest, dan browser smoke tetap hijau |
 | Cache | Config, route, event, view cache production | `php artisan optimize` aman dijalankan |
 | Queue | Notifikasi dan proses berat masuk queue | Request user tidak menunggu kerja background |
 
@@ -163,6 +163,8 @@ Verifikasi:
 php artisan optimize
 npm run build
 php artisan test tests\Feature\MetronicFrontendTest.php --no-ansi
+php artisan test tests\Feature\PerformanceOptimizationTest.php --no-ansi
+node output/playwright/task4-role-smoke.mjs
 ```
 
 ## Phase 5 — Reusable UI dan Visual QA

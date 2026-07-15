@@ -35,11 +35,21 @@ class PerformanceOptimizationTest extends TestCase
         $this->assertStringContainsString('OPcache', $docs);
     }
 
-    public function test_global_layouts_do_not_load_metronic_plugin_bundle_css_or_js(): void
+    public function test_app_and_guest_layouts_follow_metronic_bundle_order_while_public_pages_stay_light(): void
     {
         foreach ([
             resource_path('views/layouts/app.blade.php'),
             resource_path('views/layouts/guest.blade.php'),
+        ] as $path) {
+            $source = file_get_contents($path);
+
+            $this->assertStringContainsString('vendor/metronic/assets/plugins/global/plugins.bundle.css', $source);
+            $this->assertStringContainsString('vendor/metronic/assets/css/style.bundle.css', $source);
+            $this->assertStringContainsString('vendor/metronic/assets/plugins/global/plugins.bundle.js', $source);
+            $this->assertStringContainsString('vendor/metronic/assets/js/scripts.bundle.js', $source);
+        }
+
+        foreach ([
             resource_path('views/welcome.blade.php'),
             resource_path('views/errors/403.blade.php'),
             resource_path('views/errors/404.blade.php'),
@@ -50,9 +60,33 @@ class PerformanceOptimizationTest extends TestCase
         ] as $path) {
             $source = file_get_contents($path);
 
-            $this->assertStringNotContainsString('vendor/metronic/assets/plugins/global/plugins.bundle.css', $source);
             $this->assertStringNotContainsString('vendor/metronic/assets/plugins/global/plugins.bundle.js', $source);
-            $this->assertStringContainsString('vendor/metronic/assets/css/style.bundle.css', $source);
+        }
+    }
+
+    public function test_metronic_runtime_manifest_matches_public_assets(): void
+    {
+        $manifest = json_decode(file_get_contents(base_path('docs/metronic-runtime-manifest.json')), true, flags: JSON_THROW_ON_ERROR);
+
+        $this->assertSame('8.1.8', $manifest['metronic']['version']);
+        $this->assertSame('demo42', $manifest['metronic']['demo']);
+        $this->assertFalse($manifest['runtime']['custom_plugins_included']);
+        $this->assertDirectoryDoesNotExist(public_path('vendor/metronic/assets/plugins/custom'));
+
+        foreach ($manifest['bundles'] as $bundle) {
+            $path = base_path($bundle['path']);
+
+            $this->assertFileExists($path);
+
+            $contents = file_get_contents($path);
+            $normalizedContents = str_replace("\r\n", "\n", $contents);
+
+            $rawMatches = $bundle['bytes'] === strlen($contents)
+                && $bundle['sha256'] === hash('sha256', $contents);
+            $lfMatches = $bundle['lf_bytes'] === strlen($normalizedContents)
+                && $bundle['lf_sha256'] === hash('sha256', $normalizedContents);
+
+            $this->assertTrue($rawMatches || $lfMatches);
         }
     }
 
