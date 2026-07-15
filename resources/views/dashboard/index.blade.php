@@ -262,14 +262,14 @@
                 };
             @endphp
 
-            <div class="row g-6">
+            <div class="row g-5">
                 <div class="{{ $hasActivePengajuan ? 'col-12' : 'col-12 col-lg-8' }}">
                     @if($hasActivePengajuan)
                         <x-ui.card title="Pengajuan Berjalan" subtitle="Pantau posisi dan langkah berikutnya dari satu tempat." class="h-100 spm-dashboard-stat">
-                            <div class="p-6">
-                                <div class="row g-5 align-items-stretch mb-6">
+                            <div class="p-5">
+                                <div class="row g-4 align-items-stretch mb-5">
                                     <div class="col-lg-8">
-                                        <div class="rounded bg-light-primary border border-primary border-dashed p-5 h-100">
+                                        <div class="rounded border border-dashed border-gray-300 bg-body p-4 h-100">
                                             <div class="d-flex flex-column flex-md-row justify-content-between gap-4">
                                                 <div>
                                                     <div class="text-muted fw-semibold fs-8 text-uppercase mb-2">Tahap Saat Ini</div>
@@ -277,7 +277,7 @@
                                                     <div class="text-muted fw-semibold fs-7">Periode {{ $latestPesantrenActivity['periode'] ?? '-' }} - update {{ $latestPesantrenActivity['updated_at']->translatedFormat('d M Y, H:i') }}</div>
                                                 </div>
                                                 <div class="flex-shrink-0">
-                            <x-ui.status-badge :variant="\App\Support\AkreditasiStatusPresenter::variant($latestPesantrenActivity['status'])">
+                                                    <x-ui.status-badge :variant="\App\Support\AkreditasiStatusPresenter::variant($latestPesantrenActivity['status'])">
                                                         {{ $latestPesantrenActivity['status_label'] }}
                                                     </x-ui.status-badge>
                                                 </div>
@@ -285,7 +285,7 @@
                                         </div>
                                     </div>
                                     <div class="col-lg-4">
-                                        <div class="rounded bg-light-success border border-success border-dashed p-5 h-100">
+                                        <div class="rounded border border-dashed border-gray-300 bg-body p-4 h-100">
                                             <div class="text-muted fw-semibold fs-8 text-uppercase mb-2">Langkah Berikut</div>
                                             <div class="fw-semibold text-gray-900 mb-2">{{ $nextActionTitle }}</div>
                                             <div class="text-muted fs-7">Data terkunci selama pengajuan diproses.</div>
@@ -444,15 +444,15 @@
                 ];
             @endphp
 
-            <div class="row g-6 spm-asesor-dashboard-workspace">
+            <div class="row g-5 spm-asesor-dashboard-workspace">
                 <div class="col-12 col-xl-8">
                     <x-ui.card title="Fokus Hari Ini" subtitle="Mulai dari tahap paling kiri yang masih memiliki pekerjaan." class="h-100 spm-asesor-focus-card spm-dashboard-stat">
                         <div class="d-flex flex-column gap-4">
                             @foreach($asesorWorkflow as $step)
                                 <a href="{{ $step['route'] }}" class="spm-asesor-workflow-item text-decoration-none">
-                                    <div class="symbol symbol-44px flex-shrink-0">
-                                        <span class="symbol-label bg-light-{{ $step['variant'] }} text-{{ $step['variant'] }} rounded-3">
-                                            <x-ui.icon :name="$step['icon']" class="fs-2" />
+                                    <div class="symbol symbol-40px flex-shrink-0">
+                                        <span class="symbol-label bg-body border border-dashed border-gray-300 text-{{ $step['variant'] }} rounded">
+                                            <x-ui.icon :name="$step['icon']" class="fs-3" />
                                         </span>
                                     </div>
                                     <div class="flex-grow-1 min-w-0">
@@ -462,7 +462,7 @@
                                         </div>
                                         <div class="text-muted fw-semibold fs-7">{{ $step['copy'] }}</div>
                                     </div>
-                                    <span class="btn btn-sm btn-light-{{ $step['variant'] }} flex-shrink-0">Buka</span>
+                                    <x-ui.badge variant="secondary" class="flex-shrink-0">Buka</x-ui.badge>
                                 </a>
                             @endforeach
                         </div>
@@ -472,7 +472,7 @@
                 <div class="col-12 col-xl-4">
                     <x-ui.card title="Ringkasan" subtitle="Status pekerjaan asesor saat ini." class="h-100 spm-asesor-summary-card spm-dashboard-stat">
                         <div class="d-flex flex-column gap-4">
-                            <div class="rounded bg-light-primary border border-primary border-dashed p-5">
+                            <div class="rounded border border-dashed border-gray-300 bg-body p-4">
                                 <div class="text-muted fw-semibold fs-8 text-uppercase mb-2">Tugas aktif</div>
                                 <div class="fs-2x fw-semibold text-gray-900 mb-2">{{ $stats['total_aktif'] }}</div>
                                 <x-ui.button :href="route('asesor.akreditasi')" variant="light-primary" size="sm">Lihat Semua Tugas</x-ui.button>
