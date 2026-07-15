@@ -34,7 +34,7 @@
         :subtitle="$documentSubtitle"
     >
         @unless($doc === 'iapm' && auth()->user()->isPesantren())
-        <div class="row g-5 mb-6 spm-document-summary">
+        <div class="row g-5 mb-5 spm-document-summary">
             <div class="col-md-4">
                 <x-ui.stat-card label="Kategori Aktif" value="{{ $activeDocLabel }}" variant="primary" icon="document" />
             </div>
@@ -125,7 +125,7 @@
                         <td class="spm-document-title-cell">
                             <div class="d-flex align-items-center gap-3">
                                 <div class="symbol symbol-40px">
-                                    <div class="symbol-label bg-light-primary text-primary">
+                                    <div class="symbol-label bg-body border border-dashed border-gray-300 text-primary">
                                         <x-ui.icon name="document" class="fs-2" />
                                     </div>
                                 </div>
