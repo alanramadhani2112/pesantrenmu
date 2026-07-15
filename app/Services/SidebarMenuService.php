@@ -442,15 +442,15 @@ class SidebarMenuService
 
         if ($roleScope !== 'pesantren') {
             $items[] = [
-            'key' => 'semua_dokumen_'.$roleScope,
-            'label' => 'Semua Dokumen',
-            'route' => 'documents.index',
-            'route_params' => ['doc' => 'all'],
-            'icon' => 'document',
-            'active_pattern' => 'documents.index.all',
-            'tooltip' => 'Lihat seluruh dokumen yang tersedia untuk Anda',
-            'show_progress' => false,
-            'show_badge' => false,
+                'key' => 'semua_dokumen_'.$roleScope,
+                'label' => 'Semua Dokumen',
+                'route' => 'documents.index',
+                'route_params' => ['doc' => 'all'],
+                'icon' => 'document',
+                'active_pattern' => 'documents.index.all',
+                'tooltip' => 'Lihat seluruh dokumen yang tersedia untuk Anda',
+                'show_progress' => false,
+                'show_badge' => false,
             ];
         }
 

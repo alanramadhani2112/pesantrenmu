@@ -95,6 +95,7 @@ class PesantrenAkreditasiMenuContextTest extends TestCase
             ->assertSee('Pusat Akreditasi')
             ->assertSee('Hasil akhir muncul di halaman yang sama');
     }
+
     public function test_status_filter_shows_active_chip_and_reset_action(): void
     {
         $pesantren = User::factory()->create(['role_id' => Role::ID_PESANTREN]);

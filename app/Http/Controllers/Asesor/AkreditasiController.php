@@ -566,5 +566,3 @@ class AkreditasiController extends Controller
         }
     }
 }
-
-

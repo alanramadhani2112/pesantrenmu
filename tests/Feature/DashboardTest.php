@@ -89,6 +89,7 @@ class DashboardTest extends TestCase
             ->assertSee('Lihat data', false)
             ->assertDontSee('Lengkapi →', false);
     }
+
     public function test_pesantren_status_cards_link_to_filtered_akreditasi_center(): void
     {
         $user = User::factory()->create(['role_id' => 3]);

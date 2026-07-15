@@ -120,7 +120,7 @@ class MetronicFrontendTest extends TestCase
             strpos($layout, 'vendor/metronic/assets/plugins/global/plugins.bundle.js')
         );
         $this->assertLessThan(
-            strpos($layout, "resources/js/app.js"),
+            strpos($layout, 'resources/js/app.js'),
             strpos($layout, 'vendor/metronic/assets/js/scripts.bundle.js')
         );
 

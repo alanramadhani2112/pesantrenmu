@@ -149,6 +149,7 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
             'penilaian' => (int) ($rows->penilaian ?? 0),
         ];
     }
+
     public function findAssessment(int $id, array $relations = []): ?Assessment
     {
         return Assessment::with($relations)->find($id);
@@ -285,4 +286,3 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
         return $query;
     }
 }
-
