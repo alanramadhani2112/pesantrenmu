@@ -1,14 +1,19 @@
+<!-- markdownlint-disable MD013 -->
+
 # UI Standardization
 
 Dokumen ini menjadi baseline UI Laravel Blade + Metronic untuk dashboard role `super admin`, `admin`, `pesantren`, dan `asesor`.
 
 Reference theme wajib: `C:\laragon\www\dist\dist` (Metronic 8.1.8 demo42). Jika ada konflik antara gaya lokal dan theme reference, pilih markup/class dari theme reference lalu bungkus lewat komponen `x-ui.*`.
 
+Untuk standar yang lebih ketat, clean-flat, reusable component contract, standar halaman, guardrail copy domain SPM, dan enforcement gate, gunakan `docs/ui-clean-metronic-development-plan.md` sebagai referensi lanjutan. Dokumen ini tetap baseline; dokumen clean Metronic menjadi aturan pengembangan berikutnya.
+
 ## Prinsip
 
 - Pakai komponen `resources/views/components/ui/*` sebelum menulis markup Metronic mentah.
 - Pertahankan token Metronic 8.1.8 dari `C:\laragon\www\dist\dist\assets` dan override yang sudah ada di `resources/css/metronic-overrides.css`.
 - Standardisasi lewat komponen/presenter kecil. Hindari rebuild design system.
+- Ikuti arah **SPM Clean Metronic** untuk pengembangan baru: clean, flat, minim ornamen, tetap domain SPM akreditasi pesantren.
 - Raw Bootstrap/Metronic markup hanya boleh untuk kasus khusus yang belum punya komponen.
 
 ## Theme contract
