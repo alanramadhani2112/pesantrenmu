@@ -77,7 +77,7 @@
             <form action="{{ route('pesantren.akreditasi.create') }}" method="POST" id="createAkreditasiForm">
                 @csrf
                 <x-ui.button type="submit" variant="primary" id="btnCreateAkreditasi">
-                    <i class="ki-solid ki-plus fs-4 me-1"></i>
+                    <x-ui.icon name="plus" class="fs-4 me-1" />
                     Ajukan Akreditasi
                 </x-ui.button>
             </form>
@@ -131,16 +131,17 @@
             <x-ui.stat-card label="Data Tampil" value="{{ $akreditasis->total() }}" variant="info" icon="data" />
         </div>
         <div class="col-md-4">
-            <x-ui.stat-card label="Status Terbaru" value="{{ $latestStatusLabel }}" variant="secondary" icon="information-5" />
+            <x-ui.stat-card label="Fokus Halaman" value="{{ $focuses[$focus] ?? 'Semua Proses' }}" variant="secondary" icon="filter" />
         </div>
     </div>
 
     <x-ui.alert variant="info" icon="information-5" title="Alur Akreditasi" class="mb-5 spm-akreditasi-ux-note">
         Gunakan filter Tahapan untuk melihat posisi pengajuan. Perbaikan, kartu kendali, dan hasil tetap bagian dari satu alur yang sama.
         <div class="mt-3 d-flex flex-wrap gap-2">
-            <a href="{{ route('documents.index', ['doc' => 'iapm']) }}" class="btn btn-sm btn-light-primary fw-semibold">
-                <x-ui.icon name="document" class="fs-5 me-1" /> Baca Panduan IAPM
-            </a>
+            <x-ui.button :href="route('documents.index', ['doc' => 'iapm'])" variant="light" size="sm">
+                <x-ui.icon name="document" class="fs-5 me-1" />
+                Baca Panduan IAPM
+            </x-ui.button>
         </div>
     </x-ui.alert>
 

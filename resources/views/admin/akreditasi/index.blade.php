@@ -11,14 +11,11 @@
 @endphp
 
 <div data-admin-akreditasi-page="metronic" x-data="adminAkreditasiPage()">
-    <x-slot name="header">{{ __('Akreditasi') }}</x-slot>
-
     <x-ui.index-layout
         title="Akreditasi"
         subtitle="Kelola pengajuan, penilaian, visitasi, dan tindak lanjut pesantren dari satu daftar akreditasi."
     >
         <x-slot name="toolbar">
-            <x-ui.badge variant="primary">Admin</x-ui.badge>
             <x-ui.badge variant="warning">Aktif: {{ $activeCount }}</x-ui.badge>
             @if(($statusCounts['overdue'] ?? 0) > 0)
                 <x-ui.badge variant="danger">Terlambat: {{ $statusCounts['overdue'] }}</x-ui.badge>
@@ -84,21 +81,21 @@
                 >
                     <div class="d-flex flex-column gap-4">
                         <div class="d-flex align-items-start gap-3">
-                            <span class="badge badge-circle badge-light-primary">1</span>
+                            <x-ui.badge variant="primary" class="badge-circle flex-shrink-0">1</x-ui.badge>
                             <div>
                                 <div class="fw-semibold text-gray-900">Verifikasi & tetapkan asesor</div>
                                 <div class="text-muted fs-7">Buka berkas, periksa kelengkapan, tetapkan asesor.</div>
                             </div>
                         </div>
                         <div class="d-flex align-items-start gap-3">
-                            <span class="badge badge-circle badge-light-primary">2</span>
+                            <x-ui.badge variant="primary" class="badge-circle flex-shrink-0">2</x-ui.badge>
                             <div>
                                 <div class="fw-semibold text-gray-900">Pantau & jadwalkan visitasi</div>
                                 <div class="text-muted fs-7">Jadwalkan visitasi, tinjau laporan, tetapkan NV.</div>
                             </div>
                         </div>
                         <div class="d-flex align-items-start gap-3">
-                            <span class="badge badge-circle badge-light-primary">3</span>
+                            <x-ui.badge variant="primary" class="badge-circle flex-shrink-0">3</x-ui.badge>
                             <div>
                                 <div class="fw-semibold text-gray-900">Tindak lanjuti</div>
                                 <div class="text-muted fs-7">Keputusan admin tercatat pada riwayat akreditasi pesantren.</div>

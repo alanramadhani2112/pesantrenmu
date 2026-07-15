@@ -55,8 +55,6 @@
     }
 @endphp
 
-<x-slot name="header">{{ __('Detail Akreditasi') }}</x-slot>
-
 <x-ui.page
     title="Detail Akreditasi"
     subtitle="{{ $pesantren->nama_pesantren ?? $pesantren->name ?? '-' }}"
@@ -65,8 +63,8 @@
     data-module-page="asesor-akreditasi-detail"
 >
     <x-slot:toolbar>
-        <x-ui.status-badge :variant="$statusVariant">
-            {{ Akreditasi::getStatusLabel($akreditasi->status) }}
+        <x-ui.status-badge :variant="$status['variant']">
+            {{ $status['label'] }}
         </x-ui.status-badge>
 
         @if($canConfirmVisitasi)
@@ -146,8 +144,8 @@
         <div class="col-lg-4">
             <x-ui.stat-card
                 label="Status Tugas"
-                value="{{ Akreditasi::getStatusLabel($akreditasi->status) }}"
-                variant="{{ $statusVariant }}"
+                value="{{ $status['label'] }}"
+                variant="{{ $status['variant'] }}"
                 icon="shield-tick"
             />
         </div>
