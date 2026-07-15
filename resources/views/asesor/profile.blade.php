@@ -582,7 +582,7 @@ function asesorProfileEdit() {
                             <img src="{{ Storage::url(auth()->user()->profile_photo_path) }}"
                                  alt="Foto asesor"
                                  loading="lazy"
-                                 class="rounded-circle object-fit-cover border border-3 border-light shadow-sm"
+                                  class="rounded-circle object-fit-cover border border-3 border-light"
                                  style="width:100px;height:100px;">
                         @else
                             <div class="spm-profile-avatar d-flex align-items-center justify-content-center">
@@ -780,5 +780,4 @@ function asesorProfileEdit() {
 
 </div>
 @endsection
-
 

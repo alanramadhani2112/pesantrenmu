@@ -5,7 +5,7 @@
                 <div class="d-flex flex-column gap-6">
 
                     {{-- Profile Photo --}}
-                    <x-ui.section-card title="Foto Profil" subtitle="Unggah foto profil Anda. Maksimal 2MB, format JPG/PNG." class="shadow-sm">
+                    <x-ui.section-card title="Foto Profil" subtitle="Unggah foto profil Anda. Maksimal 2MB, format JPG/PNG.">
                         <div class="p-6">
                             <div class="d-flex flex-column align-items-center">
                                 <form method="POST" action="{{ route('profile.photo') }}" enctype="multipart/form-data"
@@ -26,7 +26,7 @@
                                             :style="preview ? 'background-image:url(' + preview + ')' : ''">
                                         </div>
 
-                                        <label class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-30px h-30px bg-body shadow-sm"
+                                        <label class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-30px h-30px bg-body border border-dashed border-gray-300"
                                             data-kt-image-input-action="change"
                                             title="Ganti foto">
                                             <x-ui.icon name="pencil" class="fs-6" />
@@ -40,7 +40,7 @@
                                                 " />
                                         </label>
 
-                                        <span class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-30px h-30px bg-body shadow-sm"
+                                        <span class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-30px h-30px bg-body border border-dashed border-gray-300"
                                             data-kt-image-input-action="cancel"
                                             title="Batal"
                                             @click="changed = false; preview = '{{ $user->profile_photo_path ? asset('storage/' . $user->profile_photo_path) : '' }}'; $el.closest('form').querySelector('input[type=file]').value = '';">
@@ -75,7 +75,7 @@
                     </x-ui.section-card>
 
                     {{-- Update Profile Info --}}
-                    <x-ui.section-card title="Informasi Profil" subtitle="Perbarui nama dan alamat email akun Anda." class="shadow-sm">
+                    <x-ui.section-card title="Informasi Profil" subtitle="Perbarui nama dan alamat email akun Anda.">
                         <div class="p-6">
                             <form method="POST" action="{{ route('profile.info') }}"
                                   x-data="formValidation"
@@ -122,7 +122,7 @@
                     </x-ui.section-card>
 
                     {{-- Update Password --}}
-                    <x-ui.section-card title="Ubah Password" subtitle="Gunakan password yang panjang dan acak agar akun tetap aman." class="shadow-sm">
+                    <x-ui.section-card title="Ubah Password" subtitle="Gunakan password yang panjang dan acak agar akun tetap aman.">
                         <div class="p-6">
                             <form method="POST" action="{{ route('profile.password') }}"
                                   x-data="formValidation"
@@ -220,7 +220,7 @@
                     </x-ui.section-card>
 
                     {{-- Account Governance --}}
-                    <x-ui.section-card title="Pengelolaan Akun" subtitle="Akun pengguna terhubung dengan proses akreditasi dan audit sistem." class="shadow-sm">
+                    <x-ui.section-card title="Pengelolaan Akun" subtitle="Akun pengguna terhubung dengan proses akreditasi dan audit sistem.">
                         <div class="p-6">
                             <x-ui.alert variant="info" icon="shield-tick" title="Penghapusan akun dilakukan oleh admin" class="mb-0">
                                 Untuk menjaga riwayat akreditasi, audit trail, dan keterkaitan data antar role, penghapusan akun tidak tersedia sebagai aksi mandiri di halaman profil. Hubungi admin apabila akun perlu dinonaktifkan atau dikelola.
