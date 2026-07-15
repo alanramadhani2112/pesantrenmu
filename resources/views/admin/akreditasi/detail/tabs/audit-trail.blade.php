@@ -178,13 +178,13 @@
                                         @if($log->old_value || $log->new_value)
                                             <div class="spm-audit-stepper-change">
                                                 @if($log->old_value && $log->new_value)
-                                                    <span class="badge badge-light-danger">{{ $log->old_value }}</span>
+                                                    <x-ui.badge variant="danger">{{ $log->old_value }}</x-ui.badge>
                                                     <x-ui.icon name="arrow-right" class="fs-7 text-gray-500 mx-2" />
-                                                    <span class="badge badge-light-success">{{ $log->new_value }}</span>
+                                                    <x-ui.badge variant="success">{{ $log->new_value }}</x-ui.badge>
                                                 @elseif($log->new_value)
-                                                    <span class="badge badge-light-success">{{ $log->new_value }}</span>
+                                                    <x-ui.badge variant="success">{{ $log->new_value }}</x-ui.badge>
                                                 @elseif($log->old_value)
-                                                    <span class="badge badge-light-danger">{{ $log->old_value }}</span>
+                                                    <x-ui.badge variant="danger">{{ $log->old_value }}</x-ui.badge>
                                                 @endif
                                             </div>
                                         @endif

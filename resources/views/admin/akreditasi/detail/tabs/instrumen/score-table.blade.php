@@ -63,9 +63,9 @@
                                         aria-label="Alasan perubahan NV butir {{ $no }}"
                                     >{{ $reasonValue }}</textarea>
                                 @else
-                                    <span class="badge badge-light-success fs-7">
+                                    <x-ui.badge variant="success" class="fs-7">
                                         {{ $adminNvs[$butir->id]['nv'] ?? '-' }}
-                                    </span>
+                                    </x-ui.badge>
                                 @endif
                             </td>
                         </tr>
