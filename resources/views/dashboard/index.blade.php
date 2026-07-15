@@ -171,7 +171,7 @@
         @endunless
         {{-- Quick Actions --}}
         @if(count($quickActions) > 0 && ! $isPesantren && ! $isAsesor)
-            <div class="row g-3 mb-6 spm-dashboard-quick-actions">
+            <div class="row g-3 mb-5 spm-dashboard-quick-actions">
                 @foreach($quickActions as $action)
                     <div class="col-6 col-md-4 col-lg-3">
                         <a href="{{ $action['route'] }}"
@@ -205,7 +205,7 @@
                                 <div class="rounded border border-dashed border-gray-300 bg-body p-4 h-100">
                                     <x-ui.badge variant="warning" class="mb-3">Verifikasi</x-ui.badge>
                                     <div class="fs-2x fw-semibold text-gray-900 mb-1">{{ $stats['verifikasi'] }}</div>
-                                    <div class="text-muted fw-medium fs-8 mb-5">Pengajuan menunggu validasi awal.</div>
+                                    <div class="text-muted fw-medium fs-8 mb-4">Pengajuan menunggu validasi awal.</div>
                                     <x-ui.button :href="route('admin.akreditasi')" variant="light-warning" size="sm">Buka Pengajuan</x-ui.button>
                                 </div>
                             </div>
@@ -214,7 +214,7 @@
                                 <div class="rounded border border-dashed border-gray-300 bg-body p-4 h-100">
                                     <x-ui.badge variant="info" class="mb-3">Penilaian</x-ui.badge>
                                     <div class="fs-2x fw-semibold text-gray-900 mb-1">{{ $stats['assessment'] }}</div>
-                                    <div class="text-muted fw-medium fs-8 mb-5">Pengajuan sedang dinilai asesor.</div>
+                                    <div class="text-muted fw-medium fs-8 mb-4">Pengajuan sedang dinilai asesor.</div>
                                     <x-ui.button :href="route('admin.akreditasi')" variant="light-info" size="sm">Pantau Proses</x-ui.button>
                                 </div>
                             </div>
@@ -223,7 +223,7 @@
                                 <div class="rounded border border-dashed border-gray-300 bg-body p-4 h-100">
                                     <x-ui.badge variant="primary" class="mb-3">Visitasi</x-ui.badge>
                                     <div class="fs-2x fw-semibold text-gray-900 mb-1">{{ $stats['visitasi'] }}</div>
-                                    <div class="text-muted fw-medium fs-8 mb-5">Visitasi berjalan atau menunggu hasil.</div>
+                                    <div class="text-muted fw-medium fs-8 mb-4">Visitasi berjalan atau menunggu hasil.</div>
                                     <x-ui.button :href="route('admin.akreditasi')" variant="light" size="sm">Lihat Jadwal</x-ui.button>
                                 </div>
                             </div>
@@ -271,7 +271,7 @@
                                         <div class="rounded border border-dashed border-gray-300 bg-body p-4 h-100">
                                             <div class="d-flex flex-column flex-md-row justify-content-between gap-4">
                                                 <div>
-                                <div class="text-muted fw-semibold fs-8 mb-2">Tahap saat ini</div>
+                                                    <div class="text-muted fw-semibold fs-8 mb-2">Tahap saat ini</div>
                                                     <h3 class="fw-semibold text-gray-900 mb-2">{{ $latestPesantrenActivity['status_label'] }}</h3>
                                                     <div class="text-muted fw-semibold fs-7">Periode {{ $latestPesantrenActivity['periode'] ?? '-' }} - update {{ $latestPesantrenActivity['updated_at']->translatedFormat('d M Y, H:i') }}</div>
                                                 </div>
@@ -285,14 +285,14 @@
                                     </div>
                                     <div class="col-lg-4">
                                         <div class="rounded border border-dashed border-gray-300 bg-body p-4 h-100">
-                                <div class="text-muted fw-semibold fs-8 mb-2">Langkah berikut</div>
+                                            <div class="text-muted fw-semibold fs-8 mb-2">Langkah berikut</div>
                                             <div class="fw-semibold text-gray-900 mb-2">{{ $nextActionTitle }}</div>
                                             <div class="text-muted fs-7">Data terkunci selama pengajuan diproses.</div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="mb-6">
+                                <div class="mb-5">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <span class="fw-semibold text-gray-900 fs-7">Alur Akreditasi</span>
                                         <span class="text-muted fw-semibold fs-8">Tahap {{ ($activeTimelineIndex === false ? 0 : $activeTimelineIndex + 1) }}/{{ count($akreditasiTimeline) }}</span>
@@ -306,7 +306,7 @@
                                     />
                                 </div>
 
-                                <div class="d-flex flex-wrap gap-2 mb-6">
+                                <div class="d-flex flex-wrap gap-2 mb-5">
                                     @foreach($akreditasiTimeline as $status => $label)
                                         @php
                                             $index = $loop->index;
@@ -321,7 +321,7 @@
                                 </div>
 
                                 @if($latestPesantrenActivity['latest_catatan'] ?? null)
-                                    <x-ui.alert variant="warning" icon="information-5" title="Catatan terbaru" class="mb-6">
+                                <x-ui.alert variant="warning" icon="information-5" title="Catatan terbaru" class="mb-5">
                                         <div style="white-space: pre-line;">{{ $latestPesantrenActivity['latest_catatan'] }}</div>
                                     </x-ui.alert>
                                 @endif
@@ -538,7 +538,7 @@
                 <x-ui.card title="Distribusi Status" subtitle="Hasil akhir pengajuan akreditasi." class="h-100 spm-dashboard-stat">
                     @if($hasStatusData)
                         <div class="d-flex flex-column align-items-center justify-content-center">
-                            <div class="position-relative h-250px w-250px d-flex align-items-center justify-content-center">
+                            <div class="position-relative h-225px w-225px d-flex align-items-center justify-content-center">
                                 <canvas id="statusChart"></canvas>
                                 <div class="position-absolute top-50 start-50 translate-middle text-center pe-none">
                                     <span class="fs-2hx fw-semibold text-gray-900">{{ $stats['terakreditasi'] + $stats['ditolak'] }}</span>
@@ -546,7 +546,7 @@
                                 </div>
                             </div>
 
-                            <div class="d-flex justify-content-center gap-5 mt-6">
+                            <div class="d-flex justify-content-center gap-4 mt-5">
                                 <span class="d-flex align-items-center gap-2 text-muted fw-semibold fs-7">
                                     <span class="bullet bullet-dot bg-success"></span>
                                     Terakreditasi
@@ -561,7 +561,7 @@
                         <x-ui.empty-state
                             title="Belum ada hasil akhir"
                             description="Ringkasan status akan tersedia setelah pengajuan selesai divalidasi."
-                            class="min-h-250px"
+                            class="min-h-200px"
                             variant="info"
                         >
                             <x-slot name="icon">
@@ -587,7 +587,7 @@
                         @if($isPesantren)
                         <x-ui.simple-table>
                             <thead>
-                                <tr class="text-uppercase fs-8 fw-semibold text-muted">
+                                <tr class="fs-8 fw-semibold text-muted">
                                     <th class="min-w-100px ps-4">Periode</th>
                                     <th class="min-w-120px">Tahapan</th>
                                     <th class="min-w-120px">Status</th>
@@ -623,7 +623,7 @@
                     @else
                         <x-ui.simple-table>
                             <thead>
-                                <tr class="text-uppercase fs-8 fw-semibold text-muted">
+                                <tr class="fs-8 fw-semibold text-muted">
                                     <th class="min-w-200px ps-4">Pesantren</th>
                                     <th class="min-w-100px">Status</th>
                                     <th class="min-w-100px d-none d-md-table-cell">Peringkat</th>
@@ -637,7 +637,7 @@
                                         <td class="ps-4">
                                             <div class="d-flex align-items-center gap-3">
                                                 <div class="symbol symbol-40px flex-shrink-0">
-                                                <div class="symbol-label bg-body border border-dashed border-gray-300 text-primary fw-semibold">
+                                                    <div class="symbol-label bg-body border border-dashed border-gray-300 text-primary fw-semibold">
                                                         {{ strtoupper(substr($activity['pesantren_name'], 0, 1)) }}
                                                     </div>
                                                 </div>
@@ -650,7 +650,7 @@
                                             </div>
                                         </td>
                                         <td>
-                                        <x-ui.status-badge :variant="\App\Support\AkreditasiStatusPresenter::variant($activity['status'])">
+                                            <x-ui.status-badge :variant="\App\Support\AkreditasiStatusPresenter::variant($activity['status'])">
                                                 {{ $activity['status_label'] }}
                                             </x-ui.status-badge>
                                         </td>
