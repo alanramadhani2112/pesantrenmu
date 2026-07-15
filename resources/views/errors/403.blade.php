@@ -35,14 +35,12 @@
             </p>
 
             <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-                <a href="{{ url('/dashboard') }}" class="btn btn-primary fw-semibold px-6">
-                    <i class="ki-solid ki-home fs-3 me-1"></i>
+                <x-ui.button :href="url('/dashboard')" class="px-6" icon="home" icon-class="fs-3 me-1">
                     Ke Dashboard
-                </a>
-                <a href="javascript:history.back()" class="btn btn-light fw-semibold px-6">
-                    <i class="ki-solid ki-arrow-left fs-3 me-1"></i>
+                </x-ui.button>
+                <x-ui.button href="javascript:history.back()" variant="light" class="px-6" icon="arrow-left" icon-class="fs-3 me-1">
                     Kembali
-                </a>
+                </x-ui.button>
             </div>
 
         </div>
