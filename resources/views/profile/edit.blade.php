@@ -1,12 +1,12 @@
 <x-app-layout>
     <x-ui.page title="Pengaturan Profil" subtitle="Kelola nama, email, password, dan keamanan akun Anda.">
-        <div class="row g-6 justify-content-center">
+        <div class="row g-5 justify-content-center">
             <div class="col-xl-8">
-                <div class="d-flex flex-column gap-6">
+                <div class="d-flex flex-column gap-5">
 
                     {{-- Profile Photo --}}
                     <x-ui.section-card title="Foto Profil" subtitle="Unggah foto profil Anda. Maksimal 2MB, format JPG/PNG.">
-                        <div class="p-6">
+                        <div class="p-5">
                             <div class="d-flex flex-column align-items-center">
                                 <form method="POST" action="{{ route('profile.photo') }}" enctype="multipart/form-data"
                                     x-data="{
@@ -53,7 +53,7 @@
                                     @enderror
 
                                     <div x-show="changed" x-cloak>
-                                        <button type="submit" class="btn btn-sm btn-primary px-6">Simpan Foto</button>
+                                        <x-ui.button type="submit" size="sm">Simpan Foto</x-ui.button>
                                     </div>
                                 </form>
 
@@ -61,7 +61,7 @@
                                 <form method="POST" action="{{ route('profile.photo.remove') }}" class="mt-2">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-light-danger">Hapus Foto</button>
+                                    <x-ui.button type="submit" variant="light-danger" size="sm">Hapus Foto</x-ui.button>
                                 </form>
                                 @endif
 
@@ -76,7 +76,7 @@
 
                     {{-- Update Profile Info --}}
                     <x-ui.section-card title="Informasi Profil" subtitle="Perbarui nama dan alamat email akun Anda.">
-                        <div class="p-6">
+                        <div class="p-5">
                             <form method="POST" action="{{ route('profile.info') }}"
                                   x-data="formValidation"
                                   @submit="if(!validateAll()) $event.preventDefault()"
@@ -85,7 +85,7 @@
                                 @csrf
                                 @method('PUT')
 
-                                <div class="d-flex flex-column gap-6">
+                                <div class="d-flex flex-column gap-5">
                                     <x-ui.form-field label="{{ __('Nama') }}" for="name">
                                         <input data-ui-input="metronic" type="text" id="name" name="name"
                                             value="{{ old('name', $user->name) }}"
@@ -111,7 +111,7 @@
                                     </div>
 
                                     <div class="d-flex align-items-center gap-4">
-                                        <button type="submit" class="btn btn-primary">{{ __('Simpan') }}</button>
+                                        <x-ui.button type="submit">{{ __('Simpan') }}</x-ui.button>
                                         @if(session('status') === 'profile-updated')
                                             <span class="text-success fs-8 fw-semibold">{{ __('Tersimpan.') }}</span>
                                         @endif
@@ -123,7 +123,7 @@
 
                     {{-- Update Password --}}
                     <x-ui.section-card title="Ubah Password" subtitle="Gunakan password yang panjang dan acak agar akun tetap aman.">
-                        <div class="p-6">
+                        <div class="p-5">
                             <form method="POST" action="{{ route('profile.password') }}"
                                   x-data="formValidation"
                                   @submit="if(!validateAll()) $event.preventDefault()"
@@ -132,7 +132,7 @@
                                 @csrf
                                 @method('PUT')
 
-                                <div class="d-flex flex-column gap-6">
+                                <div class="d-flex flex-column gap-5">
                                     <x-ui.form-field label="{{ __('Password Saat Ini') }}" for="current_password" data-validate="required">
                                         <div class="position-relative" x-data="{ show: false }">
                                             <input data-ui-input="metronic" :type="show ? 'text' : 'password'"
@@ -209,7 +209,7 @@
                                     </x-ui.form-field>
 
                                     <div class="d-flex align-items-center gap-4">
-                                        <button type="submit" class="btn btn-primary">{{ __('Simpan') }}</button>
+                                        <x-ui.button type="submit">{{ __('Simpan') }}</x-ui.button>
                                         @if(session('status') === 'password-updated')
                                             <span class="text-success fs-8 fw-semibold">{{ __('Password berhasil diubah.') }}</span>
                                         @endif
@@ -221,7 +221,7 @@
 
                     {{-- Account Governance --}}
                     <x-ui.section-card title="Pengelolaan Akun" subtitle="Akun pengguna terhubung dengan proses akreditasi dan audit sistem.">
-                        <div class="p-6">
+                        <div class="p-5">
                             <x-ui.alert variant="info" icon="shield-tick" title="Penghapusan akun dilakukan oleh admin" class="mb-0">
                                 Untuk menjaga riwayat akreditasi, audit trail, dan keterkaitan data antar role, penghapusan akun tidak tersedia sebagai aksi mandiri di halaman profil. Hubungi admin apabila akun perlu dinonaktifkan atau dikelola.
                             </x-ui.alert>
