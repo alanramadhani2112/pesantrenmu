@@ -134,13 +134,13 @@
                             </div>
                             <div class="col-md-4 text-end">
                                 @if($hasFile)
-                                    <span class="badge badge-light-success fs-8">
+                                    <x-ui.status-badge variant="success" class="fs-8">
                                         <x-ui.icon name="check-circle" class="fs-7 me-1" /> Terpenuhi
-                                    </span>
+                                    </x-ui.status-badge>
                                 @else
-                                    <span class="badge badge-light-warning fs-8">
+                                    <x-ui.status-badge variant="warning" class="fs-8">
                                         <x-ui.icon name="information-5" class="fs-7 me-1" /> Belum Lengkap
-                                    </span>
+                                    </x-ui.status-badge>
                                 @endif
                             </div>
                         </div>

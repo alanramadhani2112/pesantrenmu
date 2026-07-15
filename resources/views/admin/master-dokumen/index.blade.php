@@ -48,15 +48,15 @@
                         </td>
                         <td class="text-center">
                             @if($doc->category)
-                                <span class="badge badge-light-primary">{{ $doc->category->name }}</span>
+                                <x-ui.badge variant="primary">{{ $doc->category->name }}</x-ui.badge>
                             @else
                                 <span class="text-muted">-</span>
                             @endif
                         </td>
                         <td class="text-center">
-                            <span class="badge badge-light-{{ $doc->status ? 'success' : 'danger' }}">
+                            <x-ui.status-badge :variant="$doc->status ? 'success' : 'danger'">
                                 {{ $doc->status ? 'Aktif' : 'Nonaktif' }}
-                            </span>
+                            </x-ui.status-badge>
                         </td>
                         <td>{{ $doc->created_at->format('d M Y') }}</td>
                         <td class="text-end">

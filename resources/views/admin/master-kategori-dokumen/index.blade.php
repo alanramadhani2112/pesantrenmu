@@ -42,14 +42,14 @@
                         </td>
                         <td><code>{{ $cat->slug }}</code></td>
                         <td class="text-center">
-                            <span class="badge badge-light-{{ $cat->visibility === 'public' ? 'success' : 'warning' }}">
+                            <x-ui.badge :variant="$cat->visibility === 'public' ? 'success' : 'warning'">
                                 {{ ucfirst($cat->visibility) }}
-                            </span>
+                            </x-ui.badge>
                         </td>
                         <td class="text-center">
-                            <span class="badge badge-light-{{ $cat->is_active ? 'success' : 'danger' }}">
+                            <x-ui.status-badge :variant="$cat->is_active ? 'success' : 'danger'">
                                 {{ $cat->is_active ? 'Aktif' : 'Nonaktif' }}
-                            </span>
+                            </x-ui.status-badge>
                         </td>
                         <td class="text-center">{{ $cat->sort_order }}</td>
                         <td class="text-end">
