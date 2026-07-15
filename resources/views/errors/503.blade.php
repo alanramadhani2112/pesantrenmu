@@ -66,10 +66,9 @@
             @endif
 
             <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-                <a href="javascript:location.reload()" class="btn btn-primary fw-semibold px-6">
-                    <i class="ki-solid ki-arrows-circle fs-3 me-1"></i>
+                <x-ui.button href="javascript:location.reload()" class="px-6" icon="arrows-circle" icon-class="fs-3 me-1">
                     Coba Lagi
-                </a>
+                </x-ui.button>
             </div>
 
         </div>
