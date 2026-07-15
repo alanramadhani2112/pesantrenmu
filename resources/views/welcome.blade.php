@@ -53,7 +53,7 @@
                     <div class="spm-hero-layout">
                         <div class="spm-hero-text">
                             <div class="spm-hero-kicker">
-                                <span class="badge badge-light-success fw-semibold">Sistem Akreditasi Pesantren</span>
+                                <x-ui.badge variant="success">Sistem Akreditasi Pesantren</x-ui.badge>
                                 <span>Terpusat &bull; Tertata &bull; Mudah Dipantau</span>
                             </div>
                             <h1 class="spm-hero-headline">Sistem akreditasi pesantren yang lebih tertata.</h1>

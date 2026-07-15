@@ -92,7 +92,7 @@
 
                     <div class="px-6 pt-5 pb-4">
                         <div class="panduan-sidebar-panel">
-                            <span class="badge badge-light-primary fw-semibold mb-3">Panduan Sistem</span>
+                            <x-ui.badge variant="primary" class="mb-3">Panduan Sistem</x-ui.badge>
                             <div class="fw-semibold text-gray-900 fs-5 lh-sm">{{ $title }}</div>
                             <div class="text-gray-500 fs-8 mt-2">{{ count($sections) }} kelompok materi</div>
                         </div>
@@ -162,7 +162,7 @@
                                     <div class="card-body p-6 p-lg-8">
                                         <div class="d-flex flex-column flex-xl-row align-items-xl-center justify-content-between gap-6">
                                             <div class="min-w-0">
-                                                <span class="badge badge-light-primary fw-semibold mb-4">Dokumentasi Pengguna</span>
+                                                <x-ui.badge variant="primary" class="mb-4">Dokumentasi Pengguna</x-ui.badge>
                                                 <h2 class="fw-semibold text-gray-900 mb-3">{{ $title }}</h2>
                                                 <p class="text-gray-600 fs-6 mb-0">Ikuti urutan materi dari menu kiri untuk memahami alur kerja sesuai peran pengguna.</p>
                                             </div>
