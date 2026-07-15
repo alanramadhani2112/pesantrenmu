@@ -1,6 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">{{ __('Pengaturan Profil') }}</x-slot>
-
     <x-ui.page title="Pengaturan Profil" subtitle="Kelola nama, email, password, dan keamanan akun Anda.">
         <div class="row g-6 justify-content-center">
             <div class="col-xl-8">
