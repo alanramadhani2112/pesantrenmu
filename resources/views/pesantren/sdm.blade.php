@@ -157,7 +157,7 @@
             </div>
 
             {{-- Grand Total Summary --}}
-            <div class="card border border-primary border-dashed bg-light-primary spm-sdm-grand-total mb-0">
+            <div class="card border border-dashed border-gray-300 bg-body spm-sdm-grand-total mb-0">
                 <div class="card-body py-4 px-6">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                         <div class="d-flex align-items-center gap-3">

@@ -1,16 +1,16 @@
 <x-ui.section-card title="Ringkasan Skor">
-    <div class="p-6">
+    <div class="p-5">
         @if($scoreSummary['isPending'])
-            <div class="notice bg-light-warning rounded-3 p-4 mb-5" role="status">
+            <div class="notice bg-body border border-dashed border-gray-300 rounded p-4 mb-5" role="status">
                 <div class="fw-semibold text-warning mb-1">Menunggu NV lengkap</div>
                 <div class="text-muted fs-7">{{ $scoreSummary['pendingCount'] }} butir masih belum memiliki NV tersimpan.</div>
             </div>
         @endif
 
-        <div class="row g-5">
+        <div class="row g-4">
             @if($scoreSummary['isIpr'])
                 <div class="col-md-6">
-                    <div class="bg-light-info rounded-3 p-4 text-center">
+                    <div class="bg-body border border-dashed border-gray-300 rounded p-4 text-center">
                         <div class="text-muted fs-7 mb-2">IPR</div>
                         <div class="fw-semibold fs-3x text-info">{{ $scoreSummary['iprScore'] }}</div>
                         <div class="text-muted fs-7 mt-1">dari 100</div>
@@ -20,7 +20,7 @@
 
             @foreach($scoreSummary['komponenDetails'] as $detail)
                 <div class="col-md-6">
-                    <div class="bg-light-primary rounded-3 p-4 text-center">
+                    <div class="bg-body border border-dashed border-gray-300 rounded p-4 text-center">
                         <div class="text-muted fs-7 mb-2">{{ $detail['nama'] }}</div>
                         <div class="fw-semibold fs-3x text-primary">{{ $detail['score'] }}</div>
                         <div class="text-muted fs-7 mt-1">
@@ -31,7 +31,7 @@
             @endforeach
 
             <div class="col-12">
-                <div class="bg-light-success rounded-3 p-5 text-center">
+                <div class="bg-body border border-dashed border-gray-300 rounded p-4 text-center">
                     <div class="text-muted fs-7 mb-2">Skor Akhir</div>
                     <div class="fw-semibold fs-3x text-success">{{ $scoreSummary['isPending'] ? '-' : $scoreSummary['finalScore'] }}</div>
                     <div class="mt-3">
