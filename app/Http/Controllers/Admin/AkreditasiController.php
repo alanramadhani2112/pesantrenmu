@@ -22,7 +22,7 @@ class AkreditasiController extends Controller
     {
         abort_unless(auth()->user()->canAccessAdminArea(), 403);
 
-        $statusFilter = $request->input('statusFilter', 'pengajuan');
+        $statusFilter = $request->filled('statusFilter') ? (string) $request->input('statusFilter') : 'pengajuan';
         $search = $request->input('search', '');
         $perPage = $request->integer('perPage', 10);
         $sortField = $request->input('sortField', 'created_at');

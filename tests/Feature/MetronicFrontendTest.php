@@ -1121,6 +1121,17 @@ class MetronicFrontendTest extends TestCase
             ->assertSee('data-ui-simple-table="metronic"', false);
     }
 
+    public function test_admin_accreditation_list_defaults_when_status_filter_is_null(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $admin = User::query()->where('email', 'admin@spm.test')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->call('GET', '/admin/akreditasi', ['statusFilter' => null])
+            ->assertOk()
+            ->assertSee('data-admin-akreditasi-page="metronic"', false);
+    }
+
     public function test_user_module_list_pages_use_page_heading_and_reusable_tables(): void
     {
         $this->seed(DatabaseSeeder::class);
