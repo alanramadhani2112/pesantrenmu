@@ -175,7 +175,7 @@
 .panduan-hero,
 .panduan-content > .card,
 .panduan-section {
-    border: 1px solid var(--panduan-border) !important;
+    border: 1px solid var(--panduan-border);
     border-radius: 8px;
     box-shadow: 0 8px 26px rgba(15, 23, 42, 0.045);
 }
@@ -249,17 +249,17 @@
 .panduan-section-body ol.list-unstyled > li {
     min-height: 64px;
     padding: 16px;
-    margin-bottom: 0 !important;
+    margin-bottom: 0;
     background-color: #fbfcfe;
     border: 1px solid var(--panduan-border);
     border-radius: 8px;
 }
 
 .panduan-section-body ol.list-unstyled > li > .badge.rounded-circle {
-    width: 30px !important;
-    height: 30px !important;
+    width: 30px;
+    height: 30px;
     min-width: 30px;
-    background-color: var(--spm-primary) !important;
+    background-color: var(--spm-primary);
     box-shadow: 0 5px 12px rgba(var(--spm-primary-rgb), 0.2);
 }
 
@@ -288,8 +288,8 @@
     overflow: hidden;
     background:
         linear-gradient(180deg, #f8fafc, #ffffff);
-    border: 1px solid var(--panduan-border) !important;
-    border-radius: 8px !important;
+    border: 1px solid var(--panduan-border);
+    border-radius: 8px;
 }
 
 .panduan-section-body .card.card-flush.mt-6 {
@@ -304,7 +304,7 @@
 
 .panduan-content .small,
 .panduan-section-body .text-gray-500.small {
-    color: #7e8299 !important;
+    color: #7e8299;
     font-size: 12px;
     font-weight: 600;
 }
@@ -328,9 +328,9 @@
         bottom: 0;
         left: 0;
         z-index: 1050;
-        width: min(304px, calc(100vw - 28px)) !important;
+        width: min(304px, calc(100vw - 28px));
         max-width: calc(100vw - 28px);
-        flex: 0 0 min(304px, calc(100vw - 28px)) !important;
+        flex: 0 0 min(304px, calc(100vw - 28px));
         height: 100vh;
         transform: translateX(-106%);
         transition: transform 180ms ease;
@@ -351,13 +351,13 @@
     .panduan-hero .card-body,
     .panduan-section .card-body,
     .panduan-section .card-header {
-        padding-left: 18px !important;
-        padding-right: 18px !important;
+        padding-left: 18px;
+        padding-right: 18px;
     }
 
     .panduan-section-body ol.list-unstyled > li {
         padding: 14px;
-        gap: 12px !important;
+        gap: 12px;
     }
 
     .panduan-hero-metric {
