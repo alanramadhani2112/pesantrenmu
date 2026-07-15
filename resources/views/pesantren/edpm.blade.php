@@ -1,7 +1,5 @@
 @extends('layouts.app')
 
-@section('header', 'Evaluasi Diri Pesantren/Madrasah (EDPM)')
-
 @section('content')
 @php
     $isLocked = $pesantren->is_locked ?? false;
@@ -81,7 +79,7 @@
                         :aria-selected="activeGroup === 'edpm' ? 'true' : 'false'"
                         x-on:click.prevent="setGroup('edpm')">
                         Komponen EDPM
-                        <span class="badge badge-light-primary ms-2">{{ $edpmCount }}</span>
+                        <x-ui.badge variant="primary" class="ms-2">{{ $edpmCount }}</x-ui.badge>
                     </a>
                 </li>
                 @if($iprCount > 0)
@@ -91,7 +89,7 @@
                             :aria-selected="activeGroup === 'ipr' ? 'true' : 'false'"
                             x-on:click.prevent="setGroup('ipr')">
                             Komponen IPR
-                            <span class="badge badge-light-success ms-2">{{ $iprCount }}</span>
+                            <x-ui.badge variant="success" class="ms-2">{{ $iprCount }}</x-ui.badge>
                         </a>
                     </li>
                 @endif
@@ -166,7 +164,7 @@
                                                 <div>
                                                     <h3 class="spm-card-title text-gray-900 mb-1">
                                                         <span class="d-inline-flex align-items-center gap-2">
-                                                            <span class="badge badge-light-primary rounded-circle" x-text="kIndex + 1"></span>
+                                                            <span class="badge badge-primary rounded-circle" x-text="kIndex + 1"></span>
                                                             <span x-text="komponen ? komponen.nama : 'Komponen'"></span>
                                                         </span>
                                                     </h3>
@@ -241,7 +239,7 @@
                                                 <div>
                                                     <h3 class="spm-card-title text-gray-900 mb-1">
                                                         <span class="d-inline-flex align-items-center gap-2">
-                                                            <span class="badge badge-light-success rounded-circle" x-text="kIndex + 1"></span>
+                                                            <span class="badge badge-success rounded-circle" x-text="kIndex + 1"></span>
                                                             <span x-text="komponen ? komponen.nama : 'Komponen IPR'"></span>
                                                         </span>
                                                     </h3>
@@ -461,8 +459,8 @@ document.addEventListener('alpine:init', () => {
         },
 
         stepBadgeClass(index) {
-            if (index === this.activeStep) return 'badge-light-primary';
-            return 'badge-light-secondary';
+            if (index === this.activeStep) return 'badge-primary';
+            return 'badge-secondary';
         },
 
         appendStateTo(form) {
