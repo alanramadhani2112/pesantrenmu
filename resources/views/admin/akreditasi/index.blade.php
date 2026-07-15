@@ -2,26 +2,6 @@
 
 @section('content')
 @php
-    $statusVariantMap = [
-        0 => 'success',
-        -1 => 'danger', -2 => 'danger',
-        1 => 'warning',
-        2 => 'info',
-        3 => 'primary', 4 => 'primary', 5 => 'primary', 6 => 'primary',
-    ];
-
-    $stageMap = [
-        6 => ['label' => 'Pengajuan', 'variant' => 'primary'],
-        5 => ['label' => 'Verifikasi Berkas', 'variant' => 'warning'],
-        4 => ['label' => 'Review Asesor', 'variant' => 'info'],
-        3 => ['label' => 'Visitasi', 'variant' => 'info'],
-        2 => ['label' => 'Penilaian Pasca Visitasi', 'variant' => 'info'],
-        1 => ['label' => 'Validasi Admin', 'variant' => 'warning'],
-        0 => ['label' => 'Selesai', 'variant' => 'success'],
-        -1 => ['label' => 'Ditolak', 'variant' => 'danger'],
-        -2 => ['label' => 'Banding', 'variant' => 'warning'],
-    ];
-
     $activeCount = ($statusCounts['pengajuan'] ?? 0)
         + ($statusCounts['verifikasi'] ?? 0)
         + ($statusCounts['assessment'] ?? 0)
@@ -167,7 +147,7 @@
             <x-slot name="tbody">
                 @forelse ($akreditasis as $item)
                 @php
-                    $stage = $stageMap[(int) $item->status] ?? ['label' => 'Unknown', 'variant' => 'secondary'];
+                    $stage = \App\Support\AkreditasiStatusPresenter::stage($item->status);
                     $stageDate = match ((int) $item->status) {
                         6 => $item->created_at->format('d/m/y'),
                         5 => $item->created_at->format('d/m/y'),
@@ -177,8 +157,7 @@
                         1, 0, -1, -2 => $item->updated_at->format('d/m/y'),
                         default => '-',
                     };
-                    $statusVariant = $statusVariantMap[(int) $item->status] ?? 'secondary';
-                    $statusLabel = \App\Models\Akreditasi::getStatusLabel($item->status);
+                    $status = \App\Support\AkreditasiStatusPresenter::for($item->status);
                 @endphp
 
                 <tr>
@@ -217,7 +196,7 @@
 
                     <td class="text-center">
                         <div class="d-flex flex-column align-items-center gap-1">
-                            <x-ui.badge :variant="$statusVariant">{{ $statusLabel }}</x-ui.badge>
+                            <x-ui.status-badge :variant="$status['variant']">{{ $status['label'] }}</x-ui.status-badge>
                             @if ($item->status == 4)
                                 <x-ui.badge variant="info" class="fs-9">Pra Visitasi</x-ui.badge>
                             @endif

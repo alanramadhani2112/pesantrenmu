@@ -142,6 +142,15 @@
             <x-slot name="tbody">
                 @forelse ($assessments as $index => $item)
                 @if($item->akreditasi)
+                @php
+                    $akreditasiStatus = $item->akreditasi->catatans->whereNotNull('perbaikan')->filter(fn($c) => !empty($c->perbaikan))->isNotEmpty()
+                        ? ['label' => 'Perlu Revisi', 'variant' => 'danger']
+                        : \App\Support\AkreditasiStatusPresenter::for($item->akreditasi->status);
+
+                    if ((int) $item->akreditasi->status === \App\Models\Akreditasi::STATUS_VISITASI) {
+                        $akreditasiStatus['label'] = 'Visitasi Terjadwal';
+                    }
+                @endphp
                 <tr>
                     <td>
                         <span class="text-gray-900 fw-semibold fs-6">{{ $item->akreditasi->user?->pesantren?->nama_pesantren ?? $item->akreditasi->user?->name ?? 'N/A' }}</span>
@@ -152,21 +161,7 @@
                         </span>
                     </td>
                     <td class="text-center">
-                        @if($item->akreditasi->status == 0)
-                        <x-ui.status-badge variant="success">Selesai</x-ui.status-badge>
-                        @elseif($item->akreditasi->status == -1)
-                        <x-ui.status-badge variant="danger">Ditolak</x-ui.status-badge>
-                        @elseif($item->akreditasi->status == 1)
-                        <x-ui.status-badge variant="primary">Validasi Admin</x-ui.status-badge>
-                        @elseif($item->akreditasi->status == 2)
-                        <x-ui.status-badge variant="info">Penilaian Pasca Visitasi</x-ui.status-badge>
-                        @elseif($item->akreditasi->status == 3)
-                        <x-ui.status-badge variant="info">Visitasi Terjadwal</x-ui.status-badge>
-                        @elseif($item->akreditasi->catatans->whereNotNull('perbaikan')->filter(fn($c) => !empty($c->perbaikan))->isNotEmpty())
-                        <x-ui.status-badge variant="danger">Perlu Revisi</x-ui.status-badge>
-                        @else
-                        <x-ui.status-badge variant="warning">Review Berkas</x-ui.status-badge>
-                        @endif
+                        <x-ui.status-badge :variant="$akreditasiStatus['variant']">{{ $akreditasiStatus['label'] }}</x-ui.status-badge>
                     </td>
                     <td class="text-center text-muted fw-semibold">
                         @if($item->akreditasi->tgl_visitasi)
@@ -248,12 +243,9 @@
                     @csrf
                     <input type="hidden" name="akreditasi_id" x-model="jadwalForm.akreditasi_id">
 
-                    <div class="modal-header">
-                        <h5 class="modal-title">Atur Jadwal Visitasi</h5>
-                        <button type="button" class="btn-close" x-on:click="closeModals()"></button>
-                    </div>
+                    <x-ui.modal-header title="Atur Jadwal Visitasi" icon="calendar" x-on:close="closeModals()" />
 
-                    <div class="modal-body">
+                    <x-ui.modal-body>
                         <div class="bg-light rounded-4 p-6 border border-gray-200 mb-8">
                             <div class="mb-4">
                                 <p class="text-muted fs-8 fw-semibold text-uppercase mb-1">Pesantren</p>
@@ -289,12 +281,12 @@
                             <label class="form-label">Catatan Tambahan</label>
                             <textarea name="catatan" class="form-control" rows="4" placeholder="Contoh: Koordinasi kedatangan dengan pimpinan pesantren pukul 08.00 WIB."></textarea>
                         </div>
-                    </div>
+                    </x-ui.modal-body>
 
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" x-on:click="closeModals()">Batal</button>
-                        <button type="submit" class="btn btn-primary">Atur Jadwal Visitasi</button>
-                    </div>
+                    <x-ui.modal-footer>
+                        <x-ui.button type="button" variant="light" x-on:click="closeModals()">Batal</x-ui.button>
+                        <x-ui.button type="submit" variant="primary">Atur Jadwal Visitasi</x-ui.button>
+                    </x-ui.modal-footer>
                 </form>
             </div>
         </div>
@@ -308,12 +300,9 @@
                     @csrf
                     <input type="hidden" name="akreditasi_id" x-model="tolakForm.akreditasi_id">
 
-                    <div class="modal-header">
-                        <h5 class="modal-title text-danger">Tolak Dokumen</h5>
-                        <button type="button" class="btn-close" x-on:click="closeModals()"></button>
-                    </div>
+                    <x-ui.modal-header title="Tolak Dokumen" icon="cross-circle" variant="danger" x-on:close="closeModals()" />
 
-                    <div class="modal-body">
+                    <x-ui.modal-body>
                         <div class="bg-light rounded-4 p-6 border border-gray-200 mb-8">
                             <div class="mb-4">
                                 <p class="text-muted fs-8 fw-semibold text-uppercase mb-1">Pesantren</p>
@@ -346,12 +335,12 @@
                             <textarea name="catatan" class="form-control" rows="4" placeholder="Jelaskan secara spesifik bagian yang perlu diperbaiki." required minlength="10"></textarea>
                             @error('catatan') <div class="text-danger fs-7 mt-1">{{ $message }}</div> @enderror
                         </div>
-                    </div>
+                    </x-ui.modal-body>
 
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" x-on:click="closeModals()">Batal</button>
-                        <button type="submit" class="btn btn-danger">Tolak Dokumen</button>
-                    </div>
+                    <x-ui.modal-footer>
+                        <x-ui.button type="button" variant="light" x-on:click="closeModals()">Batal</x-ui.button>
+                        <x-ui.button type="submit" variant="danger">Tolak Dokumen</x-ui.button>
+                    </x-ui.modal-footer>
                 </form>
             </div>
         </div>
@@ -361,11 +350,8 @@
     <div x-show="showCatatanModal" x-cloak class="modal fade" x-bind:class="{ 'show d-block': showCatatanModal }" tabindex="-1" role="dialog" aria-modal="true" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Catatan Akreditasi</h5>
-                    <button type="button" class="btn-close" x-on:click="closeModals()"></button>
-                </div>
-                <div class="modal-body spm-modal-content-scroll">
+                <x-ui.modal-header title="Catatan Akreditasi" icon="document" x-on:close="closeModals()" />
+                <x-ui.modal-body class="spm-modal-content-scroll">
                     <div x-show="catatanLoading" class="text-center py-8">
                         <div class="spinner-border text-primary" role="status"></div>
                         <p class="text-muted mt-3">Memuat catatan...</p>
@@ -398,7 +384,7 @@
                             </div>
                         </template>
                     </div>
-                </div>
+                </x-ui.modal-body>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" x-on:click="closeModals()">Tutup</button>
                 </div>
@@ -491,7 +477,5 @@ function asesorAkreditasiPage() {
 </script>
 @endpush
 @endsection
-
-
 
 

@@ -92,18 +92,6 @@
         default => [],
     };
 
-    $statusVariantMap = [
-        6 => 'primary',
-        5 => 'warning',
-        4 => 'info',
-        3 => 'warning',
-        2 => 'info',
-        1 => 'warning',
-        0 => 'success',
-        -1 => 'danger',
-        -2 => 'warning',
-    ];
-
     $recentRouteFor = function ($uuid) use ($isAdmin, $isPesantren, $isAsesor) {
         if ($isAdmin) return route('admin.akreditasi-detail', $uuid);
         if ($isPesantren) return route('pesantren.akreditasi-detail', $uuid);
@@ -299,7 +287,7 @@
                                                     <div class="text-muted fw-semibold fs-7">Periode {{ $latestPesantrenActivity['periode'] ?? '-' }} - update {{ $latestPesantrenActivity['updated_at']->translatedFormat('d M Y, H:i') }}</div>
                                                 </div>
                                                 <div class="flex-shrink-0">
-                                                    <x-ui.status-badge :variant="$statusVariantMap[$latestPesantrenActivity['status']] ?? 'secondary'">
+                            <x-ui.status-badge :variant="\App\Support\AkreditasiStatusPresenter::variant($latestPesantrenActivity['status'])">
                                                         {{ $latestPesantrenActivity['status_label'] }}
                                                     </x-ui.status-badge>
                                                 </div>
@@ -624,7 +612,7 @@
                                         <td class="ps-4 fw-semibold text-gray-900">{{ $activity['periode'] ?? '-' }}</td>
                                         <td>{{ ucfirst($activity['tahapan'] ?? '-') }}</td>
                                         <td>
-                                            <x-ui.status-badge :variant="$statusVariantMap[$activity['status']] ?? 'secondary'">
+                                            <x-ui.status-badge :variant="\App\Support\AkreditasiStatusPresenter::variant($activity['status'])">
                                                 {{ $activity['status_label'] }}
                                             </x-ui.status-badge>
                                         </td>
@@ -673,7 +661,7 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <x-ui.status-badge :variant="$statusVariantMap[$activity['status']] ?? 'secondary'">
+                                        <x-ui.status-badge :variant="\App\Support\AkreditasiStatusPresenter::variant($activity['status'])">
                                                 {{ $activity['status_label'] }}
                                             </x-ui.status-badge>
                                         </td>
@@ -732,6 +720,5 @@
     </x-ui.page>
 </div>
 @endsection
-
 
 

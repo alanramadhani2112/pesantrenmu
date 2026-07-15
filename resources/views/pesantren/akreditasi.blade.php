@@ -1,38 +1,8 @@
 @extends('layouts.app')
 
-@section('header', 'Pusat Akreditasi')
-
 @section('content')
 @php
-    $statusBadgeClass = [
-        '6' => 'badge-light-primary',
-        '5' => 'badge-light-warning',
-        '4' => 'badge-light-info',
-        '3' => 'badge-light-warning',
-        '2' => 'badge-light-info',
-        '1' => 'badge-light-success',
-        '0' => 'badge-light-success',
-        '-1' => 'badge-light-danger',
-        'hasil_akhir' => 'badge-light-primary',
-    ];
-    $statusLabels = [
-        '6' => 'Pengajuan',
-        '5' => 'Verifikasi Berkas',
-        '4' => 'Assessment',
-        '3' => 'Visitasi',
-        '2' => 'Pasca Visitasi',
-        '1' => 'Validasi Admin',
-        '0' => 'Selesai',
-        '-1' => 'Perbaikan',
-        'hasil_akhir' => 'Hasil Akhir',
-    ];
-    $tahapanLabels = [
-        'pengajuan' => 'Pengajuan',
-        'verifikasi' => 'Verifikasi',
-        'visitasi' => 'Visitasi',
-        'penilaian' => 'Penilaian',
-        'hasil' => 'Hasil',
-    ];
+    $tahapanLabels = \App\Support\AkreditasiStatusPresenter::tahapanOptions();
     $focuses = [
         '' => 'Semua Proses',
         'perbaikan' => 'Perbaikan',
@@ -92,9 +62,9 @@
     $currentRoute = $focusRoutes[$focus] ?? $focusRoutes[''];
     $latestAkreditasi = $akreditasis->first();
     $latestStatusLabel = $latestAkreditasi
-        ? ($statusLabels[$latestAkreditasi->status] ?? $latestAkreditasi->status)
+        ? \App\Support\AkreditasiStatusPresenter::label($latestAkreditasi->status)
         : 'Belum Ada';
-    $activeStatusFilterLabel = $statusFilter !== '' ? ($statusLabels[$statusFilter] ?? 'Status '.$statusFilter) : null;
+    $activeStatusFilterLabel = $statusFilter !== '' ? \App\Support\AkreditasiStatusPresenter::label($statusFilter) : null;
 @endphp
 
 <div data-module-page="pesantren-akreditasi">
@@ -225,15 +195,13 @@
 
         <x-slot name="tbody">
             @forelse($akreditasis as $akreditasi)
-                @php $statusLabel = $statusLabels[$akreditasi->status] ?? $akreditasi->status; @endphp
+                @php($status = \App\Support\AkreditasiStatusPresenter::for($akreditasi->status))
                 <tr>
                     <td>{{ $loop->iteration + (($akreditasis->currentPage() - 1) * $akreditasis->perPage()) }}</td>
                     <td class="fw-semibold">{{ $akreditasi->id }}</td>
                     <td>{{ $akreditasi->created_at?->format('Y') ?? '-' }}</td>
                     <td>
-                        <span class="spm-status-badge badge {{ $statusBadgeClass[$akreditasi->status] ?? 'badge-light-secondary' }}">
-                            {{ $statusLabel }}
-                        </span>
+                        <x-ui.status-badge :variant="$status['variant']">{{ $status['label'] }}</x-ui.status-badge>
                     </td>
                     <td>{{ $akreditasi->created_at->format('d M Y') }}</td>
                     <td class="text-end">

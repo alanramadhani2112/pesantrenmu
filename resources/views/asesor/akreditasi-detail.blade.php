@@ -6,14 +6,7 @@
     use App\StateMachine\AkreditasiStateMachine;
     use Illuminate\Support\Facades\Storage;
 
-    $statusVariant = match ((int) $akreditasi->status) {
-        0 => 'success',
-        -1, -2 => 'danger',
-        1 => 'warning',
-        2 => 'info',
-        3, 4, 5, 6 => 'primary',
-        default => 'secondary',
-    };
+    $status = \App\Support\AkreditasiStatusPresenter::for($akreditasi->status);
 
     $ipmItems = [
         'nsp_file' => '1. Izin operasional Kementerian Agama (NSP)',
@@ -123,10 +116,10 @@
             <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-5">
                 <div class="min-w-0">
                     <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
-                        <x-ui.status-badge :variant="$statusVariant">
-                            {{ Akreditasi::getStatusLabel($akreditasi->status) }}
+                        <x-ui.status-badge :variant="$status['variant']">
+                            {{ $status['label'] }}
                         </x-ui.status-badge>
-                        <span class="badge badge-light-primary fw-semibold">{{ $asesorTipe === 1 ? 'Ketua Asesor' : 'Anggota Asesor' }}</span>
+                        <x-ui.badge variant="primary">{{ $asesorTipe === 1 ? 'Ketua Asesor' : 'Anggota Asesor' }}</x-ui.badge>
                     </div>
                     <h2 class="fw-semibold text-gray-900 mb-2 text-break">{{ $pesantren->nama_pesantren ?? $pesantren->name ?? '-' }}</h2>
                     <div class="text-muted fw-semibold lh-lg">{{ $pesantren->alamat ?? 'Alamat belum tersedia' }}</div>
