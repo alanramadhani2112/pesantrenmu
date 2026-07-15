@@ -31,14 +31,14 @@
             </x-ui.button>
         </x-slot:toolbar>
 
-        <div class="row g-6">
+        <div class="row g-5">
             {{-- Left column: Banding info + Actions --}}
             <div class="col-xl-4">
-                <div class="d-flex flex-column gap-6">
+                <div class="d-flex flex-column gap-5">
 
                     {{-- Alasan Banding --}}
                     <x-ui.section-card title="Alasan Banding">
-                        <div class="p-6">
+                        <div class="p-5">
                             <p class="text-gray-800 fs-6 mb-0">{{ $banding->alasan }}</p>
                         </div>
                     </x-ui.section-card>
@@ -46,7 +46,7 @@
                     {{-- Keputusan (if decided) --}}
                     @if($banding->keputusan)
                         <x-ui.section-card title="Keputusan">
-                            <div class="p-6">
+                            <div class="p-5">
                                 <p class="text-gray-800 fs-6 mb-2">{{ $banding->keputusan }}</p>
                                 @if($banding->decided_at)
                                     <div class="text-muted fs-8">Diputuskan: {{ $banding->decided_at->format('d/m/Y H:i') }}</div>
@@ -57,7 +57,7 @@
 
                     {{-- Actions --}}
                     <x-ui.section-card title="Tindakan">
-                        <div class="p-6">
+                        <div class="p-5">
                             @if($banding->status === 'pending')
                                 <x-ui.button type="button" @click="assignAction = 'assign'; showAssignModal = true" variant="primary" class="w-100 justify-content-center mb-3">
                                     <x-ui.icon name="profile-user" class="fs-4 me-2" />
@@ -135,7 +135,7 @@
                     {{-- Reviewer info --}}
                     @if($banding->reviewer)
                         <x-ui.section-card title="Reviewer">
-                            <div class="p-6">
+                    <div class="p-5">
                                 <div class="fw-semibold text-gray-900">{{ $banding->reviewer->name }}</div>
                                 <div class="text-muted fs-7">{{ $banding->reviewer->email }}</div>
                             </div>
@@ -146,12 +146,12 @@
 
             {{-- Right column: Akreditasi info + History --}}
             <div class="col-xl-8">
-                <div class="d-flex flex-column gap-6">
+                <div class="d-flex flex-column gap-5">
 
                     {{-- Akreditasi Info --}}
                     @if($banding->akreditasi)
                         <x-ui.section-card title="Informasi Akreditasi" subtitle="Data akreditasi yang menjadi dasar pengajuan banding.">
-                            <div class="p-6">
+                        <div class="p-5">
                                 <div class="row g-5">
                                     <x-ui.detail-item label="Pesantren" value="{{ $banding->akreditasi->user->pesantren->nama_pesantren ?? '-' }}" />
                                     <x-ui.detail-item label="Status Akreditasi" value="{{ \App\Models\Akreditasi::getStatusLabel($banding->akreditasi->status) }}" />
@@ -183,7 +183,7 @@
                     {{-- Previous Banding History --}}
                     @if($previousBandings->count() > 0)
                         <x-ui.section-card title="Riwayat Banding Sebelumnya" subtitle="Banding lain untuk akreditasi yang sama.">
-                            <div class="p-6">
+                        <div class="p-5">
                                 <div class="d-flex flex-column gap-4">
                                     @foreach($previousBandings as $prevBanding)
                                         @php
