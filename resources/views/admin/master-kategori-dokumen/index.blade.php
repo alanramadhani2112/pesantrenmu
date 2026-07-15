@@ -37,7 +37,7 @@
                 @forelse($categories as $cat)
                     <tr>
                         <td class="fw-semibold">
-                            <i class="ki-outline ki-{{ $cat->icon }} fs-6 me-2 text-primary"></i>
+                            <x-ui.icon :name="$cat->icon" class="fs-6 me-2 text-primary" />
                             {{ $cat->name }}
                         </td>
                         <td><code>{{ $cat->slug }}</code></td>

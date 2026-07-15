@@ -37,7 +37,7 @@
                     <tr>
                         <td>
                             <div class="d-flex align-items-center gap-2">
-                                <i class="ki-outline ki-file fs-4 text-primary"></i>
+                                <x-ui.icon name="file" class="fs-4 text-primary" />
                                 <div>
                                     <div class="fw-semibold">{{ $doc->title }}</div>
                                     @if($doc->description)
@@ -155,7 +155,7 @@
                     <div class="text-muted fs-8 mt-1">PDF, DOC, DOCX, XLS, XLSX. Maks 10MB.</div>
                     <template x-if="isEditing && currentFile">
                         <div class="mt-2 text-muted fs-8">
-                            <i class="ki-outline ki-paperclip fs-8"></i>
+                                <x-ui.icon name="paperclip" class="fs-8" />
                             File saat ini: <span x-text="currentFile" class="fw-semibold"></span>
                         </div>
                     </template>
