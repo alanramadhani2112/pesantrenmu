@@ -62,12 +62,10 @@
 
                     <div class="app-navbar d-flex align-items-stretch flex-shrink-0">
                         <div class="app-navbar-item d-flex align-items-center ms-1 ms-md-3">
-                            <a href="{{ route('dashboard') }}" class="btn btn-sm btn-light-primary">
-                                <i class="ki-duotone ki-element-11 fs-6 me-1">
-                                    <span class="path1"></span><span class="path2"></span><span class="path3"></span><span class="path4"></span>
-                                </i>
+                            <x-ui.button :href="route('dashboard')" variant="light-primary" size="sm">
+                                <x-ui.icon name="element-11" class="fs-6 me-1" />
                                 Dashboard
-                            </a>
+                            </x-ui.button>
                         </div>
                     </div>
                 </div>

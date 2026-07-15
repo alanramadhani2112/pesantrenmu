@@ -63,7 +63,7 @@
         {{-- Badge count --}}
         @if($badgeCount && $badgeCount > 0)
             <span class="menu-badge">
-                <span class="badge badge-sm badge-circle badge-primary">{{ $badgeCount }}</span>
+                <x-ui.badge variant="primary" :light="false" class="badge-sm badge-circle">{{ $badgeCount }}</x-ui.badge>
             </span>
         @endif
 
@@ -94,7 +94,7 @@
         {{-- Badge count --}}
         @if($badgeCount && $badgeCount > 0)
             <span class="menu-badge">
-                <span class="badge badge-sm badge-circle badge-primary">{{ $badgeCount }}</span>
+                <x-ui.badge variant="primary" :light="false" class="badge-sm badge-circle">{{ $badgeCount }}</x-ui.badge>
             </span>
         @endif
 
