@@ -19,7 +19,7 @@
         </a>
     </div>
 
-    <div class="card shadow-sm border-0 w-100 mw-450px">
+    <div class="card border border-dashed border-gray-300 w-100 mw-450px">
         <div class="card-body p-10 text-center">
 
             <div class="spm-error-icon-wrap spm-error-icon-wrap-primary">
