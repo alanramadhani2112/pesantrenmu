@@ -19,8 +19,6 @@
 @endphp
 
 <div x-data="{ showAssignModal: false, showDecisionModal: false, decisionType: '', assignAction: '' }">
-    <x-slot name="header">{{ __('Detail Banding') }}</x-slot>
-
     <x-ui.page
         title="Detail Banding #{{ $banding->id }}"
         subtitle="Diajukan: {{ $banding->created_at->format('d/m/Y H:i') }}"

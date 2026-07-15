@@ -48,8 +48,6 @@
     ];
 @endphp
 
-<x-slot name="header">{{ __('Detail Asesor') }}</x-slot>
-
 <x-ui.page title="Detail Asesor" subtitle="Profil lengkap, rekam jejak, dan dokumen pendukung asesor." class="spm-detail-page">
     <x-slot:toolbar>
         <x-ui.button :href="route('admin.asesor.index')" variant="light">
