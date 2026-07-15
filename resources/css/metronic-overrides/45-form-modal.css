@@ -192,15 +192,15 @@
 
 /* ── Body text (hitam) ── */
 .spm-text-body {
-    color: var(--spm-text-body) !important;
+    color: var(--spm-text-body);
 }
 
 .spm-text-heading {
-    color: var(--spm-text-heading) !important;
+    color: var(--spm-text-heading);
 }
 
 .spm-text-muted {
-    color: var(--spm-text-muted) !important;
+    color: var(--spm-text-muted);
 }
 
 .form-check {
@@ -218,16 +218,16 @@
     align-items: flex-start;
     padding-top: 24px;
     padding-bottom: 24px;
-    z-index: 1050 !important;
+    z-index: 1050;
 }
 
 .spm-modal-panel {
     --spm-modal-width: 720px;
     width: min(calc(100vw - 32px), var(--spm-modal-width));
-    max-width: var(--spm-modal-width) !important;
+    max-width: var(--spm-modal-width);
     border: 1px solid #eef2f7;
-    border-radius: 12px !important;
-    box-shadow: 0 24px 64px rgba(15, 23, 42, 0.18) !important;
+    border-radius: 12px;
+    box-shadow: 0 24px 64px rgba(15, 23, 42, 0.18);
     display: flex;
     flex-direction: column;
     max-height: calc(100vh - 48px);
@@ -268,8 +268,8 @@
 
 .spm-modal-header {
     align-items: flex-start;
-    padding: 24px 28px 18px !important;
-    border-bottom: 1px solid #eef2f7 !important;
+    padding: 24px 28px 18px;
+    border-bottom: 1px solid #eef2f7;
 }
 
 .spm-modal-header h2 {
@@ -283,8 +283,8 @@
 
 .spm-modal-header .text-muted {
     margin-top: 3px;
-    color: #7e8299 !important;
-    font-size: 13px !important;
+    color: #7e8299;
+    font-size: 13px;
     line-height: 1.45;
 }
 
@@ -300,15 +300,15 @@
     min-height: 0;
     max-height: calc(100vh - 176px);
     max-height: calc(100dvh - 176px);
-    padding: 22px 28px 20px !important;
+    padding: 22px 28px 20px;
     overflow-y: auto;
     overscroll-behavior: contain;
 }
 
 .spm-modal-footer {
     flex: 0 0 auto;
-    padding: 18px 28px 24px !important;
-    border-top: 1px solid #eef2f7 !important;
+    padding: 18px 28px 24px;
+    border-top: 1px solid #eef2f7;
     background-color: #ffffff;
 }
 
@@ -326,9 +326,9 @@
 
 .spm-form-field .form-label {
     margin-bottom: 8px;
-    color: #4b5675 !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
+    color: #4b5675;
+    font-size: 14px;
+    font-weight: 600;
     line-height: 1.35;
 }
 
@@ -359,7 +359,7 @@
 
 .spm-modal-body [data-ui-form-field] > .d-flex.align-items-center {
     flex-wrap: wrap;
-    gap: 12px 22px !important;
+    gap: 12px 22px;
 }
 
 [data-ui-checkbox="metronic"],
@@ -427,7 +427,7 @@
 
 [data-ui-checkbox="metronic"] .form-check-label,
 [data-ui-radio="metronic"] .form-check-label {
-    color: #4b5675 !important;
+    color: #4b5675;
     font-size: 14px;
     line-height: 1.35;
 }
@@ -449,7 +449,7 @@
 .spm-file-upload label {
     cursor: pointer;
     min-height: 76px;
-    border-radius: 10px !important;
+    border-radius: 10px;
     transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
@@ -461,7 +461,7 @@
     justify-content: center;
     padding: 22px;
     border: 1px dashed #d8e0ea;
-    border-radius: 8px !important;
+    border-radius: 8px;
     background-color: #fbfcfe;
 }
 
@@ -549,7 +549,7 @@
 
     .spm-modal-panel {
         width: calc(100vw - 20px);
-        max-width: calc(100vw - 20px) !important;
+        max-width: calc(100vw - 20px);
         max-height: calc(100vh - 20px);
         max-height: calc(100dvh - 20px);
     }
@@ -557,13 +557,13 @@
     .spm-modal-header,
     .spm-modal-body,
     .spm-modal-footer {
-        padding-right: 18px !important;
-        padding-left: 18px !important;
+        padding-right: 18px;
+        padding-left: 18px;
     }
 
     .spm-modal-footer {
         flex-direction: column-reverse;
-        align-items: stretch !important;
+        align-items: stretch;
     }
 
     .spm-modal-footer .btn {
@@ -622,8 +622,8 @@
 }
 
 .spm-file-upload label:hover {
-    border-color: rgba(var(--spm-primary-rgb), 0.35) !important;
-    background-color: var(--spm-primary-subtle) !important;
+    border-color: rgba(var(--spm-primary-rgb), 0.35);
+    background-color: var(--spm-primary-subtle);
 }
 
 /* ===== Navigation Progress Bar ===== */
