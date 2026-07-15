@@ -11,14 +11,7 @@
         'hasil' => 'Hasil',
         'banding' => 'Banding',
     ];
-    $statusLabel = \App\Models\Akreditasi::getStatusLabel($akreditasi->status);
-    $statusVariant = match ((int) $akreditasi->status) {
-        \App\Models\Akreditasi::STATUS_SELESAI => 'success',
-        \App\Models\Akreditasi::STATUS_DITOLAK => 'danger',
-        \App\Models\Akreditasi::STATUS_BANDING => 'warning',
-        \App\Models\Akreditasi::STATUS_PENGAJUAN => 'primary',
-        default => 'info',
-    };
+    $status = \App\Support\AkreditasiStatusPresenter::for($akreditasi->status);
     $asesorAssignments = $akreditasi->assessments
         ->sortBy('tipe')
         ->values();
@@ -46,7 +39,7 @@
     
     @php $activeRejection = $rejectionStatus['active'] ?? null; @endphp
     @if($activeRejection && $activeRejection->status === 'pending')
-        <div class="alert alert-dismissible bg-body border border-dashed border-gray-300 d-flex flex-wrap align-items-center justify-content-between gap-3 p-4 mb-6">
+        <div class="alert alert-dismissible bg-body border border-dashed border-gray-300 d-flex flex-wrap align-items-center justify-content-between gap-3 p-4 mb-5">
             <div class="d-flex align-items-center gap-3">
                 <x-ui.icon name="information-5" class="fs-2 text-warning" />
                 <div>
@@ -68,7 +61,7 @@
         <div class="card-body p-5 p-lg-6 d-flex flex-column flex-lg-row justify-content-between gap-4">
             <div class="min-w-0">
                 <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
-                    <x-ui.badge :variant="$statusVariant">{{ $statusLabel }}</x-ui.badge>
+                    <x-ui.badge :variant="$status['variant']">{{ $status['label'] }}</x-ui.badge>
                     <x-ui.status-badge variant="secondary">ID #{{ $akreditasi->id }}</x-ui.status-badge>
                     <x-ui.status-badge variant="secondary">Periode {{ $akreditasi->created_at?->format('Y') ?? '-' }}</x-ui.status-badge>
                 </div>
@@ -87,7 +80,7 @@
             <x-ui.stat-card label="Periode" value="{{ $akreditasi->created_at?->format('Y') ?? '-' }}" variant="primary" icon="calendar" />
         </div>
         <div class="col-lg-4">
-            <x-ui.stat-card label="Status" value="{{ $statusLabel }}" variant="info" icon="information-3" />
+            <x-ui.stat-card label="Status" value="{{ $status['label'] }}" :variant="$status['variant']" icon="information-3" />
         </div>
         <div class="col-lg-4">
             <x-ui.stat-card label="Tanggal Pengajuan" value="{{ $akreditasi->created_at?->format('d M Y') ?? '-' }}" variant="success" icon="calendar" />
@@ -308,7 +301,7 @@
                                     <td class="ps-5 spm-sdm-level-cell">
                                         <div class="d-flex align-items-center gap-3">
                                             <span class="symbol symbol-35px">
-                                                <span class="symbol-label bg-light-primary text-primary fw-semibold">{{ strtoupper(substr((string) $row->tingkat, 0, 2)) }}</span>
+                                                <span class="symbol-label bg-body border border-dashed border-gray-300 text-primary fw-semibold">{{ strtoupper(substr((string) $row->tingkat, 0, 2)) }}</span>
                                             </span>
                                             <span class="fw-semibold text-gray-900">{{ strtoupper($row->tingkat) }}</span>
                                         </div>
@@ -352,7 +345,7 @@
                                 <div class="spm-asesor-card h-100">
                                     <div class="d-flex align-items-start gap-4">
                                         <div class="symbol symbol-55px flex-shrink-0">
-                                            <div class="symbol-label bg-light-primary text-primary">
+                                            <div class="symbol-label bg-body border border-dashed border-gray-300 text-primary">
                                                 <x-ui.icon name="profile-user" class="fs-2x" />
                                             </div>
                                         </div>

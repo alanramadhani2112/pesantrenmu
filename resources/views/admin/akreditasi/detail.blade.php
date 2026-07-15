@@ -107,9 +107,9 @@
         </x-ui.button>
     </x-slot:toolbar>
 
-    <div class="row g-5 mb-6">
+    <div class="row g-5 mb-5">
         <div class="col-lg-4">
-                <x-ui.stat-card label="Status Pengajuan" value="{{ $status['label'] }}" variant="{{ $status['variant'] }}" icon="shield-tick" />
+            <x-ui.stat-card label="Status Pengajuan" value="{{ $status['label'] }}" :variant="$status['variant']" icon="shield-tick" />
         </div>
         <div class="col-lg-4">
             <x-ui.stat-card label="Tim Penilai" value="{{ $akreditasi->assessments->count() }} Asesor" variant="info" icon="profile-user" />
@@ -123,18 +123,18 @@
         :status="$akreditasi->status"
         title="Tahapan Akreditasi LP2M"
         subtitle="Pantau posisi pengajuan dari review awal, review asesor, visitasi, penilaian pasca visitasi, validasi admin, sampai hasil akhir."
-        class="mb-6"
+        class="mb-5"
     />
 
     {{-- Rejection History --}}
     @if(!empty($rejectionStatus) && ($rejectionStatus['count'] > 0 || $rejectionStatus['history']->count() > 0))
-        <div class="mb-6">
+        <div class="mb-5">
             @php
                 $adminFinalRejection = $rejectionStatus['history']->where('type', 'admin_final')->first();
             @endphp
             @if($adminFinalRejection)
                 <x-ui.section-card title="Detail Penolakan Final (Admin)" subtitle="Penolakan terstruktur oleh Admin pada tahap Validasi." class="mb-4">
-                    <div class="p-6">
+                    <div class="p-5">
                         <div class="d-flex flex-column gap-4">
                             @foreach($adminFinalRejection->categories ?? [] as $entry)
                                 <div class="spm-soft-panel">
@@ -154,7 +154,7 @@
 
             @if($rejectionStatus['history']->count() > 0)
                 <x-ui.section-card title="Riwayat Penolakan" subtitle="Catatan penolakan asesor dan admin untuk pengajuan ini.">
-                    <div class="p-6">
+                    <div class="p-5">
                         <div class="d-flex flex-column gap-4">
                             @foreach($rejectionStatus['history'] as $rejection)
                                 <div class="spm-soft-panel">
@@ -221,7 +221,7 @@
             </x-ui.tabs>
         </div>
 
-        <div class="spm-detail-tab-content p-6">
+        <div class="spm-detail-tab-content p-5">
             <div x-show="activeTab === 'profil'" x-cloak>
                 @include('admin.akreditasi.detail.tabs.profil')
             </div>
@@ -286,7 +286,7 @@
                 icon="arrows-circle"
             />
             <x-ui.modal-body>
-                <div class="notice d-flex bg-light-danger rounded border-danger border border-dashed p-4 mb-6">
+                <div class="notice d-flex bg-body rounded border border-dashed border-gray-300 p-4 mb-5">
                     <x-ui.icon name="warning-2" class="fs-2 text-danger me-4" />
                     <div class="d-flex flex-column">
                         <h4 class="mb-1 text-danger">Akreditasi Terlambat</h4>
