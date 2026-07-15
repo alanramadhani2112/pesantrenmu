@@ -2,8 +2,6 @@
 
 @section('content')
 <div x-data="accountsPage()" data-module-page="accounts">
-    <x-slot name="header">{{ __('Akun Pengguna') }}</x-slot>
-
     <x-ui.index-layout
         title="Akun Pengguna"
         subtitle="Kelola akun admin, asesor, dan pesantren dari satu daftar."
@@ -66,10 +64,10 @@
                             <div class="d-flex flex-column gap-1">
                                 <span class="text-gray-900 fw-semibold fs-6">{{ $user->name }}</span>
                                 @if ($user->sso_linked_at)
-                                    <span class="badge badge-light-success fs-8 fw-semibold">
-                                        <i class="ki-solid ki-shield-tick fs-7 me-1"></i>
+                                    <x-ui.badge variant="success" class="fs-8">
+                                        <x-ui.icon name="shield-tick" class="fs-7 me-1" />
                                         Linked to Muhammadiyah ID
-                                    </span>
+                                    </x-ui.badge>
                                 @endif
                             </div>
                         </div>

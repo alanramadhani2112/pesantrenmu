@@ -45,9 +45,9 @@
                         <div class="spm-soft-panel">
                             <div class="spm-detail-label">Peringkat Akreditasi</div>
                             <div class="d-flex flex-wrap gap-2 mt-1">
-                                <span class="badge badge-light-success">A (Unggul): 86–100</span>
-                                <span class="badge badge-light-primary">B (Baik Sekali): 71–85</span>
-                                <span class="badge badge-light-warning">C (Baik): &lt; 70</span>
+                                <x-ui.badge variant="success">A (Unggul): 86–100</x-ui.badge>
+                                <x-ui.badge variant="primary">B (Baik Sekali): 71–85</x-ui.badge>
+                                <x-ui.badge variant="warning">C (Baik): &lt; 70</x-ui.badge>
                             </div>
                         </div>
                     </div>
@@ -68,7 +68,7 @@
                             <tr>
                                 <td class="ps-4 fw-semibold">Mutu Lulusan</td>
                                 <td class="text-center">35</td>
-                                <td class="text-center pe-4" rowspan="4"><span class="badge badge-light-primary">70%</span></td>
+                            <td class="text-center pe-4" rowspan="4"><x-ui.badge variant="primary">70%</x-ui.badge></td>
                             </tr>
                             <tr>
                                 <td class="ps-4 fw-semibold">Proses Pembelajaran</td>
@@ -85,7 +85,7 @@
                             <tr>
                                 <td class="ps-4 fw-semibold">Indikator Pemenuhan Relatif</td>
                                 <td class="text-center">100</td>
-                                <td class="text-center pe-4"><span class="badge badge-light-success">30%</span></td>
+                            <td class="text-center pe-4"><x-ui.badge variant="success">30%</x-ui.badge></td>
                             </tr>
                         </tbody>
                     </x-ui.simple-table>
