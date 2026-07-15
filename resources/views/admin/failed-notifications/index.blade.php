@@ -7,7 +7,7 @@
         subtitle="Pantau dan kelola notifikasi yang gagal terkirim setelah semua percobaan ulang habis."
     >
         <x-slot name="toolbar">
-            <x-ui.badge variant="primary">Admin</x-ui.badge>
+            <x-ui.badge variant="secondary">Admin</x-ui.badge>
             @if($pendingCount > 0)
                 <x-ui.badge variant="danger">Pending: {{ $pendingCount }}</x-ui.badge>
             @endif
@@ -20,24 +20,20 @@
             :per-page-options="[15, 25, 50]"
         >
             <x-slot name="filters">
-                <form method="GET" action="{{ route('admin.failed-notifications') }}" id="fn-filter-form" class="mb-5">
+                <form method="GET" action="{{ route('admin.failed-notifications') }}" id="fn-filter-form">
                     <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-                        <a href="{{ route('admin.failed-notifications', array_merge(request()->except('status', 'page'), ['status' => 'pending'])) }}"
-                           class="btn btn-sm btn-{{ $statusFilter === 'pending' ? 'danger' : 'light' }}">
+                        <x-ui.button :href="route('admin.failed-notifications', array_merge(request()->except('status', 'page'), ['status' => 'pending']))" variant="{{ $statusFilter === 'pending' ? 'secondary' : 'light' }}" size="sm">
                             Pending
-                        </a>
-                        <a href="{{ route('admin.failed-notifications', array_merge(request()->except('status', 'page'), ['status' => 'resolved'])) }}"
-                           class="btn btn-sm btn-{{ $statusFilter === 'resolved' ? 'success' : 'light' }}">
+                        </x-ui.button>
+                        <x-ui.button :href="route('admin.failed-notifications', array_merge(request()->except('status', 'page'), ['status' => 'resolved']))" variant="{{ $statusFilter === 'resolved' ? 'secondary' : 'light' }}" size="sm">
                             Resolved
-                        </a>
-                        <a href="{{ route('admin.failed-notifications', array_merge(request()->except('status', 'page'), ['status' => 'dismissed'])) }}"
-                           class="btn btn-sm btn-{{ $statusFilter === 'dismissed' ? 'secondary' : 'light' }}">
+                        </x-ui.button>
+                        <x-ui.button :href="route('admin.failed-notifications', array_merge(request()->except('status', 'page'), ['status' => 'dismissed']))" variant="{{ $statusFilter === 'dismissed' ? 'secondary' : 'light' }}" size="sm">
                             Dismissed
-                        </a>
-                        <a href="{{ route('admin.failed-notifications', array_merge(request()->except('status', 'page'), ['status' => ''])) }}"
-                           class="btn btn-sm btn-{{ $statusFilter === '' ? 'primary' : 'light' }}">
+                        </x-ui.button>
+                        <x-ui.button :href="route('admin.failed-notifications', array_merge(request()->except('status', 'page'), ['status' => '']))" variant="{{ $statusFilter === '' ? 'secondary' : 'light' }}" size="sm">
                             Semua
-                        </a>
+                        </x-ui.button>
                     </div>
 
                     <div class="d-flex gap-3 align-items-center">

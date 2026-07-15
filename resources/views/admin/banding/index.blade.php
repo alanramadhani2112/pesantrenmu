@@ -7,7 +7,7 @@
         subtitle="Kelola pengajuan banding pesantren dari satu daftar."
     >
         <x-slot name="toolbar">
-            <x-ui.badge variant="primary">Admin</x-ui.badge>
+            <x-ui.badge variant="secondary">Admin</x-ui.badge>
             <x-ui.badge variant="warning">Tertunda: {{ $pendingCount }}</x-ui.badge>
         </x-slot>
 
@@ -63,7 +63,7 @@
                     };
                 @endphp
 
-                <tr class="{{ $isOverdue ? 'bg-light-danger' : '' }}">
+                <tr>
                     <td>
                         <div class="d-flex flex-column">
                             <span class="text-gray-900 fw-semibold fs-6">{{ $pesantrenName }}</span>

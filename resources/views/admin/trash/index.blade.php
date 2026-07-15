@@ -7,13 +7,13 @@
         subtitle="Pulihkan akreditasi yang terhapus atau hapus permanen sebelum batas retensi {{ $retentionDays }} hari berakhir."
     >
         <x-slot name="toolbar">
-            <x-ui.badge variant="primary">Admin</x-ui.badge>
+            <x-ui.badge variant="secondary">Admin</x-ui.badge>
             @if ($trashCount > 0)
                 <x-ui.badge variant="warning">Total: {{ $trashCount }}</x-ui.badge>
             @endif
         </x-slot>
 
-        <x-ui.card class="mb-6">
+        <x-ui.card class="mb-5">
             <div class="d-flex align-items-start gap-3 p-4">
                 <x-ui.icon name="information-5" class="fs-2x text-info" />
                 <div>
@@ -32,7 +32,7 @@
             :records="$trashedAkreditasis->appends(compact('search', 'perPage'))"
         >
             <x-slot name="filters">
-                <form method="GET" action="{{ route('admin.trash') }}" id="trash-filter-form" class="mb-5">
+                <form method="GET" action="{{ route('admin.trash') }}" id="trash-filter-form">
                     <div class="d-flex gap-3 align-items-center">
                         <x-datatable.search name="search" placeholder="Cari pesantren atau pengguna..." :value="$search" form="trash-filter-form" />
                     </div>
