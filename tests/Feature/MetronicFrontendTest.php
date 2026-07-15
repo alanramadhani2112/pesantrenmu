@@ -668,7 +668,7 @@ class MetronicFrontendTest extends TestCase
         $this->assertStringNotContainsString('spm-table-utility-row', $html);
         $this->assertStringContainsString('spm-table-footer', $html);
         $this->assertStringContainsString('Menampilkan 0-0 dari 0 entri', $html);
-        $this->assertStringContainsString('table table-striped table-row-bordered align-middle gy-5 gs-7', $html);
+        $this->assertStringContainsString('table align-middle table-row-dashed fs-6 gy-5', $html);
         $this->assertStringContainsString('spm-table--metronic-docs', $html);
         $this->assertStringContainsString('spm-datatable', $html);
         $this->assertStringContainsString('spm-table-search-input', $html);
@@ -703,7 +703,7 @@ class MetronicFrontendTest extends TestCase
 
         $this->assertStringContainsString('data-ui-table="metronic"', $html);
         $this->assertStringContainsString('data-ui-table-adapter="datatable"', $html);
-        $this->assertStringContainsString('table table-striped table-row-bordered align-middle gy-5 gs-7', $html);
+        $this->assertStringContainsString('table align-middle table-row-dashed fs-6 gy-5', $html);
         $this->assertStringContainsString('spm-table-footer--datatable', $html);
         $this->assertStringContainsString('spm-table-per-page--compact', $html);
         $this->assertStringContainsString('data-ui-table-search="metronic"', $html);
@@ -738,7 +738,7 @@ class MetronicFrontendTest extends TestCase
             </x-datatable.layout>
             BLADE, ['records' => $records]);
 
-        $this->assertStringContainsString('table table-striped table-row-bordered align-middle gy-5 gs-7', $html);
+        $this->assertStringContainsString('table align-middle table-row-dashed fs-6 gy-5', $html);
         $this->assertStringContainsString('spm-table-footer--datatable', $html);
         $this->assertStringContainsString('spm-table-footer-start', $html);
         $this->assertStringContainsString('spm-table-footer-end', $html);

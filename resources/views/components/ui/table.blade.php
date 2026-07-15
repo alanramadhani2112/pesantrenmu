@@ -31,7 +31,7 @@
     $usesDatatableAdapter = $attributes->has('data-ui-table-adapter');
     $showToolbarPerPage = $showPerPage && $perPagePosition === 'toolbar';
     $showFooterPerPage = $showPerPage && $perPagePosition === 'footer';
-    $defaultClasses = 'table table-striped table-row-bordered align-middle gy-5 gs-7 mb-0 spm-datatable spm-table spm-table--list spm-table--metronic-docs';
+    $defaultClasses = 'table align-middle table-row-dashed fs-6 gy-5 mb-0 spm-datatable spm-table spm-table--list spm-table--metronic-docs';
     $tableClasses = $tableClass ? trim($defaultClasses . ' ' . $tableClass) : $defaultClasses;
 @endphp
 
