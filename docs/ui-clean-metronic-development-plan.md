@@ -193,6 +193,115 @@ Role consistency: list structure same across roles; columns/actions may differ b
 
 Acceptance checklist: list page must support scan, filter, sort, row action, and empty/filter-empty state.
 
+## Table/List Contract
+
+Table/list pages are operational work surfaces. They must feel like one system across `admin`, `pesantren`, and `asesor` pages, even when columns and filters differ.
+
+### Card header
+
+- Use `x-ui.index-layout` for page shell and `x-ui.table` for the list card.
+- Left side: table title and short operational subtitle.
+- Right side: exactly one dominant page/card action when needed.
+- Create/add actions may use `variant="primary"`.
+- Export/import actions use `variant="secondary"` or `variant="light"` unless export is the page's main workflow.
+- Status counters in toolbar use `x-ui.badge`; they must not compete with the primary action.
+
+### Filter bar
+
+- Put search, selects, and filter actions in one compact `x-ui.filter-bar` row when viewport allows.
+- Search belongs left / flex-grow; select filters belong right.
+- Select filters should auto-submit when safe and current page already uses this pattern.
+- If a manual apply action is needed, use a small secondary/light button labeled `Terapkan` or `Cari`.
+- Do not use a full-width green/primary `Cari` button on operational list pages.
+- Do not stack filters into a form-like block unless the page is a search workflow, not a list page.
+
+### Button hierarchy in list pages
+
+- One primary action per list card/page section.
+- Search/filter submit is never the primary action for ordinary list pages.
+- Row actions use `x-ui.action-menu` or one compact secondary/light button.
+- Destructive row actions stay inside menu/modal with danger variant and confirmation.
+- Export is secondary unless there is no create/add action and export is the user's main task.
+
+### Table density and row actions
+
+- Use `x-ui.table`, `x-ui.table-th`, and the clean Metronic table class: `table align-middle table-row-dashed fs-6 gy-5`.
+- Keep action column on the far right with `align="end"`.
+- Keep status columns centered only when they are compact badges.
+- Avoid repeating large badges or icon clusters inside table rows.
+- Use `x-ui.empty-state` for empty and filter-empty results.
+
+### Bulk selection
+
+- Checkbox column is allowed only when a visible bulk action exists or is immediately revealed after selection.
+- If there is no bulk action, remove checkbox column from the list page.
+- Do not keep hidden `selectedIds` state without a user-visible bulk operation.
+
+### Allowed examples
+
+- `resources/views/admin/accounts/index.blade.php`: compact role filter tabs + search, one primary `Tambah Akun`, simple row action column.
+- `resources/views/admin/pesantren/index.blade.php`: compact search + select filters can be reused after export hierarchy is checked.
+
+### Forbidden examples
+
+- `resources/views/admin/asesor/index.blade.php` current drift: search + multiple selects plus primary `Cari` button that turns the filter area into a form block.
+- Full-width green `Cari` below filters on a list page.
+- Primary `Ekspor Data` and primary `Cari` competing in the same table card.
+- Checkbox column without visible bulk action.
+
+### Pilot target
+
+Start Phase 11 implementation with `resources/views/admin/asesor/index.blade.php`, then compare against `resources/views/admin/accounts/index.blade.php` before touching broader admin lists.
+
+## Button Hierarchy Contract
+
+- `primary`: create/add/start the main workflow for the current page or section.
+- `secondary` / `light`: filter apply, export, cancel, back, open supporting detail.
+- `danger`: destructive or rejection action, always with clear confirmation when data changes.
+- `icon-button`: compact utility only when label would be redundant and context is obvious.
+- Table row actions prefer `x-ui.action-menu`; only use direct buttons for one obvious safe action.
+- A card/section with more than one primary button must be refactored before it passes review.
+
+## Role Dashboard Grammar
+
+All role dashboards share one layout grammar:
+
+1. Page header and role context.
+2. Compact context summary, not ornamental hero noise.
+3. Metrics row using consistent card density.
+4. Primary work area for current role tasks.
+5. Secondary insight area for chart/status summary.
+6. Recent activity or operational list.
+
+Allowed differences by role: labels, data, route targets, and workflow-specific next actions.
+
+Not allowed: different spacing scale, different action hierarchy, decorative icon density, or role-specific visual style that makes dashboards feel like separate products.
+
+## Spacing and Density Scale
+
+- Default page section gap: `mb-5` or `row g-5` for dashboard/detail sections.
+- Compact list/filter gap: `gap-3` and `row g-3` for table toolbars and quick actions.
+- Card body padding defaults to `p-4` or `p-5`; avoid `p-6` unless the section is a single high-focus summary.
+- Avoid mixing `g-6`, `p-6`, and large colored surfaces in operational pages.
+- Use neutral surfaces (`bg-body`, dashed gray border) for supporting blocks; reserve colored backgrounds for alerts or critical workflow states.
+- A page should not add extra vertical spacing to compensate for inconsistent component structure; fix the component composition instead.
+
+## Icon Usage Rules
+
+- Icons must communicate action, status, navigation, or empty-state meaning.
+- Decorative icons are not allowed in dense tables or dashboard summary blocks.
+- List/table rows should use icons only inside action menus or status/action affordances.
+- Dashboard quick actions may use one icon per card, with neutral surface and consistent size.
+- Avoid role-specific icon styles; keep `x-ui.icon` as the default icon primitive.
+
+## Sidemenu Stability Rules
+
+- Sidemenu structure and visual hierarchy must stay stable across roles.
+- Active state, section spacing, icon size, and badge style must not vary per page.
+- Sidebar badges use `x-ui.badge` or existing sidebar component patterns, not raw badge markup.
+- Do not add page-specific ornament, extra shadows, or custom colors to sidemenu items.
+- Navigation copy stays domain-specific and concise: role, master data, akreditasi, dokumen, panduan, profil.
+
 ### Detail pages
 
 Skeleton:
