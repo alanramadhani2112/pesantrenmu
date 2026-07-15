@@ -46,7 +46,7 @@
     
     @php $activeRejection = $rejectionStatus['active'] ?? null; @endphp
     @if($activeRejection && $activeRejection->status === 'pending')
-        <div class="alert alert-dismissible bg-light-warning border border-warning border-dashed d-flex flex-wrap align-items-center justify-content-between gap-3 p-5 mb-6">
+        <div class="alert alert-dismissible bg-body border border-dashed border-gray-300 d-flex flex-wrap align-items-center justify-content-between gap-3 p-4 mb-6">
             <div class="d-flex align-items-center gap-3">
                 <x-ui.icon name="information-5" class="fs-2 text-warning" />
                 <div>
