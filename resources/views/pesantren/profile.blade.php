@@ -1,7 +1,5 @@
 @extends('layouts.app')
 
-@section('header', 'Profil Pesantren')
-
 @section('content')
 @php
     $isLocked = $pesantren->is_locked ?? false;

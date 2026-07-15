@@ -1,7 +1,5 @@
 @extends('layouts.app')
 
-@section('header', 'Detail Akreditasi')
-
 @section('content')
 @php
     $tabs = [

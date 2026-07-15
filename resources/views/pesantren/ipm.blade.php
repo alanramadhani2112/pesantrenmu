@@ -1,7 +1,5 @@
 ﻿@extends('layouts.app')
 
-@section('header', 'Indikator Pemenuhan Mutlak (IPM)')
-
 @section('content')
 @php
     $criteria = [
