@@ -12,8 +12,6 @@
         };
     @endphp
 
-    <x-slot name="header">{{ __($context['title']) }}</x-slot>
-
     <x-ui.page
         :title="$context['title']"
         :subtitle="$context['subtitle']"
@@ -385,9 +383,9 @@
                         </template>
                     </div>
                 </x-ui.modal-body>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" x-on:click="closeModals()">Tutup</button>
-                </div>
+                <x-ui.modal-footer>
+                    <x-ui.button type="button" variant="light" x-on:click="closeModals()">Tutup</x-ui.button>
+                </x-ui.modal-footer>
             </div>
         </div>
     </div>
@@ -477,5 +475,3 @@ function asesorAkreditasiPage() {
 </script>
 @endpush
 @endsection
-
-

@@ -38,13 +38,13 @@
                     <textarea class="form-control" name="catatan" id="rejectionExplanation" rows="4" placeholder="Jelaskan alasan penolakan dokumen..." required></textarea>
                 </div>
             </div>
-            <div class="modal-footer">
+            <x-ui.modal-footer>
                 <x-ui.button type="button" variant="light" x-on:click="$dispatch('close-modal', 'reject-documents-modal')">Batal</x-ui.button>
                 <x-ui.button type="button" variant="danger" x-on:click="confirmSubmitRejection()">
-                    <i class="ki-solid ki-cross-circle fs-4 me-1"></i>
+                    <x-ui.icon name="cross-circle" class="fs-4 me-1" />
                     Kirim Penolakan
                 </x-ui.button>
-            </div>
+            </x-ui.modal-footer>
         </form>
     </x-ui.modal>
 
@@ -67,12 +67,12 @@
                     <textarea class="form-control" name="catatan" id="catatanVisitasi" rows="3" placeholder="Catatan tambahan untuk visitasi..."></textarea>
                 </div>
             </div>
-            <div class="modal-footer">
+            <x-ui.modal-footer>
                 <x-ui.button type="button" variant="light" x-on:click="$dispatch('close-modal', 'schedule-visitasi-modal')">Batal</x-ui.button>
                 <x-ui.button type="submit" variant="info">
-                    <i class="ki-solid ki-calendar-add fs-4 me-1"></i>
+                    <x-ui.icon name="calendar-add" class="fs-4 me-1" />
                     Jadwalkan
                 </x-ui.button>
-            </div>
+            </x-ui.modal-footer>
         </form>
     </x-ui.modal>
