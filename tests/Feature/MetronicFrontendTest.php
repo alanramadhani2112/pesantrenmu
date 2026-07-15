@@ -59,6 +59,27 @@ class MetronicFrontendTest extends TestCase
         return $source;
     }
 
+    /**
+     * @return array<int, string>
+     */
+    private function bladeViewPaths(): array
+    {
+        $paths = [];
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator(resource_path('views'))
+        );
+
+        foreach ($iterator as $file) {
+            if ($file->isFile() && str_ends_with($file->getFilename(), '.blade.php')) {
+                $paths[] = $file->getPathname();
+            }
+        }
+
+        sort($paths);
+
+        return $paths;
+    }
+
     public function test_public_landing_page_describes_pesantren_accreditation_without_legacy_copy(): void
     {
         $this->withoutVite();
@@ -1317,6 +1338,55 @@ class MetronicFrontendTest extends TestCase
             foreach ($legacyMarkers as $marker) {
                 $this->assertStringNotContainsString($marker, $view, "{$path} should not contain legacy UI marker {$marker}");
             }
+        }
+    }
+
+    public function test_clean_metronic_guard_blocks_legacy_ui_patterns(): void
+    {
+        $badgeLightAllowed = [
+            'resources/views/components/ui/badge.blade.php',
+            'resources/views/components/ui/status-badge.blade.php',
+        ];
+
+        $modalInternalsAllowedPrefix = 'resources/views/components/ui/modal';
+
+        foreach ($this->bladeViewPaths() as $path) {
+            $relativePath = str_replace('\\', '/', str_replace(base_path().DIRECTORY_SEPARATOR, '', $path));
+            $view = file_get_contents($path);
+
+            if (! in_array($relativePath, $badgeLightAllowed, true)) {
+                $this->assertStringNotContainsString(
+                    'badge-light-',
+                    $view,
+                    "{$relativePath} should use x-ui.badge/status-badge or solid Metronic badges instead of raw badge-light-* classes."
+                );
+            }
+
+            if (! str_starts_with($relativePath, $modalInternalsAllowedPrefix)) {
+                $this->assertDoesNotMatchRegularExpression(
+                    '/<div\s+[^>]*class=["\'][^"\']*\bmodal-(header|body|footer)\b/',
+                    $view,
+                    "{$relativePath} should use x-ui.modal-header/body/footer instead of raw modal internals."
+                );
+            }
+
+            $this->assertDoesNotMatchRegularExpression(
+                '/(<x-slot\s+name=["\']header["\']|@section\(\s*["\']header["\'])/',
+                $view,
+                "{$relativePath} should use x-ui.page/index-layout headings instead of duplicate header slots or sections."
+            );
+
+            $this->assertDoesNotMatchRegularExpression(
+                '/\b(table-striped|table-row-bordered)\b/',
+                $view,
+                "{$relativePath} should use clean Metronic table-row-dashed table classes."
+            );
+
+            $this->assertDoesNotMatchRegularExpression(
+                '/\$(statusVariantMap|statusBadgeClass|stageMap|statusLabels)\b/',
+                $view,
+                "{$relativePath} should use AkreditasiStatusPresenter instead of local status maps."
+            );
         }
     }
 }
