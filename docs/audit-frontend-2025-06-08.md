@@ -1,8 +1,8 @@
 # Audit Frontend — Living Document
 
-**Terakhir di-update:** 8 Juni 2025 | **Sesi:** Super Admin Fixes Complete  
+**Terakhir di-update:** 15 Juli 2026 | **Sesi:** Post-PR frontend check
 **Cakupan:** 4 role (super_admin, admin, asesor, pesantren) + komponen shared  
-**Status:** ✅ Super Admin role — ALL ISSUES FIXED (8 file, 4 step) | ⬜ Admin role — belum diaudit
+**Status:** ✅ Build frontend pass | ✅ `MetronicFrontendTest` pass via `composer prod:check` | ⬜ Browser visual QA per role belum dieksekusi
 
 > Dokumen ini akan di-update terus seiring perbaikan. Setiap kali ada perubahan, update status di dokumen ini.
 
@@ -508,14 +508,16 @@ Catatan dari audit backend role Super Admin:
 
 ### Global (setelah super admin)
 
+> Update 15 Juli 2026: item 7-12 di bawah adalah temuan lama dari sesi 8 Juni. `composer prod:check` sekarang menjalankan `MetronicFrontendTest` dan pass; `npm run build` juga pass. Sisa risiko frontend adalah browser visual QA manual/otomatis per role sesuai `docs/ui-qa-checklist.md`, bukan blocker CI saat ini.
+
 | # | Prioritas | Item | Estimasi | Status |
 |---|---|---|---|---|
-| 7 | 🟡 P1 | Investigasi fix 404 `test_legacy_datatable_page_renders_metronic_table_adapter` | 30 menit | ⬜ Pending |
-| 8 | 🟡 P1 | Investigasi fix 2x 500 error di MetronicFrontendTest | 2 jam | ⬜ Pending |
-| 9 | 🟡 P1 | Fix 8 assertion mismatch di MetronicFrontendTest | 4 jam | ⬜ Pending |
-| 10 | 🟡 P1 | Fix 7 test full HTML page (bukan komponen) | 2 jam | ⬜ Pending |
+| 7 | 🟡 P1 | Investigasi fix 404 `test_legacy_datatable_page_renders_metronic_table_adapter` | 30 menit | ✅ Stale — covered by passing `MetronicFrontendTest` |
+| 8 | 🟡 P1 | Investigasi fix 2x 500 error di MetronicFrontendTest | 2 jam | ✅ Stale — `composer prod:check` pass |
+| 9 | 🟡 P1 | Fix 8 assertion mismatch di MetronicFrontendTest | 4 jam | ✅ Stale — `composer prod:check` pass |
+| 10 | 🟡 P1 | Fix 7 test full HTML page (bukan komponen) | 2 jam | ✅ Stale — `MetronicFrontendTest` pass |
 | 11 | 🔵 P2 | Ganti `fw-bold` → `fw-semibold` di 16 file | 1 jam | ⬜ Pending |
-| 12 | — | Re-run full test suite, target 0 failure | 5 menit | ⬜ Pending |
+| 12 | — | Re-run full test suite, target 0 failure | 5 menit | ✅ `composer prod:check` pass |
 
 ---
 
@@ -530,4 +532,4 @@ Catatan dari audit backend role Super Admin:
 | 8 Jun 2026 | Sinkron dengan audit backend Admin: UI Validasi Admin NV menunggu kontrak reason, Trash harus mengikuti route POST dengan body `id`, Failed Notifications memakai route name backend, dan filter Asesor menunggu perbaikan key backend. |
 | 8 Jun 2026 | Sinkron dengan audit backend Super Admin: permission matrix tidak mengelola role id `4`, role inti sebaiknya disabled dari delete/edit berbahaya, dan notifikasi Super Admin menunggu keputusan recipient backend. |
 | 8 Jun 2025 | ✅ **Super Admin role COMPLETE — 8 file fixed dalam 4 step.** Step 1: `action-message` (`legacy server binding.on` → `window.addEventListener`) + `accounts/index` (`init()` string→boolean). Step 2: `pesantren/index` (`json_encode($sortAsc)`) + `failed-notifications` (`route({id})`). Step 3: 5 view `callWire` cleanup (ganti inline Swal + form submit, hapus `adminManagement` dead code). Step 4: `banding/detail` (4x `legacy client binding` → Alpine modal + form POST). Semua perubahan hanya di Blade view, 0 production code. |
-
+| 15 Jul 2026 | Post-PR frontend check: `npm run build` pass, `composer prod:check` pass termasuk `MetronicFrontendTest`. Temuan lama 404/500/assertion mismatch ditandai stale. Browser visual QA per role masih perlu dieksekusi karena tidak ada script smoke Playwright tersimpan di repo. |
