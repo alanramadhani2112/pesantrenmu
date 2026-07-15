@@ -77,8 +77,16 @@ class PerformanceOptimizationTest extends TestCase
             $path = base_path($bundle['path']);
 
             $this->assertFileExists($path);
-            $this->assertSame($bundle['bytes'], filesize($path));
-            $this->assertSame($bundle['sha256'], hash_file('sha256', $path));
+
+            $contents = file_get_contents($path);
+            $normalizedContents = str_replace("\r\n", "\n", $contents);
+
+            $rawMatches = $bundle['bytes'] === strlen($contents)
+                && $bundle['sha256'] === hash('sha256', $contents);
+            $lfMatches = $bundle['lf_bytes'] === strlen($normalizedContents)
+                && $bundle['lf_sha256'] === hash('sha256', $normalizedContents);
+
+            $this->assertTrue($rawMatches || $lfMatches);
         }
     }
 

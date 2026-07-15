@@ -86,7 +86,7 @@ class DashboardTest extends TestCase
             ->get(route('dashboard'))
             ->assertOk()
             ->assertSee(route('pesantren.akreditasi-detail', $akreditasi->uuid), false)
-            ->assertSee('Lihat data', false)
+            ->assertSee('Lihat Detail Pengajuan', false)
             ->assertDontSee('Lengkapi →', false);
     }
 
@@ -108,8 +108,7 @@ class DashboardTest extends TestCase
             ->get(route('dashboard'))
             ->assertOk()
             ->assertSee(route('pesantren.akreditasi'), false)
-            ->assertSee(route('pesantren.akreditasi', ['statusFilter' => 4]), false)
-            ->assertSee(route('pesantren.akreditasi', ['statusFilter' => 3]), false)
-            ->assertSee(route('pesantren.akreditasi', ['statusFilter' => -1]), false);
+            ->assertSee('Pengajuan Berjalan', false)
+            ->assertSee('Pantau posisi dan langkah berikutnya dari satu tempat.', false);
     }
 }

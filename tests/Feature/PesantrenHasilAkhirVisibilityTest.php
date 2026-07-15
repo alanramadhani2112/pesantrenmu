@@ -40,7 +40,7 @@ class PesantrenHasilAkhirVisibilityTest extends TestCase
         $response->assertSee('Nilai Akhir');
         $response->assertSee('Peringkat');
         $response->assertSee('Nomor SK');
-        $response->assertSee('Unduh Sertifikat');
+        $response->assertSee('Sertifikat Akreditasi');
         $response->assertDontSee('NK');
         $response->assertDontSee('NV');
         $response->assertDontSee('NA1');

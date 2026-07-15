@@ -191,7 +191,7 @@ class HybridAccreditationFlowTest extends TestCase
             ->assertSeeText('Peringkat')
             ->assertSeeText((string) $final->peringkat)
             ->assertSeeText('Sertifikat')
-            ->assertSeeText('Unduh Sertifikat')
+            ->assertSeeText('Sertifikat Akreditasi')
             ->assertDontSeeText('NV')
             ->assertDontSeeText('NK')
             ->assertDontSee(route('admin.akreditasi-detail.approve', $akreditasi->uuid), false)
