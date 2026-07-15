@@ -133,17 +133,7 @@
 <div data-dashboard-page="metronic" data-dashboard-role="{{ $isAsesor ? 'asesor' : ($isPesantren ? 'pesantren' : ($isAdminArea ? 'admin' : 'user')) }}" x-data='dashboardCharts(@json($chartData), @json($stats))'>
     <x-ui.page title="Dashboard" :subtitle="$pageSubtitle">
         <x-slot name="toolbar">
-            <x-ui.badge variant="primary">{{ $roleLabel }}</x-ui.badge>
-
-            @if($isPesantren && $pesantrenNextAction && $stats['total_aktif'] === 0)
-                <x-ui.button :href="$pesantrenNextAction['route']" variant="primary" size="sm">
-                    {{ $pesantrenNextAction['label'] }}
-                </x-ui.button>
-            @elseif(! $isPesantren && $primaryAction)
-                <x-ui.button :href="$primaryAction['route']" variant="primary" size="sm">
-                    {{ $primaryAction['label'] }}
-                </x-ui.button>
-            @endif
+            <x-ui.badge variant="secondary">{{ $roleLabel }}</x-ui.badge>
         </x-slot>
 
         @unless($isPesantren && $latestPesantrenActivity && $stats['total_aktif'] > 0)
@@ -182,13 +172,13 @@
         @endunless
         {{-- Quick Actions --}}
         @if(count($quickActions) > 0 && ! $isPesantren && ! $isAsesor)
-            <div class="row g-3 g-md-4 mb-6 spm-dashboard-quick-actions">
+            <div class="row g-3 mb-6 spm-dashboard-quick-actions">
                 @foreach($quickActions as $action)
                     <div class="col-6 col-md-4 col-lg-3">
                         <a href="{{ $action['route'] }}"
-                           class="card border-0 shadow-sm h-100 text-decoration-none spm-quick-action spm-quick-action--dashboard">
-                            <div class="card-body d-flex flex-column align-items-center text-center p-4 p-md-5">
-                                <div class="symbol symbol-40px symbol-md-50px mb-3">
+                           class="card border border-dashed border-gray-300 h-100 text-decoration-none spm-quick-action spm-quick-action--dashboard">
+                            <div class="card-body d-flex flex-column align-items-center text-center p-4">
+                                <div class="symbol symbol-40px mb-3">
                                     <div class="symbol-label bg-light-{{ $action['variant'] }} text-{{ $action['variant'] }}">
                                         <x-ui.icon :name="$action['icon']" class="fs-3 fs-md-2" />
                                     </div>
@@ -208,13 +198,13 @@
         @endif
 
         @if($isSuperAdmin || $isAdmin)
-            <div class="row g-6">
+            <div class="row g-5">
                 <div class="col-12 col-lg-7 col-xl-8">
                     <x-ui.card title="Perlu Ditindaklanjuti" subtitle="Prioritas proses aktif yang membutuhkan perhatian admin." class="h-100 spm-dashboard-stat">
-                        <div class="row g-5">
+                        <div class="row g-4">
                             <div class="col-sm-6 col-md-4">
-                                <div class="rounded border border-dashed border-warning bg-light-warning p-5 h-100">
-                                    <x-ui.badge variant="warning" class="mb-4">Verifikasi</x-ui.badge>
+                                <div class="rounded border border-dashed border-gray-300 bg-body p-4 h-100">
+                                    <x-ui.badge variant="warning" class="mb-3">Verifikasi</x-ui.badge>
                                     <div class="fs-2x fw-semibold text-gray-900 mb-1">{{ $stats['verifikasi'] }}</div>
                                     <div class="text-muted fw-medium fs-8 mb-5">Pengajuan menunggu validasi awal.</div>
                                     <x-ui.button :href="route('admin.akreditasi')" variant="light-warning" size="sm">Buka Pengajuan</x-ui.button>
@@ -222,8 +212,8 @@
                             </div>
 
                             <div class="col-sm-6 col-md-4">
-                                <div class="rounded border border-dashed border-info bg-light-info p-5 h-100">
-                                    <x-ui.badge variant="info" class="mb-4">Penilaian</x-ui.badge>
+                                <div class="rounded border border-dashed border-gray-300 bg-body p-4 h-100">
+                                    <x-ui.badge variant="info" class="mb-3">Penilaian</x-ui.badge>
                                     <div class="fs-2x fw-semibold text-gray-900 mb-1">{{ $stats['assessment'] }}</div>
                                     <div class="text-muted fw-medium fs-8 mb-5">Pengajuan sedang dinilai asesor.</div>
                                     <x-ui.button :href="route('admin.akreditasi')" variant="light-info" size="sm">Pantau Proses</x-ui.button>
@@ -231,8 +221,8 @@
                             </div>
 
                             <div class="col-sm-6 col-md-4">
-                                <div class="rounded border border-dashed border-primary bg-light-primary p-5 h-100">
-                                    <x-ui.badge variant="primary" class="mb-4">Visitasi</x-ui.badge>
+                                <div class="rounded border border-dashed border-gray-300 bg-body p-4 h-100">
+                                    <x-ui.badge variant="primary" class="mb-3">Visitasi</x-ui.badge>
                                     <div class="fs-2x fw-semibold text-gray-900 mb-1">{{ $stats['visitasi'] }}</div>
                                     <div class="text-muted fw-medium fs-8 mb-5">Visitasi berjalan atau menunggu hasil.</div>
                                     <x-ui.button :href="route('admin.akreditasi')" variant="light" size="sm">Lihat Jadwal</x-ui.button>
@@ -396,14 +386,14 @@
                 @unless($hasActivePengajuan)
                 <div class="col-12 col-lg-4">
                     <x-ui.card title="Aksi Berikutnya" subtitle="Panduan singkat untuk langkah Anda." class="h-100 spm-dashboard-stat">
-                        <div class="p-6 d-flex flex-column gap-4">
-                            <div class="rounded bg-light-primary border border-primary border-dashed p-4">
+                        <div class="p-5 d-flex flex-column gap-4">
+                            <div class="rounded bg-body border border-dashed border-gray-300 p-4">
                                 <div class="fw-semibold text-gray-900 mb-1">{{ $nextActionTitle }}</div>
                                 <div class="text-muted fs-7">{{ $hasActivePengajuan ? 'Tidak perlu mengubah data kecuali ada catatan perbaikan.' : 'Mulai dari bagian yang belum lengkap.' }}</div>
                             </div>
 
                             @if($hasActivePengajuan)
-                                <div class="rounded bg-light-warning p-4">
+                                <div class="rounded bg-body border border-dashed border-gray-300 p-4">
                                     <div class="fw-semibold text-gray-900 mb-1">Data Pesantren Terkunci</div>
                                     <div class="text-muted fs-7">Profil, IPM, SDM, dan EDPM/IPR dikunci selama pengajuan berjalan.</div>
                                 </div>
@@ -720,5 +710,3 @@
     </x-ui.page>
 </div>
 @endsection
-
-
