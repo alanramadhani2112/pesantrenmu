@@ -70,7 +70,7 @@
         {{-- Static badge text (e.g. "Soon") --}}
         @if($badgeText)
             <span class="menu-badge">
-                <span class="badge badge-sm badge-light-warning fw-semibold">{{ $badgeText }}</span>
+                <x-ui.badge variant="warning" class="badge-sm">{{ $badgeText }}</x-ui.badge>
             </span>
         @endif
     </a>
@@ -101,7 +101,7 @@
         {{-- Static badge text (e.g. "Soon") --}}
         @if($badgeText)
             <span class="menu-badge">
-                <span class="badge badge-sm badge-light-warning fw-semibold">{{ $badgeText }}</span>
+                <x-ui.badge variant="warning" class="badge-sm">{{ $badgeText }}</x-ui.badge>
             </span>
         @endif
     </a>
