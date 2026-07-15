@@ -146,8 +146,8 @@ Resolved - vendor custom plugin ownership.
 
 P2 - override CSS besar.
 
-- Override layer berisi 18 modul, 8.942 line, 238.890 character.
-- `!important` debt is being reduced incrementally; low-risk utility overrides no longer use `!important`.
+- Override layer berisi 18 modul; six low-risk modules are now `!important`-free (`10-layout-header.css`, `30-detail-components.css`, `55-landing.css`, `55-landing-v3.css`, `56-auth-v3.css`, `95-spm-utilities.css`).
+- `!important` debt was reduced across foundation, panduan, dashboard, sidebar, admin, form-modal, typography, and detail modules; remaining flags are mostly structural/mobile drawer/table/legacy visual-normalization guards.
 - `:has()` selectors remain documented CSS debt; reduce only when changing related UI modules.
 - Continue consolidating CSS debt gradually so a future Metronic upgrade stays manageable.
 
@@ -175,7 +175,7 @@ P2 - override CSS besar.
 
 ### P2 - kurangi design debt override
 
-- Continue reducing `!important` only in low-risk, scoped modules first; avoid broad visual rewrites.
+- Continue reducing `!important` only where a selector is scoped and visually covered; avoid broad rewrites in `60-visual-normalization.css`, `90-sidebar-brand-guard.css`, and `85-pesantren-polish.css` without targeted screenshots.
 - Ganti override global dengan token atau component variant.
 - `docs/metronic-runtime-manifest.json` tracks Metronic version, demo, runtime policy, bundle size, and hashes.
 - Evaluasi upgrade `8.1.8 -> 8.3.x` sebagai proyek terpisah, bukan side quest saat polish.
@@ -201,14 +201,14 @@ P2 - override CSS besar.
 
 Yang sudah diverifikasi selama audit:
 
-- `git status --short`: ada 11 modified file user-owned sebelum laporan ini dibuat.
+- `git status --short`: clean after the latest Metronic cleanup commits.
 - Public docs recrawl: HTML `8.3.2`, Laravel `8.3.1`.
 - Source lokal: `C:\laragon\www\dist\dist`, `Product Version: 8.1.8`, demo42.
 - Hash 4 bundle runtime repo sama dengan source lokal.
 - Asset runtime repo now excludes unused `plugins/custom` payload.
 - Custom plugin folder removed: 63 files, 15.651.144 bytes deleted from public runtime.
 - Komponen Blade: 81 total, 49 `x-ui.*`.
-- Override CSS: 18 modules; `!important` debt is tracked incrementally with no-important guards on low-risk modules.
+- Override CSS: 18 modules; no-important guards cover six low-risk modules, and remaining flags are tracked as structural/legacy debt.
 - `git diff --check`: lulus setelah laporan dibuat.
 - `npm run build`: lulus pada task audit yang terinterupsi.
 - Asesor/sidebar test subset: lulus 36 test, 335 assertion pada task audit yang terinterupsi.
