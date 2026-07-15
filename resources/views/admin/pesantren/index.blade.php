@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div data-module-page="admin-pesantren" x-data="{ sortAsc: {{ json_encode($sortAsc) }}, sortField: '{{ $sortField }}', selectAll: false, selectedIds: [] }">
+<div data-module-page="admin-pesantren" x-data="{ sortAsc: {{ json_encode($sortAsc) }}, sortField: '{{ $sortField }}' }">
     <x-ui.index-layout
         title="Pesantren"
         subtitle="Kelola data pesantren, status akun, dan status akreditasi."
@@ -50,17 +50,13 @@
                     <input type="hidden" name="filterAkreditasi" value="{{ $filterAkreditasi }}">
                     <input type="hidden" name="sortField" :value="sortField">
                     <input type="hidden" name="sortAsc" :value="sortAsc">
-                    <x-ui.button type="submit" variant="primary" size="sm" icon="document">
+                    <x-ui.button type="submit" variant="secondary" size="sm" icon="document">
                         Ekspor Data
                     </x-ui.button>
                 </form>
             </x-slot>
 
             <x-slot name="thead">
-                <x-ui.table-th :min-width="false" align="center" class="w-60px">
-                    <x-ui.table-checkbox model="selectAll" label="Pilih semua pesantren" />
-                </x-ui.table-th>
-
                 <x-datatable.th field="name" :sortField="$sortField" :sortAsc="$sortAsc">
                     Nama Pesantren
                 </x-datatable.th>
@@ -72,9 +68,6 @@
             <x-slot name="tbody">
                 @forelse ($pesantrens as $user)
                 <tr>
-                    <td class="text-center">
-                        <x-ui.table-checkbox model="selectedIds" :value="$user->id" :label="'Pilih ' . ($user->pesantren->nama_pesantren ?? $user->name)" />
-                    </td>
                     <td>
                         <span class="text-gray-900 fw-semibold fs-6">{{ $user->pesantren->nama_pesantren ?? $user->name }}</span>
                     </td>
@@ -110,7 +103,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5">
+                    <td colspan="4">
                         <x-ui.empty-state title="Data tidak ditemukan" class="py-15" />
                     </td>
                 </tr>

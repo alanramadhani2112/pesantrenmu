@@ -37,7 +37,7 @@
                         <input type="hidden" name="sortField" value="{{ $sortField }}">
                         <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
 
-                        <x-ui.button type="submit" variant="primary" size="sm">
+                        <x-ui.button type="submit" variant="secondary" size="sm" class="flex-shrink-0">
                             <x-ui.icon name="magnifier" class="fs-5 me-1" />
                             Cari
                         </x-ui.button>
@@ -54,17 +54,13 @@
                     <input type="hidden" name="filterStatus" value="{{ $filterStatus }}">
                     <input type="hidden" name="sortField" value="{{ $sortField }}">
                     <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
-                    <x-ui.button type="submit" variant="primary" size="sm" icon="document">
+                    <x-ui.button type="submit" variant="secondary" size="sm" icon="document">
                         Ekspor Data
                     </x-ui.button>
                 </form>
             </x-slot>
 
             <x-slot name="thead">
-                <x-ui.table-th :min-width="false" align="center" class="w-60px">
-                    <x-ui.table-checkbox model="selectAll" label="Pilih semua asesor" />
-                </x-ui.table-th>
-
                 <x-datatable.th field="name" :sortField="$sortField" :sortAsc="$sortAsc">
                     Asesor
                 </x-datatable.th>
@@ -78,9 +74,6 @@
             <x-slot name="tbody">
                 @forelse ($asesors as $user)
                 <tr>
-                    <td class="text-center">
-                        <x-ui.table-checkbox model="selectedIds" :value="$user->id" :label="'Pilih ' . $user->name" />
-                    </td>
                     <td>
                         <span class="text-gray-900 fw-semibold fs-6">{{ $user->name }}</span>
                     </td>
@@ -155,7 +148,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7">
+                    <td colspan="6">
                         <x-ui.empty-state title="Data tidak ditemukan" class="py-15" />
                     </td>
                 </tr>
@@ -170,8 +163,6 @@
 <script>
     function asesorIndex() {
         return {
-            selectAll: false,
-            selectedIds: [],
             confirmToggle(event, id, currentStatus, name, label) {
                 const nextAction = Number(currentStatus) === 1 ? 'nonaktifkan' : 'aktifkan';
                 const title = `${nextAction.charAt(0).toUpperCase()}${nextAction.slice(1)} ${label}?`;
