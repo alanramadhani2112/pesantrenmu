@@ -30,12 +30,12 @@
                 </p>
 
                 <div class="spm-error-actions">
-                    <button type="button" onclick="window.location.reload()" class="btn btn-primary fw-semibold px-6">
+                    <x-ui.button type="button" onclick="window.location.reload()" class="px-6">
                         Coba Lagi
-                    </button>
-                    <a href="{{ url('/') }}" class="btn btn-light fw-semibold px-6">
+                    </x-ui.button>
+                    <x-ui.button :href="url('/')" variant="light" class="px-6">
                         Ke Beranda
-                    </a>
+                    </x-ui.button>
                 </div>
             </div>
         </section>

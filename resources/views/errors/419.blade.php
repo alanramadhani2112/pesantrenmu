@@ -30,12 +30,12 @@
                 </p>
 
                 <div class="spm-error-actions">
-                    <button type="button" onclick="window.location.reload()" class="btn btn-primary fw-semibold px-6">
+                    <x-ui.button type="button" onclick="window.location.reload()" class="px-6">
                         Muat Ulang
-                    </button>
-                    <a href="{{ url('/login') }}" class="btn btn-light fw-semibold px-6">
+                    </x-ui.button>
+                    <x-ui.button :href="url('/login')" variant="light" class="px-6">
                         Masuk Kembali
-                    </a>
+                    </x-ui.button>
                 </div>
             </div>
         </section>
