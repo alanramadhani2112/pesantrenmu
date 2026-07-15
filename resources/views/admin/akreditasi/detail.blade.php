@@ -3,17 +3,11 @@
 @section('content')
 @php
     use App\Models\Akreditasi;
+    use App\Support\AkreditasiStatusPresenter;
     use App\StateMachine\AkreditasiStateMachine;
     use Illuminate\Support\Facades\Storage;
 
-    $statusVariant = match ((int) $akreditasi->status) {
-        0 => 'success',
-        -1, -2 => 'danger',
-        1 => 'warning',
-        2 => 'info',
-        3, 4, 5, 6 => 'primary',
-        default => 'secondary',
-    };
+    $status = AkreditasiStatusPresenter::for($akreditasi->status);
 
     $canShowAdminScoring = in_array((int) $akreditasi->status, [
         AkreditasiStateMachine::STATUS_PASCA_VISITASI,
@@ -53,8 +47,6 @@
     ];
 @endphp
 
-<x-slot name="header">{{ __('Detail Akreditasi') }}</x-slot>
-
 <x-ui.page
     title="Detail Akreditasi"
     subtitle="{{ $pesantren?->nama_pesantren ?? $akreditasi->user->name }}"
@@ -63,8 +55,8 @@
 >
     <x-akreditasi.presence-indicator :akreditasi-id="$akreditasi->id" />
     <x-slot:toolbar>
-        <x-ui.status-badge :variant="$statusVariant">
-            {{ Akreditasi::getStatusLabel($akreditasi->status) }}
+        <x-ui.status-badge :variant="$status['variant']">
+            {{ $status['label'] }}
         </x-ui.status-badge>
 
         @if($isOverdue)
@@ -117,7 +109,7 @@
 
     <div class="row g-5 mb-6">
         <div class="col-lg-4">
-            <x-ui.stat-card label="Status Pengajuan" value="{{ Akreditasi::getStatusLabel($akreditasi->status) }}" variant="{{ $statusVariant }}" icon="shield-tick" />
+                <x-ui.stat-card label="Status Pengajuan" value="{{ $status['label'] }}" variant="{{ $status['variant'] }}" icon="shield-tick" />
         </div>
         <div class="col-lg-4">
             <x-ui.stat-card label="Tim Penilai" value="{{ $akreditasi->assessments->count() }} Asesor" variant="info" icon="profile-user" />
