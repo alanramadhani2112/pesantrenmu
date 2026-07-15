@@ -2,8 +2,6 @@
 
 @section('content')
 <div data-module-page="admin-pesantren" x-data="{ sortAsc: {{ json_encode($sortAsc) }}, sortField: '{{ $sortField }}', selectAll: false, selectedIds: [] }">
-    <x-slot name="header">{{ __('Pesantren') }}</x-slot>
-
     <x-ui.index-layout
         title="Pesantren"
         subtitle="Kelola data pesantren, status akun, dan status akreditasi."

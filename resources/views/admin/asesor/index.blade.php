@@ -2,8 +2,6 @@
 
 @section('content')
 <div data-module-page="admin-asesor" x-data="asesorIndex()">
-    <x-slot name="header">{{ __('Asesor') }}</x-slot>
-
     <x-ui.index-layout
         title="Asesor"
         subtitle="Kelola data asesor, status akun, dan riwayat penugasan."

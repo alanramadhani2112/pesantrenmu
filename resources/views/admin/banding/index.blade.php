@@ -2,8 +2,6 @@
 
 @section('content')
 <div data-admin-banding-page="metronic">
-    <x-slot name="header">{{ __('Banding') }}</x-slot>
-
     <x-ui.index-layout
         title="Banding"
         subtitle="Kelola pengajuan banding pesantren dari satu daftar."

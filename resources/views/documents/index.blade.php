@@ -29,10 +29,6 @@
         ]));
     @endphp
 
-    <x-slot name="header">
-        {{ $displayPageTitle }}
-    </x-slot>
-
     <x-ui.page
         :title="$displayPageTitle"
         :subtitle="$documentSubtitle"

@@ -2,8 +2,6 @@
 
 @section('content')
 <div data-admin-trash-page="metronic" x-data="adminTrashPage()">
-    <x-slot name="header">{{ __('Arsip Akreditasi') }}</x-slot>
-
     <x-ui.index-layout
         title="Arsip Akreditasi"
         subtitle="Pulihkan akreditasi yang terhapus atau hapus permanen sebelum batas retensi {{ $retentionDays }} hari berakhir."
