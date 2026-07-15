@@ -68,6 +68,7 @@
             "@php artisan optimize:clear --ansi"
         ],
         "prod:check": [
+            "Composer\\Config::disableProcessTimeout",
             "@php artisan test tests/Feature/ProductionReadinessTest.php tests/Feature/PerformanceOptimizationTest.php tests/Feature/MetronicFrontendTest.php --stop-on-failure"
         ],
         "post-autoload-dump": [

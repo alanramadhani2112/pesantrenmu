@@ -74,6 +74,9 @@ jobs:
       - name: Run Tests
         run: php artisan test --no-coverage
 
+      - name: Production Check
+        run: composer prod:check
+
   build:
     name: Build Frontend
     runs-on: ubuntu-latest
