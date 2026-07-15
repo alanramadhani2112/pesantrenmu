@@ -138,11 +138,10 @@
 
         @unless($isPesantren && $latestPesantrenActivity && $stats['total_aktif'] > 0)
         {{-- Greeting Hero --}}
-        <div class="spm-dashboard-hero rounded p-5 p-md-6 mb-6">
-            <div class="spm-hero-pattern"></div>
+        <div class="spm-dashboard-hero rounded p-5 mb-5">
             <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-4 position-relative">
                 <div class="d-flex flex-column flex-grow-1">
-                    <div class="text-white opacity-75 fw-semibold fs-8 fs-md-7 text-uppercase mb-1">{{ $today }}</div>
+                    <div class="text-white opacity-75 fw-semibold fs-8 fs-md-7 mb-1">{{ $today }}</div>
                     <h2 class="text-white fw-semibold fs-3 fs-md-2 mb-2">{{ $greeting }}, {{ $firstName }}.</h2>
                     <div class="text-white opacity-75 fw-semibold fs-7 fs-md-6">{{ $contextualMessage }}</div>
                 </div>
@@ -179,7 +178,7 @@
                            class="card border border-dashed border-gray-300 h-100 text-decoration-none spm-quick-action spm-quick-action--dashboard">
                             <div class="card-body d-flex flex-column align-items-center text-center p-4">
                                 <div class="symbol symbol-40px mb-3">
-                                    <div class="symbol-label bg-light-{{ $action['variant'] }} text-{{ $action['variant'] }}">
+                                    <div class="symbol-label bg-body border border-dashed border-gray-300 text-{{ $action['variant'] }}">
                                         <x-ui.icon :name="$action['icon']" class="fs-3 fs-md-2" />
                                     </div>
                                 </div>
@@ -200,7 +199,7 @@
         @if($isSuperAdmin || $isAdmin)
             <div class="row g-5">
                 <div class="col-12 col-lg-7 col-xl-8">
-                    <x-ui.card title="Perlu Ditindaklanjuti" subtitle="Prioritas proses aktif yang membutuhkan perhatian admin." class="h-100 spm-dashboard-stat">
+                    <x-ui.card title="Perlu Ditindaklanjuti" subtitle="Proses aktif yang perlu ditindaklanjuti admin." class="h-100 spm-dashboard-stat">
                         <div class="row g-4">
                             <div class="col-sm-6 col-md-4">
                                 <div class="rounded border border-dashed border-gray-300 bg-body p-4 h-100">
@@ -272,7 +271,7 @@
                                         <div class="rounded border border-dashed border-gray-300 bg-body p-4 h-100">
                                             <div class="d-flex flex-column flex-md-row justify-content-between gap-4">
                                                 <div>
-                                                    <div class="text-muted fw-semibold fs-8 text-uppercase mb-2">Tahap Saat Ini</div>
+                                <div class="text-muted fw-semibold fs-8 mb-2">Tahap saat ini</div>
                                                     <h3 class="fw-semibold text-gray-900 mb-2">{{ $latestPesantrenActivity['status_label'] }}</h3>
                                                     <div class="text-muted fw-semibold fs-7">Periode {{ $latestPesantrenActivity['periode'] ?? '-' }} - update {{ $latestPesantrenActivity['updated_at']->translatedFormat('d M Y, H:i') }}</div>
                                                 </div>
@@ -286,7 +285,7 @@
                                     </div>
                                     <div class="col-lg-4">
                                         <div class="rounded border border-dashed border-gray-300 bg-body p-4 h-100">
-                                            <div class="text-muted fw-semibold fs-8 text-uppercase mb-2">Langkah Berikut</div>
+                                <div class="text-muted fw-semibold fs-8 mb-2">Langkah berikut</div>
                                             <div class="fw-semibold text-gray-900 mb-2">{{ $nextActionTitle }}</div>
                                             <div class="text-muted fs-7">Data terkunci selama pengajuan diproses.</div>
                                         </div>
@@ -338,21 +337,21 @@
                     @else
                         <x-ui.card title="Kesiapan Pengajuan Akreditasi" subtitle="Lengkapi semua data berikut sebelum mengajukan akreditasi.">
                             <div class="d-flex flex-column gap-0">
-                                <div class="d-flex align-items-center justify-content-between px-6 pt-4 pb-3">
+                                <div class="d-flex align-items-center justify-content-between px-5 pt-4 pb-3">
                                     <span class="fw-semibold text-gray-900 fs-6">{{ $doneCount }}/{{ $totalSteps }} langkah selesai</span>
                                     <span class="fw-semibold fs-6 {{ $progressPercent >= 100 ? 'text-success' : 'text-primary' }}">{{ $progressPercent >= 100 ? 'Siap diajukan' : 'Belum lengkap' }}</span>
                                 </div>
 
-                                <div class="px-6 pb-5">
+                                <div class="px-5 pb-5">
                                     <x-ui.progress :value="$progressPercent" :variant="$progressPercent >= 100 ? 'success' : 'primary'" :label="'Kesiapan Data'" :meta="$progressPercent . '%'" class="spm-dashboard-progress" />
                                 </div>
 
                                 <div class="separator"></div>
 
                                 @foreach($readiness as $step)
-                                    <a href="{{ route($step['route']) }}" class="d-flex align-items-center gap-4 px-6 py-4 text-decoration-none border-bottom border-dashed spm-readiness-item {{ $step['done'] ? '' : 'spm-readiness-item-pending' }}">
+                                    <a href="{{ route($step['route']) }}" class="d-flex align-items-center gap-4 px-5 py-4 text-decoration-none border-bottom border-dashed spm-readiness-item {{ $step['done'] ? '' : 'spm-readiness-item-pending' }}">
                                         <div class="symbol symbol-35px flex-shrink-0">
-                                            <span class="symbol-label {{ $step['done'] ? 'bg-light-success text-success' : 'bg-light-warning text-warning' }} rounded-circle">
+                                            <span class="symbol-label bg-body border border-dashed border-gray-300 {{ $step['done'] ? 'text-success' : 'text-warning' }} rounded-circle">
                                                 <x-ui.icon :name="$step['done'] ? 'check' : 'information'" class="fs-4" />
                                             </span>
                                         </div>
@@ -367,7 +366,7 @@
                                 @endforeach
 
                                 @if($progressPercent >= 100)
-                                    <div class="px-6 py-5 bg-light-success">
+                                    <div class="px-5 py-4 bg-body border-top border-dashed">
                                         <div class="d-flex align-items-center gap-3">
                                             <x-ui.icon name="check-circle" class="fs-2x text-success" />
                                             <div>
@@ -473,7 +472,7 @@
                     <x-ui.card title="Ringkasan" subtitle="Status pekerjaan asesor saat ini." class="h-100 spm-asesor-summary-card spm-dashboard-stat">
                         <div class="d-flex flex-column gap-4">
                             <div class="rounded border border-dashed border-gray-300 bg-body p-4">
-                                <div class="text-muted fw-semibold fs-8 text-uppercase mb-2">Tugas aktif</div>
+                                <div class="text-muted fw-semibold fs-8 mb-2">Tugas aktif</div>
                                 <div class="fs-2x fw-semibold text-gray-900 mb-2">{{ $stats['total_aktif'] }}</div>
                                 <x-ui.button :href="route('asesor.akreditasi')" variant="light-primary" size="sm">Lihat Semua Tugas</x-ui.button>
                             </div>
@@ -489,7 +488,7 @@
         @endif
 
         @unless($isPesantren || $isAsesor)
-        <div class="row g-6 mt-0">
+        <div class="row g-5 mt-0">
             @foreach($statCards as $card)
                 <div class="col-6 col-lg-4">
                     <x-ui.stat-card
@@ -503,7 +502,7 @@
             @endforeach
         </div>
 
-        <div class="row g-6 mt-0">
+        <div class="row g-5 mt-0">
             <div class="col-12 col-lg-7 col-xl-8">
                 <x-ui.card title="Pengajuan Akreditasi per Bulan" subtitle="Tren pengajuan tahun {{ date('Y') }}" class="h-100 spm-dashboard-stat">
                     <x-slot name="toolbar">
@@ -543,7 +542,7 @@
                                 <canvas id="statusChart"></canvas>
                                 <div class="position-absolute top-50 start-50 translate-middle text-center pe-none">
                                     <span class="fs-2hx fw-semibold text-gray-900">{{ $stats['terakreditasi'] + $stats['ditolak'] }}</span>
-                                    <span class="d-block text-muted fw-semibold fs-8 text-uppercase">Selesai</span>
+                                <span class="d-block text-muted fw-semibold fs-8">Selesai</span>
                                 </div>
                             </div>
 
@@ -578,7 +577,7 @@
 
         @unless($isPesantren)
         {{-- Recent Activity --}}
-        <div class="row g-6 mt-0">
+                    <div class="row g-5 mt-0">
             <div class="col-12">
                 <x-ui.card
                     title="Aktivitas Terbaru"
@@ -638,7 +637,7 @@
                                         <td class="ps-4">
                                             <div class="d-flex align-items-center gap-3">
                                                 <div class="symbol symbol-40px flex-shrink-0">
-                                                    <div class="symbol-label bg-light-primary text-primary fw-semibold">
+                                                <div class="symbol-label bg-body border border-dashed border-gray-300 text-primary fw-semibold">
                                                         {{ strtoupper(substr($activity['pesantren_name'], 0, 1)) }}
                                                     </div>
                                                 </div>
