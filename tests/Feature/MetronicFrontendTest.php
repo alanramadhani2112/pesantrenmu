@@ -1387,6 +1387,18 @@ class MetronicFrontendTest extends TestCase
                 $view,
                 "{$relativePath} should use AkreditasiStatusPresenter instead of local status maps."
             );
+
+            $this->assertStringNotContainsString(
+                'shadow-sm',
+                $view,
+                "{$relativePath} should use neutral border/dashed surfaces instead of shadow-sm."
+            );
+
+            $this->assertStringNotContainsString(
+                'symbol-md-50px',
+                $view,
+                "{$relativePath} should keep dashboard/list icons compact instead of symbol-md-50px."
+            );
         }
     }
 }
