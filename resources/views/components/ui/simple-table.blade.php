@@ -4,7 +4,7 @@
 ])
 
 @php
-    $classes = 'table table-row-dashed table table-striped table-row-bordered align-middle gs-0 mb-0 spm-table spm-table--simple spm-simple-table';
+    $classes = 'table table-row-dashed align-middle fs-6 gs-0 mb-0 spm-table spm-table--simple spm-simple-table';
     $classes .= $dense ? ' gy-2 spm-table--dense spm-simple-table-dense' : ' gy-3';
     $classes = trim($classes . ' ' . $tableClass);
 @endphp
