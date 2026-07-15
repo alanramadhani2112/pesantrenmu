@@ -85,21 +85,21 @@
 }
 
 .spm-stat-card .fs-2 {
-    font-size: 1.75rem !important;
+    font-size: 1.75rem;
     line-height: 1.2;
 }
 
 /* ===== Quick Actions ===== */
 .spm-quick-action {
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-    border: 1px solid transparent !important;
+    border: 1px solid transparent;
     border-radius: 0.625rem;
 }
 
 .spm-quick-action:hover {
     transform: translateY(-3px);
-    border-color: rgba(var(--spm-primary-rgb), 0.18) !important;
-    box-shadow: 0 8px 24px rgba(var(--spm-primary-rgb), 0.10) !important;
+    border-color: rgba(var(--spm-primary-rgb), 0.18);
+    box-shadow: 0 8px 24px rgba(var(--spm-primary-rgb), 0.10);
 }
 
 .spm-quick-action .symbol-label {
@@ -140,7 +140,7 @@
 /* Hero banner adjustments on mobile */
 @media (max-width: 767.98px) {
     .spm-dashboard-hero {
-        padding: 1.5rem !important;
+        padding: 1.5rem;
     }
     .spm-dashboard-hero::before {
         width: 200px;
@@ -155,7 +155,7 @@
 /* Quick action cards more compact on mobile */
 @media (max-width: 575.98px) {
     .spm-quick-action .card-body {
-        padding: 1rem !important;
+        padding: 1rem;
     }
 }
 
