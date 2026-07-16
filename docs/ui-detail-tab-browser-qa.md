@@ -58,14 +58,20 @@ Evidence folder:
 - Tab dasar `Profil`, `IPM`, `SDM`, dan `EDPM` tersedia di semua role yang diuji.
 - Perbedaan jumlah tab sesuai scope role: admin punya tab audit/penilaian/laporan; pesantren punya tab hasil/asesor; asesor fokus pada data penilaian.
 
-### Visual inconsistencies to fix next
+## Re-run after tab casing fix
 
-1. **Casing label tab belum seragam.** Admin masih merender label uppercase (`PROFIL`, `LAPORAN VISITASI`, `AUDIT TRAIL`), sementara Pesantren/Asesor memakai Title Case. Standar detail page sebaiknya memakai Title Case untuk semua role.
-2. **Admin tab count paling panjang.** Tujuh tab bisa terasa padat pada layar kecil. Perlu dicek responsive/manual: jika wrap buruk, gabungkan tab sekunder ke dropdown atau kurangi padding tab.
-3. **Konten tab scoring/laporan butuh review manual.** QA screenshot berhasil, tetapi bagian tabel panjang dan form scoring tetap perlu review visual manusia karena screenshot full-page tidak menggantikan penilaian usability detail.
+Admin tab visual casing sudah diverifikasi ulang setelah CSS detail tab disesuaikan.
+
+| Role | URL | Screenshot | Result | Console error |
+| --- | --- | --- | --- | --- |
+| Admin/Super Admin | `/admin/akreditasi/ada01276-1092-49ee-9ed9-4575a5d27440` | `.sisyphus/evidence/ui-detail-page-standardization/browser-qa-tabs/admin-tabs-title-case-rerun.png` | Semua tab `text-transform: none` | 0 |
+
+### Visual inconsistencies to watch next
+
+1. **Admin tab count paling panjang.** Tujuh tab bisa terasa padat pada layar kecil. Perlu dicek responsive/manual: jika wrap buruk, gabungkan tab sekunder ke dropdown atau kurangi padding tab.
+2. **Konten tab scoring/laporan butuh review manual.** QA screenshot berhasil, tetapi bagian tabel panjang dan form scoring tetap perlu review visual manusia karena screenshot full-page tidak menggantikan penilaian usability detail.
 
 ## Recommended follow-up
 
-1. Patch casing tab admin dari uppercase ke Title Case.
-2. Review responsive tab admin pada viewport tablet/mobile.
-3. Lanjut mini-refactor hanya jika screenshot menunjukkan density/table/form drift nyata di tab `Nilai`, `Laporan Visitasi`, atau `Audit Trail`.
+1. Review responsive tab admin pada viewport tablet/mobile.
+2. Lanjut mini-refactor hanya jika screenshot menunjukkan density/table/form drift nyata di tab `Nilai`, `Laporan Visitasi`, atau `Audit Trail`.

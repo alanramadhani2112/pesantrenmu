@@ -951,7 +951,7 @@
     box-shadow: none !important;
     font-size: 13px !important;
     line-height: 1.2;
-    text-transform: none;
+    text-transform: none !important;
 }
 
 .spm-detail-tabs-shell .spm-tab-link.active {
