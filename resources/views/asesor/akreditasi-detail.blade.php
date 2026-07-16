@@ -181,11 +181,11 @@
             <x-ui.tabs>
                 @foreach($tabs as $key => $label)
                     <x-ui.tab
+                        :href="request()->fullUrlWithQuery(['tab' => $key])"
+                        :active="$activeTab === $key"
                         id="tab-{{ $key }}"
-                        x-bind:aria-selected="activeTab === '{{ $key }}' ? 'true' : 'false'"
                         aria-controls="panel-{{ $key }}"
-                        x-bind:class="{ 'active': activeTab === '{{ $key }}' }"
-                        x-on:click="activeTab = '{{ $key }}'">
+                    >
                         {{ $label }}
                     </x-ui.tab>
                 @endforeach
