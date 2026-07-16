@@ -1126,6 +1126,7 @@ class MetronicFrontendTest extends TestCase
     {
         $this->seed(DatabaseSeeder::class);
         $admin = User::query()->where('email', 'admin@spm.test')->firstOrFail();
+        Akreditasi::query()->create(['user_id' => 999_999, 'status' => Akreditasi::STATUS_PENGAJUAN]);
 
         $this->actingAs($admin)
             ->call('GET', '/admin/akreditasi', ['statusFilter' => null])

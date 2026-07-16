@@ -164,8 +164,10 @@
 
                     <td>
                         <div class="d-flex flex-column">
-                            <span class="text-gray-900 fw-semibold fs-6">{{ $item->user->pesantren->nama_pesantren ?? $item->user->name }}</span>
-                            <span class="text-muted fw-semibold fs-7">{{ $item->user->email }}</span>
+                            <span class="text-gray-900 fw-semibold fs-6">
+                                {{ $item->user?->pesantren?->nama_pesantren ?? $item->user?->name ?? 'Pesantren tidak tersedia' }}
+                            </span>
+                            <span class="text-muted fw-semibold fs-7">{{ $item->user?->email ?? '-' }}</span>
                         </div>
                     </td>
 
