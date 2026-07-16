@@ -1308,6 +1308,23 @@
     overflow-wrap: anywhere;
 }
 
+[data-module-page="asesor-akreditasi-detail"] .spm-document-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .85rem;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-document-item {
+    min-height: 58px;
+    border: 1px solid var(--spm-asesor-border);
+    border-radius: .85rem;
+}
+
+[data-module-page="asesor-akreditasi-detail"] .spm-document-item .symbol-label {
+    background: #f8fafc !important;
+    color: #0f766e !important;
+}
+
 [data-module-page="asesor-akreditasi-detail"] .spm-document-review-item {
     display: flex;
     align-items: center;
