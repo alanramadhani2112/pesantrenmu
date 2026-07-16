@@ -58,18 +58,18 @@
         </div>
     @endif
     <div class="spm-detail-hero card mb-5">
-        <div class="card-body p-5 p-lg-6 d-flex flex-column flex-lg-row justify-content-between gap-4">
+        <div class="card-body p-5 d-flex flex-column flex-lg-row justify-content-between gap-4">
             <div class="min-w-0">
                 <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
-                    <x-ui.badge :variant="$status['variant']">{{ $status['label'] }}</x-ui.badge>
-                    <x-ui.status-badge variant="secondary">ID #{{ $akreditasi->id }}</x-ui.status-badge>
-                    <x-ui.status-badge variant="secondary">Periode {{ $akreditasi->created_at?->format('Y') ?? '-' }}</x-ui.status-badge>
+                    <x-ui.status-badge :variant="$status['variant']">{{ $status['label'] }}</x-ui.status-badge>
+                    <x-ui.badge variant="secondary">ID #{{ $akreditasi->id }}</x-ui.badge>
+                    <x-ui.badge variant="secondary">Periode {{ $akreditasi->created_at?->format('Y') ?? '-' }}</x-ui.badge>
                 </div>
                 <h2 class="text-gray-900 fw-semibold mb-2">{{ $profil->nama_pesantren ?? 'Detail Akreditasi' }}</h2>
                 <div class="text-muted fw-semibold mw-700px">Pantau profil, dokumen, EDPM/IPR, asesor, dan hasil dalam satu alur pengajuan.</div>
             </div>
             <div class="spm-detail-hero-meta">
-                <div class="spm-detail-hero-label">Tanggal Pengajuan</div>
+                <div class="spm-detail-hero-label">Tanggal pengajuan</div>
                 <div class="spm-detail-hero-value">{{ $akreditasi->created_at?->format('d M Y') ?? '-' }}</div>
             </div>
         </div>

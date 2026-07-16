@@ -69,34 +69,34 @@
 
         @if($canConfirmVisitasi)
             <x-ui.button variant="success" x-on:click="confirmVisitasiSelesai()">
-                <i class="ki-solid ki-check-circle fs-4 me-1"></i>
+                <x-ui.icon name="check-circle" class="fs-4 me-1" />
                 Konfirmasi Visitasi Selesai
             </x-ui.button>
         @endif
 
         @if((int) $akreditasi->status === AkreditasiStateMachine::STATUS_PASCA_VISITASI && $asesorTipe === 1)
             <x-ui.button variant="primary" x-on:click="confirmFinalizeScoring()">
-                <i class="ki-solid ki-verify fs-4 me-1"></i>
+                <x-ui.icon name="verify" class="fs-4 me-1" />
                 Finalisasi Penilaian
             </x-ui.button>
         @endif
 
         @if($canSubmitDocumentRejection)
             <x-ui.button variant="warning" x-on:click="$dispatch('open-modal', 'reject-documents-modal')">
-                <i class="ki-solid ki-cross-circle fs-4 me-1"></i>
+                <x-ui.icon name="cross-circle" class="fs-4 me-1" />
                 Tolak Dokumen
             </x-ui.button>
         @endif
 
         @if($canScheduleVisitasi)
             <x-ui.button variant="info" x-on:click="$dispatch('open-modal', 'schedule-visitasi-modal')">
-                <i class="ki-solid ki-calendar-add fs-4 me-1"></i>
+                <x-ui.icon name="calendar-add" class="fs-4 me-1" />
                 Jadwalkan Visitasi
             </x-ui.button>
         @endif
 
         <x-ui.button :href="route('asesor.akreditasi')" variant="light">
-            <i class="ki-solid ki-arrow-left fs-4 me-1"></i>
+            <x-ui.icon name="arrow-left" class="fs-4 me-1" />
             Kembali
         </x-ui.button>
     </x-slot:toolbar>
@@ -109,8 +109,8 @@
         <x-ui.alert variant="danger" title="Gagal" class="mb-4">{{ session('error') }}</x-ui.alert>
     @endif
 
-    <div class="card spm-asesor-detail-hero mb-6">
-        <div class="card-body p-6 p-lg-8">
+    <div class="card spm-detail-hero spm-asesor-detail-hero mb-5">
+        <div class="card-body p-5">
             <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-5">
                 <div class="min-w-0">
                     <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
@@ -140,7 +140,7 @@
         </div>
     </div>
     {{-- Stats Row --}}
-    <div class="row g-5 mb-6">
+    <div class="row g-5 mb-5">
         <div class="col-lg-4">
             <x-ui.stat-card
                 label="Status Tugas"
@@ -172,12 +172,12 @@
         :status="$akreditasi->status"
         title="Tahapan Akreditasi LP2M"
         subtitle="Pantau posisi pengajuan dari review awal, review asesor, visitasi, penilaian pasca visitasi, validasi admin, sampai hasil akhir."
-        class="mb-6"
+        class="mb-5"
     />
 
     {{-- Tabs Navigation --}}
     <div class="spm-detail-tabs-shell" aria-label="Navigasi detail akreditasi">
-        <div data-ui-tabs="metronic" class="nav nav-tabs nav-line-tabs mb-6 spm-tabs-nav" role="tablist">
+        <div data-ui-tabs="metronic" class="nav nav-tabs nav-line-tabs mb-5 spm-tabs-nav" role="tablist">
         @foreach($tabs as $key => $label)
             <x-ui.button type="button" :unstyled="true"
                class="nav-item nav-link cursor-pointer spm-tab-link"
@@ -221,8 +221,8 @@
 
     {{-- Rejection Section (Asesor 1 Only) --}}
     @if($asesorTipe === 1 && !empty($rejectionStatus))
-        <x-ui.section-card title="Status Penolakan Dokumen" subtitle="Kelola penolakan dan perbaikan dokumen pesantren" class="mt-6">
-            <div class="p-6">
+        <x-ui.section-card title="Status Penolakan Dokumen" subtitle="Kelola penolakan dan perbaikan dokumen pesantren" class="mt-5">
+            <div class="p-5">
                 @if($rejectionStatus['status'] === 'pending' || $rejectionStatus['status'] === 'rejected')
                     <div class="d-flex align-items-center gap-3 mb-4">
                         <x-ui.badge variant="warning">
@@ -239,13 +239,13 @@
                                 @csrf
                                 <input type="hidden" name="akreditasi_id" value="{{ $akreditasi->id }}">
                                 <x-ui.button type="button" variant="success" x-on:click="confirmAcceptPerbaikan($el.closest('form'))">
-                                    <i class="ki-solid ki-check fs-4 me-1"></i>
+                                    <x-ui.icon name="check" class="fs-4 me-1" />
                                     Terima Perbaikan
                                 </x-ui.button>
                             </form>
                             @if($rejectionStatus['rejectionCount'] < $rejectionStatus['rejectionLimit'])
                                 <x-ui.button variant="danger" x-on:click="$dispatch('open-modal', 'reject-documents-modal')">
-                                    <i class="ki-solid ki-cross fs-4 me-1"></i>
+                                    <x-ui.icon name="cross" class="fs-4 me-1" />
                                     Tolak Lagi
                                 </x-ui.button>
                             @endif

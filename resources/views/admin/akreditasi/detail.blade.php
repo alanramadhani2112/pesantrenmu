@@ -49,7 +49,7 @@
 
 <x-ui.page
     title="Detail Akreditasi"
-    subtitle="{{ $pesantren?->nama_pesantren ?? $akreditasi->user->name }}"
+    subtitle="{{ $pesantren?->nama_pesantren ?? $akreditasi->user?->name ?? 'Pesantren tidak tersedia' }}"
     class="spm-detail-page"
     x-data="{ activeTab: '{{ $activeTab }}' }"
 >
@@ -106,6 +106,28 @@
             Kembali
         </x-ui.button>
     </x-slot:toolbar>
+
+    <div class="spm-detail-hero card mb-5">
+        <div class="card-body p-5 d-flex flex-column flex-lg-row justify-content-between gap-4">
+            <div class="min-w-0">
+                <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+                    <x-ui.status-badge :variant="$status['variant']">{{ $status['label'] }}</x-ui.status-badge>
+                    <x-ui.badge variant="secondary">ID #{{ $akreditasi->id }}</x-ui.badge>
+                    <x-ui.badge variant="secondary">Periode {{ $akreditasi->created_at?->format('Y') ?? '-' }}</x-ui.badge>
+                </div>
+                <h2 class="text-gray-900 fw-semibold mb-2 text-break">
+                    {{ $pesantren?->nama_pesantren ?? $akreditasi->user?->name ?? 'Pesantren tidak tersedia' }}
+                </h2>
+                <div class="text-muted fw-semibold mw-700px">
+                    Review status, dokumen, asesor, penilaian, dan riwayat pengajuan dalam satu halaman detail.
+                </div>
+            </div>
+            <div class="spm-detail-hero-meta">
+                <div class="spm-detail-hero-label">Fokus admin</div>
+                <div class="spm-detail-hero-value">Validasi dan tindak lanjut pengajuan</div>
+            </div>
+        </div>
+    </div>
 
     <div class="row g-5 mb-5">
         <div class="col-lg-4">
