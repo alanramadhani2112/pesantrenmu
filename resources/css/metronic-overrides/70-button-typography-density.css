@@ -9,29 +9,29 @@
 [data-ui-button="metronic"],
 .spm-btn,
 .btn.spm-btn {
-    min-height: 42px;
-    padding: 0.55rem 1.3rem;
+    min-height: 40px;
+    padding: 0.5rem 1.15rem;
     font-family: var(--bs-font-sans-serif) !important;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0;
     line-height: 1.35;
-    border-radius: 8px !important;
+    border-radius: 10px !important;
     border: 1px solid transparent;
     transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
 }
 
 [data-ui-button="metronic"].btn-sm,
 .spm-btn.btn-sm {
-    min-height: 34px;
-    padding: 0.35rem 0.9rem;
+    min-height: 32px;
+    padding: 0.32rem 0.8rem;
     font-size: 12px;
 }
 
 [data-ui-button="metronic"].btn-lg,
 .spm-btn.btn-lg {
-    min-height: 48px;
-    padding: 0.65rem 1.7rem;
+    min-height: 46px;
+    padding: 0.6rem 1.55rem;
     font-size: 14px;
 }
 
@@ -57,6 +57,20 @@ form[data-spm-submit-lock="active"] {
 .spm-btn.btn-light-danger,
 .spm-btn.btn-light-info {
     font-weight: 600;
+    border-color: #e6edf5 !important;
+    background-color: #f8fafc !important;
+}
+
+[data-ui-button="metronic"].btn-light,
+.spm-btn.btn-light {
+    color: #344054 !important;
+    border-color: #e6edf5 !important;
+    background-color: #f8fafc !important;
+}
+
+[data-ui-button="metronic"].btn-primary,
+.spm-btn.btn-primary {
+    box-shadow: none !important;
 }
 
 /* Icon-only buttons — compact */
@@ -352,4 +366,3 @@ body .font-monospace {
     font-family: "keenicons-solid" !important;
     font-weight: normal !important;
 }
-

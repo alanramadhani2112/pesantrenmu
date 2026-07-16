@@ -17,6 +17,56 @@
     border-bottom-color: var(--spm-primary) !important;
 }
 
+/* ===== SPM Clean Metronic component foundation ===== */
+.spm-card--clean {
+    border: 1px solid #e6edf5 !important;
+    border-radius: 12px !important;
+    background-color: #ffffff !important;
+    box-shadow: none !important;
+}
+
+.spm-card--clean > .card-header,
+.spm-card-header,
+.spm-section-card-header {
+    min-height: auto !important;
+    padding: 1.25rem 1.5rem 1rem !important;
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #eef2f7 !important;
+}
+
+.spm-card-body:not(.p-0),
+.spm-card--clean > .card-body:not(.p-0) {
+    padding: 1.25rem 1.5rem !important;
+}
+
+.spm-section-card-accent {
+    width: 2px;
+    height: 20px;
+    background-color: #d0d5dd;
+}
+
+.spm-filter-bar--clean {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.spm-filter-bar--clean > * {
+    margin-bottom: 0 !important;
+}
+
+.spm-badge,
+.spm-status-badge {
+    border-radius: 999px;
+    padding: 0.42em 0.78em;
+    letter-spacing: 0;
+}
+
+.spm-badge--soft {
+    border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
 /* Breadcrumb dot separator */
 .breadcrumb-dot .breadcrumb-item + .breadcrumb-item::before {
     content: "\2022";
