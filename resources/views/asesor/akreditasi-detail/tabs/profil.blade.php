@@ -71,19 +71,9 @@
 {{-- Dokumen Utama --}}
 <x-ui.section-card title="Dokumen Utama" subtitle="Dokumen utama kelengkapan akreditasi" class="mt-4 spm-asesor-document-panel">
 <div class="p-5">
-        <div class="row g-3">
+        <div class="spm-document-grid">
             @foreach($dokumenUtama as $field => $label)
-                <div class="col-md-6">
-                    <div class="spm-document-review-item">
-                        @if(!empty($pesantren->$field))
-<x-ui.icon name="check-circle" class="text-success fs-5" />
-                            <a data-ui-document-item="metronic" href="{{ Storage::url($pesantren->$field) }}" target="_blank" class="text-primary fw-semibold fs-7">{{ $label }}</a>
-                        @else
-<x-ui.icon name="cross-circle" class="text-muted fs-5" />
-                            <span data-ui-document-item="metronic" class="text-muted fs-7">{{ $label }}</span>
-                        @endif
-                    </div>
-                </div>
+                <x-ui.document-item :label="$label" :href="!empty($pesantren->$field) ? Storage::url($pesantren->$field) : null" />
             @endforeach
         </div>
     </div>
@@ -92,19 +82,9 @@
 {{-- Dokumen Sekunder --}}
 <x-ui.section-card title="Dokumen Sekunder" subtitle="Dokumen pendukung akreditasi" class="mt-4 spm-asesor-document-panel">
 <div class="p-5">
-        <div class="row g-3">
+        <div class="spm-document-grid">
             @foreach($dokumenSekunder as $field => $label)
-                <div class="col-md-6">
-                    <div class="spm-document-review-item">
-                        @if(!empty($pesantren->$field))
-<x-ui.icon name="check-circle" class="text-success fs-5" />
-                            <a data-ui-document-item="metronic" href="{{ Storage::url($pesantren->$field) }}" target="_blank" class="text-primary fw-semibold fs-7">{{ $label }}</a>
-                        @else
-<x-ui.icon name="cross-circle" class="text-muted fs-5" />
-                            <span data-ui-document-item="metronic" class="text-muted fs-7">{{ $label }}</span>
-                        @endif
-                    </div>
-                </div>
+                <x-ui.document-item :label="$label" :href="!empty($pesantren->$field) ? Storage::url($pesantren->$field) : null" />
             @endforeach
         </div>
     </div>
