@@ -31,7 +31,7 @@
         </x-ui.button>
     </x-slot:toolbar>
 
-    <div class="row g-5 mb-6">
+    <div class="row g-5 mb-5">
         <div class="col-lg-4">
             <x-ui.stat-card label="Status SDM" value="{{ $isLocked ? 'Terkunci' : 'Aktif' }}" variant="{{ $isLocked ? 'warning' : 'success' }}" icon="shield-tick" />
         </div>
@@ -68,7 +68,7 @@
             @csrf
 
             @if($errors->any())
-                <x-ui.alert variant="danger" title="Data SDM belum valid" class="mb-6">
+                <x-ui.alert variant="danger" title="Data SDM belum valid" class="mb-5">
                     <ul class="mb-0 ps-4">
                         @foreach($errors->all() as $message)
                             <li>{{ $message }}</li>
@@ -87,17 +87,17 @@
                         $catTotal += (int) ($data[$level][$catKey . '_p'] ?? 0);
                     }
                 @endphp
-                <x-ui.section-card :title="$category['label']" subtitle="Input rekap per unit layanan" class="mb-6">
+                <x-ui.section-card :title="$category['label']" subtitle="Input rekap per unit layanan" class="mb-5">
                     <x-ui.simple-table class="spm-table-compact p-4" table-class="table-bordered">
                         <thead>
                             <tr class="bg-light">
                                 <x-ui.table-th align="center" style="min-width:120px;">Kategori</x-ui.table-th>
                                 @foreach($levels as $level)
-                                    <x-ui.table-th align="center" class="text-uppercase" style="min-width:90px;">
+                                    <x-ui.table-th align="center" style="min-width:90px;">
                                         {{ str_replace(['satuan_pesantren_muadalah_(SPM)'], ['SPM'], $level) }}
                                     </x-ui.table-th>
                                 @endforeach
-                                <x-ui.table-th align="center" class="bg-light-primary" style="min-width:80px;">Total</x-ui.table-th>
+                                    <x-ui.table-th align="center" class="bg-body" style="min-width:80px;">Total</x-ui.table-th>
                             </tr>
                         </thead>
                             <tbody>
@@ -119,7 +119,7 @@
                                             />
                                         </td>
                                     @endforeach
-                                    <td class="text-center fw-semibold bg-light-primary text-primary js-row-total">{{ $rowTotalL }}</td>
+                                        <td class="text-center fw-semibold bg-body text-primary js-row-total">{{ $rowTotalL }}</td>
                                 </tr>
                                 <tr>
                                     <td class="fw-semibold text-gray-800">Perempuan</td>
@@ -139,11 +139,11 @@
                                             />
                                         </td>
                                     @endforeach
-                                    <td class="text-center fw-semibold bg-light-primary text-primary js-row-total">{{ $rowTotalP }}</td>
+                                        <td class="text-center fw-semibold bg-body text-primary js-row-total">{{ $rowTotalP }}</td>
                                 </tr>
                             </tbody>
                             <tfoot>
-                                <tr class="bg-light-primary">
+                                    <tr class="bg-body">
                                     <td class="fw-semibold text-primary">Total {{ $category['label'] }}</td>
                                     @foreach($levels as $level)
                                         <td class="text-center fw-semibold text-primary js-col-total" data-level="{{ $level }}">{{ ((int) ($data[$level][$catKey . '_l'] ?? 0)) + ((int) ($data[$level][$catKey . '_p'] ?? 0)) }}</td>
@@ -158,7 +158,7 @@
 
             {{-- Grand Total Summary --}}
             <div class="card border border-dashed border-gray-300 bg-body spm-sdm-grand-total mb-0">
-                <div class="card-body py-4 px-6">
+                                    <div class="card-body py-4 px-5">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                         <div class="d-flex align-items-center gap-3">
                             <x-ui.icon name="people" class="fs-2x text-primary" />

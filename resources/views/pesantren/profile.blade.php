@@ -106,23 +106,23 @@
         </div>
     </div>
 
-    <x-ui.progress id="profileProgress" :value="$totalFields > 0 ? round(($filledCount / $totalFields) * 100) : 0" :variant="$filledCount >= $totalFields ? 'success' : 'info'" :label="'Kelengkapan Profil'" :meta="$filledCount . '/' . $totalFields" class="mb-6" />
+    <x-ui.progress id="profileProgress" :value="$totalFields > 0 ? round(($filledCount / $totalFields) * 100) : 0" :variant="$filledCount >= $totalFields ? 'success' : 'info'" :label="'Kelengkapan Profil'" :meta="$filledCount . '/' . $totalFields" class="mb-5" />
 
     @if($isLocked)
-        <x-ui.alert variant="warning" icon="shield-tick" title="Data Terkunci — Akreditasi Berlangsung" class="mb-6">
+        <x-ui.alert variant="warning" icon="shield-tick" title="Data Terkunci — Akreditasi Berlangsung" class="mb-5">
             Profil pesantren tidak dapat diubah karena sedang dalam proses akreditasi. Hubungi admin untuk informasi lebih lanjut.
         </x-ui.alert>
     @endif
 
     @if(session('success'))
-        <x-ui.alert variant="success" title="Berhasil" class="mb-6">{{ session('success') }}</x-ui.alert>
+        <x-ui.alert variant="success" title="Berhasil" class="mb-5">{{ session('success') }}</x-ui.alert>
     @endif
     @if(session('error'))
-        <x-ui.alert variant="danger" title="Gagal" class="mb-6">{{ session('error') }}</x-ui.alert>
+        <x-ui.alert variant="danger" title="Gagal" class="mb-5">{{ session('error') }}</x-ui.alert>
     @endif
 
     @if($errors->any())
-        <x-ui.alert variant="danger" title="Data profil belum valid" class="mb-6">
+        <x-ui.alert variant="danger" title="Data profil belum valid" class="mb-5">
             <ul class="mb-0 ps-4">
                 @foreach($errors->all() as $message)
                     <li>{{ $message }}</li>
@@ -137,12 +137,12 @@
     @endif
 
     {{-- DATA PESANTREN --}}
-    <x-ui.section-card title="Data Pesantren" subtitle="Informasi identitas dan kontak pesantren." class="mb-6">
+    <x-ui.section-card title="Data Pesantren" subtitle="Informasi identitas dan kontak pesantren." class="mb-5">
         <x-slot:toolbar>
             <x-ui.icon name="building" class="fs-2x text-primary" />
         </x-slot:toolbar>
-        <div class="p-6">
-            <div class="row g-6">
+        <div class="p-5">
+            <div class="row g-5">
                 <div class="col-lg-6">
                     <x-ui.form-field label="Nama Pesantren" for="nama_pesantren" :required="true">
                         <input type="text" name="nama_pesantren" id="nama_pesantren"
@@ -224,12 +224,12 @@
     </x-ui.section-card>
 
     {{-- KONTAK & PIMPINAN --}}
-    <x-ui.section-card title="Kontak & Pimpinan" subtitle="Informasi mudir, kontak, dan persyarikatan." class="mb-6">
+    <x-ui.section-card title="Kontak & Pimpinan" subtitle="Informasi mudir, kontak, dan persyarikatan." class="mb-5">
         <x-slot:toolbar>
             <x-ui.icon name="profile-user" class="fs-2x text-primary" />
         </x-slot:toolbar>
-        <div class="p-6">
-            <div class="row g-6">
+        <div class="p-5">
+            <div class="row g-5">
                 <div class="col-lg-6">
                     <x-ui.form-field label="Nama Mudir / Pimpinan" for="nama_mudir" :required="true">
                         <input type="text" name="nama_mudir" id="nama_mudir"
@@ -305,11 +305,11 @@
     </x-ui.section-card>
 
     {{-- LAYANAN SATUAN PENDIDIKAN --}}
-    <x-ui.section-card title="Layanan Satuan Pendidikan" subtitle="Pilih layanan satuan pendidikan yang tersedia." class="mb-6">
+    <x-ui.section-card title="Layanan Satuan Pendidikan" subtitle="Pilih layanan satuan pendidikan yang tersedia." class="mb-5">
         <x-slot:toolbar>
             <x-ui.icon name="book" class="fs-2x text-primary" />
         </x-slot:toolbar>
-        <div class="p-6">
+        <div class="p-5">
             @if($errors->has('layanan_satuan_pendidikan'))
                 <div class="text-danger fw-semibold mb-4">{{ $errors->first('layanan_satuan_pendidikan') }}</div>
             @endif
@@ -331,12 +331,12 @@
     </x-ui.section-card>
 
     {{-- JUMLAH ROMBEL --}}
-    <x-ui.section-card title="Rombongan Belajar" subtitle="Input jumlah rombel per unit layanan." class="mb-6">
+    <x-ui.section-card title="Rombongan Belajar" subtitle="Input jumlah rombel per unit layanan." class="mb-5">
         <x-slot:toolbar>
             <x-ui.icon name="chart" class="fs-2x text-primary" />
         </x-slot:toolbar>
-        <div class="p-6">
-            <div class="row g-6">
+        <div class="p-5">
+            <div class="row g-5">
                 @foreach($layananOptions as $unitValue => $unitLabel)
                     @php
                         $checked = in_array($unitValue, $selectedLayanan);
@@ -358,12 +358,12 @@
     </x-ui.section-card>
 
     {{-- DOKUMENTASI UTAMA --}}
-    <x-ui.section-card title="Dokumentasi Pendukung Utama" subtitle="Unggah dokumen utama pendukung profil pesantren." class="mb-6">
+    <x-ui.section-card title="Dokumentasi Pendukung Utama" subtitle="Unggah dokumen utama pendukung profil pesantren." class="mb-5">
         <x-slot:toolbar>
             <x-ui.icon name="document" class="fs-2x text-primary" />
         </x-slot:toolbar>
-        <div class="p-6">
-            <div class="row g-6">
+        <div class="p-5">
+            <div class="row g-5">
                 @foreach($mainDocs as $inputName => $doc)
                     @php
                         $existingPath = $pesantren->{$doc['field']} ?? null;
@@ -393,12 +393,12 @@
     </x-ui.section-card>
 
     {{-- DOKUMENTASI SEKUNDER --}}
-    <x-ui.section-card title="Dokumentasi Pendukung Sekunder" subtitle="Unggah dokumen tambahan pendukung profil." class="mb-6">
+    <x-ui.section-card title="Dokumentasi Pendukung Sekunder" subtitle="Unggah dokumen tambahan pendukung profil." class="mb-5">
         <x-slot:toolbar>
             <x-ui.icon name="folder" class="fs-2x text-primary" />
         </x-slot:toolbar>
-        <div class="p-6">
-            <div class="row g-6">
+        <div class="p-5">
+            <div class="row g-5">
                 @foreach($secondaryDocs as $inputName => $doc)
                     @php
                         $existingPath = $pesantren->{$doc['field']} ?? null;
