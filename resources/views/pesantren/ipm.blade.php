@@ -48,7 +48,7 @@
         </x-ui.button>
     </x-slot:toolbar>
 
-    <div class="row g-5 mb-6">
+    <div class="row g-5 mb-5">
         <div class="col-lg-4">
             <x-ui.stat-card label="Status IPM" value="{{ $isLocked ? 'Terkunci' : 'Aktif' }}" variant="{{ $isLocked ? 'warning' : 'success' }}" icon="shield-tick" />
         </div>
@@ -82,7 +82,7 @@
         @csrf
 
         @if($errors->any())
-            <x-ui.alert variant="danger" title="Data IPM belum valid" class="mb-6">
+            <x-ui.alert variant="danger" title="Data IPM belum valid" class="mb-5">
                 <ul class="mb-0 ps-4">
                     @foreach($errors->all() as $message)
                         <li>{{ $message }}</li>
@@ -98,7 +98,7 @@
                     $cardVariant = $hasFile ? 'success' : 'light';
                 @endphp
                 <x-ui.section-card :title="$item['label']" :subtitle="$item['description']" class="spm-card-lift">
-                    <div class="p-6">
+                    <div class="p-5">
                         <div class="row align-items-center">
                             <div class="col-md-8">
                                 @if($hasFile)

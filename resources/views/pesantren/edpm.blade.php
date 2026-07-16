@@ -31,7 +31,7 @@
             </x-ui.button>
         </x-slot:toolbar>
 
-        <div class="row g-5 mb-6 spm-edpm-stats">
+        <div class="row g-5 mb-5 spm-edpm-stats">
             <div class="col-lg-4">
                 <x-ui.stat-card label="Status EDPM" value="{{ $isLocked ? 'Terkunci' : 'Aktif' }}" variant="{{ $isLocked ? 'warning' : 'success' }}" icon="shield-tick" />
             </div>
@@ -57,7 +57,7 @@
         @endif
 
         @if($errors->any())
-            <x-ui.alert variant="danger" title="Data EDPM belum valid" class="mb-6">
+            <x-ui.alert variant="danger" title="Data EDPM belum valid" class="mb-5">
                 <ul class="mb-0 ps-4">
                     @foreach($errors->all() as $message)
                         <li>{{ $message }}</li>
@@ -173,7 +173,7 @@
                                         </div>
                                         <div class="card-body p-0">
                                         <template x-if="komponen">
-                                            <div class="p-6">
+                                            <div class="p-5">
                                                 <x-ui.simple-table table-class="spm-table-compact table-bordered">
                                                         <thead>
                                                             <tr class="bg-light">
@@ -248,7 +248,7 @@
                                         </div>
                                         <div class="card-body p-0">
                                         <template x-if="komponen">
-                                            <div class="p-6">
+                                            <div class="p-5">
                                                 <x-ui.simple-table table-class="spm-table-compact table-bordered">
                                                         <thead>
                                                             <tr class="bg-light">
