@@ -73,25 +73,21 @@
         @if($komponens->isNotEmpty())
             {{-- Group Toggle Tabs --}}
             <x-ui.tabs class="mb-5 spm-edpm-tabs">
-                <li class="nav-item">
-                    <a href="#" data-ui-tab="metronic" role="tab" class="nav-link text-active-primary spm-tab-link"
-                        :class="activeGroup === 'edpm' ? 'active' : ''"
-                        :aria-selected="activeGroup === 'edpm' ? 'true' : 'false'"
-                        x-on:click.prevent="setGroup('edpm')">
+                <x-ui.tab
+                    x-bind:class="{ 'active': activeGroup === 'edpm' }"
+                    x-bind:aria-selected="activeGroup === 'edpm' ? 'true' : 'false'"
+                    x-on:click.prevent="setGroup('edpm')">
                         Komponen EDPM
                         <x-ui.badge variant="primary" class="ms-2">{{ $edpmCount }}</x-ui.badge>
-                    </a>
-                </li>
+                </x-ui.tab>
                 @if($iprCount > 0)
-                    <li class="nav-item">
-                        <a href="#" data-ui-tab="metronic" role="tab" class="nav-link text-active-primary spm-tab-link"
-                            :class="activeGroup === 'ipr' ? 'active' : ''"
-                            :aria-selected="activeGroup === 'ipr' ? 'true' : 'false'"
-                            x-on:click.prevent="setGroup('ipr')">
+                    <x-ui.tab
+                        x-bind:class="{ 'active': activeGroup === 'ipr' }"
+                        x-bind:aria-selected="activeGroup === 'ipr' ? 'true' : 'false'"
+                        x-on:click.prevent="setGroup('ipr')">
                             Komponen IPR
                             <x-ui.badge variant="success" class="ms-2">{{ $iprCount }}</x-ui.badge>
-                        </a>
-                    </li>
+                    </x-ui.tab>
                 @endif
             </x-ui.tabs>
 

@@ -50,15 +50,11 @@
         @unless($doc === 'iapm' && auth()->user()->isPesantren())
         <x-ui.tabs class="mb-5 spm-document-category-tabs">
             @foreach($categoryLinks as $categoryLink)
-                <li class="nav-item">
-                    <a href="{{ $categoryLink['href'] }}"
-                        data-ui-tab="metronic"
-                        role="tab"
-                        class="nav-link text-active-primary spm-tab-link {{ ($doc ?: 'all') === $categoryLink['slug'] ? 'active' : '' }}"
-                        aria-selected="{{ ($doc ?: 'all') === $categoryLink['slug'] ? 'true' : 'false' }}">
-                        {{ $categoryLink['label'] }}
-                    </a>
-                </li>
+                <x-ui.tab
+                    :href="$categoryLink['href']"
+                    :active="($doc ?: 'all') === $categoryLink['slug']">
+                    {{ $categoryLink['label'] }}
+                </x-ui.tab>
             @endforeach
         </x-ui.tabs>
         @endunless

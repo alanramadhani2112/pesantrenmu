@@ -13,7 +13,7 @@
         </x-slot>
 
         {{-- Tabs --}}
-        <x-ui.tabs class="mb-6">
+        <x-ui.tabs class="mb-5">
             <x-ui.tab
                 :active="true"
                 x-bind:class="{ 'active': activeTab === 'edpm' }"
