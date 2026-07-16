@@ -148,6 +148,26 @@
                     if ((int) $item->akreditasi->status === \App\Models\Akreditasi::STATUS_VISITASI) {
                         $akreditasiStatus['label'] = 'Visitasi Terjadwal';
                     }
+
+                    $pesantrenLabel = $item->akreditasi->user?->pesantren?->nama_pesantren
+                        ?? $item->akreditasi->user?->name
+                        ?? 'N/A';
+                    $jadwalMulai = \Carbon\Carbon::parse($item->tanggal_mulai)->format('Y-m-d');
+                    $jadwalAkhir = \Carbon\Carbon::parse($item->tanggal_berakhir)->format('Y-m-d');
+                    $reviewPeriodeLabel = \Carbon\Carbon::parse($item->tanggal_mulai)->format('d')
+                        . ' - '
+                        . \Carbon\Carbon::parse($item->tanggal_berakhir)->format('d M Y');
+                    $jadwalClick = 'openJadwalModal('
+                        . $item->akreditasi->id . ', '
+                        . \Illuminate\Support\Js::from($pesantrenLabel) . ', '
+                        . \Illuminate\Support\Js::from($jadwalMulai) . ', '
+                        . \Illuminate\Support\Js::from($jadwalAkhir)
+                        . ')';
+                    $tolakClick = 'openTolakModal('
+                        . $item->akreditasi->id . ', '
+                        . \Illuminate\Support\Js::from($pesantrenLabel) . ', '
+                        . \Illuminate\Support\Js::from($reviewPeriodeLabel)
+                        . ')';
                 @endphp
                 <tr>
                     <td>
@@ -184,7 +204,7 @@
                             @if(in_array((int) $item->akreditasi->status, [4], true))
                                 <x-ui.action-menu-item
                                     variant="primary"
-                                    x-on:click="openJadwalModal({{ $item->akreditasi->id }}, @js($item->akreditasi->user?->pesantren?->nama_pesantren ?? $item->akreditasi->user?->name ?? 'N/A'), @js(\Carbon\Carbon::parse($item->tanggal_mulai)->format('Y-m-d')), @js(\Carbon\Carbon::parse($item->tanggal_berakhir)->format('Y-m-d')))"
+                                    x-on:click="{{ $jadwalClick }}"
                                 >
                                     <x-ui.icon name="timer" class="fs-5" />
                                     Atur Jadwal
@@ -192,7 +212,7 @@
 
                                 <x-ui.action-menu-item
                                     variant="danger"
-                                    x-on:click="openTolakModal({{ $item->akreditasi->id }}, @js($item->akreditasi->user?->pesantren?->nama_pesantren ?? $item->akreditasi->user?->name ?? 'N/A'), @js(\Carbon\Carbon::parse($item->tanggal_mulai)->format('d').' - '.\Carbon\Carbon::parse($item->tanggal_berakhir)->format('d M Y')))"
+                                    x-on:click="{{ $tolakClick }}"
                                 >
                                     <x-ui.icon name="cross-circle" class="fs-5" />
                                     Tolak Dokumen
