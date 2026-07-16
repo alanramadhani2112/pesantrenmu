@@ -5,23 +5,23 @@
 <x-ui.page-header title="Profil Asesor" subtitle="Kelola data profil, pengalaman, dan dokumen pendukung Anda.">
     <x-slot:toolbar>
         @if(!request('edit'))
-            <a href="{{ route('asesor.profile', ['edit' => 1]) }}" class="btn btn-primary">
+            <x-ui.button :href="route('asesor.profile', ['edit' => 1])">
                 <x-ui.icon name="pencil" class="fs-4 me-1" />
                 Edit Profil
-            </a>
+            </x-ui.button>
         @else
-            <a href="{{ route('asesor.profile') }}" class="btn btn-light">
+            <x-ui.button :href="route('asesor.profile')" variant="light">
                 <x-ui.icon name="arrow-left" class="fs-4 me-1" />
                 Batal Edit
-            </a>
+            </x-ui.button>
         @endif
     </x-slot:toolbar>
 </x-ui.page-header>
 
 @if(request('edit'))
 {{-- Profile Photo Upload (inline Blade form) --}}
-<x-ui.section-card title="Foto Profil" subtitle="Unggah foto profil akun Anda. Maksimal 2MB, format JPG/PNG." class="mb-6">
-    <div class="p-6">
+<x-ui.section-card title="Foto Profil" subtitle="Unggah foto profil akun Anda. Maksimal 2MB, format JPG/PNG." class="mb-5">
+    <div class="p-5">
         <form method="POST" action="{{ route('profile.photo') }}" enctype="multipart/form-data"
             x-data="{
                 preview: '{{ auth()->user()->profile_photo_path ? asset('storage/' . auth()->user()->profile_photo_path) : '' }}',
@@ -39,10 +39,10 @@
                     :style="preview ? 'background-image:url(' + preview + ')' : ''">
                 </div>
 
-                <label class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow"
+                <label class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body border border-dashed border-gray-300"
                     data-kt-image-input-action="change"
                     title="Ganti foto">
-                    <i class="ki-solid ki-pencil fs-6"></i>
+                    <x-ui.icon name="pencil" class="fs-6" />
                     <input type="file" name="photo" accept=".png,.jpg,.jpeg"
                         @change="
                             const file = $event.target.files[0];
@@ -53,11 +53,11 @@
                         " />
                 </label>
 
-                <span class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow"
+                <span class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body border border-dashed border-gray-300"
                     data-kt-image-input-action="cancel"
                     title="Batal"
                     @click="changed = false; preview = '{{ auth()->user()->profile_photo_path ? asset('storage/' . auth()->user()->profile_photo_path) : '' }}'; $el.closest('form').querySelector('input[type=file]').value = '';">
-                    <i class="ki-solid ki-cross fs-3"></i>
+                    <x-ui.icon name="cross" class="fs-3" />
                 </span>
             </div>
 
@@ -66,7 +66,7 @@
             @enderror
 
             <div class="mt-4 d-flex gap-3" x-show="changed" x-cloak>
-                <button type="submit" class="btn btn-sm btn-primary">Simpan Foto</button>
+                <x-ui.button type="submit" size="sm">Simpan Foto</x-ui.button>
             </div>
         </form>
 
@@ -74,7 +74,7 @@
         <form method="POST" action="{{ route('profile.photo.remove') }}" class="mt-3">
             @csrf
             @method('DELETE')
-            <button type="submit" class="btn btn-sm btn-light-danger">Hapus Foto</button>
+            <x-ui.button type="submit" variant="light-danger" size="sm">Hapus Foto</x-ui.button>
         </form>
         @endif
 
@@ -95,7 +95,7 @@
         @csrf
 
         @if($errors->any())
-            <x-ui.alert variant="danger" title="Data profil belum valid" class="mb-6">
+            <x-ui.alert variant="danger" title="Data profil belum valid" class="mb-5">
                 <div class="mb-3">Periksa kembali isian yang ditandai sebelum menyimpan.</div>
                 <ul class="mb-0 ps-4">
                     @foreach($errors->all() as $message)
@@ -105,12 +105,12 @@
             </x-ui.alert>
         @endif
 
-        <div class="d-flex flex-column gap-6">
+        <div class="d-flex flex-column gap-5">
 
             {{-- A. Identitas --}}
             <x-ui.section-card title="A. Identitas Asesor" subtitle="Data pribadi, kontak, dan informasi pekerjaan.">
-                <div class="p-6">
-                    <div class="row g-6">
+                <div class="p-5">
+                    <div class="row g-5">
                         <div class="col-lg-12">
                             <div class="row g-5">
                                 <div class="col-md-6">
@@ -243,16 +243,16 @@
 
             {{-- B. Pengalaman --}}
             <x-ui.section-card title="B. Pengalaman & Rekam Jejak" subtitle="Riwayat pendidikan, pekerjaan, pelatihan, organisasi, dan publikasi.">
-                <div class="p-6">
+                <div class="p-5">
                     <div class="d-flex flex-column gap-8">
 
                         {{-- Riwayat Pendidikan --}}
                         <div>
                             <div class="d-flex align-items-center justify-content-between mb-4">
                                 <div class="fw-semibold fs-6">Riwayat Pendidikan</div>
-                                <button type="button" @click="addRow('riwayat_pendidikan', {dimana:'',kapan:'',jenjang:''})" class="btn btn-light btn-sm">
+                                <x-ui.button type="button" variant="light" size="sm" x-on:click="addRow('riwayat_pendidikan', {dimana:'',kapan:'',jenjang:''})">
                                     <x-ui.icon name="plus" class="fs-5 me-1" /> Tambah
-                                </button>
+                                </x-ui.button>
                             </div>
                             <template x-for="(item, index) in riwayat_pendidikan" :key="index">
                                 <div class="row g-3 align-items-end mb-3 p-3 bg-light rounded">
@@ -269,9 +269,9 @@
                                         <input type="text" class="form-control" x-model="item.jenjang" placeholder="S1/S2/S3">
                                     </div>
                                     <div class="col-md-2">
-                                        <button type="button" @click="removeRow('riwayat_pendidikan', index)" class="btn btn-sm btn-light-danger w-100">
+                                        <x-ui.button type="button" variant="light-danger" size="sm" class="w-100" x-on:click="removeRow('riwayat_pendidikan', index)">
                                             <x-ui.icon name="trash" class="fs-5" />
-                                        </button>
+                                        </x-ui.button>
                                     </div>
                                 </div>
                             </template>
@@ -281,9 +281,9 @@
                         <div>
                             <div class="d-flex align-items-center justify-content-between mb-4">
                                 <div class="fw-semibold fs-6">Pengalaman Pelatihan</div>
-                                <button type="button" @click="addRow('pengalaman_pelatihan', {dimana:'',kapan:'',sebagai:''})" class="btn btn-light btn-sm">
+                                <x-ui.button type="button" variant="light" size="sm" x-on:click="addRow('pengalaman_pelatihan', {dimana:'',kapan:'',sebagai:''})">
                                     <x-ui.icon name="plus" class="fs-5 me-1" /> Tambah
-                                </button>
+                                </x-ui.button>
                             </div>
                             <template x-for="(item, index) in pengalaman_pelatihan" :key="index">
                                 <div class="row g-3 align-items-end mb-3 p-3 bg-light rounded">
@@ -300,9 +300,9 @@
                                         <input type="text" class="form-control" x-model="item.sebagai" placeholder="Peserta/Pemateri">
                                     </div>
                                     <div class="col-md-2">
-                                        <button type="button" @click="removeRow('pengalaman_pelatihan', index)" class="btn btn-sm btn-light-danger w-100">
+                                        <x-ui.button type="button" variant="light-danger" size="sm" class="w-100" x-on:click="removeRow('pengalaman_pelatihan', index)">
                                             <x-ui.icon name="trash" class="fs-5" />
-                                        </button>
+                                        </x-ui.button>
                                     </div>
                                 </div>
                             </template>
@@ -312,9 +312,9 @@
                         <div>
                             <div class="d-flex align-items-center justify-content-between mb-4">
                                 <div class="fw-semibold fs-6">Pengalaman Bekerja</div>
-                                <button type="button" @click="addRow('pengalaman_bekerja', {dimana:'',kapan:'',sebagai:''})" class="btn btn-light btn-sm">
+                                <x-ui.button type="button" variant="light" size="sm" x-on:click="addRow('pengalaman_bekerja', {dimana:'',kapan:'',sebagai:''})">
                                     <x-ui.icon name="plus" class="fs-5 me-1" /> Tambah
-                                </button>
+                                </x-ui.button>
                             </div>
                             <template x-for="(item, index) in pengalaman_bekerja" :key="index">
                                 <div class="row g-3 align-items-end mb-3 p-3 bg-light rounded">
@@ -331,9 +331,9 @@
                                         <input type="text" class="form-control" x-model="item.sebagai" placeholder="Manager">
                                     </div>
                                     <div class="col-md-2">
-                                        <button type="button" @click="removeRow('pengalaman_bekerja', index)" class="btn btn-sm btn-light-danger w-100">
+                                        <x-ui.button type="button" variant="light-danger" size="sm" class="w-100" x-on:click="removeRow('pengalaman_bekerja', index)">
                                             <x-ui.icon name="trash" class="fs-5" />
-                                        </button>
+                                        </x-ui.button>
                                     </div>
                                 </div>
                             </template>
@@ -343,9 +343,9 @@
                         <div>
                             <div class="d-flex align-items-center justify-content-between mb-4">
                                 <div class="fw-semibold fs-6">Pengalaman Berorganisasi</div>
-                                <button type="button" @click="addRow('pengalaman_berorganisasi', {dimana:'',kapan:'',sebagai:''})" class="btn btn-light btn-sm">
+                                <x-ui.button type="button" variant="light" size="sm" x-on:click="addRow('pengalaman_berorganisasi', {dimana:'',kapan:'',sebagai:''})">
                                     <x-ui.icon name="plus" class="fs-5 me-1" /> Tambah
-                                </button>
+                                </x-ui.button>
                             </div>
                             <template x-for="(item, index) in pengalaman_berorganisasi" :key="index">
                                 <div class="row g-3 align-items-end mb-3 p-3 bg-light rounded">
@@ -362,9 +362,9 @@
                                         <input type="text" class="form-control" x-model="item.sebagai" placeholder="Ketua">
                                     </div>
                                     <div class="col-md-2">
-                                        <button type="button" @click="removeRow('pengalaman_berorganisasi', index)" class="btn btn-sm btn-light-danger w-100">
+                                        <x-ui.button type="button" variant="light-danger" size="sm" class="w-100" x-on:click="removeRow('pengalaman_berorganisasi', index)">
                                             <x-ui.icon name="trash" class="fs-5" />
-                                        </button>
+                                        </x-ui.button>
                                     </div>
                                 </div>
                             </template>
@@ -374,9 +374,9 @@
                         <div>
                             <div class="d-flex align-items-center justify-content-between mb-4">
                                 <div class="fw-semibold fs-6">Karya Publikasi</div>
-                                <button type="button" @click="addRow('karya_publikasi', {judul:'',link:''})" class="btn btn-light btn-sm">
+                                <x-ui.button type="button" variant="light" size="sm" x-on:click="addRow('karya_publikasi', {judul:'',link:''})">
                                     <x-ui.icon name="plus" class="fs-5 me-1" /> Tambah
-                                </button>
+                                </x-ui.button>
                             </div>
                             <template x-for="(item, index) in karya_publikasi" :key="index">
                                 <div class="row g-3 align-items-end mb-3 p-3 bg-light rounded">
@@ -389,9 +389,9 @@
                                         <input type="url" class="form-control" x-model="item.link" placeholder="https://...">
                                     </div>
                                     <div class="col-md-2">
-                                        <button type="button" @click="removeRow('karya_publikasi', index)" class="btn btn-sm btn-light-danger w-100">
+                                        <x-ui.button type="button" variant="light-danger" size="sm" class="w-100" x-on:click="removeRow('karya_publikasi', index)">
                                             <x-ui.icon name="trash" class="fs-5" />
-                                        </button>
+                                        </x-ui.button>
                                     </div>
                                 </div>
                             </template>
@@ -403,8 +403,8 @@
 
             {{-- C. Dokumen --}}
             <x-ui.section-card title="C. Dokumen Pendukung" subtitle="Unggah berkas identitas dan sertifikasi.">
-                <div class="p-6">
-                    <div class="row g-6">
+                <div class="p-5">
+                    <div class="row g-5">
                         @php
                             $uploadDocs = [
                                 'ktp_file_upload'       => ['label' => 'KTP / Identitas',    'existing' => $asesor->ktp_file],
@@ -449,7 +449,7 @@
 
             {{-- D. Ganti Password --}}
             <x-ui.section-card title="D. Ganti Password" subtitle="Isi password saat ini untuk mengubah ke password baru.">
-                <div class="p-6">
+                <div class="p-5">
                     <div class="row g-5">
                         <div class="col-md-6">
                             <x-ui.form-field label="Password Saat Ini">
@@ -475,11 +475,11 @@
             <input type="hidden" name="karya_publikasi" :value="JSON.stringify(karya_publikasi)">
 
             {{-- Save Bar --}}
-            <div class="d-flex align-items-center justify-content-end gap-3 p-5 bg-light rounded">
-                <a href="{{ route('asesor.profile') }}" class="btn btn-light">Batal</a>
-                <button type="submit" class="btn btn-primary">
+            <div class="d-flex align-items-center justify-content-end gap-3 p-5 bg-body border border-dashed border-gray-300 rounded">
+                <x-ui.button :href="route('asesor.profile')" variant="light">Batal</x-ui.button>
+                <x-ui.button type="submit">
                     <x-ui.icon name="check" class="fs-5 me-1" /> Simpan Profil
-                </button>
+                </x-ui.button>
             </div>
 
         </div>
@@ -563,7 +563,7 @@ function asesorProfileEdit() {
     ];
 @endphp
 
-<div class="row g-4 mb-6 spm-asesor-profile-metrics">
+<div class="row g-4 mb-5 spm-asesor-profile-metrics">
     @foreach($profileMetrics as $metric)
         <div class="col-md-4">
             <x-ui.stat-card :label="$metric['label']" :value="$metric['value']" :variant="$metric['variant']" :icon="$metric['icon']" />
@@ -571,10 +571,10 @@ function asesorProfileEdit() {
     @endforeach
 </div>
 
-<div class="row g-6">
+<div class="row g-5">
     {{-- Sidebar --}}
     <div class="col-xl-4">
-        <div class="d-flex flex-column gap-6">
+        <div class="d-flex flex-column gap-5">
             <x-ui.card class="spm-asesor-profile-card">
                 <div class="d-flex flex-column align-items-center text-center">
                     <div class="mb-5">
@@ -591,7 +591,7 @@ function asesorProfileEdit() {
                         @endif
                     </div>
                     <h2 class="spm-card-title fs-4 mb-1">{{ $asesor->nama_dengan_gelar ?: '-' }}</h2>
-                    <div class="text-muted fw-semibold fs-8 text-uppercase mb-1">
+                    <div class="text-muted fw-semibold fs-8 mb-1">
                         NIA PM: {{ $asesor->nomor_induk_asesor_pm ?: '-' }}
                     </div>
                     <div class="text-muted fs-8 mb-4">
@@ -602,7 +602,7 @@ function asesorProfileEdit() {
             </x-ui.card>
 
             <x-ui.section-card title="Informasi Kontak" class="spm-asesor-contact-card">
-                <div class="p-6">
+                <div class="p-5">
                     <div class="d-flex flex-column gap-4">
                         <div class="d-flex align-items-center gap-3 spm-asesor-contact-item">
                             <x-ui.icon name="sms" class="fs-3 text-muted" />
@@ -634,11 +634,11 @@ function asesorProfileEdit() {
 
     {{-- Main Content --}}
     <div class="col-xl-8">
-        <div class="d-flex flex-column gap-6">
+        <div class="d-flex flex-column gap-5">
 
             {{-- A. Identitas --}}
             <x-ui.section-card title="A. Identitas Diri" subtitle="Data pribadi dan informasi pekerjaan.">
-                <div class="p-6">
+                <div class="p-5">
                     <div class="row g-4 spm-asesor-detail-grid">
                         @php
                             $identityFields = [
@@ -668,11 +668,11 @@ function asesorProfileEdit() {
 
             {{-- B. Pengalaman --}}
             <x-ui.section-card title="B. Pengalaman & Rekam Jejak" subtitle="Riwayat pendidikan, pekerjaan, dan aktivitas profesional.">
-                <div class="p-6">
-                    <div class="d-flex flex-column gap-6">
+                <div class="p-5">
+                    <div class="d-flex flex-column gap-5">
 
                         <div>
-                            <div class="text-uppercase fw-semibold fs-8 text-muted mb-3">Riwayat Pendidikan</div>
+                        <div class="fw-semibold fs-8 text-muted mb-3">Riwayat Pendidikan</div>
                             @forelse(array_filter($asesor->riwayat_pendidikan ?? [], fn($i) => !empty($i['dimana'])) as $item)
                                 <div class="d-flex align-items-center justify-content-between py-3 border-bottom border-dashed">
                                     <div class="d-flex align-items-center gap-3">
@@ -687,7 +687,7 @@ function asesorProfileEdit() {
                         </div>
 
                         <div>
-                            <div class="text-uppercase fw-semibold fs-8 text-muted mb-3">Pengalaman Bekerja</div>
+                        <div class="fw-semibold fs-8 text-muted mb-3">Pengalaman Bekerja</div>
                             @forelse(array_filter($asesor->pengalaman_bekerja ?? [], fn($i) => !empty($i['dimana'])) as $item)
                                 <div class="d-flex align-items-center justify-content-between py-3 border-bottom border-dashed">
                                     <div>
@@ -701,9 +701,9 @@ function asesorProfileEdit() {
                             @endforelse
                         </div>
 
-                        <div class="row g-6">
+                    <div class="row g-5">
                             <div class="col-lg-6">
-                                <div class="text-uppercase fw-semibold fs-8 text-muted mb-3">Pelatihan</div>
+                        <div class="fw-semibold fs-8 text-muted mb-3">Pelatihan</div>
                                 @forelse(array_filter($asesor->pengalaman_pelatihan ?? [], fn($i) => !empty($i['dimana'])) as $item)
                                     <div class="py-3 border-bottom border-dashed">
                                         <div class="fw-semibold fs-7">{{ $item['sebagai'] ?? '-' }}</div>
@@ -717,7 +717,7 @@ function asesorProfileEdit() {
                                 @endforelse
                             </div>
                             <div class="col-lg-6">
-                                <div class="text-uppercase fw-semibold fs-8 text-muted mb-3">Organisasi</div>
+                        <div class="fw-semibold fs-8 text-muted mb-3">Organisasi</div>
                                 @forelse(array_filter($asesor->pengalaman_berorganisasi ?? [], fn($i) => !empty($i['dimana'])) as $item)
                                     <div class="py-3 border-bottom border-dashed">
                                         <div class="fw-semibold fs-7">{{ $item['sebagai'] ?? '-' }}</div>
@@ -733,14 +733,14 @@ function asesorProfileEdit() {
                         </div>
 
                         <div>
-                            <div class="text-uppercase fw-semibold fs-8 text-muted mb-3">Karya Publikasi</div>
+                            <div class="fw-semibold fs-8 text-muted mb-3">Karya Publikasi</div>
                             @forelse(array_filter($asesor->karya_publikasi ?? [], fn($i) => is_array($i) ? !empty($i['judul']) : !empty($i)) as $item)
                                 <div class="d-flex align-items-center justify-content-between py-3 border-bottom border-dashed">
                                     <span class="fw-semibold fs-7 text-truncate pe-3">{{ is_array($item) ? $item['judul'] : $item }}</span>
                                     @if(is_array($item) && !empty($item['link']))
-                                        <a href="{{ $item['link'] }}" target="_blank" class="btn btn-sm btn-light-primary">
+                                        <x-ui.button :href="$item['link']" target="_blank" variant="light-primary" size="sm">
                                             <x-ui.icon name="exit-right" class="fs-5" />
-                                        </a>
+                                        </x-ui.button>
                                     @endif
                                 </div>
                             @empty
@@ -754,7 +754,7 @@ function asesorProfileEdit() {
 
             {{-- C. Dokumen --}}
             <x-ui.section-card title="C. Dokumen Pendukung" subtitle="Status unggahan berkas identitas dan sertifikasi.">
-                <div class="p-6">
+                <div class="p-5">
                     @php
                         $viewDocs = [
                             'ktp_file'       => 'KTP / Identitas',
@@ -780,4 +780,3 @@ function asesorProfileEdit() {
 
 </div>
 @endsection
-
