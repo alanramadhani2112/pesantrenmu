@@ -6,33 +6,18 @@
 
 @php
     $classes = trim('nav-link cursor-pointer spm-tab-link ' . ($active ? 'active' : ''));
-    $ariaPressed = $active ? 'true' : 'false';
+    $tabHref = $href ?: '#';
 @endphp
 
 <li class="nav-item">
-    @if($href)
-        <a
-            href="{{ $href }}"
-            data-ui-tab="metronic"
-            role="tab"
-            aria-selected="{{ $active ? 'true' : 'false' }}"
-            @if($active) aria-current="page" @endif
-            {{ $attributes->merge(['class' => $classes]) }}
-        >
-            {{ $slot }}
-        </a>
-    @else
-        <x-ui.button
-            :type="$type"
-            variant="link"
-            unstyled
-            data-ui-tab="metronic"
-            role="tab"
-            aria-selected="{{ $active ? 'true' : 'false' }}"
-            aria-pressed="{{ $ariaPressed }}"
-            {{ $attributes->merge(['class' => $classes . ' bg-transparent border-0']) }}
-        >
-            {{ $slot }}
-        </x-ui.button>
-    @endif
+    <a
+        href="{{ $tabHref }}"
+        data-ui-tab="metronic"
+        role="tab"
+        aria-selected="{{ $active ? 'true' : 'false' }}"
+        @if($active) aria-current="page" @endif
+        {{ $attributes->merge(['class' => $classes]) }}
+    >
+        {{ $slot }}
+    </a>
 </li>
