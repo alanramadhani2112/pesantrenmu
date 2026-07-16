@@ -23,7 +23,7 @@
             $visitasiAktif = $summary['visitasi'];
             $penilaianAktif = $summary['penilaian'];
         @endphp
-        <div class="row g-6 mb-6">
+        <div class="row g-5 mb-5">
             <div class="col-12 col-xl-8">
                 <x-ui.card
                     title="Prioritas Tugas Asesor"
@@ -244,13 +244,13 @@
                     <x-ui.modal-header title="Atur Jadwal Visitasi" icon="calendar" x-on:close="closeModals()" />
 
                     <x-ui.modal-body>
-                        <div class="bg-light rounded-4 p-6 border border-gray-200 mb-8">
+                        <div class="bg-body rounded border border-dashed border-gray-300 p-5 mb-5">
                             <div class="mb-4">
-                                <p class="text-muted fs-8 fw-semibold text-uppercase mb-1">Pesantren</p>
+                                <p class="text-muted fs-8 fw-semibold mb-1">Pesantren</p>
                                 <p class="fs-6 fw-semibold text-gray-900" x-text="jadwalForm.pesantren"></p>
                             </div>
                             <div>
-                                <p class="text-muted fs-8 fw-semibold text-uppercase mb-1">Jadwal Penilaian</p>
+                                <p class="text-muted fs-8 fw-semibold mb-1">Jadwal Penilaian</p>
                                 <p class="fs-6 fw-semibold text-gray-900" x-text="jadwalForm.periodeLabel"></p>
                             </div>
                         </div>
@@ -269,7 +269,7 @@
                             </div>
                         </div>
 
-                        <div class="notice d-flex bg-light-warning rounded border-warning border border-dashed p-4 mb-4">
+                        <div class="notice d-flex bg-body rounded border border-dashed border-gray-300 p-4 mb-4">
                             <div class="fw-semibold text-warning fs-7">
                                 Rentang visitasi maksimal 14 hari dan harus berada dalam periode review yang telah ditetapkan.
                             </div>
@@ -301,18 +301,18 @@
                     <x-ui.modal-header title="Tolak Dokumen" icon="cross-circle" variant="danger" x-on:close="closeModals()" />
 
                     <x-ui.modal-body>
-                        <div class="bg-light rounded-4 p-6 border border-gray-200 mb-8">
+                        <div class="bg-body rounded border border-dashed border-gray-300 p-5 mb-5">
                             <div class="mb-4">
-                                <p class="text-muted fs-8 fw-semibold text-uppercase mb-1">Pesantren</p>
+                                <p class="text-muted fs-8 fw-semibold mb-1">Pesantren</p>
                                 <p class="fs-6 fw-semibold text-gray-900" x-text="tolakForm.pesantren"></p>
                             </div>
                             <div>
-                                <p class="text-muted fs-8 fw-semibold text-uppercase mb-1">Periode Review</p>
+                                <p class="text-muted fs-8 fw-semibold mb-1">Periode Review</p>
                                 <p class="fs-6 fw-semibold text-gray-900" x-text="tolakForm.periodeLabel"></p>
                             </div>
                         </div>
 
-                        <div class="mb-6">
+                            <div class="mb-5">
                             <label class="form-label fw-semibold">Dokumen yang Memerlukan Perbaikan</label>
                             <div class="row g-3">
                                 @foreach(['Profil Pesantren', 'IPM', 'Data SDM', 'EDPM'] as $docName)
@@ -356,19 +356,19 @@
                     </div>
                     <div x-show="!catatanLoading">
                         <template x-if="catatanData && catatanData.catatans && catatanData.catatans.length > 0">
-                            <div class="d-flex flex-column gap-6">
+                            <div class="d-flex flex-column gap-5">
                                 <template x-for="(catatan, idx) in catatanData.catatans" :key="idx">
                                     <div class="border-bottom border-gray-200 pb-6">
                                         <div class="d-flex align-items-center gap-3 mb-4">
                                             <div class="symbol symbol-40px">
-                                                <div class="symbol-label bg-light-primary text-primary fw-semibold text-uppercase" x-text="catatan.user.substring(0, 2)"></div>
+                                <div class="symbol-label bg-body border border-dashed border-gray-300 text-primary fw-semibold" x-text="catatan.user.substring(0, 2)"></div>
                                             </div>
                                             <div>
                                                 <h6 class="fw-semibold text-gray-900 mb-0" x-text="catatan.user"></h6>
                                                 <span class="text-muted fs-8" x-text="catatan.created_at"></span>
                                             </div>
                                         </div>
-                                        <div class="rounded-4 p-4 bg-light-primary">
+                            <div class="rounded p-4 bg-body border border-dashed border-gray-300">
                                             <p class="fs-7 fw-medium text-gray-700 mb-0" x-text="catatan.catatan" style="white-space: pre-line;"></p>
                                         </div>
                                     </div>

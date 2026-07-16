@@ -123,7 +123,7 @@
         </x-ui.alert>
     @endif
 
-    <div class="row g-5 mb-6 spm-akreditasi-context-cards">
+    <div class="row g-5 mb-5 spm-akreditasi-context-cards">
         <div class="col-md-4">
             <x-ui.stat-card label="Pengajuan Terbaru" value="{{ $latestStatusLabel }}" :variant="$activeFocusConfig['variant']" :icon="$activeFocusConfig['icon']" />
         </div>
@@ -388,7 +388,7 @@ function openCatatanModal(id) {
 
                 item.className = 'd-flex gap-3 mb-3 pb-3 border-bottom';
                 iconWrap.className = 'flex-shrink-0';
-                icon.className = 'symbol symbol-35px bg-light-primary rounded';
+                icon.className = 'symbol symbol-35px bg-body border border-dashed border-gray-300 rounded';
                 iconEl.className = 'ki-solid ki-user fs-5 text-primary';
                 note.style.whiteSpace = 'pre-line';
 
