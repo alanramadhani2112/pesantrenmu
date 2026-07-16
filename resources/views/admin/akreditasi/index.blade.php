@@ -26,10 +26,10 @@
             :status="$workflowStatus"
             title="Tahapan Akreditasi LP2M"
             subtitle="Alur kerja dari pengajuan berkas sampai hasil akhir akreditasi."
-            class="mb-6"
+            class="mb-5"
         />
 
-        <div class="row g-6 mb-6">
+        <div class="row g-5 mb-5">
             <div class="col-12 col-xl-8">
                 <x-ui.card
                     title="Prioritas Operasional"
@@ -301,7 +301,7 @@ function adminAkreditasiPage() {
         },
         async loadCatatan(event) {
             const target = document.getElementById('catatan-modal-content');
-            target.innerHTML = '<div class="p-6 text-muted">Memuat catatan...</div>';
+            target.innerHTML = '<div class="p-5 text-muted">Memuat catatan...</div>';
 
             const response = await fetch(event.target.action, {
                 method: 'POST',
@@ -311,7 +311,7 @@ function adminAkreditasiPage() {
 
             target.innerHTML = response.ok
                 ? await response.text()
-                : '<div class="p-6 text-danger">Gagal memuat catatan.</div>';
+                : '<div class="p-5 text-danger">Gagal memuat catatan.</div>';
         },
     };
 }
