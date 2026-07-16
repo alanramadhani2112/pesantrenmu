@@ -119,19 +119,19 @@
                     {{ $pesantren?->nama_pesantren ?? $akreditasi->user?->name ?? 'Pesantren tidak tersedia' }}
                 </h2>
                 <div class="text-muted fw-semibold mw-700px">
-                    Review status, dokumen, asesor, penilaian, dan riwayat pengajuan dalam satu halaman detail.
+                    Pantau status, dokumen, asesor, penilaian, dan riwayat pengajuan dalam satu struktur detail.
                 </div>
             </div>
             <div class="spm-detail-hero-meta">
                 <div class="spm-detail-hero-label">Fokus admin</div>
-                <div class="spm-detail-hero-value">Validasi dan tindak lanjut pengajuan</div>
+                <div class="spm-detail-hero-value">Validasi dan tindak lanjut akreditasi</div>
             </div>
         </div>
     </div>
 
     <div class="row g-5 mb-5">
         <div class="col-lg-4">
-            <x-ui.stat-card label="Status Pengajuan" value="{{ $status['label'] }}" :variant="$status['variant']" icon="shield-tick" />
+            <x-ui.stat-card label="Status" value="{{ $status['label'] }}" :variant="$status['variant']" icon="shield-tick" />
         </div>
         <div class="col-lg-4">
             <x-ui.stat-card label="Tim Penilai" value="{{ $akreditasi->assessments->count() }} Asesor" variant="info" icon="profile-user" />

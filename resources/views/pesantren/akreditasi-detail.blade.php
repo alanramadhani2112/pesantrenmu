@@ -66,16 +66,16 @@
                     <x-ui.badge variant="secondary">Periode {{ $akreditasi->created_at?->format('Y') ?? '-' }}</x-ui.badge>
                 </div>
                 <h2 class="text-gray-900 fw-semibold mb-2">{{ $profil->nama_pesantren ?? 'Detail Akreditasi' }}</h2>
-                <div class="text-muted fw-semibold mw-700px">Pantau profil, dokumen, EDPM/IPR, asesor, dan hasil dalam satu alur pengajuan.</div>
+                <div class="text-muted fw-semibold mw-700px">Pantau profil, dokumen, EDPM/IPR, asesor, dan hasil dalam satu struktur detail.</div>
             </div>
             <div class="spm-detail-hero-meta">
-                <div class="spm-detail-hero-label">Tanggal pengajuan</div>
-                <div class="spm-detail-hero-value">{{ $akreditasi->created_at?->format('d M Y') ?? '-' }}</div>
+                <div class="spm-detail-hero-label">Fokus pesantren</div>
+                <div class="spm-detail-hero-value">Pantau progres dan tindak lanjut pengajuan</div>
             </div>
         </div>
     </div>
     {{-- Info Bar --}}
-    <div class="row g-4 mb-5 spm-detail-summary-grid">
+    <div class="row g-5 mb-5 spm-detail-summary-grid">
         <div class="col-lg-4">
             <x-ui.stat-card label="Periode" value="{{ $akreditasi->created_at?->format('Y') ?? '-' }}" variant="primary" icon="calendar" />
         </div>
@@ -83,7 +83,7 @@
             <x-ui.stat-card label="Status" value="{{ $status['label'] }}" :variant="$status['variant']" icon="information-3" />
         </div>
         <div class="col-lg-4">
-            <x-ui.stat-card label="Tanggal Pengajuan" value="{{ $akreditasi->created_at?->format('d M Y') ?? '-' }}" variant="success" icon="calendar" />
+            <x-ui.stat-card label="Tanggal pengajuan" value="{{ $akreditasi->created_at?->format('d M Y') ?? '-' }}" variant="success" icon="calendar" />
         </div>
     </div>
 
