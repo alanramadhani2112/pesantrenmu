@@ -14,9 +14,21 @@ Target:
 | Pesantren | `/pesantren/akreditasi/5b032b34-8e1e-460a-b59b-1cc6eb2ac410` | `.sisyphus/evidence/ui-detail-page-standardization/browser-qa/pesantren-akreditasi-detail.png` | 200 | 0 |
 | Asesor | `/asesor/akreditasi/ada01276-1092-49ee-9ed9-4575a5d27440` | `.sisyphus/evidence/ui-detail-page-standardization/browser-qa/asesor-akreditasi-detail.png` | 200 | 0 |
 
+## Re-run after orphan data fix
+
+QA diulang setelah fix `4686a49 fix: avoid creating missing pesantren detail` untuk memastikan detail admin tidak 500 ketika data akreditasi tidak punya user/pesantren valid.
+
+| Role | URL | Screenshot | Status | Console error |
+| --- | --- | --- | --- | --- |
+| Super Admin/Admin valid data | `/admin/akreditasi/ada01276-1092-49ee-9ed9-4575a5d27440` | `.sisyphus/evidence/ui-detail-page-standardization/browser-qa/admin-akreditasi-detail-rerun.png` | 200 | 0 |
+| Super Admin/Admin orphan data | `/admin/akreditasi/9a9b5132-24ee-4043-bf18-e04e0e5a20c6` | `.sisyphus/evidence/ui-detail-page-standardization/browser-qa/admin-akreditasi-detail-orphan-rerun.png` | 200 | 0 |
+| Pesantren | `/pesantren/akreditasi/5b032b34-8e1e-460a-b59b-1cc6eb2ac410` | `.sisyphus/evidence/ui-detail-page-standardization/browser-qa/pesantren-akreditasi-detail-rerun.png` | 200 | 0 |
+| Asesor | `/asesor/akreditasi/ada01276-1092-49ee-9ed9-4575a5d27440` | `.sisyphus/evidence/ui-detail-page-standardization/browser-qa/asesor-akreditasi-detail-rerun.png` | 200 | 0 |
+
 ## Result
 
 - Semua target detail akreditasi lintas role bisa dibuka tanpa 500.
+- Detail admin dengan orphan akreditasi juga bisa dibuka tanpa 500 dan menampilkan fallback data.
 - Browser console bersih dari error JavaScript pada halaman target.
 - Screenshot baseline QA tersimpan di folder evidence.
 - Halaman detail sudah memakai pola standar utama: `x-ui.page`, detail hero, badge status, metadata ringkas, tab/section, dan density `p-5`/`mb-5`/`row g-5`.
