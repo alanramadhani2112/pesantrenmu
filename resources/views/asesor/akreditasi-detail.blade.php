@@ -110,31 +110,31 @@
     @endif
 
     <div class="card spm-detail-hero spm-asesor-detail-hero mb-5">
-        <div class="card-body p-5">
-            <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-5">
-                <div class="min-w-0">
-                    <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
-                        <x-ui.status-badge :variant="$status['variant']">
-                            {{ $status['label'] }}
-                        </x-ui.status-badge>
-                        <x-ui.badge variant="primary">{{ $asesorTipe === 1 ? 'Ketua Asesor' : 'Anggota Asesor' }}</x-ui.badge>
-                    </div>
-                    <h2 class="fw-semibold text-gray-900 mb-2 text-break">{{ $pesantren->nama_pesantren ?? $pesantren->name ?? '-' }}</h2>
-                    <div class="text-muted fw-semibold lh-lg">{{ $pesantren->alamat ?? 'Alamat belum tersedia' }}</div>
+        <div class="card-body p-5 d-flex flex-column flex-lg-row justify-content-between gap-4">
+            <div class="min-w-0">
+                <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+                    <x-ui.status-badge :variant="$status['variant']">
+                        {{ $status['label'] }}
+                    </x-ui.status-badge>
+                    <x-ui.badge variant="secondary">{{ $asesorTipe === 1 ? 'Ketua Asesor' : 'Anggota Asesor' }}</x-ui.badge>
+                    <x-ui.badge variant="secondary">ID #{{ $akreditasi->id }}</x-ui.badge>
+                    <x-ui.badge variant="secondary">Periode {{ $akreditasi->created_at?->format('Y') ?? '-' }}</x-ui.badge>
                 </div>
-                <div class="spm-asesor-detail-next-step">
-                    <div class="spm-detail-label mb-2">Fokus Saat Ini</div>
-                    <div class="fw-semibold text-gray-900">
-                        @if($canScheduleVisitasi)
-                            Jadwalkan visitasi dan beri catatan awal.
-                        @elseif($canConfirmVisitasi)
-                            Konfirmasi visitasi setelah selesai di lapangan.
-                        @elseif((int) $akreditasi->status === AkreditasiStateMachine::STATUS_PASCA_VISITASI)
-                            Lengkapi nilai dan laporan visitasi.
-                        @else
-                            Review data dan pantau status akreditasi.
-                        @endif
-                    </div>
+                <h2 class="fw-semibold text-gray-900 mb-2 text-break">{{ $pesantren->nama_pesantren ?? $pesantren->name ?? '-' }}</h2>
+                <div class="text-muted fw-semibold mw-700px">Review profil, dokumen, instrumen, visitasi, dan laporan dalam satu struktur detail.</div>
+            </div>
+            <div class="spm-detail-hero-meta">
+                <div class="spm-detail-hero-label">Fokus asesor</div>
+                <div class="spm-detail-hero-value">
+                    @if($canScheduleVisitasi)
+                        Jadwalkan visitasi dan beri catatan awal.
+                    @elseif($canConfirmVisitasi)
+                        Konfirmasi visitasi setelah selesai di lapangan.
+                    @elseif((int) $akreditasi->status === AkreditasiStateMachine::STATUS_PASCA_VISITASI)
+                        Lengkapi nilai dan laporan visitasi.
+                    @else
+                        Review data dan pantau status akreditasi.
+                    @endif
                 </div>
             </div>
         </div>
@@ -143,7 +143,7 @@
     <div class="row g-5 mb-5">
         <div class="col-lg-4">
             <x-ui.stat-card
-                label="Status Tugas"
+                label="Status"
                 value="{{ $status['label'] }}"
                 variant="{{ $status['variant'] }}"
                 icon="shield-tick"
