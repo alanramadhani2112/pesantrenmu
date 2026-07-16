@@ -1135,6 +1135,21 @@ class MetronicFrontendTest extends TestCase
             ->assertSee('data-admin-akreditasi-page="metronic"', false);
     }
 
+    public function test_admin_accreditation_detail_tolerates_missing_user(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $admin = User::query()->where('email', 'admin@spm.test')->firstOrFail();
+        $akreditasi = Akreditasi::query()->create([
+            'user_id' => 999_999,
+            'status' => Akreditasi::STATUS_PENGAJUAN,
+        ]);
+
+        $this->actingAs($admin)
+            ->get("/admin/akreditasi/{$akreditasi->uuid}")
+            ->assertOk()
+            ->assertSee('Pesantren tidak tersedia');
+    }
+
     public function test_user_module_list_pages_use_page_heading_and_reusable_tables(): void
     {
         $this->seed(DatabaseSeeder::class);

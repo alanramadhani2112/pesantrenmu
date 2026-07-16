@@ -8,6 +8,7 @@ use App\Exceptions\StaleStateException;
 use App\Http\Controllers\Controller;
 use App\Models\AkreditasiEdpm;
 use App\Models\Asesor;
+use App\Models\Ipm;
 use App\Notifications\AkreditasiNotification;
 use App\Services\AkreditasiService;
 use App\Services\AkreditasiWorkflowService;
@@ -53,9 +54,10 @@ class AkreditasiDetailController extends Controller
         Gate::authorize('view', $akreditasi);
 
         $userId = $akreditasi->user_id;
-        $pesantren = $this->pesantrenService->getProfile($userId);
+        $pesantren = $akreditasi->user?->pesantren;
+        $pesantren?->loadMissing('units');
         $isLocked = (bool) ($pesantren?->is_locked ?? false);
-        $ipm = $this->pesantrenService->getIpm($userId);
+        $ipm = Ipm::where('user_id', $userId)->first();
         $sdm = $this->pesantrenService->getSdm($userId)->keyBy('tingkat');
 
         $levels = [];
@@ -712,7 +714,8 @@ class AkreditasiDetailController extends Controller
 
         Gate::authorize('pesantren.lock');
 
-        $pesantren = $this->pesantrenService->getProfile($akreditasi->user_id);
+        $akreditasi->loadMissing('user.pesantren');
+        $pesantren = $akreditasi->user?->pesantren;
         if ($pesantren) {
             $prevLocked = $pesantren->is_locked;
             $pesantren->is_locked = ! $pesantren->is_locked;
