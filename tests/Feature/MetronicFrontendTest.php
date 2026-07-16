@@ -1104,7 +1104,8 @@ class MetronicFrontendTest extends TestCase
                 ->assertOk()
                 ->assertSee($marker, false)
                 ->assertSee('spm-page-title', false)
-                ->assertSee('data-ui-table="metronic"', false);
+                ->assertSee('data-ui-table="metronic"', false)
+                ->assertDontSee('@js(', false);
         }
 
         $this->actingAs($superAdmin)

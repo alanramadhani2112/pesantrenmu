@@ -182,9 +182,19 @@
                             </x-ui.action-menu-item>
 
                             @if(in_array((int) $item->akreditasi->status, [4], true))
+                                @php
+                                    $pesantrenName = $item->akreditasi->user?->pesantren?->nama_pesantren
+                                        ?? $item->akreditasi->user?->name
+                                        ?? 'N/A';
+                                    $tanggalMulai = \Carbon\Carbon::parse($item->tanggal_mulai);
+                                    $tanggalBerakhir = \Carbon\Carbon::parse($item->tanggal_berakhir);
+                                @endphp
                                 <x-ui.action-menu-item
                                     variant="primary"
-                                    x-on:click="openJadwalModal({{ $item->akreditasi->id }}, @js($item->akreditasi->user?->pesantren?->nama_pesantren ?? $item->akreditasi->user?->name ?? 'N/A'), @js(\Carbon\Carbon::parse($item->tanggal_mulai)->format('Y-m-d')), @js(\Carbon\Carbon::parse($item->tanggal_berakhir)->format('Y-m-d')))"
+                                    data-pesantren="{{ $pesantrenName }}"
+                                    data-mulai="{{ $tanggalMulai->format('Y-m-d') }}"
+                                    data-akhir="{{ $tanggalBerakhir->format('Y-m-d') }}"
+                                    x-on:click="openJadwalModal({{ $item->akreditasi->id }}, $el.dataset.pesantren, $el.dataset.mulai, $el.dataset.akhir)"
                                 >
                                     <x-ui.icon name="timer" class="fs-5" />
                                     Atur Jadwal
@@ -192,7 +202,9 @@
 
                                 <x-ui.action-menu-item
                                     variant="danger"
-                                    x-on:click="openTolakModal({{ $item->akreditasi->id }}, @js($item->akreditasi->user?->pesantren?->nama_pesantren ?? $item->akreditasi->user?->name ?? 'N/A'), @js(\Carbon\Carbon::parse($item->tanggal_mulai)->format('d').' - '.\Carbon\Carbon::parse($item->tanggal_berakhir)->format('d M Y')))"
+                                    data-pesantren="{{ $pesantrenName }}"
+                                    data-periode="{{ $tanggalMulai->format('d') }} - {{ $tanggalBerakhir->format('d M Y') }}"
+                                    x-on:click="openTolakModal({{ $item->akreditasi->id }}, $el.dataset.pesantren, $el.dataset.periode)"
                                 >
                                     <x-ui.icon name="cross-circle" class="fs-5" />
                                     Tolak Dokumen
