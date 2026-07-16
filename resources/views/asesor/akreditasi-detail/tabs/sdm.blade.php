@@ -1,6 +1,6 @@
 {{-- Tab: SDM (Sumber Daya Manusia) --}}
 <x-ui.section-card title="Rekapitulasi SDM" subtitle="Data sumber daya manusia pesantren" class="spm-asesor-table-panel">
-    <div class="p-6">
+<div class="p-5">
         <x-ui.simple-table class="spm-sdm-table-wrap" table-class="table-row-gray-200 spm-sdm-review-table">
                 <thead>
                     <tr class="fw-semibold text-muted">

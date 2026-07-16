@@ -5,7 +5,7 @@
 
 {{-- Scoring Progress --}}
 @if(!empty($scoringProgressCards))
-<div class="row g-4 mb-6 spm-scoring-progress">
+<div class="row g-4 mb-5 spm-scoring-progress">
     @foreach($scoringProgressCards as $card)
         <div class="col-md-3">
             <x-ui.stat-card
@@ -100,7 +100,7 @@
                                     <td class="text-center">
                                         @if($isNaFinal || $isLocked)
                                             <x-ui.badge variant="primary">{{ $asesorEval->value ?? '-' }}</x-ui.badge>
-                                            <i class="ki-solid ki-lock fs-7 text-muted ms-1"></i>
+<x-ui.icon name="lock" class="fs-7 text-muted ms-1" />
                                         @else
                                             <select class="form-select form-select-sm spm-score-select" aria-label="Nilai NA butir {{ $butir->nomor_butir ?? $loop->iteration }}"
                                                     x-on:change="saveNa({{ $butirId }}, $event.target.value, false)">
@@ -113,7 +113,7 @@
                                                     aria-label="Kunci nilai butir {{ $butir->nomor_butir ?? $loop->iteration }}"
                                                     x-on:click="saveNa({{ $butirId }}, '{{ $asesorEval->value ?? '' }}', true)"
                                                     title="Kunci Nilai">
-                                                <i class="ki-solid ki-lock fs-7"></i>
+<x-ui.icon name="lock" class="fs-7" />
                                             </x-ui.button>
                                         @endif
                                     </td>
@@ -149,7 +149,7 @@
                                     <td class="text-center">
                                         @if($isNaFinal || $isLocked)
                                             <x-ui.badge variant="primary">{{ $asesorEval->value ?? '-' }}</x-ui.badge>
-                                            <i class="ki-solid ki-lock fs-7 text-muted ms-1"></i>
+<x-ui.icon name="lock" class="fs-7 text-muted ms-1" />
                                         @else
                                             <select class="form-select form-select-sm spm-score-select" aria-label="Nilai NA butir {{ $butir->nomor_butir ?? $loop->iteration }}"
                                                     x-on:change="saveNa({{ $butirId }}, $event.target.value, false)">
@@ -162,7 +162,7 @@
                                                     aria-label="Kunci nilai butir {{ $butir->nomor_butir ?? $loop->iteration }}"
                                                     x-on:click="saveNa({{ $butirId }}, '{{ $asesorEval->value ?? '' }}', true)"
                                                     title="Kunci Nilai">
-                                                <i class="ki-solid ki-lock fs-7"></i>
+<x-ui.icon name="lock" class="fs-7" />
                                             </x-ui.button>
                                         @endif
                                     </td>
@@ -177,7 +177,7 @@
 {{-- Catatan Rekomendasi per Komponen (Asesor 1 only) --}}
 @if($asesorTipe === 1 && !$isLocked)
 <x-ui.section-card title="Catatan Rekomendasi" subtitle="Catatan rekomendasi per komponen penilaian" class="mt-4">
-    <div class="p-6">
+<div class="p-5">
         @foreach($komponens as $komponen)
             <div class="mb-4">
                 <label class="form-label fw-semibold">{{ $komponen->nama ?? $komponen->name ?? 'Komponen ' . $loop->iteration }}</label>
@@ -189,11 +189,11 @@
 @endif
 
 {{-- Scroll Actions --}}
-<div class="position-fixed bottom-0 end-0 mb-6 me-6 d-flex flex-column gap-2 spm-scroll-actions" style="z-index: 100;">
+<div class="position-fixed bottom-0 end-0 mb-5 me-5 d-flex flex-column gap-2 spm-scroll-actions" style="z-index: 100;">
     <x-ui.button type="button" variant="light-primary" size="sm" class="btn-icon" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Ke Atas">
-        <i class="ki-solid ki-arrow-up fs-5"></i>
+<x-ui.icon name="arrow-up" class="fs-5" />
     </x-ui.button>
     <x-ui.button type="button" variant="light-primary" size="sm" class="btn-icon" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" title="Ke Bawah">
-        <i class="ki-solid ki-arrow-down fs-5"></i>
+<x-ui.icon name="arrow-down" class="fs-5" />
     </x-ui.button>
 </div>

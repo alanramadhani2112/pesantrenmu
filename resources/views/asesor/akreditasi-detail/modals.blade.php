@@ -3,7 +3,7 @@
         <form method="POST" action="{{ route('asesor.akreditasi.reject-document') }}" id="rejectDocumentsForm">
             @csrf
             <input type="hidden" name="akreditasi_id" value="{{ $akreditasi->id }}">
-            <div class="p-6">
+<div class="p-5">
                 <p class="text-muted mb-4">Pilih dokumen yang ditolak dan berikan alasan penolakan.</p>
 
                 <div class="mb-4">
@@ -53,7 +53,7 @@
         <form method="POST" action="{{ route('asesor.akreditasi.schedule-visitasi') }}" id="scheduleVisitasiForm">
             @csrf
             <input type="hidden" name="akreditasi_id" value="{{ $akreditasi->id }}">
-            <div class="p-6">
+<div class="p-5">
                 <div class="mb-4">
                     <label class="form-label fw-semibold" for="tanggalMulai">Tanggal Mulai</label>
                     <input type="date" class="form-control" name="tanggal_mulai" id="tanggalMulai" required>

@@ -4,8 +4,8 @@
 @endphp
 
 <x-ui.section-card title="Upload Laporan Visitasi" subtitle="Halaman ini khusus unggah dokumen laporan. Butir dan komponen ada di tab Butir Penilaian.">
-    <div class="p-6">
-        <x-ui.alert variant="info" title="Butir penilaian ada di tab lain" class="mb-6">
+<div class="p-5">
+<x-ui.alert variant="info" title="Butir penilaian ada di tab lain" class="mb-5">
             Halaman ini hanya untuk unggah laporan visitasi. Untuk melihat komponen, butir pertanyaan, dan input nilai, buka tab <strong>Butir Penilaian</strong>.
             <div class="mt-3">
                 <x-ui.button type="button" variant="light-primary" size="sm" x-on:click="activeTab = 'instrumen'">
@@ -14,7 +14,7 @@
             </div>
         </x-ui.alert>
         {{-- Laporan Individu --}}
-        <div class="spm-upload-panel mb-6">
+<div class="spm-upload-panel mb-5">
             <h6 class="fw-semibold mb-3">Laporan Individu</h6>
             <p class="text-muted fs-7 mb-3">Unggah laporan visitasi individu Anda (PDF/DOCX, maks 5MB).</p>
 
