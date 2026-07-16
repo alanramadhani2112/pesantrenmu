@@ -6,6 +6,7 @@
     margin-right: 2rem;
     border-bottom: 2px solid transparent;
     transition: color 0.15s ease, border-color 0.15s ease;
+    text-transform: none;
 }
 
 .spm-tabs .nav-link:hover {

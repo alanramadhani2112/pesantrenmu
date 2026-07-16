@@ -5,7 +5,7 @@
 ])
 
 @php
-    $classes = trim('nav-link text-active-primary spm-tab-link ' . ($active ? 'active' : ''));
+    $classes = trim('nav-link cursor-pointer spm-tab-link ' . ($active ? 'active' : ''));
     $ariaPressed = $active ? 'true' : 'false';
 @endphp
 
