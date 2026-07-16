@@ -135,21 +135,22 @@
 
     @endif
 
-    {{-- Tabs --}}
-    <div class="spm-detail-tabs-shell spm-tab-spacing" aria-label="Navigasi detail akreditasi">
-    <x-ui.tabs class="mb-5">
-        @foreach($tabs as $key => $label)
-            @if($key !== 'banding' || !empty($akreditasi->banding))
-                <x-ui.tab :href="request()->fullUrlWithQuery(['tab' => $key])" :active="$activeTab === $key">
-                    {{ $label }}
-                </x-ui.tab>
-            @endif
-        @endforeach
-    </x-ui.tabs>
-    </div>
+    <x-ui.card :flush="true">
+        {{-- Tabs --}}
+        <div class="spm-detail-tabs-shell px-6 pt-5 pb-5" aria-label="Navigasi detail akreditasi">
+            <x-ui.tabs>
+                @foreach($tabs as $key => $label)
+                    @if($key !== 'banding' || !empty($akreditasi->banding))
+                        <x-ui.tab :href="request()->fullUrlWithQuery(['tab' => $key])" :active="$activeTab === $key">
+                            {{ $label }}
+                        </x-ui.tab>
+                    @endif
+                @endforeach
+            </x-ui.tabs>
+        </div>
 
-    {{-- Tab Content --}}
-    <div class="spm-detail-tab-content spm-detail-alignment">
+        {{-- Tab Content --}}
+        <div class="spm-detail-tab-content spm-detail-alignment p-5">
     @if($activeTab === 'profil')
         {{-- Profil Tab --}}
         <x-ui.section-card title="Identitas Pesantren" subtitle="Ringkasan data utama yang menjadi dasar pengajuan." class="mb-5 spm-detail-panel">
@@ -411,7 +412,8 @@
             </div>
         </x-ui.section-card>
     @endif
-    </div>
+        </div>
+    </x-ui.card>
 </x-ui.page>
 
 @push('scripts')

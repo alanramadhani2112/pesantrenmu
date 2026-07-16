@@ -178,20 +178,18 @@
     {{-- Tabs Navigation --}}
     <x-ui.card :flush="true">
         <div class="spm-detail-tabs-shell px-6 pt-5 pb-5" aria-label="Navigasi detail akreditasi">
-            <div data-ui-tabs="metronic" class="nav nav-tabs nav-line-tabs spm-tabs-nav" role="tablist">
+            <x-ui.tabs>
                 @foreach($tabs as $key => $label)
-                    <x-ui.button type="button" :unstyled="true"
-                        class="nav-item nav-link cursor-pointer spm-tab-link"
+                    <x-ui.tab
                         id="tab-{{ $key }}"
-                        role="tab"
                         x-bind:aria-selected="activeTab === '{{ $key }}' ? 'true' : 'false'"
                         aria-controls="panel-{{ $key }}"
                         x-bind:class="{ 'active': activeTab === '{{ $key }}' }"
                         x-on:click="activeTab = '{{ $key }}'">
                         {{ $label }}
-                    </x-ui.button>
+                    </x-ui.tab>
                 @endforeach
-            </div>
+            </x-ui.tabs>
         </div>
 
         {{-- Tab Content --}}
