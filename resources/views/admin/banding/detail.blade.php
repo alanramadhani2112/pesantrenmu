@@ -92,7 +92,7 @@
                     <div x-show="showAssignModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
                         <div class="min-h-screen flex items-center justify-center p-4">
                             <div class="fixed inset-0 bg-black/50" @click="showAssignModal = false"></div>
-                            <div class="modal-content bg-white rounded p-6 position-relative w-100 mw-450px">
+                            <div class="modal-content bg-white rounded p-5 position-relative w-100 mw-450px">
                                 <h3 class="mb-4" x-text="assignAction === 'assign' ? 'Pilih Reviewer' : 'Pilih Reviewer Baru'"></h3>
                                 <form method="POST" :action="assignAction === 'assign' ? '{{ route('banding.assign-reviewer', $banding->id) }}' : '{{ route('banding.reassign-reviewer', $banding->id) }}'">
                                     @csrf
@@ -115,7 +115,7 @@
                     <div x-show="showDecisionModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
                         <div class="min-h-screen flex items-center justify-center p-4">
                             <div class="fixed inset-0 bg-black/50" @click="showDecisionModal = false"></div>
-                            <div class="modal-content bg-white rounded p-6 position-relative w-100 mw-450px">
+                            <div class="modal-content bg-white rounded p-5 position-relative w-100 mw-450px">
                                 <h3 class="mb-4" x-text="decisionType === 'accept' ? 'Terima Banding' : 'Tolak Banding'"></h3>
                                 <form method="POST" action="{{ route('banding.submit-decision', $banding->id) }}">
                                     @csrf
