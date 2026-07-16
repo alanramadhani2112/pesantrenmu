@@ -176,48 +176,50 @@
     />
 
     {{-- Tabs Navigation --}}
-    <div class="spm-detail-tabs-shell" aria-label="Navigasi detail akreditasi">
-        <div data-ui-tabs="metronic" class="nav nav-tabs nav-line-tabs mb-5 spm-tabs-nav" role="tablist">
-        @foreach($tabs as $key => $label)
-            <x-ui.button type="button" :unstyled="true"
-               class="nav-item nav-link cursor-pointer spm-tab-link"
-               id="tab-{{ $key }}"
-               role="tab"
-               x-bind:aria-selected="activeTab === '{{ $key }}' ? 'true' : 'false'"
-               aria-controls="panel-{{ $key }}"
-               x-bind:class="{ 'active': activeTab === '{{ $key }}' }"
-               x-on:click="activeTab = '{{ $key }}'">
-                {{ $label }}
-            </x-ui.button>
-        @endforeach
+    <x-ui.card :flush="true">
+        <div class="spm-detail-tabs-shell px-6 pt-5 pb-5" aria-label="Navigasi detail akreditasi">
+            <div data-ui-tabs="metronic" class="nav nav-tabs nav-line-tabs spm-tabs-nav" role="tablist">
+                @foreach($tabs as $key => $label)
+                    <x-ui.button type="button" :unstyled="true"
+                        class="nav-item nav-link cursor-pointer spm-tab-link"
+                        id="tab-{{ $key }}"
+                        role="tab"
+                        x-bind:aria-selected="activeTab === '{{ $key }}' ? 'true' : 'false'"
+                        aria-controls="panel-{{ $key }}"
+                        x-bind:class="{ 'active': activeTab === '{{ $key }}' }"
+                        x-on:click="activeTab = '{{ $key }}'">
+                        {{ $label }}
+                    </x-ui.button>
+                @endforeach
+            </div>
         </div>
-    </div>
 
-    {{-- Tab Content --}}
-    <div class="spm-detail-tab-content">
-    <div x-show="activeTab === 'profil'" id="panel-profil" role="tabpanel" aria-labelledby="tab-profil" x-cloak>
-        @include('asesor.akreditasi-detail.tabs.profil')
-    </div>
-    <div x-show="activeTab === 'ipm'" id="panel-ipm" role="tabpanel" aria-labelledby="tab-ipm" x-cloak>
-        @include('asesor.akreditasi-detail.tabs.ipm')
-    </div>
-    <div x-show="activeTab === 'sdm'" id="panel-sdm" role="tabpanel" aria-labelledby="tab-sdm" x-cloak>
-        @include('asesor.akreditasi-detail.tabs.sdm')
-    </div>
-    <div x-show="activeTab === 'edpm'" id="panel-edpm" role="tabpanel" aria-labelledby="tab-edpm" x-cloak>
-        @include('asesor.akreditasi-detail.tabs.edpm')
-    </div>
-    @if(in_array((int) $akreditasi->status, [AkreditasiStateMachine::STATUS_PASCA_VISITASI, AkreditasiStateMachine::STATUS_VALIDASI_ADMIN, AkreditasiStateMachine::STATUS_SELESAI, AkreditasiStateMachine::STATUS_DITOLAK], true))
-        <div x-show="activeTab === 'instrumen'" id="panel-instrumen" role="tabpanel" aria-labelledby="tab-instrumen" x-cloak>
-            @include('asesor.akreditasi-detail.tabs.instrumen')
+        {{-- Tab Content --}}
+        <div class="spm-detail-tab-content p-5">
+            <div x-show="activeTab === 'profil'" id="panel-profil" role="tabpanel" aria-labelledby="tab-profil" x-cloak>
+                @include('asesor.akreditasi-detail.tabs.profil')
+            </div>
+            <div x-show="activeTab === 'ipm'" id="panel-ipm" role="tabpanel" aria-labelledby="tab-ipm" x-cloak>
+                @include('asesor.akreditasi-detail.tabs.ipm')
+            </div>
+            <div x-show="activeTab === 'sdm'" id="panel-sdm" role="tabpanel" aria-labelledby="tab-sdm" x-cloak>
+                @include('asesor.akreditasi-detail.tabs.sdm')
+            </div>
+            <div x-show="activeTab === 'edpm'" id="panel-edpm" role="tabpanel" aria-labelledby="tab-edpm" x-cloak>
+                @include('asesor.akreditasi-detail.tabs.edpm')
+            </div>
+            @if(in_array((int) $akreditasi->status, [AkreditasiStateMachine::STATUS_PASCA_VISITASI, AkreditasiStateMachine::STATUS_VALIDASI_ADMIN, AkreditasiStateMachine::STATUS_SELESAI, AkreditasiStateMachine::STATUS_DITOLAK], true))
+                <div x-show="activeTab === 'instrumen'" id="panel-instrumen" role="tabpanel" aria-labelledby="tab-instrumen" x-cloak>
+                    @include('asesor.akreditasi-detail.tabs.instrumen')
+                </div>
+            @endif
+            @if(in_array((int) $akreditasi->status, [AkreditasiStateMachine::STATUS_PASCA_VISITASI, AkreditasiStateMachine::STATUS_VALIDASI_ADMIN, AkreditasiStateMachine::STATUS_SELESAI, AkreditasiStateMachine::STATUS_DITOLAK], true))
+                <div x-show="activeTab === 'laporan'" id="panel-laporan" role="tabpanel" aria-labelledby="tab-laporan" x-cloak>
+                    @include('asesor.akreditasi-detail.tabs.laporan-visitasi')
+                </div>
+            @endif
         </div>
-    @endif
-    @if(in_array((int) $akreditasi->status, [AkreditasiStateMachine::STATUS_PASCA_VISITASI, AkreditasiStateMachine::STATUS_VALIDASI_ADMIN, AkreditasiStateMachine::STATUS_SELESAI, AkreditasiStateMachine::STATUS_DITOLAK], true))
-    <div x-show="activeTab === 'laporan'" id="panel-laporan" role="tabpanel" aria-labelledby="tab-laporan" x-cloak>
-        @include('asesor.akreditasi-detail.tabs.laporan-visitasi')
-    </div>
-    @endif
-    </div>
+    </x-ui.card>
 
     {{-- Rejection Section (Asesor 1 Only) --}}
     @if($asesorTipe === 1 && !empty($rejectionStatus))

@@ -44,7 +44,7 @@
 
 {{-- Layanan & Fasilitas --}}
 @if($pesantren->units && $pesantren->units->count() > 0)
-<x-ui.section-card title="Layanan Pendidikan" subtitle="Unit layanan pendidikan pesantren" class="mt-4 spm-asesor-table-panel">
+<x-ui.section-card title="Layanan Pendidikan" subtitle="Unit layanan pendidikan pesantren" class="mt-5 spm-asesor-table-panel">
 <div class="p-5">
         <x-ui.simple-table table-class="table-row-gray-200">
                 <thead>
@@ -68,24 +68,26 @@
 </x-ui.section-card>
 @endif
 
-{{-- Dokumen Utama --}}
-<x-ui.section-card title="Dokumen Utama" subtitle="Dokumen utama kelengkapan akreditasi" class="mt-4 spm-asesor-document-panel">
-<div class="p-5">
-        <div class="spm-document-grid">
-            @foreach($dokumenUtama as $field => $label)
-                <x-ui.document-item :label="$label" :href="!empty($pesantren->$field) ? Storage::url($pesantren->$field) : null" />
-            @endforeach
-        </div>
-    </div>
-</x-ui.section-card>
-
-{{-- Dokumen Sekunder --}}
-<x-ui.section-card title="Dokumen Sekunder" subtitle="Dokumen pendukung akreditasi" class="mt-4 spm-asesor-document-panel">
-<div class="p-5">
-        <div class="spm-document-grid">
-            @foreach($dokumenSekunder as $field => $label)
-                <x-ui.document-item :label="$label" :href="!empty($pesantren->$field) ? Storage::url($pesantren->$field) : null" />
-            @endforeach
+{{-- Dokumen Pesantren --}}
+<x-ui.section-card title="Dokumen Pesantren" subtitle="Dokumen utama dan pendukung akreditasi" class="mt-5 spm-asesor-document-panel">
+    <div class="p-5">
+        <div class="row g-5">
+            <div class="col-lg-6">
+                <h5 class="fw-semibold text-gray-800 mb-4">Dokumen Utama</h5>
+                <div class="spm-document-grid">
+                    @foreach($dokumenUtama as $field => $label)
+                        <x-ui.document-item :label="$label" :href="!empty($pesantren->$field) ? Storage::url($pesantren->$field) : null" />
+                    @endforeach
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <h5 class="fw-semibold text-gray-800 mb-4">Dokumen Sekunder</h5>
+                <div class="spm-document-grid">
+                    @foreach($dokumenSekunder as $field => $label)
+                        <x-ui.document-item :label="$label" :href="!empty($pesantren->$field) ? Storage::url($pesantren->$field) : null" />
+                    @endforeach
+                </div>
+            </div>
         </div>
     </div>
 </x-ui.section-card>
