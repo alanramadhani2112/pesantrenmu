@@ -986,6 +986,7 @@ class MetronicFrontendTest extends TestCase
 
         Akreditasi::query()->create(['user_id' => $pesantren->id, 'status' => 1]);
         Akreditasi::query()->create(['user_id' => $pesantren->id, 'status' => 3]);
+        Akreditasi::query()->create(['user_id' => 999_999, 'status' => 1]);
 
         $users = [
             'admin' => User::factory()->create(['role_id' => 1]),

@@ -134,7 +134,9 @@ class DashboardController extends Controller
             return [
                 'id' => $akreditasi->id,
                 'uuid' => $akreditasi->uuid,
-                'pesantren_name' => $akreditasi->user->pesantren->nama_pesantren ?? $akreditasi->user->name,
+                'pesantren_name' => $akreditasi->user?->pesantren?->nama_pesantren
+                    ?? $akreditasi->user?->name
+                    ?? 'Pesantren tidak tersedia',
                 'status' => (int) $akreditasi->status,
                 'status_label' => Akreditasi::getStatusLabel($akreditasi->status),
                 'periode' => $akreditasi->periode ?? $akreditasi->created_at?->format('Y'),
