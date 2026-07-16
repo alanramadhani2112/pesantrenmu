@@ -4,9 +4,9 @@
     'flush' => false,
 ])
 
-<div data-ui-card="metronic" {{ $attributes->merge(['class' => 'card']) }}>
+<div data-ui-card="metronic" {{ $attributes->merge(['class' => 'card spm-card spm-card--clean']) }}>
     @if($title || isset($toolbar))
-        <div class="card-header border-0">
+        <div class="card-header border-0 spm-card-header">
             <div class="card-title d-flex flex-column">
                 @if($title)
                     <h3 class="spm-card-title mb-1">{{ $title }}</h3>
@@ -25,7 +25,7 @@
         </div>
     @endif
 
-    <div class="{{ $flush ? 'card-body p-0' : 'card-body' }}">
+    <div class="{{ $flush ? 'card-body p-0 spm-card-body' : 'card-body spm-card-body' }}">
         {{ $slot }}
     </div>
 </div>

@@ -2,6 +2,6 @@
     'class' => '',
 ])
 
-<div data-ui-filter-bar="metronic" {{ $attributes->merge(['class' => trim('spm-filter-bar ' . $class)]) }}>
+<div data-ui-filter-bar="metronic" {{ $attributes->merge(['class' => trim('spm-filter-bar spm-filter-bar--clean ' . $class)]) }}>
     {{ $slot }}
 </div>

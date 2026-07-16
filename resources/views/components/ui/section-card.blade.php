@@ -3,9 +3,9 @@
     'subtitle' => null,
 ])
 
-<div data-ui-section-card="metronic" {{ $attributes->merge(['class' => 'card spm-section-card']) }}>
+<div data-ui-section-card="metronic" {{ $attributes->merge(['class' => 'card spm-card--clean spm-section-card']) }}>
     @if($title || $subtitle || isset($toolbar))
-        <div class="card-header border-0 py-4">
+        <div class="card-header border-0 py-4 spm-section-card-header">
             <div class="card-title d-flex align-items-center gap-3 m-0">
                 <span class="spm-section-card-accent"></span>
 

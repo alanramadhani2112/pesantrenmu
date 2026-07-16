@@ -35,7 +35,7 @@
     $tableClasses = $tableClass ? trim($defaultClasses . ' ' . $tableClass) : $defaultClasses;
 @endphp
 
-<div data-ui-table="metronic" {{ $attributes->merge(['class' => 'card spm-table-shell spm-table-shell--standard']) }}>
+<div data-ui-table="metronic" {{ $attributes->merge(['class' => 'card spm-card--clean spm-table-shell spm-table-shell--standard']) }}>
     @if($title || $subtitle || isset($filters) || isset($toolbar) || $showToolbarPerPage)
         <div class="card-header border-0 spm-table-header">
             <div class="spm-table-heading">
