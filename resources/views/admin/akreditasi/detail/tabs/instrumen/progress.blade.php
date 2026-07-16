@@ -1,5 +1,5 @@
 <x-ui.section-card title="Progress Penilaian">
-    <div class="p-6 d-flex flex-column gap-4">
+<div class="p-5 d-flex flex-column gap-4">
         @foreach($scoringProgressCards as $card)
             <div class="d-flex align-items-center gap-3">
                 <div class="fw-semibold text-gray-800 w-125px">{{ $card['nama'] }}</div>

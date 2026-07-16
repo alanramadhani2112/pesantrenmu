@@ -11,7 +11,7 @@
 
 <div data-ui-audit-timeline="metronic" class="spm-audit-timeline">
     {{-- Summary Grid --}}
-    <div class="spm-audit-summary-grid mb-6">
+<div class="spm-audit-summary-grid mb-5">
         <div class="spm-audit-summary-item">
             <span class="spm-audit-summary-label">Total Riwayat</span>
             <span class="spm-audit-summary-value">{{ $auditLogs instanceof \Illuminate\Pagination\LengthAwarePaginator ? $auditLogs->total() : 0 }}</span>

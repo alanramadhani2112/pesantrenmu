@@ -3,7 +3,7 @@
 @endphp
 
 @if($activeTab === 'laporan_visitasi')
-    <div class="d-flex flex-column gap-6">
+<div class="d-flex flex-column gap-5">
         {{-- Post-Visitasi Document Checklist --}}
         @if(in_array((int) $akreditasi->status, [
             AkreditasiStateMachine::STATUS_PASCA_VISITASI,
@@ -32,7 +32,7 @@
                         {{ $available }}/{{ count($requiredDocs) }} Lengkap
                     </x-ui.status-badge>
                 </x-slot:toolbar>
-                <div class="p-6">
+<div class="p-5">
                     <div class="d-flex flex-column gap-3">
                         @foreach($requiredDocs as $doc)
                             @php $has = !empty($akreditasi->{$doc['key']}) @endphp
@@ -59,7 +59,7 @@
 
         @if($akreditasi->status >= 3)
             <x-ui.section-card title="Kartu Kendali" subtitle="Dokumen kontrol validasi dari pesantren.">
-                <div class="p-6">
+<div class="p-5">
                     <div class="spm-document-list">
                         <x-ui.document-item
                             label="Dokumen Kartu Kendali"
@@ -72,7 +72,7 @@
         @endif
 
         <x-ui.section-card title="Laporan Hasil Visitasi" subtitle="Dokumen laporan dari ketua dan anggota asesor.">
-            <div class="p-6">
+<div class="p-5">
                 <div class="row g-5">
                     <div class="col-lg-4">
                         <div class="spm-document-list">

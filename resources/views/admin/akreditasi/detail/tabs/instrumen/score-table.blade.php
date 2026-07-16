@@ -1,5 +1,5 @@
 <x-ui.section-card title="Tabel Penilaian Admin" subtitle="Nilai Akreditasi (NA), Nilai Koreksi (NK), dan Nilai Validasi (NV) per butir.">
-    <x-ui.simple-table class="p-6" table-class="table-hover">
+<x-ui.simple-table class="p-5" table-class="table-hover">
         <thead>
             <tr class="fw-semibold text-muted bg-light">
                 <x-ui.table-th :min-width="false" class="ps-6" style="width: 5%;">No</x-ui.table-th>

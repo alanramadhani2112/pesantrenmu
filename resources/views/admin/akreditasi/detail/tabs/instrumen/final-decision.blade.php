@@ -1,6 +1,6 @@
 @if($showFinalDecision)
     <x-ui.section-card title="Keputusan Akhir" subtitle="Terbitkan SK atau tolak hasil akreditasi setelah NV final.">
-        <div class="p-6">
+<div class="p-5">
             <div class="d-flex gap-4">
                 <x-ui.button type="button" variant="success" size="lg" @click="$dispatch('open-modal', 'approve-final-modal')">
                     <x-ui.icon name="check-circle" class="fs-4 me-2" />

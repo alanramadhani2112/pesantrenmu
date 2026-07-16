@@ -1,6 +1,6 @@
 @if ($activeTab === 'sdm')
     <x-ui.section-card title="Data SDM Pesantren" subtitle="Rekap santri, ustadz, pamong, musyrif, dan tenaga kependidikan.">
-        <div class="p-6">
+<div class="p-5">
             <x-ui.simple-table tableClass="spm-wide-table">
                 <thead>
                     <tr class="text-center">
@@ -24,7 +24,7 @@
                     @foreach ($levels as $index => $level)
                         <tr class="text-center">
                             <td class="ps-4 fw-semibold">{{ $index + 1 }}</td>
-                            <td class="text-start text-uppercase fw-semibold">{{ $level }}</td>
+<td class="text-start fw-semibold">{{ $level }}</td>
                             @foreach($fields as $field)
                                 <td>{{ $sdm[$level]->$field ?? 0 }}</td>
                             @endforeach
@@ -33,7 +33,7 @@
                 </tbody>
                 <tfoot>
                     <tr class="text-center">
-                        <td colspan="2" class="ps-4 text-uppercase text-start">Jumlah</td>
+<td colspan="2" class="ps-4 text-start">Jumlah</td>
                         @foreach($fields as $field)
                             <td>{{ $sdmTotals[$field] }}</td>
                         @endforeach

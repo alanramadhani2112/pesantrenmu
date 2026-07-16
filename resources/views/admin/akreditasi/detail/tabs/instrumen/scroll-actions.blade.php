@@ -1,5 +1,5 @@
 <x-ui.section-card title="" subtitle="">
-    <div class="p-6 d-flex flex-column gap-4 align-items-end">
+<div class="p-5 d-flex flex-column gap-4 align-items-end">
         <form method="POST" action="{{ route('admin.akreditasi-detail.save-nv', $akreditasi->uuid) }}" class="d-inline">
             @csrf
             @foreach($adminNvs as $butirId => $item)

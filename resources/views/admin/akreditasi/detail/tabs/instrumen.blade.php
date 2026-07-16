@@ -1,5 +1,5 @@
 @if ($activeTab === 'instrumen')
-    <div class="d-flex flex-column gap-6">
+<div class="d-flex flex-column gap-5">
         @if(! $canShowAdminScoring)
             @include('admin.akreditasi.detail.tabs.instrumen.gate-status')
         @else

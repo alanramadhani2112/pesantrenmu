@@ -3,7 +3,7 @@
 @endphp
 
 @if ($activeTab === 'profil')
-    <div class="d-flex flex-column gap-6">
+<div class="d-flex flex-column gap-5">
         <x-ui.section-card title="Profil Pesantren" subtitle="Identitas pesantren dan status akses data.">
             <x-slot:toolbar>
                 @if($pesantren)
@@ -21,7 +21,7 @@
                 @endif
             </x-slot:toolbar>
 
-            <div class="p-6">
+<div class="p-5">
                 <div class="row g-5">
                     <x-ui.detail-item label="Nama Pesantren" value="{{ $pesantren->nama_pesantren ?? '-' }}" />
                     <x-ui.detail-item label="NSP" value="{{ $pesantren->ns_pesantren ?? '-' }}" />
@@ -37,8 +37,8 @@
         </x-ui.section-card>
 
         <x-ui.section-card title="Layanan & Fasilitas" subtitle="Unit layanan pendidikan dan luas sarana.">
-            <div class="p-6">
-                <div class="row g-6">
+<div class="p-5">
+<div class="row g-5">
                     <div class="col-lg-7">
                         @if($pesantren && $pesantren->units && $pesantren->units->count() > 0)
                             <x-ui.simple-table dense>
@@ -51,7 +51,7 @@
                                 <tbody>
                                     @foreach($pesantren->units as $unit)
                                         <tr>
-                                            <td class="ps-4 text-uppercase fw-semibold">{{ $unit->unit }}</td>
+<td class="ps-4 fw-semibold">{{ $unit->unit }}</td>
                                             <td class="text-end pe-4">
                                                 <x-ui.badge variant="success">{{ $unit->jumlah_rombel }} Rombel</x-ui.badge>
                                             </td>
@@ -75,7 +75,7 @@
         </x-ui.section-card>
 
         <x-ui.section-card title="Dokumen Pesantren" subtitle="Dokumen utama dan dokumen pendukung profil.">
-            <div class="p-6">
+<div class="p-5">
                 <div class="row g-5">
                     <div class="col-lg-6">
                         <div class="spm-detail-label mb-3">Dokumen Utama</div>
@@ -99,7 +99,7 @@
         </x-ui.section-card>
 
         <x-ui.section-card title="Asesor & Visitasi" subtitle="Tim penilai dan jadwal penilaian.">
-            <div class="p-6">
+<div class="p-5">
                 <div class="row g-5">
                     @forelse ($akreditasi->assessments as $assessment)
                         <x-ui.detail-item label="{{ $assessment->tipe == 1 ? 'Ketua' : 'Anggota' }}" value="{{ $assessment->asesor->user->name ?? '-' }}" />

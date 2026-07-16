@@ -1,5 +1,5 @@
 <x-ui.section-card title="Simpan Nilai Validasi (NV)" subtitle="Simpan draft atau finalisasi seluruh Nilai Validasi yang telah diinput.">
-    <div class="p-6 d-flex flex-wrap gap-3">
+<div class="p-5 d-flex flex-wrap gap-3">
         <x-ui.button
             type="submit"
             variant="light-primary"
