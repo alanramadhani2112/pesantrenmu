@@ -132,6 +132,14 @@ body {
     color: var(--spm-text-body);
 }
 
+.spm-app-body {
+    background-color: #f6f8fb;
+}
+
+.spm-auth-body {
+    background-color: #f5f7fa;
+}
+
 h1, h2, h3, h4, h5, h6,
 .page-title,
 .spm-heading {
@@ -462,4 +470,3 @@ body[data-kt-app-page-loading="on"] .spm-page-loader {
     line-height: 1.5;
     text-align: center;
 }
-

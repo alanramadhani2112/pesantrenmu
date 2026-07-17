@@ -22,8 +22,7 @@
 
 <body
     id="kt_app_body"
-    class="app-default font-sans antialiased text-gray-900"
-    style="background-color:#f6f8fb"
+    class="app-default font-sans antialiased text-gray-900 spm-app-body"
 
     data-kt-app-header-fixed="true"
     data-kt-app-header-fixed-mobile="true"

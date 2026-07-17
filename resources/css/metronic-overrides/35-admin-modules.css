@@ -5,14 +5,14 @@
 .spm-edpm-component-card {
     border: 1px solid #e3e9f2;
     border-radius: 8px;
-    box-shadow: 0 4px 18px rgba(16, 24, 40, 0.04);
+    box-shadow: none;
 }
 
 .spm-edpm-component-card .card-header {
     align-items: center;
-    gap: 16px;
-    min-height: 68px;
-    padding: 18px 24px;
+    gap: 12px;
+    min-height: 60px;
+    padding: 14px 18px;
 }
 
 .spm-edpm-component-card .card-title {
@@ -31,6 +31,20 @@
     line-height: 1.35;
 }
 
+.spm-edpm-component-card [data-ui-button="metronic"].btn-sm {
+    min-height: 34px;
+}
+
+.spm-edpm-component-card [data-ui-icon-button="metronic"] {
+    width: 32px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+}
+
+.spm-edpm-component-card [data-ui-icon-button="metronic"] .ki-duotone {
+    font-size: 1.05rem !important;
+}
+
 .spm-edpm-table-wrap {
     border-right: 0;
     border-bottom: 0;
@@ -40,7 +54,7 @@
 
 .spm-edpm-table {
     width: 100%;
-    min-width: 760px;
+    min-width: 680px;
     table-layout: fixed;
 }
 
@@ -49,18 +63,18 @@
 }
 
 .spm-edpm-table tbody td {
-    padding: 14px 20px;
+    padding: 11px 16px;
     vertical-align: middle;
 }
 
 .spm-edpm-col-sk,
 .spm-edpm-cell-sk {
-    width: 84px;
+    width: 72px;
 }
 
 .spm-edpm-col-number,
 .spm-edpm-cell-number {
-    width: 104px;
+    width: 88px;
 }
 
 .spm-edpm-col-action,
@@ -68,7 +82,7 @@
     position: sticky;
     right: 0;
     z-index: 2;
-    width: 112px;
+    width: 92px;
     background-color: #ffffff;
     box-shadow: -8px 0 14px rgba(255, 255, 255, 0.86);
 }
@@ -407,4 +421,3 @@
         white-space: normal;
     }
 }
-
