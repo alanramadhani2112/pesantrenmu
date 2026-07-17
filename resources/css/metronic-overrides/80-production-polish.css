@@ -26,7 +26,7 @@
     overflow: visible;
     border-color: var(--spm-border, #e4e9f2) !important;
     border-radius: var(--spm-radius) !important;
-    box-shadow: var(--spm-soft-shadow);
+    box-shadow: none;
 }
 
 .spm-table-shell--standard > .spm-table-header {

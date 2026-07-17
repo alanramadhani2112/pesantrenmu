@@ -87,9 +87,7 @@
 
 [data-module-page^="pesantren-"] .spm-section-card > .card-header,
 [data-module-page^="pesantren-"] [data-ui-section-card="metronic"] > .card-header {
-    background:
-        linear-gradient(90deg, rgba(var(--spm-primary-rgb), 0.035), transparent 72%),
-        #ffffff;
+    background: #ffffff;
 }
 
 [data-module-page="pesantren-profile"] .spm-section-card,
