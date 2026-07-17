@@ -105,6 +105,9 @@
                     <input type="hidden" name="perPage" value="{{ $perPage }}">
                     <input type="hidden" name="sortField" value="{{ $sortField }}">
                     <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
+                    @if($focus !== '')
+                        <input type="hidden" name="focus" value="{{ $focus }}">
+                    @endif
 
                     <x-datatable.search name="search" placeholder="Cari Pesantren..." :value="$search" form="asesor-akreditasi-filter-form" />
 

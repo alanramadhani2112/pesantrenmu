@@ -37,8 +37,10 @@ class AkreditasiController extends Controller
         $search = $request->input('search', '');
         $periodeFilter = $request->input('periodeFilter', '');
         $statusFilter = $request->input('statusFilter', $request->route('statusFilter', ''));
-        $perPage = $request->integer('perPage', 10);
-        $sortField = $request->input('sortField', 'id');
+        $perPage = min(max($request->integer('perPage', 10), 5), 50);
+        $sortField = in_array((string) $request->input('sortField', 'id'), ['id', 'created_at', 'updated_at'], true)
+            ? (string) $request->input('sortField', 'id')
+            : 'id';
         $sortAsc = filter_var($request->input('sortAsc', 'false'), FILTER_VALIDATE_BOOLEAN);
 
         // Map focus to expected statusFilter
