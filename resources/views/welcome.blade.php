@@ -31,13 +31,9 @@
                     <div class="spm-landing-actions">
                         @if (Route::has('login'))
                             @auth
-                                <a href="{{ url('/dashboard') }}" class="btn btn-sm btn-primary fw-semibold">
-                                    Dashboard
-                                </a>
+                                <x-ui.button :href="url('/dashboard')" size="sm">Dashboard</x-ui.button>
                             @else
-                                <a href="{{ route('login') }}" class="btn btn-sm btn-primary fw-semibold spm-landing-login-btn">
-                                    Masuk
-                                </a>
+                                <x-ui.button :href="route('login')" size="sm" class="spm-landing-login-btn">Masuk</x-ui.button>
                             @endauth
                         @endif
                     </div>
@@ -48,7 +44,6 @@
         <main>
             {{-- Hero --}}
             <section class="spm-hero">
-                <div class="spm-hero-pattern"></div>
                 <div class="spm-landing-container">
                     <div class="spm-hero-layout">
                         <div class="spm-hero-text">
@@ -65,15 +60,15 @@
                                         <x-ui.button :href="url('/dashboard')" size="lg" icon="arrow-right" icon-position="end">Buka Dashboard</x-ui.button>
                                     @else
                                         <x-ui.button :href="route('login')" size="lg" icon="arrow-right" icon-position="end">Masuk ke Sistem</x-ui.button>
-                                        <a href="#masalah" class="btn btn-light btn-lg fw-semibold">Lihat Manfaat</a>
+                                        <x-ui.button href="#masalah" variant="light" size="lg">Lihat Manfaat</x-ui.button>
                                     @endauth
                                 @endif
                             </div>
 
                             <div class="spm-hero-proof">
-                                <span><i class="ki-solid ki-check-circle fs-3"></i>Proses tertata</span>
-                                <span><i class="ki-solid ki-shield-tick fs-3"></i>Mudah dipantau</span>
-                                <span><i class="ki-solid ki-document fs-3"></i>Data terpusat</span>
+                                <span><x-ui.icon name="check-circle" class="fs-3" />Proses tertata</span>
+                                <span><x-ui.icon name="shield-tick" class="fs-3" />Mudah dipantau</span>
+                                <span><x-ui.icon name="document" class="fs-3" />Data terpusat</span>
                             </div>
                         </div>
 
@@ -103,21 +98,21 @@
 
                         <div class="spm-problem-list">
                             <div class="spm-problem-item">
-                                <i class="ki-solid ki-document fs-2"></i>
+                                <x-ui.icon name="document" class="fs-2" />
                                 <div>
                                     <h3>Lebih tertata</h3>
                                     <p>Alur akreditasi disusun agar setiap tahapan lebih mudah diikuti.</p>
                                 </div>
                             </div>
                             <div class="spm-problem-item">
-                                <i class="ki-solid ki-chart-line-up fs-2"></i>
+                                <x-ui.icon name="chart-line-up" class="fs-2" />
                                 <div>
                                     <h3>Lebih transparan</h3>
                                     <p>Perkembangan proses dapat dipantau oleh pihak yang berkepentingan.</p>
                                 </div>
                             </div>
                             <div class="spm-problem-item">
-                                <i class="ki-solid ki-time fs-2"></i>
+                                <x-ui.icon name="time" class="fs-2" />
                                 <div>
                                     <h3>Lebih efisien</h3>
                                     <p>Pengelolaan data dan komunikasi menjadi lebih ringkas.</p>
@@ -140,7 +135,7 @@
                     <div class="spm-bento">
                         <div class="spm-bento-card spm-bento-large">
                             <div class="spm-bento-icon">
-                                <i class="ki-solid ki-arrows-circle fs-2x"></i>
+                                <x-ui.icon name="arrows-circle" class="fs-2x" />
                             </div>
                             <h3>Alur akreditasi dalam satu tempat</h3>
                             <p>Membantu proses akreditasi berjalan dari pengajuan hingga hasil akhir secara lebih tertib.</p>
@@ -154,7 +149,7 @@
 
                         <div class="spm-bento-card spm-bento-medium">
                             <div class="spm-bento-icon">
-                                <i class="ki-solid ki-chart-line-up fs-2x"></i>
+                                <x-ui.icon name="chart-line-up" class="fs-2x" />
                             </div>
                             <h3>Pengajuan lebih mudah</h3>
                             <p>Pesantren dapat memulai proses akreditasi melalui alur yang lebih jelas.</p>
@@ -162,7 +157,7 @@
 
                         <div class="spm-bento-card spm-bento-medium">
                             <div class="spm-bento-icon">
-                                <i class="ki-solid ki-document fs-2x"></i>
+                                <x-ui.icon name="document" class="fs-2x" />
                             </div>
                             <h3>Data lebih terpusat</h3>
                             <p>Informasi akreditasi tersimpan lebih rapi dalam satu sistem.</p>
@@ -170,7 +165,7 @@
 
                         <div class="spm-bento-card spm-bento-small">
                             <div class="spm-bento-icon">
-                                <i class="ki-solid ki-notification-bing fs-1"></i>
+                                <x-ui.icon name="notification-bing" class="fs-1" />
                             </div>
                             <h3>Mudah dipantau</h3>
                             <p>Perkembangan proses dapat dilihat dengan lebih cepat.</p>
@@ -178,7 +173,7 @@
 
                         <div class="spm-bento-card spm-bento-small">
                             <div class="spm-bento-icon">
-                                <i class="ki-solid ki-people fs-1"></i>
+                                <x-ui.icon name="people" class="fs-1" />
                             </div>
                             <h3>Kolaborasi lebih rapi</h3>
                             <p>Pesantren, asesor, dan admin bekerja dalam alur yang sama.</p>
@@ -186,7 +181,7 @@
 
                         <div class="spm-bento-card spm-bento-small">
                             <div class="spm-bento-icon">
-                                <i class="ki-solid ki-shield-tick fs-1"></i>
+                                <x-ui.icon name="shield-tick" class="fs-1" />
                             </div>
                             <h3>Hasil lebih jelas</h3>
                             <p>Keputusan akreditasi dapat dikelola dan disampaikan dengan lebih tertib.</p>
@@ -232,9 +227,9 @@
                         <p>Masuk ke sistem untuk mengelola proses akreditasi secara lebih mudah.</p>
                         @if (Route::has('login'))
                             @auth
-                                <a href="{{ url('/dashboard') }}" class="btn btn-light btn-lg fw-semibold">Buka Dashboard</a>
+                                <x-ui.button :href="url('/dashboard')" variant="light" size="lg">Buka Dashboard</x-ui.button>
                             @else
-                                <a href="{{ route('login') }}" class="btn btn-light btn-lg fw-semibold">Masuk ke Sistem</a>
+                                <x-ui.button :href="route('login')" variant="light" size="lg">Masuk ke Sistem</x-ui.button>
                             @endauth
                         @endif
                     </div>
