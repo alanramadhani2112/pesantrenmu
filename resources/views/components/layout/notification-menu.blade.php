@@ -4,7 +4,7 @@
      @click.away="open = false"
      @close.stop="open = false">
     <div @click="toggle()">
-        <x-ui.button type="button" variant="light" class="btn-icon btn-active-light-primary position-relative">
+        <x-ui.button type="button" variant="light" class="btn-icon btn-active-light-primary position-relative" aria-label="Buka notifikasi">
             <x-ui.icon name="notification-bing" class="fs-2" />
             <span x-show="unreadCount > 0" x-cloak
                   class="position-absolute top-0 start-100 translate-middle badge badge-circle badge-danger fs-8"
