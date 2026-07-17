@@ -76,7 +76,7 @@
 
                 {{-- Sidebar — Metronic style --}}
                 <aside id="kt_app_sidebar" class="app-sidebar bg-body d-flex flex-column panduan-sidebar">
-                    <div class="app-sidebar-logo panduan-sidebar-logo px-6 d-flex align-items-center justify-content-between">
+                    <div class="app-sidebar-logo panduan-sidebar-logo px-5 d-flex align-items-center justify-content-between">
                         <a href="/" class="d-flex align-items-center gap-2 text-decoration-none">
                             <img src="{{ asset('images/brand/logo-pesantrenmu.svg') }}" alt="PesantrenMu" style="height: 28px;" />
                             <span class="fw-semibold fs-5 text-gray-900 d-none d-sm-inline">PesantrenMu</span>
@@ -88,7 +88,7 @@
                         </button>
                     </div>
 
-                    <div class="px-6 pt-5 pb-4">
+                    <div class="px-5 pt-5 pb-4">
                         <div class="panduan-sidebar-panel">
                             <x-ui.badge variant="primary" class="mb-3">Panduan Sistem</x-ui.badge>
                             <div class="fw-semibold text-gray-900 fs-5 lh-sm">{{ $title }}</div>
@@ -156,11 +156,11 @@
                     <div class="d-flex flex-column flex-column-fluid">
                         <main id="kt_app_content" class="app-content flex-column-fluid">
                             <div id="kt_app_content_container" class="app-container container-fluid panduan-content-container">
-                                <div class="panduan-hero card card-flush mb-8">
-                                    <div class="card-body p-6 p-lg-8">
-                                        <div class="d-flex flex-column flex-xl-row align-items-xl-center justify-content-between gap-6">
+                                <div class="panduan-hero card card-flush mb-5">
+                                    <div class="card-body p-5">
+                                        <div class="d-flex flex-column flex-xl-row align-items-xl-center justify-content-between gap-4">
                                             <div class="min-w-0">
-                                                <x-ui.badge variant="primary" class="mb-4">Dokumentasi Pengguna</x-ui.badge>
+                                                <x-ui.badge variant="primary" class="mb-3">Dokumentasi Pengguna</x-ui.badge>
                                                 <h2 class="fw-semibold text-gray-900 mb-3">{{ $title }}</h2>
                                                 <p class="text-gray-600 fs-6 mb-0">Ikuti urutan materi dari menu kiri untuk memahami alur kerja sesuai peran pengguna.</p>
                                             </div>
