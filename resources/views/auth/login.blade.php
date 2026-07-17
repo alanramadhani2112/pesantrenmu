@@ -72,6 +72,21 @@
             @enderror
         </div>
 
+        <div class="d-flex align-items-center justify-content-between mb-5">
+            <label class="form-check form-check-custom form-check-solid cursor-pointer mb-0">
+                <input
+                    class="form-check-input h-22px w-22px"
+                    type="checkbox"
+                    name="remember"
+                    value="1"
+                    @checked(old('remember'))
+                >
+                <span class="form-check-label fw-semibold text-gray-700 fs-7">
+                    Ingat saya
+                </span>
+            </label>
+        </div>
+
         <div class="spm-login-links">
             <span>Hubungi admin jika butuh bantuan.</span>
             @if (Route::has('password.request'))
