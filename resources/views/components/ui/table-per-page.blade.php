@@ -26,7 +26,7 @@
         name="{{ $name }}"
         aria-label="Jumlah entri per halaman"
         @if($form) form="{{ $form }}" @endif
-        onchange="if (this.form) this.form.submit(); else { const url = new URL(location.href); url.searchParams.set(this.name, this.value); location.href = url; }"
+        onchange="if (this.form) { let p=this.form.querySelector('[name=page]'); if(!p){ p=document.createElement('input'); p.type='hidden'; p.name='page'; this.form.appendChild(p); } p.value='1'; this.form.submit(); } else { const url = new URL(location.href); url.searchParams.set(this.name, this.value); url.searchParams.set('page', '1'); location.href = url; }"
         {{ $attributes->merge(['class' => $selectClass]) }}
     >
         @foreach($options as $option)

@@ -64,7 +64,9 @@
     $latestStatusLabel = $latestAkreditasi
         ? \App\Support\AkreditasiStatusPresenter::label($latestAkreditasi->status)
         : 'Belum Ada';
-    $activeStatusFilterLabel = $statusFilter !== '' ? \App\Support\AkreditasiStatusPresenter::label($statusFilter) : null;
+    $activeStatusFilterLabel = $statusFilter !== ''
+        ? ((string) $statusFilter === '4' ? 'Assessment' : \App\Support\AkreditasiStatusPresenter::label($statusFilter))
+        : null;
 @endphp
 
 <div data-module-page="pesantren-akreditasi">
@@ -206,13 +208,14 @@
                     </td>
                     <td>{{ $akreditasi->created_at->format('d M Y') }}</td>
                     <td class="text-end">
+                        @php($statusValue = (int) $akreditasi->status)
                         <x-ui.action-menu>
                             <x-ui.action-menu-item :href="route('pesantren.akreditasi-detail', $akreditasi->uuid)" variant="primary">
                                 <x-ui.icon name="eye" class="fs-5" />
                                 Lihat Detail
                             </x-ui.action-menu-item>
 
-                            @if($akreditasi->status === '0')
+                            @if($statusValue === \App\Models\Akreditasi::STATUS_SELESAI)
                                 <x-ui.action-menu-item variant="danger" x-on:click="confirmDelete({{ $akreditasi->id }})">
                                     <x-ui.icon name="trash" class="fs-5" />
                                     Hapus Pengajuan
@@ -224,7 +227,7 @@
                                 </x-ui.action-menu-item>
                             @endif
 
-                            @if($akreditasi->status === '-1')
+                            @if($statusValue === \App\Models\Akreditasi::STATUS_DITOLAK)
                                 <x-ui.action-menu-item variant="danger" x-on:click="confirmDelete({{ $akreditasi->id }})">
                                     <x-ui.icon name="trash" class="fs-5" />
                                     Hapus Pengajuan
@@ -236,7 +239,7 @@
                                 </x-ui.action-menu-item>
                             @endif
 
-                            @if(in_array($akreditasi->status, ['1', 'hasil_akhir']))
+                            @if(in_array($statusValue, [\App\Models\Akreditasi::STATUS_VALIDASI_ADMIN, \App\Models\Akreditasi::STATUS_SELESAI], true))
                                 <x-ui.action-menu-item variant="primary" x-on:click="openCatatanModal({{ $akreditasi->id }})">
                                     <x-ui.icon name="document" class="fs-5" />
                                     Catatan
