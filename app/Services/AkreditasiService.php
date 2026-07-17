@@ -32,19 +32,22 @@ class AkreditasiService
     /**
      * Get count of akreditasi per status for dashboard widgets.
      *
-     * @return array{pengajuan: int, verifikasi: int, assessment: int, visitasi: int, pasca_visitasi: int, validasi: int, overdue: int}
+     * @return array{pengajuan: int, verifikasi: int, assessment: int, visitasi: int, pasca_visitasi: int, validasi: int, selesai: int, ditolak: int, banding: int, overdue: int}
      */
     public function getStatusCounts(): array
     {
         $deadlineService = app(DeadlineService::class);
 
         return [
-            'pengajuan' => $this->akreditasiRepository->getCountByStatus(6),   // Pengajuan
-            'verifikasi' => $this->akreditasiRepository->getCountByStatus(5),   // Verifikasi Berkas
-            'assessment' => $this->akreditasiRepository->getCountByStatus(4),   // Review Asesor
-            'visitasi' => $this->akreditasiRepository->getCountByStatus(3),    // Visitasi
-            'pasca_visitasi' => $this->akreditasiRepository->getCountByStatus(2), // Penilaian Pasca Visitasi
-            'validasi' => $this->akreditasiRepository->getCountByStatus(1),   // Validasi Admin
+            'pengajuan' => $this->akreditasiRepository->getCountByStatus(Akreditasi::STATUS_PENGAJUAN),
+            'verifikasi' => $this->akreditasiRepository->getCountByStatus(Akreditasi::STATUS_VERIFIKASI_BERKAS),
+            'assessment' => $this->akreditasiRepository->getCountByStatus(Akreditasi::STATUS_ASSESSMENT),
+            'visitasi' => $this->akreditasiRepository->getCountByStatus(Akreditasi::STATUS_VISITASI),
+            'pasca_visitasi' => $this->akreditasiRepository->getCountByStatus(Akreditasi::STATUS_PASCA_VISITASI),
+            'validasi' => $this->akreditasiRepository->getCountByStatus(Akreditasi::STATUS_VALIDASI_ADMIN),
+            'selesai' => $this->akreditasiRepository->getCountByStatus(Akreditasi::STATUS_SELESAI),
+            'ditolak' => $this->akreditasiRepository->getCountByStatus(Akreditasi::STATUS_DITOLAK),
+            'banding' => $this->akreditasiRepository->getCountByStatus(Akreditasi::STATUS_BANDING),
             'overdue' => $deadlineService->getOverdueCount(),
         ];
     }

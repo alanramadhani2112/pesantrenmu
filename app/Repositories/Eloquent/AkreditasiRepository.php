@@ -16,6 +16,9 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
 {
     public function getPaginatedAkreditasis(string $statusFilter, ?string $search = null, int $perPage = 10, string $sortField = 'created_at', bool $sortAsc = false): LengthAwarePaginator
     {
+        $perPage = $this->perPage($perPage);
+        $sortField = $this->sortField($sortField, ['created_at', 'user_id', 'status', 'id'], 'created_at');
+
         // P-3 fix: eager-load assessment1 + assessment2 directly instead of bare
         // 'assessments' — the blade reads $item->assessment1 (hasOne tipe=1) which
         // was a separate lazy query per row when only 'assessments' was loaded.
@@ -88,6 +91,9 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
 
     public function getAssessmentsByAsesor(int $asesorId, ?string $search = null, ?string $periodeFilter = null, ?string $statusFilter = null, int $perPage = 10, string $sortField = 'id', bool $sortAsc = false): LengthAwarePaginator
     {
+        $perPage = $this->perPage($perPage);
+        $sortField = $this->sortField($sortField, ['id', 'created_at', 'updated_at'], 'id');
+
         $query = Assessment::with(['akreditasi.user.pesantren', 'akreditasi.catatans.user', 'akreditasi.assessment1'])
             ->where('asesor_id', $asesorId);
 
@@ -192,8 +198,15 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
 
     public function getPaginatedByUserId(int $userId, ?string $search = null, ?string $periodeFilter = null, ?string $statusFilter = null, ?string $tahapanFilter = null, int $perPage = 10, string $sortField = 'created_at', bool $sortAsc = false): LengthAwarePaginator
     {
+        $perPage = $this->perPage($perPage);
+        $sortField = $this->sortField($sortField, ['created_at', 'status', 'nomor_sk', 'peringkat', 'id'], 'created_at');
+
         $tahapanStatusMap = [
-            'visitasi' => Akreditasi::STATUS_VISITASI,
+            'pengajuan' => Akreditasi::STATUS_PENGAJUAN,
+            'verifikasi' => Akreditasi::STATUS_VERIFIKASI_BERKAS,
+            'visitasi' => [Akreditasi::STATUS_VISITASI, Akreditasi::STATUS_PASCA_VISITASI],
+            'penilaian' => Akreditasi::STATUS_PASCA_VISITASI,
+            'hasil' => [Akreditasi::STATUS_SELESAI, Akreditasi::STATUS_BANDING],
         ];
 
         return Akreditasi::with(['assessments', 'catatans', 'assessment1', 'bandings'])
@@ -209,10 +222,18 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
                     return;
                 }
 
-                $query->where('status', $statusFilter);
+                if (is_numeric($statusFilter)) {
+                    $query->where('status', (int) $statusFilter);
+                }
             })
             ->when($tahapanFilter !== null && $tahapanFilter !== '', function ($query) use ($tahapanFilter, $tahapanStatusMap) {
-                $query->where('status', $tahapanStatusMap[$tahapanFilter] ?? $tahapanFilter);
+                $statuses = $tahapanStatusMap[$tahapanFilter] ?? null;
+
+                if (is_array($statuses)) {
+                    $query->whereIn('status', $statuses);
+                } elseif ($statuses !== null) {
+                    $query->where('status', $statuses);
+                }
             })
             ->when($search, function ($query) use ($search) {
                 $query->where('nomor_sk', 'like', '%'.$search.'%')
@@ -220,6 +241,19 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
             })
             ->orderBy($sortField, $sortAsc ? 'asc' : 'desc')
             ->paginate($perPage);
+    }
+
+    private function perPage(int $perPage): int
+    {
+        return min(max($perPage, 5), 50);
+    }
+
+    /**
+     * @param  array<int, string>  $allowed
+     */
+    private function sortField(string $sortField, array $allowed, string $default): string
+    {
+        return in_array($sortField, $allowed, true) ? $sortField : $default;
     }
 
     public function latestForUser(int $userId): ?Akreditasi

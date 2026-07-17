@@ -91,6 +91,7 @@ class Akreditasi extends Model
     protected function casts(): array
     {
         return [
+            'status' => 'integer',
             'visitasi_confirmed_at' => 'datetime',
             'is_nilai_asesor_final' => 'boolean',
             'is_nilai_asesor2_final' => 'boolean',
