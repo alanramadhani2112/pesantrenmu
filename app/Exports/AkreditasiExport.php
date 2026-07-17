@@ -22,6 +22,7 @@ class AkreditasiExport implements FromQuery, ShouldAutoSize, WithHeadings, WithM
     public function query()
     {
         if ($this->statusFilter === 'overdue') {
+            $sortField = in_array($this->sortField, ['created_at', 'user_id', 'status', 'id'], true) ? $this->sortField : 'created_at';
             $overdueIds = app(DeadlineService::class)->getOverdueAkreditasi()->pluck('id')->toArray();
 
             $query = Akreditasi::with(['user.pesantren', 'assessments', 'catatans.user', 'assessment1'])
@@ -36,7 +37,7 @@ class AkreditasiExport implements FromQuery, ShouldAutoSize, WithHeadings, WithM
                 });
             }
 
-            return $query->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc');
+            return $query->orderBy($sortField, $this->sortAsc ? 'asc' : 'desc');
         }
 
         return app(AkreditasiService::class)->getPaginatedAkreditasis(

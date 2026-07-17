@@ -24,8 +24,8 @@ class AkreditasiController extends Controller
 
         $statusFilter = $request->filled('statusFilter') ? (string) $request->input('statusFilter') : 'pengajuan';
         $search = $request->input('search', '');
-        $perPage = $request->integer('perPage', 10);
-        $sortField = $request->input('sortField', 'created_at');
+        $perPage = min(max($request->integer('perPage', 10), 5), 50);
+        $sortField = $this->sortField((string) $request->input('sortField', 'created_at'));
         $sortAsc = filter_var($request->input('sortAsc', 'false'), FILTER_VALIDATE_BOOLEAN);
 
         if ($statusFilter === 'overdue') {
@@ -108,7 +108,7 @@ class AkreditasiController extends Controller
             new AkreditasiExport(
                 $request->input('statusFilter', 'pengajuan'),
                 $request->input('search', ''),
-                $request->input('sortField', 'created_at'),
+                $this->sortField((string) $request->input('sortField', 'created_at')),
                 filter_var($request->input('sortAsc', 'false'), FILTER_VALIDATE_BOOLEAN)
             ),
             'data-akreditasi-'.$request->input('statusFilter', 'pengajuan').'-'.now()->format('Y-m-d').'.xlsx'
@@ -128,5 +128,10 @@ class AkreditasiController extends Controller
         }
 
         return $map;
+    }
+
+    private function sortField(string $sortField): string
+    {
+        return in_array($sortField, ['created_at', 'user_id', 'status', 'id'], true) ? $sortField : 'created_at';
     }
 }

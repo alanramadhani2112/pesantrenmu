@@ -118,6 +118,9 @@
                             <option value="assessment" @selected($statusFilter === 'assessment')>Review Asesor ({{ $statusCounts['assessment'] ?? 0 }})</option>
                             <option value="visitasi" @selected($statusFilter === 'visitasi')>Visitasi & Penilaian Pasca Visitasi ({{ ($statusCounts['visitasi'] ?? 0) + ($statusCounts['pasca_visitasi'] ?? 0) }})</option>
                             <option value="validasi" @selected($statusFilter === 'validasi')>Validasi Admin ({{ $statusCounts['validasi'] ?? 0 }})</option>
+                            <option value="selesai" @selected($statusFilter === 'selesai')>Selesai ({{ $statusCounts['selesai'] ?? 0 }})</option>
+                            <option value="ditolak" @selected($statusFilter === 'ditolak')>Ditolak ({{ $statusCounts['ditolak'] ?? 0 }})</option>
+                            <option value="banding" @selected($statusFilter === 'banding')>Banding ({{ $statusCounts['banding'] ?? 0 }})</option>
                             <option value="overdue" @selected($statusFilter === 'overdue')>Terlambat ({{ $statusCounts['overdue'] ?? 0 }})</option>
                             <option value="" @selected($statusFilter === '')>Semua</option>
                         </x-ui.select>
@@ -130,7 +133,7 @@
 
             <x-slot name="thead">
                 <x-ui.table-th class="w-60px">
-                    <x-ui.table-checkbox model="selectAll" />
+                    <x-ui.table-checkbox x-on:change="selectAllToggle($event)" />
                 </x-ui.table-th>
                 <x-ui.table-th field="user_id" :sortField="$sortField" :sortAsc="$sortAsc" form="admin-akreditasi-filters">Pesantren</x-ui.table-th>
                 <x-ui.table-th field="created_at" :sortField="$sortField" :sortAsc="$sortAsc" form="admin-akreditasi-filters">Tahap Akreditasi</x-ui.table-th>
@@ -291,7 +294,7 @@ function adminAkreditasiPage() {
         selectedIds: [],
         selectAllToggle(event) {
             this.selectedIds = event.target.checked
-                ? Array.from(document.querySelectorAll('.row-checkbox')).map((checkbox) => checkbox.value)
+                ? Array.from(document.querySelectorAll('[data-ui-table-checkbox] input[type="checkbox"][value]')).map((checkbox) => checkbox.value)
                 : [];
         },
         openCatatanModal(id) {
