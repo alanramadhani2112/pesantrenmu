@@ -24,8 +24,9 @@ class AccountController extends Controller
         $roles = $this->roleService->getAllRoles();
         $activeTab = $request->integer('activeTab', 1);
         $search = $request->input('search', '');
-        $perPage = $request->integer('perPage', 10);
-        $sortField = $request->input('sortField', 'id');
+        $perPage = min(max($request->integer('perPage', 10), 5), 50);
+        $sortField = (string) $request->input('sortField', 'id');
+        $sortField = in_array($sortField, ['id', 'name', 'email', 'status', 'created_at'], true) ? $sortField : 'id';
         $sortAsc = filter_var($request->input('sortAsc', 'false'), FILTER_VALIDATE_BOOLEAN);
 
         $users = $this->userService->getPaginatedAccounts(

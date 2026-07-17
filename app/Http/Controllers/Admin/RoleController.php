@@ -16,7 +16,7 @@ class RoleController extends Controller
         abort_unless(auth()->user()?->isSuperAdmin(), 403);
 
         $search = $request->input('search', '');
-        $perPage = $request->integer('perPage', 10);
+        $perPage = min(max($request->integer('perPage', 10), 5), 50);
         $sortField = $request->input('sort', $request->input('sortField', 'id'));
         $sortField = in_array($sortField, ['id', 'name', 'parameter'], true) ? $sortField : 'id';
         $direction = $request->input('direction');

@@ -36,7 +36,7 @@ class DocumentController extends Controller
         }
 
         $search = $request->input('search', '');
-        $perPage = $request->integer('perPage', 10);
+        $perPage = min(max($request->integer('perPage', 10), 5), 50);
 
         $documents = $this->documentService->getActiveDocuments(
             $roleScope,

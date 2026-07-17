@@ -14,7 +14,7 @@ class BandingController extends Controller
 
         $statusFilter = $request->input('statusFilter', 'all');
         $search = $request->input('search', '');
-        $perPage = $request->integer('perPage', 10);
+        $perPage = min(max($request->integer('perPage', 10), 5), 50);
 
         $bandingService = app(BandingService::class);
         $bandings = $bandingService->getPaginatedBandings($statusFilter, $search, $perPage);

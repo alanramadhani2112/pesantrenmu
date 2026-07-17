@@ -15,7 +15,7 @@ class MasterKategoriDokumenController extends Controller
         abort_unless(auth()->user()->canAccessAdminArea(), 403);
 
         $search = $request->input('search', '');
-        $perPage = $request->integer('perPage', 10);
+        $perPage = min(max($request->integer('perPage', 10), 5), 50);
         $sortField = $request->input('sort', $request->input('sortField', 'sort_order'));
         $sortField = in_array($sortField, ['name', 'sort_order'], true) ? $sortField : 'sort_order';
         $direction = $request->input('direction');

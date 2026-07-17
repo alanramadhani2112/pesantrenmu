@@ -10,6 +10,9 @@ class UserRepository implements UserRepositoryInterface
 {
     public function getPaginatedByCategory(int $roleId, ?string $search = null, int $perPage = 10, string $sortField = 'id', bool $sortAsc = false): LengthAwarePaginator
     {
+        $perPage = min(max($perPage, 5), 50);
+        $sortField = in_array($sortField, ['id', 'name', 'email', 'status', 'created_at'], true) ? $sortField : 'id';
+
         return User::with('role')
             ->where('role_id', $roleId)
             ->when($search, function ($query) use ($search) {

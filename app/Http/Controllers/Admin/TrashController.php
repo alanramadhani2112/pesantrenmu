@@ -15,7 +15,7 @@ class TrashController extends Controller
         abort_unless(auth()->user()->canAccessAdminArea(), 403);
 
         $search = $request->input('search', '');
-        $perPage = $request->integer('perPage', 10);
+        $perPage = min(max($request->integer('perPage', 10), 5), 50);
 
         $trashedAkreditasis = $this->trashService->getPaginatedTrashed(
             $search !== '' ? $search : null,

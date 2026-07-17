@@ -17,7 +17,7 @@ class MasterDokumenController extends Controller
         abort_unless(auth()->user()->canAccessAdminArea(), 403);
 
         $search = $request->input('search', '');
-        $perPage = $request->integer('perPage', 10);
+        $perPage = min(max($request->integer('perPage', 10), 5), 50);
         $sortField = $request->input('sort', $request->input('sortField', 'created_at'));
         $sortField = in_array($sortField, ['title', 'created_at'], true) ? $sortField : 'created_at';
         $direction = $request->input('direction');

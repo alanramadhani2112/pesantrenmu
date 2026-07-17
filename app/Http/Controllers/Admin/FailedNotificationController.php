@@ -14,7 +14,7 @@ class FailedNotificationController extends Controller
 
         $search = $request->input('search', '');
         $statusFilter = $request->input('status', 'pending');
-        $perPage = $request->integer('perPage', 15);
+        $perPage = min(max($request->integer('perPage', 15), 5), 50);
 
         $query = FailedNotification::with('notifiable')
             ->orderBy('failed_at', 'desc');
