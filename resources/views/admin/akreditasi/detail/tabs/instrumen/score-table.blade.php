@@ -14,7 +14,7 @@
                 @foreach($komponens as $komponen)
                     @if($komponen->butirs->isEmpty()) @continue @endif
                     <tr>
-                        <td colspan="5" class="fw-semibold fs-4 py-3 ps-4 bg-light-primary">
+                        <td colspan="5" class="fw-semibold fs-4 py-3 ps-4 bg-body border-top border-bottom border-dashed border-gray-300">
                             {{ $komponen->nama }} @if($komponen->deskripsi) <span class="text-muted fs-6 ms-1">— {{ $komponen->deskripsi }}</span> @endif
                         </td>
                     </tr>

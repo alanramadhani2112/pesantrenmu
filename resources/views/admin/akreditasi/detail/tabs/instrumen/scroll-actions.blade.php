@@ -24,7 +24,7 @@
                         $nkVal = is_array($item) ? ($item['nk'] ?? '') : '';
                     @endphp
                     @if($nvVal && $nkVal && (int)$nvVal !== (int)$nkVal)
-                        <div class="mb-2 p-2 bg-light rounded">
+                        <div class="mb-2 p-2 bg-body border border-dashed border-gray-300 rounded">
                             <label for="nvReasons_{{ $butirId }}" class="form-label fw-semibold small mb-1">
                                 Butir #{{ $butirId }} (NK: {{ $nkVal }} → NV: {{ $nvVal }})
                             </label>
