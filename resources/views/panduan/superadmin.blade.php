@@ -26,11 +26,11 @@ $sections = [
 <x-panduan::layout title="Panduan Super Admin" :sections="$sections" currentSection="dashboard">
 
 {{-- Screenshot tampilan penuh dashboard super admin --}}
-<div class="card card-flush mb-8">
-    <div class="card-header border-0 pt-6 pb-0 px-6">
+<div class="card card-flush mb-5">
+    <div class="card-header border-0 pt-5 pb-0 px-5">
         <h3 class="card-title fw-semibold fs-3 text-gray-900">Tampilan Dashboard Super Admin</h3>
     </div>
-    <div class="card-body pt-4 px-6 pb-6">
+    <div class="card-body pt-4 px-5 pb-5">
         <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
             <img src="{{ asset('images/panduan/superadmin-full.png') }}"
                  alt="Tampilan lengkap dashboard Super Admin"
@@ -42,7 +42,7 @@ $sections = [
 
 <x-panduan::section id="dashboard" title="Dashboard Super Admin" subtitle="Halaman utama dengan akses penuh ke semua fitur sistem.">
     <div class="alert alert-primary d-flex align-items-center mb-4" role="alert">
-        <i class="ki-duotone ki-information-4 fs-2 me-3"><span class="path1"></span><span class="path2"></span><span class="path3"></span></i>
+        <x-ui.icon name="information-4" class="fs-2 me-3" />
         <div><strong>Super Admin</strong> memiliki akses ke <strong>semua menu</strong> di sistem, termasuk manajemen pengguna, master data, operasional akreditasi, dan konfigurasi sistem. Gunakan hak akses ini dengan hati-hati.</div>
     </div>
     <p>Dashboard Super Admin menampilkan ringkasan seluruh sistem: total pengguna, akreditasi aktif, notifikasi sistem, dan akses cepat ke menu administrasi.</p>

@@ -16,11 +16,11 @@ $sections = [
 <x-panduan::layout title="Panduan Admin" :sections="$sections" currentSection="dashboard">
 
 {{-- Screenshot tampilan penuh dashboard admin --}}
-<div class="card card-flush mb-8">
-    <div class="card-header border-0 pt-6 pb-0 px-6">
+<div class="card card-flush mb-5">
+    <div class="card-header border-0 pt-5 pb-0 px-5">
         <h3 class="card-title fw-semibold fs-3 text-gray-900">Tampilan Dashboard Admin</h3>
     </div>
-    <div class="card-body pt-4 px-6 pb-6">
+    <div class="card-body pt-4 px-5 pb-5">
         <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
             <img src="{{ asset('images/panduan/admin-full.png') }}"
                  alt="Tampilan lengkap dashboard Admin SPM"
