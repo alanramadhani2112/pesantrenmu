@@ -12,6 +12,9 @@ class AsesorRepository implements AsesorRepositoryInterface
 {
     public function getPaginatedAsesors(array $filters = [], int $perPage = 10, string $sortField = 'name', bool $sortAsc = true): LengthAwarePaginator
     {
+        $perPage = min(max($perPage, 5), 50);
+        $sortField = in_array($sortField, ['name', 'email', 'status', 'created_at', 'id'], true) ? $sortField : 'name';
+
         $query = User::where('role_id', 2)
             ->when($filters['search'] ?? null, function ($query, $search) {
                 $query->where('name', 'like', '%'.$search.'%');

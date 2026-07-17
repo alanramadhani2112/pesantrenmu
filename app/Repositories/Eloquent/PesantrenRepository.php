@@ -12,6 +12,9 @@ class PesantrenRepository implements PesantrenRepositoryInterface
 {
     public function getPaginatedPesantrens(?string $search = null, ?string $filterStatus = '', ?string $filterAkreditasi = '', int $perPage = 10, string $sortField = 'name', bool $sortAsc = true): LengthAwarePaginator
     {
+        $perPage = min(max($perPage, 5), 50);
+        $sortField = in_array($sortField, ['name', 'email', 'status', 'created_at', 'id'], true) ? $sortField : 'name';
+
         return User::where('role_id', 3)
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {

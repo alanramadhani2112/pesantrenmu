@@ -21,8 +21,8 @@ class PesantrenController extends Controller
         $search = $request->input('search', '');
         $filterStatus = $request->input('filterStatus', '');
         $filterAkreditasi = $request->input('filterAkreditasi', '');
-        $perPage = $request->integer('perPage', 10);
-        $sortField = $request->input('sortField', 'name');
+        $perPage = min(max($request->integer('perPage', 10), 5), 50);
+        $sortField = $this->sortField((string) $request->input('sortField', 'name'));
         $sortAsc = filter_var($request->input('sortAsc', 'true'), FILTER_VALIDATE_BOOLEAN);
 
         $pesantrens = $this->pesantrenService->getPaginatedData(
@@ -79,12 +79,17 @@ class PesantrenController extends Controller
         $search = $request->input('search', '');
         $filterStatus = $request->input('filterStatus', '');
         $filterAkreditasi = $request->input('filterAkreditasi', '');
-        $sortField = $request->input('sortField', 'name');
+        $sortField = $this->sortField((string) $request->input('sortField', 'name'));
         $sortAsc = filter_var($request->input('sortAsc', 'true'), FILTER_VALIDATE_BOOLEAN);
 
         return Excel::download(
             new PesantrenExport($search, $filterStatus, $filterAkreditasi, $sortField, $sortAsc),
             'data-pesantren-'.now()->format('Y-m-d').'.xlsx'
         );
+    }
+
+    private function sortField(string $sortField): string
+    {
+        return in_array($sortField, ['name', 'email', 'status', 'created_at', 'id'], true) ? $sortField : 'name';
     }
 }

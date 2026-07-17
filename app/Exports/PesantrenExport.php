@@ -21,6 +21,8 @@ class PesantrenExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMa
 
     public function query()
     {
+        $sortField = in_array($this->sortField, ['name', 'email', 'status', 'created_at', 'id'], true) ? $this->sortField : 'name';
+
         return User::where('role_id', 3)
             ->when($this->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -54,7 +56,7 @@ class PesantrenExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMa
                 }
             })
             ->with(['pesantren', 'akreditasis'])
-            ->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc');
+            ->orderBy($sortField, $this->sortAsc ? 'asc' : 'desc');
     }
 
     public function headings(): array

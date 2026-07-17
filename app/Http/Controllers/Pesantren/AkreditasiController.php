@@ -25,8 +25,8 @@ class AkreditasiController extends Controller
         $periodeFilter = $request->input('periodeFilter', '');
         $statusFilter = $request->input('statusFilter', '');
         $tahapanFilter = $request->input('tahapanFilter', '');
-        $perPage = $request->integer('perPage', 10);
-        $sortField = $request->input('sortField', 'created_at');
+        $perPage = min(max($request->integer('perPage', 10), 5), 50);
+        $sortField = $this->sortField((string) $request->input('sortField', 'created_at'));
         $sortAsc = filter_var($request->input('sortAsc', 'false'), FILTER_VALIDATE_BOOLEAN);
 
         $akreditasis = $this->pesantrenService->getAkreditasis(
@@ -148,5 +148,10 @@ class AkreditasiController extends Controller
                 'created_at' => $c->created_at->format('d M Y H:i'),
             ]),
         ]);
+    }
+
+    private function sortField(string $sortField): string
+    {
+        return in_array($sortField, ['created_at', 'status', 'nomor_sk', 'peringkat', 'id'], true) ? $sortField : 'created_at';
     }
 }

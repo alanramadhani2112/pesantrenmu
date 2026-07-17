@@ -21,8 +21,8 @@ class AsesorController extends Controller
         $filterPeran = $request->input('filterPeran', '');
         $filterPenugasan = $request->input('filterPenugasan', '');
         $filterStatus = $request->input('filterStatus', '');
-        $perPage = $request->integer('perPage', 10);
-        $sortField = $request->input('sortField', 'name');
+        $perPage = min(max($request->integer('perPage', 10), 5), 50);
+        $sortField = $this->sortField((string) $request->input('sortField', 'name'));
         $sortAsc = filter_var($request->input('sortAsc', 'true'), FILTER_VALIDATE_BOOLEAN);
 
         $asesors = $this->asesorService->getPaginatedAsesors(
@@ -75,12 +75,17 @@ class AsesorController extends Controller
         $filterPeran = $request->input('filterPeran', '');
         $filterPenugasan = $request->input('filterPenugasan', '');
         $filterStatus = $request->input('filterStatus', '');
-        $sortField = $request->input('sortField', 'name');
+        $sortField = $this->sortField((string) $request->input('sortField', 'name'));
         $sortAsc = filter_var($request->input('sortAsc', 'true'), FILTER_VALIDATE_BOOLEAN);
 
         return Excel::download(
             new AsesorExport($search, $filterPeran, $filterPenugasan, $filterStatus, $sortField, $sortAsc),
             'data-asesor-'.now()->format('Y-m-d').'.xlsx'
         );
+    }
+
+    private function sortField(string $sortField): string
+    {
+        return in_array($sortField, ['name', 'email', 'status', 'created_at', 'id'], true) ? $sortField : 'name';
     }
 }
