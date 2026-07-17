@@ -1,8 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div data-module-page="asesor-profile">
-<x-ui.page-header title="Profil Asesor" subtitle="Kelola data profil, pengalaman, dan dokumen pendukung Anda.">
+<x-ui.page title="Profil Asesor" subtitle="Kelola data profil, pengalaman, dan dokumen pendukung Anda." data-module-page="asesor-profile">
     <x-slot:toolbar>
         @if(!request('edit'))
             <x-ui.button :href="route('asesor.profile', ['edit' => 1])">
@@ -16,7 +15,6 @@
             </x-ui.button>
         @endif
     </x-slot:toolbar>
-</x-ui.page-header>
 
 @if(request('edit'))
 {{-- Profile Photo Upload (inline Blade form) --}}
@@ -31,9 +29,8 @@
             @csrf
             @method('PUT')
 
-            <div data-kt-image-input="true" class="image-input image-input-circle image-input-outline"
-                :class="{ 'image-input-empty': isEmpty, 'image-input-changed': changed }"
-                style="background-color: #f5f8fa;">
+            <div data-kt-image-input="true" class="image-input image-input-circle image-input-outline bg-light"
+                :class="{ 'image-input-empty': isEmpty, 'image-input-changed': changed }">
 
                 <div class="image-input-wrapper w-125px h-125px"
                     :style="preview ? 'background-image:url(' + preview + ')' : ''">
@@ -775,8 +772,7 @@ function asesorProfileEdit() {
 
         </div>
     </div>
-</div>
 @endif
 
-</div>
+</x-ui.page>
 @endsection

@@ -157,20 +157,18 @@
             </div>
 
             {{-- Grand Total Summary --}}
-            <div class="card border border-dashed border-gray-300 bg-body spm-sdm-grand-total mb-0">
-                                    <div class="card-body py-4 px-5">
-                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-                        <div class="d-flex align-items-center gap-3">
-                            <x-ui.icon name="people" class="fs-2x text-primary" />
-                            <div>
-                                <span class="fw-semibold text-gray-900 fs-6">Total Seluruh SDM</span>
-                                <span class="text-muted fw-semibold fs-8 d-block">Semua kategori dan unit layanan</span>
-                            </div>
+            <x-ui.card class="border border-dashed border-gray-300 bg-body spm-sdm-grand-total mb-0">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 py-4 px-5">
+                    <div class="d-flex align-items-center gap-3">
+                        <x-ui.icon name="people" class="fs-2x text-primary" />
+                        <div>
+                            <span class="fw-semibold text-gray-900 fs-6">Total Seluruh SDM</span>
+                            <span class="text-muted fw-semibold fs-8 d-block">Semua kategori dan unit layanan</span>
                         </div>
-                        <x-ui.badge variant="primary" class="fs-4 px-4 py-2"><span id="sdmGrandTotal">{{ $grandTotal }}</span> Data</x-ui.badge>
                     </div>
+                    <x-ui.badge variant="primary" class="fs-4 px-4 py-2"><span id="sdmGrandTotal">{{ $grandTotal }}</span> Data</x-ui.badge>
                 </div>
-            </div>
+            </x-ui.card>
 
             @if(!$isLocked)
                 <div class="d-flex justify-content-end gap-3 mt-6">

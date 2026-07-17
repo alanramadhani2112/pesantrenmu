@@ -430,16 +430,14 @@
     {{-- SUBMIT BUTTONS --}}
     @if(!$isLocked)
         <div class="d-flex align-items-center justify-content-end gap-3">
-            <button type="submit" name="draft" formnovalidate formaction="{{ route('pesantren.profile.save-draft') }}"
-                class="btn btn-light-primary fw-semibold">
+            <x-ui.button type="submit" variant="light-primary" name="draft" formnovalidate formaction="{{ route('pesantren.profile.save-draft') }}">
                 <x-ui.icon name="document" class="fs-4 me-1" />
                 Simpan Draft
-            </button>
-            <button type="submit" formaction="{{ route('pesantren.profile.save') }}"
-                class="btn btn-primary fw-semibold">
+            </x-ui.button>
+            <x-ui.button type="submit" variant="primary" formaction="{{ route('pesantren.profile.save') }}">
                 <x-ui.icon name="check-circle" class="fs-4 me-1" />
                 Simpan & Submit
-            </button>
+            </x-ui.button>
         </div>
         </form>
     @endif
