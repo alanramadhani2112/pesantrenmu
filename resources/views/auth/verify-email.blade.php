@@ -22,20 +22,18 @@
     <form method="POST" action="{{ route('verification.send') }}" class="mb-4">
         @csrf
         <div class="d-grid">
-            <button type="submit" class="btn btn-primary btn-lg">
+            <x-ui.button type="submit" size="lg">
                 <span class="d-flex align-items-center justify-content-center gap-2">
                     Kirim Ulang Email Verifikasi
-                    <i class="ki-solid ki-sms fs-2 text-white"></i>
+                    <x-ui.icon name="sms" class="fs-2 text-white" />
                 </span>
-            </button>
+            </x-ui.button>
         </div>
     </form>
 
     <form method="POST" action="{{ route('logout') }}" class="d-grid">
         @csrf
-        <button type="submit" class="btn btn-light btn-lg fw-semibold">
-            Keluar
-        </button>
+        <x-ui.button type="submit" variant="light" size="lg">Keluar</x-ui.button>
     </form>
 </div>
 @endsection

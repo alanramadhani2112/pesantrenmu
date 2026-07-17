@@ -26,7 +26,7 @@
                 <span class="text-danger ms-1">*</span>
             </label>
             <div class="position-relative">
-                <i class="ki-solid ki-sms fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4"></i>
+                <x-ui.icon name="sms" class="fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4" />
                 <input
                     data-ui-input="metronic"
                     type="email"
@@ -52,7 +52,7 @@
                 <span class="text-danger ms-1">*</span>
             </label>
             <div class="position-relative" x-data="{ show: false }">
-                <i class="ki-solid ki-lock-2 fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4"></i>
+                <x-ui.icon name="lock-2" class="fs-2 text-gray-500 position-absolute top-50 translate-middle-y ms-4" />
                 <input
                     data-ui-input="metronic"
                     id="password"
@@ -62,15 +62,8 @@
                     required
                     autocomplete="current-password"
                 >
-                <button
-                    type="button"
-                    class="btn btn-light btn-sm btn-icon btn-active-light-primary position-absolute top-50 end-0 translate-middle-y me-2"
-                    @click="show = !show"
-                    aria-label="Tampilkan password"
-                >
-                    <i class="ki-solid ki-eye fs-2 text-gray-500" x-show="!show"></i>
-                    <i class="ki-solid ki-eye-slash fs-2 text-gray-500" x-show="show" x-cloak></i>
-                </button>
+                <x-ui.icon-button type="button" icon="eye" label="Tampilkan password" class="position-absolute top-50 end-0 translate-middle-y me-2" @click="show = !show" x-show="!show" />
+                <x-ui.icon-button type="button" icon="eye-slash" label="Sembunyikan password" class="position-absolute top-50 end-0 translate-middle-y me-2" @click="show = !show" x-show="show" x-cloak />
             </div>
             @error('password')
                 <div class="invalid-feedback d-block fw-semibold">
@@ -87,12 +80,12 @@
         </div>
 
         <div class="d-grid">
-            <button type="submit" class="btn btn-primary btn-lg">
+            <x-ui.button type="submit" size="lg">
                 <span class="indicator-label d-flex align-items-center justify-content-center gap-2">
                     Masuk
-                    <i class="ki-solid ki-arrow-right fs-2 text-white"></i>
+                    <x-ui.icon name="arrow-right" class="fs-2 text-white" />
                 </span>
-            </button>
+            </x-ui.button>
         </div>
     </form>
 
@@ -102,13 +95,12 @@
     </div>
 
     <div class="d-grid">
-        <a href="{{ route('sso.preflight') }}"
-           class="btn btn-flex btn-lg btn-sso-muhammadiyah fw-semibold">
-             <img src="{{ asset('images/brand/logo-horizontal.svg') }}"
-                  alt="Login via Muhammadiyah ID"
-                  loading="lazy"
-                  class="h-30px object-fit-contain">
-        </a>
+        <x-ui.button :href="route('sso.preflight')" variant="light" size="lg" class="btn-flex btn-sso-muhammadiyah">
+            <img src="{{ asset('images/brand/logo-horizontal.svg') }}"
+                 alt="Login via Muhammadiyah ID"
+                 loading="lazy"
+                 class="h-30px object-fit-contain">
+        </x-ui.button>
     </div>
     @endif
 </div>

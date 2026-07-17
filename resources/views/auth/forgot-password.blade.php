@@ -20,7 +20,7 @@
           @input.debounce.150ms="onInput($event)">
         @csrf
 
-        <div class="fv-row spm-form-field mb-6" data-validate="required|email">
+        <div class="fv-row spm-form-field mb-5" data-validate="required|email">
             <label for="email" class="form-label fw-semibold text-gray-700 fs-7">
                 Email
                 <span class="text-danger ms-1">*</span>
@@ -34,17 +34,17 @@
         </div>
 
         <div class="d-grid mb-4">
-            <button type="submit" class="btn btn-primary btn-lg">
+            <x-ui.button type="submit" size="lg">
                 <span class="d-flex align-items-center justify-content-center gap-2">
                     Kirim Tautan Reset
-                    <i class="ki-solid ki-arrow-right fs-2 text-white"></i>
+                    <x-ui.icon name="arrow-right" class="fs-2 text-white" />
                 </span>
-            </button>
+            </x-ui.button>
         </div>
 
         <div class="text-center">
             <a href="{{ route('login') }}" class="fw-semibold fs-7 text-primary">
-                <i class="ki-solid ki-arrow-left fs-7 me-1"></i> Kembali ke halaman login
+                <x-ui.icon name="arrow-left" class="fs-7 me-1" /> Kembali ke halaman login
             </a>
         </div>
     </form>
