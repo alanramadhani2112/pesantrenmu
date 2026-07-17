@@ -68,7 +68,7 @@
                                     </x-ui.action-menu-item>
                                 @endif
 
-                                <x-ui.action-menu-item variant="primary" x-on:click="openEditModal(@js($doc))">
+                                <x-ui.action-menu-item variant="primary" x-on:click="openEditModal({{ \Illuminate\Support\Js::from($doc) }})">
                                     <x-ui.icon name="pencil" class="fs-5" />
                                     Edit Dokumen
                                 </x-ui.action-menu-item>
