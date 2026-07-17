@@ -20,7 +20,7 @@
     };
 
     $statCards = match (true) {
-        $isAdmin => [
+        ($isSuperAdmin || $isAdmin) => [
             ['label' => 'Perlu Anda Verifikasi', 'value' => $stats['verifikasi'], 'variant' => 'warning', 'icon' => 'timer'],
             ['label' => 'Sedang Dinilai Asesor', 'value' => $stats['assessment'], 'variant' => 'info', 'icon' => 'document'],
             ['label' => 'Proses Visitasi', 'value' => $stats['visitasi'], 'variant' => 'warning', 'icon' => 'geolocation'],
@@ -174,23 +174,14 @@
             <div class="row g-3 mb-5 spm-dashboard-quick-actions">
                 @foreach($quickActions as $action)
                     <div class="col-6 col-md-4 col-lg-3">
-                        <a href="{{ $action['route'] }}"
-                           class="card border border-dashed border-gray-300 h-100 text-decoration-none spm-quick-action spm-quick-action--dashboard">
-                            <div class="card-body d-flex flex-column align-items-center text-center p-4">
-                                <div class="symbol symbol-40px mb-3">
-                                    <div class="symbol-label bg-body border border-dashed border-gray-300 text-{{ $action['variant'] }}">
-                                        <x-ui.icon :name="$action['icon']" class="fs-3 fs-md-2" />
-                                    </div>
-                                </div>
-                                <span class="fw-semibold fs-8 fs-md-7 text-gray-800">{{ $action['label'] }}</span>
-                                @if($isPesantren && isset($readinessMap[$action['route']]))
-                                    <span class="d-flex align-items-center gap-1 mt-1 fs-8 fw-semibold {{ $readinessMap[$action['route']] ? 'text-success' : 'text-muted' }}">
-                                        <x-ui.icon :name="$readinessMap[$action['route']] ? 'check-circle' : 'information-5'" class="fs-8" />
-                                        {{ $readinessMap[$action['route']] ? 'Selesai' : 'Belum lengkap' }}
-                                    </span>
-                                @endif
-                            </div>
-                        </a>
+                        <x-ui.action-card
+                            :href="$action['route']"
+                            :icon="$action['icon']"
+                            :title="$action['label']"
+                            :variant="$action['variant']"
+                            icon-class="fs-3 fs-md-2"
+                            class="spm-quick-action spm-quick-action--dashboard"
+                        />
                     </div>
                 @endforeach
             </div>
@@ -350,11 +341,13 @@
 
                                 @foreach($readiness as $step)
                                     <a href="{{ route($step['route']) }}" class="d-flex align-items-center gap-4 px-5 py-4 text-decoration-none border-bottom border-dashed spm-readiness-item {{ $step['done'] ? '' : 'spm-readiness-item-pending' }}">
-                                        <div class="symbol symbol-35px flex-shrink-0">
-                                            <span class="symbol-label bg-body border border-dashed border-gray-300 {{ $step['done'] ? 'text-success' : 'text-warning' }} rounded-circle">
-                                                <x-ui.icon :name="$step['done'] ? 'check' : 'information'" class="fs-4" />
-                                            </span>
-                                        </div>
+                                        <x-ui.symbol-icon
+                                            :icon="$step['done'] ? 'check' : 'information'"
+                                            :variant="$step['done'] ? 'success' : 'warning'"
+                                            size="35px"
+                                            shape="circle"
+                                            icon-class="fs-4"
+                                        />
                                         <div class="flex-grow-1 min-w-0">
                                             <span class="fw-semibold fs-7 {{ $step['done'] ? 'text-gray-600' : 'text-gray-900' }}">{{ $step['label'] }}</span>
                                             <span class="d-block text-muted fs-8 mt-1">{{ $step['meta'] ?? '' }} terisi</span>
@@ -448,21 +441,23 @@
                     <x-ui.card title="Fokus Hari Ini" subtitle="Mulai dari tahap paling kiri yang masih memiliki pekerjaan." class="h-100 spm-asesor-focus-card spm-dashboard-stat">
                         <div class="d-flex flex-column gap-4">
                             @foreach($asesorWorkflow as $step)
-                                <a href="{{ $step['route'] }}" class="spm-asesor-workflow-item text-decoration-none">
-                                    <div class="symbol symbol-40px flex-shrink-0">
-                                        <span class="symbol-label bg-body border border-dashed border-gray-300 text-{{ $step['variant'] }} rounded">
-                                            <x-ui.icon :name="$step['icon']" class="fs-3" />
-                                        </span>
+                                <x-ui.action-card
+                                    :href="$step['route']"
+                                    :icon="$step['icon']"
+                                    :variant="$step['variant']"
+                                    :description="$step['copy']"
+                                    align="start"
+                                    class="spm-asesor-workflow-item"
+                                >
+                                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                        <span class="fw-semibold text-gray-900 fs-6">{{ $step['label'] }}</span>
+                                        <x-ui.badge :variant="$step['variant']">{{ $step['value'] }} tugas</x-ui.badge>
                                     </div>
-                                    <div class="flex-grow-1 min-w-0">
-                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-                                            <span class="fw-semibold text-gray-900 fs-6">{{ $step['label'] }}</span>
-                                            <x-ui.badge :variant="$step['variant']">{{ $step['value'] }} tugas</x-ui.badge>
-                                        </div>
-                                        <div class="text-muted fw-semibold fs-7">{{ $step['copy'] }}</div>
-                                    </div>
-                                    <x-ui.badge variant="secondary" class="flex-shrink-0">Buka</x-ui.badge>
-                                </a>
+
+                                    <x-slot:actions>
+                                        <x-ui.badge variant="secondary">Buka</x-ui.badge>
+                                    </x-slot:actions>
+                                </x-ui.action-card>
                             @endforeach
                         </div>
                     </x-ui.card>
@@ -636,11 +631,7 @@
                                     <tr>
                                         <td class="ps-4">
                                             <div class="d-flex align-items-center gap-3">
-                                                <div class="symbol symbol-40px flex-shrink-0">
-                                                    <div class="symbol-label bg-body border border-dashed border-gray-300 text-primary fw-semibold">
-                                                        {{ strtoupper(substr($activity['pesantren_name'], 0, 1)) }}
-                                                    </div>
-                                                </div>
+                                                <x-ui.symbol-icon :text="strtoupper(substr($activity['pesantren_name'], 0, 1))" variant="primary" label-class="fw-semibold" />
                                                 <div class="d-flex flex-column min-w-0">
                                                     <span class="text-gray-900 fw-semibold fs-7 fs-md-6 text-truncate">{{ $activity['pesantren_name'] }}</span>
                                                     <span class="text-muted fw-semibold fs-8 d-sm-none">
