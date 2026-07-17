@@ -43,9 +43,9 @@
         </x-ui.button>
     </x-slot:toolbar>
 
-    <div class="row g-6">
+    <div class="row g-5">
         <div class="col-xl-4">
-            <div class="d-flex flex-column gap-6">
+            <div class="d-flex flex-column gap-5">
                 <x-ui.card>
                     <div class="d-flex flex-column align-items-center text-center">
                         <div class="spm-profile-avatar d-flex align-items-center justify-content-center mb-5">
@@ -53,7 +53,7 @@
                         </div>
 
                         <h2 class="spm-card-title fs-4 mb-2">{{ $profileName }}</h2>
-                        <div class="text-muted fw-semibold fs-8 text-uppercase mb-4">NSP: {{ $pesantren?->ns_pesantren ?? '-' }}</div>
+                        <div class="text-muted fw-semibold fs-8 mb-4">NSP: {{ $pesantren?->ns_pesantren ?? '-' }}</div>
 
                         <div class="d-flex flex-wrap justify-content-center gap-2">
                             <x-ui.status-badge :variant="$user->status == 1 ? 'success' : 'danger'">
@@ -68,7 +68,7 @@
                 </x-ui.card>
 
                 <x-ui.section-card title="Informasi Kontak">
-                    <div class="p-6">
+                    <div class="p-5">
                         <div class="row g-5">
                             <x-ui.detail-item label="Email Pesantren" value="{{ $pesantren?->email_pesantren ?? '-' }}" span="2" />
                             <x-ui.detail-item label="No. Telp / WA" value="{{ ($pesantren?->telp_pesantren ?? '-') . ' / ' . ($pesantren?->hp_wa ?? '-') }}" span="2" />
@@ -77,7 +77,7 @@
                     </div>
 
                     @if($pesantren)
-                        <div class="px-6 pb-6">
+                        <div class="px-5 pb-5">
                             <div class="border-top border-gray-200 pt-5">
                                 <form method="POST" action="{{ route('admin.pesantren.toggle-lock') }}">
                                     @csrf
@@ -104,10 +104,10 @@
         </div>
 
         <div class="col-xl-8">
-            <div class="d-flex flex-column gap-6">
+            <div class="d-flex flex-column gap-5">
                 @if($pesantren)
                     <x-ui.section-card title="Profil Pesantren" subtitle="Identitas utama dan narasi kelembagaan.">
-                        <div class="p-6">
+                        <div class="p-5">
                             <div class="row g-5">
                                 <x-ui.detail-item label="Tahun Pendirian" value="{{ $pesantren->tahun_pendirian ?: '-' }}" />
                                 <x-ui.detail-item label="Nama Mudir" value="{{ $pesantren->nama_mudir ?: '-' }}" />
@@ -130,8 +130,8 @@
                     </x-ui.section-card>
 
                     <x-ui.section-card title="Data & Fasilitas" subtitle="Layanan pendidikan dan kapasitas sarana.">
-                        <div class="p-6">
-                            <div class="row g-6">
+                        <div class="p-5">
+                            <div class="row g-5">
                                 <div class="col-lg-7">
                                     <div class="spm-detail-label mb-3">Layanan Pendidikan</div>
 
@@ -146,7 +146,7 @@
                                             <tbody>
                                                 @foreach($pesantren->units as $unit)
                                                     <tr>
-                                                        <td class="ps-4 text-uppercase fw-semibold">{{ str_replace('_', ' ', $unit->unit) }}</td>
+                                        <td class="ps-4 fw-semibold">{{ str_replace('_', ' ', $unit->unit) }}</td>
                                                         <td class="text-end pe-4">
                                                             <x-ui.badge variant="success">{{ $unit->jumlah_rombel ?? 0 }} Rombel</x-ui.badge>
                                                         </td>
@@ -171,7 +171,7 @@
                     </x-ui.section-card>
 
                     <x-ui.section-card title="Dokumen Pesantren" subtitle="Status unggahan dokumen pendukung.">
-                        <div class="p-6">
+                        <div class="p-5">
                             <div class="row g-5">
                                 @foreach(array_chunk($documents, 9, true) as $documentGroup)
                                     <div class="col-lg-6">

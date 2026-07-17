@@ -57,9 +57,9 @@
     </x-slot:toolbar>
 
     @if($asesor)
-        <div class="row g-6">
+        <div class="row g-5">
             <div class="col-xl-4">
-                <div class="d-flex flex-column gap-6 spm-asesor-sidebar">
+                <div class="d-flex flex-column gap-5 spm-asesor-sidebar">
                     <x-ui.card class="spm-asesor-summary-card">
                         <div class="d-flex align-items-start gap-4">
                             <div class="spm-asesor-avatar-wrap">
@@ -102,7 +102,7 @@
                     </x-ui.card>
 
                     <x-ui.section-card title="Informasi Kontak" subtitle="Akses cepat untuk menghubungi asesor.">
-                        <div class="p-6">
+                        <div class="p-5">
                             <div class="d-flex flex-column gap-4">
                                 @foreach($contactSummary as $item)
                                     <div class="spm-contact-row">
@@ -123,9 +123,9 @@
             </div>
 
             <div class="col-xl-8">
-                <div class="d-flex flex-column gap-6">
+                <div class="d-flex flex-column gap-5">
                     <x-ui.section-card title="A. Identitas Diri" subtitle="Data inti asesor yang paling sering dipakai untuk verifikasi.">
-                        <div class="p-6">
+                        <div class="p-5">
                             <div class="row g-5">
                                 <x-ui.detail-item label="Nama Lengkap (Tanpa Gelar)" value="{{ $asesor->nama_tanpa_gelar ?: '-' }}" />
                                 <x-ui.detail-item label="NIK / Nomor KTP" value="{{ $asesor->nik ?: '-' }}" />
@@ -153,7 +153,7 @@
                     </x-ui.section-card>
 
                     <x-ui.section-card title="B. Pengalaman & Rekam Jejak" subtitle="Setiap bagian dipisahkan agar lebih mudah dipindai dan dibandingkan.">
-                        <div class="p-6">
+                        <div class="p-5">
                             <div class="row g-5">
                                 @foreach($experienceCards as $card)
                                     <div class="col-lg-6">
@@ -208,7 +208,7 @@
                                                 </div>
                                             @empty
                                                 <div class="spm-compact-empty-state">
-                                                    <x-ui.empty-state title="Belum Ada Data" description="Karya publikasi belum diisi." class="py-6" />
+                                                    <x-ui.empty-state title="Belum Ada Data" description="Karya publikasi belum diisi." class="py-5" />
                                                 </div>
                                             @endforelse
                                         </div>
@@ -219,7 +219,7 @@
                     </x-ui.section-card>
 
                     <x-ui.section-card title="C. Dokumen Pendukung" subtitle="Dokumen resmi yang diunggah oleh asesor.">
-                        <div class="p-6">
+                        <div class="p-5">
                             <div class="row g-5">
                                 @foreach([
                                     'ktp' => 'KTP',
