@@ -76,6 +76,14 @@
     overflow: visible;
 }
 
+@media (max-width: 991.98px) {
+    [data-ui-simple-table="metronic"].spm-table-shell {
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: visible;
+    }
+}
+
 .spm-table-header {
     display: grid !important;
     grid-template-columns: minmax(260px, 1fr) auto;
