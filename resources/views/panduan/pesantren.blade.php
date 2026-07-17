@@ -18,11 +18,11 @@ $sections = [
 <x-panduan::layout title="Panduan Pesantren" :sections="$sections" currentSection="dashboard">
 
 {{-- Intro --}}
-<div class="card card-flush border border-primary border-dashed mb-6">
-    <div class="card-body py-5 px-6">
+<div class="card card-flush border border-dashed border-gray-300 mb-5">
+    <div class="card-body py-5 px-5">
         <div class="d-flex align-items-start gap-4">
             <div class="symbol symbol-50px flex-shrink-0">
-                <div class="symbol-label bg-light-primary text-primary">
+                <div class="symbol-label bg-body border border-dashed border-gray-300 text-primary">
                     <x-ui.icon name="information-5" class="fs-2x" />
                 </div>
             </div>
@@ -39,11 +39,11 @@ $sections = [
 </div>
 
 {{-- Screenshot tampilan penuh dashboard pesantren --}}
-<div class="card card-flush mb-8">
-    <div class="card-header border-0 pt-6 pb-0 px-6">
+<div class="card card-flush mb-5">
+    <div class="card-header border-0 pt-5 pb-0 px-5">
         <h3 class="card-title fw-semibold fs-3 text-gray-900">Tampilan Dashboard Pesantren</h3>
     </div>
-    <div class="card-body pt-4 px-6 pb-6">
+    <div class="card-body pt-4 px-5 pb-5">
         <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
             <img src="{{ asset('images/panduan/pesantren-full.png') }}"
                  alt="Tampilan lengkap dashboard Pesantren"
