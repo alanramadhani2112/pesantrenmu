@@ -305,16 +305,16 @@
                             <div>
                                 <x-ui.button type="button" variant="light" x-show="canGoBack()"
                                     @click="prevStep()">
-                                    <i class="ki-solid ki-arrow-left fs-4 me-1"></i> <span x-text="prevLabel()"></span>
+                                    <x-ui.icon name="arrow-left" class="fs-4 me-1" /> <span x-text="prevLabel()"></span>
                                 </x-ui.button>
                             </div>
                             <div class="d-flex gap-3">
                                 @if(!$isLocked)
                                     <x-ui.button type="button" variant="light" id="btnSaveDraft">
-                                        <i class="ki-solid ki-save-2 fs-4 me-1"></i> Simpan Draft
+                                        <x-ui.icon name="save-2" class="fs-4 me-1" /> Simpan Draft
                                     </x-ui.button>
                                     <x-ui.button type="submit" variant="primary" id="btnSaveEdpm">
-                                        <i class="ki-solid ki-check fs-4 me-1"></i> Submit Final
+                                        <x-ui.icon name="check" class="fs-4 me-1" /> Submit Final
                                     </x-ui.button>
                                 @endif
                             </div>
@@ -322,7 +322,7 @@
                                 <x-ui.button type="button" variant="light"
                                     x-show="canGoNext()"
                                     @click="nextStep()">
-                                    <span x-text="nextLabel()"></span> <i class="ki-solid ki-arrow-right fs-4 ms-1"></i>
+                                    <span x-text="nextLabel()"></span> <x-ui.icon name="arrow-right" class="fs-4 ms-1" />
                                 </x-ui.button>
                             </div>
                         </div>
