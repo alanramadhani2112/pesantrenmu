@@ -37,14 +37,14 @@
                 </x-ui.button>
             </div>
 
-            <a href="{{ route('dashboard') }}" class="d-flex align-items-center d-lg-none me-4">
+            <a href="{{ route('dashboard') }}" class="d-flex align-items-center d-lg-none me-4" aria-label="Ke dashboard">
                 <img src="{{ asset('images/brand/favicon.svg') }}" class="h-30px" alt="PesantrenMu" loading="eager" />
             </a>
 
             <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3 min-w-0">
-                <h1 class="page-heading d-flex text-gray-900 fw-semibold fs-3 flex-column justify-content-center my-0 spm-header-title">
+                <div class="page-heading d-flex text-gray-900 fw-semibold fs-3 flex-column justify-content-center my-0 spm-header-title" aria-hidden="true">
                     {{ $pageTitle }}
-                </h1>
+                </div>
 
                 <x-ui.breadcrumb :items="$breadcrumbItems" />
             </div>

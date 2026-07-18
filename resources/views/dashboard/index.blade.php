@@ -606,7 +606,7 @@
                                             </span>
                                         </td>
                                         <td class="text-end pe-4">
-                                            <x-ui.button :href="$recentRouteFor($activity['uuid'])" variant="light" size="sm" class="btn-icon btn-sm-auto">
+                                            <x-ui.button :href="$recentRouteFor($activity['uuid'])" variant="light" size="sm" class="btn-icon btn-sm-auto" aria-label="Lihat detail {{ $activity['periode'] ?? 'akreditasi' }}">
                                                 <x-ui.icon name="eye" class="fs-5" />
                                                 <span class="d-none d-sm-inline ms-1">Detail</span>
                                             </x-ui.button>
@@ -658,7 +658,7 @@
                                             </span>
                                         </td>
                                         <td class="text-end pe-4">
-                                            <x-ui.button :href="$recentRouteFor($activity['uuid'])" variant="light" size="sm" class="btn-icon btn-sm-auto">
+                                            <x-ui.button :href="$recentRouteFor($activity['uuid'])" variant="light" size="sm" class="btn-icon btn-sm-auto" aria-label="Lihat detail {{ $activity['pesantren_name'] }}">
                                                 <x-ui.icon name="eye" class="fs-5" />
                                                 <span class="d-none d-sm-inline ms-1">Detail</span>
                                             </x-ui.button>
