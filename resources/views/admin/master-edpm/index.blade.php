@@ -101,11 +101,18 @@
             @endforelse
 
             @foreach ($komponens as $komponen)
-                <div x-show="activeTab === '{{ $komponen->ipr ? 'ipr' : 'edpm' }}'">
-                    <x-ui.section-card :title="$komponen->nama" class="spm-edpm-component-card">
+                <div x-show="activeTab === '{{ $komponen->ipr ? 'ipr' : 'edpm' }}'" x-data="{ detailsOpen: false }">
+                    <x-ui.section-card :title="$komponen->nama" :subtitle="$komponen->butirs->count() . ' butir pernyataan'" class="spm-edpm-component-card">
                         <x-slot name="toolbar">
+                            <x-ui.button variant="light-info" size="sm" icon="eye"
+                                         x-bind:aria-expanded="detailsOpen.toString()"
+                                         aria-controls="edpm-component-{{ $komponen->id }}-details"
+                                         x-on:click="detailsOpen = !detailsOpen">
+                                <span x-text="detailsOpen ? 'Sembunyikan Butir' : 'Lihat Butir'"></span>
+                            </x-ui.button>
+
                             <x-ui.button variant="light" size="sm" icon="plus"
-                                         x-on:click="openButirModal({{ \Illuminate\Support\Js::from($komponen->id) }})">
+                                          x-on:click="openButirModal({{ \Illuminate\Support\Js::from($komponen->id) }})">
                                 Tambah Butir
                             </x-ui.button>
 
@@ -129,59 +136,70 @@
                             </form>
                         </x-slot>
 
-                        <x-ui.simple-table class="border-0 rounded-0 spm-edpm-table-wrap" table-class="spm-edpm-table">
-                            <thead>
-                                <tr>
-                                    <x-ui.table-th :min-width="false" class="spm-edpm-col-sk">No SK</x-ui.table-th>
-                                    <x-ui.table-th :min-width="false" class="spm-edpm-col-number">No Butir</x-ui.table-th>
-                                    <x-ui.table-th :min-width="false" class="spm-edpm-col-statement">Butir Pernyataan</x-ui.table-th>
-                                    <x-ui.table-th :min-width="false" align="end" class="spm-edpm-col-action">Aksi</x-ui.table-th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($komponen->butirs as $butir)
-                                    <tr>
-                                        <td class="fw-semibold text-muted spm-edpm-cell-sk">{{ $butir->no_sk ?: '-' }}</td>
-                                        <td class="spm-edpm-cell-number">
-                                            <x-ui.badge variant="primary">{{ $butir->nomor_butir }}</x-ui.badge>
-                                        </td>
-                                        <td class="text-gray-700 fw-semibold spm-edpm-statement">{{ $butir->butir_pernyataan }}</td>
-                                        <td class="text-end spm-edpm-cell-action">
-                                            <div class="d-flex align-items-center justify-content-end gap-2">
-                                                <x-ui.icon-button
-                                                    icon="pencil"
-                                                    label="Edit Butir"
-                                                    variant="primary"
-                                                    x-on:click="openButirModal({{ \Illuminate\Support\Js::from($komponen->id) }}, {{ \Illuminate\Support\Js::from($butir->id) }}, {{ \Illuminate\Support\Js::from($butir->no_sk ?? '') }}, {{ \Illuminate\Support\Js::from($butir->nomor_butir) }}, {{ \Illuminate\Support\Js::from($butir->butir_pernyataan) }})"
-                                                />
+                        <div class="spm-edpm-component-summary">
+                            <x-ui.badge variant="{{ $komponen->ipr ? 'info' : 'primary' }}">
+                                {{ $komponen->ipr ? 'IPR' : 'EDPM' }}
+                            </x-ui.badge>
+                            <span class="text-muted fw-semibold fs-8">
+                                {{ $komponen->butirs->count() }} butir tersedia. Buka detail untuk melihat dan mengelola butir.
+                            </span>
+                        </div>
 
-                                                <form method="POST" action="{{ route('admin.master-edpm.butir.destroy', $butir->id) }}" class="d-inline"
-                                                      x-on:submit.prevent="confirmDelete($event, 'Hapus butir ini?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <x-ui.icon-button
-                                                        type="submit"
-                                                        icon="trash"
-                                                        label="Hapus Butir"
-                                                        variant="danger"
-                                                    />
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @empty
+                        <div id="edpm-component-{{ $komponen->id }}-details" x-show="detailsOpen" x-cloak>
+                            <x-ui.simple-table class="border-0 rounded-0 spm-edpm-table-wrap" table-class="spm-edpm-table">
+                                <thead>
                                     <tr>
-                                        <td colspan="4">
-                                            <x-ui.empty-state
-                                                title="Belum ada butir pernyataan"
-                                                description="Tambahkan butir untuk komponen ini agar bisa digunakan pada EDPM/IPR."
-                                                class="py-10"
-                                            />
-                                        </td>
+                                        <x-ui.table-th :min-width="false" class="spm-edpm-col-sk">No SK</x-ui.table-th>
+                                        <x-ui.table-th :min-width="false" class="spm-edpm-col-number">No Butir</x-ui.table-th>
+                                        <x-ui.table-th :min-width="false" class="spm-edpm-col-statement">Butir Pernyataan</x-ui.table-th>
+                                        <x-ui.table-th :min-width="false" align="end" class="spm-edpm-col-action">Aksi</x-ui.table-th>
                                     </tr>
-                                @endforelse
-                            </tbody>
-                        </x-ui.simple-table>
+                                </thead>
+                                <tbody>
+                                    @forelse($komponen->butirs as $butir)
+                                        <tr>
+                                            <td class="fw-semibold text-muted spm-edpm-cell-sk">{{ $butir->no_sk ?: '-' }}</td>
+                                            <td class="spm-edpm-cell-number">
+                                                <x-ui.badge variant="primary">{{ $butir->nomor_butir }}</x-ui.badge>
+                                            </td>
+                                            <td class="text-gray-700 fw-semibold spm-edpm-statement">{{ $butir->butir_pernyataan }}</td>
+                                            <td class="text-end spm-edpm-cell-action">
+                                                <div class="d-flex align-items-center justify-content-end gap-2">
+                                                    <x-ui.icon-button
+                                                        icon="pencil"
+                                                        label="Edit Butir"
+                                                        variant="primary"
+                                                        x-on:click="openButirModal({{ \Illuminate\Support\Js::from($komponen->id) }}, {{ \Illuminate\Support\Js::from($butir->id) }}, {{ \Illuminate\Support\Js::from($butir->no_sk ?? '') }}, {{ \Illuminate\Support\Js::from($butir->nomor_butir) }}, {{ \Illuminate\Support\Js::from($butir->butir_pernyataan) }})"
+                                                    />
+
+                                                    <form method="POST" action="{{ route('admin.master-edpm.butir.destroy', $butir->id) }}" class="d-inline"
+                                                          x-on:submit.prevent="confirmDelete($event, 'Hapus butir ini?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <x-ui.icon-button
+                                                            type="submit"
+                                                            icon="trash"
+                                                            label="Hapus Butir"
+                                                            variant="danger"
+                                                        />
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4">
+                                                <x-ui.empty-state
+                                                    title="Belum ada butir pernyataan"
+                                                    description="Tambahkan butir untuk komponen ini agar bisa digunakan pada EDPM/IPR."
+                                                    class="py-10"
+                                                />
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </x-ui.simple-table>
+                        </div>
                     </x-ui.section-card>
                 </div>
             @endforeach

@@ -31,6 +31,20 @@
     line-height: 1.35;
 }
 
+.spm-edpm-component-card .spm-card-subtitle {
+    font-size: 12px;
+}
+
+.spm-edpm-component-summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 14px 18px;
+    border-top: 1px solid #eef2f7;
+    background: #fbfcfe;
+}
+
 .spm-edpm-component-card [data-ui-button="metronic"].btn-sm {
     min-height: 34px;
 }
