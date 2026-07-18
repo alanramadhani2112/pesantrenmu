@@ -470,3 +470,24 @@ body[data-kt-app-page-loading="on"] .spm-page-loader {
     line-height: 1.5;
     text-align: center;
 }
+
+@media (prefers-reduced-motion: reduce) {
+    html:focus-within {
+        scroll-behavior: auto !important;
+    }
+
+    .spm-app-shell *,
+    .spm-app-shell *::before,
+    .spm-app-shell *::after,
+    .spm-auth-shell *,
+    .spm-auth-shell *::before,
+    .spm-auth-shell *::after,
+    [data-ui-page="metronic"] *,
+    [data-ui-page="metronic"] *::before,
+    [data-ui-page="metronic"] *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}
