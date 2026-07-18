@@ -88,6 +88,43 @@ form[data-spm-submit-lock="active"] {
     min-height: 30px;
 }
 
+@media (max-width: 767.98px) {
+    [data-ui-button="metronic"].btn-sm,
+    .spm-btn.btn-sm,
+    [data-ui-button="metronic"].btn-icon,
+    .spm-btn.btn-icon,
+    [data-ui-button="metronic"].btn-icon.btn-sm,
+    .spm-btn.btn-icon.btn-sm {
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .btn.btn-icon {
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .btn.btn-icon.w-25px,
+    .btn.btn-icon.w-30px,
+    .btn.btn-icon.w-35px,
+    .btn.btn-icon.h-25px,
+    .btn.btn-icon.h-30px,
+    .btn.btn-icon.h-35px {
+        width: 44px !important;
+        height: 44px !important;
+    }
+
+    .app-header a[aria-label="Ke dashboard"] {
+        min-width: 44px;
+        min-height: 44px;
+        justify-content: center;
+    }
+}
+
 /* Action menu trigger buttons */
 [data-ui-action-menu="metronic"] > .btn {
     min-height: 38px;
