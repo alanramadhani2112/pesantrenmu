@@ -59,6 +59,17 @@ class AsesorAkreditasiMenuContextTest extends TestCase
             ->assertSee('Lihat Detail');
     }
 
+    public function test_review_deeplink_allows_manual_status_filter_changes(): void
+    {
+        $asesor = $this->createAssignedAssessment(Akreditasi::STATUS_PASCA_VISITASI);
+
+        $this->actingAs($asesor->user)
+            ->get('/asesor/akreditasi?statusFilter=2&focus=review')
+            ->assertOk()
+            ->assertSee('<option value="2" selected>Penilaian Pasca Visitasi</option>', false)
+            ->assertDontSee('<option value="review" selected>Review Berkas</option>', false);
+    }
+
     public function test_input_nilai_deeplink_redirects_to_status_filter(): void
     {
         $asesor = $this->createAssignedAssessment(Akreditasi::STATUS_PASCA_VISITASI);
