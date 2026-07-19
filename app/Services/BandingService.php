@@ -636,7 +636,7 @@ class BandingService
             });
         }
 
-        return $query->paginate($perPage);
+        return $query->paginate($perPage)->withQueryString();
     }
 
     /**
