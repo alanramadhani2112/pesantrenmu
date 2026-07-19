@@ -20,7 +20,15 @@
     };
 
     $statCards = match (true) {
-        ($isSuperAdmin || $isAdmin) => [
+        $isSuperAdmin => [
+            ['label' => 'Total Pesantren', 'value' => $totalPesantren, 'variant' => 'primary', 'icon' => 'category'],
+            ['label' => 'Pengajuan Aktif', 'value' => $stats['total_aktif'], 'variant' => 'info', 'icon' => 'abstract-26'],
+            ['label' => 'Asesor Aktif', 'value' => $totalAsesor, 'variant' => 'success', 'icon' => 'profile-user'],
+            ['label' => 'Sertifikat Terbit', 'value' => $stats['terakreditasi'], 'variant' => 'success', 'icon' => 'check-circle'],
+            ['label' => 'Total Akun', 'value' => $totalAkun, 'variant' => 'secondary', 'icon' => 'people'],
+            ['label' => 'Perlu Perbaikan', 'value' => $stats['ditolak'], 'variant' => 'danger', 'icon' => 'cross-circle'],
+        ],
+        $isAdmin => [
             ['label' => 'Perlu Anda Verifikasi', 'value' => $stats['verifikasi'], 'variant' => 'warning', 'icon' => 'timer'],
             ['label' => 'Sedang Dinilai Asesor', 'value' => $stats['assessment'], 'variant' => 'info', 'icon' => 'document'],
             ['label' => 'Proses Visitasi', 'value' => $stats['visitasi'], 'variant' => 'warning', 'icon' => 'geolocation'],
@@ -92,8 +100,8 @@
         default => [],
     };
 
-    $recentRouteFor = function ($uuid) use ($isAdmin, $isPesantren, $isAsesor) {
-        if ($isAdmin) return route('admin.akreditasi-detail', $uuid);
+    $recentRouteFor = function ($uuid) use ($isAdminArea, $isPesantren, $isAsesor) {
+        if ($isAdminArea) return route('admin.akreditasi-detail', $uuid);
         if ($isPesantren) return route('pesantren.akreditasi-detail', $uuid);
         if ($isAsesor) return route('asesor.akreditasi-detail', $uuid);
         return '#';
@@ -128,6 +136,8 @@
     $activeTimelineIndex = $latestPesantrenActivity
         ? array_search($latestPesantrenActivity['status'], array_keys($akreditasiTimeline), true)
         : false;
+    $pipelineMax = max(1, collect($pipelineStages)->max('value') ?? 0);
+    $gradeTotal = array_sum($gradeCounts ?? []);
 @endphp
 
 <div data-dashboard-page="metronic" data-dashboard-role="{{ $isAsesor ? 'asesor' : ($isPesantren ? 'pesantren' : ($isAdminArea ? 'admin' : 'user')) }}" x-data='dashboardCharts(@json($chartData), @json($stats))'>
@@ -170,7 +180,7 @@
 
         @endunless
         {{-- Quick Actions --}}
-        @if(count($quickActions) > 0 && ! $isPesantren && ! $isAsesor)
+        @if(count($quickActions) > 0)
             <div class="row g-3 mb-5 spm-dashboard-quick-actions">
                 @foreach($quickActions as $action)
                     <div class="col-6 col-md-4 col-lg-3">
@@ -187,10 +197,57 @@
             </div>
         @endif
 
-        @if($isSuperAdmin || $isAdmin)
+        @if($isPesantren || $isAsesor)
+            <div class="row g-5 mb-5">
+                @foreach($statCards as $card)
+                    <div class="col-6 col-lg-3">
+                        <x-ui.stat-card
+                            class="spm-dashboard-stat"
+                            :label="$card['label']"
+                            :value="$card['value']"
+                            :variant="$card['variant']"
+                            :icon="$card['icon']"
+                        />
+                    </div>
+                @endforeach
+            </div>
+        @endif
+
+        @if($isSuperAdmin)
+            <div class="row g-5">
+                <div class="col-12 col-xl-8">
+                    <x-ui.card title="Monitoring Nasional" subtitle="Pipeline akreditasi aktif seluruh pesantren." class="h-100 spm-dashboard-stat">
+                        <div class="spm-pipeline d-flex flex-column gap-4">
+                            @foreach($pipelineStages as $stage)
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-semibold text-gray-900 fs-7">{{ $stage['label'] }}</span>
+                                        <x-ui.badge :variant="$stage['variant']">{{ $stage['value'] }}</x-ui.badge>
+                                    </div>
+                                    <div class="progress h-8px bg-light">
+                                        <div class="progress-bar bg-{{ $stage['variant'] }}" style="width: {{ round(($stage['value'] / $pipelineMax) * 100) }}%"></div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </x-ui.card>
+                </div>
+
+                <div class="col-12 col-xl-4">
+                    <x-ui.card title="Governance Sistem" subtitle="Kapasitas pengguna dan asesor." class="h-100 spm-dashboard-stat">
+                        <div class="d-flex flex-column">
+                            <x-ui.metric-row label="Total Akun" :value="$totalAkun" variant="primary" icon="people" />
+                            <x-ui.metric-row label="Total Pesantren" :value="$totalPesantren" variant="info" icon="category" />
+                            <x-ui.metric-row label="Asesor Aktif" :value="$totalAsesor" variant="success" icon="profile-user" />
+                            <x-ui.metric-row label="Asesor Tanpa Tugas" :value="$asesorTanpaTugas" variant="warning" icon="timer" class="border-bottom-0" />
+                        </div>
+                    </x-ui.card>
+                </div>
+            </div>
+        @elseif($isAdmin)
             <div class="row g-5">
                 <div class="col-12 col-lg-7 col-xl-8">
-                    <x-ui.card title="Perlu Ditindaklanjuti" subtitle="Proses aktif yang perlu ditindaklanjuti admin." class="h-100 spm-dashboard-stat">
+                    <x-ui.card title="Perlu Ditindaklanjuti Hari Ini" subtitle="Operasi akreditasi yang butuh respons admin." class="h-100 spm-dashboard-stat">
                         <div class="row g-4">
                             <div class="col-sm-6 col-md-4">
                                 <div class="rounded border border-dashed border-gray-300 bg-body p-4 h-100">
@@ -223,7 +280,7 @@
                 </div>
 
                 <div class="col-12 col-lg-5 col-xl-4">
-                    <x-ui.card title="Monitoring Asesor" subtitle="Distribusi dan kapasitas tugas aktif." class="h-100 spm-dashboard-stat">
+                    <x-ui.card title="Beban Operasional" subtitle="Distribusi tugas asesor aktif." class="h-100 spm-dashboard-stat">
                         <div class="d-flex flex-column">
                             <x-ui.metric-row label="Total Asesor Aktif" :value="$totalAsesor" variant="primary" icon="profile-user" />
                             <x-ui.metric-row label="Total Tugas Aktif" :value="$totalTugasAktif" variant="info" icon="document" />
@@ -530,8 +587,22 @@
             </div>
 
             <div class="col-12 col-lg-5 col-xl-4">
-                <x-ui.card title="Distribusi Status" subtitle="Hasil akhir pengajuan akreditasi." class="h-100 spm-dashboard-stat">
-                    @if($hasStatusData)
+                <x-ui.card title="{{ $isSuperAdmin ? 'Distribusi Peringkat' : 'Distribusi Status' }}" subtitle="{{ $isSuperAdmin ? 'Peringkat akreditasi dari data final yang tersedia.' : 'Hasil akhir pengajuan akreditasi.' }}" class="h-100 spm-dashboard-stat">
+                    @if($isSuperAdmin && $gradeTotal > 0)
+                        <div class="d-flex flex-column gap-4">
+                            @foreach($gradeCounts as $grade => $total)
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-semibold text-gray-900 fs-7">{{ $grade }}</span>
+                                        <x-ui.badge variant="success">{{ $total }}</x-ui.badge>
+                                    </div>
+                                    <div class="progress h-8px bg-light">
+                                        <div class="progress-bar bg-success" style="width: {{ round(($total / $gradeTotal) * 100) }}%"></div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @elseif(! $isSuperAdmin && $hasStatusData)
                         <div class="d-flex flex-column align-items-center justify-content-center">
                             <div class="position-relative h-225px w-225px d-flex align-items-center justify-content-center">
                                 <canvas id="statusChart"></canvas>
@@ -554,8 +625,8 @@
                         </div>
                     @else
                         <x-ui.empty-state
-                            title="Belum ada hasil akhir"
-                            description="Ringkasan status akan tersedia setelah pengajuan selesai divalidasi."
+                            title="{{ $isSuperAdmin ? 'Belum ada peringkat final' : 'Belum ada hasil akhir' }}"
+                            description="{{ $isSuperAdmin ? 'Distribusi peringkat akan muncul setelah data peringkat tersedia.' : 'Ringkasan status akan tersedia setelah pengajuan selesai divalidasi.' }}"
                             class="min-h-200px"
                             variant="info"
                         >

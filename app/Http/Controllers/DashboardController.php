@@ -109,6 +109,19 @@ class DashboardController extends Controller
             $avgBeban = $totalAsesor > 0 ? round($totalTugasAktif / $totalAsesor, 1) : 0;
         }
 
+        $pipelineStages = $this->pipelineStages($stats);
+        $gradeCounts = [];
+        if ($isAdminArea) {
+            $gradeCounts = Akreditasi::query()
+                ->whereNotNull('peringkat')
+                ->select('peringkat', DB::raw('COUNT(*) as total'))
+                ->groupBy('peringkat')
+                ->orderBy('peringkat')
+                ->pluck('total', 'peringkat')
+                ->map(fn ($total) => (int) $total)
+                ->toArray();
+        }
+
         // Greeting based on time
         $hour = (int) now()->format('H');
         $greeting = match (true) {
@@ -190,6 +203,8 @@ class DashboardController extends Controller
             'avgBeban',
             'totalPesantren',
             'totalAkun',
+            'pipelineStages',
+            'gradeCounts',
             'greeting',
             'recentActivities',
             'readiness',
@@ -206,6 +221,18 @@ class DashboardController extends Controller
             AkreditasiStateMachine::STATUS_VISITASI,
             AkreditasiStateMachine::STATUS_PASCA_VISITASI,
             AkreditasiStateMachine::STATUS_VALIDASI_ADMIN,
+        ];
+    }
+
+    private function pipelineStages(array $stats): array
+    {
+        return [
+            ['label' => 'Pengajuan Baru', 'value' => $stats['total_aktif'], 'variant' => 'primary'],
+            ['label' => 'Verifikasi', 'value' => $stats['verifikasi'], 'variant' => 'warning'],
+            ['label' => 'Assessment', 'value' => $stats['assessment'], 'variant' => 'info'],
+            ['label' => 'Visitasi', 'value' => $stats['visitasi'], 'variant' => 'success'],
+            ['label' => 'Selesai', 'value' => $stats['terakreditasi'], 'variant' => 'success'],
+            ['label' => 'Perbaikan', 'value' => $stats['ditolak'], 'variant' => 'danger'],
         ];
     }
 

@@ -107,6 +107,16 @@
     transition: width 0.6s ease;
 }
 
+/* ===== IA Pipeline ===== */
+.spm-pipeline .progress {
+    border-radius: 6px;
+}
+
+.spm-pipeline .progress-bar {
+    border-radius: 6px;
+    min-width: 4px;
+}
+
 /* ===== Responsive Utility Helpers ===== */
 @media (min-width: 768px) {
     .fs-md-1 { font-size: 1.75rem !important; }
