@@ -13,7 +13,7 @@
         >
             <x-slot name="filters">
                 <x-ui.filter-bar>
-                    <form method="GET" action="{{ route('admin.asesor.index') }}" id="asesor-filter-form" class="d-flex align-items-center gap-3 flex-wrap">
+                    <form method="GET" action="{{ route('admin.asesor.index') }}" id="asesor-filter-form" class="spm-table-filter-grid spm-table-filter-grid--wide">
                         <x-datatable.search name="search" placeholder="Cari Asesor..." :value="$search" form="asesor-filter-form" />
 
                         <x-ui.select name="filterPeran" size="sm" class="w-auto min-w-180px" onchange="this.form.submit()">

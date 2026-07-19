@@ -109,7 +109,7 @@
         <x-ui.table title="Daftar Akreditasi" subtitle="Pengajuan, penilaian, visitasi, dan tindak lanjut pesantren." :records="$akreditasis">
             <x-slot name="filters">
                 <form method="GET" action="{{ route('admin.akreditasi') }}" id="admin-akreditasi-filters">
-                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <div class="spm-table-filter-grid spm-table-filter-grid--compact">
                         <x-datatable.search name="search" placeholder="Cari Pesantren..." :value="$search" form="admin-akreditasi-filters" />
 
                         <x-ui.select name="statusFilter" size="sm" class="w-auto min-w-280px" onchange="this.form.submit()">
