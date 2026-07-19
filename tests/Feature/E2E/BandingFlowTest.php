@@ -66,6 +66,23 @@ class BandingFlowTest extends TestCase
         ]);
     }
 
+    public function test_pesantren_cannot_submit_duplicate_banding(): void
+    {
+        $akreditasi = $this->scenario('BF-NEG-006');
+        $existingCount = Banding::where('akreditasi_id', $akreditasi->id)->count();
+
+        $this->actingAs($this->pesantren)
+            ->post(route('pesantren.akreditasi.banding'), [
+                'id' => $akreditasi->id,
+                'alasan' => str_repeat('Alasan banding duplikat harus ditolak. ', 2),
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $this->assertSame(Akreditasi::STATUS_DITOLAK, (int) $akreditasi->fresh()->status);
+        $this->assertSame($existingCount, Banding::where('akreditasi_id', $akreditasi->id)->count());
+    }
+
     public function test_super_admin_can_assign_and_accept_banding(): void
     {
         $banding = $this->bandingScenario('BF-BANDING-002');

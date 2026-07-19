@@ -133,6 +133,25 @@ class AsesorWorkflowTest extends TestCase
         ]);
     }
 
+    public function test_invalid_na_score_is_rejected_without_mutation(): void
+    {
+        $akreditasi = $this->scenario('BF-HAPPY-005');
+        $butir = MasterEdpmButir::firstOrFail();
+        $beforeCount = AkreditasiEdpm::where('akreditasi_id', $akreditasi->id)->count();
+
+        $this->actingAs($this->asesor1)
+            ->postJson(route('asesor.akreditasi.save-na'), [
+                'akreditasi_id' => $akreditasi->id,
+                'butir_id' => $butir->id,
+                'value' => 5,
+                'is_final' => false,
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('value');
+
+        $this->assertSame($beforeCount, AkreditasiEdpm::where('akreditasi_id', $akreditasi->id)->count());
+    }
+
     public function test_anggota_asesor_cannot_finalize_scoring(): void
     {
         $akreditasi = $this->scenario('BF-HAPPY-005');

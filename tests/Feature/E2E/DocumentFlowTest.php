@@ -135,6 +135,53 @@ class DocumentFlowTest extends TestCase
             ->assertSessionHasErrors('laporan_individu_file');
     }
 
+    public function test_invalid_kartu_kendali_upload_stores_nothing(): void
+    {
+        $akreditasi = $this->scenario('BF-HAPPY-005');
+        $existingPath = $akreditasi->kartu_kendali;
+
+        $this->actingAs($this->pesantren)
+            ->post(route('pesantren.akreditasi.upload-kartu-kendali'), [
+                'akreditasi_id' => $akreditasi->id,
+                'kartu_kendali_file' => UploadedFile::fake()->create('kartu-kendali.txt', 1, 'text/plain'),
+            ])
+            ->assertSessionHasErrors('kartu_kendali_file');
+
+        $this->assertSame($existingPath, $akreditasi->fresh()->kartu_kendali);
+        $this->assertSame([], Storage::disk('public')->allFiles('kartu_kendali'));
+    }
+
+    public function test_oversized_kartu_kendali_upload_stores_nothing(): void
+    {
+        $akreditasi = $this->scenario('BF-HAPPY-005');
+        $existingPath = $akreditasi->kartu_kendali;
+
+        $this->actingAs($this->pesantren)
+            ->post(route('pesantren.akreditasi.upload-kartu-kendali'), [
+                'akreditasi_id' => $akreditasi->id,
+                'kartu_kendali_file' => UploadedFile::fake()->create('kartu-kendali.pdf', 3072, 'application/pdf'),
+            ])
+            ->assertSessionHasErrors('kartu_kendali_file');
+
+        $this->assertSame($existingPath, $akreditasi->fresh()->kartu_kendali);
+        $this->assertSame([], Storage::disk('public')->allFiles('kartu_kendali'));
+    }
+
+    public function test_missing_kartu_kendali_upload_stores_nothing(): void
+    {
+        $akreditasi = $this->scenario('BF-HAPPY-005');
+        $existingPath = $akreditasi->kartu_kendali;
+
+        $this->actingAs($this->pesantren)
+            ->post(route('pesantren.akreditasi.upload-kartu-kendali'), [
+                'akreditasi_id' => $akreditasi->id,
+            ])
+            ->assertSessionHasErrors('kartu_kendali_file');
+
+        $this->assertSame($existingPath, $akreditasi->fresh()->kartu_kendali);
+        $this->assertSame([], Storage::disk('public')->allFiles('kartu_kendali'));
+    }
+
     private function scenario(string $code): Akreditasi
     {
         return Akreditasi::where('catatan', 'like', "[{$code}]%")

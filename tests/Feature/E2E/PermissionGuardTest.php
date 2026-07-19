@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\E2E;
 
+use App\Models\Akreditasi;
 use App\Models\User;
 use Database\Seeders\TestDataSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -50,6 +51,30 @@ class PermissionGuardTest extends TestCase
         $this->actingAs($this->asesor)
             ->get(route('pesantren.akreditasi'))
             ->assertForbidden();
+    }
+
+    public function test_admin_cannot_access_asesor_area(): void
+    {
+        $this->actingAs($this->admin)
+            ->get(route('asesor.akreditasi'))
+            ->assertForbidden();
+    }
+
+    public function test_admin_cannot_access_pesantren_area(): void
+    {
+        $this->actingAs($this->admin)
+            ->get(route('pesantren.akreditasi'))
+            ->assertForbidden();
+    }
+
+    public function test_pesantren_cannot_view_other_tenant_akreditasi_detail(): void
+    {
+        $otherTenantAkreditasi = Akreditasi::where('catatan', 'like', '[BF-NEG-002]%')
+            ->firstOrFail();
+
+        $this->actingAs($this->pesantren)
+            ->get(route('pesantren.akreditasi-detail', $otherTenantAkreditasi->uuid))
+            ->assertNotFound();
     }
 
     public function test_admin_without_master_role_permission_is_forbidden(): void
