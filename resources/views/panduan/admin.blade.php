@@ -1,15 +1,14 @@
 @php
 $sections = [
     ['id' => 'dashboard', 'title' => 'Dashboard', 'icon' => 'ki-element-11'],
-    ['id' => 'manajemen-pengguna', 'title' => 'Manajemen Pengguna', 'icon' => 'ki-user'],
-    ['id' => 'manajemen-sistem', 'title' => 'Manajemen Sistem', 'icon' => 'ki-setting-3'],
+    ['id' => 'administrasi', 'title' => 'Administrasi', 'icon' => 'ki-user'],
+    ['id' => 'master-data', 'title' => 'Master Data', 'icon' => 'ki-setting-3'],
     ['id' => 'operasional-akreditasi', 'title' => 'Operasional Akreditasi', 'icon' => 'ki-verify', 'children' => [
         ['id' => 'verifikasi-berkas', 'title' => 'Verifikasi Berkas'],
         ['id' => 'assign-asesor', 'title' => 'Assign Asesor'],
         ['id' => 'validasi-admin', 'title' => 'Validasi & Penerbitan SK'],
         ['id' => 'kelola-banding', 'title' => 'Kelola Banding'],
     ]],
-    ['id' => 'arsip-trash', 'title' => 'Arsip & Trash', 'icon' => 'ki-trash'],
 ];
 @endphp
 
@@ -69,7 +68,7 @@ $sections = [
 </div>
 </x-panduan::section>
 
-<x-panduan::section id="manajemen-pengguna" title="Manajemen Pengguna" subtitle="Admin dapat mengelola akun pengguna sistem melalui menu Akun Pengguna.">
+<x-panduan::section id="administrasi" title="Administrasi" subtitle="Admin dapat mengelola akun pengguna sesuai akses yang tersedia.">
     <ol class="list-unstyled mb-0">
         <li class="d-flex align-items-start gap-3 mb-4">
             <span class="badge badge-primary rounded-circle fw-semibold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">1</span>
@@ -92,13 +91,6 @@ $sections = [
                 Klik tombol aksi di baris pengguna untuk mengedit data atau menonaktifkan akun.
             </div>
         </li>
-        <li class="d-flex align-items-start gap-3">
-            <span class="badge badge-primary rounded-circle fw-semibold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">4</span>
-            <div>
-                <strong>Filter &amp; Pencarian</strong><br/>
-                Gunakan kolom pencarian di atas tabel untuk mencari pengguna berdasarkan nama atau email. Filter role membantu menyaring pengguna sesuai jenis akun.
-            </div>
-        </li>
     </ol>
 
 {{-- Screenshot Manajemen Pengguna --}}
@@ -115,7 +107,7 @@ $sections = [
 </div>
 </x-panduan::section>
 
-<x-panduan::section id="manajemen-sistem" title="Manajemen Sistem" subtitle="Konfigurasi master data dan hak akses sistem.">
+<x-panduan::section id="master-data" title="Master Data" subtitle="Konfigurasi master data akreditasi yang dikelola admin.">
     <ol class="list-unstyled mb-0">
         <li class="d-flex align-items-start gap-3 mb-4">
             <span class="badge badge-primary rounded-circle fw-semibold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">1</span>
@@ -138,25 +130,18 @@ $sections = [
                 Menu <strong>Dokumen Wajib</strong> untuk mengelola daftar dokumen yang wajib diunggah pesantren per kategori.
             </div>
         </li>
-        <li class="d-flex align-items-start gap-3">
-            <span class="badge badge-primary rounded-circle fw-semibold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">4</span>
-            <div>
-                <strong>Peran &amp; Hak Akses</strong><br/>
-                Menu <strong>Peran & Hak Akses</strong> untuk mengelola role dan permission di sistem. <strong>Hati-hati:</strong> perubahan di menu ini berdampak pada seluruh sistem.
-            </div>
-        </li>
     </ol>
 
-{{-- Screenshot Manajemen Sistem --}}
+{{-- Screenshot Master Data --}}
 <div class="card card-flush mt-6">
     <div class="card-body p-4">
         <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
             <img src="{{ asset('images/panduan/admin-master-kategori.png') }}"
-                 alt="Tampilan halaman Manajemen Sistem (Master Kategori Dokumen)"
+                 alt="Tampilan halaman Master Data (Master Kategori Dokumen)"
                  class="img-fluid w-100"
                  loading="lazy" />
         </div>
-        <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Manajemen Sistem (Master Kategori Dokumen) pada Sistem PesantrenMu</div>
+                    <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Master Data (Master Kategori Dokumen) pada Sistem PesantrenMu</div>
     </div>
 </div>
 </x-panduan::section>
@@ -167,7 +152,7 @@ $sections = [
             <span class="badge badge-primary rounded-circle fw-semibold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">1</span>
             <div>
                 <strong>Buka Menu Akreditasi</strong><br/>
-                Klik <strong>Akreditasi</strong> di sidebar. Tabel menampilkan daftar pengajuan akreditasi dari pesantren.
+                            Klik <strong>Review Akreditasi</strong> di sidebar. Tabel menampilkan daftar pengajuan akreditasi dari pesantren.
             </div>
         </li>
         <li class="d-flex align-items-start gap-3 mb-4">
@@ -334,38 +319,6 @@ $sections = [
                  loading="lazy" />
         </div>
         <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Kelola Banding pada Sistem PesantrenMu</div>
-    </div>
-</div>
-</x-panduan::section>
-
-<x-panduan::section id="arsip-trash" title="Arsip & Trash" subtitle="Mengelola akreditasi yang diarsipkan atau dihapus.">
-    <ol class="list-unstyled mb-0">
-        <li class="d-flex align-items-start gap-3 mb-4">
-            <span class="badge badge-primary rounded-circle fw-semibold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">1</span>
-            <div>
-                <strong>Arsip Akreditasi</strong><br/>
-                Klik <strong>Arsip Akreditasi</strong> di sidebar untuk melihat data akreditasi yang telah dihapus (soft delete).
-            </div>
-        </li>
-        <li class="d-flex align-items-start gap-3">
-            <span class="badge badge-primary rounded-circle fw-semibold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">2</span>
-            <div>
-                <strong>Restore / Hapus Permanen</strong><br/>
-                Data di trash dapat di-<strong>restore</strong> (kembalikan) atau dihapus permanen. Hati-hati: hapus permanen tidak dapat dibatalkan.
-            </div>
-        </li>
-    </ol>
-
-{{-- Screenshot Arsip & Trash --}}
-<div class="card card-flush mt-6">
-    <div class="card-body p-4">
-        <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
-            <img src="{{ asset('images/panduan/admin-trash.png') }}"
-                 alt="Tampilan halaman Arsip & Trash"
-                 class="img-fluid w-100"
-                 loading="lazy" />
-        </div>
-        <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Arsip & Trash pada Sistem PesantrenMu</div>
     </div>
 </div>
 </x-panduan::section>

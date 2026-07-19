@@ -2,7 +2,7 @@
 $sections = [
     ['id' => 'dashboard', 'title' => 'Dashboard', 'icon' => 'ki-element-11'],
     ['id' => 'kelola-pengguna', 'title' => 'Kelola Pengguna', 'icon' => 'ki-people', 'children' => [
-        ['id' => 'role-permission', 'title' => 'Role & Permission'],
+        ['id' => 'role-permission', 'title' => 'Role Sistem & Hak Akses'],
         ['id' => 'akun-pengguna', 'title' => 'Akun Pengguna'],
     ]],
     ['id' => 'master-data', 'title' => 'Master Data', 'icon' => 'ki-data', 'children' => [
@@ -61,7 +61,7 @@ $sections = [
 </div>
 </x-panduan::section>
 
-<x-panduan::section id="role-permission" title="Role & Permission" subtitle="Mengelola role dan hak akses pengguna sistem.">
+<x-panduan::section id="role-permission" title="Role Sistem & Hak Akses" subtitle="Mengelola role dan hak akses pengguna sistem.">
     <ol class="list-unstyled mb-0">
         <li class="d-flex align-items-start gap-3 mb-4">
             <span class="badge badge-primary rounded-circle fw-semibold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">1</span>
@@ -74,7 +74,7 @@ $sections = [
             <span class="badge badge-primary rounded-circle fw-semibold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">2</span>
             <div>
                 <strong>Konfigurasi Permission</strong><br/>
-                Buka <strong>Peran & Hak Akses</strong> untuk mengatur permission tiap role. Setiap permission mengontrol akses ke fitur spesifik. <strong>Peringatan:</strong> perubahan di sini langsung berdampak ke seluruh pengguna.
+                Buka <strong>Hak Akses</strong> untuk mengatur permission tiap role. Setiap permission mengontrol akses ke fitur spesifik. <strong>Peringatan:</strong> perubahan di sini langsung berdampak ke seluruh pengguna.
             </div>
         </li>
         <li class="d-flex align-items-start gap-3">
@@ -86,16 +86,16 @@ $sections = [
         </li>
     </ol>
 
-{{-- Screenshot Role & Permission --}}
+{{-- Screenshot Role Sistem & Hak Akses --}}
 <div class="card card-flush mt-6">
     <div class="card-body p-4">
         <div class="rounded border border-gray-300 overflow-hidden bg-gray-100 text-center">
             <img src="{{ asset('images/panduan/sa-role-permission.png') }}"
-                 alt="Tampilan halaman Role & Permission"
+                 alt="Tampilan halaman Role Sistem & Hak Akses"
                  class="img-fluid w-100"
                  loading="lazy" />
         </div>
-        <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Role & Permission pada Sistem PesantrenMu</div>
+        <div class="text-center text-gray-500 mt-2 small">Gambar: Tampilan halaman Role Sistem & Hak Akses pada Sistem PesantrenMu</div>
     </div>
 </div>
 </x-panduan::section>

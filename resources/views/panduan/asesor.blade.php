@@ -72,7 +72,7 @@ $sections = [
             <span class="badge badge-primary rounded-circle fw-semibold flex-shrink-0" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;">1</span>
             <div>
                 <strong>Buka Tugas Akreditasi</strong><br/>
-                Klik <strong>Akreditasi</strong> di sidebar. Tabel menampilkan daftar akreditasi yang ditugaskan kepada Anda. Filter status <strong>Review Asesor (4)</strong>.
+                Klik <strong>Tugas Akreditasi</strong> di sidebar. Tabel menampilkan daftar akreditasi yang ditugaskan kepada Anda. Filter status <strong>Review Asesor (4)</strong>.
             </div>
         </li>
         <li class="d-flex align-items-start gap-3 mb-4">
