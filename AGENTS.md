@@ -23,3 +23,9 @@
 - Match existing Laravel Blade and Metronic style.
 - Run the smallest relevant check after non-trivial edits.
 - UI changes must preserve Metronic components and existing design tokens.
+
+## Execution Policy
+
+- Work in the main agent (single-threaded, inline) by default.
+- Do not spawn subagents for code search, investigation, implementation, review, or debugging unless the user explicitly asks or a higher-priority instruction requires delegation.
+- If delegation is required by a system instruction, explain why before spawning.
