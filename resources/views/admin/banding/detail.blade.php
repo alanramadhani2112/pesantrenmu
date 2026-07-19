@@ -94,7 +94,7 @@
                             <div class="fixed inset-0 bg-black/50" @click="showAssignModal = false"></div>
                             <div class="modal-content bg-white rounded p-5 position-relative w-100 mw-450px">
                                 <h3 class="mb-4" x-text="assignAction === 'assign' ? 'Pilih Reviewer' : 'Pilih Reviewer Baru'"></h3>
-                                <form method="POST" :action="assignAction === 'assign' ? '{{ route('banding.assign-reviewer', $banding->id) }}' : '{{ route('banding.reassign-reviewer', $banding->id) }}'">
+                                <form method="POST" :action="assignAction === 'assign' ? '{{ route('admin.banding.assign-reviewer', $banding->id) }}' : '{{ route('admin.banding.reassign-reviewer', $banding->id) }}'">
                                     @csrf
                                     <select name="selectedReviewerId" class="form-select mb-4" required>
                                         <option value="">-- Pilih Reviewer --</option>
@@ -117,7 +117,7 @@
                             <div class="fixed inset-0 bg-black/50" @click="showDecisionModal = false"></div>
                             <div class="modal-content bg-white rounded p-5 position-relative w-100 mw-450px">
                                 <h3 class="mb-4" x-text="decisionType === 'accept' ? 'Terima Banding' : 'Tolak Banding'"></h3>
-                                <form method="POST" action="{{ route('banding.submit-decision', $banding->id) }}">
+                                <form method="POST" action="{{ route('admin.banding.submit-decision', $banding->id) }}">
                                     @csrf
                                     <input type="hidden" name="decisionType" x-bind:value="decisionType">
                                     <textarea name="keputusan" class="form-control mb-4" rows="4" required minlength="10"
