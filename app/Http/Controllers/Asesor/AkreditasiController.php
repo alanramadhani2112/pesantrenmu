@@ -36,6 +36,7 @@ class AkreditasiController extends Controller
         $focus = $request->input('focus', $request->route('focus', ''));
         $search = $request->input('search', '');
         $periodeFilter = $request->input('periodeFilter', '');
+        $hasExplicitStatusFilter = $request->query->has('statusFilter');
         $statusFilter = $request->input('statusFilter', $request->route('statusFilter', ''));
         $perPage = min(max($request->integer('perPage', 10), 5), 50);
         $sortField = in_array((string) $request->input('sortField', 'id'), ['id', 'created_at', 'updated_at'], true)
@@ -52,7 +53,7 @@ class AkreditasiController extends Controller
         ];
 
         $expectedStatus = $focusStatusMap[$focus] ?? null;
-        if ($expectedStatus && $statusFilter !== $expectedStatus) {
+        if (! $hasExplicitStatusFilter && $expectedStatus && $statusFilter !== $expectedStatus) {
             return redirect()->route('asesor.akreditasi', [
                 'statusFilter' => $expectedStatus,
                 'focus' => $focus,
@@ -60,9 +61,10 @@ class AkreditasiController extends Controller
         }
 
         // Derive effective status filter
-        $effectiveStatusFilter = match ($focus) {
-            'review', 'jadwal' => 'review',
-            'nilai', 'laporan_visitasi' => '2',
+        $effectiveStatusFilter = match (true) {
+            $hasExplicitStatusFilter => $statusFilter,
+            in_array($focus, ['review', 'jadwal'], true) => 'review',
+            in_array($focus, ['nilai', 'laporan_visitasi'], true) => '2',
             default => $statusFilter,
         };
 
