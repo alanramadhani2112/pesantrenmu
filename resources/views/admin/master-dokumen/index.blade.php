@@ -118,7 +118,7 @@
                 <div class="mb-5">
                     <label class="form-label required" for="doc_title">Nama Dokumen</label>
                     <input type="text" name="title" id="doc_title" x-model="form.title"
-                           class="form-control" placeholder="Judul dokumen" required>
+                           class="form-control" placeholder="Contoh: Surat Izin Operasional" required>
                     @error('title') <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
                 </div>
 
@@ -145,7 +145,7 @@
                 <div class="mt-5">
                     <label class="form-label" for="doc_description">Deskripsi</label>
                     <textarea name="description" id="doc_description" x-model="form.description"
-                              class="form-control" rows="2" placeholder="Opsional"></textarea>
+                              class="form-control" rows="2" placeholder="Jelaskan isi atau ketentuan dokumen"></textarea>
                 </div>
 
                 <div class="mt-5">

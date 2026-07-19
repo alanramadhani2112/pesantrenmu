@@ -23,7 +23,7 @@
                 <div class="row g-5">
                     <div class="col-md-6">
                         <x-ui.form-field label="Nomor SK" for="nomor_sk" :error="$errors->first('nomor_sk')">
-                            <input type="text" name="nomor_sk" id="nomor_sk" class="form-control" value="{{ old('nomor_sk') }}" required maxlength="100" />
+                            <input type="text" name="nomor_sk" id="nomor_sk" class="form-control" value="{{ old('nomor_sk') }}" placeholder="Contoh: 001/SK-AK/X/2026" required maxlength="100" />
                         </x-ui.form-field>
                     </div>
                     <div class="col-md-6">
@@ -43,7 +43,7 @@
                     </div>
                     <div class="col-12">
                         <x-ui.form-field label="Catatan Admin" for="catatan_admin" :error="$errors->first('catatan_admin')">
-                            <textarea name="catatan_admin" id="catatan_admin" rows="3" class="form-control">{{ old('catatan_admin') }}</textarea>
+                            <textarea name="catatan_admin" id="catatan_admin" rows="3" class="form-control" placeholder="Tambahkan catatan penerbitan SK bila diperlukan">{{ old('catatan_admin') }}</textarea>
                         </x-ui.form-field>
                     </div>
                 </div>
@@ -69,7 +69,7 @@
                     </select>
                 </x-ui.form-field>
                 <x-ui.form-field label="Penjelasan" for="rejection_explanation" :error="$errors->first('rejectionCategories.0.explanation')">
-                    <textarea name="rejectionCategories[0][explanation]" id="rejection_explanation" rows="4" class="form-control" required minlength="10" maxlength="2000"></textarea>
+                    <textarea name="rejectionCategories[0][explanation]" id="rejection_explanation" rows="4" class="form-control" placeholder="Jelaskan alasan penolakan akhir" required minlength="10" maxlength="2000"></textarea>
                 </x-ui.form-field>
             </x-ui.modal-body>
             <x-ui.modal-footer>

@@ -114,7 +114,7 @@
                     <div class="col-md-4">
                         <label class="form-label required" for="cat_sort_order">Urutan</label>
                         <input type="number" name="sort_order" id="cat_sort_order" x-model="form.sort_order"
-                               class="form-control" min="0" max="9999">
+                               class="form-control" min="0" max="9999" placeholder="Contoh: 10">
                     </div>
                 </div>
 
@@ -135,8 +135,8 @@
 
                 <div class="mt-5">
                     <label class="form-label" for="cat_description">Deskripsi</label>
-                    <textarea name="description" id="cat_description" x-model="form.description"
-                              class="form-control" rows="2" placeholder="Opsional"></textarea>
+                        <textarea name="description" id="cat_description" x-model="form.description"
+                              class="form-control" rows="2" placeholder="Jelaskan fungsi kategori dokumen ini"></textarea>
                 </div>
 
                 <div class="row g-5 mt-1">

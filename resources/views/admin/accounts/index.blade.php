@@ -145,11 +145,11 @@
             <x-ui.modal-body>
                 <div class="d-flex flex-column gap-4">
                     <x-ui.form-field label="Nama" for="name" :error="$errors->get('name')" required>
-                        <x-ui.input name="name" id="name" x-model="formData.name" required autofocus />
+                        <x-ui.input name="name" id="name" x-model="formData.name" placeholder="Contoh: Ahmad Fauzi" required autofocus />
                     </x-ui.form-field>
 
                     <x-ui.form-field label="Email" for="email" :error="$errors->get('email')" required>
-                        <x-ui.input type="email" name="email" id="email" x-model="formData.email" required />
+                        <x-ui.input type="email" name="email" id="email" x-model="formData.email" placeholder="nama@domain.com" required />
                     </x-ui.form-field>
 
                     <x-ui.form-field label="Role" for="role_id" :error="$errors->get('role_id')" required>
@@ -167,7 +167,7 @@
                         :error="$errors->get('password')"
                         hint="Kosongkan untuk membuat password otomatis saat tambah akun, atau bila password tidak diubah saat edit."
                     >
-                        <x-ui.input type="password" name="password" id="password" x-model="formData.password" />
+                        <x-ui.input type="password" name="password" id="password" x-model="formData.password" placeholder="Kosongkan bila tidak diubah" />
                     </x-ui.form-field>
 
                     <template x-if="isEditing">

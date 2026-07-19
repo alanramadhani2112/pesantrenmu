@@ -271,7 +271,7 @@
                 <div class="row g-5">
                     <x-ui.form-field label="No SK" for="butir_no_sk" class="col-md-6">
                         <input type="text" name="no_sk" id="butir_no_sk" x-model="butirForm.no_sk"
-                               class="form-control" placeholder="Opsional">
+                               class="form-control" placeholder="Contoh: SK-001/2026">
                     </x-ui.form-field>
                     <div class="col-md-6">
                         <label class="form-label required" for="butir_nomor_butir">Nomor Butir</label>
@@ -284,7 +284,7 @@
                 <div class="mt-5">
                     <label class="form-label required" for="butir_pernyataan">Butir Pernyataan</label>
                     <textarea name="butir_pernyataan" id="butir_pernyataan" x-model="butirForm.butir_pernyataan"
-                              class="form-control" rows="4" placeholder="Isi butir pernyataan..." required></textarea>
+                              class="form-control" rows="4" placeholder="Tulis pernyataan butir penilaian" required></textarea>
                     @error('butir_pernyataan') <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
                 </div>
             </x-ui.modal-body>
