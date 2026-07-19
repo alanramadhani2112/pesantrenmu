@@ -23,11 +23,19 @@ class OnboardingController extends Controller
             $user = Auth::user();
 
             if (! $user) {
-                return response()->json(['showModal' => false]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sesi tidak valid.',
+                    'showModal' => false,
+                ], 401);
             }
 
             if (! $this->onboardingService->shouldShowOnboarding($user->id)) {
-                return response()->json(['showModal' => false]);
+                return response()->json([
+                    'success' => true,
+                    'message' => null,
+                    'showModal' => false,
+                ]);
             }
 
             $steps = $this->onboardingService->getStepsForRole($user->role_id);
@@ -38,10 +46,16 @@ class OnboardingController extends Controller
             if ($allCompleted) {
                 $this->onboardingService->completeOnboarding($user->id);
 
-                return response()->json(['showModal' => false]);
+                return response()->json([
+                    'success' => true,
+                    'message' => null,
+                    'showModal' => false,
+                ]);
             }
 
             return response()->json([
+                'success' => true,
+                'message' => null,
                 'showModal' => true,
                 'steps' => $steps,
                 'completionStatus' => $completionStatus,
@@ -52,7 +66,11 @@ class OnboardingController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return response()->json(['showModal' => false]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memuat status onboarding.',
+                'showModal' => false,
+            ], 500);
         }
     }
 
@@ -65,28 +83,44 @@ class OnboardingController extends Controller
             $user = Auth::user();
 
             if (! $user) {
-                return response()->json(['url' => '/dashboard']);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sesi tidak valid.',
+                    'url' => '/dashboard',
+                ], 401);
             }
 
             $steps = $this->onboardingService->getStepsForRole($user->role_id);
             $step = collect($steps)->firstWhere('key', $request->input('step_key'));
 
             if (! $step) {
-                return response()->json(['url' => '/dashboard'], 404);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Langkah onboarding tidak ditemukan.',
+                    'url' => '/dashboard',
+                ], 404);
             }
 
             if ($step['completion_type'] === 'visit_based') {
                 $this->onboardingService->markStepVisited($user->id, $request->input('step_key'));
             }
 
-            return response()->json(['url' => route($step['route'])]);
+            return response()->json([
+                'success' => true,
+                'message' => null,
+                'url' => route($step['route']),
+            ]);
         } catch (\Exception $e) {
             Log::error('Onboarding: Failed to navigate to step', [
                 'step_key' => $request->input('step_key'),
                 'error' => $e->getMessage(),
             ]);
 
-            return response()->json(['url' => '/dashboard'], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membuka langkah onboarding.',
+                'url' => '/dashboard',
+            ], 500);
         }
     }
 
@@ -97,18 +131,24 @@ class OnboardingController extends Controller
             $user = Auth::user();
 
             if (! $user) {
-                return response()->json(['success' => false], 401);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sesi tidak valid.',
+                ], 401);
             }
 
             $this->onboardingService->skipOnboarding($user->id);
 
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => null]);
         } catch (\Exception $e) {
             Log::error('Onboarding: Failed to skip', [
                 'error' => $e->getMessage(),
             ]);
 
-            return response()->json(['success' => false], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal melewati onboarding.',
+            ], 500);
         }
     }
 
@@ -119,18 +159,24 @@ class OnboardingController extends Controller
             $user = Auth::user();
 
             if (! $user) {
-                return response()->json(['success' => false], 401);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sesi tidak valid.',
+                ], 401);
             }
 
             $this->onboardingService->completeOnboarding($user->id);
 
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => null]);
         } catch (\Exception $e) {
             Log::error('Onboarding: Failed to complete', [
                 'error' => $e->getMessage(),
             ]);
 
-            return response()->json(['success' => false], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyelesaikan onboarding.',
+            ], 500);
         }
     }
 }

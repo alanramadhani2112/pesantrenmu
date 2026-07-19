@@ -420,12 +420,14 @@ Route::middleware(['auth', 'verified', 'role:pesantren'])
 | Internal API (session-auth, JSON responses)
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth')->prefix('_api')->name('api.')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('_api')->name('api.')->group(function () {
     Route::get('/sidebar-badges', [LayoutDataController::class, 'sidebarBadges'])->name('sidebar-badges');
     Route::get('/notifications', [LayoutDataController::class, 'notifications'])->name('notifications');
     Route::post('/notifications/{id}/read', [LayoutDataController::class, 'markNotificationRead'])->name('notifications.read');
     Route::post('/notifications/mark-all-read', [LayoutDataController::class, 'markAllNotificationsRead'])->name('notifications.mark-all-read');
+});
 
+Route::middleware('auth')->prefix('_api')->name('api.')->group(function () {
     Route::get('/onboarding/status', [OnboardingController::class, 'status'])->name('onboarding.status');
     Route::post('/onboarding/navigate', [OnboardingController::class, 'navigateToStep'])->name('onboarding.navigate');
     Route::post('/onboarding/skip', [OnboardingController::class, 'skip'])->name('onboarding.skip');

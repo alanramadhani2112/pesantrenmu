@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Log;
 
 class LayoutDataController extends Controller
 {
+    private const NOTIFICATION_LIMIT = 10;
+
     public function sidebarBadges(): JsonResponse
     {
         try {
@@ -21,6 +23,8 @@ class LayoutDataController extends Controller
 
             if (! $user) {
                 return response()->json([
+                    'success' => false,
+                    'message' => 'Sesi tidak valid.',
                     'pendingAkreditasiCount' => 0,
                     'pendingBandingCount' => 0,
                     'activeTaskCount' => 0,
@@ -60,6 +64,8 @@ class LayoutDataController extends Controller
             }
 
             return response()->json([
+                'success' => true,
+                'message' => null,
                 'pendingAkreditasiCount' => $pendingAkreditasiCount,
                 'pendingBandingCount' => $pendingBandingCount,
                 'activeTaskCount' => $activeTaskCount,
@@ -70,10 +76,12 @@ class LayoutDataController extends Controller
             ]);
 
             return response()->json([
+                'success' => false,
+                'message' => 'Gagal memuat badge sidebar.',
                 'pendingAkreditasiCount' => 0,
                 'pendingBandingCount' => 0,
                 'activeTaskCount' => 0,
-            ]);
+            ], 500);
         }
     }
 
@@ -83,7 +91,7 @@ class LayoutDataController extends Controller
             /** @var User $user */
             $user = Auth::user();
 
-            $notifications = $user->notifications()->take(10)->get()->map(function ($notification) {
+            $notifications = $user->notifications()->take(self::NOTIFICATION_LIMIT)->get()->map(function ($notification) {
                 return [
                     'id' => $notification->id,
                     'data' => $notification->data,
@@ -95,6 +103,8 @@ class LayoutDataController extends Controller
             $unreadCount = $user->unreadNotifications()->count();
 
             return response()->json([
+                'success' => true,
+                'message' => null,
                 'notifications' => $notifications,
                 'unreadCount' => $unreadCount,
             ]);
@@ -104,9 +114,11 @@ class LayoutDataController extends Controller
             ]);
 
             return response()->json([
+                'success' => false,
+                'message' => 'Gagal memuat notifikasi.',
                 'notifications' => [],
                 'unreadCount' => 0,
-            ]);
+            ], 500);
         }
     }
 
@@ -123,17 +135,26 @@ class LayoutDataController extends Controller
 
                 return response()->json([
                     'success' => true,
+                    'message' => null,
                     'url' => $notification->data['url'] ?? '/dashboard',
                 ]);
             }
 
-            return response()->json(['success' => false, 'url' => '/dashboard'], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Notifikasi tidak ditemukan.',
+                'url' => '/dashboard',
+            ], 404);
         } catch (\Exception $e) {
             Log::error('LayoutData: Failed to mark notification as read', [
                 'error' => $e->getMessage(),
             ]);
 
-            return response()->json(['success' => false, 'url' => '/dashboard'], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menandai notifikasi.',
+                'url' => '/dashboard',
+            ], 500);
         }
     }
 
@@ -145,13 +166,16 @@ class LayoutDataController extends Controller
 
             $user->unreadNotifications->markAsRead();
 
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => null]);
         } catch (\Exception $e) {
             Log::error('LayoutData: Failed to mark all notifications as read', [
                 'error' => $e->getMessage(),
             ]);
 
-            return response()->json(['success' => false], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menandai semua notifikasi.',
+            ], 500);
         }
     }
 }
