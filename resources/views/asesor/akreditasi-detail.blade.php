@@ -58,7 +58,7 @@
 <x-ui.page
     title="Detail Akreditasi"
     subtitle="{{ $pesantren->nama_pesantren ?? $pesantren->name ?? '-' }}"
-    class="spm-detail-page"
+    class="spm-detail-page spm-asesor-akreditasi-detail-page"
     x-data="asesorAkreditasiDetailPage()"
     data-module-page="asesor-akreditasi-detail"
 >
@@ -175,6 +175,63 @@
         class="mb-5"
     />
 
+    {{-- Rejection Section (Asesor 1 Only) --}}
+    @if($asesorTipe === 1 && !empty($rejectionStatus))
+        @php
+            $lastRejection = collect($rejectionStatus['history'] ?? [])->last();
+            $rejectionBadge = match ($rejectionStatus['status']) {
+                'accepted' => 'success',
+                'corrected' => 'info',
+                default => 'warning',
+            };
+            $rejectionLabel = match ($rejectionStatus['status']) {
+                'accepted' => 'Perbaikan diterima',
+                'corrected' => 'Perbaikan dikirim',
+                default => 'Menunggu perbaikan',
+            };
+        @endphp
+        <div class="spm-rejection-strip mb-5">
+            <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+                <div class="d-flex align-items-start gap-3">
+                    <x-ui.icon name="information-5" class="fs-2 text-warning" />
+                    <div>
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                            <span class="fw-semibold text-gray-900">Status Penolakan Dokumen</span>
+                            <x-ui.badge :variant="$rejectionBadge">{{ $rejectionLabel }} ({{ $rejectionStatus['rejectionCount'] }}/{{ $rejectionStatus['rejectionLimit'] }})</x-ui.badge>
+                        </div>
+                        <div class="text-muted fs-8">
+                            @if($rejectionStatus['updatedAt'])
+                                Update {{ \Carbon\Carbon::parse($rejectionStatus['updatedAt'])->format('d M Y H:i') }}.
+                            @endif
+                            @if($lastRejection?->explanation)
+                                Catatan terakhir: {{ $lastRejection->explanation }}
+                            @else
+                                Kelola status perbaikan dokumen pesantren.
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                @if($rejectionStatus['status'] === 'corrected')
+                    <div class="d-flex flex-wrap gap-2">
+                        <form method="POST" action="{{ route('asesor.akreditasi.accept-perbaikan') }}">
+                            @csrf
+                            <input type="hidden" name="akreditasi_id" value="{{ $akreditasi->id }}">
+                            <x-ui.button type="button" variant="success" size="sm" x-on:click="confirmAcceptPerbaikan($el.closest('form'))">
+                                Terima Perbaikan
+                            </x-ui.button>
+                        </form>
+                        @if($rejectionStatus['rejectionCount'] < $rejectionStatus['rejectionLimit'])
+                            <x-ui.button variant="danger" size="sm" x-on:click="$dispatch('open-modal', 'reject-documents-modal')">
+                                Tolak Lagi
+                            </x-ui.button>
+                        @endif
+                    </div>
+                @endif
+            </div>
+        </div>
+    @endif
+
     {{-- Tabs Navigation --}}
     <x-ui.card :flush="true">
         <div class="spm-detail-tabs-shell px-6 pt-5 pb-5" aria-label="Navigasi detail akreditasi">
@@ -193,7 +250,7 @@
         </div>
 
         {{-- Tab Content --}}
-        <div class="spm-detail-tab-content p-5">
+        <div class="spm-detail-tab-content spm-detail-alignment p-5">
             <div x-show="activeTab === 'profil'" id="panel-profil" role="tabpanel" aria-labelledby="tab-profil" x-cloak>
                 @include('asesor.akreditasi-detail.tabs.profil')
             </div>
@@ -218,69 +275,6 @@
             @endif
         </div>
     </x-ui.card>
-
-    {{-- Rejection Section (Asesor 1 Only) --}}
-    @if($asesorTipe === 1 && !empty($rejectionStatus))
-        <x-ui.section-card title="Status Penolakan Dokumen" subtitle="Kelola penolakan dan perbaikan dokumen pesantren" class="mt-5">
-            <div class="p-5">
-                @if($rejectionStatus['status'] === 'pending' || $rejectionStatus['status'] === 'rejected')
-                    <div class="d-flex align-items-center gap-3 mb-4">
-                        <x-ui.badge variant="warning">
-                            Menunggu Perbaikan ({{ $rejectionStatus['rejectionCount'] }}/{{ $rejectionStatus['rejectionLimit'] }})
-                        </x-ui.badge>
-                        @if($rejectionStatus['updatedAt'])
-                            <span class="text-muted fs-8">Terakhir diperbarui: {{ \Carbon\Carbon::parse($rejectionStatus['updatedAt'])->format('d M Y H:i') }}</span>
-                        @endif
-                    </div>
-
-                    @if($rejectionStatus['status'] === 'corrected')
-                        <div class="d-flex gap-3">
-                            <form method="POST" action="{{ route('asesor.akreditasi.accept-perbaikan') }}">
-                                @csrf
-                                <input type="hidden" name="akreditasi_id" value="{{ $akreditasi->id }}">
-                                <x-ui.button type="button" variant="success" x-on:click="confirmAcceptPerbaikan($el.closest('form'))">
-                                    <x-ui.icon name="check" class="fs-4 me-1" />
-                                    Terima Perbaikan
-                                </x-ui.button>
-                            </form>
-                            @if($rejectionStatus['rejectionCount'] < $rejectionStatus['rejectionLimit'])
-                                <x-ui.button variant="danger" x-on:click="$dispatch('open-modal', 'reject-documents-modal')">
-                                    <x-ui.icon name="cross" class="fs-4 me-1" />
-                                    Tolak Lagi
-                                </x-ui.button>
-                            @endif
-                        </div>
-                    @endif
-                @elseif($rejectionStatus['status'] === 'accepted')
-                    <x-ui.alert variant="success" title="Perbaikan Diterima">
-                        Perbaikan dokumen telah diterima dan disetujui.
-                    </x-ui.alert>
-                @endif
-
-                {{-- Rejection History --}}
-                @if(!empty($rejectionStatus['history']) && count($rejectionStatus['history']) > 0)
-                    <div class="mt-5">
-                        <h6 class="fw-semibold mb-3">Riwayat Penolakan</h6>
-                        <div class="timeline">
-                            @foreach($rejectionStatus['history'] as $history)
-                                <div class="timeline-item mb-3">
-                                    <div class="d-flex align-items-center gap-2 mb-1">
-                                        <x-ui.badge :variant="$history->status === 'accepted' ? 'success' : ($history->status === 'corrected' ? 'info' : 'warning')">
-                                            {{ ucfirst($history->status) }}
-                                        </x-ui.badge>
-                                        <span class="text-muted fs-8">{{ $history->created_at->format('d M Y H:i') }}</span>
-                                    </div>
-                                    @if($history->explanation)
-                                        <p class="text-muted fs-7 mb-0">{{ $history->explanation }}</p>
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-            </div>
-        </x-ui.section-card>
-    @endif
 
     @include('asesor.akreditasi-detail.modals')
 
