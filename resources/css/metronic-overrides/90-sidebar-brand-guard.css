@@ -60,14 +60,16 @@
     max-height: 100% !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
 }
 
 .spm-app-sidebar .menu {
-    gap: 2px !important;
+    gap: 3px !important;
 }
 
 .spm-app-sidebar .spm-sidebar-section.menu-item {
-    padding: 18px 0 7px !important;
+    padding: 18px 0 6px !important;
 }
 
 .spm-app-sidebar .spm-sidebar-section .menu-content {
@@ -78,17 +80,19 @@
     color: rgba(255, 255, 255, 0.48) !important;
     font-size: 11px !important;
     font-weight: 600 !important;
-    letter-spacing: 0 !important;
+    letter-spacing: 0.05em !important;
 }
 
 .spm-app-sidebar .spm-sidebar-link.menu-link,
 .spm-app-sidebar .spm-sidebar-group-toggle {
-    min-height: 44px !important;
+    gap: 10px !important;
+    min-height: 42px !important;
     padding: 0 12px !important;
     color: rgba(255, 255, 255, 0.74) !important;
     border-color: transparent !important;
-    border-radius: 8px !important;
+    border-radius: 10px !important;
     background-color: transparent !important;
+    transition: color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .spm-app-sidebar .spm-sidebar-link.menu-link:hover,
@@ -100,14 +104,12 @@
 .spm-app-sidebar .spm-sidebar-link.menu-link.active,
 .spm-app-sidebar .menu-item.here > .spm-sidebar-group-toggle {
     color: #ffffff !important;
-    background-color: var(--spm-primary-500) !important;
+    background-color: rgba(255, 255, 255, 0.13) !important;
+    box-shadow: inset 3px 0 0 #ffffff;
 }
 
 .spm-app-sidebar .spm-sidebar-link.menu-link.active::before {
-    left: -4px !important;
-    width: 3px !important;
-    height: 20px !important;
-    background-color: #ffffff !important;
+    display: none !important;
 }
 
 .spm-app-sidebar .spm-sidebar-icon,
@@ -136,11 +138,24 @@
 
 .spm-app-sidebar .spm-sidebar-link-child.menu-link {
     color: rgba(255, 255, 255, 0.66) !important;
+    min-height: 36px !important;
+    padding: 6px 12px !important;
+    font-size: 0.9rem !important;
 }
 
 .spm-app-sidebar .spm-sidebar-link-child.menu-link:hover,
 .spm-app-sidebar .spm-sidebar-link-child.menu-link.active {
     color: #ffffff !important;
+}
+
+.spm-app-sidebar .menu-sub {
+    margin-left: 18px !important;
+    padding: 3px 0 4px 16px !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+
+.spm-app-sidebar .spm-sidebar-guide {
+    border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 .spm-app-sidebar .app-sidebar-footer {
