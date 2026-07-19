@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -41,5 +42,25 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    public function asAdmin(): static
+    {
+        return $this->state(fn (array $attributes) => ['role_id' => Role::ID_ADMIN]);
+    }
+
+    public function asAsesor(): static
+    {
+        return $this->state(fn (array $attributes) => ['role_id' => Role::ID_ASESOR]);
+    }
+
+    public function asPesantren(): static
+    {
+        return $this->state(fn (array $attributes) => ['role_id' => Role::ID_PESANTREN]);
+    }
+
+    public function asSuperAdmin(): static
+    {
+        return $this->state(fn (array $attributes) => ['role_id' => Role::ID_SUPER_ADMIN]);
     }
 }
