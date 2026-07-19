@@ -200,7 +200,7 @@
                                                                         <input data-ui-input="metronic" type="url" class="form-control form-control-sm"
                                                                             :name="'links[' + butir.id + ']'"
                                                                             x-model="links[butir.id]"
-                                                                            placeholder="https://"
+                                                                            placeholder="https://contoh-domain.com/bukti"
                                                                             @if($isLocked) disabled @endif />
                                                                     </td>
                                                                 </tr>
@@ -275,7 +275,7 @@
                                                                         <input data-ui-input="metronic" type="url" class="form-control form-control-sm"
                                                                             :name="'links[' + butir.id + ']'"
                                                                             x-model="links[butir.id]"
-                                                                            placeholder="https://"
+                                                                            placeholder="https://contoh-domain.com/bukti"
                                                                             @if($isLocked) disabled @endif />
                                                                     </td>
                                                                 </tr>

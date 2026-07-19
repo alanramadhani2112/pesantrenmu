@@ -148,6 +148,7 @@
                         <input type="text" name="nama_pesantren" id="nama_pesantren"
                             class="form-control form-control-solid @error('nama_pesantren') is-invalid @enderror"
                             value="{{ old('nama_pesantren', $pesantren->nama_pesantren) }}"
+                            placeholder="Contoh: Pesantren Al Hikmah"
                             required {{ $isLocked ? 'disabled' : '' }}>
                         @error('nama_pesantren') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
@@ -157,6 +158,7 @@
                         <input type="text" name="ns_pesantren" id="ns_pesantren"
                             class="form-control form-control-solid @error('ns_pesantren') is-invalid @enderror"
                             value="{{ old('ns_pesantren', $pesantren->ns_pesantren) }}"
+                            placeholder="Contoh: 510032710001"
                             required {{ $isLocked ? 'disabled' : '' }}>
                         @error('ns_pesantren') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
@@ -165,6 +167,7 @@
                     <x-ui.form-field label="Alamat Pesantren" for="alamat" :required="true">
                         <textarea name="alamat" id="alamat" rows="3"
                             class="form-control form-control-solid @error('alamat') is-invalid @enderror"
+                            placeholder="Tulis alamat lengkap pesantren"
                             required {{ $isLocked ? 'disabled' : '' }}>{{ old('alamat', $pesantren->alamat) }}</textarea>
                         @error('alamat') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
@@ -187,6 +190,7 @@
                         <input type="text" name="kota_kabupaten" id="kota_kabupaten"
                             class="form-control form-control-solid @error('kota_kabupaten') is-invalid @enderror"
                             value="{{ old('kota_kabupaten', $pesantren->kota_kabupaten) }}"
+                            placeholder="Contoh: Kabupaten Sleman"
                             required {{ $isLocked ? 'disabled' : '' }}>
                         @error('kota_kabupaten') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
@@ -197,6 +201,7 @@
                             class="form-control form-control-solid @error('tahun_pendirian') is-invalid @enderror"
                             value="{{ old('tahun_pendirian', $pesantren->tahun_pendirian) }}"
                             min="1900" max="{{ date('Y') }}"
+                            placeholder="Contoh: 1998"
                             required {{ $isLocked ? 'disabled' : '' }}>
                         @error('tahun_pendirian') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
@@ -235,6 +240,7 @@
                         <input type="text" name="nama_mudir" id="nama_mudir"
                             class="form-control form-control-solid @error('nama_mudir') is-invalid @enderror"
                             value="{{ old('nama_mudir', $pesantren->nama_mudir) }}"
+                            placeholder="Contoh: KH Ahmad Fauzi"
                             required {{ $isLocked ? 'disabled' : '' }}>
                         @error('nama_mudir') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
@@ -253,6 +259,7 @@
                         <input type="text" name="telp_pesantren" id="telp_pesantren"
                             class="form-control form-control-solid @error('telp_pesantren') is-invalid @enderror"
                             value="{{ old('telp_pesantren', $pesantren->telp_pesantren) }}"
+                            placeholder="Contoh: 0274xxxxxx"
                             required {{ $isLocked ? 'disabled' : '' }}>
                         @error('telp_pesantren') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
@@ -262,6 +269,7 @@
                         <input type="text" name="hp_wa" id="hp_wa"
                             class="form-control form-control-solid @error('hp_wa') is-invalid @enderror"
                             value="{{ old('hp_wa', $pesantren->hp_wa) }}"
+                            placeholder="Contoh: 08xxxxxxxxxx"
                             required {{ $isLocked ? 'disabled' : '' }}>
                         @error('hp_wa') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
@@ -271,6 +279,7 @@
                         <input type="email" name="email_pesantren" id="email_pesantren"
                             class="form-control form-control-solid @error('email_pesantren') is-invalid @enderror"
                             value="{{ old('email_pesantren', $pesantren->email_pesantren) }}"
+                            placeholder="Contoh: pesantren@domain.com"
                             required {{ $isLocked ? 'disabled' : '' }}>
                         @error('email_pesantren') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
@@ -288,6 +297,7 @@
                     <x-ui.form-field label="Visi" for="visi" :required="true">
                         <textarea name="visi" id="visi" rows="3"
                             class="form-control form-control-solid @error('visi') is-invalid @enderror"
+                            placeholder="Tulis visi utama pesantren"
                             required {{ $isLocked ? 'disabled' : '' }}>{{ old('visi', $pesantren->visi) }}</textarea>
                         @error('visi') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
@@ -296,6 +306,7 @@
                     <x-ui.form-field label="Misi" for="misi" :required="true">
                         <textarea name="misi" id="misi" rows="3"
                             class="form-control form-control-solid @error('misi') is-invalid @enderror"
+                            placeholder="Tulis misi pesantren secara ringkas"
                             required {{ $isLocked ? 'disabled' : '' }}>{{ old('misi', $pesantren->misi) }}</textarea>
                         @error('misi') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </x-ui.form-field>
@@ -348,6 +359,7 @@
                                     class="form-control form-control-solid @error('units_data.{{ $unitValue }}.jumlah_rombel') is-invalid @enderror"
                                     value="{{ $rombel }}"
                                     min="1" max="9999" @if($checked) required @endif
+                                    placeholder="Contoh: 6"
                                     {{ $isLocked ? 'disabled' : '' }}>
                                 @error("units_data.{$unitValue}.jumlah_rombel") <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </x-ui.form-field>
