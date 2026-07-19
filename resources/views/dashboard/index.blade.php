@@ -94,8 +94,8 @@
             ['label' => 'EDPM', 'icon' => 'document', 'route' => route('pesantren.edpm'), 'variant' => 'warning'],
         ],
         $isAsesor => [
-            ['label' => 'Tugas Akreditasi', 'icon' => 'shield-tick', 'route' => route('asesor.akreditasi'), 'variant' => 'primary'],
-            ['label' => 'Profil Asesor', 'icon' => 'profile-user', 'route' => route('asesor.profile'), 'variant' => 'info'],
+            ['label' => 'Tugas Akreditasi', 'description' => 'Buka daftar tugas penilaian', 'icon' => 'shield-tick', 'route' => route('asesor.akreditasi'), 'variant' => 'primary'],
+            ['label' => 'Profil Asesor', 'description' => 'Lengkapi data asesor', 'icon' => 'profile-user', 'route' => route('asesor.profile'), 'variant' => 'info'],
         ],
         default => [],
     };
@@ -183,13 +183,15 @@
         @if(count($quickActions) > 0)
             <div class="row g-3 mb-5 spm-dashboard-quick-actions">
                 @foreach($quickActions as $action)
-                    <div class="col-6 col-md-4 col-lg-3">
+                    <div class="{{ $isAsesor ? 'col-12 col-md-6' : 'col-6 col-md-4 col-lg-3' }}">
                         <x-ui.action-card
                             :href="$action['route']"
                             :icon="$action['icon']"
                             :title="$action['label']"
+                            :description="$action['description'] ?? null"
                             :variant="$action['variant']"
                             icon-class="fs-3 fs-md-2"
+                            :align="$isAsesor ? 'start' : 'center'"
                             class="spm-quick-action spm-quick-action--dashboard"
                         />
                     </div>
@@ -502,13 +504,15 @@
                                     :href="$step['route']"
                                     :icon="$step['icon']"
                                     :variant="$step['variant']"
-                                    :description="$step['copy']"
                                     align="start"
                                     class="spm-asesor-workflow-item"
                                 >
-                                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-                                        <span class="fw-semibold text-gray-900 fs-6">{{ $step['label'] }}</span>
-                                        <x-ui.badge :variant="$step['variant']">{{ $step['value'] }} tugas</x-ui.badge>
+                                    <div class="d-flex flex-column gap-1">
+                                        <div class="d-flex flex-wrap align-items-center gap-2">
+                                            <span class="fw-semibold text-gray-900 fs-6">{{ $step['label'] }}</span>
+                                            <x-ui.badge :variant="$step['variant']">{{ $step['value'] }} tugas</x-ui.badge>
+                                        </div>
+                                        <span class="text-muted fw-semibold fs-8">{{ $step['copy'] }}</span>
                                     </div>
 
                                     <x-slot:actions>
