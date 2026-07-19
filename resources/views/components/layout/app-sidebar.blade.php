@@ -172,7 +172,7 @@
                     $panduanRoute = $panduanRoutes[$roleName] ?? null;
                 @endphp
                 @if($panduanRoute)
-                    <div class="pt-4 mt-4 border-top">
+                    <div class="spm-sidebar-guide mt-4 pt-4">
                         <x-sidebar-link
                             :href="route($panduanRoute)"
                             :active="request()->routeIs('panduan.*')"
