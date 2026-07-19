@@ -101,7 +101,7 @@
             class="spm-table-shell--asesor-akreditasi spm-table-shell--asesor-{{ $activeFocus }}"
         >
             <x-slot name="filters">
-                <form method="GET" action="{{ route('asesor.akreditasi') }}" id="asesor-akreditasi-filter-form" class="d-flex align-items-center gap-3 flex-wrap">
+                <form method="GET" action="{{ route('asesor.akreditasi') }}" id="asesor-akreditasi-filter-form" class="spm-table-filter-grid spm-table-filter-grid--wide">
                     <input type="hidden" name="perPage" value="{{ $perPage }}">
                     <input type="hidden" name="sortField" value="{{ $sortField }}">
                     <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">

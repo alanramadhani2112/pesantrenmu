@@ -161,7 +161,7 @@
                 @if($statusFilter !== '')
                     <input type="hidden" name="statusFilter" value="{{ $statusFilter }}">
                 @endif
-                <div class="d-flex align-items-center gap-3 flex-wrap">
+                <div class="spm-table-filter-grid spm-table-filter-grid--wide">
                     <x-datatable.search name="search" placeholder="Cari periode atau ID..." :value="$search" form="pesantren-akreditasi-filter-form" />
 
                     <x-ui.input name="periodeFilter" value="{{ $periodeFilter }}" class="w-auto min-w-120px" placeholder="2025" />
