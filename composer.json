@@ -52,6 +52,10 @@
             "@php artisan config:clear --ansi",
             "@php artisan test"
         ],
+        "test:e2e": [
+            "@php artisan config:clear --ansi",
+            "@php artisan test tests/Feature/E2E --stop-on-failure"
+        ],
         "perf:cache": [
             "Composer\\Config::disableProcessTimeout",
             "@php artisan config:clear --ansi",
