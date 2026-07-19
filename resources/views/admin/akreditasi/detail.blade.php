@@ -50,7 +50,7 @@
 <x-ui.page
     title="Detail Akreditasi"
     subtitle="{{ $pesantren?->nama_pesantren ?? $akreditasi->user?->name ?? 'Pesantren tidak tersedia' }}"
-    class="spm-detail-page"
+    class="spm-detail-page spm-admin-akreditasi-detail-page"
     x-data="{ activeTab: '{{ $activeTab }}' }"
 >
     <x-akreditasi.presence-indicator :akreditasi-id="$akreditasi->id" />
@@ -129,7 +129,7 @@
         </div>
     </div>
 
-    <div class="row g-5 mb-5">
+    <div class="row g-5 mb-5 spm-admin-akreditasi-detail-stats">
         <div class="col-lg-4">
             <x-ui.stat-card label="Status" value="{{ $status['label'] }}" :variant="$status['variant']" icon="shield-tick" />
         </div>

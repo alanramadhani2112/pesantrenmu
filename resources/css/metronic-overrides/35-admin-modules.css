@@ -110,6 +110,38 @@
     background-color: #fbfcfe;
 }
 
+.spm-admin-akreditasi-detail-page .spm-detail-hero .card-body {
+    padding: 22px !important;
+}
+
+.spm-admin-akreditasi-detail-page .spm-workflow-stepper .stepper-item {
+    padding: 12px !important;
+}
+
+@media (max-width: 767.98px) {
+    .spm-admin-akreditasi-detail-page .spm-detail-hero .card-body,
+    .spm-admin-akreditasi-detail-page .spm-card-body,
+    .spm-admin-akreditasi-detail-page .card-body {
+        padding: 16px !important;
+    }
+
+    .spm-admin-akreditasi-detail-page .spm-detail-tabs-shell {
+        padding: 16px 16px 0 !important;
+    }
+
+    .spm-admin-akreditasi-detail-page .spm-detail-tab-content {
+        padding: 16px !important;
+    }
+
+    .spm-admin-akreditasi-detail-page .spm-workflow-stepper .stepper-item {
+        padding: 10px !important;
+    }
+
+    .spm-admin-akreditasi-detail-page .spm-workflow-stepper .stepper-desc {
+        display: none !important;
+    }
+}
+
 .spm-edpm-statement {
     color: #243b53;
     font-weight: 500;
