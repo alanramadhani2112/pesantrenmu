@@ -51,7 +51,8 @@ class PesantrenRepository implements PesantrenRepositoryInterface
                 'akreditasis as akreditasi_aktif_count' => fn ($q) => $q->whereIn('status', Akreditasi::activeStatuses()),
             ])
             ->orderBy($sortField, $sortAsc ? 'asc' : 'desc')
-            ->paginate($perPage);
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
     public function findUserByUuid(string $uuid, array $relations = []): ?User

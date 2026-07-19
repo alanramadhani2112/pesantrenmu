@@ -54,7 +54,8 @@ class AsesorRepository implements AsesorRepositoryInterface
             },
         ])
             ->orderBy($sortField, $sortAsc ? 'asc' : 'desc')
-            ->paginate($perPage);
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
     public function findByUuid(string $uuid): ?User

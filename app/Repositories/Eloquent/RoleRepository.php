@@ -17,7 +17,8 @@ class RoleRepository implements RoleRepositoryInterface
                     ->orWhere('parameter', 'like', '%'.$search.'%');
             })
             ->orderBy($sortField, $sortAsc ? 'asc' : 'desc')
-            ->paginate($perPage);
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
     public function getAll(): Collection

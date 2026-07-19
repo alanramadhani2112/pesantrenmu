@@ -53,7 +53,8 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
         }
 
         return $query->orderBy($sortField, $sortAsc ? 'asc' : 'desc')
-            ->paginate($perPage);
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
     public function getCountByStatus(int|array $status): int
@@ -135,7 +136,8 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
         }
 
         return $query->orderBy($sortField, $sortAsc ? 'asc' : 'desc')
-            ->paginate($perPage);
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
     public function getAssessmentSummaryByAsesor(int $asesorId, ?string $search = null, ?string $periodeFilter = null, ?string $statusFilter = null): array
@@ -240,7 +242,8 @@ class AkreditasiRepository implements AkreditasiRepositoryInterface
                     ->orWhere('peringkat', 'like', '%'.$search.'%');
             })
             ->orderBy($sortField, $sortAsc ? 'asc' : 'desc')
-            ->paginate($perPage);
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
     private function perPage(int $perPage): int

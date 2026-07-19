@@ -17,7 +17,8 @@ class DocumentRepository implements DocumentRepositoryInterface
                 $query->where('title', 'like', '%'.$search.'%');
             })
             ->orderBy($sortField, $sortAsc ? 'asc' : 'desc')
-            ->paginate($perPage);
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
     public function find(int $id): ?Document
@@ -69,6 +70,6 @@ class DocumentRepository implements DocumentRepositoryInterface
             $query->where('title', 'like', '%'.$search.'%');
         }
 
-        return $query->orderBy('created_at', 'desc')->paginate($perPage);
+        return $query->orderBy('created_at', 'desc')->paginate($perPage)->withQueryString();
     }
 }

@@ -22,7 +22,8 @@ class UserRepository implements UserRepositoryInterface
                 });
             })
             ->orderBy($sortField, $sortAsc ? 'asc' : 'desc')
-            ->paginate($perPage);
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
     public function getCountByRole(int $roleId): int
