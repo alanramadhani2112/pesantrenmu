@@ -90,6 +90,7 @@
                                         <input data-ui-input="metronic" type="text" id="name" name="name"
                                             value="{{ old('name', $user->name) }}"
                                             class="form-control form-control-solid @error('name') is-invalid @enderror"
+                                            placeholder="Contoh: Ahmad Fauzi"
                                             required autofocus autocomplete="name" />
                                         @error('name') <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
                                     </x-ui.form-field>
@@ -99,6 +100,7 @@
                                             <input data-ui-input="metronic" type="email" id="email" name="email"
                                                 value="{{ old('email', $user->email) }}"
                                                 class="form-control form-control-solid @error('email') is-invalid @enderror"
+                                                placeholder="nama@domain.com"
                                                 required autocomplete="username" />
                                             @error('email') <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
                                         </x-ui.form-field>

@@ -50,18 +50,18 @@
                                 </div>
                                 <div class="col-md-6">
                                     <x-ui.form-field label="Nama Lengkap (Tanpa Gelar)" required>
-                                        <x-ui.input name="nama_tanpa_gelar" :value="old('nama_tanpa_gelar', $asesor->nama_tanpa_gelar)" />
+                                        <x-ui.input name="nama_tanpa_gelar" :value="old('nama_tanpa_gelar', $asesor->nama_tanpa_gelar)" placeholder="Contoh: Ahmad Fauzi" />
                                         @error('nama_tanpa_gelar') <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
                                     </x-ui.form-field>
                                 </div>
                                 <div class="col-md-6">
                                     <x-ui.form-field label="NBM / NIA">
-                                        <x-ui.input name="nbm_nia" :value="old('nbm_nia', $asesor->nbm_nia)" />
+                                        <x-ui.input name="nbm_nia" :value="old('nbm_nia', $asesor->nbm_nia)" placeholder="Contoh: 123456" />
                                     </x-ui.form-field>
                                 </div>
                                 <div class="col-md-6">
                                     <x-ui.form-field label="No. Induk Asesor PM">
-                                        <x-ui.input name="nomor_induk_asesor_pm" :value="old('nomor_induk_asesor_pm', $asesor->nomor_induk_asesor_pm)" />
+                                        <x-ui.input name="nomor_induk_asesor_pm" :value="old('nomor_induk_asesor_pm', $asesor->nomor_induk_asesor_pm)" placeholder="Contoh: APM-001" />
                                     </x-ui.form-field>
                                 </div>
                                 <div class="col-md-6">
@@ -71,12 +71,12 @@
                                 </div>
                                 <div class="col-md-6">
                                     <x-ui.form-field label="NIK">
-                                        <x-ui.input name="nik" :value="old('nik', $asesor->nik)" />
+                                        <x-ui.input name="nik" :value="old('nik', $asesor->nik)" placeholder="16 digit NIK" />
                                     </x-ui.form-field>
                                 </div>
                                 <div class="col-md-6">
                                     <x-ui.form-field label="Tempat Lahir">
-                                        <x-ui.input name="tempat_lahir" :value="old('tempat_lahir', $asesor->tempat_lahir)" />
+                                        <x-ui.input name="tempat_lahir" :value="old('tempat_lahir', $asesor->tempat_lahir)" placeholder="Contoh: Yogyakarta" />
                                     </x-ui.form-field>
                                 </div>
                                 <div class="col-md-6">
@@ -95,23 +95,23 @@
                                 </div>
                                 <div class="col-md-6">
                                     <x-ui.form-field label="Email Pribadi">
-                                        <x-ui.input type="email" name="email_pribadi" :value="old('email_pribadi', $asesor->email_pribadi)" />
+                                        <x-ui.input type="email" name="email_pribadi" :value="old('email_pribadi', $asesor->email_pribadi)" placeholder="nama@domain.com" />
                                         @error('email_pribadi') <div class="text-danger fs-8 mt-1">{{ $message }}</div> @enderror
                                     </x-ui.form-field>
                                 </div>
                                 <div class="col-12">
                                     <x-ui.form-field label="Alamat Rumah">
-                                        <x-ui.textarea name="alamat_rumah" rows="2">{{ old('alamat_rumah', $asesor->alamat_rumah) }}</x-ui.textarea>
+                                        <x-ui.textarea name="alamat_rumah" rows="2" placeholder="Tulis alamat domisili lengkap">{{ old('alamat_rumah', $asesor->alamat_rumah) }}</x-ui.textarea>
                                     </x-ui.form-field>
                                 </div>
                                 <div class="col-md-6">
                                     <x-ui.form-field label="Provinsi">
-                                        <x-ui.input name="provinsi" :value="old('provinsi', $asesor->provinsi)" />
+                                        <x-ui.input name="provinsi" :value="old('provinsi', $asesor->provinsi)" placeholder="Contoh: DI Yogyakarta" />
                                     </x-ui.form-field>
                                 </div>
                                 <div class="col-md-6">
                                     <x-ui.form-field label="Kota / Kabupaten">
-                                        <x-ui.input name="kota_kabupaten" :value="old('kota_kabupaten', $asesor->kota_kabupaten)" />
+                                        <x-ui.input name="kota_kabupaten" :value="old('kota_kabupaten', $asesor->kota_kabupaten)" placeholder="Contoh: Kabupaten Sleman" />
                                     </x-ui.form-field>
                                 </div>
                                 <div class="col-md-6">
@@ -126,7 +126,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <x-ui.form-field label="Profesi">
-                                        <x-ui.input name="profesi" :value="old('profesi', $asesor->profesi)" />
+                                        <x-ui.input name="profesi" :value="old('profesi', $asesor->profesi)" placeholder="Contoh: Dosen" />
                                     </x-ui.form-field>
                                 </div>
                                 <div class="col-md-6">
@@ -141,27 +141,27 @@
                                 </div>
                                 <div class="col-md-6">
                                     <x-ui.form-field label="Tahun Terbit Sertifikat">
-                                        <x-ui.input name="tahun_terbit_sertifikat" :value="old('tahun_terbit_sertifikat', $asesor->tahun_terbit_sertifikat)" />
+                                        <x-ui.input name="tahun_terbit_sertifikat" :value="old('tahun_terbit_sertifikat', $asesor->tahun_terbit_sertifikat)" placeholder="Contoh: 2024" />
                                     </x-ui.form-field>
                                 </div>
                                 <div class="col-md-6">
                                     <x-ui.form-field label="Jabatan Utama">
-                                        <x-ui.input name="jabatan_utama" :value="old('jabatan_utama', $asesor->jabatan_utama)" />
+                                        <x-ui.input name="jabatan_utama" :value="old('jabatan_utama', $asesor->jabatan_utama)" placeholder="Contoh: Ketua Program Studi" />
                                     </x-ui.form-field>
                                 </div>
                                 <div class="col-md-6">
                                     <x-ui.form-field label="Unit Tempat Kerja">
-                                        <x-ui.input name="unit_kerja" :value="old('unit_kerja', $asesor->unit_kerja)" />
+                                        <x-ui.input name="unit_kerja" :value="old('unit_kerja', $asesor->unit_kerja)" placeholder="Contoh: Universitas Muhammadiyah" />
                                     </x-ui.form-field>
                                 </div>
                                 <div class="col-md-6">
                                     <x-ui.form-field label="No. Telp Kantor">
-                                        <x-ui.input name="telp_kantor" :value="old('telp_kantor', $asesor->telp_kantor)" />
+                                        <x-ui.input name="telp_kantor" :value="old('telp_kantor', $asesor->telp_kantor)" placeholder="Contoh: 0274xxxxxx" />
                                     </x-ui.form-field>
                                 </div>
                                 <div class="col-12">
                                     <x-ui.form-field label="Alamat Kantor">
-                                        <x-ui.textarea name="alamat_kantor" rows="2">{{ old('alamat_kantor', $asesor->alamat_kantor) }}</x-ui.textarea>
+                                        <x-ui.textarea name="alamat_kantor" rows="2" placeholder="Tulis alamat kantor lengkap">{{ old('alamat_kantor', $asesor->alamat_kantor) }}</x-ui.textarea>
                                     </x-ui.form-field>
                                 </div>
                             </div>
