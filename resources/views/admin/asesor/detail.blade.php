@@ -3,6 +3,7 @@
 @section('content')
 @php
     $profileName = $asesor?->nama_dengan_gelar ?? $user->name;
+    $profilePhotoPath = $user->profile_photo_path ?: $asesor?->foto;
 
     $profileSummary = [
         ['label' => 'NIA PM', 'value' => $asesor?->nomor_induk_asesor_pm ?? '-'],
@@ -63,8 +64,8 @@
                     <x-ui.card class="spm-asesor-summary-card">
                         <div class="d-flex align-items-start gap-4">
                             <div class="spm-asesor-avatar-wrap">
-                                @if($asesor->foto)
-                                    <img src="{{ Storage::url($asesor->foto) }}" class="spm-asesor-avatar-image" alt="{{ $profileName }}" loading="lazy">
+                                @if($profilePhotoPath)
+                                    <img src="{{ Storage::url($profilePhotoPath) }}" class="spm-asesor-avatar-image" alt="{{ $profileName }}" loading="lazy">
                                 @else
                                     <div class="spm-profile-avatar spm-asesor-avatar-fallback d-flex align-items-center justify-content-center">
                                         {{ substr($profileName, 0, 1) }}

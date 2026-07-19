@@ -29,7 +29,6 @@ class ProfileController extends Controller
             'nama_dengan_gelar' => 'required|string|max:255',
             'nama_tanpa_gelar' => 'required|string|max:255',
             'email_pribadi' => 'nullable|email',
-            'foto_upload' => 'nullable|image|max:1024',
             'ktp_file_upload' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
             'ijazah_file_upload' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
             'kartu_nbm_file_upload' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
@@ -67,16 +66,6 @@ class ProfileController extends Controller
         $data['pengalaman_berorganisasi'] = json_decode($request->input('pengalaman_berorganisasi', '[]'), true) ?: [];
         $data['karya_publikasi'] = json_decode($request->input('karya_publikasi', '[]'), true) ?: [];
 
-        // Handle foto (public disk)
-        $oldFotoPath = null;
-        if ($request->hasFile('foto_upload')) {
-            $newFotoPath = $request->file('foto_upload')->store('asesor_docs', 'public');
-            if ($newFotoPath) {
-                $oldFotoPath = $asesor->foto;
-                $data['foto'] = $newFotoPath;
-            }
-        }
-
         // Handle private documents (local disk)
         $privateFields = [
             'ktp_file' => 'ktp_file_upload',
@@ -102,9 +91,6 @@ class ProfileController extends Controller
 
         if ($success) {
             // Delete old files only after successful DB update
-            if (isset($newFotoPath) && $oldFotoPath) {
-                Storage::disk('public')->delete($oldFotoPath);
-            }
             foreach ($newPrivatePaths as ['old' => $oldPath]) {
                 if ($oldPath) {
                     Storage::disk('local')->delete($oldPath);

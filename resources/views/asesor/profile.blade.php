@@ -17,74 +17,6 @@
     </x-slot:toolbar>
 
 @if(request('edit'))
-{{-- Profile Photo Upload (inline Blade form) --}}
-<x-ui.section-card title="Foto Profil" subtitle="Unggah foto profil akun Anda. Maksimal 2MB, format JPG/PNG." class="mb-5">
-    <div class="p-5">
-        <form method="POST" action="{{ route('profile.photo') }}" enctype="multipart/form-data"
-            x-data="{
-                preview: '{{ auth()->user()->profile_photo_path ? asset('storage/' . auth()->user()->profile_photo_path) : '' }}',
-                changed: false,
-                get isEmpty() { return !this.preview; },
-            }">
-            @csrf
-            @method('PUT')
-
-            <div data-kt-image-input="true" class="image-input image-input-circle image-input-outline bg-light"
-                :class="{ 'image-input-empty': isEmpty, 'image-input-changed': changed }">
-
-                <div class="image-input-wrapper w-125px h-125px"
-                    :style="preview ? 'background-image:url(' + preview + ')' : ''">
-                </div>
-
-                <label class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body border border-dashed border-gray-300"
-                    data-kt-image-input-action="change"
-                    title="Ganti foto">
-                    <x-ui.icon name="pencil" class="fs-6" />
-                    <input type="file" name="photo" accept=".png,.jpg,.jpeg"
-                        @change="
-                            const file = $event.target.files[0];
-                            if (file) {
-                                preview = URL.createObjectURL(file);
-                                changed = true;
-                            }
-                        " />
-                </label>
-
-                <span class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body border border-dashed border-gray-300"
-                    data-kt-image-input-action="cancel"
-                    title="Batal"
-                    @click="changed = false; preview = '{{ auth()->user()->profile_photo_path ? asset('storage/' . auth()->user()->profile_photo_path) : '' }}'; $el.closest('form').querySelector('input[type=file]').value = '';">
-                    <x-ui.icon name="cross" class="fs-3" />
-                </span>
-            </div>
-
-            @error('photo')
-                <div class="text-danger fs-8 mt-3">{{ $message }}</div>
-            @enderror
-
-            <div class="mt-4 d-flex gap-3" x-show="changed" x-cloak>
-                <x-ui.button type="submit" size="sm">Simpan Foto</x-ui.button>
-            </div>
-        </form>
-
-        @if(auth()->user()->profile_photo_path)
-        <form method="POST" action="{{ route('profile.photo.remove') }}" class="mt-3">
-            @csrf
-            @method('DELETE')
-            <x-ui.button type="submit" variant="light-danger" size="sm">Hapus Foto</x-ui.button>
-        </form>
-        @endif
-
-        @if(session('status') === 'photo-updated')
-            <div class="text-success fs-8 fw-semibold mt-3">Foto berhasil diperbarui.</div>
-        @elseif(session('status') === 'photo-removed')
-            <div class="text-success fs-8 fw-semibold mt-3">Foto berhasil dihapus.</div>
-        @endif
-    </div>
-</x-ui.section-card>
-@endif
-
-@if(request('edit'))
 {{-- ===== EDIT MODE ===== --}}
 <div x-data="asesorProfileEdit()" x-init="init()">
     <form method="POST" action="{{ route('asesor.profile.update') }}" enctype="multipart/form-data"
@@ -574,7 +506,7 @@ function asesorProfileEdit() {
         <div class="d-flex flex-column gap-5">
             <x-ui.card class="spm-asesor-profile-card">
                 <div class="d-flex flex-column align-items-center text-center">
-                    <div class="mb-5">
+                    <div class="mb-5" data-kt-image-input="true">
                         @if(auth()->user()->profile_photo_path && Storage::disk('public')->exists(auth()->user()->profile_photo_path))
                             <img src="{{ Storage::url(auth()->user()->profile_photo_path) }}"
                                  alt="Foto asesor"
