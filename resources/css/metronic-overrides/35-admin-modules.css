@@ -137,8 +137,142 @@
         padding: 10px !important;
     }
 
-    .spm-admin-akreditasi-detail-page .spm-workflow-stepper .stepper-desc {
+.spm-admin-akreditasi-detail-page .spm-workflow-stepper .stepper-desc {
         display: none !important;
+    }
+}
+
+.spm-failed-notifications-table {
+    table-layout: fixed;
+    min-width: 820px;
+}
+
+.spm-failed-notifications-col-time,
+.spm-failed-notifications-cell-time {
+    width: 132px;
+}
+
+.spm-failed-notifications-col-recipient,
+.spm-failed-notifications-cell-recipient {
+    width: 190px;
+}
+
+.spm-failed-notifications-col-type,
+.spm-failed-notifications-cell-type {
+    width: 185px;
+}
+
+.spm-failed-notifications-col-status,
+.spm-failed-notifications-cell-status {
+    width: 105px;
+}
+
+.spm-failed-notifications-col-action,
+.spm-failed-notifications-cell-action {
+    width: 112px;
+}
+
+.spm-failed-notifications-type-badge {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.35;
+    text-align: left;
+}
+
+.spm-failed-notifications-reason {
+    display: block;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.spm-table-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) repeat(auto-fit, minmax(160px, max-content));
+    align-items: center;
+    gap: 12px;
+    width: min(920px, 100%);
+}
+
+.spm-table-filter-grid--compact {
+    grid-template-columns: minmax(160px, 210px) minmax(260px, 1fr);
+    width: min(760px, 100%);
+}
+
+.spm-table-filter-grid--wide {
+    width: min(1040px, 100%);
+}
+
+.spm-table-filter-grid [data-ui-select="metronic"],
+.spm-table-filter-grid [data-ui-input="metronic"],
+.spm-table-filter-grid .form-control,
+.spm-table-filter-grid .form-select {
+    min-height: 44px;
+}
+
+.spm-failed-notifications-filters {
+    width: min(760px, 100%);
+}
+
+.spm-failed-notifications-status-filter {
+    min-height: 44px;
+}
+
+@media (max-width: 991.98px) {
+    .spm-failed-notifications-page .spm-table-header {
+        grid-template-columns: 1fr !important;
+    }
+
+    .spm-failed-notifications-page .spm-table-controls,
+    .spm-failed-notifications-page .spm-table-dom-row,
+    .spm-failed-notifications-page .spm-table-filter-row {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .spm-table-filter-grid,
+    .spm-table-filter-grid--compact,
+    .spm-table-filter-grid--wide,
+    .spm-failed-notifications-filters {
+        grid-template-columns: 1fr;
+        width: 100%;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .spm-failed-notifications-table {
+        min-width: 720px;
+    }
+
+    .spm-failed-notifications-table thead th,
+    .spm-failed-notifications-table tbody td {
+        padding-right: 12px !important;
+        padding-left: 12px !important;
+    }
+
+    .spm-failed-notifications-col-time,
+    .spm-failed-notifications-cell-time {
+        width: 118px;
+    }
+
+    .spm-failed-notifications-col-recipient,
+    .spm-failed-notifications-cell-recipient {
+        width: 168px;
+    }
+
+    .spm-failed-notifications-col-type,
+    .spm-failed-notifications-cell-type {
+        width: 150px;
+    }
+
+    .spm-failed-notifications-col-status,
+    .spm-failed-notifications-cell-status {
+        width: 92px;
+    }
+
+    .spm-failed-notifications-col-action,
+    .spm-failed-notifications-cell-action {
+        width: 94px;
     }
 }
 

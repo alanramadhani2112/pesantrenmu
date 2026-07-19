@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div x-data="failedNotificationPage()">
+<div x-data="failedNotificationPage()" class="spm-failed-notifications-page">
     <x-ui.index-layout
         title="Notifikasi Gagal"
         subtitle="Pantau dan kelola notifikasi yang gagal terkirim setelah semua percobaan ulang habis."
@@ -18,38 +18,30 @@
             subtitle="Gunakan tombol Kirim Ulang untuk mencoba kembali, atau Abaikan untuk menutup laporan."
             :records="$failedNotifications"
             :per-page-options="[15, 25, 50]"
+            table-class="spm-failed-notifications-table"
         >
             <x-slot name="filters">
                 <form method="GET" action="{{ route('admin.failed-notifications') }}" id="fn-filter-form">
-                    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-                        <x-ui.button :href="route('admin.failed-notifications', array_merge(request()->except('status', 'page'), ['status' => 'pending']))" variant="{{ $statusFilter === 'pending' ? 'secondary' : 'light' }}" size="sm">
-                            Pending
-                        </x-ui.button>
-                        <x-ui.button :href="route('admin.failed-notifications', array_merge(request()->except('status', 'page'), ['status' => 'resolved']))" variant="{{ $statusFilter === 'resolved' ? 'secondary' : 'light' }}" size="sm">
-                            Resolved
-                        </x-ui.button>
-                        <x-ui.button :href="route('admin.failed-notifications', array_merge(request()->except('status', 'page'), ['status' => 'dismissed']))" variant="{{ $statusFilter === 'dismissed' ? 'secondary' : 'light' }}" size="sm">
-                            Dismissed
-                        </x-ui.button>
-                        <x-ui.button :href="route('admin.failed-notifications', array_merge(request()->except('status', 'page'), ['status' => '']))" variant="{{ $statusFilter === '' ? 'secondary' : 'light' }}" size="sm">
-                            Semua
-                        </x-ui.button>
-                    </div>
+                    <div class="spm-table-filter-grid spm-table-filter-grid--compact spm-failed-notifications-filters">
+                        <x-ui.select name="status" size="sm" class="spm-failed-notifications-status-filter" onchange="this.form.submit()">
+                            <option value="" @selected($statusFilter === '')>Semua status</option>
+                            <option value="pending" @selected($statusFilter === 'pending')>Pending</option>
+                            <option value="resolved" @selected($statusFilter === 'resolved')>Resolved</option>
+                            <option value="dismissed" @selected($statusFilter === 'dismissed')>Dismissed</option>
+                        </x-ui.select>
 
-                    <div class="d-flex gap-3 align-items-center">
                         <x-datatable.search name="search" placeholder="Cari tipe, alasan, atau penerima..." :value="$search" form="fn-filter-form" />
-                        <input type="hidden" name="status" value="{{ $statusFilter }}" />
                     </div>
                 </form>
             </x-slot>
 
             <x-slot name="thead">
-                <x-ui.table-th>Waktu Gagal</x-ui.table-th>
-                <x-ui.table-th>Penerima</x-ui.table-th>
-                <x-ui.table-th>Tipe Notifikasi</x-ui.table-th>
-                <x-ui.table-th>Alasan Gagal</x-ui.table-th>
-                <x-ui.table-th align="center">Status</x-ui.table-th>
-                <x-ui.table-th align="end">Aksi</x-ui.table-th>
+                <x-ui.table-th class="spm-failed-notifications-col-time">Waktu Gagal</x-ui.table-th>
+                <x-ui.table-th class="spm-failed-notifications-col-recipient">Penerima</x-ui.table-th>
+                <x-ui.table-th class="spm-failed-notifications-col-type">Tipe Notifikasi</x-ui.table-th>
+                <x-ui.table-th class="spm-failed-notifications-col-reason">Alasan Gagal</x-ui.table-th>
+                <x-ui.table-th class="spm-failed-notifications-col-status" align="center">Status</x-ui.table-th>
+                <x-ui.table-th class="spm-failed-notifications-col-action" align="end">Aksi</x-ui.table-th>
             </x-slot>
 
             <x-slot name="tbody">
@@ -70,7 +62,7 @@
                     @endphp
 
                     <tr>
-                        <td>
+                        <td class="spm-failed-notifications-cell-time">
                             <div class="d-flex flex-column">
                                 <span class="text-gray-900 fw-semibold fs-7">
                                     {{ $item->failed_at?->format('d/m/Y H:i') ?? '-' }}
@@ -83,34 +75,34 @@
                             </div>
                         </td>
 
-                        <td>
-                            <div class="d-flex flex-column">
+                        <td class="spm-failed-notifications-cell-recipient">
+                            <div class="d-flex flex-column min-w-0">
                                 <span class="text-gray-900 fw-semibold fs-6">
                                     {{ $item->notifiable?->name ?? '(Pengguna dihapus)' }}
                                 </span>
-                                <span class="text-muted fw-semibold fs-7">
+                                <span class="text-muted fw-semibold fs-7 text-break">
                                     {{ $item->notifiable?->email ?? 'ID: ' . $item->notifiable_id }}
                                 </span>
                             </div>
                         </td>
 
-                        <td>
-                            <x-ui.badge variant="primary">
+                        <td class="spm-failed-notifications-cell-type">
+                            <x-ui.badge variant="primary" class="spm-failed-notifications-type-badge">
                                 {{ $item->notification_type }}
                             </x-ui.badge>
                         </td>
 
-                        <td>
-                            <span class="text-gray-700 fs-7" title="{{ $item->failure_reason }}">
+                        <td class="spm-failed-notifications-cell-reason">
+                            <span class="text-gray-700 fs-7 spm-failed-notifications-reason" title="{{ $item->failure_reason }}">
                                 {{ \Illuminate\Support\Str::limit($item->failure_reason, 80) }}
                             </span>
                         </td>
 
-                        <td class="text-center">
+                        <td class="text-center spm-failed-notifications-cell-status">
                             <x-ui.badge :variant="$statusVariant">{{ $statusLabel }}</x-ui.badge>
                         </td>
 
-                        <td class="text-end">
+                        <td class="text-end spm-failed-notifications-cell-action">
                             @if($item->status === 'pending')
                                 <x-ui.action-menu>
                                     <x-ui.action-menu-item
