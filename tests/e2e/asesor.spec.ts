@@ -33,6 +33,12 @@ test('asesor can open assigned akreditasi list', async ({ asesorPage }) => {
   await expect(asesorPage.getByText('BF Pesantren', { exact: false }).first()).toBeVisible();
 });
 
+test('asesor cannot open unassigned akreditasi detail', async ({ asesorPage }) => {
+  const response = await asesorPage.goto(`/asesor/akreditasi/${scenarioUuid('BF-NEG-002')}`);
+
+  expect(response?.status()).toBe(404);
+});
+
 test('ketua asesor can schedule visitasi from detail', async ({ asesorPage }) => {
   await asesorPage.goto('/asesor/akreditasi');
 

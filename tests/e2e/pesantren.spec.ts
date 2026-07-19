@@ -36,6 +36,12 @@ test('pesantren can open akreditasi detail', async ({ pesantrenPage }) => {
   await expect(pesantrenPage.getByRole('heading', { name: 'Kartu Kendali' })).toBeVisible();
 });
 
+test('pesantren cannot open other tenant akreditasi detail', async ({ pesantrenPage }) => {
+  const response = await pesantrenPage.goto(`/pesantren/akreditasi/${scenarioUuid('BF-NEG-002')}`);
+
+  expect(response?.status()).toBe(404);
+});
+
 test('pesantren can upload kartu kendali', async ({ pesantrenPage }) => {
   await pesantrenPage.goto(`/pesantren/akreditasi/${scenarioUuid('BF-HAPPY-005')}`);
 
@@ -48,4 +54,18 @@ test('pesantren can upload kartu kendali', async ({ pesantrenPage }) => {
   await pesantrenPage.getByRole('button', { name: /ya, upload/i }).click();
 
   await expect(pesantrenPage.getByText('Dokumen Terunggah')).toBeVisible();
+});
+
+test('pesantren cannot upload invalid kartu kendali file', async ({ pesantrenPage }) => {
+  await pesantrenPage.goto(`/pesantren/akreditasi/${scenarioUuid('BF-HAPPY-005')}`);
+
+  await pesantrenPage.locator('input[name="kartu_kendali_file"]').setInputFiles({
+    name: 'kartu-kendali-e2e.txt',
+    mimeType: 'text/plain',
+    buffer: Buffer.from('invalid kartu kendali'),
+  });
+  await pesantrenPage.getByRole('button', { name: /upload/i }).click();
+  await pesantrenPage.getByRole('button', { name: /ya, upload/i }).click();
+
+  await expect(pesantrenPage.getByText('File harus berformat PDF, JPG, JPEG, atau PNG.')).toBeVisible();
 });

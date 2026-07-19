@@ -27,12 +27,25 @@ test.beforeEach(() => {
   seed();
 });
 
+test('guest cannot open admin akreditasi', async ({ page }) => {
+  const response = await page.goto('/admin/akreditasi');
+
+  expect(response?.status()).toBeLessThan(400);
+  await expect(page).toHaveURL(/\/login$/);
+});
+
 test('admin can open akreditasi list', async ({ adminPage }) => {
   await adminPage.goto('/admin/akreditasi');
 
   await expect(adminPage.getByRole('heading', { name: 'Akreditasi' }).first()).toBeVisible();
   await expect(adminPage.getByText('Prioritas Operasional')).toBeVisible();
   await expect(adminPage.getByText('BF Pesantren', { exact: false }).first()).toBeVisible();
+});
+
+test('admin cannot open asesor area', async ({ adminPage }) => {
+  const response = await adminPage.goto('/asesor/akreditasi');
+
+  expect(response?.status()).toBe(403);
 });
 
 test('admin can move pengajuan to berkas review', async ({ adminPage }) => {
