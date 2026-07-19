@@ -74,12 +74,12 @@
 
     $quickActions = match (true) {
         $isSuperAdmin => [
-            ['label' => 'Hak Akses', 'icon' => 'security-user', 'route' => route('admin.role-permission.index'), 'variant' => 'primary'],
-            ['label' => 'Role Sistem', 'icon' => 'key', 'route' => route('admin.roles.index'), 'variant' => 'info'],
-            ['label' => 'Akun Pengguna', 'icon' => 'profile-user', 'route' => route('accounts.index'), 'variant' => 'success'],
-            ['label' => 'Notif Gagal', 'icon' => 'notification-bing', 'route' => route('admin.failed-notifications'), 'variant' => 'warning'],
-            ['label' => 'Kelola Akreditasi', 'icon' => 'shield-tick', 'route' => route('admin.akreditasi'), 'variant' => 'primary'],
-            ['label' => 'Trash', 'icon' => 'trash', 'route' => route('admin.trash'), 'variant' => 'danger'],
+            ['label' => 'Hak Akses', 'description' => 'Atur izin fitur', 'icon' => 'security-user', 'route' => route('admin.role-permission.index'), 'variant' => 'primary'],
+            ['label' => 'Role Sistem', 'description' => 'Kelola peran user', 'icon' => 'key', 'route' => route('admin.roles.index'), 'variant' => 'info'],
+            ['label' => 'Akun Pengguna', 'description' => 'Pantau semua akun', 'icon' => 'profile-user', 'route' => route('accounts.index'), 'variant' => 'success'],
+            ['label' => 'Notif Gagal', 'description' => 'Cek antrean gagal', 'icon' => 'notification-bing', 'route' => route('admin.failed-notifications'), 'variant' => 'warning'],
+            ['label' => 'Kelola Akreditasi', 'description' => 'Buka operasi utama', 'icon' => 'shield-tick', 'route' => route('admin.akreditasi'), 'variant' => 'primary'],
+            ['label' => 'Trash', 'description' => 'Pulihkan data arsip', 'icon' => 'trash', 'route' => route('admin.trash'), 'variant' => 'danger'],
         ],
         $isAdmin => [
             ['label' => 'Kelola Akreditasi', 'icon' => 'shield-tick', 'route' => route('admin.akreditasi'), 'variant' => 'primary'],
@@ -88,10 +88,10 @@
             ['label' => 'Master EDPM', 'icon' => 'document', 'route' => route('admin.master-edpm'), 'variant' => 'warning'],
         ],
         $isPesantren => [
-            ['label' => 'Profil Pesantren', 'icon' => 'profile-user', 'route' => route('pesantren.profile'), 'variant' => 'primary'],
-            ['label' => 'IPM', 'icon' => 'data', 'route' => route('pesantren.ipm'), 'variant' => 'info'],
-            ['label' => 'Data SDM', 'icon' => 'people', 'route' => route('pesantren.sdm'), 'variant' => 'success'],
-            ['label' => 'EDPM', 'icon' => 'document', 'route' => route('pesantren.edpm'), 'variant' => 'warning'],
+            ['label' => 'Profil Pesantren', 'description' => 'Lengkapi identitas', 'icon' => 'profile-user', 'route' => route('pesantren.profile'), 'variant' => 'primary'],
+            ['label' => 'IPM', 'description' => 'Isi data kelembagaan', 'icon' => 'data', 'route' => route('pesantren.ipm'), 'variant' => 'info'],
+            ['label' => 'Data SDM', 'description' => 'Perbarui tenaga pendidik', 'icon' => 'people', 'route' => route('pesantren.sdm'), 'variant' => 'success'],
+            ['label' => 'EDPM', 'description' => 'Lengkapi evaluasi diri', 'icon' => 'document', 'route' => route('pesantren.edpm'), 'variant' => 'warning'],
         ],
         $isAsesor => [
             ['label' => 'Tugas Akreditasi', 'description' => 'Buka daftar tugas penilaian', 'icon' => 'shield-tick', 'route' => route('asesor.akreditasi'), 'variant' => 'primary'],
@@ -138,15 +138,21 @@
         : false;
     $pipelineMax = max(1, collect($pipelineStages)->max('value') ?? 0);
     $gradeTotal = array_sum($gradeCounts ?? []);
+    $quickActionColClass = match (true) {
+        $isSuperAdmin => 'col-12 col-md-6 col-xl-2',
+        $isPesantren => 'col-12 col-md-6 col-xl-3',
+        $isAsesor => 'col-12 col-md-6',
+        default => 'col-6 col-md-4 col-lg-3',
+    };
+    $quickActionAlign = ($isSuperAdmin || $isPesantren || $isAsesor) ? 'start' : 'center';
 @endphp
 
-<div data-dashboard-page="metronic" data-dashboard-role="{{ $isAsesor ? 'asesor' : ($isPesantren ? 'pesantren' : ($isAdminArea ? 'admin' : 'user')) }}" x-data='dashboardCharts(@json($chartData), @json($stats))'>
+<div data-dashboard-page="metronic" data-dashboard-role="{{ $isAsesor ? 'asesor' : ($isPesantren ? 'pesantren' : ($isSuperAdmin ? 'superadmin' : ($isAdminArea ? 'admin' : 'user'))) }}" x-data='dashboardCharts(@json($chartData), @json($stats))'>
     <x-ui.page title="Dashboard" :subtitle="$pageSubtitle">
         <x-slot name="toolbar">
             <x-ui.badge variant="secondary">{{ $roleLabel }}</x-ui.badge>
         </x-slot>
 
-        @unless($isPesantren && $latestPesantrenActivity && $stats['total_aktif'] > 0)
         {{-- Greeting Hero --}}
         <div class="spm-dashboard-hero rounded p-5 mb-5">
             <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-4 position-relative">
@@ -178,12 +184,27 @@
             </div>
         </div>
 
-        @endunless
+        @if($isSuperAdmin)
+            <div class="row g-4 mb-5 spm-dashboard-priority-stats">
+                @foreach($statCards as $card)
+                    <div class="col-6 col-lg-4 col-xl-2">
+                        <x-ui.stat-card
+                            class="spm-dashboard-stat"
+                            :label="$card['label']"
+                            :value="$card['value']"
+                            :variant="$card['variant']"
+                            :icon="$card['icon']"
+                        />
+                    </div>
+                @endforeach
+            </div>
+        @endif
+
         {{-- Quick Actions --}}
-        @if(count($quickActions) > 0)
-            <div class="row g-3 mb-5 spm-dashboard-quick-actions">
+        @if(count($quickActions) > 0 && ! ($isPesantren && $latestPesantrenActivity && $stats['total_aktif'] > 0))
+            <div class="row g-3 mb-5 spm-dashboard-quick-actions {{ $isSuperAdmin ? 'spm-dashboard-quick-actions--compact' : '' }}">
                 @foreach($quickActions as $action)
-                    <div class="{{ $isAsesor ? 'col-12 col-md-6' : 'col-6 col-md-4 col-lg-3' }}">
+                    <div class="{{ $quickActionColClass }}">
                         <x-ui.action-card
                             :href="$action['route']"
                             :icon="$action['icon']"
@@ -191,7 +212,7 @@
                             :description="$action['description'] ?? null"
                             :variant="$action['variant']"
                             icon-class="fs-3 fs-md-2"
-                            :align="$isAsesor ? 'start' : 'center'"
+                            :align="$quickActionAlign"
                             class="spm-quick-action spm-quick-action--dashboard"
                         />
                     </div>
@@ -199,10 +220,10 @@
             </div>
         @endif
 
-        @if($isPesantren || $isAsesor)
+        @if($isAsesor || ($isPesantren && ! ($latestPesantrenActivity && $stats['total_aktif'] > 0)))
             <div class="row g-5 mb-5">
                 @foreach($statCards as $card)
-                    <div class="col-6 col-lg-3">
+                    <div class="{{ $isPesantren ? 'col-6 col-md-4 col-xl' : 'col-6 col-lg-3' }}">
                         <x-ui.stat-card
                             class="spm-dashboard-stat"
                             :label="$card['label']"
@@ -457,6 +478,39 @@
                 </div>
                 @endunless
             </div>
+
+            @if($hasActivePengajuan)
+                <div class="row g-4 mb-5 spm-dashboard-priority-stats">
+                    @foreach($statCards as $card)
+                        <div class="col-6 col-md-4 col-xl">
+                            <x-ui.stat-card
+                                class="spm-dashboard-stat"
+                                :label="$card['label']"
+                                :value="$card['value']"
+                                :variant="$card['variant']"
+                                :icon="$card['icon']"
+                            />
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="row g-3 mb-5 spm-dashboard-quick-actions spm-dashboard-quick-actions--compact">
+                    @foreach($quickActions as $action)
+                        <div class="{{ $quickActionColClass }}">
+                            <x-ui.action-card
+                                :href="$action['route']"
+                                :icon="$action['icon']"
+                                :title="$action['label']"
+                                :description="$action['description'] ?? null"
+                                :variant="$action['variant']"
+                                icon-class="fs-3 fs-md-2"
+                                :align="$quickActionAlign"
+                                class="spm-quick-action spm-quick-action--dashboard"
+                            />
+                        </div>
+                    @endforeach
+                </div>
+            @endif
         @elseif($isAsesor)
             @php
                 $asesorWorkflow = [
@@ -516,7 +570,7 @@
                                     </div>
 
                                     <x-slot:actions>
-                                        <x-ui.badge variant="secondary">Buka</x-ui.badge>
+                                        <span class="btn btn-sm btn-light-{{ $step['variant'] }}">Buka</span>
                                     </x-slot:actions>
                                 </x-ui.action-card>
                             @endforeach
@@ -544,19 +598,21 @@
         @endif
 
         @unless($isPesantren || $isAsesor)
-        <div class="row g-5 mt-0">
-            @foreach($statCards as $card)
-                <div class="col-6 col-lg-4">
-                    <x-ui.stat-card
-                        class="spm-dashboard-stat"
-                        :label="$card['label']"
-                        :value="$card['value']"
-                        :variant="$card['variant']"
-                        :icon="$card['icon']"
-                    />
-                </div>
-            @endforeach
-        </div>
+        @unless($isSuperAdmin)
+            <div class="row g-5 mt-0">
+                @foreach($statCards as $card)
+                    <div class="col-6 col-lg-4">
+                        <x-ui.stat-card
+                            class="spm-dashboard-stat"
+                            :label="$card['label']"
+                            :value="$card['value']"
+                            :variant="$card['variant']"
+                            :icon="$card['icon']"
+                        />
+                    </div>
+                @endforeach
+            </div>
+        @endunless
 
         <div class="row g-5 mt-0">
             <div class="col-12 col-lg-7 col-xl-8">
