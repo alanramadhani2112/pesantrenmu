@@ -26,7 +26,12 @@ class AsesorController extends Controller
         $sortAsc = filter_var($request->input('sortAsc', 'true'), FILTER_VALIDATE_BOOLEAN);
 
         $asesors = $this->asesorService->getPaginatedAsesors(
-            compact('search', 'filterStatus', 'filterPeran', 'filterPenugasan'),
+            [
+                'search' => $search,
+                'status' => $filterStatus,
+                'peran' => $filterPeran,
+                'penugasan' => $filterPenugasan,
+            ],
             $perPage,
             $sortField,
             $sortAsc

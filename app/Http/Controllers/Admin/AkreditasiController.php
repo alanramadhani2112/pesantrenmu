@@ -22,7 +22,7 @@ class AkreditasiController extends Controller
     {
         abort_unless(auth()->user()->canAccessAdminArea(), 403);
 
-        $statusFilter = $request->filled('statusFilter') ? (string) $request->input('statusFilter') : 'pengajuan';
+        $statusFilter = $request->query->has('statusFilter') ? (string) $request->query('statusFilter') : 'pengajuan';
         $search = $request->input('search', '');
         $perPage = min(max($request->integer('perPage', 10), 5), 50);
         $sortField = $this->sortField((string) $request->input('sortField', 'created_at'));
@@ -44,7 +44,8 @@ class AkreditasiController extends Controller
             }
 
             $akreditasis = $query->orderBy($sortField, $sortAsc ? 'asc' : 'desc')
-                ->paginate($perPage);
+                ->paginate($perPage)
+                ->withQueryString();
         } else {
             $akreditasis = $this->akreditasiService->getPaginatedAkreditasis(
                 $statusFilter, $search, $perPage, $sortField, $sortAsc
