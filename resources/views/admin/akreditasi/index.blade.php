@@ -8,6 +8,24 @@
         + ($statusCounts['visitasi'] ?? 0)
         + ($statusCounts['pasca_visitasi'] ?? 0)
         + ($statusCounts['validasi'] ?? 0);
+    $allCount = $activeCount
+        + ($statusCounts['selesai'] ?? 0)
+        + ($statusCounts['ditolak'] ?? 0)
+        + ($statusCounts['banding'] ?? 0);
+    $reviewCount = $statusCounts['assessment'] ?? 0;
+    $visitasiCount = ($statusCounts['visitasi'] ?? 0) + ($statusCounts['pasca_visitasi'] ?? 0);
+    $activeFilterLabel = match ($statusFilter) {
+        'pengajuan' => 'Pengajuan',
+        'verifikasi' => 'Verifikasi Berkas',
+        'assessment' => 'Review Asesor',
+        'visitasi' => 'Visitasi & Penilaian Pasca Visitasi',
+        'validasi' => 'Validasi Admin',
+        'selesai' => 'Selesai',
+        'ditolak' => 'Ditolak',
+        'banding' => 'Banding',
+        'overdue' => 'Terlambat',
+        default => 'Semua Akreditasi',
+    };
 @endphp
 
 <div data-admin-akreditasi-page="metronic" x-data="adminAkreditasiPage()">
@@ -32,41 +50,80 @@
         <div class="row g-5 mb-5">
             <div class="col-12 col-xl-8">
                 <x-ui.card
-                    title="Prioritas Operasional"
-                    subtitle="Gunakan ringkasan ini untuk menentukan antrean pengajuan yang perlu diproses terlebih dahulu."
+                    title="Ringkasan Filter Akreditasi"
+                    subtitle="Gunakan kartu ini sebagai pintasan filter yang sinkron dengan tabel daftar akreditasi."
                     class="h-100"
                 >
                     <div class="row g-4">
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-4 col-lg-2">
+                            <x-ui.metric-box
+                                label="Semua"
+                                :value="$allCount"
+                                variant="info"
+                                description="Seluruh pengajuan dalam daftar akreditasi."
+                                actionLabel="Lihat Semua"
+                                :actionHref="route('admin.akreditasi', array_merge(request()->except('page'), ['statusFilter' => '']))"
+                                class="{{ $statusFilter === '' ? 'border-info bg-light-info' : '' }}"
+                            />
+                        </div>
+
+                        <div class="col-12 col-md-4 col-lg-2">
                             <x-ui.metric-box
                                 label="Pengajuan"
                                 :value="$statusCounts['pengajuan'] ?? 0"
                                 variant="primary"
-                                description="Pengajuan baru menunggu dibuka untuk verifikasi berkas."
-                                actionLabel="Buka Pengajuan"
-                                :actionHref="route('admin.akreditasi', array_merge(request()->query(), ['statusFilter' => 'pengajuan']))"
+                                description="Pengajuan baru menunggu verifikasi berkas."
+                                actionLabel="Filter"
+                                :actionHref="route('admin.akreditasi', array_merge(request()->except('page'), ['statusFilter' => 'pengajuan']))"
+                                class="{{ $statusFilter === 'pengajuan' ? 'border-primary bg-light-primary' : '' }}"
                             />
                         </div>
 
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-4 col-lg-2">
                             <x-ui.metric-box
-                                label="Review Berkas & Asesor"
-                                :value="($statusCounts['verifikasi'] ?? 0) + ($statusCounts['assessment'] ?? 0)"
+                                label="Review Asesor"
+                                :value="$reviewCount"
                                 variant="warning"
-                                description="Verifikasi awal admin dan review asesor sebelum visitasi dijadwalkan."
-                                actionLabel="Pantau Review"
-                                :actionHref="route('admin.akreditasi', array_merge(request()->query(), ['statusFilter' => 'assessment']))"
+                                description="Berkas siap ditinjau dan ditetapkan asesor."
+                                actionLabel="Review Asesor"
+                                :actionHref="route('admin.akreditasi', array_merge(request()->except('page'), ['statusFilter' => 'assessment']))"
+                                class="{{ $statusFilter === 'assessment' ? 'border-warning bg-light-warning' : '' }}"
                             />
                         </div>
 
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-4 col-lg-2">
                             <x-ui.metric-box
-                                label="Visitasi & Penilaian"
-                                :value="($statusCounts['visitasi'] ?? 0) + ($statusCounts['pasca_visitasi'] ?? 0) + ($statusCounts['validasi'] ?? 0)"
+                                label="Visitasi"
+                                :value="$visitasiCount"
                                 variant="info"
-                                description="Visitasi lapangan, penilaian pasca visitasi, dan Nilai Verifikasi admin."
-                                actionLabel="Lihat Jadwal"
-                                :actionHref="route('admin.akreditasi', array_merge(request()->query(), ['statusFilter' => 'visitasi']))"
+                                description="Visitasi dan penilaian pasca visitasi."
+                                actionLabel="Filter"
+                                :actionHref="route('admin.akreditasi', array_merge(request()->except('page'), ['statusFilter' => 'visitasi']))"
+                                class="{{ $statusFilter === 'visitasi' ? 'border-info bg-light-info' : '' }}"
+                            />
+                        </div>
+
+                        <div class="col-12 col-md-4 col-lg-2">
+                            <x-ui.metric-box
+                                label="Validasi"
+                                :value="$statusCounts['validasi'] ?? 0"
+                                variant="success"
+                                description="Nilai verifikasi dan keputusan admin."
+                                actionLabel="Filter"
+                                :actionHref="route('admin.akreditasi', array_merge(request()->except('page'), ['statusFilter' => 'validasi']))"
+                                class="{{ $statusFilter === 'validasi' ? 'border-success bg-light-success' : '' }}"
+                            />
+                        </div>
+
+                        <div class="col-12 col-md-4 col-lg-2">
+                            <x-ui.metric-box
+                                label="Terlambat"
+                                :value="$statusCounts['overdue'] ?? 0"
+                                variant="danger"
+                                description="Pengajuan melewati batas waktu proses."
+                                actionLabel="Filter"
+                                :actionHref="route('admin.akreditasi', array_merge(request()->except('page'), ['statusFilter' => 'overdue']))"
+                                class="{{ $statusFilter === 'overdue' ? 'border-danger bg-light-danger' : '' }}"
                             />
                         </div>
                     </div>
@@ -109,10 +166,11 @@
         <x-ui.table title="Daftar Akreditasi" subtitle="Pengajuan, penilaian, visitasi, dan tindak lanjut pesantren." :records="$akreditasis">
             <x-slot name="filters">
                 <form method="GET" action="{{ route('admin.akreditasi') }}" id="admin-akreditasi-filters">
-                    <div class="spm-table-filter-grid spm-table-filter-grid--compact">
+                    <div class="spm-table-filter-grid spm-table-filter-grid--compact align-items-center">
                         <x-datatable.search name="search" placeholder="Cari Pesantren..." :value="$search" form="admin-akreditasi-filters" />
 
                         <x-ui.select name="statusFilter" size="sm" class="w-auto min-w-280px" onchange="this.form.submit()">
+                            <option value="" @selected($statusFilter === '')>Semua Akreditasi ({{ $allCount }})</option>
                             <option value="pengajuan" @selected($statusFilter === 'pengajuan')>Pengajuan ({{ $statusCounts['pengajuan'] ?? 0 }})</option>
                             <option value="verifikasi" @selected($statusFilter === 'verifikasi')>Verifikasi Berkas ({{ $statusCounts['verifikasi'] ?? 0 }})</option>
                             <option value="assessment" @selected($statusFilter === 'assessment')>Review Asesor ({{ $statusCounts['assessment'] ?? 0 }})</option>
@@ -122,11 +180,23 @@
                             <option value="ditolak" @selected($statusFilter === 'ditolak')>Ditolak ({{ $statusCounts['ditolak'] ?? 0 }})</option>
                             <option value="banding" @selected($statusFilter === 'banding')>Banding ({{ $statusCounts['banding'] ?? 0 }})</option>
                             <option value="overdue" @selected($statusFilter === 'overdue')>Terlambat ({{ $statusCounts['overdue'] ?? 0 }})</option>
-                            <option value="" @selected($statusFilter === '')>Semua</option>
                         </x-ui.select>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <x-ui.button type="submit" size="sm" variant="primary">Cari</x-ui.button>
+                            <x-ui.button :href="route('admin.akreditasi')" size="sm" variant="light">Reset</x-ui.button>
+                        </div>
 
                         <input type="hidden" name="sortField" value="{{ $sortField }}">
                         <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
+                    </div>
+
+                    <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+                        <span class="text-muted fw-semibold fs-7">Filter aktif:</span>
+                        <x-ui.badge variant="info">{{ $activeFilterLabel }}</x-ui.badge>
+                        @if(filled($search))
+                            <x-ui.badge variant="primary">Pencarian: {{ $search }}</x-ui.badge>
+                        @endif
                     </div>
                 </form>
             </x-slot>
