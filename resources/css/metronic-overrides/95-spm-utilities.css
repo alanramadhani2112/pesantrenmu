@@ -133,3 +133,17 @@
 [data-ui-table="metronic"] .spm-filter-bar .btn {
   min-height: var(--spm-control-height, 42px);
 }
+
+/* Icon + text action buttons: override icon-only square sizing. */
+[data-ui-button="metronic"].btn-icon.btn-sm-auto,
+.spm-btn.btn-icon.btn-sm-auto {
+  width: auto !important;
+  min-width: 0 !important;
+  padding-inline: 0.85rem !important;
+  gap: 0.35rem;
+}
+
+[data-ui-button="metronic"].btn-icon.btn-sm-auto > [class*="ki-"],
+.spm-btn.btn-icon.btn-sm-auto > [class*="ki-"] {
+  margin-right: 0 !important;
+}
