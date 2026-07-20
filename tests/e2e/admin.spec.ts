@@ -38,7 +38,7 @@ test('admin can open akreditasi list', async ({ adminPage }) => {
   await adminPage.goto('/admin/akreditasi');
 
   await expect(adminPage.getByRole('heading', { name: 'Akreditasi' }).first()).toBeVisible();
-  await expect(adminPage.getByText('Prioritas Operasional')).toBeVisible();
+  await expect(adminPage.getByText('Mode Kerja Admin')).toBeVisible();
   await expect(adminPage.getByText('BF Pesantren', { exact: false }).first()).toBeVisible();
 });
 

@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { test as setup } from '@playwright/test';
+import { expect, test as setup } from '@playwright/test';
 import { authUsers } from './auth';
 
 setup.beforeAll(() => {
@@ -20,7 +20,7 @@ for (const [role, user] of Object.entries(authUsers)) {
     await page.locator('input[name="email"]').fill(user.email);
     await page.locator('input[name="password"]').fill(user.password);
     await page.getByRole('button', { name: /masuk/i }).click();
-    await page.waitForURL('**/dashboard');
+    await expect(page).toHaveURL(/\/dashboard(?:$|\?)/);
     await page.context().storageState({ path: user.state });
   });
 }

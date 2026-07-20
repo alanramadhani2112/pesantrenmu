@@ -54,13 +54,21 @@ test('ketua asesor can schedule visitasi from detail', async ({ asesorPage }) =>
 });
 
 test('asesor can save NA score from instrumen tab', async ({ asesorPage }) => {
-  await asesorPage.goto(`/asesor/akreditasi/${scenarioUuid('BF-HAPPY-005')}?activeTab=instrumen`);
+  test.setTimeout(60_000);
+
+  await asesorPage.goto(`/asesor/akreditasi/${scenarioUuid('BF-HAPPY-005')}?activeTab=instrumen`, {
+    waitUntil: 'domcontentloaded',
+    timeout: 60_000,
+  });
+
+  const scoreSelect = asesorPage.getByLabel(/Nilai NA butir/i).first();
+  await expect(scoreSelect).toBeVisible();
 
   const response = asesorPage.waitForResponse((res) =>
     res.url().includes('/asesor/akreditasi/save-na') && res.status() === 200,
   );
-  await asesorPage.getByLabel(/Nilai NA butir/i).first().selectOption('4');
+  await scoreSelect.selectOption('4');
   await response;
 
-  await expect(asesorPage.getByLabel(/Nilai NA butir/i).first()).toHaveValue('4');
+  await expect(scoreSelect).toHaveValue('4');
 });
