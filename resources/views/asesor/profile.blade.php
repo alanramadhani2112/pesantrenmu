@@ -506,7 +506,7 @@ function asesorProfileEdit() {
         <div class="d-flex flex-column gap-5">
             <x-ui.card class="spm-asesor-profile-card">
                 <div class="d-flex flex-column align-items-center text-center">
-                    <div class="mb-5" data-kt-image-input="true">
+                    <div class="mb-5">
                         @if(auth()->user()->profile_photo_path && Storage::disk('public')->exists(auth()->user()->profile_photo_path))
                             <img src="{{ Storage::url(auth()->user()->profile_photo_path) }}"
                                  alt="Foto asesor"
