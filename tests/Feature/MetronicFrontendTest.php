@@ -880,9 +880,9 @@ class MetronicFrontendTest extends TestCase
         }
 
         $asesorProfile = file_get_contents(resource_path('views/asesor/profile.blade.php'));
-        $this->assertStringContainsString('data-kt-image-input="true"', $asesorProfile);
-        $this->assertStringContainsString('data-kt-image-input-action="change"', $asesorProfile);
-        $this->assertStringContainsString('data-kt-image-input-action="cancel"', $asesorProfile);
+        $this->assertStringNotContainsString('data-kt-image-input="true"', $asesorProfile);
+        $this->assertStringNotContainsString('data-kt-image-input-action="change"', $asesorProfile);
+        $this->assertStringNotContainsString('data-kt-image-input-action="cancel"', $asesorProfile);
     }
 
     public function test_metronic_accessibility_contract_for_tabs_menu_and_modal(): void

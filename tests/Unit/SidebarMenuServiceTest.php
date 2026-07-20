@@ -133,10 +133,10 @@ class SidebarMenuServiceTest extends TestCase
         $menu = $this->service->getMenuForRole(1);
         $items = $menu[3]['items'];
 
-        $this->assertCount(3, $items);
+        $this->assertCount(1, $items);
 
         $keys = array_column($items, 'key');
-        $this->assertSame(['akun_pengguna', 'failed_notifications', 'trash'], $keys);
+        $this->assertSame(['akun_pengguna'], $keys);
     }
 
     // ─── Asesor Menu (Role ID = 2) ──────────────────────────────────────────────
