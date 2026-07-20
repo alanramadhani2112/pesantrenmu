@@ -109,7 +109,7 @@ class AppServiceProvider extends ServiceProvider
         // PR-16 fix: paksa HTTPS di production untuk mencegah mixed-content
         // dan broken signed URLs saat di-deploy di belakang reverse proxy.
         // Dev IP tanpa TLS boleh override via FORCE_HTTPS=false.
-        if ($this->app->environment('production') && filter_var(env('FORCE_HTTPS', true), FILTER_VALIDATE_BOOL)) {
+        if ($this->app->environment('production') && filter_var(config('app.force_https'), FILTER_VALIDATE_BOOL)) {
             URL::forceScheme('https');
         }
 
