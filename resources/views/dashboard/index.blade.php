@@ -277,7 +277,7 @@
                                     <x-ui.badge variant="warning" class="mb-3">Verifikasi</x-ui.badge>
                                     <div class="fs-2x fw-semibold text-gray-900 mb-1">{{ $stats['verifikasi'] }}</div>
                                     <div class="text-muted fw-medium fs-8 mb-4">Pengajuan menunggu validasi awal.</div>
-                                    <x-ui.button :href="route('admin.akreditasi')" variant="light-warning" size="sm">Buka Pengajuan</x-ui.button>
+                                    <x-ui.button :href="route('admin.akreditasi', ['statusFilter' => 'verifikasi'])" variant="light-warning" size="sm">Buka Pengajuan</x-ui.button>
                                 </div>
                             </div>
 
@@ -286,7 +286,7 @@
                                     <x-ui.badge variant="info" class="mb-3">Penilaian</x-ui.badge>
                                     <div class="fs-2x fw-semibold text-gray-900 mb-1">{{ $stats['assessment'] }}</div>
                                     <div class="text-muted fw-medium fs-8 mb-4">Pengajuan sedang dinilai asesor.</div>
-                                    <x-ui.button :href="route('admin.akreditasi')" variant="light-info" size="sm">Pantau Proses</x-ui.button>
+                                    <x-ui.button :href="route('admin.akreditasi', ['statusFilter' => 'assessment'])" variant="light-info" size="sm">Pantau Proses</x-ui.button>
                                 </div>
                             </div>
 
@@ -295,7 +295,7 @@
                                     <x-ui.badge variant="primary" class="mb-3">Visitasi</x-ui.badge>
                                     <div class="fs-2x fw-semibold text-gray-900 mb-1">{{ $stats['visitasi'] }}</div>
                                     <div class="text-muted fw-medium fs-8 mb-4">Visitasi berjalan atau menunggu hasil.</div>
-                                    <x-ui.button :href="route('admin.akreditasi')" variant="light" size="sm">Lihat Jadwal</x-ui.button>
+                                    <x-ui.button :href="route('admin.akreditasi', ['statusFilter' => 'visitasi'])" variant="light" size="sm">Lihat Jadwal</x-ui.button>
                                 </div>
                             </div>
                         </div>

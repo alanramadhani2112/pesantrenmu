@@ -82,4 +82,16 @@ class AdminDashboardTest extends TestCase
             'pasca_visitasi count should be 0 when only status 1 and 0 exist'
         );
     }
+
+    public function test_admin_dashboard_action_cards_link_to_filtered_akreditasi_lists(): void
+    {
+        $admin = User::factory()->create(['role_id' => 1]);
+
+        $response = $this->actingAs($admin)->get(route('dashboard'));
+
+        $response->assertOk();
+        $response->assertSee(route('admin.akreditasi', ['statusFilter' => 'verifikasi']), false);
+        $response->assertSee(route('admin.akreditasi', ['statusFilter' => 'assessment']), false);
+        $response->assertSee(route('admin.akreditasi', ['statusFilter' => 'visitasi']), false);
+    }
 }
