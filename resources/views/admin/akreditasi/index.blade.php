@@ -12,29 +12,6 @@
         + ($statusCounts['selesai'] ?? 0)
         + ($statusCounts['ditolak'] ?? 0)
         + ($statusCounts['banding'] ?? 0);
-    $reviewCount = $statusCounts['assessment'] ?? 0;
-    $visitasiCount = ($statusCounts['visitasi'] ?? 0) + ($statusCounts['pasca_visitasi'] ?? 0);
-    $activeFilterLabel = match ($statusFilter) {
-        'pengajuan' => 'Pengajuan',
-        'verifikasi' => 'Verifikasi Berkas',
-        'assessment' => 'Review Asesor',
-        'visitasi' => 'Visitasi & Penilaian Pasca Visitasi',
-        'validasi' => 'Validasi Admin',
-        'selesai' => 'Selesai',
-        'ditolak' => 'Ditolak',
-        'banding' => 'Banding',
-        'overdue' => 'Terlambat',
-        default => 'Semua Akreditasi',
-    };
-
-    $quickFilters = [
-        ['label' => 'Semua', 'value' => '', 'count' => $allCount, 'variant' => 'info'],
-        ['label' => 'Pengajuan', 'value' => 'pengajuan', 'count' => $statusCounts['pengajuan'] ?? 0, 'variant' => 'primary'],
-        ['label' => 'Review Asesor', 'value' => 'assessment', 'count' => $reviewCount, 'variant' => 'warning'],
-        ['label' => 'Visitasi', 'value' => 'visitasi', 'count' => $visitasiCount, 'variant' => 'info'],
-        ['label' => 'Validasi', 'value' => 'validasi', 'count' => $statusCounts['validasi'] ?? 0, 'variant' => 'success'],
-        ['label' => 'Terlambat', 'value' => 'overdue', 'count' => $statusCounts['overdue'] ?? 0, 'variant' => 'danger'],
-    ];
 @endphp
 
 <div data-admin-akreditasi-page="metronic" x-data="adminAkreditasiPage()">
@@ -116,29 +93,6 @@
 
                         <input type="hidden" name="sortField" value="{{ $sortField }}">
                         <input type="hidden" name="sortAsc" value="{{ $sortAsc ? 'true' : 'false' }}">
-                    </div>
-
-                    <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
-                        <span class="text-muted fw-semibold fs-7">Filter aktif:</span>
-                        <x-ui.badge variant="info">{{ $activeFilterLabel }}</x-ui.badge>
-                        @if(filled($search))
-                            <x-ui.badge variant="primary">Pencarian: {{ $search }}</x-ui.badge>
-                        @endif
-                    </div>
-
-                    <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
-                        <span class="text-muted fw-semibold fs-7 me-1">Filter cepat:</span>
-                        @foreach($quickFilters as $quickFilter)
-                            @php
-                                $isQuickFilterActive = $statusFilter === $quickFilter['value'];
-                            @endphp
-                            <a
-                                href="{{ route('admin.akreditasi', array_merge(request()->except('page'), ['statusFilter' => $quickFilter['value']])) }}"
-                                class="badge badge-light-{{ $quickFilter['variant'] }} fw-semibold spm-badge spm-badge--soft {{ $isQuickFilterActive ? 'border border-' . $quickFilter['variant'] : '' }}"
-                            >
-                                {{ $quickFilter['label'] }} <span class="fw-bold ms-1">{{ $quickFilter['count'] }}</span>
-                            </a>
-                        @endforeach
                     </div>
                 </form>
             </x-slot>
