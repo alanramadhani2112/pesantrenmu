@@ -120,12 +120,10 @@ class AkreditasiDetailController extends Controller
         $asesor1NkProgress = null;
         $asesor2NaProgress = null;
 
-        if ($akreditasi->status == AkreditasiStateMachine::STATUS_PASCA_VISITASI) {
-            $progress = $this->progressTracker->getAkreditasiProgress($akreditasi->id);
-            $asesor1NaProgress = $progress['asesor1_na'];
-            $asesor1NkProgress = $progress['asesor1_nk'];
-            $asesor2NaProgress = $progress['asesor2_na'];
-        }
+        $progress = $this->progressTracker->getAkreditasiProgress($akreditasi->id);
+        $asesor1NaProgress = $progress['asesor1_na'];
+        $asesor1NkProgress = $progress['asesor1_nk'];
+        $asesor2NaProgress = $progress['asesor2_na'];
 
         $isOverdue = false;
         $availableAsesorsForReassignment = [];
@@ -243,16 +241,23 @@ class AkreditasiDetailController extends Controller
         ?array $asesor2NaProgress
     ): array {
         $cards = [
-            ['progress' => $asesor1NaProgress, 'label' => 'Nilai Ketua'],
-            ['progress' => $asesor1NkProgress, 'label' => 'Nilai Kelompok'],
-            ['progress' => $asesor2NaProgress, 'label' => 'Nilai Anggota'],
+            ['progress' => $asesor1NaProgress, 'label' => 'NA1', 'description' => 'Nilai Asesor 1'],
+            ['progress' => $asesor2NaProgress, 'label' => 'NA2', 'description' => 'Nilai Asesor 2'],
+            ['progress' => $asesor1NkProgress, 'label' => 'NK', 'description' => 'Nilai Kelompok'],
         ];
 
         return array_values(array_filter(array_map(function (array $card): ?array {
             if (empty($card['progress'])) {
                 return null;
             }
-            $card['color'] = $this->progressTracker->getColorClass((float) ($card['progress']['percentage'] ?? 0));
+
+            $percentage = (float) ($card['progress']['percentage'] ?? 0);
+            $card['color'] = $this->progressTracker->getColorClass($percentage);
+            $card['colorClass'] = match ($card['color']) {
+                'green' => 'bg-success',
+                'amber' => 'bg-warning',
+                default => 'bg-danger',
+            };
 
             return $card;
         }, $cards)));
