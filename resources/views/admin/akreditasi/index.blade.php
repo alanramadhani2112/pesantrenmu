@@ -26,6 +26,15 @@
         'overdue' => 'Terlambat',
         default => 'Semua Akreditasi',
     };
+
+    $quickFilters = [
+        ['label' => 'Semua', 'value' => '', 'count' => $allCount, 'variant' => 'info'],
+        ['label' => 'Pengajuan', 'value' => 'pengajuan', 'count' => $statusCounts['pengajuan'] ?? 0, 'variant' => 'primary'],
+        ['label' => 'Review Asesor', 'value' => 'assessment', 'count' => $reviewCount, 'variant' => 'warning'],
+        ['label' => 'Visitasi', 'value' => 'visitasi', 'count' => $visitasiCount, 'variant' => 'info'],
+        ['label' => 'Validasi', 'value' => 'validasi', 'count' => $statusCounts['validasi'] ?? 0, 'variant' => 'success'],
+        ['label' => 'Terlambat', 'value' => 'overdue', 'count' => $statusCounts['overdue'] ?? 0, 'variant' => 'danger'],
+    ];
 @endphp
 
 <div data-admin-akreditasi-page="metronic" x-data="adminAkreditasiPage()">
@@ -48,95 +57,13 @@
         />
 
         <div class="row g-5 mb-5">
-            <div class="col-12 col-xl-8">
-                <x-ui.card
-                    title="Ringkasan Filter Akreditasi"
-                    subtitle="Gunakan kartu ini sebagai pintasan filter yang sinkron dengan tabel daftar akreditasi."
-                    class="h-100"
-                >
-                    <div class="row g-4">
-                        <div class="col-12 col-md-4 col-lg-2">
-                            <x-ui.metric-box
-                                label="Semua"
-                                :value="$allCount"
-                                variant="info"
-                                description="Seluruh pengajuan dalam daftar akreditasi."
-                                actionLabel="Lihat Semua"
-                                :actionHref="route('admin.akreditasi', array_merge(request()->except('page'), ['statusFilter' => '']))"
-                                class="{{ $statusFilter === '' ? 'border-info bg-light-info' : '' }}"
-                            />
-                        </div>
-
-                        <div class="col-12 col-md-4 col-lg-2">
-                            <x-ui.metric-box
-                                label="Pengajuan"
-                                :value="$statusCounts['pengajuan'] ?? 0"
-                                variant="primary"
-                                description="Pengajuan baru menunggu verifikasi berkas."
-                                actionLabel="Filter"
-                                :actionHref="route('admin.akreditasi', array_merge(request()->except('page'), ['statusFilter' => 'pengajuan']))"
-                                class="{{ $statusFilter === 'pengajuan' ? 'border-primary bg-light-primary' : '' }}"
-                            />
-                        </div>
-
-                        <div class="col-12 col-md-4 col-lg-2">
-                            <x-ui.metric-box
-                                label="Review Asesor"
-                                :value="$reviewCount"
-                                variant="warning"
-                                description="Berkas siap ditinjau dan ditetapkan asesor."
-                                actionLabel="Review Asesor"
-                                :actionHref="route('admin.akreditasi', array_merge(request()->except('page'), ['statusFilter' => 'assessment']))"
-                                class="{{ $statusFilter === 'assessment' ? 'border-warning bg-light-warning' : '' }}"
-                            />
-                        </div>
-
-                        <div class="col-12 col-md-4 col-lg-2">
-                            <x-ui.metric-box
-                                label="Visitasi"
-                                :value="$visitasiCount"
-                                variant="info"
-                                description="Visitasi dan penilaian pasca visitasi."
-                                actionLabel="Filter"
-                                :actionHref="route('admin.akreditasi', array_merge(request()->except('page'), ['statusFilter' => 'visitasi']))"
-                                class="{{ $statusFilter === 'visitasi' ? 'border-info bg-light-info' : '' }}"
-                            />
-                        </div>
-
-                        <div class="col-12 col-md-4 col-lg-2">
-                            <x-ui.metric-box
-                                label="Validasi"
-                                :value="$statusCounts['validasi'] ?? 0"
-                                variant="success"
-                                description="Nilai verifikasi dan keputusan admin."
-                                actionLabel="Filter"
-                                :actionHref="route('admin.akreditasi', array_merge(request()->except('page'), ['statusFilter' => 'validasi']))"
-                                class="{{ $statusFilter === 'validasi' ? 'border-success bg-light-success' : '' }}"
-                            />
-                        </div>
-
-                        <div class="col-12 col-md-4 col-lg-2">
-                            <x-ui.metric-box
-                                label="Terlambat"
-                                :value="$statusCounts['overdue'] ?? 0"
-                                variant="danger"
-                                description="Pengajuan melewati batas waktu proses."
-                                actionLabel="Filter"
-                                :actionHref="route('admin.akreditasi', array_merge(request()->except('page'), ['statusFilter' => 'overdue']))"
-                                class="{{ $statusFilter === 'overdue' ? 'border-danger bg-light-danger' : '' }}"
-                            />
-                        </div>
-                    </div>
-                </x-ui.card>
-            </div>
-
-            <div class="col-12 col-xl-4">
+            <div class="col-12">
                 <x-ui.card
                     title="Mode Kerja Admin"
                     subtitle="Alur keputusan tetap mengikuti proses yang sudah berjalan."
                     class="h-100"
                 >
-                    <div class="d-flex flex-column gap-4">
+                    <div class="d-flex flex-column flex-xl-row gap-4">
                         <div class="d-flex align-items-start gap-3">
                             <x-ui.badge variant="primary" class="badge-circle flex-shrink-0">1</x-ui.badge>
                             <div>
@@ -197,6 +124,21 @@
                         @if(filled($search))
                             <x-ui.badge variant="primary">Pencarian: {{ $search }}</x-ui.badge>
                         @endif
+                    </div>
+
+                    <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+                        <span class="text-muted fw-semibold fs-7 me-1">Filter cepat:</span>
+                        @foreach($quickFilters as $quickFilter)
+                            @php
+                                $isQuickFilterActive = $statusFilter === $quickFilter['value'];
+                            @endphp
+                            <a
+                                href="{{ route('admin.akreditasi', array_merge(request()->except('page'), ['statusFilter' => $quickFilter['value']])) }}"
+                                class="badge badge-light-{{ $quickFilter['variant'] }} fw-semibold spm-badge spm-badge--soft {{ $isQuickFilterActive ? 'border border-' . $quickFilter['variant'] : '' }}"
+                            >
+                                {{ $quickFilter['label'] }} <span class="fw-bold ms-1">{{ $quickFilter['count'] }}</span>
+                            </a>
+                        @endforeach
                     </div>
                 </form>
             </x-slot>
@@ -318,7 +260,8 @@
 
                             <x-ui.action-menu-item
                                 variant="danger"
-                                x-on:click="window.SpmSwal.confirm({ title: 'Hapus data?', text: 'Pengajuan akreditasi yang dihapus tidak dapat dikembalikan!', icon: 'warning', showCancelButton: true, confirmButtonText: 'Ya, hapus', cancelButtonText: 'Batal', }).then((result) => { if (result.isConfirmed) { document.getElementById('deleteForm').querySelector('input[name=id]').value = {{ $item->id }}; document.getElementById('deleteForm').submit(); } })"
+                                data-akreditasi-id="{{ $item->id }}"
+                                x-on:click="window.SpmSwal.confirm({ title: 'Hapus data?', text: 'Pengajuan akreditasi yang dihapus tidak dapat dikembalikan!', icon: 'warning', showCancelButton: true, confirmButtonText: 'Ya, hapus', cancelButtonText: 'Batal', }).then((result) => { if (result.isConfirmed) { document.getElementById('deleteForm').querySelector('input[name=id]').value = $el.dataset.akreditasiId; document.getElementById('deleteForm').submit(); } })"
                             >
                                 <x-ui.icon name="trash" class="fs-4" />
                                 Hapus
