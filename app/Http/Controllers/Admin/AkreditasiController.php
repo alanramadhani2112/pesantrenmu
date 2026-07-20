@@ -22,7 +22,7 @@ class AkreditasiController extends Controller
     {
         abort_unless(auth()->user()->canAccessAdminArea(), 403);
 
-        $statusFilter = $request->query->has('statusFilter') ? (string) $request->query('statusFilter') : 'pengajuan';
+        $statusFilter = $request->query->has('statusFilter') ? (string) $request->query('statusFilter') : '';
         $search = $request->input('search', '');
         $perPage = min(max($request->integer('perPage', 10), 5), 50);
         $sortField = $this->sortField((string) $request->input('sortField', 'created_at'));
@@ -60,7 +60,7 @@ class AkreditasiController extends Controller
             'pengajuan' => Akreditasi::STATUS_PENGAJUAN,
             'verifikasi' => Akreditasi::STATUS_VERIFIKASI_BERKAS,
             'assessment' => Akreditasi::STATUS_ASSESSMENT,
-            'visitasi' => Akreditasi::STATUS_VISITASI,
+            'visitasi' => null,
             'validasi' => Akreditasi::STATUS_VALIDASI_ADMIN,
             'selesai' => Akreditasi::STATUS_SELESAI,
             'ditolak' => Akreditasi::STATUS_DITOLAK,
@@ -107,12 +107,12 @@ class AkreditasiController extends Controller
 
         return Excel::download(
             new AkreditasiExport(
-                $request->input('statusFilter', 'pengajuan'),
+                $request->input('statusFilter', ''),
                 $request->input('search', ''),
                 $this->sortField((string) $request->input('sortField', 'created_at')),
                 filter_var($request->input('sortAsc', 'false'), FILTER_VALIDATE_BOOLEAN)
             ),
-            'data-akreditasi-'.$request->input('statusFilter', 'pengajuan').'-'.now()->format('Y-m-d').'.xlsx'
+            'data-akreditasi-'.($request->input('statusFilter') ?: 'semua').'-'.now()->format('Y-m-d').'.xlsx'
         );
     }
 
