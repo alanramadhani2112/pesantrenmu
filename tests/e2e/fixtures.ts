@@ -2,15 +2,22 @@ import { test as base, expect, type BrowserContext, type Page } from '@playwrigh
 import { authStates } from './auth';
 
 type RoleFixtures = {
+  superadminContext: BrowserContext;
   adminContext: BrowserContext;
   asesorContext: BrowserContext;
   pesantrenContext: BrowserContext;
+  superadminPage: Page;
   adminPage: Page;
   asesorPage: Page;
   pesantrenPage: Page;
 };
 
 export const test = base.extend<RoleFixtures>({
+  superadminContext: async ({ browser }, use) => {
+    const context = await browser.newContext({ storageState: authStates.superadmin });
+    await use(context);
+    await context.close();
+  },
   adminContext: async ({ browser }, use) => {
     const context = await browser.newContext({ storageState: authStates.admin });
     await use(context);
@@ -25,6 +32,11 @@ export const test = base.extend<RoleFixtures>({
     const context = await browser.newContext({ storageState: authStates.pesantren });
     await use(context);
     await context.close();
+  },
+  superadminPage: async ({ superadminContext }, use) => {
+    const page = await superadminContext.newPage();
+    await use(page);
+    await page.close();
   },
   adminPage: async ({ adminContext }, use) => {
     const page = await adminContext.newPage();
