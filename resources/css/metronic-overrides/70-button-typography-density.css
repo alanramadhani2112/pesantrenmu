@@ -91,10 +91,10 @@ form[data-spm-submit-lock="active"] {
 @media (max-width: 767.98px) {
     [data-ui-button="metronic"].btn-sm,
     .spm-btn.btn-sm,
-    [data-ui-button="metronic"].btn-icon,
-    .spm-btn.btn-icon,
-    [data-ui-button="metronic"].btn-icon.btn-sm,
-    .spm-btn.btn-icon.btn-sm {
+    [data-ui-button="metronic"].btn-icon:not(.btn-sm-auto),
+    .spm-btn.btn-icon:not(.btn-sm-auto),
+    [data-ui-button="metronic"].btn-icon.btn-sm:not(.btn-sm-auto),
+    .spm-btn.btn-icon.btn-sm:not(.btn-sm-auto) {
         width: 44px !important;
         height: 44px !important;
         min-width: 44px;
