@@ -1,4 +1,4 @@
-<x-ui.section-card title="Tabel Instrumen Butir Penilaian" subtitle="NA1 dan NA2 tampil sebagai referensi asesor. NK adalah nilai kelompok dari ketua asesor. NV otomatis mengikuti NK saat belum tersimpan, namun tetap dapat diedit admin.">
+<x-ui.section-card title="Tabel Instrumen Butir Penilaian" subtitle="NA1 dan NA2 tampil sebagai referensi asesor. NK adalah nilai kelompok dari ketua asesor. NV wajib dipilih admin sebelum tersimpan.">
 <x-ui.simple-table class="p-5" table-class="table-hover align-middle">
         <thead>
             <tr class="fw-semibold text-muted bg-light">
@@ -26,8 +26,7 @@
                             $na2Value = $asesor2Evaluasis[$butir->id] ?? null;
                             $nkValue = $adminNvs[$butir->id]['nk'] ?? null;
                             $storedNv = $adminNvs[$butir->id]['nv'] ?? null;
-                            $defaultNvValue = blank($storedNv) ? $nkValue : $storedNv;
-                            $nvValue = old("adminNvs.$butir->id", $defaultNvValue);
+                            $nvValue = old("adminNvs.$butir->id", $storedNv);
                             $reasonValue = old("nvReasons.$butir->id", '');
                             $nvMirrorsNk = ! blank($nvValue) && ! blank($nkValue) && (string) $nvValue === (string) $nkValue;
                         @endphp
@@ -74,7 +73,7 @@
                                             <x-ui.badge variant="{{ $nvMirrorsNk ? 'light-success' : 'light-warning' }}">
                                                 {{ $nvMirrorsNk ? 'Mirror NK' : 'Berbeda dari NK' }}
                                             </x-ui.badge>
-                                            <span class="text-muted fs-8">Default NV mengikuti NK: {{ $nkValue ?? '-' }}</span>
+                                            <span class="text-muted fs-8">NK saat ini: {{ $nkValue ?? '-' }}</span>
                                         </div>
                                     </div>
                                     <textarea
