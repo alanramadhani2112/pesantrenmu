@@ -65,7 +65,7 @@ class AkreditasiController extends Controller
             'selesai' => Akreditasi::STATUS_SELESAI,
             'ditolak' => Akreditasi::STATUS_DITOLAK,
             'banding' => Akreditasi::STATUS_BANDING,
-            default => null,
+            default => Akreditasi::STATUS_PENGAJUAN,
         };
 
         return view('admin.akreditasi.index', compact(

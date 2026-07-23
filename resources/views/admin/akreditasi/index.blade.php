@@ -44,14 +44,14 @@
                         <div class="d-flex align-items-start gap-3">
                             <x-ui.badge variant="primary" class="badge-circle flex-shrink-0">1</x-ui.badge>
                             <div>
-                                <div class="fw-semibold text-gray-900">Verifikasi & tetapkan asesor</div>
+                                <div class="fw-semibold text-gray-900">Review Berkas &amp; Asesor</div>
                                 <div class="text-muted fs-7">Buka berkas, periksa kelengkapan, tetapkan asesor.</div>
                             </div>
                         </div>
                         <div class="d-flex align-items-start gap-3">
                             <x-ui.badge variant="primary" class="badge-circle flex-shrink-0">2</x-ui.badge>
                             <div>
-                                <div class="fw-semibold text-gray-900">Pantau & jadwalkan visitasi</div>
+                                <div class="fw-semibold text-gray-900">Visitasi &amp; Penilaian</div>
                                 <div class="text-muted fs-7">Jadwalkan visitasi, tinjau laporan, tetapkan NV.</div>
                             </div>
                         </div>
@@ -98,9 +98,6 @@
             </x-slot>
 
             <x-slot name="thead">
-                <x-ui.table-th class="w-60px">
-                    <x-ui.table-checkbox x-on:change="selectAllToggle($event)" />
-                </x-ui.table-th>
                 <x-ui.table-th field="user_id" :sortField="$sortField" :sortAsc="$sortAsc" form="admin-akreditasi-filters">Pesantren</x-ui.table-th>
                 <x-ui.table-th field="created_at" :sortField="$sortField" :sortAsc="$sortAsc" form="admin-akreditasi-filters">Tahap Akreditasi</x-ui.table-th>
                 <x-ui.table-th align="center">Nilai</x-ui.table-th>
@@ -127,10 +124,6 @@
                 @endphp
 
                 <tr>
-                    <td class="text-center">
-                        <x-ui.table-checkbox value="{{ $item->id }}" x-model="selectedIds" />
-                    </td>
-
                     <td>
                         <div class="d-flex flex-column">
                             <span class="text-gray-900 fw-semibold fs-6">
@@ -258,12 +251,6 @@
 <script>
 function adminAkreditasiPage() {
     return {
-        selectedIds: [],
-        selectAllToggle(event) {
-            this.selectedIds = event.target.checked
-                ? Array.from(document.querySelectorAll('[data-ui-table-checkbox] input[type="checkbox"][value]')).map((checkbox) => checkbox.value)
-                : [];
-        },
         openCatatanModal(id) {
             document.getElementById('catatanAkreditasiId').value = id;
             document.getElementById('catatan-modal-form').requestSubmit();
