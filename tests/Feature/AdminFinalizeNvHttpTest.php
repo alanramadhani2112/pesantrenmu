@@ -153,6 +153,28 @@ class AdminFinalizeNvHttpTest extends TestCase
         $this->assertFalse((bool) $setup['akreditasi']->fresh()->is_nv_final);
     }
 
+    public function test_finalize_nv_returns_warning_when_submitted_butir_has_no_nk_record(): void
+    {
+        $setup = $this->createSetup();
+        $extraButir = MasterEdpmButir::create([
+            'komponen_id' => $setup['butir']->komponen_id,
+            'no_sk' => '2',
+            'nomor_butir' => '1.2',
+            'butir_pernyataan' => 'Butir tanpa NK record',
+        ]);
+
+        $this->actingAs($setup['admin'])->post(route('admin.akreditasi-detail.finalize-nv', $setup['akreditasi']->uuid), [
+            'adminNvs' => [$extraButir->id => 4],
+            'nvReasons' => [],
+        ])->assertSessionHas('error', "NV untuk butir #{$extraButir->id} belum dapat disimpan karena NK belum tersedia.");
+
+        $this->assertDatabaseMissing('akreditasi_edpms', [
+            'akreditasi_id' => $setup['akreditasi']->id,
+            'butir_id' => $extraButir->id,
+        ]);
+        $this->assertFalse((bool) $setup['akreditasi']->fresh()->is_nv_final);
+    }
+
     private function createSetup(): array
     {
         $this->seed(RoleSeeder::class);

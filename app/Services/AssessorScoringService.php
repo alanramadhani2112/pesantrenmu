@@ -315,18 +315,9 @@ class AssessorScoringService
                 ->first();
 
             if (! $record) {
-                // No NK record yet — create a new record for admin NV
-                // Default NV from NK if available; otherwise use provided value
-                $record = AkreditasiEdpm::create([
-                    'akreditasi_id' => $akreditasiId,
-                    'asesor_id' => $adminId,
-                    'butir_id' => $butirId,
-                    'nv' => $nvValue,
-                    'is_final' => $isFinal,
-                    'pesantren_id' => $akreditasi->user_id,
-                ]);
-
-                return $record->fresh();
+                throw new \DomainException(
+                    "NV untuk butir #{$butirId} belum dapat disimpan karena NK belum tersedia."
+                );
             }
 
             // Check NV immutability: if nv is already Final, reject
