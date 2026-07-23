@@ -17,6 +17,10 @@
                     : 'Dokumen kategori '.$activeDocLabel.' yang tersedia untuk proses akreditasi.'));
         $displayPageTitle = $doc === 'iapm' ? 'Panduan IAPM' : $pageTitle;
         $guideDocument = $doc === 'iapm' ? $documents->first() : null;
+        $documentFileExists = fn ($document) => filled($document?->file_path)
+            && (\Illuminate\Support\Facades\Storage::disk('local')->exists($document->file_path)
+                || \Illuminate\Support\Facades\Storage::disk('public')->exists($document->file_path));
+        $guideDocumentAvailable = $guideDocument && $documentFileExists($guideDocument);
         $tabQueryParams = array_filter(request()->except(['page']));
         $categoryLinks = collect([[
             'slug' => 'all',
@@ -62,7 +66,7 @@
         @if($doc === 'iapm')
             <x-ui.section-card title="Panduan IAPM" subtitle="Baca panduan dari admin. Tidak ada unggah dokumen dari sisi pesantren." class="spm-iapm-viewer-card spm-iapm-viewer-card--wide">
                 <div class="p-6">
-                    @if($guideDocument)
+                    @if($guideDocumentAvailable)
                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-5">
                             <div>
                                 <div class="fw-semibold text-gray-900">{{ $guideDocument->title }}</div>
@@ -82,8 +86,8 @@
                         </div>
                     @else
                         <x-ui.empty-state
-                            title="Panduan IAPM belum tersedia"
-                            description="Admin belum mengunggah Panduan IAPM. Silakan cek kembali nanti."
+                            title="File Panduan IAPM belum tersedia"
+                            description="Data panduan sudah ada, tetapi file belum tersedia di storage. Silakan hubungi admin untuk mengunggah ulang berkas."
                             class="py-15"
                         />
                     @endif
@@ -117,6 +121,7 @@
 
             <x-slot name="tbody">
                 @forelse ($documents as $document)
+                    @php($documentFileAvailable = $documentFileExists($document))
                     <tr>
                         <td class="spm-document-title-cell">
                             <div class="d-flex align-items-center gap-3">
@@ -145,16 +150,20 @@
                         </td>
 
                         <td class="text-end spm-action-cell">
-                            <x-ui.button
-                                :href="route('documents.download', $document)"
-                                target="_blank"
-                                variant="light-primary"
-                                size="sm"
-                                icon="eye"
-                                class="spm-table-compact-action"
-                            >
-                                Buka Berkas
-                            </x-ui.button>
+                            @if($documentFileAvailable)
+                                <x-ui.button
+                                    :href="route('documents.download', $document)"
+                                    target="_blank"
+                                    variant="light-primary"
+                                    size="sm"
+                                    icon="eye"
+                                    class="spm-table-compact-action"
+                                >
+                                    Buka Berkas
+                                </x-ui.button>
+                            @else
+                                <x-ui.badge variant="warning">Berkas belum tersedia</x-ui.badge>
+                            @endif
                         </td>
                     </tr>
                 @empty

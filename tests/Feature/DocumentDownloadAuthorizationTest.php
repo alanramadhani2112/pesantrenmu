@@ -131,6 +131,24 @@ class DocumentDownloadAuthorizationTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_document_index_marks_missing_file_without_broken_download_link(): void
+    {
+        Storage::fake('local');
+        Storage::fake('public');
+        $this->seedBasePermissions();
+        $asesor = User::factory()->create(['role_id' => 2, 'email_verified_at' => now()]);
+        $document = $this->document(
+            $this->category('Public Missing', 'public_missing', DocumentCategory::VISIBILITY_PUBLIC),
+            'documents/missing.pdf'
+        );
+
+        $this->actingAs($asesor)
+            ->get(route('documents.index', ['doc' => 'public_missing']))
+            ->assertOk()
+            ->assertSee('Berkas belum tersedia')
+            ->assertDontSee(route('documents.download', $document), false);
+    }
+
     private function seedBasePermissions(): void
     {
         $this->seed(RoleSeeder::class);
